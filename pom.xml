@@ -28,6 +28,7 @@
 	<module>addon-configurable</module>
 	<module>addon-javabean</module>
 	<module>addon-jpa</module>
+	<module>addon-jms</module>
 	<module>addon-finder</module>
 	<module>addon-logging</module>
 	<module>addon-entity</module>
