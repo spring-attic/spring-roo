@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
+
+    <http auto-config="true">
+    	<form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?login_error=t"/>
+        <intercept-url pattern="/admin/**" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/member/**" access="IS_AUTHENTICATED_REMEMBERED" />
+        <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+    </http>
+
+    <authentication-provider>
+    	<!-- SHA-256 values can be produced using 'echo -n your_desired_password | sha256sum' (using normal *nix environments) -->
+    	<password-encoder hash="sha-256"/>
+        <user-service>
+            <user name="admin" password="8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918" authorities="ROLE_ADMIN"/>
+	        <user name="user" password="04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb" authorities="ROLE_USER"/>
+	    </user-service>
+	</authentication-provider>
+
+</beans:beans>

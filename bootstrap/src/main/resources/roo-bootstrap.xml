@@ -1,0 +1,49 @@
+<beans default-autowire="constructor"
+	xmlns='http://www.springframework.org/schema/beans' xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+	xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd'>
+
+	<!--
+		Temporary component scanning only supports ROO components in the CLI
+		classpath under the org.springframework.roo package
+	-->
+	<context:component-scan base-package="org.springframework.roo"
+		use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.roo.support.lifecycle.ScopeDevelopment" />
+		<context:include-filter type="annotation"
+			expression="org.springframework.roo.support.lifecycle.ScopeDevelopmentShell" />
+	</context:component-scan>
+
+	<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+		<property name="scheduledTimerTasks">
+			<list>
+				<bean class="org.springframework.scheduling.timer.ScheduledTimerTask">
+					<property name="period" value="1000" />
+					<property name="runnable" ref="defaultProcessManager" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean class="org.springframework.roo.shell.converters.DateConverter">
+		<constructor-arg ref="dateFormat"/>
+	</bean>
+
+	<bean id="dateFormat" class="java.text.SimpleDateFormat">
+		<constructor-arg value="MM/dd/yyyy" />
+	</bean>
+	
+	<bean id="menuOperations" class="org.springframework.roo.addon.web.menu.MenuOperations" />
+
+	<!--
+		Used by DefaultProcessManager to monitor the current working directory
+		for project metadata files (eg pom.xml)
+	-->
+	<bean id="initiallyMonitor"
+		class="org.springframework.roo.process.manager.internal.InitialMonitoringRequest"
+		autowire="no">
+		<constructor-arg value=".,CRUD" />
+	</bean>
+</beans>

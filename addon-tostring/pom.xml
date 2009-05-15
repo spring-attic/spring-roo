@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>spring-roo</artifactId>
+		<version>1.0.0.M1</version>
+	</parent>
+	<artifactId>spring-roo-addon-tostring</artifactId>
+	<packaging>jar</packaging>
+	<name>Spring Roo - Addon - toString</name>
+	<dependencies>
+        <!-- ROO modules -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-classpath</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-process-manager</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-support</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-metadata</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-model</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-project</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>spring-roo-addon-beaninfo</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

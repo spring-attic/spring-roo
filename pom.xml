@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.springframework.roo</groupId>
+    <artifactId>spring-roo</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0.0.M1</version>
+    <name>Spring Roo</name>
+
+    <modules>
+        <module>annotations</module>
+        <module>support</module>
+	<module>model</module>
+        <module>shell</module>
+        <module>shell-jline</module>
+	<module>metadata</module>
+        <module>file-undo</module>
+        <module>file-monitor</module>
+        <module>file-monitor-polling</module>
+        <module>project</module>
+        <module>process-manager</module>
+	<module>classpath</module>
+	<module>classpath-javaparser</module>
+	<module>addon-maven</module>
+	<module>addon-plural</module>
+	<module>addon-propfiles</module>
+	<module>addon-beaninfo</module>
+	<module>addon-configurable</module>
+	<module>addon-javabean</module>
+	<module>addon-jpa</module>
+	<module>addon-finder</module>
+	<module>addon-logging</module>
+	<module>addon-entity</module>
+	<module>addon-property-editor</module>
+	<module>addon-security</module>
+	<module>addon-tostring</module>
+	<module>addon-web-mvc-controller</module>
+	<module>addon-web-mvc-jsp</module>
+	<module>addon-web-menu</module>
+	<module>addon-web-selenium</module>
+	<module>addon-dod</module>
+	<module>addon-test</module>
+        <module>bootstrap</module>
+    </modules>
+
+    <organization>
+        <name>SpringSource, Inc</name>
+        <url>http://www.springsource.com/</url>
+    </organization>
+    <inceptionYear>2009</inceptionYear>
+    <url>http://static.springframework.org/spring-roo/site/index.html</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- Note when doing releases: tagBase is set in release plugin configuration below -->
+    <scm>
+        <connection>scm:svn:https://src.springsource.com/svn/roo/trunk</connection>
+        <developerConnection>scm:svn:https://src.springsource.com/svn/roo/trunk</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>http://jira.springframework.org/browse/ROO</url>
+    </issueManagement>
+    <ciManagement>
+        <system>bamboo</system>
+        <url>https://build.springframework.org/browse/ROO</url>
+    </ciManagement>    
+
+    <distributionManagement>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Milestone Repository</name>
+            <url>s3://maven.springframework.org/milestone</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>spring-snapshot</id>
+            <name>Spring Snapshot Repository</name>
+            <url>s3://maven.springframework.org/snapshot</url>
+        </snapshotRepository>
+
+        <site>
+            <id>local</id>
+            <name>Local Site Directory</name>
+            <!--
+            This variable is set by the build release script. You can also set it on the command line if
+            you are running maven directly. e.g. mvn site -DsiteDirectory=file:///home/joe/mysite
+            -->
+            <url>${siteDirectory}</url>
+        </site>
+    </distributionManagement>
+
+	<repositories>
+        <repository>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.external</id>
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository> 
+		<repository>
+			<id>com.springsource.repository.bundles.milestone</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
+			<url>http://repository.springsource.com/maven/bundles/milestone</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.snapshot</id>
+			<name>SpringSource Enterprise Bundle Repository - Nightly Snapshots</name>
+			<url> http://repository.springsource.com/maven/bundles/snapshot</url>
+		</repository>
+	</repositories>
+
+    <developers>
+        <developer>
+            <name>Ben Alex</name>
+            <id>benalex</id>
+            <email>benalex at users.sourceforge.net</email>
+            <organization>SpringSource</organization>
+            <timezone>+10</timezone>
+        </developer>
+ 	<developer>
+            <name>Stefan Schmidt</name>
+            <id>sschmidt</id>
+            <email>stefan.schmidt at springsource.com</email>
+            <organization>SpringSource</organization>
+            <timezone>+10</timezone>
+        </developer>
+    </developers>
+
+    <dependencies>
+		<!-- JUnits with repo1 artifact/groupId required due to SureFire hard-coded dependency -->
+        <!--
+		<dependency>
+			<groupId>org.junit</groupId>
+			<artifactId>com.springsource.org.junit</artifactId>
+			<version>4.5.0</version>
+			<scope>test</scope>
+		</dependency>
+        -->
+        <dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.5</version>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.springframework.build.aws</groupId>
+                <artifactId>org.springframework.build.aws.maven</artifactId>
+                <version>2.0.0.RELEASE</version>
+            </extension>
+        </extensions>
+        <plugins>            
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-help-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.4.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.0.4</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Other -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-3</version>
+				<configuration>
+					<descriptors>
+						<descriptor>bootstrap/src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.0-beta-7</version>
+                <configuration>
+                    <tagBase>
+                        https://src.springsource.com/svn/roo/tags
+                    </tagBase>
+                </configuration>
+            </plugin>
+            <!-- IDE -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>false</downloadJavadocs>
+                    <!-- WTP is not required
+                    <wtpversion>2.0</wtpversion> -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-idea-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <dependenciesAsLibraries>true</dependenciesAsLibraries>
+                </configuration>
+            </plugin>
+            <!-- Site -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>2.0-beta-7</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.4.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>                    
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <header>Spring Roo</header>
+                    <quiet>true</quiet>
+                    <excludePackageNames>sample,bigbank,zzz</excludePackageNames>                                        
+                    <links>
+                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                        <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
+                        <link>http://asm.objectweb.org/current/doc/javadoc/user/</link>
+                        <link>http://junit.sourceforge.net/javadoc/</link>
+                        <link>http://jline.sourceforge.net/apidocs/index.html</link>
+                        <link>http://logging.apache.org/log4j/1.2/apidocs/index.html</link>
+                    </links>
+                </configuration>
+                <reportSets>
+                  <reportSet>
+                    <reports>
+                      <report>javadoc</report>
+                    </reports>
+                  </reportSet>
+                </reportSets>                
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>taglist-maven-plugin</artifactId>
+				<version>2.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>           
+        </plugins>
+    </reporting>
+
+    <properties>
+        <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
+        <spring.version>3.0.0.M3</spring.version>
+        <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
+        <roo.version>1.0.0.M1</roo.version>
+    </properties>
+
+</project>

@@ -1,0 +1,257 @@
+package org.springframework.roo.classpath.javaparser.details;
+
+import japa.parser.ast.body.BodyDeclaration;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.VariableDeclaratorId;
+import japa.parser.ast.expr.AnnotationExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.BlockStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
+import japa.parser.ast.type.Type;
+
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.style.ToStringCreator;
+import org.springframework.roo.support.util.Assert;
+
+/**
+ * Java Parser implementation of {@link MethodMetadata}.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ *
+ */
+public class JavaParserMethodMetadata implements MethodMetadata {
+
+	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+	private JavaType returnType;
+	private JavaSymbolName methodName;
+	private String body;
+	private String declaredByMetadataId;
+	private int modifier;
+	
+	public JavaParserMethodMetadata(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices) {
+		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
+		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
+		
+		// Convert Java Parser modifier into JDK modifier
+		this.modifier = JavaParserUtils.getJdkModifier(methodDeclaration.getModifiers());
+		
+		// Compute the return type
+		Type rt = methodDeclaration.getType();
+		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), rt);
+		
+		// Compute the method name
+		this.methodName = new JavaSymbolName(methodDeclaration.getName());
+		
+		// Get the body
+		this.body = methodDeclaration.getBody().toString();
+		
+		// Lookup the parameters and their names
+		if (methodDeclaration.getParameters() != null) {
+			for (Parameter p : methodDeclaration.getParameters()) {
+				Type pt = p.getType();
+				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt);
+				
+				List<AnnotationExpr> annotationsList = p.getAnnotations();
+				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+				if (annotationsList != null) {
+					for (AnnotationExpr candidate : annotationsList) {
+						JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, compilationUnitServices);
+						annotations.add(md);
+					}
+				}
+				
+				parameterTypes.add(new AnnotatedJavaType(parameterType, annotations));
+				parameterNames.add(new JavaSymbolName(p.getId().getName()));
+			}
+		}
+		
+		if (methodDeclaration.getAnnotations() != null) {
+			for (AnnotationExpr annotation : methodDeclaration.getAnnotations()) {
+				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
+			}
+		}
+		
+	}
+
+	public int getModifier() {
+		return modifier;
+	}
+
+	public String getDeclaredByMetadataId() {
+		return declaredByMetadataId;
+	}
+
+	public List<AnnotationMetadata> getAnnotations() {
+		return Collections.unmodifiableList(annotations);
+	}
+	
+	public List<JavaSymbolName> getParameterNames() {
+		return Collections.unmodifiableList(parameterNames);
+	}
+
+	public List<AnnotatedJavaType> getParameterTypes() {
+		return Collections.unmodifiableList(parameterTypes);
+	}
+
+	public JavaType getReturnType() {
+		return returnType;
+	}
+
+	public JavaSymbolName getMethodName() {
+		return methodName;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public String toString() {
+		ToStringCreator tsc = new ToStringCreator(this);
+		tsc.append("declaredByMetadataId", declaredByMetadataId);
+		tsc.append("modifier", Modifier.toString(modifier));
+		tsc.append("methodName", methodName);
+		tsc.append("parameterTypes", parameterTypes);
+		tsc.append("parameterNames", parameterNames);
+		tsc.append("returnType", returnType);
+		tsc.append("annotations", annotations);
+		tsc.append("body", body);
+		return tsc.toString();
+	}
+
+	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, boolean permitFlush) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(members, "Members required");
+		Assert.notNull(method, "Method required");
+		
+		// Create the return type we should use
+		Type returnType = null;
+		if (method.getReturnType().isPrimitive()) {
+			returnType = JavaParserUtils.getType(method.getReturnType());
+		} else {
+			NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), method.getReturnType());
+			ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
+			
+			// Add any type arguments presented for the return type
+			if (method.getReturnType().getParameters().size() > 0) {
+				List<Type> typeArgs = new ArrayList<Type>();
+				cit.setTypeArgs(typeArgs);
+				for (JavaType parameter : method.getReturnType().getParameters()) {
+					NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+					typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+				}
+			}
+			
+			returnType = cit;
+		}
+		
+		// Start with the basic method
+		MethodDeclaration d = new MethodDeclaration();
+		d.setModifiers(JavaParserUtils.getJavaParserModifier(method.getModifier()));
+		d.setName(method.getMethodName().getSymbolName());
+		d.setType(returnType);
+		
+		// Add any method-level annotations (not parameter annotations)
+		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
+		d.setAnnotations(annotations);
+		for (AnnotationMetadata annotation : method.getAnnotations()) {
+			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation, false);
+		}
+	
+		// Add any method parameters, including their individual annotations and type parameters
+		List<Parameter> parameters = new ArrayList<Parameter>();
+		d.setParameters(parameters);
+		int index = -1;
+		for (AnnotatedJavaType methodParameter : method.getParameterTypes()) {
+			index++;
+
+			// Add the parameter annotations applicable for this parameter type
+			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
+	
+			for (AnnotationMetadata parameterAnnotation : methodParameter.getAnnotations()) {
+				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation, false);
+			}
+			
+			// Compute the parameter name
+			String parameterName = method.getParameterNames().get(index).getSymbolName();
+			
+			// Compute the parameter type
+			Type parameterType = null;
+			if (methodParameter.getJavaType().isPrimitive()) {
+				parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
+			} else {
+				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), methodParameter.getJavaType());
+				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
+				
+				// Add any type arguments presented for the return type
+				if (methodParameter.getJavaType().getParameters().size() > 0) {
+					List<Type> typeArgs = new ArrayList<Type>();
+					cit.setTypeArgs(typeArgs);
+					for (JavaType parameter : methodParameter.getJavaType().getParameters()) {
+						NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+						typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+					}
+					
+				}
+				parameterType = cit;
+			}
+			
+			// Create a Java Parser method parameter and add it to the list of parameters
+			Parameter p = new Parameter(parameterType, new VariableDeclaratorId(parameterName));
+			p.setAnnotations(parameterAnnotations);
+			parameters.add(p);
+		}
+		
+		// Set the body
+		Assert.isTrue(method.getBody() == null || method.getBody().length() == 0, "A body is not supported by JavaParserMethodMetadata");
+		d.setBody(new BlockStmt());
+	
+		// Locate where to add this method; also verify if this method already exists
+		int nextMethodIndex = 0;
+		int i = -1;
+		for (BodyDeclaration bd : members) {
+			i++;
+			if (bd instanceof MethodDeclaration) {
+				// Next method should appear after this current method
+				nextMethodIndex = i + 1;
+				MethodDeclaration md = (MethodDeclaration) bd;
+				if (md.getName().equals(d.getName()) && md.getParameters().size() == d.getParameters().size()) {
+					// Possible match, we need to consider parameter types as well now
+					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices);
+					boolean matchesFully = true;
+					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
+						if (!existingParameter.getJavaType().equals(method.getParameterTypes().get(index))) {
+							matchesFully = false;
+							break;
+						}
+					}
+					if (matchesFully) {
+						throw new IllegalStateException("Method '" + method.getMethodName().getSymbolName() + "' already exists with identical parameters");
+					}
+				}
+			}
+		}
+	
+		// Add the method to the compilation unit
+		members.add(nextMethodIndex, d);
+		
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
+	}
+}

@@ -1,0 +1,58 @@
+create project -topLevelPackage com.springsource.petclinic
+
+install jpa -provider HIBERNATE -database HYPERSONIC_IN_MEMORY
+
+new persistent class jpa -name ~.reference.PetType -testAutomatically
+new persistent class jpa -name ~.reference.Specialty -testAutomatically
+new persistent class jpa -name ~.domain.Pet -testAutomatically
+new persistent class jpa -name ~.domain.Visit -testAutomatically
+new persistent class jpa -name ~.domain.AbstractPerson -abstract
+new persistent class jpa -name ~.domain.Vet -extends ~.domain.AbstractPerson -testAutomatically
+new persistent class jpa -name ~.domain.Owner -extends ~.domain.AbstractPerson -testAutomatically
+new persistent class jpa -name ~.domain.VetSpecialty -testAutomatically
+
+add field string -class ~.reference.PetType -fieldName type -notNull -sizeMax 30
+add field string -class ~.reference.Specialty -fieldName name -notNull -sizeMax 30
+add field string -class ~.domain.AbstractPerson -fieldName firstName -sizeMin 3 -sizeMax 30
+add field string -class ~.domain.AbstractPerson -fieldName lastName -notNull -sizeMin 3 -sizeMax 30
+add field string -class ~.domain.AbstractPerson -fieldName address -notNull -sizeMax 50
+add field string -class ~.domain.AbstractPerson -fieldName city -notNull -sizeMax 30
+add field number -class ~.domain.AbstractPerson -fieldName telephone -type java.lang.Integer -notNull -sizeMin 3 -sizeMax 30 
+add field string -class ~.domain.AbstractPerson -fieldName homePage -sizeMax 50
+add field string -class ~.domain.AbstractPerson -fieldName email -sizeMax 30 -sizeMin 6
+
+add field string -class ~.domain.Visit -fieldName description -sizeMax 255
+add field boolean -class ~.domain.Pet -fieldName sendReminders -notNull
+add field string -class ~.domain.Pet -fieldName name -notNull
+add field number -class ~.domain.Pet -fieldName weight -type java.lang.Float -notNull -min 0
+add field date jpa -class ~.domain.Vet -fieldName employedSince -type java.util.Date -notNull -past
+add field date jpa -class ~.domain.VetSpecialty -fieldName registered -type java.util.Date -notNull -past
+add field date jpa -class ~.domain.Visit -fieldName visitDate -type java.util.Date -notNull -past
+
+add field reference jpa -class ~.domain.Visit -fieldName pet -type ~.domain.Pet -notNull
+add field reference jpa -class ~.domain.Visit -fieldName vet -type ~.domain.Vet
+add field reference jpa -class ~.domain.Pet -fieldName owner -type ~.domain.Owner
+add field reference jpa -class ~.domain.Pet -fieldName type -type ~.reference.PetType
+add field reference jpa -class ~.domain.VetSpecialty -fieldName specialty -type ~.reference.Specialty
+add field reference jpa -class ~.domain.VetSpecialty -fieldName vet -type ~.domain.Vet
+add field set jpa -class ~.domain.Owner -fieldName pets -element ~.domain.Pet -mappedBy owner -notNull false
+add field set jpa -class ~.domain.Vet -fieldName specialties -element ~.domain.VetSpecialty -mappedBy vet -notNull false
+add field date jpa -class ~.domain.AbstractPerson -fieldName birthDay -type java.util.Date -notNull
+
+install finder -class ~.domain.Pet -finderName findPetsByNameAndWeight
+install finder -class ~.domain.Pet -finderName findPetsByOwner
+install finder -class ~.domain.Visit -finderName findVisitsByDescriptionAndVisitDate  
+install finder -class ~.domain.Visit -finderName findVisitsByVisitDateBetween 
+install finder -class ~.domain.Visit -finderName findVisitsByDescriptionLike
+
+new controller automatic -name ~.web.PetTypeController -formBackingObject ~.reference.PetType
+new controller automatic -name ~.web.OwnerController -formBackingObject ~.domain.Owner
+new controller automatic -name ~.web.PetController -formBackingObject ~.domain.Pet 
+new controller automatic -name ~.web.VetController -formBackingObject ~.domain.Vet
+
+new selenium test -controller ~.web.PetTypeController
+new selenium test -controller ~.web.OwnerController
+new selenium test -controller ~.web.PetController
+new selenium test -controller ~.web.VetController
+
+configure logging -level DEBUG -package WEB

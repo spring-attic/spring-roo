@@ -1,0 +1,19 @@
+#/bin/shell
+
+if [ -z "$ROO_CLASSPATH_FILE" ]; then
+    export ROO_CLASSPATH_FILE="target/roo_classpath.txt"
+    echo "WARNING: ROO_CLASSPATH_FILE environment variable is not set (using default '$ROO_CLASSPATH_FILE')"
+fi
+
+if [ -e $ROO_CLASSPATH_FILE ]; then
+    read ROO_CP <$ROO_CLASSPATH_FILE
+    java -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml"
+else
+    echo "Maven launch; will output '$ROO_CLASSPATH_FILE' for future caching"
+    if [ -e pom.xml ]; then
+	    mvn -e exec:java -Dexec.mainClass=org.springframework.roo.bootstrap.Bootstrap -Dexec.args="classpath:/roo-bootstrap.xml"
+    else
+        echo "pom.xml missing from working directory; execute from your bootstrap ROO directory (which contains pom.xml)"
+    fi
+fi
+

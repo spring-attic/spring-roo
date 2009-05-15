@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<databases>
+		<database id="HYPERSONIC">
+			<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" />
+		</database>
+		<database id="POSTGRES">
+			<dependency org="org.postgresql" name="com.springsource.org.postgresql.jdbc4" rev="8.3.604" />
+		</database>
+		<database id="MYSQL">
+			<dependency org="com.mysql.jdbc" name="com.springsource.com.mysql.jdbc" rev="5.1.6" />
+		</database>
+		<database id="H2">
+			<dependency org="com.h2database" name="com.springsource.org.h2" rev="1.0.71" />
+		</database>
+		<database id="MSSQL">
+			<dependency  org="net.sourceforge.jtds" name="com.springsource.net.sourceforge.jtds" rev="1.2.2" />
+		</database>
+		<database id="SYBASE">
+			<dependency org="net.sourceforge.jtds" name="com.springsource.net.sourceforge.jtds" rev="1.2.2" />
+		</database>
+	</databases>
+	<ormProviders>
+		<provider id="HIBERNATE">
+			<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.3.1.ga" />
+			<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.2.GA" />
+			<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.4.1" />
+			<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.1.0" />
+			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
+		</provider>
+		<provider id="OPENJPA">
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" />
+			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
+		<!-- 
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.lib.java5" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.jdbc.java5" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.java5" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.jdbc" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.lib" rev="1.0.2" />
+			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence.jdbc" rev="1.0.2" />
+		 -->
+		</provider>
+		<provider id="ECLIPSELINK">
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.antlr" rev="1.0.1" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.asm" rev="1.0.1" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" />
+		</provider>
+	</ormProviders>
+	<persistence>
+		<provider id="JPA">
+			<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" />
+			<dependency org="org.slf4j" name="com.springsource.slf4j.api" rev="1.5.6" />
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>com.springsource.org.hibernate.validator</artifactId>
+				<version>4.0.0.Alpha3</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.CR1" />
+		</provider>
+	</persistence>
+</dependencies>

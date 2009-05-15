@@ -1,0 +1,190 @@
+/*
+To use this file:
+
+sudo apt-get install graphviz
+dot -Tpdf roo.dot -o roo.pdf
+
+*/
+
+digraph roo {
+ size="8.5,11";
+ ratio=auto;
+ center=true;
+ rankdir=LR;
+ compound=true;
+
+ subgraph cluster_roo {
+  label="ROO Infrastructure";
+  api [label="ROO Development API"];
+  stsImpl [label="SpringSource Tool Suite"];
+  ideImpl [label="Spring IDE"];
+  cliImpl [label="Command Line Interface"];
+  runtimePlugin [label="Runtime Plugin"];
+  asm [label="Dynamic ASM Instance",shape=trapezium,shape=trapezium,style=filled,fillcolor=cyan];
+  rooService [label="Shared Framework Service",shape=box,style=filled,fillcolor=azure1];
+  bfpp [label="Bean Factory Post Processor"];
+  namespace [label="Spring Namespace"];
+  skeleton [label="Project Skeleton Stubber"];
+  developmentPlugin [label="Development Plugin"];
+  autoRefresh [label="Automatically Managed Artifact",shape=polygon,sides=12,shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  gestureDriven [label="Developer Gesture\nManaged Artifact",style=filled,fillcolor=snow2];
+  jsr269 [label="JSR 269 APT"];
+  maven [label="Maven"];
+  s2ap [label="SpringSource Application Platform"];
+  brits [label="SpringSource Enterprise Bundle Repository"];
+  stsImpl -> api;
+  ideImpl -> api;
+  cliImpl -> api;
+  stsImpl -> ideImpl;
+  api -> developmentPlugin;
+  api -> runtimePlugin;
+  runtimePlugin -> asm;
+  runtimePlugin -> rooService;
+  rooService -> bfpp;
+  rooService -> namespace;
+  developmentPlugin -> autoRefresh;
+  developmentPlugin -> gestureDriven;
+  autoRefresh -> jsr269;
+  gestureDriven -> skeleton;
+  skeleton -> maven;
+  maven -> s2ap;
+  maven -> brits;
+ }
+
+ subgraph cluster_repository {
+  label="Repository";
+  repoInterface [label="Repository Interface",style=filled,fillcolor=snow2];
+  repoImpl [label="Repository Impl\n(JPA/Hibernate)",shape=trapezium,style=filled,fillcolor=cyan];
+  auditEventInterceptor [label="Audit Event Interceptor",shape=box,style=filled,fillcolor=azure1];
+  liquibase [label="LiquiBase",shape=box,style=filled,fillcolor=azure1];
+  repoImpl -> repoInterface [style=dashed,arrowhead=oarrow];
+  repoImpl -> auditEventInterceptor;
+  liquibase -> repoImpl;
+ }
+
+ subgraph cluster_domain {
+  label="Domain Driven Design Business Objects";
+  sl [label="Services Objects"];
+  do [label="Domain Objects",style=filled,fillcolor=snow2];
+  vo [label="Value Objects",style=filled,fillcolor=snow2];
+  sl -> do;
+  do -> vo;
+  do -> repoInterface [lhead=cluster_repository, ltail=cluster_domain];
+ }
+
+ subgraph cluster_facade {
+  label="Transactional Business Facade";
+  security [label="Spring Security",shape=box,style=filled,fillcolor=azure1];
+  /* ams [label="SpringSource AMS",shape=box,style=filled,fillcolor=azure1]; */
+  facadeInterface [label="Facade Interface",style=filled,fillcolor=snow2];
+  facadeImpl [label="Facade Impl",shape=trapezium,style=filled,fillcolor=cyan];
+  facadeImpl -> facadeInterface [style=dashed,arrowhead=oarrow];
+  facadeImpl -> repoInterface;
+  facadeImpl -> do [lhead=cluster_domain];
+  facadeImpl -> security;
+  /* facadeImpl -> ams; */
+ }
+
+ subgraph cluster_mapper {
+  label="DTO Mapper";
+  mapperInterface [label="Mapper Interface",shape=box,style=filled,fillcolor=azure1];
+  mapperImpl [label="Mapper Impl (Dozer)",shape=box,style=filled,fillcolor=azure1];
+  classABRegistry [label="Class A-B Auto Registry",shape=box,style=filled,fillcolor=azure1];
+  lazyBoundaryAwareMapper [label="Lazy Boundary Aware Mapper",shape=box,style=filled,fillcolor=azure1];
+  mapperImpl -> mapperInterface [style=dashed,arrowhead=oarrow];
+  mapperImpl -> classABRegistry;
+  mapperImpl -> lazyBoundaryAwareMapper;
+  facadeImpl -> mapperInterface;
+  mapperImpl -> do;
+  mapperImpl -> vo;
+ }
+
+ subgraph cluster_dto {
+  label="Data Transfer Objects";
+  dto [label="Manual DTO",style=filled,fillcolor=snow2];
+  mirrorDto [label="Mirror DTO",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  marshalDto [label="JAXB DTO",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+ }
+ mapperImpl -> dto [lhead=cluster_dto];
+ integrationTests -> dto [lhead=cluster_dto];
+ facadeImpl -> dto [lhead=cluster_dto];
+ facadeInterface -> dto [lhead=cluster_dto];
+
+ subgraph cluster_commands {
+  label="Dynamic Commands";
+  cmd [label="Command",shape=trapezium,style=filled,fillcolor=cyan];
+  cmdExec [label="Transactional Command Executor",shape=box,style=filled,fillcolor=azure1];
+  cmdExec -> cmd [style=dashed, label="executes"];
+  cmdExec -> facadeInterface;
+  cmd -> dto [lhead=cluster_dto];
+ }
+
+ subgraph cluster_rest {
+  label="REST";
+  rest [label="REST Endpoint",shape=box,style=filled,fillcolor=azure1];
+  oxm [label="XML Serializer",shape=box,style=filled,fillcolor=azure1];
+  ojm [label="JSON Serializer",shape=box,style=filled,fillcolor=azure1];
+  oxm -> cmd;
+  ojm -> cmd;
+  rest -> oxm;
+  rest -> ojm;
+  rest -> cmdExec;
+ }
+
+ subgraph cluster_gwt_remoting {
+  label="GWT Asynchronous Remoting for Spring";
+  asyncInterface [label="GWT Asynchronous Interface",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  asyncEndpoint [label="GWT Spring Exporting Endpoint",shape=box,style=filled,fillcolor=azure1];
+  asyncEndpoint -> asyncInterface [style=dashed, label="exports"];
+  asyncEndpoint -> facadeInterface;
+  asyncEndpoint -> dto [lhead=cluster_dto];
+ }
+
+ subgraph cluster_gwt {
+  label="GWT Client";
+  gwtUi [label="GWT User Interface",style=filled,fillcolor=snow2];
+  stubbedJavaCommand [label="Stubbed Java Command",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  springIocGwt [label="Spring IoC for GWT",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  gwtUi -> stubbedJavaCommand;
+  gwtUi -> springIocGwt;
+  gwtUi -> rest;
+  stubbedJavaCommand -> rest [style=dashed, label="development time"];
+  gwtUi -> asyncInterface;
+  gwtUi -> asyncEndpoint;
+ }
+
+ subgraph cluster_flex {
+  label="Flex Client";
+  flexUi [label="Flex User Interface",style=filled,fillcolor=snow2];
+  stubbedASCommand [label="Stubbed ActionScript Command",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  springIocAS [label="Spring IoC for ActionScript",shape=polygon,sides=12,style=filled,fillcolor=yellow];
+  flexUi -> stubbedASCommand;
+  flexUi -> springIocAS;
+  flexUi -> rest;
+  stubbedASCommand -> rest [style=dashed, label="development time"];
+ }
+
+ subgraph cluster_mvc {
+  label="Spring MVC";
+  controller [label="MVC Controller",style=filled,fillcolor=snow2];
+  jsp [label="JSP with\nJavaScript",style=filled,fillcolor=snow2];
+  hdiv [label="HDIV",shape=box,style=filled,fillcolor=azure1];
+  controller -> jsp;
+  controller -> facadeInterface;
+  controller -> dto [lhead=cluster_dto];
+  controller -> do [style=dashed/*, label="not recommended"*/];
+  controller -> hdiv;
+ }
+
+ subgraph cluster_testing {
+  label="Integration Testing Services";
+  dataSeeders [label="Data Seeders",style=filled,fillcolor=snow2];
+  integrationTests [label="Integration Tests",style=filled,fillcolor=snow2];
+  runner [label="ROO JUnit Test Runner",shape=box,style=filled,fillcolor=azure1];
+  integrationTests -> dataSeeders;
+  integrationTests -> facadeInterface;
+  integrationTests -> runner;
+ }
+
+}
+

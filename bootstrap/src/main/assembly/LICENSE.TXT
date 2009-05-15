@@ -1,0 +1,36 @@
+======================================================================
+LEGAL NOTICES
+======================================================================
+
+Roo is copyright (C) 2008-2009 SpringSource Inc. All Rights Reserved. 
+
+Roo is licensed under the GPLv3: http://www.gnu.org/copyleft/gpl.html
+
+The contents of roo-annotations-*.jar are dual licensed under both the
+GPLv3 and also the Apache License, Version 2.0: 
+
+     http://www.apache.org/licenses/LICENSE-2.0.html. 
+
+You may apply your choice of GPLv3 or ASLv2 to your use of the
+roo-annotations-*.jar file.
+
+Ensuring an ASLv2 license is provided for the roo-annotations-*.jar
+file is SpringSource's reassurance that we do not intend for GPLv3
+obligations to extend to people simply using Roo to build software.
+
+In connection with the annotations, we further note:
+
+ 1. The annotations are source level retention only. As such there is
+    no requirement for the roo-annotations-*.jar file to be present
+    in your classpath at runtime. The annotations are not even 
+    referred to in your compiled .class files.
+    
+ 2. Roo itself is a development time only tool. No Roo JARs whatsoever
+    are required by your project at runtime.
+
+We trust the above clarifies our application of GPLv3 to Roo and that it 
+is not intended to cause people simply wishing to use Roo any unexpected
+GPLv3-related implications. We only intend that GPLv3 impacts those
+wishing to improve, build on, redistribute, extend etc Roo itself.
+
+[end]

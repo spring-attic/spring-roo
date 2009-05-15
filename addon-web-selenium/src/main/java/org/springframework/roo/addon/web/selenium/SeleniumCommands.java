@@ -1,0 +1,34 @@
+package org.springframework.roo.addon.web.selenium;
+
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
+import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
+import org.springframework.roo.support.util.Assert;
+
+/**
+ * Commands for the 'selenium' add-on to be used by the ROO shell.
+ * 
+ * @author Stefan Schmidt
+ * @since 1.0
+ *
+ */
+@ScopeDevelopmentShell
+public class SeleniumCommands implements CommandMarker {
+	
+	private SeleniumOperations seleniumOperations;
+	
+	public SeleniumCommands(SeleniumOperations seleniumOperations) {
+		Assert.notNull(seleniumOperations, "Selenium operations required");
+		this.seleniumOperations = seleniumOperations;
+	}
+	
+	@CliCommand(value="new selenium test", help="Creates a new Selenium test for a particular controller")
+	public void generateTest(
+			@CliOption(key="controller", mandatory=true) JavaType controller, 
+			@CliOption(key="name", mandatory=false) String name,
+			@CliOption(key="serverUrl", mandatory=false, unspecifiedDefaultValue="http://localhost:8080/", specifiedDefaultValue="http://localhost:8080/") String url){
+		seleniumOperations.generateTest(controller, name, url);
+	}
+}
