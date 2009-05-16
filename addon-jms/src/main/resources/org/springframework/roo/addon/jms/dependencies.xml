@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<springJms>
+		<dependency org="org.springframework" name="org.springframework.beans" rev="${spring.version}" />
+		<dependency org="org.springframework" name="org.springframework.jms" rev="${spring.version}" />
+		<dependency org="javax.jms" name="com.springsource.javax.jms" rev="1.1.0" />		
+	</springJms>
+	<jmsProviders>
+		<provider id="ACTIVEMQ_IN_MEMORY">
+			<dependency org="org.apache.activemq" name="com.springsource.org.apache.activemq" rev="5.2.0" />
+			<dependency org="org.apache.xbean" name="com.springsource.org.apache.xbean.spring" rev="3.3.0" />
+			<dependency org="org.apache.geronimo.specs" name="com.springsource.javax.management.j2ee" rev="1.0.1" />
+		</provider>
+	</jmsProviders>
+</dependencies>
