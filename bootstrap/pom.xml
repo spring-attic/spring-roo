@@ -127,6 +127,12 @@
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		 <dependency>
+                        <groupId>org.springframework.roo</groupId>
+                        <artifactId>spring-roo-addon-email</artifactId>
+                        <version>${roo.version}</version>
+                        <scope>provided</scope>
+                </dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>spring-roo-addon-finder</artifactId>

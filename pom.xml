@@ -26,6 +26,7 @@
 	<module>addon-propfiles</module>
 	<module>addon-beaninfo</module>
 	<module>addon-configurable</module>
+	<module>addon-email</module>
 	<module>addon-javabean</module>
 	<module>addon-jpa</module>
 	<module>addon-jms</module>
