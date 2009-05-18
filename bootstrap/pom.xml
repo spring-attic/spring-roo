@@ -194,6 +194,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+                        <groupId>org.springframework.roo</groupId>
+                        <artifactId>spring-roo-addon-web-flow</artifactId>
+                        <version>${roo.version}</version>
+                        <scope>provided</scope>
+                </dependency>
+		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>spring-roo-addon-web-mvc-controller</artifactId>
 			<version>${roo.version}</version>

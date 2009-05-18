@@ -36,6 +36,7 @@
 	<module>addon-property-editor</module>
 	<module>addon-security</module>
 	<module>addon-tostring</module>
+	<module>addon-web-flow</module>
 	<module>addon-web-mvc-controller</module>
 	<module>addon-web-mvc-jsp</module>
 	<module>addon-web-menu</module>
