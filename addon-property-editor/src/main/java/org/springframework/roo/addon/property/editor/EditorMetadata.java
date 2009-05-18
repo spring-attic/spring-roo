@@ -91,7 +91,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		String identifierTypeName = entityMetadata.getIdentifierField().getFieldType().getFullyQualifiedTypeName();
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (text == null || \"\".equals(text)) {");
+		bodyBuilder.appendFormalLine("if (text == null || 0 == text.length()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("setValue(null);");
 		bodyBuilder.appendFormalLine("return;");
