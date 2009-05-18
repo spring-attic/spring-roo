@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.details;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -51,7 +52,7 @@ public abstract class MemberFindingUtils {
 		}
 		for (MethodMetadata method : memberHoldingTypeDetails.getDeclaredMethods()) {
 			if (method.getMethodName().equals(methodName)) {
-				if (method.getParameterTypes().equals(parameters)) {
+				if (parameters.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(method.getParameterTypes()))) {
 					return method;
 				}
 			}
@@ -72,7 +73,7 @@ public abstract class MemberFindingUtils {
 			parameters = new ArrayList<JavaType>();
 		}
 		for (ConstructorMetadata constructor : memberHoldingTypeDetails.getDeclaredConstructors()) {
-			if (constructor.getParameterTypes().equals(parameters)) {
+			if (parameters.equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(constructor.getParameterTypes()))) {
 				return constructor;
 			}
 		}
