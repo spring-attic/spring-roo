@@ -98,7 +98,7 @@ public class SecurityOperations {
 		
 		Element root = (Element) webXmlDoc.getFirstChild();
 
-		Element paramValue = XmlUtils.findRequiredElement("/web-app/context-param[param-value='classpath:applicationContext.xml']/param-value", root);
+		Element paramValue = XmlUtils.findRequiredElement("/web-app/context-param[param-value='classpath:applicationContext*.xml']/param-value", root);
 		String currentContent = paramValue.getTextContent();
 		paramValue.setTextContent(currentContent + System.getProperty("line.separator") + "\t\tclasspath:applicationContext-security.xml");
 		
