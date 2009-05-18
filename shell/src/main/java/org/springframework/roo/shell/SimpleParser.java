@@ -292,7 +292,7 @@ public final class SimpleParser {
 				// At end of word or buffer. Let's see if a word matched or not
 				
 				for (int candidate = lastCommandWordUsed; candidate < commandWords.length; candidate++) {
-					if (commandWords[candidate].startsWith(lastWord) && !"".equals(lastWord)) {
+					if (lastWord != null && lastWord.length() > 0 && commandWords[candidate].startsWith(lastWord)) {
 						
 						if (bufferToReturn != null) {
 							// We already matched something earlier, so ensure we didn't skip any word
