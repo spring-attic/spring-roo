@@ -56,7 +56,6 @@
 		</fileSet>
 		<fileSet>
 			<outputDirectory>/legal</outputDirectory>
-			<directory>bootstrap/src/main/assembly</directory>
 			<lineEnding>unix</lineEnding>
 			<useDefaultExcludes>true</useDefaultExcludes>
 			<includes>
