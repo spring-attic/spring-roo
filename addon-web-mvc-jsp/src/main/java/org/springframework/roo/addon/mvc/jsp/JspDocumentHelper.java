@@ -209,12 +209,6 @@ public class JspDocumentHelper {
 		deleteFormElement.appendChild(deleteSubmitElement);
 		deleteElement.appendChild(deleteFormElement);
 		trElement2.appendChild(deleteElement);
-
-		// Element createElement = document.createElement("a");
-		// createElement.setAttribute("href", "/" +
-		// projectName + "/" + entityName +
-		// "/create.html");
-		// createElement.setTextContent("create");
 		
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityMetadata.getPlural().toLowerCase() + "}");
@@ -253,12 +247,12 @@ public class JspDocumentHelper {
 			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + field.getFieldName().getSymbolName());
 				
 			Element label = document.createElement("label");
-			label.setAttribute("for", field.getFieldName().getSymbolName());
+			label.setAttribute("for", "_" + field.getFieldName().getSymbolName());
 			label.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divSubmitElement.appendChild(label);
 			
 			Element divContent = document.createElement("div");
-			divContent.setAttribute("id", field.getFieldName().getSymbolName());
+			divContent.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				Element fmt = document.createElement("fmt:formatDate");
@@ -364,9 +358,11 @@ public class JspDocumentHelper {
 		
 		Element formHiddenId = document.createElement("form:hidden");
 		formHiddenId.setAttribute("path", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
+		formHiddenId.setAttribute("id", "_" + entityMetadata.getIdentifierField().getFieldName().getSymbolName());
 		formElement.appendChild(formHiddenId);
 		Element formHiddenVersion = document.createElement("form:hidden");
 		formHiddenVersion.setAttribute("path", entityMetadata.getVersionField().getFieldName().getSymbolName());
+		formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName());
 		formElement.appendChild(formHiddenVersion);
 
 		divElement.appendChild(formElement);
@@ -384,7 +380,7 @@ public class JspDocumentHelper {
 			JavaType fieldType = field.getFieldType();
 			if(fieldType.isCommonCollectionType() && fieldType.equals(new JavaType(Set.class.getName()))) {
 				if (fieldType.getParameters().size() != 1) {
-					throw new IllegalArgumentException("Only");
+					throw new IllegalArgumentException();
 				}
 				fieldType = fieldType.getParameters().get(0);
 			}
@@ -393,7 +389,7 @@ public class JspDocumentHelper {
 			divElement.setAttribute("id", "roo_" + entityName + "_" + field.getFieldName().getSymbolName());
 						
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", field.getFieldName().getSymbolName());
+			labelElement.setAttribute("for", "_" + field.getFieldName().getSymbolName());
 			labelElement.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divElement.appendChild(labelElement);
 			
@@ -402,7 +398,7 @@ public class JspDocumentHelper {
 				
 				Element formCheck = document.createElement("form:checkbox");
 				formCheck.setAttribute("path", field.getFieldName().getSymbolName());
-
+				formCheck.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 				divElement.appendChild(formCheck);
 				formElement.appendChild(divElement);
 				formElement.appendChild(document.createElement("br"));
@@ -497,7 +493,7 @@ public class JspDocumentHelper {
 	private Element getDateDojo(Document document, FieldMetadata field, String pattern) {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + pattern + "\", required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}})); ");
 		return script;
@@ -530,7 +526,7 @@ public class JspDocumentHelper {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		String message = "Enter " + field.getFieldName().getReadableSymbolName() + (isRequired ? " (required)" : "");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"" + message + "\", invalidMessage: \"" + invalid 
 				+ "\"" + regex + ", required : " + isRequired + "}})); ");
 		return script;
@@ -539,7 +535,7 @@ public class JspDocumentHelper {
 	private Element getTextAreaDojo(Document document, FieldMetadata field) {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType: \"dijit.form.Textarea\", widgetAttrs: {value: \"\"}})); ");
 		return script;
 	}
@@ -547,7 +543,7 @@ public class JspDocumentHelper {
 	private Element getSelectDojo(Document document, FieldMetadata field) {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType: \"dijit.form.FilteringSelect\", widgetAttrs : {hasDownArrow : true}})); ");
 		return script;
 	}
@@ -555,7 +551,7 @@ public class JspDocumentHelper {
 	private Element getMultiSelectDojo(Document document, FieldMetadata field) {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType: \"dijit.form.MultiSelect\")); ");
 		return script;
 	}
@@ -570,6 +566,7 @@ public class JspDocumentHelper {
 	private Element getInputBox(Document document, FieldMetadata field, Integer maxValue) {
 		Element formInput = document.createElement("form:input");
 		formInput.setAttribute("path", field.getFieldName().getSymbolName());
+		formInput.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 		formInput.setAttribute("size", "0");
 		formInput.setAttribute("cssStyle", "width:250px");
 		formInput.setAttribute("maxlength", maxValue.toString());
@@ -580,7 +577,7 @@ public class JspDocumentHelper {
 		Element formSelect = document.createElement("form:select");
 		formSelect.setAttribute("path", field.getFieldName().getSymbolName());
 		formSelect.setAttribute("cssStyle", "width:250px");						
-	
+		formSelect.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 		Element formOptions = document.createElement("form:options");
 		formOptions.setAttribute("items", "${" + pluralName.toLowerCase() + "}");
 		formOptions.setAttribute("itemValue", "id");
@@ -591,15 +588,17 @@ public class JspDocumentHelper {
 	}
 	
 	private Element getTextArea(Document document, FieldMetadata field, Integer maxValue) {
-		Element formInput = document.createElement("form:textarea");
-		formInput.setAttribute("path", field.getFieldName().getSymbolName());
-		formInput.setAttribute("cssStyle", "width:250px;height:" + Math.round(new Float(maxValue) / 10) + "em");
-		return formInput;
+		Element textArea = document.createElement("form:textarea");
+		textArea.setAttribute("path", field.getFieldName().getSymbolName());
+		textArea.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+		textArea.setAttribute("cssStyle", "width:250px;height:" + Math.round(new Float(maxValue) / 10) + "em");
+		return textArea;
 	}
 	
 	private Element getErrorsElement(Document document, FieldMetadata field) {
 		Element errors = document.createElement("form:errors");
 		errors.setAttribute("path", field.getFieldName().getSymbolName());
+		errors.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 		errors.setAttribute("cssClass", "errors");
 		return errors;
 	}
