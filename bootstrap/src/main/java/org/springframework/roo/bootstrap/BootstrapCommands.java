@@ -25,7 +25,7 @@ public class BootstrapCommands implements CommandMarker {
 	
 	@CliCommand(value="development mode", help="Switches the system into development mode (greater diagnostic information)")
 	public String developmentMode(
-			@CliOption(key="enabled", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false") boolean enabled) {
+			@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true") boolean enabled) {
 		processManager.setDevelopmentMode(enabled);
 		return "Development mode set to " + enabled;
 	}
