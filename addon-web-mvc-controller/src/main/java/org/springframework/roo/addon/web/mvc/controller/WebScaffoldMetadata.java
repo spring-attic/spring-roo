@@ -257,7 +257,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + entityName));
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), entityName));
 		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
 		
 		List<AnnotationMetadata> noAnnotations = new ArrayList<AnnotationMetadata>();
@@ -337,7 +337,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + entityName));
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), entityName));
 		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
 		
 		List<AnnotationMetadata> noAnnotations = new ArrayList<AnnotationMetadata>();
