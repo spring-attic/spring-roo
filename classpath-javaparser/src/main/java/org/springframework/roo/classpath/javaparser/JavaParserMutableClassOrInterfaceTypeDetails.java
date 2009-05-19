@@ -1,7 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
 import japa.parser.ASTHelper;
-import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
@@ -9,6 +8,7 @@ import japa.parser.ast.PackageDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
+import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.TypeDeclaration;
@@ -81,13 +81,16 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	
 	// internal use
 	private ClassOrInterfaceDeclaration clazz;
+	private EnumDeclaration enumClazz;
 	private CompilationUnit compilationUnit;
 	private List<ImportDeclaration> imports;
 	private JavaPackage compilationUnitPackage;
 	
 	private int modifier = 0;
 	
-	public JavaParserMutableClassOrInterfaceTypeDetails(FileManager fileManager, String declaredByMetadataId, String fileIdentifier, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+	public JavaParserMutableClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, FileManager fileManager, String declaredByMetadataId, String fileIdentifier, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		Assert.notNull(compilationUnit, "Compilation unit required");
+		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
 		Assert.notNull(fileManager, "File manager requried");
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fileIdentifier, "File identifier (canonical path) required");
@@ -95,13 +98,15 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
 		
-		this.declaredByMetadataId = declaredByMetadataId;
 		this.name = typeName;
+
+		this.declaredByMetadataId = declaredByMetadataId;
 		this.fileManager = fileManager;
 		
 		this.fileIdentifier = fileIdentifier;
 		
-		compilationUnit = JavaParser.parse(fileManager.getInputStream(fileIdentifier));
+		this.compilationUnit = compilationUnit;
+		
 		imports = compilationUnit.getImports();
 		if (imports == null) {
 			imports = new ArrayList<ImportDeclaration>();
@@ -112,64 +117,66 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		
 		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
 		
-		for (TypeDeclaration candidate : compilationUnit.getTypes()) {
-			// This implementation only supports the main type declared within a compilation unit
-			if (typeName.getSimpleTypeName().equals(candidate.getName())) {
-				Assert.isInstanceOf(ClassOrInterfaceDeclaration.class, candidate, "Parsing empty, enum or annotation types is unsupported");
-				
-				// We have the required type declaration
-				clazz = (ClassOrInterfaceDeclaration) candidate;
-				
-				break;
-			}
-		}
-		Assert.notNull(clazz, "Unable to locate the class or interface declaration");
+		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
+			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
 
-		// Determine the type name, adding type parameters if possible
-		JavaType name = JavaParserUtils.getJavaType(compilationUnitPackage, imports, clazz);
+			// Determine the type name, adding type parameters if possible
+			this.name = JavaParserUtils.getJavaType(compilationUnitPackage, imports, this.clazz);
+			
+			if (this.clazz.isInterface()) {
+				physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
+			} else {
+				physicalTypeCategory = PhysicalTypeCategory.CLASS;
+			}
+			
+		} else if (typeDeclaration instanceof EnumDeclaration) {
+			this.enumClazz = (EnumDeclaration) typeDeclaration;
+			this.physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
+			// NB: JavaParser does not parse the actual enum constants, so this is not available
+		}
+		
+		Assert.notNull(physicalTypeCategory, "Only enum, class and interface files are supported");
+		
 		
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 		
-		if (clazz.isInterface()) {
-			physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
-		} else {
-			physicalTypeCategory = PhysicalTypeCategory.CLASS;
-		}
-		
 		// Convert Java Parser modifier into JDK modifier
-		this.modifier = JavaParserUtils.getJdkModifier(clazz.getModifiers());
+		this.modifier = JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers());
 		
-		List<ClassOrInterfaceType> extendsList = clazz.getExtends();
-		if (extendsList != null) {
-			for (ClassOrInterfaceType candidate : extendsList) {
-				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate);
-				extendsTypes.add(javaType);
+		if (this.clazz != null) {
+			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
+			if (extendsList != null) {
+				for (ClassOrInterfaceType candidate : extendsList) {
+					JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate);
+					extendsTypes.add(javaType);
+				}
+			}
+
+			// Obtain the superclass, if this is a class and one is available
+			if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
+				JavaType superclass = extendsTypes.get(0);
+				String superclassId = physicalTypeMetadataProvider.findIdentifier(superclass);
+				PhysicalTypeMetadata superPtm = null;
+				if (superclassId != null) {
+					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
+				}
+				if (superPtm != null && superPtm.getPhysicalTypeDetails() != null && superPtm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+					this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getPhysicalTypeDetails();
+				}
 			}
 		}
 		
-		// Obtain the superclass, if this is a class and one is available
-		if (physicalTypeCategory == PhysicalTypeCategory.CLASS && extendsTypes.size() == 1) {
-			JavaType superclass = extendsTypes.get(0);
-			String superclassId = physicalTypeMetadataProvider.findIdentifier(superclass);
-			PhysicalTypeMetadata superPtm = null;
-			if (superclassId != null) {
-				superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
-			}
-			if (superPtm != null && superPtm.getPhysicalTypeDetails() != null && superPtm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-				this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getPhysicalTypeDetails();
-			}
-		}
-		
-		List<ClassOrInterfaceType> implementsList = clazz.getImplements();
+		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
 		if (implementsList != null) {
 			for (ClassOrInterfaceType candidate : implementsList) {
 				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate);
 				implementsTypes.add(javaType);
 			}
 		}
+	
 		
-		List<AnnotationExpr> annotationsList = clazz.getAnnotations();
+		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
 		if (annotationsList != null) {
 			for (AnnotationExpr candidate : annotationsList) {
 				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, this);
@@ -177,7 +184,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			}
 		}
 
-		for (BodyDeclaration member : clazz.getMembers()) {
+		for (BodyDeclaration member : this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers()) {
 			if (member instanceof FieldDeclaration) {
 				FieldDeclaration castMember = (FieldDeclaration) member;
 				for (VariableDeclarator var : castMember.getVariables()) {
@@ -241,10 +248,14 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	}
 	
 	public void addTypeAnnotation(AnnotationMetadata annotation) {
-		List<AnnotationExpr> annotations = clazz.getAnnotations();
+		List<AnnotationExpr> annotations = clazz == null ? enumClazz.getAnnotations() : clazz.getAnnotations();
 		if (annotations == null) {
 			annotations = new ArrayList<AnnotationExpr>();
-			clazz.setAnnotations(annotations);
+			if (clazz == null) {
+				enumClazz.setAnnotations(annotations);
+			} else {
+				clazz.setAnnotations(annotations);
+			}
 		}
 		JavaParserAnnotationMetadata.addAnnotationToList(this, annotations, annotation, true);
 	}
@@ -259,28 +270,40 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	}
 
 	public void addField(FieldMetadata fieldMetadata) {
-		List<BodyDeclaration> members = clazz.getMembers();
+		List<BodyDeclaration> members = clazz == null ? enumClazz.getMembers() : clazz.getMembers();
 		if (members == null) {
 			members = new ArrayList<BodyDeclaration>();
-			clazz.setMembers(members);
+			if (clazz == null) {
+				enumClazz.setMembers(members);
+			} else {
+				clazz.setMembers(members);
+			}
 		}
 		JavaParserFieldMetadata.addField(this, members, fieldMetadata, true);
 	}
 
 	public void removeField(JavaSymbolName fieldName) {
-		List<BodyDeclaration> members = clazz.getMembers();
+		List<BodyDeclaration> members = clazz == null ? enumClazz.getMembers() : clazz.getMembers();
 		if (members == null) {
 			members = new ArrayList<BodyDeclaration>();
-			clazz.setMembers(members);
+			if (clazz == null) {
+				enumClazz.setMembers(members);
+			} else {
+				clazz.setMembers(members);
+			}
 		}
 		JavaParserFieldMetadata.removeField(this, members, fieldName);
 	}
 	
 	public void addMethod(MethodMetadata methodMetadata) {
-		List<BodyDeclaration> members = clazz.getMembers();
+		List<BodyDeclaration> members = clazz == null ? enumClazz.getMembers() : clazz.getMembers();
 		if (members == null) {
 			members = new ArrayList<BodyDeclaration>();
-			clazz.setMembers(members);
+			if (clazz == null) {
+				enumClazz.setMembers(members);
+			} else {
+				clazz.setMembers(members);
+			}
 		}
 		JavaParserMethodMetadata.addMethod(this, members, methodMetadata, true);
 	}

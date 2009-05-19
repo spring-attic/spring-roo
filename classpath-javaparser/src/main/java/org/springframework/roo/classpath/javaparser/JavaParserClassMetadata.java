@@ -1,12 +1,16 @@
 package org.springframework.roo.classpath.javaparser;
 
+import japa.parser.JavaParser;
+import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.body.TypeDeclaration;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
-import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.internal.AbstractMetadataItem;
@@ -20,7 +24,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 	private static final Logger logger = Logger.getLogger(JavaParserClassMetadata.class.getName());
 
 	private String fileIdentifier;
-	private MutableClassOrInterfaceTypeDetails physicalTypeDetails;
+	private PhysicalTypeDetails physicalTypeDetails;
 
 	/**
 	 * Creates a new {@link JavaParserClassMetadata} that parses the specified file.
@@ -47,7 +51,18 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 
 		try {
 			Assert.isTrue(fileManager.exists(fileIdentifier), "Path '" + fileIdentifier + "' must exist");
-			physicalTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
+			CompilationUnit compilationUnit= JavaParser.parse(fileManager.getInputStream(fileIdentifier));
+			
+			for (TypeDeclaration candidate : compilationUnit.getTypes()) {
+				// This implementation only supports the main type declared within a compilation unit
+				if (PhysicalTypeIdentifier.getJavaType(metadataIdentificationString).getSimpleTypeName().equals(candidate.getName())) {
+					// We have the required type declaration
+					physicalTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, candidate, fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
+					
+					break;
+				}
+			}
+			Assert.notNull(physicalTypeDetails, "Parsing empty, enum or annotation types is unsupported");
 			
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.finest("Parsed '" + metadataIdentificationString + "'");
@@ -61,7 +76,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 		}
 	}
 
-	public MutableClassOrInterfaceTypeDetails getPhysicalTypeDetails() {
+	public PhysicalTypeDetails getPhysicalTypeDetails() {
 		return physicalTypeDetails;
 	}
 
