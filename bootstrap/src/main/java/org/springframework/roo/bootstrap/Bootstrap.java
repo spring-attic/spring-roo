@@ -35,7 +35,7 @@ public class Bootstrap {
         StringBuilder sb = new StringBuilder();
         if (args.length > 1) {
         	for (int i = 1; i < args.length; i++) {
-        		if (i > 2) {
+        		if (i >= 2) {
         			sb.append(" ");
         		}
         		sb.append(args[i]);
