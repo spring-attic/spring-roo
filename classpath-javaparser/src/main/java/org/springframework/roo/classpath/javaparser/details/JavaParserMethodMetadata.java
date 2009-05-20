@@ -1,8 +1,12 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import japa.parser.JavaParser;
+import japa.parser.ParseException;
+import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
@@ -10,6 +14,7 @@ import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -218,8 +223,42 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		}
 		
 		// Set the body
-		Assert.isTrue(method.getBody() == null || method.getBody().length() == 0, "A body is not supported by JavaParserMethodMetadata");
-		d.setBody(new BlockStmt());
+		if (method.getBody() == null || method.getBody().length() == 0) {
+			d.setBody(new BlockStmt());
+		} else {
+			// There is a body.
+			// We need to make a fake method that we can have JavaParser parse.
+			// Easiest way to do that is to build a simple source class containing the required method and re-parse it.
+			StringBuilder sb = new StringBuilder();
+			sb.append("class TemporaryClass {\n");
+			sb.append("  public void temporaryMethod() {\n");
+			sb.append(method.getBody());
+			sb.append("\n");
+			sb.append("  }\n");
+			sb.append("}\n");
+			ByteArrayInputStream bais = new ByteArrayInputStream(sb.toString().getBytes());
+			CompilationUnit ci;
+			try {
+				ci = JavaParser.parse(bais);
+			} catch (ParseException pe) {
+				throw new IllegalStateException("Illegal state: JavaParser did not parse correctly", pe);
+			}
+			List<TypeDeclaration> types = ci.getTypes();
+			if (types == null || types.size() != 1) {
+				throw new IllegalArgumentException("Method body invalid");
+			}
+			TypeDeclaration td = types.get(0);
+			List<BodyDeclaration> bodyDeclarations = td.getMembers();
+			if (bodyDeclarations == null || bodyDeclarations.size() != 1) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return body declarations correctly");
+			}
+			BodyDeclaration bd = bodyDeclarations.get(0);
+			if (!(bd instanceof MethodDeclaration)) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return a method declaration correctly");
+			}
+			MethodDeclaration md = (MethodDeclaration) bd;
+			d.setBody(md.getBody());
+		}
 	
 		// Locate where to add this method; also verify if this method already exists
 		int nextMethodIndex = 0;
