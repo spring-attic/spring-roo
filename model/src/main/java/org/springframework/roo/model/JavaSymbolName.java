@@ -96,6 +96,30 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * @param name to evaluate (required)
 	 */
 	public static final void assertJavaNameLegal(String name) {
+		if (name == null) {
+			throw new IllegalArgumentException("Name required");
+		}
+		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
+		char[] value = name.toCharArray();
+		for (int i = 0; i < value.length; i++) {
+			char c = value[i];
+			if ('/' == c || ' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
+					'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
+					'|' == c || '\\' == c || '\'' == c || '+' == c)  {
+				throw new IllegalArgumentException("Illegal name '" + name + "' (illegal character)");
+			}
+			if (i == 0) {
+				if ('1' == c || '2' == c || '3' == c || '4' == c || '5' == c || '6' == c || '7' == c || '8' == c || '9' == c || '0' == c) {
+					throw new IllegalArgumentException("Illegal name '" + name + "' (cannot start with a number)");
+				}
+			}
+			if (i+1 == value.length || i == 0) {
+				if ('.' == c) {
+					throw new IllegalArgumentException("Illegal name '" + name + "' (cannot start or end with a period)");
+				}
+			}
+		}
+		/*
 		Assert.notNull(name, "Name required");
 		Assert.isTrue(!name.contains("/"), "Slashes are prohibited in the name");
 		Assert.isTrue(!name.contains(" "), "Spaces are prohibited in the name");
@@ -109,10 +133,8 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		Assert.isTrue(!name.contains("?"), "Illegal name");
 		Assert.isTrue(!name.contains("("), "Illegal name");
 		Assert.isTrue(!name.contains(")"), "Illegal name");
-//		Assert.isTrue(!name.contains("-"), "Illegal name");
 		Assert.isTrue(!name.contains("~"), "Illegal name");
 		Assert.isTrue(!name.contains("`"), "Illegal name");
-		Assert.isTrue(!name.contains("\\"), "Illegal name");
 		Assert.isTrue(!name.contains("{"), "Illegal name");
 		Assert.isTrue(!name.contains("}"), "Illegal name");
 		Assert.isTrue(!name.contains("["), "Illegal name");
@@ -133,6 +155,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		Assert.isTrue(!name.startsWith("0"), "Illegal name");
 		Assert.isTrue(!name.startsWith("."), "The name cannot begin with a period");
 		Assert.isTrue(!name.endsWith("."), "The name cannot end with a period");
+		*/
 	}
 
 }

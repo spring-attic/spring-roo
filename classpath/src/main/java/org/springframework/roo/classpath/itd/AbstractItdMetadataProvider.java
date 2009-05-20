@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.itd;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -261,7 +260,8 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 					
 					try {
 						if (mutableFile != null) {
-							FileCopyUtils.copy(itd, new OutputStreamWriter(mutableFile.getOutputStream()));
+							FileCopyUtils.copy(itd.getBytes(), mutableFile.getOutputStream());
+							//FileCopyUtils.copy(itd, new OutputStreamWriter(mutableFile.getOutputStream()));
 						}
 					} catch (IOException ioe) {
 						throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);

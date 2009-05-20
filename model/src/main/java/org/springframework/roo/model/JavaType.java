@@ -75,11 +75,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
 	 */
 	public JavaType(String fullyQualifiedTypeName) {
-		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
-		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
-		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
-		String firstChar = getSimpleTypeName().substring(0,1);
-		Assert.isTrue(firstChar.toUpperCase().equals(firstChar), "The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
+		this(fullyQualifiedTypeName, false, false, null);
 	}
 
 	/**
@@ -92,11 +88,15 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
 	public JavaType(String fullyQualifiedTypeName, boolean array, boolean primitive, List<JavaType> parameters) {
-		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
+		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
+			throw new IllegalArgumentException("Fully qualified type name required");
+		}
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
-		String firstChar = getSimpleTypeName().substring(0,1);
-		Assert.isTrue(firstChar.toUpperCase().equals(firstChar), "The first letter of the type name portion must be uppercase");
+		if (!Character.isUpperCase(getSimpleTypeName().charAt(0))) {
+			throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
+		}
+		
 		this.array = array;
 		this.primitive = primitive;
 		if (parameters != null) {

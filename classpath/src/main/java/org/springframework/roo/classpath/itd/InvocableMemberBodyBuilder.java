@@ -1,8 +1,5 @@
 package org.springframework.roo.classpath.itd;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-
 import org.springframework.roo.classpath.details.InvocableMemberMetadata;
 import org.springframework.roo.support.util.Assert;
 
@@ -20,13 +17,11 @@ public class InvocableMemberBodyBuilder {
 	
 	private int indentLevel = 0;
 	
-	private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	private PrintWriter pw;
+	private StringBuilder stringBuilder = new StringBuilder();
 
 	public InvocableMemberBodyBuilder() {
-		this.pw = new PrintWriter(baos);
-		indent();
-		indent();
+		indentLevel++;
+		indentLevel++;
 	}
 
 	/**
@@ -59,7 +54,7 @@ public class InvocableMemberBodyBuilder {
 	public InvocableMemberBodyBuilder newLine() {
 		appendIndent();
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
-		pw.append("\n");
+		stringBuilder.append("\n");
 		//pw.append(System.getProperty("line.separator"));
 		return this;
 	}
@@ -69,7 +64,7 @@ public class InvocableMemberBodyBuilder {
 	 */
 	public InvocableMemberBodyBuilder append(String message) {
 		if (message != null && !"".equals(message)) {
-			pw.append(message);
+			stringBuilder.append(message);
 		}
 		return this;
 	}
@@ -80,7 +75,7 @@ public class InvocableMemberBodyBuilder {
 	public InvocableMemberBodyBuilder appendFormalLine(String message) {
 		appendIndent();
 		if (message != null && !"".equals(message)) {
-			pw.append(message);
+			stringBuilder.append(message);
 		}
 		return newLine();
 	}
@@ -90,20 +85,14 @@ public class InvocableMemberBodyBuilder {
 	 */
 	public InvocableMemberBodyBuilder appendIndent() {
 		for (int i = 0 ; i < indentLevel; i++) {
-			pw.append("    ");
+			stringBuilder.append("    ");
 		}
 		return this;
 	}
 	
 	public String getOutput() {
 		Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not " + indentLevel + ") to terminate!");
-		pw.flush();
-		return baos.toString();
+		return stringBuilder.toString();
 	}
 
-
-	public byte[] getBytes() {
-		pw.flush();
-		return baos.toByteArray();
-	}
 }

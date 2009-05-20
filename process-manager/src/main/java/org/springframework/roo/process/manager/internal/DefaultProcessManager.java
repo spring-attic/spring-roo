@@ -116,18 +116,17 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		T result = null;
 		try {
 			ActiveProcessManager.setActiveProcessManager(this);
-			int changes = Integer.MAX_VALUE;
 			
 			// run the requested operation
 			if (callback == null) {
-				changes = fileMonitorService.scanAll();
+				fileMonitorService.scanAll();
 			} else {
 				result = callback.callback();
 			}
 			
 			// guarantee scans repeat until there are no more changes detected
-			while (changes > 0) {
-				changes = fileMonitorService.scanAll();
+			while (fileMonitorService.isDirty()) {
+				fileMonitorService.scanAll();
 			}
 			
 			// it all seems to have worked, so clear the undo history

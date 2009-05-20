@@ -81,6 +81,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		return monitored;
 	}
 
+	public boolean isDirty() {
+		return notifyChanged.size() > 0;
+	}
+	
 	public int scanAll() {
 		if (requests.size() == 0) {
 			return 0;

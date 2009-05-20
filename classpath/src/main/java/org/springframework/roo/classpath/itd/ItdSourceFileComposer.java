@@ -1,7 +1,5 @@
 package org.springframework.roo.classpath.itd;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
@@ -28,8 +26,7 @@ public class ItdSourceFileComposer {
 	private int indentLevel = 0;
 	
 	private JavaType introductionTo;
-	private ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	private PrintWriter pw = new PrintWriter(baos);
+	private StringBuilder pw = new StringBuilder();
 	private boolean content;
 
 	/**
@@ -394,20 +391,8 @@ public class ItdSourceFileComposer {
 		
 	}
 	
-	public PrintWriter getOutputWriter() {
-		pw.flush();
-		return pw;
-	}
-	
 	public String getOutput() {
-		pw.flush();
-		return baos.toString();
-	}
-
-
-	public byte[] getBytes() {
-		pw.flush();
-		return baos.toByteArray();
+		return pw.toString();
 	}
 
 	/**

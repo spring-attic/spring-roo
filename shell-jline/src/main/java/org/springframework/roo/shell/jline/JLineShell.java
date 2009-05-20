@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
@@ -31,7 +30,6 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.logging.DeferredLogHandler;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.ExceptionUtils;
 
 /**
  * Uses the feature-rich <a href="http://jline.sourceforge.net/">JLine</a> library to provide an interactive shell.
@@ -117,6 +115,7 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
 						@CliOption(key="lineNumbers", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false") boolean lineNumbers) {
 		Assert.notNull(resource, "Resource to parser is required");
 		
+		long started = new Date().getTime();
 		InputStream inputStream = null;
 		try {
 			inputStream = new FileInputStream(resource);
@@ -150,6 +149,7 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
 	        }
 	        in.close();
 	    } catch (IOException e) {}
+	    logger.fine("Milliseconds required: " + (new Date().getTime() - started));
 	}
 	
 	public boolean executeCommand(String line) {

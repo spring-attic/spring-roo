@@ -3,7 +3,9 @@ package org.springframework.roo.support.util;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,6 +35,9 @@ import org.w3c.dom.NodeList;
  */
 public abstract class XmlUtils {
 
+	private static final XPath xpath = XPathFactory.newInstance().newXPath();
+	private static final Map<String,XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
+	
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
 	}
@@ -183,14 +188,18 @@ public abstract class XmlUtils {
 	 * @return the Element if discovered (null if not found)
 	 */
 	public static Element findFirstElement(String xPathExpression, Element root) {
-		Assert.hasText(xPathExpression, "XPath expression required");
-		Assert.notNull(root, "Root element required");
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
+		if (xPathExpression == null || root == null || xPathExpression.length() == 0) {
+			throw new IllegalArgumentException("Xpath expression and root element required");
+		}
 
 		Element rootElement = null;
 		try {
-			XPathExpression expr = xpath.compile(xPathExpression);
+			
+			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+			if (expr == null) {
+				expr = xpath.compile(xPathExpression);
+				compiledExpressionCache.put(xPathExpression, expr);
+			}
 			rootElement = (Element) expr.evaluate(root, XPathConstants.NODE);
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);

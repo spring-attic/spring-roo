@@ -2,7 +2,9 @@ package org.springframework.roo.classpath.details.annotations.populator;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -17,7 +19,6 @@ import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Automatically populates the {@link AutoPopulate} annotated fields on a 
@@ -29,6 +30,9 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public abstract class AutoPopulationUtils {
+	
+	private static final Map<Class<?>,List<Field>> cachedIntrospections = new HashMap<Class<?>, List<Field>>();
+	private static final Map<Field, JavaSymbolName> attributeNameForEachField = new HashMap<Field, JavaSymbolName>();
 	
 	/**
 	 * Introspects the target {@link Object} for its declared fields, locating all
@@ -42,32 +46,56 @@ public abstract class AutoPopulationUtils {
 	 * @param annotation to obtain values from (can be null, for convenience of the caller)
 	 */
 	public static final void populate(Object target, AnnotationMetadata annotation) {
-		Assert.notNull(target, "Target required");
+		if (target == null) {
+			throw new IllegalArgumentException("Target required");
+		}
 		
 		if (annotation == null) {
 			return;
 		}
 		
-		for (Field field : target.getClass().getDeclaredFields()) {
-			// Determine if this field even contains the necessary annotation
-			AutoPopulate ap = field.getAnnotation(AutoPopulate.class);
-			if (ap == null) {
-				continue;
-			}
-			
-			// Determine attribute name we should be looking for in the annotation
-			String attribute = ap.value();
-			if ("".equals(ap.value())) {
-				attribute = field.getName();
-			}
-			
-			// Lookup whether this attibute name was provided
-			JavaSymbolName attributeName = new JavaSymbolName(attribute);
-			if (annotation.getAttributeNames().contains(attributeName)) {
-				// First ensure field is accessible
+		List<Field> fields = cachedIntrospections.get(target.getClass());
+		if (fields == null) {
+			// Go and cache them
+			fields = new ArrayList<Field>();
+
+			for (Field field : target.getClass().getDeclaredFields()) {
+				// Determine if this field even contains the necessary annotation
+				AutoPopulate ap = field.getAnnotation(AutoPopulate.class);
+				if (ap == null) {
+					continue;
+				}
+				
+				// Determine attribute name we should be looking for in the annotation
+				String attribute = ap.value();
+				if ("".equals(ap.value())) {
+					attribute = field.getName();
+				}
+				
+				// Ensure field is accessible
 				if (!field.isAccessible()) {
 					field.setAccessible(true);
 				}
+
+				JavaSymbolName attributeName = new JavaSymbolName(attribute);
+				
+				// Store the info
+				fields.add(field);
+				attributeNameForEachField.put(field, attributeName);
+
+			}
+			
+			cachedIntrospections.put(target.getClass(), fields);
+		}
+		
+		for (Field field : fields) {
+			// Lookup whether this attibute name was provided
+			JavaSymbolName attributeName = attributeNameForEachField.get(field);
+			if (attributeName == null) {
+				throw new IllegalStateException("Expected cached attribute name lookup");
+			}
+			
+			if (annotation.getAttributeNames().contains(attributeName)) {
 				
 				// Get the value
 				AnnotationAttributeValue<?> value = annotation.getAttribute(attributeName);
