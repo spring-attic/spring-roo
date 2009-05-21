@@ -51,7 +51,7 @@ public class MailCommands implements CommandMarker {
 	/**
 	 * @return true if the "add field mail template" command is available at this moment
 	 */
-	@CliAvailabilityIndicator("add field mail template,configure email template")
+	@CliAvailabilityIndicator({"add field email template","configure email template"})
 	public boolean isInsertJmsAvailable() {
 		return mailOperations.isManageEmailAvailable();
 	}
