@@ -26,6 +26,7 @@ public class JmsCommands implements CommandMarker {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(jmsOperations, "Jms operations required");
 		staticFieldConverter.add(JmsProvider.class);
+		staticFieldConverter.add(JmsDestinationType.class);
 		this.jmsOperations = jmsOperations;
 	}
 	
@@ -40,9 +41,9 @@ public class JmsCommands implements CommandMarker {
 	@CliCommand(value="install jms", help="Install a JMS provider in your project")
 	public void installJms(
 			@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") JmsProvider jmsProvider,
-			@CliOption(key={"queueName"}, mandatory=false, help="The name of the queue") String queueName,
-			@CliOption(key={"topicName"}, mandatory=false, help="The name of the topic") String topicName) {
-		jmsOperations.installJms(jmsProvider, queueName, topicName);
+			@CliOption(key={"destinationName"}, mandatory=false, unspecifiedDefaultValue="myDestination", specifiedDefaultValue="myDestination", help="The name of the destination") String name,
+			@CliOption(key={"destinationType"}, mandatory=false, unspecifiedDefaultValue="QUEUE", specifiedDefaultValue="QUEUE", help="The type of the destination") JmsDestinationType type) {
+		jmsOperations.installJms(jmsProvider, name, type);
 	}
 	
 	/**
@@ -63,7 +64,8 @@ public class JmsCommands implements CommandMarker {
 	@CliCommand(value="new java jms listener", help="Create a new type which is a asynchronous JMS consumer")
 	public void addJmsListener(
 			@CliOption(key="class", mandatory=true, help="The name of the class to create") JavaType typeName,
-			@CliOption(key={"queueOrTopicName"}, mandatory=true, help="The name of the queue or topic to listen to") String queueOrTopicName) {
-		jmsOperations.addJmsListener(typeName, queueOrTopicName);
+			@CliOption(key={"destinationName"}, mandatory=false, unspecifiedDefaultValue="myDestination", specifiedDefaultValue="myDestination", help="The name of the destination") String name,
+			@CliOption(key={"destinationType"}, mandatory=false, unspecifiedDefaultValue="QUEUE", specifiedDefaultValue="QUEUE", help="The type of the destination") JmsDestinationType type) {
+			jmsOperations.addJmsListener(typeName, name, type);
 	}
 }

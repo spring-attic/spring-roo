@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -82,7 +83,7 @@ public class JmsOperations {
 		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml"));
 	}
 	
-	public void installJms(JmsProvider jmsProvider, String queueName, String topicName) {
+	public void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType) {
 		Assert.notNull(jmsProvider, "Jms provider required");
 		String jmsContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml");
 		MutableFile jmsContextMutableFile = null;
@@ -105,22 +106,25 @@ public class JmsOperations {
 		
 		boolean needsPersisted = false;
 		
-		if(topicName!=null && topicName.length() > 0) {
-			Element amqTopic = appCtx.createElement("amq:topic");
-			amqTopic.setAttribute("id", "destination");
-			amqTopic.setAttribute("physicalName", topicName);
-			root.appendChild(amqTopic);
+		if(name!=null && name.length() > 0) {
+			Element destination = appCtx.createElement("amq:" + destinationType.getType().toLowerCase());
+			destination.setAttribute("physicalName", name);
+			destination.setAttribute("id", name);			
+			root.appendChild(destination);
+			addDefaultDestination(appCtx, name);
 			needsPersisted = true;
 		}
 		
-		if(queueName!=null && queueName.length() > 0) {
-			Element amqQueue = appCtx.createElement("amq:queue");
-			amqQueue.setAttribute("id", "destination");
-			amqQueue.setAttribute("physicalName", queueName);
-			root.appendChild(amqQueue);
+		Element listenerContainer = XmlUtils.findFirstElement("/beans/jms:listener-container[@destination-type='" + destinationType.getType().toLowerCase() + "']", root);
+		
+		if (listenerContainer == null) {
+			listenerContainer = appCtx.createElement("jms:listener-container");
+			listenerContainer.setAttribute("connection-factory", "jmsFactory");
+			listenerContainer.setAttribute("destination-type", destinationType.getType().toLowerCase());
+			root.appendChild(listenerContainer);
 			needsPersisted = true;
 		}
-		
+				
 		if(needsPersisted) {
 			XmlUtils.writeXml(jmsContextMutableFile.getOutputStream(), appCtx);
 		}		
@@ -137,7 +141,8 @@ public class JmsOperations {
 		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));		
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, fieldName, new JavaType("org.springframework.jms.core.JmsTemplate"), null, annotations);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
+		FieldMetadata fieldMetadata = new DefaultFieldMetadata(declaredByMetadataId, modifier, fieldName, new JavaType("org.springframework.jms.core.JmsTemplate"), null, annotations);
 		
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(fieldMetadata.getDeclaredByMetadataId());
@@ -147,10 +152,15 @@ public class JmsOperations {
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 		
+		//create some method content to get people started
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(\"JMS message sent by \" + getClass().getName());");
+		
 		mutableTypeDetails.addField(fieldMetadata);
+		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
 	}
 	
-	public void addJmsListener(JavaType targetType, String queueOrTopicName) {
+	public void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType) {
 		Assert.notNull(targetType, "Java type required");
 		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
@@ -161,7 +171,11 @@ public class JmsOperations {
 		paramTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Object"), annotations));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("message"));
-		methods.add(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), null));
+		
+		//create some method content to get people started
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
+		methods.add(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
 		
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, targetType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, null);
 		
@@ -193,22 +207,23 @@ public class JmsOperations {
 		
 		Element root = (Element) appCtx.getFirstChild();
 		
-		Element listenerContainer = XmlUtils.findFirstElement("//jms:listener-container", root);
-		
-		if (listenerContainer == null) {
+		Element listenerContainer = XmlUtils.findFirstElementByName("jms:listener-container", root);
+				
+		if (listenerContainer == null && destinationType.getType().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = appCtx.createElement("jms:listener-container");
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
+			listenerContainer.setAttribute("destination-type", destinationType.getType().toLowerCase());
 			root.appendChild(listenerContainer);
 		}
 		
 		Element jmsListener = appCtx.createElement("jms:listener");
 		jmsListener.setAttribute("ref", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
 		jmsListener.setAttribute("method", "onMessage");
-		jmsListener.setAttribute("destination", queueOrTopicName);
+		jmsListener.setAttribute("destination", name);
 		
 		Element bean = appCtx.createElement("bean");
-		bean.setAttribute("id", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
 		bean.setAttribute("class", targetType.getFullyQualifiedTypeName());
+		bean.setAttribute("id", StringUtils.uncapitalize(targetType.getSimpleTypeName()));		
 		root.appendChild(bean);
 		
 		listenerContainer.appendChild(jmsListener);
@@ -240,6 +255,20 @@ public class JmsOperations {
 		}	
 	}	
 	
+	private void addDefaultDestination(Document appCtx, String name) {
+		//if we do already have a default destination configured then do nothing
+		Element root = (Element) appCtx.getFirstChild();
+		if (null != XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.jms.core.JmsTemplate']/property[@name='defaultDestination']", root)) {
+			return;
+		}
+		//otherwise add it
+		Element jmsTemplate = XmlUtils.findRequiredElement("/beans/bean[@class='org.springframework.jms.core.JmsTemplate']", root);
+		Element defaultDestination = appCtx.createElement("property");
+		defaultDestination.setAttribute("ref", name);
+		defaultDestination.setAttribute("name", "defaultDestination");		
+		jmsTemplate.appendChild(defaultDestination);
+	}
+
 	private String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
 		PathResolver pathResolver = getPathResolver();
