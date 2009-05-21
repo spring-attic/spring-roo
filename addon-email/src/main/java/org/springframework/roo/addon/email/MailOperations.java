@@ -10,11 +10,14 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
+import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -256,16 +259,45 @@ public class MailOperations {
 			throw new IllegalStateException(e);
 		} 	
 		
-		Element root = (Element) appCtx.getFirstChild();
+		Element root = (Element) appCtx.getFirstChild();		
 		
 		Element smmBean = XmlUtils.findFirstElement("//bean[@class='org.springframework.mail.SimpleMailMessage']", root);
 		
+		//create some method content to get the user started			
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
 		List<AnnotationMetadata> smmAnnotations = new ArrayList<AnnotationMetadata>();
+		
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		
 		if (smmBean != null) {			
 			smmAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));		
+			FieldMetadata smmFieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, new JavaSymbolName("message"), new JavaType("org.springframework.mail.SimpleMailMessage"), null, smmAnnotations);
+			mutableTypeDetails.addField(smmFieldMetadata);			
+		} else {							
+			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
+			paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+			paramNames.add(new JavaSymbolName("mailFrom"));
+			bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(mailFrom);");
+			
+			paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+			paramNames.add(new JavaSymbolName("subject"));			
+			bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
 		}
-		FieldMetadata smmFieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, new JavaSymbolName("message"), new JavaType("org.springframework.mail.SimpleMailMessage"), null, smmAnnotations);
-		mutableTypeDetails.addField(smmFieldMetadata);
+		
+		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+		paramNames.add(new JavaSymbolName("mailTo"));
+		bodyBuilder.appendFormalLine("simpleMailMessage.setTo(mailTo);");
+		
+		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+		paramNames.add(new JavaSymbolName("message"));		
+		bodyBuilder.appendFormalLine("simpleMailMessage.setText(message);");
+		
+		bodyBuilder.newLine();
+		bodyBuilder.appendFormalLine(fieldName + ".sendMessage(simpleMailMessage);");				
+		
+		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
 	}
 	
 	private void updateDependencies() {		
