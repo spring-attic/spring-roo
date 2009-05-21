@@ -48,7 +48,7 @@ public class JmsCommands implements CommandMarker {
 	/**
 	 * @return true if the "add field jms template, new java jms listener" command is available at this moment
 	 */
-	@CliAvailabilityIndicator("add field jms template,new java jms listener")
+	@CliAvailabilityIndicator({"add field jms template","new java jms listener"})
 	public boolean isInsertJmsAvailable() {
 		return jmsOperations.isManageJmsAvailable();
 	}
