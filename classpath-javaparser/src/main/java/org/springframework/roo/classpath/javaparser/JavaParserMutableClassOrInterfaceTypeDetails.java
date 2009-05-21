@@ -184,22 +184,25 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			}
 		}
 
-		for (BodyDeclaration member : this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers()) {
-			if (member instanceof FieldDeclaration) {
-				FieldDeclaration castMember = (FieldDeclaration) member;
-				for (VariableDeclarator var : castMember.getVariables()) {
-					declaredFields.add(new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this));
-				}
-			}
-			if (member instanceof MethodDeclaration) {
-				MethodDeclaration castMember = (MethodDeclaration) member;
-				declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this));
-			}
-			if (member instanceof ConstructorDeclaration) {
-				ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-				declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this));
-			}
-		}
+        List<BodyDeclaration> members = this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers();
+        if (members != null) {
+                for (BodyDeclaration member : members) {
+                        if (member instanceof FieldDeclaration) {
+                                FieldDeclaration castMember = (FieldDeclaration) member;
+                                for (VariableDeclarator var : castMember.getVariables()) {
+                                        declaredFields.add(new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this));
+                                }
+                        }
+                        if (member instanceof MethodDeclaration) {
+                                MethodDeclaration castMember = (MethodDeclaration) member;
+                                declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this));
+                        }
+                        if (member instanceof ConstructorDeclaration) {
+                                ConstructorDeclaration castMember = (ConstructorDeclaration) member;
+                                declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this));
+                        }
+                }
+        }
 
 	}
 	
