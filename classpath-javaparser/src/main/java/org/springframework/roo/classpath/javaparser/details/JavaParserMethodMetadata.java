@@ -261,13 +261,9 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		}
 	
 		// Locate where to add this method; also verify if this method already exists
-		int nextMethodIndex = 0;
-		int i = -1;
 		for (BodyDeclaration bd : members) {
-			i++;
 			if (bd instanceof MethodDeclaration) {
 				// Next method should appear after this current method
-				nextMethodIndex = i + 1;
 				MethodDeclaration md = (MethodDeclaration) bd;
 				if (md.getName().equals(d.getName()) && md.getParameters().size() == d.getParameters().size()) {
 					// Possible match, we need to consider parameter types as well now
@@ -286,8 +282,8 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 			}
 		}
 	
-		// Add the method to the compilation unit
-		members.add(nextMethodIndex, d);
+		// Add the method to the end of the compilation unit
+		members.add(d);
 		
 		if (permitFlush) {
 			compilationUnitServices.flush();
