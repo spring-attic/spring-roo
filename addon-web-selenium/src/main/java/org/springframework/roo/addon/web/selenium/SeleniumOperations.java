@@ -115,7 +115,7 @@ public class SeleniumOperations {
 		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName().toLowerCase() + "/"));							
 		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
 		
-		for (FieldMetadata field : getElegibleFields()) {
+		for (FieldMetadata field : getEligableFields()) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
 			} else {				
@@ -263,7 +263,7 @@ public class SeleniumOperations {
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 	}
 	
-	private List<FieldMetadata> getElegibleFields() {
+	private List<FieldMetadata> getEligableFields() {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
 			JavaSymbolName propertyName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
@@ -314,7 +314,7 @@ public class SeleniumOperations {
 		td1.setTextContent("type");
 		
 		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent(field.getFieldName().getSymbolName());		
+		td2.setTextContent("_" + field.getFieldName().getSymbolName());		
 		
 		Node td3 = tr.appendChild(document.createElement("td"));	
 		td3.setTextContent(convertToInitializer(field));		
