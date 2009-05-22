@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.email;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -72,7 +75,24 @@ public class MailOperations {
 	}
 	
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
-		Assert.hasText(hostServer, "Host server name required");
+		Assert.hasText(hostServer, "Host server name required");		
+		
+		String emailPropsPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "email.properties");
+		MutableFile databaseMutableFile = null;
+		
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(emailPropsPath)) {
+				databaseMutableFile = fileManager.updateFile(emailPropsPath);
+				props.load(databaseMutableFile.getInputStream());
+			} else {
+				databaseMutableFile = fileManager.createFile(emailPropsPath);
+				props.load(databaseMutableFile.getInputStream());
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 		
 		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
@@ -106,57 +126,63 @@ public class MailOperations {
 		
 		Element property = appCtx.createElement("property");
 		property.setAttribute("name", "host");
-		property.setAttribute("value", hostServer);		
+		property.setAttribute("value", "${email.host}");		
 		mailBean.appendChild(property);
 		root.appendChild(mailBean);	
+		props.put("email.host", hostServer);
 		
 		if (protocol != null) {
 			Element pElement = appCtx.createElement("property");
-			pElement.setAttribute("name", "protocol");
-			pElement.setAttribute("value", protocol.getProtocol());		
+			pElement.setAttribute("value", "${email.protocol}");	
+			pElement.setAttribute("name", "protocol");				
 			mailBean.appendChild(pElement);
+			props.put("email.protocol", protocol.getProtocol());
 		}
 		
 		if (port != null && port.length() > 0) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "port");
-			pElement.setAttribute("value", port);		
+			pElement.setAttribute("value", "${email.port}");		
 			mailBean.appendChild(pElement);
+			props.put("email.port", port);
 		}
 		
 		if (encoding != null && encoding.length() > 0) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "encoding");
-			pElement.setAttribute("value", encoding);		
+			pElement.setAttribute("value", "${email.encoding}");		
 			mailBean.appendChild(pElement);
+			props.put("email.encoding", encoding);
 		}
 		
 		if (username != null && username.length() > 0) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "username");
-			pElement.setAttribute("value", username);		
+			pElement.setAttribute("value", "${email.username}");		
 			mailBean.appendChild(pElement);
+			props.put("email.username", username);
 		}
 		
 		if (password != null && password.length() > 0) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "password");
-			pElement.setAttribute("value", password);		
+			pElement.setAttribute("value", "${email.password}");		
 			mailBean.appendChild(pElement);
+			props.put("email.password", password);
 			
 			if(MailProtocol.SMTP.equals(protocol)) {
 				Element javaMailProperties = appCtx.createElement("property");
 				javaMailProperties.setAttribute("name", "javaMailProperties");
-				Element props = appCtx.createElement("props");
-				javaMailProperties.appendChild(props);
+				Element securityProps = appCtx.createElement("props");
+				javaMailProperties.appendChild(securityProps);
 				Element prop = appCtx.createElement("prop");
 				prop.setAttribute("key", "mail.smtp.auth");
 				prop.setTextContent("true");
-				props.appendChild(prop);
+				securityProps.appendChild(prop);
 				Element prop2 = appCtx.createElement("prop");
 				prop2.setAttribute("key", "mail.smtp.starttls.enable");
 				prop2.setTextContent("true");
-				props.appendChild(prop2);			
+				securityProps.appendChild(prop2);			
 				mailBean.appendChild(javaMailProperties);
 			}
 		}
@@ -166,9 +192,33 @@ public class MailOperations {
 		if (installDependencies) {
 			updateDependencies();
 		}
+		
+		try {
+			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 	}	
 	
 	public void configureTemplateMessage(String from, String subject) {		
+		
+		String emailPropsPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "email.properties");
+		MutableFile databaseMutableFile = null;
+		
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(emailPropsPath)) {
+				databaseMutableFile = fileManager.updateFile(emailPropsPath);
+				props.load(databaseMutableFile.getInputStream());
+			} else {
+				databaseMutableFile = fileManager.createFile(emailPropsPath);
+				props.load(databaseMutableFile.getInputStream());
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}	
+		
 		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
@@ -201,9 +251,10 @@ public class MailOperations {
 					smmBean.removeChild(smmProperty);
 				}
 				smmProperty = appCtx.createElement("property");
-				smmProperty.setAttribute("value", from);
+				smmProperty.setAttribute("value", "${email.from}");
 				smmProperty.setAttribute("name", "from");
 				smmBean.appendChild(smmProperty);
+				props.put("email.from", from);
 			}
 			
 			if (null != subject && subject.length() > 0) {
@@ -212,15 +263,22 @@ public class MailOperations {
 					smmBean.removeChild(smmProperty);
 				}
 				smmProperty = appCtx.createElement("property");
-				smmProperty.setAttribute("value", subject);
+				smmProperty.setAttribute("value", "${email.subject}");
 				smmProperty.setAttribute("name", "subject");
 				smmBean.appendChild(smmProperty);
+				props.put("email.subject", subject);
 			}
 			
 			root.appendChild(smmBean);
 			
 			XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 		}		
+		
+		try {
+			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 	}
 	
 	public void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName) {
@@ -273,7 +331,7 @@ public class MailOperations {
 		
 		if (smmBean != null) {			
 			smmAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));		
-			FieldMetadata smmFieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, new JavaSymbolName("message"), new JavaType("org.springframework.mail.SimpleMailMessage"), null, smmAnnotations);
+			FieldMetadata smmFieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, new JavaSymbolName("simpleMailMessage"), new JavaType("org.springframework.mail.SimpleMailMessage"), null, smmAnnotations);
 			mutableTypeDetails.addField(smmFieldMetadata);			
 		} else {							
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
