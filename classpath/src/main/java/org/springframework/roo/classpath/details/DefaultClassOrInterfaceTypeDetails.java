@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -29,6 +30,7 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
+	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 	private int modifier;
 	private String declaredByMetadataId;
 	
@@ -55,7 +57,8 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 			ClassOrInterfaceTypeDetails superclass,
 			List<JavaType> extendsTypes,
 			List<JavaType> implementsTypes,
-			List<AnnotationMetadata> typeAnnotations) {
+			List<AnnotationMetadata> typeAnnotations,
+			List<JavaSymbolName> enumConstants) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
@@ -89,6 +92,11 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		if (typeAnnotations != null) {
 			this.typeAnnotations = typeAnnotations;
 		}
+
+		if (enumConstants != null) {
+			Assert.isTrue(physicalTypeCategory == PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
+			this.enumConstants = enumConstants;
+		}
 	}
 
 	public String getDeclaredByMetadataId() {
@@ -111,6 +119,10 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		return Collections.unmodifiableList(declaredConstructors);
 	}
 	
+	public List<JavaSymbolName> getEnumConstants() {
+		return Collections.unmodifiableList(enumConstants);
+	}
+
 	public List<? extends FieldMetadata> getDeclaredFields() {
 		return Collections.unmodifiableList(declaredFields);
 	}
@@ -144,6 +156,7 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		tsc.append("declaredConstructors", declaredConstructors);
 		tsc.append("declaredFields", declaredFields);
 		tsc.append("declaredMethods", declaredMethods);
+		tsc.append("enumConstants", enumConstants);
 		tsc.append("superclass", superclass);
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("implementsTypes", implementsTypes);

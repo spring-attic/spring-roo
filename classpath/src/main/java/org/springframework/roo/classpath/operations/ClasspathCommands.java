@@ -56,7 +56,7 @@ public class ClasspathCommands implements CommandMarker {
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
 		classpathOperations.generateClassFile(details);
 	}
 	
@@ -74,7 +74,7 @@ public class ClasspathCommands implements CommandMarker {
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
 		classpathOperations.generateClassFile(details);
 	}
 	
@@ -92,7 +92,7 @@ public class ClasspathCommands implements CommandMarker {
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
 		classpathOperations.generateClassFile(details);
 	}
 
@@ -130,7 +130,7 @@ public class ClasspathCommands implements CommandMarker {
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, entityAnnotations);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, entityAnnotations, null);
 		classpathOperations.generateClassFile(details);
 		
 		if (testAutomatically) {

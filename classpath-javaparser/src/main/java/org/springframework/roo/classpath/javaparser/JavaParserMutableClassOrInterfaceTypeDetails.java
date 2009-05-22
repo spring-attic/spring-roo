@@ -8,6 +8,7 @@ import japa.parser.ast.PackageDeclaration;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
+import japa.parser.ast.body.EnumConstantDeclaration;
 import japa.parser.ast.body.EnumDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
@@ -78,6 +79,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
+	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 	
 	// internal use
 	private ClassOrInterfaceDeclaration clazz;
@@ -137,7 +139,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		
 		Assert.notNull(physicalTypeCategory, "Only enum, class and interface files are supported");
 		
-		
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
 		
@@ -167,6 +168,15 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			}
 		}
 		
+		if (this.enumClazz != null) {
+			List<EnumConstantDeclaration> constants = this.enumClazz.getEntries();
+			if (constants != null) {
+				for (EnumConstantDeclaration enumConstants : constants) {
+					this.enumConstants.add(new JavaSymbolName(enumConstants.getName()));
+				}
+			}
+		}
+		
 		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
 		if (implementsList != null) {
 			for (ClassOrInterfaceType candidate : implementsList) {
@@ -174,7 +184,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 				implementsTypes.add(javaType);
 			}
 		}
-	
 		
 		List<AnnotationExpr> annotationsList = this.clazz == null ? this.enumClazz.getAnnotations() : typeDeclaration.getAnnotations();
 		if (annotationsList != null) {
@@ -206,6 +215,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 
 	}
 	
+	
 	public String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
@@ -230,6 +240,10 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		return Collections.unmodifiableList(declaredConstructors);
 	}
 	
+	public List<JavaSymbolName> getEnumConstants() {
+		return Collections.unmodifiableList(enumConstants);
+	}
+
 	public List<? extends FieldMetadata> getDeclaredFields() {
 		return Collections.unmodifiableList(declaredFields);
 	}
@@ -409,6 +423,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		tsc.append("declaredConstructors", declaredConstructors);
 		tsc.append("declaredFields", declaredFields);
 		tsc.append("declaredMethods", declaredMethods);
+		tsc.append("enumConstants", enumConstants);
 		tsc.append("superclass", superclass);
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("implementsTypes", implementsTypes);

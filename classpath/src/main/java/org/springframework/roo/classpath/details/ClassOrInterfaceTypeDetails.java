@@ -1,9 +1,12 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
+import java.util.List;
+
+import org.springframework.roo.model.JavaSymbolName;
 
 /**
- * Provides information about the different components of a class or interface.
+ * Provides information about the different components of a class, interface or enum.
  * 
  * <p>
  * For simplicity of implementation this is not a complete representation of all members and other
@@ -36,4 +39,11 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 	 * @return the physical type identifier (never null)
 	 */
 	String getDeclaredByMetadataId();
+
+	/**
+	 * Lists the enum constants this type provides. Always empty except if an enum type.
+	 * 
+	 * @return the constants (may be empty, but never null)
+	 */
+	List<JavaSymbolName> getEnumConstants();
 }

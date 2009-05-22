@@ -214,7 +214,7 @@ public class ClasspathOperations {
 		MethodMetadata method = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, null, null, methodAnnotations, null);
 		methods.add(method);
 
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 		generateClassFile(details);
 	}
 
@@ -238,7 +238,7 @@ public class ClasspathOperations {
 		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand"), dodConfig));
 
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, annotations);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, annotations, null);
 		generateClassFile(details);
 	}
 	
