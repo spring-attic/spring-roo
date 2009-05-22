@@ -177,7 +177,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 		
-		JspDocumentHelper helper = new JspDocumentHelper(elegibleFields, beanInfoMetadata, entityMetadata, projectMetadata.getProjectName());
+		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, projectMetadata.getProjectName());
 		// Make the holding directory for this controller
 		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 		if (!fileManager.exists(destinationDirectory)) {

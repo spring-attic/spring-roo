@@ -7,7 +7,10 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
@@ -183,6 +186,10 @@ public class ControllerOperations {
 
 	public void createPropertyEditors(Set<JavaType> types) {
 		for(JavaType type : types) {
+			//do nothing if we are dealing with an enum
+			if(isEnumType(type)) {
+				continue;
+			}
 			JavaType newType = new JavaType(type.getFullyQualifiedTypeName() + "Editor");
 			String ressourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(newType, Path.SRC_MAIN_JAVA);		
 			
@@ -198,5 +205,18 @@ public class ControllerOperations {
 
 			classpathOperations.generateClassFile(details);
 		}
+	}
+	
+	private boolean isEnumType(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata  = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata != null) {
+			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
+			if (details != null) {
+				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

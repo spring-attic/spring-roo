@@ -7,13 +7,21 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeDetails;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -32,17 +40,18 @@ public class JspDocumentHelper {
 	private BeanInfoMetadata beanInfoMetadata; 
 	private EntityMetadata entityMetadata;
 	private String projectName;
-	
-	public JspDocumentHelper(List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, String projectName) {
+	private MetadataService metadataService;
+	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, String projectName) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.hasText(projectName, "Project name required");
-		
+		Assert.notNull(metadataService, "Metadata service required");
 		this.fields = fields;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.projectName = projectName;
+		this.metadataService = metadataService;
 	}
 	
 	public Document getListDocument() {
@@ -408,14 +417,16 @@ public class JspDocumentHelper {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
 
+						//TODO: direct dependency on Inflector should be removed
+						String plural = Noun.pluralOf(field.getFieldType().getSimpleTypeName()).toLowerCase();
 						Element ifElement = document.createElement("c:if");
-						ifElement.setAttribute("test", "${not empty " + entityMetadata.getPlural().toLowerCase() + "}");
+						ifElement.setAttribute("test", "${not empty " + plural + "}");
 						divElement.appendChild(ifElement);
 						
 						divElement.removeChild(labelElement);
 						ifElement.appendChild(labelElement);
 						
-						ifElement.appendChild(getSelectBox(document, field, entityMetadata.getPlural().toLowerCase()));		
+						ifElement.appendChild(getSelectBox(document, field, plural));		
 
 						specialAnnotation = true;
 						formElement.appendChild(divElement);
@@ -443,10 +454,17 @@ public class JspDocumentHelper {
 							formElement.appendChild(document.createElement("br"));	
 							specialAnnotation = true;
 						}
+					} else if (isEnumType(field.getFieldType())) {
+						divElement.appendChild(getEnumSelectBox(document, field));		
+						divElement.appendChild(getSelectDojo(document, field));
+						divElement.appendChild(document.createElement("br"));
+						divElement.appendChild(getErrorsElement(document, field));
+						formElement.appendChild(divElement);
+						formElement.appendChild(document.createElement("br"));	
+						specialAnnotation = true;
 					}
 				}
 				if (!specialAnnotation) {
-
 					divElement.appendChild(getInputBox(document, field, 30));
 					divElement.appendChild(document.createElement("br"));
 					divElement.appendChild(getErrorsElement(document, field));
@@ -580,10 +598,17 @@ public class JspDocumentHelper {
 		formSelect.setAttribute("id", "_" + field.getFieldName().getSymbolName());
 		Element formOptions = document.createElement("form:options");
 		formOptions.setAttribute("items", "${" + pluralName.toLowerCase() + "}");
-		formOptions.setAttribute("itemValue", "id");
+		formOptions.setAttribute("itemValue", "id");	
+		formSelect.appendChild(formOptions);		
+		return formSelect;
+	}
 	
-		formSelect.appendChild(formOptions);
-		
+	private Element getEnumSelectBox(Document document, FieldMetadata field) {
+		Element formSelect = document.createElement("form:select");
+		formSelect.setAttribute("path", field.getFieldName().getSymbolName());
+		formSelect.setAttribute("cssStyle", "width:250px");						
+		formSelect.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+		formSelect.setAttribute("items", "${_" + field.getFieldName().getSymbolName() + "}");		
 		return formSelect;
 	}
 	
@@ -634,5 +659,18 @@ public class JspDocumentHelper {
 			}			
 		}
 		return Integer.MAX_VALUE;
+	}
+	
+	private boolean isEnumType(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata  = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata != null) {
+			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
+			if (details != null) {
+				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

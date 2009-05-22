@@ -9,6 +9,8 @@ import java.util.TreeSet;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -321,13 +323,19 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				if (typeEntityMetadata != null) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				} else if(isEnumType(type)){
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + ".class.getEnumConstants());");
+				}				
 			}
 		}
 		bodyBuilder.appendFormalLine("return \"" + entityName + "/create\";");
 		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
 	}
+
+
 	
 	private MethodMetadata getUpdateMethod() {		
 		JavaSymbolName methodName = new JavaSymbolName("update");
@@ -408,7 +416,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				if (typeEntityMetadata != null) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				} else if (isEnumType(type)){
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + ".class.getEnumConstants());");
+				}
 			}
 		}
 		bodyBuilder.appendFormalLine("return \"" + entityName + "/update\";");
@@ -498,6 +510,19 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 		}
 		return editorTypes;
+	}
+	
+	private boolean isEnumType(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata  = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata != null) {
+			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
+			if (details != null) {
+				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	private boolean hasMutator(FieldMetadata fieldMetadata) {
