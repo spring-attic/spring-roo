@@ -13,9 +13,9 @@ while [ -h "$PRG" ]; do
 done
 ROO_HOME=`dirname "$PRG"`
 
-#Absolute path
+# Absolute path
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 
-echo Resolved ROO_HOME: $ROO_HOME
+# echo Resolved ROO_HOME: $ROO_HOME
 
 java -Djava.ext.dirs="$ROO_HOME/lib:$ROO_HOME/dist" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml"
