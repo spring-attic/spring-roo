@@ -76,6 +76,11 @@ public class ParserUtils {
 				continue;
 			}
 			
+			if (currentToken.trim().equals("")) {
+				// It's simply empty, so ignore it (ROO-23)
+				continue;
+			}
+			
 			if (currentToken.startsWith("-")) {
 				// We're about to start a new option marker
 				// First strip of the - or -- or however many there are
