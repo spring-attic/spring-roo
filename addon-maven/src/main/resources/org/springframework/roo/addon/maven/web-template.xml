@@ -70,14 +70,6 @@
 		<servlet-name>Resource Servlet</servlet-name>
 		<url-pattern>/resources/*</url-pattern>
 	</servlet-mapping>
-	
-	<!--
-	 - Map static resources to the default servlet
-	-->
-	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>/static/*</url-pattern>
-	</servlet-mapping>
 
 	<session-config>
 		<session-timeout>10</session-timeout>

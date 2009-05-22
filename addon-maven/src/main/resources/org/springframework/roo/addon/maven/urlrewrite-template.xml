@@ -8,7 +8,7 @@
 	</rule>
 	<rule>
 		<from>/static/**</from>
-		<to>/static/$1</to>
+		<to>/$1</to>
 	</rule>
 	<rule>
 		<from>/</from>
