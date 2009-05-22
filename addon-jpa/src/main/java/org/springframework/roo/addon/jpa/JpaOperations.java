@@ -95,15 +95,10 @@ public class JpaOperations {
 		Element root = (Element) appCtx.getFirstChild();
 
 		//checking for existence of configurations, if found abort
-		Assert.isNull(XmlUtils.findFirstElement("//context:property-placeholder", root), "'<context:property-placeholder' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='dataSource']", root), "'<bean id=\"dataSource\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='transactionManager']", root), "'<bean id=\"transactionManager\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-		
-		Element placeholder = appCtx.createElement("context:property-placeholder");
-		placeholder.setAttribute("location", "classpath:database.properties");
-		root.appendChild(placeholder);
 			
 		root.appendChild(appCtx.createTextNode(System.getProperty("line.separator")));
 				
