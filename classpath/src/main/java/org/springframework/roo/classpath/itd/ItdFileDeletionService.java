@@ -29,9 +29,17 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopment
 public class ItdFileDeletionService implements FileEventListener {
 
-	private static final String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
-	private static final String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator + "*.java";
+	private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
+	private static String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator + "*.java";
 
+	static {
+		if ("/".equals(File.separator)) {
+			// This is a *nix box and thus starts all paths with a slash (ROO-34)
+			ANT_PATH_ALL_ITD_SOURCE = File.separator + ANT_PATH_ALL_ITD_SOURCE;
+			ANT_PATH_ALL_JAVA_SOURCE = File.separator + ANT_PATH_ALL_JAVA_SOURCE;
+		}
+	}
+	
 	private FileManager fileManager;
 
 	public ItdFileDeletionService(FileMonitorService fileMonitorService, FileManager fileManager) {
