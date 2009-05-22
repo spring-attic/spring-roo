@@ -24,6 +24,7 @@ public class JLineLogHandler extends Handler {
 	private ConsoleReader reader;
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
+	private String lastMessage;
 	
 	public JLineLogHandler(ConsoleReader reader, ShellPromptAccessor shellPromptAccessor) {
 		Assert.notNull(reader, "Console reader required");
@@ -72,6 +73,13 @@ public class JLineLogHandler extends Handler {
 	@Override
 	public void publish(LogRecord record) {
 		try {
+			// Avoid repeating the same message that displayed immediately before the current message (ROO-30)
+			String toDisplay = toDisplay(record, reader.getTerminal().isANSISupported());
+			if (toDisplay.equals(lastMessage)) {
+				return;
+			}
+			lastMessage = toDisplay;
+			
 			StringBuffer buffer = reader.getCursorBuffer().getBuffer();
 			int cursor = reader.getCursorBuffer().cursor;
 			if (reader.getCursorBuffer().length() > 0) {
@@ -93,7 +101,6 @@ public class JLineLogHandler extends Handler {
 			reader.getCursorBuffer().setBuffer(buffer);
 			reader.getCursorBuffer().cursor = cursor;
 
-			String toDisplay = toDisplay(record, reader.getTerminal().isANSISupported());
 			reader.printString(toDisplay);
 			
 			Boolean prohibitingRedraw = redrawProhibit.get();
