@@ -27,7 +27,7 @@ with tab completion, context aware operations, intelligent command
 hinting and a complete knowledge of your application artifacts. It
 constructs your application in a standard directory format, manages
 and updates your build configuration files, helps you create domain
-objects, integrates with popular persistance choices and provides
+objects, integrates with popular persistence choices and provides
 automatic web tier generation for easy REST-based web user interfaces.
 It also offers dynamic finders (freeing you from you the need to
 write query expressions), automated and passing JUnit integration
@@ -35,7 +35,8 @@ tests, automatic round trip processing and many more features via the
 add-ons shipped with Roo.
 
 We've provided a FAQ at our current project home page, where you can
-find links to the latest release and even vote on the project name!:
+find links to the latest release and other project resources (see also
+the bottom of this readme for further links):
 
    http://www.springsource.org/roo
 
@@ -46,7 +47,7 @@ that you find Roo as much fun to work with as we had in building it.
 ROO INSTALLATION
 ======================================================================
 
-   **** This is an alpha release - see 'Known Issues' section ****
+  **** This is a milestone release - see 'Known Issues' section ****
 
 The following steps explain how to install the Roo distribution ZIP.
 Installing Roo is very similar to installing Ant or Maven: you just
@@ -63,17 +64,10 @@ More detailed instructions are provided below.
 
 * unzip spring-roo-1.0.0.M1.zip
 
-* Add a ROO_HOME entry to your system's environment variables
-    1. Do NOT use "~" in the variable; expand the paths fully
-    2. Do NOT have a "/" or "\" at the end of the variable
-    3. Ensure the variable specifies where you unzipped the archive
-    4. The variable should refer to the root of the unzipped archive
-    5. For example, ROO_HOME="/home/balex/spring-roo-1.0.0.M1"
-
 * For Windows users, add \path\to\roo\bin to your path (NB: the \bin)
 
 * For Linux/Mac users, execute the following command as root:
-    ln -s $ROO_HOME/bin/roo.sh /usr/bin/roo
+    ln -s /path/to/roo/bin/roo.sh /usr/bin/roo
 
 * For Eclipse users, install AJDT 1.6.5 or above (mandatory)
   Roo will still work with an earlier AJDT version, but you may notice
@@ -82,12 +76,6 @@ More detailed instructions are provided below.
 * We highly recommend you download the SpringSource Tool Suite (STS)
   2.1.0.M1 or above, which is a free Eclipse-based IDE offered by
   SpringSource that includes significant inbuilt Roo integration
-
-Note that until Roo appears in official Maven repositories, you will
-need to install the spring-roo-annotations-XXXX.jar in your local
-Maven repository. You can do this by typing the following command:
-
-mvn install:install-file -DgroupId=org.springframework.roo -DartifactId=spring-roo-annotations -Dversion=1.0.0.M1  -Dpackaging=jar -Dfile=$ROO_HOME/dist/spring-roo-annotations-1.0.0.M1.jar
 
 Installation should now be complete.
 
@@ -165,11 +153,12 @@ In this case the "script" command will use the file from the current
 working directory. Alternately, you can use a fully-qualified path
 to the script, such as "script /home/balex/roo/samples/clinic.roo".
 Or you can use an operating system command like "mkdir petclinic;
-cd petclinic; cp $ROO_HOME/samples/clinic.roo .; roo". The benefit of
-the latter approach is you can then just use "script clinic.roo" once
-you load the Roo shell, and your command history will contain the
-copy command (useful given you'll probably delete your project
-directory several times when experimenting with the script).
+cd petclinic; cp /home/balex/roo/samples/clinic.roo .; roo". The
+benefit of the latter approach is you can then just use 
+"script clinic.roo" once you load the Roo shell, and your command
+history will contain the copy command (useful given you'll probably
+delete your project directory several times when experimenting with
+the script).
 
 You can also just type commands directly into the shell, as suggested
 in the "Using Roo" section above. The script command is just a
@@ -180,7 +169,7 @@ need to use the script facility unless you wish to.
 KNOWN ISSUES
 ======================================================================
 
-* This is alpha level software. There has been minimal testing. Not
+* This is beta level software. There has been minimal testing. Not
   everything works reliably yet. Don't use Roo for important projects!
   Having said that, given Roo isn't part of your runtime, it isn't a
   major issue if it doesn't work perfectly.
@@ -195,7 +184,7 @@ KNOWN ISSUES
   files in the directory. As both instances are guaranteed to always
   emit identical files, it isn't a major problem if you happen to run
   two concurrent instances by accident. Your machine will just be a
-  little slower (unnecessary file monitoring will be occuring) and
+  little slower (unnecessary file monitoring will be occurring) and
   some advanced and uncommon events (eg file undo operation) will not
   behave as designed. You may also not receive reliable shell messages
   regarding which file resources were created, managed or deleted.
@@ -204,7 +193,7 @@ KNOWN ISSUES
   current line correctly. This happens mainly when skipping mandatory
   options or introducing escaped sequences, both of which are uncommon
   when using the TAB key to build the line. We're intending to revisit
-  the shell parsing modules before Roo is final and tidy this up.
+  the shell parsing modules in due course and tidy this up.
 
 * Roo does not prevent you from creating package, entity, field or
   other members names which are reserved words. Please ensure you
@@ -231,6 +220,7 @@ KNOWN ISSUES
   with Roo, but rather Spring is reporting a circular dependency
   because we use @Configurable @Entity types which in turn use
   @PersistenceContext. As such, the log level defaults to INFO.
+  See SPR-5752 for the related issue in Spring Framework.
 
 * The data on demand mechanism (which is used for integration tests)
   has limited JSR 303 (Bean Validator) compatibility. Roo supports
@@ -243,28 +233,40 @@ KNOWN ISSUES
   in Roo unless you have relatively simple validation constraints or
   you are willing to provide a data on demand method.
 
-* The web.xml in generated user projects refers to Spring's JPA-
-  specific OpenEntityManagerInViewFilter. In the extremely rare case
-  you quit the shell after "create project" but before "install jpa"
-  (which is the second step if following any sample script or the
-  "hint" guidance), you technically have a web.xml requiring a type
-  which is not available through a defined pom.xml dependency. As such
-  this is a very unlikely to affect anyone pragmatically using Roo. We
-  will fix the issue before the next Roo release is made.
-  
 ======================================================================
 TROUBLESHOOTING AND FURTHER HELP
 ======================================================================
 
-In the first instance, refer to the "Known Issues" section above.
+We're very happy to help you and very much welcome community feedback!
+The best place to ask questions or obtain Roo usage advice is the
+community support forum. This can be found at the following URL:
 
-If you still encounter problems, we recommend that you "exit" Roo, and
-then reload Roo. This will ensure file consistency. If you still
-encounter difficulty, let us know! We're happy to help and very much
-welcome community feedback. Please note there is no issue tracker, SVN
-or community forum as yet, as we have not selected a final name. Once
-we have the final name, we will promptly implement these resources and
-post details (and a new release) at http://www.springsource.org/roo.
+   http://forum.springsource.org/forumdisplay.php?f=67
 
-Good luck! If you have any questions, suggestions or issues, please
-email ben.alex@springsource.com. We hope you enjoy using Spring Roo.
+We also operate a public issue tracker, which can be used to find and
+file bug reports, feature requests and improvement ideas:
+
+   http://jira.springframework.org/browse/ROO
+
+The Roo home page is also a good source of links and other resources:
+
+   http://www.springsource.org/roo
+
+We also regularly post about our development activities and other
+interesting events on the #roo Twitter channel. You can follow it via:
+
+   http://search.twitter.com/search?q=%23roo
+
+If you find Roo useful, please let others know! If you publish a blog
+or forum entry you think others in the Roo community would like to
+read, please email ben.alex@springsource.com or Tweet including #roo.
+
+Finally, those interested in accessing the Roo source code can do so
+using either anonymous Subversion or viewing it via FishEye. Build
+instructions are provided in the root checkout directory: 
+
+   https://anonsvn.springframework.org/svn/spring-roo/trunk/
+   https://fisheye.springsource.org/browse/spring-roo
+
+Good luck, and thanks for taking the time to look at Spring Roo. We
+hope that you enjoy using it!
