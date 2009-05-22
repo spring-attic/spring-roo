@@ -64,7 +64,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		this.methodName = new JavaSymbolName(methodDeclaration.getName());
 		
 		// Get the body
-		this.body = methodDeclaration.getBody().toString();
+		this.body = methodDeclaration.getBody() == null ? null : methodDeclaration.getBody().toString();
 		
 		// Lookup the parameters and their names
 		if (methodDeclaration.getParameters() != null) {
