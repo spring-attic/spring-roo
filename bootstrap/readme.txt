@@ -136,6 +136,10 @@ You can also build a deployment artifact (.war) or run tests using:
 # mvn test
 # mvn package
 
+You can even immediately deploy your application with Tomcat:
+
+# mvn tomcat:run
+
 Note that the "mvn package" command automatically runs tests, so there
 is no need to separately "mvn test". Also before packaging you may
 edit your project's src/main/resources/META-INF/persistence.xml and
