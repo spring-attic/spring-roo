@@ -8,11 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
+import java.net.URL;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
@@ -246,7 +248,7 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
 
 	@CliCommand(value={"date"}, help="Displays the local date and time")
 	public String date() {
-		return new SimpleDateFormat().format(new Date());
+		return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
 	}
 
 	@CliCommand(value={"version"}, help="Displays shell version")
@@ -274,7 +276,7 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
     		sb.append("      | .`\\/' | Y   | !              / __ \\/ __ \\/ __ \\").append(System.getProperty("line.separator"));
     		sb.append("      l  \"~   j l   j L______       / /_/ / / / / / / /").append(System.getProperty("line.separator"));
     		sb.append("       \\,____{ __\"\" ~ __ ,\\_,\\_    / _, _/ /_/ / /_/ /").append(System.getProperty("line.separator"));
-    		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(System.getProperty("line.separator"));
+    		sb.append("    ~~~~~~~~~~~~~~~~~~~~~~~~~~~   /_/ |_|\\____/\\____/").append(" ").append(versionInfo()).append(System.getProperty("line.separator"));
     		return sb.toString();
     	}
     	
@@ -282,12 +284,64 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
 		sb.append("   / __ \\/ __ \\/ __ \\ ").append(System.getProperty("line.separator"));
 		sb.append("  / /_/ / / / / / / / ").append(System.getProperty("line.separator"));
 		sb.append(" / _, _/ /_/ / /_/ /  ").append(System.getProperty("line.separator"));
-		sb.append("/_/ |_|\\____/\\____/   ").append(System.getProperty("line.separator"));
+		sb.append("/_/ |_|\\____/\\____/   ").append(" ").append(versionInfo()).append(System.getProperty("line.separator"));
 		sb.append(System.getProperty("line.separator"));
 		
 		return sb.toString();
 	}
 
+	private String versionInfo() {
+		// Try to determine the SVN version
+		String svnRev = null;
+		try {
+			String classContainer = getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+			
+			if (classContainer.endsWith(".jar")) {
+				// Attempt to obtain the SVN version from the manifest
+				URL manifestUrl = new URL("jar:" + classContainer + "!/META-INF/MANIFEST.MF");
+				Manifest manifest = new Manifest(manifestUrl.openStream());
+				svnRev = manifest.getMainAttributes().getValue("Implementation-Build");
+			} else {
+				// We're likely in development mode, so try to obtain it via the "svnversion" external tool
+				if (classContainer.startsWith("file:")) {
+					String location = classContainer.substring(5);
+					File f = new File(location).getParentFile().getParentFile().getParentFile();
+					if (f.exists()) {
+						String line;
+						Process p = Runtime.getRuntime().exec("svnversion -n " + f.getCanonicalPath());
+					    BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					    try {
+						    while ((line = input.readLine()) != null) {
+						    	svnRev = line;
+						    }
+					    } finally {
+				    		input.close();
+					    }
+					}
+				}
+			}
+			
+		} catch (Exception ignoreAndMoveOn) {}
+		
+		String formalBuild = getClass().getPackage().getImplementationVersion();
+		
+		// Build the version details
+		StringBuilder sb = new StringBuilder();
+		if (formalBuild == null) {
+			sb.append("ENGINEERING BUILD");
+		} else {
+			sb.append(formalBuild);
+		}
+
+		if (svnRev == null) {
+			sb.append(" [rev unknown]");
+		} else {
+			sb.append(" [rev ").append(svnRev).append("]");
+		}
+		
+		return sb.toString();
+	}
+	
 	public SimpleParser getParser() {
 		return parser;
 	}
