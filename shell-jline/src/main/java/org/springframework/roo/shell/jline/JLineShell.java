@@ -87,7 +87,7 @@ public class JLineShell extends AbstractShellStatusPublisher implements Shell {
 		writer = new PrintWriter(System.out);
         logger.info(version(null));
         
-        logger.info("Welcome to Spring ROO. For assistance press TAB or type \"hint\" then hit ENTER.");
+        logger.info("Welcome to Spring Roo. For assistance press TAB or type \"hint\" then hit ENTER.");
         
         setShellStatus(ShellStatus.STARTED);
 	}
