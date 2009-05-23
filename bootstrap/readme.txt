@@ -50,8 +50,9 @@ ROO INSTALLATION
   **** This is a milestone release - see 'Known Issues' section ****
 
 The following steps explain how to install the Roo distribution ZIP.
-Installing Roo is very similar to installing Ant or Maven: you just
-unzip it, add a ROO_HOME, and add the ROO_HOME/bin to your path.
+Installing Roo is as simple as unzipping it and then adding the bin
+directory to your path (or making a symbolic link on *nix).
+
 More detailed instructions are provided below.
 
 * mvn -v
