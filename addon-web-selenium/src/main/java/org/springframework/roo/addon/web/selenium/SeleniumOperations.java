@@ -352,17 +352,17 @@ public class SeleniumOperations {
 			} else {
 				initializer = dateFormat.format(new Date());
 			}
-		}  else if (field.getFieldType().equals(new JavaType(Boolean.class.getName()))) {		
+		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {		
 			initializer = new Boolean(true).toString();
-		} else if (field.getFieldType().equals(new JavaType(Integer.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
 			initializer = new Integer(index).toString();
-		} else if (field.getFieldType().equals(new JavaType(Double.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
 			initializer = new Double(index).toString();
-		} else if (field.getFieldType().equals(new JavaType(Float.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
 			initializer = new Float(index).toString();
-		} else if (field.getFieldType().equals(new JavaType(Long.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
 			initializer = new Long(index).toString();
-		} else if (field.getFieldType().equals(new JavaType(Short.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
 			initializer = new Short(index).toString();
 		} 
 		return initializer;		

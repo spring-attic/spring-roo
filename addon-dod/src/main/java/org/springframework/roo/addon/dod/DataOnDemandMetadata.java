@@ -417,17 +417,17 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					} else {
 						initializer = "new java.util.Date()";
 					}
-				} else if (field.getFieldType().equals(new JavaType(Boolean.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 					initializer = "new Boolean(true)";
-				} else if (field.getFieldType().equals(new JavaType(Integer.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
 					initializer = "new Integer(index)";
-				} else if (field.getFieldType().equals(new JavaType(Double.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
 					initializer = "new Double(index)";
-				} else if (field.getFieldType().equals(new JavaType(Float.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
 					initializer = "new Float(index)";
-				} else if (field.getFieldType().equals(new JavaType(Long.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
 					initializer = "new Long(index)";
-				} else if (field.getFieldType().equals(new JavaType(Short.class.getName()))) {
+				} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
 					initializer = "new Short(index)";
 				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null) {
 					requiredDataOnDemandCollaborators.add(field.getFieldType());

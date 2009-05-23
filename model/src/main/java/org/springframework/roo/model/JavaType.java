@@ -34,6 +34,15 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	private boolean array = false;
 	private boolean primitive = false;
 	private String fullyQualifiedTypeName;
+	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", false, false, null);
+	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", false, false, null);
+	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", false, false, null);
+	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", false, false, null);
+	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", false, false, null);
+	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", false, false, null);
+	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", false, false, null);
+	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", false, false, null);
+	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", false, false, null);
 	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", false, true, null);
 	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", false, true, null);
 	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", false, true, null);
