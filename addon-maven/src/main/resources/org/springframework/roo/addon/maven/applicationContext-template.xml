@@ -9,7 +9,7 @@
            http://www.springframework.org/schema/context/spring-context-2.5.xsd
            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
-	<context:property-placeholder location="classpath:*.properties"/>
+	<context:property-placeholder location="classpath*:*.properties"/>
 	
 	<!-- Turn on AspectJ @Configurable support -->
 	<context:spring-configured />
