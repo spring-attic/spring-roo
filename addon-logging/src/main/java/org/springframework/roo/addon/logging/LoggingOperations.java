@@ -123,9 +123,12 @@ public class LoggingOperations {
 				log4jListenerClass.setTextContent("org.springframework.web.util.Log4jConfigListener");
 				log4jListener.appendChild(log4jListenerClass);
 				
+				Element ctx = XmlUtils.findRequiredElement("/web-app/context-param", rootElement);
+				Assert.notNull(ctx, "Could not find the context param element in web.xml");
+				ctx.getParentNode().insertBefore(log4jContextParam, ctx);
+				
 				Element listener = XmlUtils.findRequiredElement("/web-app/listener", rootElement);
-				Assert.notNull(listener, "Could not find the context param element in web.xml");
-				listener.getParentNode().insertBefore(log4jContextParam, listener);
+				Assert.notNull(listener, "Could not find the listener element in web.xml");
 				listener.getParentNode().insertBefore(log4jListener, listener);
 	
 				XmlUtils.writeXml(webXmlMutableFile.getOutputStream(), document);
