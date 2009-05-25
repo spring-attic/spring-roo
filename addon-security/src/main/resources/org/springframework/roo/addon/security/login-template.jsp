@@ -45,7 +45,7 @@
         Reason: <c:out value="${SPRING_SECURITY_LAST_EXCEPTION.message}"/>.
       </font>
     </c:if>
-	<form name="f" action="<c:url value='j_spring_security_check'/>" method="POST"> 
+	<form name="f" action="<c:url value='/static/j_spring_security_check'/>" method="POST"> 
     	<div>
             <label for="j_username">Name:</label>
             <input id="j_username" type='text' name='j_username' style="width:150px"/>

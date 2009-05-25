@@ -7,9 +7,12 @@
                         http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.4.xsd">
 
     <http auto-config="true">
-    	<form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?login_error=t"/>
+    	<form-login login-processing-url="/static/j_spring_security_check" login-page="/static/login.jsp" authentication-failure-url="/static/login.jsp?login_error=t"/>
+        <logout logout-url="/static/j_spring_security_logout"/>
         <intercept-url pattern="/admin/**" access="ROLE_ADMIN"/>
         <intercept-url pattern="/member/**" access="IS_AUTHENTICATED_REMEMBERED" />
+        <intercept-url pattern="/resources/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+        <intercept-url pattern="/static/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
         <intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY" />
     </http>
 

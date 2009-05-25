@@ -114,10 +114,13 @@ public class SecurityOperations {
 		filterMapping.appendChild(filterName2);
 		filterMapping.appendChild(urlPattern);
 		
-		Element listener = XmlUtils.findRequiredElement("//listener", root);
-		Assert.notNull(listener, "Could not find the first listener element in web.xml");
-		listener.getParentNode().insertBefore(filter, listener);
-		listener.getParentNode().insertBefore(filterMapping, listener);
+		Element ctx = XmlUtils.findRequiredElement("//context-param[last()]", root);
+		Assert.notNull(ctx, "Could not find the last context-param element in web.xml");
+		ctx.getParentNode().insertBefore(filter, ctx.getNextSibling());
+
+		Element fm = XmlUtils.findRequiredElement("//filter-mapping", root);
+		Assert.notNull(fm, "Could not find the first filter mapping element in web.xml");
+		fm.getParentNode().insertBefore(filterMapping, fm);
 		
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
