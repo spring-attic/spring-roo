@@ -96,7 +96,7 @@ public final class FinderTokenizer {
 			this.finder = finder;
 
 			// Compile pattern and prepare input
-			Pattern pattern = Pattern.compile("[A-Z][a-z]+");
+			Pattern pattern = Pattern.compile("[A-Z][a-z | 0-9]+");
 			matcher = pattern.matcher(finder);
 		}
 
