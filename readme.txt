@@ -238,11 +238,28 @@ RELEASING
 ======================================================================
 
 Roo is released on a regular basis by the Roo project team. To build a
-release, the following command is used from the root SVN location:
+release, ensure you perform an "svn update" first and then run
+"svnversion" to verify a standard Subversion revision number is given.
+
+the following command is used from the root SVN location:
 
   mvn clean install assembly:assembly
 
 This will create a ZIP in the "target" directory.
+
+The org.springframework.roo.annotations JAR should be uploaded to
+repository.springsource.com/maven/bundles/release/org/springframework/
+roo/org.springframework.roo/org.sfw.roo.annotations/<version>. Ensure
+SHA1/MD5 files, plus the POM and JAR is uploaded. Set public read ACL.
+
+The target/spring-roo-<version>.zip should be uploaded to
+/dist.springframework.org/milestone/ROO/. Also upload an SHA1 file.
+The following S3 properties must be set on the upload release ZIP:
+
+x-amz-meta-bundle.version:1.0.0.M1
+x-amz-meta-release.type:milestone
+x-amz-meta-package.file.name:spring-roo-1.0.0.M1.zip
+x-amz-meta-project.name:Spring Roo
 
 In addition, a SVN branch should be created using the copy command:
 
