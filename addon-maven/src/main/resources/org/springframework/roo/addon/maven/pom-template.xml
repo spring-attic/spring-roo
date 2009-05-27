@@ -112,7 +112,7 @@
 		<!-- ROO dependencies -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-annotations</artifactId>
+			<artifactId>org.springframework.roo.annotations</artifactId>
 			<version>1.0.0.M1</version>
 			<scope>provided</scope>
 		</dependency>
