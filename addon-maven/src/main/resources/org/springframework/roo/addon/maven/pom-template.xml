@@ -94,11 +94,6 @@
 			<version>${aspectj.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>com.springsource.org.aspectj.tools</artifactId>
-			<version>${aspectj.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet.jsp.jstl</artifactId>
 			<version>1.2.0</version>
