@@ -6,7 +6,7 @@
 	<groupId>org.springframework.roo</groupId>
 	<version>1.0.0.M2</version>
 	<packaging>jar</packaging>
-	<name>Spring Roo - Annotations (ASLv2 &amp; GPLv3 Dual Licensed)</name>
+	<name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
 
     <scm>
         <connection>scm:svn:https://src.springsource.com/svn/roo/trunk</connection>
