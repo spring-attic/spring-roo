@@ -3,83 +3,83 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
-		<artifactId>spring-roo</artifactId>
-		<version>1.0.0.M1</version>
+		<artifactId>org.springframework.roo.parent</artifactId>
+		<version>1.0.0.M2</version>
 	</parent>
-	<artifactId>spring-roo-addon-web-flow</artifactId>
+	<artifactId>org.springframework.roo.addon.web.flow</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Addon - Web - Flow</name>
 	<dependencies>
         <!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-classpath</artifactId>
+			<artifactId>org.springframework.roo.classpath</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-process-manager</artifactId>
+			<artifactId>org.springframework.roo.process.manager</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-            <artifactId>spring-roo-addon-configurable</artifactId>
+            <artifactId>org.springframework.roo.addon.configurable</artifactId>
             <version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-            <artifactId>spring-roo-addon-plural</artifactId>
+            <artifactId>org.springframework.roo.addon.plural</artifactId>
             <version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-addon-beaninfo</artifactId>
+			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-support</artifactId>
+			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-metadata</artifactId>
+			<artifactId>org.springframework.roo.metadata</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-model</artifactId>
+			<artifactId>org.springframework.roo.model</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-project</artifactId>
+			<artifactId>org.springframework.roo.project</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-shell</artifactId>
+			<artifactId>org.springframework.roo.shell</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-project</artifactId>
+			<artifactId>org.springframework.roo.project</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-file-monitor</artifactId>
+			<artifactId>org.springframework.roo.file.monitor</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>

@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.springframework.roo</groupId>
-    <artifactId>spring-roo</artifactId>
+    <artifactId>org.springframework.roo.parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0.M1</version>
+    <version>1.0.0.M2</version>
     <name>Spring Roo</name>
 
     <modules>
@@ -373,7 +373,7 @@
         <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
         <spring.version>3.0.0.M3</spring.version>
         <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
-        <roo.version>1.0.0.M1</roo.version>
+        <roo.version>1.0.0.M2</roo.version>
     </properties>
 
 </project>

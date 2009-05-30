@@ -3,41 +3,41 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
-		<artifactId>spring-roo</artifactId>
-		<version>1.0.0.M1</version>
+		<artifactId>org.springframework.roo.parent</artifactId>
+		<version>1.0.0.M2</version>
 	</parent>
-	<artifactId>spring-roo-process-manager</artifactId>
+	<artifactId>org.springframework.roo.process.manager</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Process Manager</name>
 	<dependencies>
         <!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-support</artifactId>
+			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-metadata</artifactId>
+			<artifactId>org.springframework.roo.metadata</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-file-undo</artifactId>
+			<artifactId>org.springframework.roo.file.undo</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-file-monitor</artifactId>
+			<artifactId>org.springframework.roo.file.monitor</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-project</artifactId>
+			<artifactId>org.springframework.roo.project</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>

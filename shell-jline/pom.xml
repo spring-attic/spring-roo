@@ -3,23 +3,23 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
-		<artifactId>spring-roo</artifactId>
-		<version>1.0.0.M1</version>
+		<artifactId>org.springframework.roo.parent</artifactId>
+		<version>1.0.0.M2</version>
 	</parent>
-	<artifactId>spring-roo-shell-jline</artifactId>
+	<artifactId>org.springframework.roo.shell.jline</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Shell (JLine Implementation)</name>
 	<dependencies>
         <!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-support</artifactId>
+			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>spring-roo-shell</artifactId>
+			<artifactId>org.springframework.roo.shell</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
