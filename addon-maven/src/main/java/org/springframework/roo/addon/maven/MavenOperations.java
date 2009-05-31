@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.maven;
 
 import java.io.InputStream;
+import java.util.List;
 
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -44,11 +45,26 @@ public class MavenOperations extends ProjectOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
 	}
 	
-	public void createProject(InputStream templateInputStream, JavaPackage topLevelPackage, String projectName) {
+	public void createProject(InputStream templateInputStream, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		Assert.notNull(templateInputStream, "Could not acquire template POM");
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.hasText(projectName, "Project name required");
+		
+		if (majorJavaVersion == null || (majorJavaVersion < 5 || majorJavaVersion > 7)) {
+			// We need to detect the major Java version to use
+			String ver = System.getProperty("java.version");
+			if (ver.indexOf("1.7.") > -1) {
+				majorJavaVersion = 7;
+			}
+			else if (ver.indexOf("1.6.") > -1) {
+				majorJavaVersion = 6;
+			}
+			else {
+				// To be running Roo they must be on Java 5 or above
+				majorJavaVersion = 5;
+			}
+		}
 		
 		Document pom;
 		try {
@@ -61,6 +77,11 @@ public class MavenOperations extends ProjectOperations {
 		XmlUtils.findRequiredElement("//artifactId", rootElement).setTextContent(projectName);
 		XmlUtils.findRequiredElement("//groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("//name", rootElement).setTextContent(projectName);
+		
+		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement) ;
+		for (Element e : versionElements) {
+			e.setTextContent("1." + majorJavaVersion);
+		}
 		
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);

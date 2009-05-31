@@ -35,7 +35,8 @@ public class MavenCommands implements CommandMarker {
 	
 	@CliCommand(value="create project", help="Creates a new project")
 	public void createProject(@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name") JavaPackage topLevelPackage,
-			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName) {
+			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName,
+			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
 		if (projectName == null) {
 			String packageName = topLevelPackage.getFullyQualifiedPackageName();
 			int lastIndex = packageName.lastIndexOf(".");
@@ -46,8 +47,7 @@ public class MavenCommands implements CommandMarker {
 			}
 		}
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "pom-template.xml");
-		mavenOperations.createProject(templateInputStream, topLevelPackage, projectName);
-		
+		mavenOperations.createProject(templateInputStream, topLevelPackage, projectName, majorJavaVersion);
 		applicationContextOperations.createMiddleTierApplicationContext();
 		applicationContextOperations.createWebApplicationContext();
 		webXmlOperations.createWebXml();

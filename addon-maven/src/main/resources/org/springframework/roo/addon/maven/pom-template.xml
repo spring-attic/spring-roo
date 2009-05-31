@@ -185,17 +185,13 @@
 					<configuration> <webXml>target/web.xml</webXml> </configuration>
 				-->
 			</plugin>
-			<!--
-				tell the compiler we can use 1.5; we only need this for
-				eclipse:eclipse compatibility
-			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.0.2</version>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>JAVA_VERSION</source>
+					<target>JAVA_VERSION</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -233,8 +229,8 @@
 							<artifactId>org.springframework.aspects</artifactId>
 						</aspectLibrary>
 					</aspectLibraries>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>JAVA_VERSION</source>
+					<target>JAVA_VERSION</target>
 				</configuration>
 			</plugin>
 			<plugin>
