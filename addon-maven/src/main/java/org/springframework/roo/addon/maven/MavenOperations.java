@@ -7,6 +7,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -87,6 +88,11 @@ public class MavenOperations extends ProjectOperations {
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 		
 		fileManager.scanAll();
+		
+		// Finally, Java 5 needs the javax.annotation library (it's included in Java 6 and above)
+		if (majorJavaVersion == 5) {
+			dependencyUpdate(new Dependency("javax.annotation", "com.springsource.javax.annotation", "1.0.0"));
+		}
 	}
 	
 }
