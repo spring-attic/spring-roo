@@ -1,7 +1,7 @@
 create project -topLevelPackage com.wedding
 install jpa -provider HIBERNATE -database HYPERSONIC_PERSISTENT
 database properties
-database set -key database.url -value jdbc:hsqldb:/home/balex/my-wedding
+database set -key database.url -value jdbc:hsqldb:${user.home}/my-wedding
 
 new persistent class jpa -name ~.domain.Rsvp
 add field string code -notNull -sizeMin 1 -sizeMax 30
