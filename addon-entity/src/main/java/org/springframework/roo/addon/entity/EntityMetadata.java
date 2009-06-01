@@ -315,7 +315,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(idAnnotation);
 		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), "version"));
+		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionField.getSymbolName()));
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 		
