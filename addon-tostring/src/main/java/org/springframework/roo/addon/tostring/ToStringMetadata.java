@@ -43,7 +43,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	@AutoPopulate private String toStringMethod = "toString";
 
 	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata) {
-		super(identifier, aspectName, governorPhysicalTypeMetadata, getJavaType(identifier));
+		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		

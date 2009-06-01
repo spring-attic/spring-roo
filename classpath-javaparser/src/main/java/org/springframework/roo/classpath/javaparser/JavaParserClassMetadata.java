@@ -69,6 +69,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 			}
 		} catch (Throwable ex) {
 			// non-fatal, it just means the type could not be parsed
+			ex.printStackTrace();
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.log(Level.FINEST, "Unable to parse '" + metadataIdentificationString + "'", ex);
 			}

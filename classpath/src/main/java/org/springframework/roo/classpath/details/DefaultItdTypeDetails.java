@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DefaultItdTypeDetails implements ItdTypeDetails {
 	
-	private JavaType name;
+	private ClassOrInterfaceTypeDetails governor;
 	private JavaType aspect;
 	private boolean privilegedAspect;
 	
@@ -31,7 +31,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	
-	public DefaultItdTypeDetails(JavaType name, JavaType aspect,
+	public DefaultItdTypeDetails(ClassOrInterfaceTypeDetails governor, JavaType aspect,
 			boolean privilegedAspect,
 			List<ConstructorMetadata> declaredConstructors,
 			List<FieldMetadata> declaredFields,
@@ -39,10 +39,10 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			List<JavaType> extendsTypes,
 			List<JavaType> implementsTypes,
 			List<AnnotationMetadata> typeAnnotations) {
-		Assert.notNull(name, "Name (to receive the introductions) required");
+		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
 
-		this.name = name;
+		this.governor = governor;
 		this.aspect = aspect;
 		this.privilegedAspect = privilegedAspect;
 		
@@ -71,8 +71,8 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		}
 	}
 	
-	public static DefaultItdTypeDetailsBuilder getBuilder(String declaredByMetadataId, JavaType name, JavaType aspect, boolean privilegedAspect) {
-		return new DefaultItdTypeDetailsBuilder(declaredByMetadataId, name, aspect, privilegedAspect);
+	public static DefaultItdTypeDetailsBuilder getBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
+		return new DefaultItdTypeDetailsBuilder(declaredByMetadataId, governor, aspect, privilegedAspect);
 	}
 
 	public List<JavaType> getImplementsTypes() {
@@ -84,7 +84,11 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	}
 
 	public JavaType getName() {
-		return name;
+		return governor.getName();
+	}
+	
+	public ClassOrInterfaceTypeDetails getGovernor() {
+		return governor;
 	}
 	
 	public JavaType getAspect() {
@@ -117,7 +121,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("name", name);
+		tsc.append("name", governor);
 		tsc.append("aspect", aspect);
 		tsc.append("physicalTypeCategory", physicalTypeCategory);
 		tsc.append("privilegedAspect", privilegedAspect);

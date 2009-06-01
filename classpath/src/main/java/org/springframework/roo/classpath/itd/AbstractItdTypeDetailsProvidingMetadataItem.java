@@ -24,10 +24,10 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 
 	protected ClassOrInterfaceTypeDetails governorTypeDetails;
 	protected ItdTypeDetails itdTypeDetails;
+	protected JavaType destination;
 	
 	protected JavaType aspectName;
 	protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
-	protected JavaType destination;
 	
 	protected DefaultItdTypeDetailsBuilder builder;
 	
@@ -45,21 +45,15 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 	 * @param identifier the identifier for this item of metadata (required)
 	 * @param aspectName the Java type of the ITD (required)
 	 * @param governorPhysicalTypeMetadata the governor, which is expected to contain a {@link ClassOrInterfaceTypeDetails} (required)
-	 * @param destination the Java type the ITD members will be introduced to (required)
 	 */
-	public AbstractItdTypeDetailsProvidingMetadataItem(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType destination) {
+	public AbstractItdTypeDetailsProvidingMetadataItem(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier);
 		Assert.notNull(aspectName, "Aspect name required");
 		Assert.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");
-		Assert.notNull(destination, "Destination type is required");
 		
 		this.aspectName = aspectName;
 		this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
-		this.destination = destination;
 
-		// Provide the subclass a builder, to make preparing an ITD even easier
-		this.builder = DefaultItdTypeDetails.getBuilder(getId(), destination, aspectName, true);
-		
 		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 		
 		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
@@ -69,6 +63,11 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 			// We have reliable physical type details
 			governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 		}
+
+		this.destination = governorTypeDetails.getName();
+		
+		// Provide the subclass a builder, to make preparing an ITD even easier
+		this.builder = DefaultItdTypeDetails.getBuilder(getId(), governorTypeDetails, aspectName, true);
 	}
 	
 	public final ItdTypeDetails getItdTypeDetails() {
@@ -80,7 +79,6 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		tsc.append("identifier", getId());
 		tsc.append("valid", valid);
 		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
