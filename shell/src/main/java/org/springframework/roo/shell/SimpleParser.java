@@ -1,7 +1,5 @@
 package org.springframework.roo.shell;
 
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -63,9 +61,8 @@ public final class SimpleParser {
 		converters.add(converter);
 	}
 	
-	public ParseResult parse(String buffer, PrintWriter writer) {
+	public ParseResult parse(String buffer) {
 		Assert.notNull(buffer, "Buffer required");
-		Assert.notNull(writer, "PrintWriter required");
 		
 		// Locate the applicable targets which match this buffer
 		Set<MethodTarget> matchingTargets = locateTargets(buffer, true);
@@ -112,9 +109,7 @@ public final class SimpleParser {
 
 			if (cliOption.systemProvided()) {
 				Object result;
-				if (Writer.class.isAssignableFrom(requiredType)) {
-					result = writer;
-				} else if (SimpleParser.class.isAssignableFrom(requiredType)) {
+				if (SimpleParser.class.isAssignableFrom(requiredType)) {
 					result = this;
 				} else {
 					logger.warning("Parameter type '" + requiredType + "' is not system provided");
