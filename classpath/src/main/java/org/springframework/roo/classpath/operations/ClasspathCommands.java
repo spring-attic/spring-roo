@@ -115,6 +115,11 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="abstract", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Whether the generated class should be marked as abstract") boolean createAbstract,
 			@CliOption(key="testAutomatically", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Create automatic integration tests for this entity") boolean testAutomatically) {
 		
+		// Reject attempts to name the entity "Test", due to possible clashes with data on demand (see ROO-50)
+		if (name.getSimpleTypeName().startsWith("Test") || name.getSimpleTypeName().endsWith("TestCase") || name.getSimpleTypeName().endsWith("Test")) {
+			throw new IllegalArgumentException("Entity name rejected as conflicts with test execution defaults; please remove 'Test' and/or 'TestCase'");
+		}
+		
 		// Produce entity itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 		List<AnnotationMetadata> entityAnnotations = new ArrayList<AnnotationMetadata>();
