@@ -55,7 +55,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
 	@AutoPopulate private String identifierField = "id";
-	@AutoPopulate private String identifierColumn = "id";
 	@AutoPopulate private boolean version = true;
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
@@ -87,9 +86,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			
 			if ("".equals(identifierField)) {
 				identifierField = "id";
-			}
-			if ("".equals(identifierColumn)) {
-				identifierColumn = "id";
 			}
 			if ("".equals(persistMethod)) {
 				persistMethod = "persist";
@@ -173,6 +169,25 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return found.get(0);
 		}
 		
+		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
+		int index= -1;
+		JavaSymbolName idField = null;
+		while (true) {
+			// Compute the required field name
+			index++;
+			String fieldName = "";
+			for (int i = 0; i < index; i++) {
+				fieldName = fieldName + "_";
+			}
+			fieldName = fieldName + identifierField;
+			
+			idField = new JavaSymbolName(fieldName);
+			if (MemberFindingUtils.getField(governorTypeDetails, idField) == null) {
+				// Found a usable field name
+				break;
+			}
+		}
+		
 		// We need to create one
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Id"), new ArrayList<AnnotationAttributeValue<?>>());
@@ -184,11 +199,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(generatedValueAnnotation);
 		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), identifierColumn));
+		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), idField.getSymbolName()));
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 		
-		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName(identifierField), identifierType, null, annotations);
+		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
 		return field;
 	}
 	
@@ -285,7 +300,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return found.get(0);
 		}
 		
-		// Quit at this stage if the user doesn't want a verison field
+		// Quit at this stage if the user doesn't want a version field
 		if (!version) {
 			return null;
 		}

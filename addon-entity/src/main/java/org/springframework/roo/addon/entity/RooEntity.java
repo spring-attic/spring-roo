@@ -38,13 +38,6 @@ public @interface RooEntity {
 	String identifierField() default "id";
 	
 	/**
-	 * Indicates the name of the identifier column, if it will be created.
-	 * 
-	 * @return the name of the identifier column (defaults to "id"; must be provided)
-	 */
-	String identifierColumn() default "id";
-	
-	/**
 	 * Creates an optimistic locking version field, unless there is already a JPA @Version field annotation
 	 * in a superclass (either written in normal Java source or introduced by a superclass that uses the
 	 * {@link RooEntity} annotation. The produced field will be a primitive integer and have a colum name
