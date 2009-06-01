@@ -579,6 +579,12 @@ public class JavaParserUtils  {
 	 * <p>
 	 * If an attempt is made to import a type without a package, it is ignored.
 	 * 
+	 * <p>
+	 * We import every type usage even if the type usage is within the same package and would
+	 * theoretically not require an import. This is undertaken so that there is no requirement
+	 * to separately parse every unqualified type usage within the compilation unit so as to
+	 * refrain from importing subsequently conflicting types.
+	 * 
 	 * @param compilationUnitPackage the compilation unit's package (required)
 	 * @param imports the compilation unit's imports (required)
 	 * @param typeToImport the type to be imported (required)
@@ -622,9 +628,10 @@ public class JavaParserUtils  {
 		}
 		
 		if (addImport && typeToImport.getPackage().equals(compilationUnitPackage)) {
-			// It is not necessary to add an import for something in the same package
-			addImport = false;
-			useSimpleTypeName = true;
+			// It is not theoretically necessary to add an import for something in the same package,
+			// but we elect to explicitly perform an import so future conflicting types are not imported
+			// addImport = false;
+			// useSimpleTypeName = true;
 		}
 		
 		if (addImport) {
