@@ -121,7 +121,7 @@ public class FieldCommands implements CommandMarker {
 		if (decimalMax != null) fieldDetails.setDecimalMax(decimalMax);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);
 		if (sizeMax != null) fieldDetails.setSizeMax(sizeMax);
-		if (regexp != null) fieldDetails.setRegexp(regexp);
+		if (regexp != null) fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails);
 	}
