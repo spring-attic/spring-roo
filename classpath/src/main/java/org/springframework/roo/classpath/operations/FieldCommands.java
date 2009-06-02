@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -59,13 +60,24 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="class", mandatory=true, help="The class to receive the field (class must exist)") JavaType name, 
 			@CliOption(key="path", mandatory=true, help="The path where the class can be found") Path path, 
 			@CliOption(key="name", mandatory=true, help="The name of the field") JavaSymbolName fieldName,
-			@CliOption(key="type", mandatory=true, help="The Java type of this field") JavaType fieldType) {
+			@CliOption(key="type", mandatory=true, help="The Java type of this field") JavaType fieldType,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			// no need to check the "name" as if the class exists it is assumed it is a legal name
+			ReservedWords.verifyReservedWordsNotPresent(fieldName);
+		}
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		FieldMetadata fieldMetadata = new DefaultFieldMetadata(declaredByMetadataId, Modifier.PRIVATE, fieldName, fieldType, null, null);
 		classpathOperations.addField(fieldMetadata);
 	}
 
-	private void insertField(FieldDetails fieldDetails) {
+	private void insertField(FieldDetails fieldDetails, boolean permitReservedWords) {
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+		}
+		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		fieldDetails.decorateAnnotationsList(annotations);
 		JavaType initializer = null;
@@ -88,7 +100,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="decimalMax", mandatory=false, help="The BigDecimal string based representation of the maximum value") String decimalMax,
 			@CliOption(key="min", mandatory=false, help="The minimum value") Long min,
 			@CliOption(key="max", mandatory=false, help="The maximum value") Long max,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		NumericField fieldDetails = new NumericField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -98,7 +111,7 @@ public class FieldCommands implements CommandMarker {
 		if (min != null) fieldDetails.setMin(min);
 		if (max != null) fieldDetails.setMax(max);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field string", help="Adds a private string field to an existing Java source file")
@@ -112,7 +125,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="sizeMin", mandatory=false, help="The minimum string length") Integer sizeMin,
 			@CliOption(key="sizeMax", mandatory=false, help="The maximum string length") Integer sizeMax,
 			@CliOption(key="regexp", mandatory=false, help="The required regular expression pattern") String regexp,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		StringField fieldDetails = new StringField(physicalTypeIdentifier, new JavaType("java.lang.String"), fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -123,7 +137,7 @@ public class FieldCommands implements CommandMarker {
 		if (sizeMax != null) fieldDetails.setSizeMax(sizeMax);
 		if (regexp != null) fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field date jpa", help="Adds a private JPA-specific date field to an existing Java source file")
@@ -136,7 +150,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="future", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the future") Boolean future,
 			@CliOption(key="past", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the past") Boolean past,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -146,7 +161,7 @@ public class FieldCommands implements CommandMarker {
 		if (persistenceType != null) fieldDetails.setPersistenceType(persistenceType);
 		if (persistenceType == null) fieldDetails.setPersistenceType(DateFieldPersistenceType.JPA_TIMESTAMP);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field date jdk", help="Adds a private date field to an existing Java source file")
@@ -158,7 +173,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="future", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the future") Boolean future,
 			@CliOption(key="past", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the past") Boolean past,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -166,7 +182,7 @@ public class FieldCommands implements CommandMarker {
 		if (future != null) fieldDetails.setFuture(future);
 		if (past != null) fieldDetails.setPast(past);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field boolean", help="Adds a private boolean field to an existing Java source file")
@@ -177,7 +193,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="assertFalse", mandatory=false, specifiedDefaultValue="true", help="Whether this value must assert false") Boolean assertFalse,
 			@CliOption(key="assertTrue", mandatory=false, specifiedDefaultValue="true", help="Whether this value must assert true") Boolean assertTrue,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		BooleanField fieldDetails = new BooleanField(physicalTypeIdentifier, new JavaType("java.lang.Boolean"), fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -185,7 +202,7 @@ public class FieldCommands implements CommandMarker {
 		if (assertFalse != null) fieldDetails.setAssertFalse(assertFalse);
 		if (assertTrue != null) fieldDetails.setAssertTrue(assertTrue);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field reference jpa", help="Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)")
@@ -195,13 +212,14 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
 			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 
 	@CliCommand(value="add field set jpa", help="Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)")
@@ -214,7 +232,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="sizeMin", mandatory=false, help="The minimum string length") Integer sizeMin,
 			@CliOption(key="sizeMax", mandatory=false, help="The maximum string length") Integer sizeMax,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment) {
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(element);
@@ -225,6 +244,6 @@ public class FieldCommands implements CommandMarker {
 		if (sizeMax != null) fieldDetails.setSizeMax(sizeMax);
 		if (mappedBy != null) fieldDetails.setMappedBy(mappedBy);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails);
+		insertField(fieldDetails, permitReservedWords);
 	}
 }

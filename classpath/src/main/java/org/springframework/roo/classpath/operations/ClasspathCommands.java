@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -46,7 +47,13 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="name", mandatory=true) JavaType name, 
 			@CliOption(key="path", mandatory=true) Path path, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
-			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract) {
+			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(name);
+		}
+		
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 		
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -64,7 +71,13 @@ public class ClasspathCommands implements CommandMarker {
 	public void newJavaFile(
 			@CliOption(key="name", mandatory=true) JavaType name, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
-			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract) {
+			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(name);
+		}
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -82,7 +95,13 @@ public class ClasspathCommands implements CommandMarker {
 	public void newTestFile(
 			@CliOption(key="name", mandatory=true) JavaType name, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
-			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract) {
+			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(name);
+		}
+
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -98,13 +117,25 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="new dod", help="Creates a new data on demand for the specified entity")
 	public void newDod(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity) {
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(entity);
+		}
+
 		classpathOperations.newDod(entity);
 	}
 
 	@CliCommand(value="new integration test", help="Creates a new data on demand for the specified entity")
 	public void newIntegrationTest(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity) {
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(entity);
+		}
+
 		classpathOperations.newIntegrationTest(entity);
 	}
 
@@ -113,7 +144,12 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
 			@CliOption(key="abstract", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Whether the generated class should be marked as abstract") boolean createAbstract,
-			@CliOption(key="testAutomatically", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Create automatic integration tests for this entity") boolean testAutomatically) {
+			@CliOption(key="testAutomatically", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Create automatic integration tests for this entity") boolean testAutomatically,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(name);
+		}
 		
 		// Reject attempts to name the entity "Test", due to possible clashes with data on demand (see ROO-50)
 		if (name.getSimpleTypeName().startsWith("Test") || name.getSimpleTypeName().endsWith("TestCase") || name.getSimpleTypeName().endsWith("Test")) {
