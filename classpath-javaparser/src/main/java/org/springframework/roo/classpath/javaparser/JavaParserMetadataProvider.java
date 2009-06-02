@@ -97,7 +97,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 	public void onFileEvent(FileEvent fileEvent) {
 		String fileIdentifier = fileEvent.getFileDetails().getCanonicalPath();
 		
-		if (fileIdentifier.endsWith(".java") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH) {
+		if (fileIdentifier.endsWith(".java") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH && !fileIdentifier.endsWith("package-info.java")) {
 			// file is of interest
 			
 			// figure out the JavaType this should be
