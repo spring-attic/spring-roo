@@ -63,7 +63,7 @@ More detailed instructions are provided below.
   Roo supports Java 5 and above
   Refer to 'Known Issues' section for non-Sun JREs
 
-* unzip spring-roo-1.0.0.M1.zip
+* unzip spring-roo-1.0.0.M2.zip
 
 * For Windows users, add \path\to\roo\bin to your path (NB: the \bin)
 
@@ -75,7 +75,7 @@ More detailed instructions are provided below.
   some code assist limitations and no automatic aspects library import
 
 * We highly recommend you download the SpringSource Tool Suite (STS)
-  2.1.0.M1 or above, which is a free Eclipse-based IDE offered by
+  2.1.0.M2 or above, which is a free Eclipse-based IDE offered by
   SpringSource that includes significant inbuilt Roo integration
 
 Installation should now be complete.
@@ -199,15 +199,6 @@ KNOWN ISSUES
   options or introducing escaped sequences, both of which are uncommon
   when using the TAB key to build the line. We're intending to revisit
   the shell parsing modules in due course and tidy this up.
-
-* Roo does not prevent you from creating package, entity, field or
-  other members names which are reserved words. Please ensure you
-  not only avoid Java keywords in such names, but also JPA, JDBC
-  and SQL-related reserved words. For example, creating an 'Order'
-  class would cause issues because 'ORDER' is a SQL reserved word.
-  You can still use an entity named 'Order', though, if you edit the
-  resulting Order.java file and add @Table(name="T_ORDER") as a type-
-  level annotation.
 
 * Only Hibernate is supported as a JPA provider, despite multiple JPA
   providers being shown. Issue reports have been logged the relevant
