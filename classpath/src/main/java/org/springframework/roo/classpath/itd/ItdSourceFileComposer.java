@@ -113,7 +113,7 @@ public class ItdSourceFileComposer {
 		for (AnnotationMetadata typeAnnotation : typeAnnotations) {
 			this.appendIndent();
 			this.append("declare @type: ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(": ");
 			outputAnnotation(typeAnnotation);
 			this.append(";");
@@ -132,7 +132,7 @@ public class ItdSourceFileComposer {
 		for (JavaType extendsType : extendsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(" extends ");
 			this.append(extendsType.getFullyQualifiedTypeNameIncludingTypeParameters());
 			this.append(";");
@@ -151,7 +151,7 @@ public class ItdSourceFileComposer {
 		for (JavaType extendsType : implementsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(" implements ");
 			this.append(extendsType.getFullyQualifiedTypeNameIncludingTypeParameters());
 			this.append(";");
@@ -181,7 +181,7 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(constructor.getModifier()));
 				this.append(" ");
 			}
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(".");
 			this.append("new");
 
@@ -236,9 +236,9 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(method.getModifier()));
 				this.append(" ");
 			}
-			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameters());
+			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(" ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(".");
 			this.append(method.getMethodName().getSymbolName());
 
@@ -294,7 +294,7 @@ public class ItdSourceFileComposer {
 			}
 			this.append(field.getFieldType().getFullyQualifiedTypeNameIncludingTypeParameters());
 			this.append(" ");
-			this.append(introductionTo.getSimpleTypeName());
+			this.append(introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames());
 			this.append(".");
 			this.append(field.getFieldName().getSymbolName());
 

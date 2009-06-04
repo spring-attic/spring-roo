@@ -162,7 +162,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
 			if (extendsList != null) {
 				for (ClassOrInterfaceType candidate : extendsList) {
-					JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate, typeParameterNames);
+					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, candidate, typeParameterNames);
 					extendsTypes.add(javaType);
 				}
 			}
@@ -193,7 +193,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
 		if (implementsList != null) {
 			for (ClassOrInterfaceType candidate : implementsList) {
-				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate, typeParameterNames);
+				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, candidate, typeParameterNames);
 				implementsTypes.add(javaType);
 			}
 		}

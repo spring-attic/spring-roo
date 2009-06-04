@@ -138,6 +138,51 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_");
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");
+
+	public String getFullyQualifiedTypeNameIncludingTypeParameterNames() {
+		StringBuilder sb = new StringBuilder();
+		if (primitive) {
+			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
+			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
+				return "int";
+			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
+					return "char";
+			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
+				return "void";
+			}
+			return StringUtils.uncapitalize(this.getSimpleTypeName());
+		}
+		if (WILDCARD_EXTENDS.equals(argName)) {
+			sb.append("? extends ").append(fullyQualifiedTypeName);
+		} else if (WILDCARD_SUPER.equals(argName)) {
+			sb.append("? super ").append(fullyQualifiedTypeName);
+		} else if (WILDCARD_NEITHER.equals(argName)) {
+			sb.append("?");
+		} else {
+			if (argName == null) {
+				sb.append(fullyQualifiedTypeName);
+			} else {
+				sb.append(argName);
+			}
+		}
+		if (this.parameters.size() > 0 && argName == null) {
+			sb.append("<");
+			int counter = 0;
+			for (JavaType param : this.parameters) {
+				counter++;
+				if (counter > 1) {
+					sb.append(", ");
+				}
+				sb.append(param.getFullyQualifiedTypeNameIncludingTypeParameterNames());
+				counter++;
+			}
+			sb.append(">");
+		}
+		if (array) {
+			sb.append("[]");
+		}
+		return sb.toString();
+	}
 	
 	/**
 	 * @return the fully qualified name, including fully-qualified name of
