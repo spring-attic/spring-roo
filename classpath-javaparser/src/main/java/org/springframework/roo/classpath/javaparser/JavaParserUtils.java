@@ -18,13 +18,17 @@ import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
+import japa.parser.ast.type.WildcardType;
 import japa.parser.ast.type.PrimitiveType.Primitive;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
@@ -294,9 +298,10 @@ public class JavaParserUtils  {
 	 * @param compilationUnitPackage to use for package resolution (required)
 	 * @param imports to use for package resolution (required)
 	 * @param type to locate (required)
+	 * @param typeParameters names to consider type parameters (can be null if there are none)
 	 * @return the {@link JavaType}, with proper indication of primitive and array status (never null)
 	 */
-	public static JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, Type type) {
+	public static JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, Type type, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(imports, "Imports cannot be null");
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
 		Assert.notNull(type, "The reference type must be provided");
@@ -318,38 +323,59 @@ public class JavaParserUtils  {
 		if (internalType instanceof PrimitiveType) {
 			PrimitiveType pt = (PrimitiveType) internalType;
 			if (pt.getType().equals(Primitive.Boolean)) {
-				return new JavaType(Boolean.class.getName(), array, true, null);
+				return new JavaType(Boolean.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Char)) {
-				return new JavaType(Character.class.getName(), array, true, null);
+				return new JavaType(Character.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Byte)) {
-				return new JavaType(Byte.class.getName(), array, true, null);
+				return new JavaType(Byte.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Short)) {
-				return new JavaType(Short.class.getName(), array, true, null);
+				return new JavaType(Short.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Int)) {
-				return new JavaType(Integer.class.getName(), array, true, null);
+				return new JavaType(Integer.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Long)) {
-				return new JavaType(Long.class.getName(), array, true, null);
+				return new JavaType(Long.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Float)) {
-				return new JavaType(Float.class.getName(), array, true, null);
+				return new JavaType(Float.class.getName(), array, true, null, null);
 			}
 			if (pt.getType().equals(Primitive.Double)) {
-				return new JavaType(Double.class.getName(), array, true, null);
+				return new JavaType(Double.class.getName(), array, true, null, null);
 			}
 			throw new IllegalStateException("Unsupported primitive '" + pt.getType() + "'");
 		}
 		
-		Assert.isInstanceOf(ReferenceType.class, type, "The presented type must be a ReferenceType");
+		if (internalType instanceof WildcardType) {
+			// We only provide very primitive support for wildcard types; Roo only needs metadata at the end of the day,
+			// not complete binding support from an AST
+			WildcardType wt = (WildcardType) internalType;
+			if (wt.getSuper() != null) {
+				ReferenceType rt = (ReferenceType) wt.getSuper();
+				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
+				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
+				boolean rtArray = rt.getArrayCount() > 0;
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rtArray, false, JavaType.WILDCARD_SUPER, effectiveType.getParameters());
+			} else if (wt.getExtends() != null) {
+				ReferenceType rt = (ReferenceType) wt.getExtends();
+				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
+				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
+				boolean rtArray = rt.getArrayCount() > 0;
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rtArray, false, JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
+			} else {
+				return new JavaType("java.lang.Object", false, false, JavaType.WILDCARD_NEITHER, null);
+			}
+		}
+		
+		Assert.isInstanceOf(ReferenceType.class, internalType, "The presented type must be a ReferenceType");
 		ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
 
-		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, cit);
+		JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
 		if (array) {
-			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.isPrimitive(), effectiveType.getParameters());
+			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.isPrimitive(), effectiveType.getArgName(), effectiveType.getParameters());
 		}
 		
 		return effectiveType;
@@ -374,9 +400,10 @@ public class JavaParserUtils  {
 	 * @param compilationUnitPackage the package that the compilation unit belongs to (required)
 	 * @param imports the compilation unit's imports (required)
 	 * @param nameToFind to locate (required)
+	 * @param typeParameters names to consider type parameters (can be null if there are none)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, NameExpr nameToFind) {
+	public static final JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, NameExpr nameToFind, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
 		Assert.notNull(nameToFind, "Name to find is required");
@@ -384,6 +411,11 @@ public class JavaParserUtils  {
 		if (nameToFind instanceof QualifiedNameExpr) {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameToFind;
 			return new JavaType(qne.toString());
+		}
+		
+		// Unqualified name detected, so check if it's in the type parameter list
+		if (typeParameters != null && typeParameters.contains(new JavaSymbolName(nameToFind.getName()))) {
+			return new JavaType(nameToFind.getName());
 		}
 		
 		ImportDeclaration importDeclaration = getImportDeclarationFor(imports, nameToFind);
@@ -476,7 +508,7 @@ public class JavaParserUtils  {
 	 * @param cit the class or interface type to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, ClassOrInterfaceType cit) {
+	public static final JavaType getJavaTypeNow(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, ClassOrInterfaceType cit, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
 		Assert.notNull(cit, "ClassOrInterfaceType required");
@@ -487,17 +519,18 @@ public class JavaParserUtils  {
 			scope = scope.getScope();
 		}
 		NameExpr nameExpr = getNameExpr(typeName);
-		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr);
+		
+		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr, typeParameters);
 		
 		// Handle any type arguments
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		if (cit.getTypeArgs() != null) {
 			for (Type ta : cit.getTypeArgs()) {
-				typeParams.add(getJavaType(compilationUnitPackage, imports, ta));
+				typeParams.add(getJavaType(compilationUnitPackage, imports, ta, typeParameters));
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), null, typeParams);
 	}
 	
 	/**
@@ -516,20 +549,29 @@ public class JavaParserUtils  {
 		
 		// Convert the ClassOrInterfaceDeclaration name into a JavaType
 		NameExpr nameExpr = getNameExpr(cid.getName());
-		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr);
+		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr, null);
 		
 		// Populate JavaType with type parameters
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		List<TypeParameter> params = cid.getTypeParameters();
 		if (params != null) {
+			Set<JavaSymbolName> locatedTypeParams = new HashSet<JavaSymbolName>();
 			for (TypeParameter candidate : params) {
-				NameExpr nameToFind = JavaParserUtils.getNameExpr(candidate.getName());
-				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, nameToFind);
+				JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
+				locatedTypeParams.add(currentTypeParam);
+				JavaType javaType = null;
+				if (candidate.getTypeBound() == null) {
+					javaType = new JavaType("java.lang.Object", false, false, currentTypeParam, null);
+				} else {
+					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
+					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, cit, locatedTypeParams);
+					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.isArray(), javaType.isPrimitive(), currentTypeParam, javaType.getParameters());
+				}
 				typeParams.add(javaType);
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), null, typeParams);
 	}
 
 	/**

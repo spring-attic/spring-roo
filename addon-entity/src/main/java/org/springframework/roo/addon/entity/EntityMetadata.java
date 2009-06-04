@@ -610,7 +610,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaSymbolName methodName = new JavaSymbolName(countMethod + plural);
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		JavaType returnType = new JavaType("java.lang.Long", false, true, null);
+		JavaType returnType = new JavaType("java.lang.Long", false, true, null, null);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
@@ -647,7 +647,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
-		JavaType returnType = new JavaType("java.util.List", false, false, typeParams);
+		JavaType returnType = new JavaType("java.util.List", false, false, null, typeParams);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
@@ -711,14 +711,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findEntriesMethod + governorTypeDetails.getName().getSimpleTypeName() + "Entries");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(new JavaType("java.lang.Integer", false, true, null));
-		paramTypes.add(new JavaType("java.lang.Integer", false, true, null));
+		paramTypes.add(new JavaType("java.lang.Integer", false, true, null, null));
+		paramTypes.add(new JavaType("java.lang.Integer", false, true, null, null));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("firstResult"));
 		paramNames.add(new JavaSymbolName("maxResults"));
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
-		JavaType returnType = new JavaType("java.util.List", false, false, typeParams);
+		JavaType returnType = new JavaType("java.util.List", false, false, null, typeParams);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);

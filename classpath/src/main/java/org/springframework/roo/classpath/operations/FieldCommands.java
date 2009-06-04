@@ -237,7 +237,7 @@ public class FieldCommands implements CommandMarker {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(element);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", false, false, params), fieldName, element);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", false, false, null, params), fieldName, element);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);

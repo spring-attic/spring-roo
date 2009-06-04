@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.javaparser.details;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
+import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.MethodDeclaration;
 import japa.parser.ast.body.Parameter;
@@ -18,7 +19,9 @@ import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -48,7 +51,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 	private String declaredByMetadataId;
 	private int modifier;
 	
-	public JavaParserMethodMetadata(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices) {
+	public JavaParserMethodMetadata(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -56,9 +59,20 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(methodDeclaration.getModifiers());
 		
+		// Add method-declared type parameters (if any) to the list of type parameters
+		Set<JavaSymbolName> fullTypeParameters = new HashSet<JavaSymbolName>();
+		fullTypeParameters.addAll(typeParameters);
+		List<TypeParameter> params = methodDeclaration.getTypeParameters();
+		if (params != null) {
+			for (TypeParameter candidate : params) {
+				JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
+				fullTypeParameters.add(currentTypeParam);
+			}
+		}
+		
 		// Compute the return type
 		Type rt = methodDeclaration.getType();
-		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), rt);
+		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), rt, fullTypeParameters);
 		
 		// Compute the method name
 		this.methodName = new JavaSymbolName(methodDeclaration.getName());
@@ -70,7 +84,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		if (methodDeclaration.getParameters() != null) {
 			for (Parameter p : methodDeclaration.getParameters()) {
 				Type pt = p.getType();
-				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt);
+				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt, fullTypeParameters);
 				
 				List<AnnotationExpr> annotationsList = p.getAnnotations();
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -139,7 +153,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		return tsc.toString();
 	}
 
-	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, boolean permitFlush) {
+	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, boolean permitFlush, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(method, "Method required");
@@ -267,7 +281,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 				MethodDeclaration md = (MethodDeclaration) bd;
 				if (md.getName().equals(d.getName()) && md.getParameters().size() == d.getParameters().size()) {
 					// Possible match, we need to consider parameter types as well now
-					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices);
+					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
 					boolean matchesFully = true;
 					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
 						if (!existingParameter.getJavaType().equals(method.getParameterTypes().get(index))) {

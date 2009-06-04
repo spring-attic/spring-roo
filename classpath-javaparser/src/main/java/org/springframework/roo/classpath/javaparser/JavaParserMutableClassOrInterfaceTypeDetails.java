@@ -25,7 +25,9 @@ import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -87,6 +89,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private CompilationUnit compilationUnit;
 	private List<ImportDeclaration> imports;
 	private JavaPackage compilationUnitPackage;
+	private Set<JavaSymbolName> typeParameterNames;
 	
 	private int modifier = 0;
 	
@@ -145,11 +148,21 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(typeDeclaration.getModifiers());
 		
+		// Type parameters
+		typeParameterNames = new HashSet<JavaSymbolName>();
+		for (JavaType param : this.name.getParameters()) {
+			JavaSymbolName arg = param.getArgName();
+			// Fortunately type names can only appear at the top-level
+			if (arg != null && !JavaType.WILDCARD_NEITHER.equals(arg) && !JavaType.WILDCARD_EXTENDS.equals(arg) && !JavaType.WILDCARD_SUPER.equals(arg)) {
+				typeParameterNames.add(param.getArgName());
+			}
+		}
+		
 		if (this.clazz != null) {
 			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
 			if (extendsList != null) {
 				for (ClassOrInterfaceType candidate : extendsList) {
-					JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate);
+					JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate, typeParameterNames);
 					extendsTypes.add(javaType);
 				}
 			}
@@ -180,7 +193,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
 		if (implementsList != null) {
 			for (ClassOrInterfaceType candidate : implementsList) {
-				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate);
+				JavaType javaType = JavaParserUtils.getJavaType(compilationUnitPackage, imports, candidate, typeParameterNames);
 				implementsTypes.add(javaType);
 			}
 		}
@@ -199,16 +212,16 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
                         if (member instanceof FieldDeclaration) {
                                 FieldDeclaration castMember = (FieldDeclaration) member;
                                 for (VariableDeclarator var : castMember.getVariables()) {
-                                        declaredFields.add(new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this));
+                                        declaredFields.add(new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this, typeParameterNames));
                                 }
                         }
                         if (member instanceof MethodDeclaration) {
                                 MethodDeclaration castMember = (MethodDeclaration) member;
-                                declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this));
+                                declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
                         }
                         if (member instanceof ConstructorDeclaration) {
                                 ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-                                declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this));
+                                declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
                         }
                 }
         }
@@ -322,7 +335,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 				clazz.setMembers(members);
 			}
 		}
-		JavaParserMethodMetadata.addMethod(this, members, methodMetadata, true);
+		JavaParserMethodMetadata.addMethod(this, members, methodMetadata, true, typeParameterNames);
 	}
 
 	public static final void createType(FileManager fileManager, final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
@@ -402,7 +415,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 
         // Add methods
         for (MethodMetadata candidate : cit.getDeclaredMethods()) {
-        	JavaParserMethodMetadata.addMethod(compilationUnitServices, cid.getMembers(), candidate, false);
+        	JavaParserMethodMetadata.addMethod(compilationUnitServices, cid.getMembers(), candidate, false, null);
         }
 
         // Write to disk

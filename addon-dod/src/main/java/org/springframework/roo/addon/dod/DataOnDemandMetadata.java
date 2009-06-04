@@ -223,7 +223,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					continue;
 				}
 				
-				if (!candidate.getFieldType().equals(new JavaType("java.util.List", false, false, typeParams))) {
+				if (!candidate.getFieldType().equals(new JavaType("java.util.List", false, false, null, typeParams))) {
 					// Candidate isn't a java.util.List<theEntity>, so it isn't suitable
 					// The equals method also verifies type params are present
 					continue;
@@ -235,7 +235,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 			
 			// Candidate not found, so let's create one
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.List", false, false, typeParams), null, null);
+			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.List", false, false, null, typeParams), null, null);
 			return field;
 		}
 	}

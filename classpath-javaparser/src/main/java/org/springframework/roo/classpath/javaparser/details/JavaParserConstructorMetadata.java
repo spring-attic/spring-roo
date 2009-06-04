@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.Parameter;
 import japa.parser.ast.expr.AnnotationExpr;
@@ -8,7 +9,9 @@ import japa.parser.ast.type.Type;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -36,7 +39,7 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 	private String declaredByMetadataId;
 	private int modifier;
 	
-	public JavaParserConstructorMetadata(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices) {
+	public JavaParserConstructorMetadata(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(constructorDeclaration, "Constructor declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -46,6 +49,17 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 		
 		this.declaredByMetadataId = declaredByMetadataId;
 		
+		// Add method-declared type parameters (if any) to the list of type parameters
+		Set<JavaSymbolName> fullTypeParameters = new HashSet<JavaSymbolName>();
+		fullTypeParameters.addAll(typeParameterNames);
+		List<TypeParameter> params = constructorDeclaration.getTypeParameters();
+		if (params != null) {
+			for (TypeParameter candidate : params) {
+				JavaSymbolName currentTypeParam = new JavaSymbolName(candidate.getName());
+				fullTypeParameters.add(currentTypeParam);
+			}
+		}
+		
 		// Get the body
 		this.body = constructorDeclaration.getBlock().toString();
 		
@@ -53,7 +67,7 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 		if (constructorDeclaration.getParameters() != null) {
 			for (Parameter p : constructorDeclaration.getParameters()) {
 				Type pt = p.getType();
-				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt);
+				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt, fullTypeParameters);
 				
 				List<AnnotationExpr> annotationsList = p.getAnnotations();
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();

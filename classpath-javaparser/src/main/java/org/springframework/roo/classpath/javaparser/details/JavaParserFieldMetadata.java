@@ -15,6 +15,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -40,7 +41,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 	private String declaredByMetadataId;
 	private int modifier;
 
-	public JavaParserFieldMetadata(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices) {
+	public JavaParserFieldMetadata(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldDeclaration, "Field declaration is mandatory");
 		Assert.notNull(var, "Variable declarator required");
@@ -53,7 +54,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		this.declaredByMetadataId = declaredByMetadataId;
 		
 		Type type = fieldDeclaration.getType();
-		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), type);
+		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), type, typeParameters);
 		this.fieldName = new JavaSymbolName(var.getId().getName());
 		
 		// Lookup initializer, if one was requested and easily determinable
@@ -62,7 +63,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			if (e instanceof ObjectCreationExpr) {
 				ObjectCreationExpr initializer = (ObjectCreationExpr) e;
 				ClassOrInterfaceType initializerType = initializer.getType();
-				this.fieldInitializer = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), initializerType);
+				this.fieldInitializer = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), initializerType, typeParameters);
 			} else {
 				// TODO: Support other initializers (eg japa.parser.ast.expr.IntegerLiteralExpr)
 			}
