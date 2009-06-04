@@ -15,7 +15,9 @@ import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.internal.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -69,7 +71,10 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 			}
 		} catch (Throwable ex) {
 			// non-fatal, it just means the type could not be parsed
-			ex.printStackTrace();
+			ProcessManager pm = ActiveProcessManager.getActiveProcessManager();
+			if (pm != null && pm.isDevelopmentMode()) {
+				ex.printStackTrace();
+			}
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.log(Level.FINEST, "Unable to parse '" + metadataIdentificationString + "'", ex);
 			}
