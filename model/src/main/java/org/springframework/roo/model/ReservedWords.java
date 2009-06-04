@@ -36,7 +36,6 @@ public abstract class ReservedWords {
 	
 	public static void verifyReservedJavaKeywordsNotPresent(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
-		System.out.println(javaType.getFullyQualifiedTypeName());
 		for (String s : javaType.getFullyQualifiedTypeName().split("\\.")) {
 			if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(s)) {
 				throw new IllegalStateException("Reserved Java keyword '" + s + "' is not permitted within fully qualified type name");
