@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.springframework.roo.addon.web.menu.MenuOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -37,20 +38,23 @@ public class WebFlowOperations {
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
+	private MenuOperations menuOperations;
 	
-	public WebFlowOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
+	public WebFlowOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations, MenuOperations menuOperations) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(projectOperations, "Project operations required");
+		Assert.notNull(menuOperations, "Menu operations required");
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;
 		this.projectOperations = projectOperations;
+		this.menuOperations = menuOperations;
 	}
 	
 	public boolean isInstallWebFlowAvailable() {		
-		return getPathResolver() != null;
+		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-webflow.xml"));
 	}
 	
 	public boolean isManageWebFlowAvailable() {
@@ -95,7 +99,7 @@ public class WebFlowOperations {
 			Element root = (Element) appCtx.getFirstChild();	
 			Element flowViewResolver = XmlUtils.findRequiredElement("/beans/bean[@class='org.springframework.web.servlet.view.InternalResourceViewResolver']", root);
 			flowViewResolver.removeAttribute("p:prefix");
-			flowViewResolver.setAttribute("p:prefix", "/WEB-INF/jsp/" + flowName);
+			flowViewResolver.setAttribute("p:prefix", "/WEB-INF/jsp/" + flowName + "/");
 			XmlUtils.writeXml(webflowContextMutableFile.getOutputStream(), appCtx);
 		}
 		
@@ -174,6 +178,22 @@ public class WebFlowOperations {
 			}
 		}
 		
+		try {
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-1.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/view-state-1.jsp")).getOutputStream());
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-2.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/view-state-2.jsp")).getOutputStream());		
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "end-state.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/end-state.jsp")).getOutputStream());	
+		} catch (IOException e) {
+			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
+		}
+
+		//add 'create new' menu item
+		menuOperations.addMenuItem(
+				"web_flow_category", 
+				flowName, 
+				"web_flow_" + flowName.toLowerCase() + "_menu_item", 
+				"Enter " + flowName + "Flow",
+				"/" + projectMetadata.getProjectName() + "/" + flowName.toLowerCase());
+
 		updateDependencies();
 	}	
 	

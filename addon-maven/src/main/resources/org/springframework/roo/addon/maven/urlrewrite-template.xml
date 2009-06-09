@@ -15,6 +15,10 @@
 		<to last="true">/WEB-INF/jsp/index.jsp</to>		
 	</rule>
 	<rule>
+		<from>/app/**</from>
+		<to last="true">/app/$1</to>
+	</rule>
+	<rule>
 		<from>/**</from>
 		<to>/app/$1</to>
 	</rule>
