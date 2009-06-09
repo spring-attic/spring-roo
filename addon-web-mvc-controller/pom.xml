@@ -26,20 +26,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.classpath.javaparser</artifactId>
-			<version>${roo.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.process.manager</artifactId>
-			<version>${roo.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.plural</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>

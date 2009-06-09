@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -418,7 +417,21 @@ public class JspDocumentHelper {
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
 
 						//TODO: direct dependency on Inflector should be removed
-						String plural = Noun.pluralOf(field.getFieldType().getSimpleTypeName()).toLowerCase();
+//						String plural = Noun.pluralOf(field.getFieldType().getSimpleTypeName(), Locale.ENGLISH).toLowerCase();
+				
+						EntityMetadata typeEntityMetadata = null;
+						
+						if (field.getFieldType().isCommonCollectionType()) {
+							typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(field.getFieldType().getParameters().get(0), Path.SRC_MAIN_JAVA));
+						} else {
+							typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+						}
+	
+						if(typeEntityMetadata == null) {
+							throw new IllegalStateException("Could not determine the plural name for the " + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + " field");
+						}
+						String plural = typeEntityMetadata.getPlural().toLowerCase();
+						
 						Element ifElement = document.createElement("c:if");
 						ifElement.setAttribute("test", "${not empty " + plural + "}");
 						divElement.appendChild(ifElement);
