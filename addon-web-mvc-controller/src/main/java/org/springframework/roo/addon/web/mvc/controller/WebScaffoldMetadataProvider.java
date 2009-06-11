@@ -2,6 +2,7 @@ package org.springframework.roo.addon.web.mvc.controller;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -46,10 +47,12 @@ public final class WebScaffoldMetadataProvider extends AbstractItdMetadataProvid
 		Path path = Path.SRC_MAIN_JAVA;
 		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
+		String finderMetdadataKey = FinderMetadata.createIdentifier(javaType, path);
 		
 		// We need to lookup the metadata we depend on
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetdadataKey);
 		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
@@ -63,7 +66,7 @@ public final class WebScaffoldMetadataProvider extends AbstractItdMetadataProvid
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata, entityMetadata, controllerOperations);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

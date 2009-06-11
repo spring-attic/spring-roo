@@ -92,4 +92,12 @@ public @interface RooWebScaffold {
 	 * @return indicates if the update() method should be provided (defaults to "true"; optional)
 	 */
 	boolean update() default true;
+	
+	
+	/**
+	 * Will scan the formBackingObjects for installed finder methods and expose them when configured. 
+	 * 
+	 * @return indicates if the finders methods should be provided (defaults to "true"; optional)
+	 */
+	boolean exposeFinders() default true;
 }

@@ -416,9 +416,6 @@ public class JspDocumentHelper {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
 
-						//TODO: direct dependency on Inflector should be removed
-//						String plural = Noun.pluralOf(field.getFieldType().getSimpleTypeName(), Locale.ENGLISH).toLowerCase();
-				
 						EntityMetadata typeEntityMetadata = null;
 						
 						if (field.getFieldType().isCommonCollectionType()) {

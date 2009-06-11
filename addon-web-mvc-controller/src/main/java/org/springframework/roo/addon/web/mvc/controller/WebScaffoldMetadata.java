@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -53,20 +54,21 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
 	private SortedSet<JavaType> specialDomainTypes;
+	private FinderMetadata finderMetadata;
 	
 	private String entityName;
 	
 	private boolean typeExposesDateField = false;
 	
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, ControllerOperations controllerOperations) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(entityMetadata, "Finder metadata required");
 		Assert.notNull(controllerOperations, "Controller operations required");
-		
 		if (!isValid()) {
 			return;
 		}
@@ -76,6 +78,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.entityMetadata = entityMetadata;
 		this.entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		this.metadataService = metadataService;
+		this.finderMetadata = finderMetadata;
 		
 		//now figure out if we need to create any custom property editors
 		
@@ -89,8 +92,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (annotationValues.create) {
 			builder.addMethod(getCreateMethod());
 			builder.addMethod(getCreateFormMethod());
-		}
-		
+		}		
 		if (annotationValues.show) {
 			builder.addMethod(getShowMethod());
 		}
@@ -106,6 +108,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		} 
 		if (typeExposesDateField) {
 			builder.addMethod(getInitBinderMethod());
+		}		
+		if (annotationValues.exposeFinders) {			
+			for (String finderName : entityMetadata.getDynamicFinders()) {
+				builder.addMethod(getFinderFormMethod(finderMetadata.getDynamicFinderMethod(finderName)));
+			}
 		}
 		
 		itdTypeDetails = builder.build();
@@ -427,6 +434,45 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
 	}
+	
+	private MethodMetadata getFinderFormMethod(MethodMetadata methodMetadata) {
+		Assert.notNull(methodMetadata, "Method metadata required for finder");
+		JavaSymbolName finderFormMethodName = new JavaSymbolName(methodMetadata.getMethodName().getSymbolName() + "Form");
+		MethodMetadata finderFormMethod = methodExists(finderFormMethodName);
+		if (finderFormMethod != null) return finderFormMethod;
+		
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes());
+		
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		boolean needModelMap = false;
+		for (JavaType javaType : types) {
+			if (isSpecialType(javaType)) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+				if (typeEntityMetadata != null) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + javaType.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				}
+				needModelMap = true;
+			}
+		}		
+		
+		if (needModelMap) {
+			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));		
+			paramNames.add(new JavaSymbolName("modelMap"));
+		}
+		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "find/" + methodMetadata.getMethodName().getSymbolName().replaceFirst("find" + entityMetadata.getPlural(), "")));
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
+		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		annotations.add(requestMapping);
+		bodyBuilder.appendFormalLine("return \"" + entityName + "/" + methodMetadata.getMethodName().getSymbolName() + "\";");
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, finderFormMethodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
+	}	
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
 		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative

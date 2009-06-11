@@ -10,6 +10,7 @@ import org.springframework.roo.model.JavaType;
  * Represents a parsed {@link RooWebScaffold} annotation.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -23,6 +24,7 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate boolean delete = true;
 	@AutoPopulate boolean create = true;
 	@AutoPopulate boolean update = true;
+	@AutoPopulate boolean exposeFinders = true;
 
 	public WebScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooWebScaffold.class.getName()));
@@ -57,5 +59,8 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 		return update;
 	}
 	
+	public boolean isExposeFinders() {
+		return exposeFinders;
+	}
 	
 }
