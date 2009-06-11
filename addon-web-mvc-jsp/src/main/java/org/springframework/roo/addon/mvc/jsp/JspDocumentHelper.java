@@ -583,7 +583,7 @@ public class JspDocumentHelper {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType: \"dijit.form.MultiSelect\")); ");
+				+ "\", widgetType: \"dijit.form.MultiSelect\"})); ");
 		return script;
 	}
 	
