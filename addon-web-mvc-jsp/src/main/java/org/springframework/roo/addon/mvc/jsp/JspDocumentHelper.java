@@ -452,14 +452,21 @@ public class JspDocumentHelper {
 						if(max != null) {
 							int maxValue = (Integer)max.getValue();
 							if(maxValue > 30) {
+								Element scriptElement = document.createElement("script");
+								scriptElement.setAttribute("type", "text/javascript");
+								scriptElement.setTextContent("dojo.require(\"dijit.form.Textarea\");");
+								divElement.appendChild(scriptElement);
 								divElement.appendChild(getTextArea(document, field, maxValue));
-								divElement.appendChild(getTextAreaDojo(document, field));								
+								divElement.appendChild(getTextAreaDojo(document, field));
+								divElement.appendChild(document.createElement("br"));
+								divElement.appendChild(getErrorsElement(document, field));
+								//TODO: due to ROO-85 the validation Dojo element has been removed since it causes problems in conjunction with Textarea
 							} else {
 								divElement.appendChild(getInputBox(document, field, maxValue));
-							}
-							divElement.appendChild(document.createElement("br"));
-							divElement.appendChild(getErrorsElement(document, field));
-							divElement.appendChild(getValidationDojo(document, field));
+								divElement.appendChild(document.createElement("br"));
+								divElement.appendChild(getErrorsElement(document, field));
+								divElement.appendChild(getValidationDojo(document, field));
+							}							
 							formElement.appendChild(divElement);
 							formElement.appendChild(document.createElement("br"));	
 							specialAnnotation = true;
@@ -564,7 +571,7 @@ public class JspDocumentHelper {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType: \"dijit.form.Textarea\", widgetAttrs: {value: \"\"}})); ");
+				+ "\", widgetType: \"dijit.form.Textarea\"})); ");
 		return script;
 	}
 	
@@ -626,7 +633,7 @@ public class JspDocumentHelper {
 		Element textArea = document.createElement("form:textarea");
 		textArea.setAttribute("path", field.getFieldName().getSymbolName());
 		textArea.setAttribute("id", "_" + field.getFieldName().getSymbolName());
-		textArea.setAttribute("cssStyle", "width:250px;height:" + Math.round(new Float(maxValue) / 10) + "em");
+		textArea.setAttribute("cssStyle", "width:250px");
 		return textArea;
 	}
 	
