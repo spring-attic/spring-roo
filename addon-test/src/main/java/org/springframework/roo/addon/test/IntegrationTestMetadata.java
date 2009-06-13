@@ -288,8 +288,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("boolean modified =  dod." + dataOnDemandMetadata.getModifyMethod().getMethodName().getSymbolName() + "(obj);");
 			bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion) || !modified);");
-
+			if (versionAccessorMethod.getReturnType().getFullyQualifiedTypeName().equals("java.util.Date")) {
+				bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion) || !modified);");
+			} else {
+				bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion || !modified);");
+			}
 			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, bodyBuilder.getOutput());
 		}
 
@@ -326,7 +329,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(versionAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " currentVersion = obj." + versionAccessorMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("obj." + mergeMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
-			bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion) || !modified);");
+			if (versionAccessorMethod.getReturnType().getFullyQualifiedTypeName().equals("java.util.Date")) {
+				bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "().after(currentVersion) || !modified);");
+			} else {
+				bodyBuilder.appendFormalLine("junit.framework.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion || !modified);");
+			}
 
 			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, bodyBuilder.getOutput());
 		}
