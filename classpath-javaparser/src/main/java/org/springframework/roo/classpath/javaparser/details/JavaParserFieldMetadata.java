@@ -55,6 +55,12 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		
 		Type type = fieldDeclaration.getType();
 		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), type, typeParameters);
+		
+		// Convert into an array if this variable ID uses array notation
+		if (var.getId().getArrayCount() > 0) {
+			this.fieldType = new JavaType(fieldType.getFullyQualifiedTypeName(), true, fieldType.isPrimitive(), fieldType.getArgName(), fieldType.getParameters());
+		}
+		
 		this.fieldName = new JavaSymbolName(var.getId().getName());
 		
 		// Lookup initializer, if one was requested and easily determinable

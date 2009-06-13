@@ -370,8 +370,14 @@ public class JavaParserUtils  {
 			}
 		}
 		
-		Assert.isInstanceOf(ReferenceType.class, internalType, "The presented type must be a ReferenceType");
-		ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
+		ClassOrInterfaceType cit;
+		if (internalType instanceof ClassOrInterfaceType) {
+			cit = (ClassOrInterfaceType) internalType;
+		} else if (internalType instanceof ReferenceType) {
+			cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
+		} else {
+			throw new IllegalStateException("The presented type '" + internalType.getClass() + "' with value '" + internalType + "' is unsupported by JavaParserUtils");
+		}
 
 		JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
 		if (array) {

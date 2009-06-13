@@ -144,13 +144,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (primitive) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
-				return "int";
+				return "int" + (array ? "[]" : "");
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char";
+					return "char" + (array ? "[]" : "");
 			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
 				return "void";
 			}
-			return StringUtils.uncapitalize(this.getSimpleTypeName());
+			return StringUtils.uncapitalize(this.getSimpleTypeName() + (array ? "[]" : ""));
 		}
 		if (WILDCARD_EXTENDS.equals(argName)) {
 			sb.append("? extends ").append(fullyQualifiedTypeName);
@@ -193,13 +193,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (primitive) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
-				return "int";
+				return "int" + (array ? "[]" : "");
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char";
+					return "char" + (array ? "[]" : "");
 			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
 				return "void";
 			}
-			return StringUtils.uncapitalize(this.getSimpleTypeName());
+			return StringUtils.uncapitalize(this.getSimpleTypeName() + (array ? "[]" : ""));
 		}
 		if (argName != null) {
 			if (WILDCARD_EXTENDS.equals(argName)) {
