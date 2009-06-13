@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.details;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.CharAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
@@ -41,32 +42,9 @@ public abstract class AnnotationMetadataUtils {
 			}
 			
 			// Compute the value
-			String attributeValue = null;
 			AnnotationAttributeValue<? extends Object> value = annotation.getAttribute(attributeName);
 			
-			if (value instanceof BooleanAttributeValue) {
-				attributeValue = ((BooleanAttributeValue)value).getValue().toString();
-			} else if (value instanceof CharAttributeValue) {
-				attributeValue = "'" + ((CharAttributeValue)value).getValue().toString() + "'";
-			} else if (value instanceof ClassAttributeValue) {
-				attributeValue = ((ClassAttributeValue)value).getValue().getFullyQualifiedTypeName() + ".class";
-			} else if (value instanceof DoubleAttributeValue) {
-				DoubleAttributeValue dbl = (DoubleAttributeValue) value;
-				if (dbl.isFloatingPrecisionOnly()) {
-					attributeValue = dbl.getValue().toString() + "F";
-				} else {
-					attributeValue = dbl.getValue().toString() + "D";
-				}
-			} else if (value instanceof EnumAttributeValue) {
-				EnumDetails enumDetails = ((EnumAttributeValue)value).getValue();
-				attributeValue = enumDetails.getType().getFullyQualifiedTypeName() + "." + enumDetails.getField().getSymbolName();
-			} else if (value instanceof IntegerAttributeValue) {
-				attributeValue = ((IntegerAttributeValue)value).getValue().toString();
-			} else if (value instanceof LongAttributeValue) {
-				attributeValue = ((LongAttributeValue)value).getValue().toString() + "L";
-			} else if (value instanceof StringAttributeValue) {
-				attributeValue = "\"" + ((StringAttributeValue)value).getValue() + "\"";
-			}
+			String attributeValue = computeAttributeValue(value);
 			
 			if (attributeValue != null) {
 				// We have a supported attribute
@@ -80,5 +58,45 @@ public abstract class AnnotationMetadataUtils {
 		}
 		sb.append(")");
 		return sb.toString();
+	}
+
+	private static String computeAttributeValue(AnnotationAttributeValue<? extends Object> value) {
+		String attributeValue = null;
+		if (value instanceof BooleanAttributeValue) {
+			attributeValue = ((BooleanAttributeValue)value).getValue().toString();
+		} else if (value instanceof CharAttributeValue) {
+			attributeValue = "'" + ((CharAttributeValue)value).getValue().toString() + "'";
+		} else if (value instanceof ClassAttributeValue) {
+			attributeValue = ((ClassAttributeValue)value).getValue().getFullyQualifiedTypeName() + ".class";
+		} else if (value instanceof DoubleAttributeValue) {
+			DoubleAttributeValue dbl = (DoubleAttributeValue) value;
+			if (dbl.isFloatingPrecisionOnly()) {
+				attributeValue = dbl.getValue().toString() + "F";
+			} else {
+				attributeValue = dbl.getValue().toString() + "D";
+			}
+		} else if (value instanceof EnumAttributeValue) {
+			EnumDetails enumDetails = ((EnumAttributeValue)value).getValue();
+			attributeValue = enumDetails.getType().getFullyQualifiedTypeName() + "." + enumDetails.getField().getSymbolName();
+		} else if (value instanceof IntegerAttributeValue) {
+			attributeValue = ((IntegerAttributeValue)value).getValue().toString();
+		} else if (value instanceof LongAttributeValue) {
+			attributeValue = ((LongAttributeValue)value).getValue().toString() + "L";
+		} else if (value instanceof StringAttributeValue) {
+			attributeValue = "\"" + ((StringAttributeValue)value).getValue() + "\"";
+		} else if (value instanceof ArrayAttributeValue<?>) {
+			ArrayAttributeValue<?> array = (ArrayAttributeValue<?>) value;
+			StringBuilder data = new StringBuilder();
+			int i = 0;
+			for (AnnotationAttributeValue<? extends Object> val : array.getValue()) {
+				i++;
+				if (i > 1) {
+					data.append(", ");
+				}
+				data.append(computeAttributeValue(val));
+			}
+			attributeValue = "{" + data.toString() + "}";
+		}
+		return attributeValue;
 	}
 }
