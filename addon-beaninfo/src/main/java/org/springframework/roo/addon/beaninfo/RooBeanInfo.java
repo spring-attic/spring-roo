@@ -15,12 +15,4 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface RooBeanInfo {
-
-	/**
-	 * @return the plural name to use when working with this object (defaults to an empty string, which means to compute
-	 * dynamically)
-	 */
-	String plural() default "";
-	
-}
+public @interface RooBeanInfo {}

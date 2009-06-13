@@ -1,21 +1,19 @@
 package org.springframework.roo.addon.plural;
 
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -34,9 +32,13 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private static final String PROVIDES_TYPE_STRING = PluralMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType PLURAL_ANNOTATION_TYPE = new JavaType(RooPlural.class.getName());
 	
 	// From annotation
 	@AutoPopulate private String value = "";
+	
+	// Cache
+	private Map<String, String> cache;
 	
 	public PluralMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -47,7 +49,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		// Process values from the annotation, if present
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooPlural.class.getName()));
+		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, PLURAL_ANNOTATION_TYPE);
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
@@ -57,36 +59,52 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			value = Noun.pluralOf(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
 		}
 		
-		builder.addMethod(getPluralAccessor());
-		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
+	/**
+	 * @return the plural of the type name
+	 */
 	public String getPlural() {
 		return value;
 	}
-
-	public MethodMetadata getPluralAccessor() {
-		JavaSymbolName methodName = new JavaSymbolName("getPluralName");
-		
-		// See if the type itself declared the accessor
-		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
-		if (result != null) {
-			return result;
+	
+	/**
+	 * @param field the field to obtain plural details for (required)
+	 * @return a guaranteed plural, computed via an annotation or Inflector (never returns null or an empty string)
+	 */
+	public String getPlural(FieldMetadata field) {
+		Assert.notNull(field, "Field required");
+		// Obtain the plural from the cache, if available
+		String symbolName = field.getFieldName().getSymbolName();
+		if (cache != null && cache.containsKey(symbolName)) {
+			return cache.get(symbolName);
 		}
 		
-		// Decide whether we need to produce the accessor method
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return \"" + value + "\";");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		result = new DefaultMethodMetadata(getId(), modifier, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
-		
-		return result;
+		// We need to build the plural
+		String thePlural = "";
+		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PLURAL_ANNOTATION_TYPE);
+		if (annotation != null) {
+			// Use the plural the user defined via the annotation
+			AnnotationAttributeValue<?> attribute = annotation.getAttribute(new JavaSymbolName("value"));
+			if (attribute != null) {
+				thePlural = attribute.getValue().toString();
+			}
+		}
+		if ("".equals(thePlural)) {
+			// Manually compute the plural, as the user did not provided one
+			thePlural = Noun.pluralOf(symbolName, Locale.ENGLISH);
+		}
+		if (cache == null) {
+			// Create the cache (we defer this in case there is no field plural retrieval ever required for this instance)
+			cache = new HashMap<String, String>();
+		}
+		// Populate the cache for next time
+		cache.put(symbolName, thePlural);
+		return thePlural;
 	}
 
-	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -95,6 +113,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		tsc.append("destinationType", destination);
 		tsc.append("governor", governorPhysicalTypeMetadata.getId());
 		tsc.append("plural", getPlural());
+		tsc.append("cachedLookups", cache == null ? "[None]" : cache.keySet().toString());
 		tsc.append("itdTypeDetails", itdTypeDetails);
 		return tsc.toString();
 	}
