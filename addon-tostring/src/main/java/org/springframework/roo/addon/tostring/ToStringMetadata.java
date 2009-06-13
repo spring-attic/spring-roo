@@ -105,12 +105,14 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				String accessorText = accessorName + "()";
 				if (accessor.getReturnType().isCommonCollectionType()) {
 					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
+				} else if (accessor.getReturnType().isArray()) {
+					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
 				}
 				map.put(fieldName, accessorText);
 				order.add(fieldName);
 			}
 
-			int index = -1;
+			int index = 0;
 			int size = map.keySet().size();
 			for (String fieldName : order) {
 				index++;
