@@ -32,27 +32,27 @@ import org.springframework.roo.support.util.StringUtils;
 public final class JavaType implements Comparable<JavaType>, Cloneable {
 	private List<JavaType> parameters = new ArrayList<JavaType>();
 	private JavaSymbolName argName = null;
-	private boolean array = false;
+	private int array = 0;
 	private boolean primitive = false;
 	private String fullyQualifiedTypeName;
-	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", false, false, null, null);
-	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", false, false, null, null);
-	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", false, false, null, null);
-	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", false, false, null, null);
-	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", false, false, null, null);
-	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", false, false, null, null);
-	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", false, false, null, null);
-	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", false, false, null, null);
-	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", false, false, null, null);
-	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", false, true, null, null);
-	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", false, true, null, null);
-	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", false, true, null, null);
-	public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", false, true, null, null);
-	public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", false, true, null, null);
-	public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", false, true, null, null);
-	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", false, true, null, null);
-	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", false, true, null, null);
-	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", false, true, null, null);
+	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, false, null, null);
+	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, false, null, null);
+	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, false, null, null);
+	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", 0, false, null, null);
+	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", 0, false, null, null);
+	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", 0, false, null, null);
+	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", 0, false, null, null);
+	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", 0, false, null, null);
+	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", 0, false, null, null);
+	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, true, null, null);
+	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, true, null, null);
+	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, true, null, null);
+	public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", 0, true, null, null);
+	public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0, true, null, null);
+	public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0, true, null, null);
+	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, true, null, null);
+	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, true, null, null);
+	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, true, null, null);
 
 	private static final Set<String> commonCollectionTypes = new HashSet<String>();
 
@@ -85,7 +85,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
 	 */
 	public JavaType(String fullyQualifiedTypeName) {
-		this(fullyQualifiedTypeName, false, false, null, null);
+		this(fullyQualifiedTypeName, 0, false, null, null);
 	}
 
 	/**
@@ -93,12 +93,12 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * setting these non-default values.
 	 * 
 	 * @param fullyQualifiedTypeName the name (as per the rules above)
-	 * @param array whether this type is an array
+	 * @param array number of array indicies (0 = not an array, 1 = single dimensional array etc)
 	 * @param primitive whether this type is representing the equivalent primitive
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
-	public JavaType(String fullyQualifiedTypeName, boolean array, boolean primitive, JavaSymbolName argName, List<JavaType> parameters) {
+	public JavaType(String fullyQualifiedTypeName, int array, boolean primitive, JavaSymbolName argName, List<JavaType> parameters) {
 		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
 			throw new IllegalArgumentException("Fully qualified type name required");
 		}
@@ -144,13 +144,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (primitive) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
-				return "int" + (array ? "[]" : "");
+				return "int" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char" + (array ? "[]" : "");
+					return "char" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
 				return "void";
 			}
-			return StringUtils.uncapitalize(this.getSimpleTypeName() + (array ? "[]" : ""));
+			return StringUtils.uncapitalize(this.getSimpleTypeName() + getArraySuffix());
 		}
 		if (WILDCARD_EXTENDS.equals(argName)) {
 			sb.append("? extends ").append(fullyQualifiedTypeName);
@@ -178,9 +178,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			}
 			sb.append(">");
 		}
-		if (array) {
-			sb.append("[]");
-		}
+		sb.append(getArraySuffix());
 		return sb.toString();
 	}
 	
@@ -193,13 +191,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (primitive) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
-				return "int" + (array ? "[]" : "");
+				return "int" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char" + (array ? "[]" : "");
+					return "char" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
 				return "void";
 			}
-			return StringUtils.uncapitalize(this.getSimpleTypeName() + (array ? "[]" : ""));
+			return StringUtils.uncapitalize(this.getSimpleTypeName() + getArraySuffix());
 		}
 		if (argName != null) {
 			if (WILDCARD_EXTENDS.equals(argName)) {
@@ -227,9 +225,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 				}
 				sb.append(">");
 			}
-			if (array) {
-				sb.append("[]");
-			}
+			sb.append(getArraySuffix());
 		}
 		return sb.toString();
 	}
@@ -270,7 +266,22 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 	
 	public boolean isArray() {
+		return array > 0;
+	}
+	
+	public int getArray() {
 		return array;
+	}
+
+	private String getArraySuffix() {
+		if (array == 0) {
+			return "";
+		}
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < array; i++) {
+			sb.append("[]");
+		}
+		return sb.toString();
 	}
 
 	public final int compareTo(JavaType o) {

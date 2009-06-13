@@ -51,7 +51,7 @@ public class SetField extends CollectionField {
 	public JavaType getInitializer() {
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(getGenericParameterTypeName());
-		return new JavaType("java.util.HashSet", false, false, null, params);
+		return new JavaType("java.util.HashSet", 0, false, null, params);
 	}
 
 	public JavaSymbolName getMappedBy() {

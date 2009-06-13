@@ -310,12 +310,12 @@ public class JavaParserUtils  {
 			return new JavaType(Void.class.getName());
 		}
 		
-		boolean array = false;
+		int array = 0;
 
 		Type internalType = type;
 		if (internalType instanceof ReferenceType) {
-			if (((ReferenceType)internalType).getArrayCount() > 0) {
-				array = true;
+			array = ((ReferenceType)internalType).getArrayCount();
+			if (array > 0) {
 				internalType = ((ReferenceType)internalType).getType();
 			}
 		}
@@ -357,16 +357,14 @@ public class JavaParserUtils  {
 				ReferenceType rt = (ReferenceType) wt.getSuper();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
-				boolean rtArray = rt.getArrayCount() > 0;
-				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rtArray, false, JavaType.WILDCARD_SUPER, effectiveType.getParameters());
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), false, JavaType.WILDCARD_SUPER, effectiveType.getParameters());
 			} else if (wt.getExtends() != null) {
 				ReferenceType rt = (ReferenceType) wt.getExtends();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
-				boolean rtArray = rt.getArrayCount() > 0;
-				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rtArray, false, JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), false, JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
 			} else {
-				return new JavaType("java.lang.Object", false, false, JavaType.WILDCARD_NEITHER, null);
+				return new JavaType("java.lang.Object", 0, false, JavaType.WILDCARD_NEITHER, null);
 			}
 		}
 		
@@ -380,7 +378,7 @@ public class JavaParserUtils  {
 		}
 
 		JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
-		if (array) {
+		if (array > 0) {
 			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.isPrimitive(), effectiveType.getArgName(), effectiveType.getParameters());
 		}
 		
@@ -536,7 +534,7 @@ public class JavaParserUtils  {
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.isPrimitive(), null, typeParams);
 	}
 	
 	/**
@@ -567,17 +565,17 @@ public class JavaParserUtils  {
 				locatedTypeParams.add(currentTypeParam);
 				JavaType javaType = null;
 				if (candidate.getTypeBound() == null) {
-					javaType = new JavaType("java.lang.Object", false, false, currentTypeParam, null);
+					javaType = new JavaType("java.lang.Object", 0, false, currentTypeParam, null);
 				} else {
 					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
 					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, cit, locatedTypeParams);
-					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.isArray(), javaType.isPrimitive(), currentTypeParam, javaType.getParameters());
+					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.isPrimitive(), currentTypeParam, javaType.getParameters());
 				}
 				typeParams.add(javaType);
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.isArray(), effectiveType.isPrimitive(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.isPrimitive(), null, typeParams);
 	}
 
 	/**
