@@ -99,8 +99,6 @@ public class JpaOperations {
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='transactionManager']", root), "'<bean id=\"transactionManager\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-			
-		root.appendChild(appCtx.createTextNode(System.getProperty("line.separator")));
 				
 		Element dataSource = appCtx.createElement("bean");
 		dataSource.setAttribute("id", "dataSource");
@@ -110,8 +108,6 @@ public class JpaOperations {
 		dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
 		dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
 		root.appendChild(dataSource);
-		
-		root.appendChild(appCtx.createTextNode(System.getProperty("line.separator") + "\t" + System.getProperty("line.separator") + "\t"));
 	
 		Element transactionManager = appCtx.createElement("bean");
 		transactionManager.setAttribute("id", "transactionManager");
@@ -119,14 +115,10 @@ public class JpaOperations {
 		transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
 		root.appendChild(transactionManager);
 		
-		root.appendChild(appCtx.createTextNode(System.getProperty("line.separator") + "\t" + System.getProperty("line.separator") + "\t"));
-		
 		Element aspectJTxManager = appCtx.createElement("tx:annotation-driven");
 		aspectJTxManager.setAttribute("mode", "aspectj");
 		aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
 		root.appendChild(aspectJTxManager);
-		
-		root.appendChild(appCtx.createTextNode(System.getProperty("line.separator") + "\t" + System.getProperty("line.separator") + "\t"));
 		
 		Element entityManagerFactory = appCtx.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
