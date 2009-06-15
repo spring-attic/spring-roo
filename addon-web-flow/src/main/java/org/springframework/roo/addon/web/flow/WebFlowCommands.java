@@ -34,7 +34,7 @@ public class WebFlowCommands implements CommandMarker {
 	
 	@CliCommand(value="install web flow", help="Install Spring Web Flow configuration artifacts into your project")
 	public void installWebFlow(
-			@CliOption(key={"flowName"}, mandatory=false, help="The name your web flow") String flowName) {
+			@CliOption(key={"flowName"}, mandatory=false, help="The name for your web flow") String flowName) {
 		webFlowOperations.installWebFlow(flowName);
 	}
 }
