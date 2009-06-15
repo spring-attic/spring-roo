@@ -5,6 +5,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
@@ -339,6 +340,7 @@ public class SeleniumOperations {
 	
 	private String convertToInitializer(FieldMetadata field) {
 		String initializer = " ";
+		DateFormat dateFormatLocalized = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		short index = 1;
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
@@ -346,11 +348,11 @@ public class SeleniumOperations {
 			initializer = "some" + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + index;
 		} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past"))) {
-				initializer = dateFormat.format(new Date(new Date().getTime() - 10000000L));
+				initializer = dateFormatLocalized.format(new Date(new Date().getTime() - 10000000L));
 			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
-				initializer = dateFormat.format(new Date(new Date().getTime() + 10000000L));
+				initializer = dateFormatLocalized.format(new Date(new Date().getTime() + 10000000L));
 			} else {
-				initializer = dateFormat.format(new Date());
+				initializer = dateFormatLocalized.format(new Date());
 			}
 		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {		
 			initializer = new Boolean(true).toString();
