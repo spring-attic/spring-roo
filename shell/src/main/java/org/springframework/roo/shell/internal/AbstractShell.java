@@ -227,7 +227,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		// Try to determine the SVN version
 		String svnRev = null;
 		try {
-			String classContainer = getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+			String classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation().toString();
 			
 			if (classContainer.endsWith(".jar")) {
 				// Attempt to obtain the SVN version from the manifest
@@ -256,7 +256,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			
 		} catch (Exception ignoreAndMoveOn) {}
 		
-		String formalBuild = getClass().getPackage().getImplementationVersion();
+		String formalBuild = AbstractShell.class.getPackage().getImplementationVersion();
 		
 		// Build the version details
 		StringBuilder sb = new StringBuilder();
