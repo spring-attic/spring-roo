@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.mvc.jsp;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +15,6 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -129,10 +127,7 @@ public class JspDocumentHelper {
 		
 		Element root = (Element) document.getFirstChild();		
 		
-		Element scriptElement = document.createElement("script");
-		scriptElement.setAttribute("type", "text/javascript");
-		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
-		root.appendChild(scriptElement);
+		addDojoDepenency(document, "dijit.TitlePane");
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("dojoType", "dijit.TitlePane");
@@ -257,10 +252,7 @@ public class JspDocumentHelper {
 		
 		Element root = (Element) document.getFirstChild();		
 		
-		Element scriptElement = document.createElement("script");
-		scriptElement.setAttribute("type", "text/javascript");
-		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
-		root.appendChild(scriptElement);
+		addDojoDepenency(document, "dijit.TitlePane");
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("dojoType", "dijit.TitlePane");
@@ -314,10 +306,12 @@ public class JspDocumentHelper {
 		
 		Element root = (Element) document.getFirstChild();		
 		
-		Element scriptElement = document.createElement("script");
-		scriptElement.setAttribute("type", "text/javascript");
-		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
-		root.appendChild(scriptElement);
+//		Element scriptElement = document.createElement("script");
+//		scriptElement.setAttribute("type", "text/javascript");
+//		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
+//		root.appendChild(scriptElement);
+		
+		addDojoDepenency(document, "dijit.TitlePane");
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("dojoType", "dijit.TitlePane");
@@ -356,10 +350,12 @@ public class JspDocumentHelper {
 		
 		Element root = (Element) document.getFirstChild();
 
-		Element scriptElement = document.createElement("script");
-		scriptElement.setAttribute("type", "text/javascript");
-		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
-		root.appendChild(scriptElement);
+//		Element scriptElement = document.createElement("script");
+//		scriptElement.setAttribute("type", "text/javascript");
+//		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
+//		root.appendChild(scriptElement);
+		
+		addDojoDepenency(document, "dijit.TitlePane");
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("dojoType", "dijit.TitlePane");
@@ -407,11 +403,8 @@ public class JspDocumentHelper {
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		Element root = (Element) document.getFirstChild();
-
-		Element scriptElement = document.createElement("script");
-		scriptElement.setAttribute("type", "text/javascript");
-		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
-		root.appendChild(scriptElement);
+		
+		addDojoDepenency(document, "dijit.TitlePane");
 		
 		Element titleDivElement = document.createElement("div");
 		titleDivElement.setAttribute("dojoType", "dijit.TitlePane");
@@ -428,15 +421,19 @@ public class JspDocumentHelper {
 		List<JavaSymbolName> paramNames = methodMetadata.getParameterNames();
 		
 		for (int i = 0; i < types.size(); i++) {
+			
+			JavaType type = types.get(i);
+			JavaSymbolName paramName = paramNames.get(i);
+			
 			Element divElement = document.createElement("div");
-			divElement.setAttribute("id", "roo_" + entityName + "_" + paramNames.get(i).getSymbolName().toLowerCase());
+			divElement.setAttribute("id", "roo_" + entityName + "_" + paramName.getSymbolName().toLowerCase());
 
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + paramNames.get(i).getSymbolName().toLowerCase());
-			labelElement.setTextContent(paramNames.get(i).getReadableSymbolName()  + ":");
+			labelElement.setAttribute("for", "_" + paramName.getSymbolName().toLowerCase());
+			labelElement.setTextContent(paramName.getReadableSymbolName()  + ":");
 			
-			if (isSpecialType(types.get(i))) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(types.get(i), Path.SRC_MAIN_JAVA));
+			if (isSpecialType(type)) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					Element ifElement = document.createElement("c:if");
 					ifElement.setAttribute("test", "${not empty " + typeEntityMetadata.getPlural().toLowerCase() + "}");
@@ -445,28 +442,36 @@ public class JspDocumentHelper {
 
 					Element select = document.createElement("select");
 					select.setAttribute("style", "width:250px");
-					select.setAttribute("name", types.get(i).getSimpleTypeName().toLowerCase());
+					select.setAttribute("name", type.getSimpleTypeName().toLowerCase());
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
-					forEach.setAttribute("var", types.get(i).getSimpleTypeName().toLowerCase());
+					forEach.setAttribute("var", type.getSimpleTypeName().toLowerCase());
 					select.appendChild(forEach);
 					Element option = document.createElement("option");
-					option.setAttribute("value", "${" + types.get(i).getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
-					option.setTextContent("${" + types.get(i).getSimpleTypeName().toLowerCase() + "}");
+					option.setAttribute("value", "${" + type.getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + type.getSimpleTypeName().toLowerCase() + "}");
 					forEach.appendChild(option);
 					ifElement.appendChild(select);		
 				}
 			} else {	
 				divElement.appendChild(labelElement);
 				Element formInput = document.createElement("input");
-				formInput.setAttribute("name", paramNames.get(i).getSymbolName().toLowerCase());
-				formInput.setAttribute("id", "_" + paramNames.get(i).getSymbolName().toLowerCase());
+				formInput.setAttribute("name", paramName.getSymbolName().toLowerCase());
+				formInput.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase());
 				formInput.setAttribute("size", "0");
 				formInput.setAttribute("style", "width:250px");
 				divElement.appendChild(formInput);
+				divElement.appendChild(getSimpleValidationDojo(document, paramName));
+				
+				if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
+						// should be tested with instanceof
+						type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
+							divElement.appendChild(getRequiredDateDojo(document, paramName, "MM/dd/yyyy"));
+				}
 			}
 
 			formElement.appendChild(divElement);
+			formElement.appendChild(document.createElement("br"));
 		}		
 		
 		Element divSubmitElement = document.createElement("div");
@@ -527,9 +532,9 @@ public class JspDocumentHelper {
 						EntityMetadata typeEntityMetadata = null;
 						
 						if (field.getFieldType().isCommonCollectionType()) {
-							typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(field.getFieldType().getParameters().get(0), Path.SRC_MAIN_JAVA));
+							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType().getParameters().get(0), Path.SRC_MAIN_JAVA));
 						} else {
-							typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
 						}
 	
 						if(typeEntityMetadata == null) {
@@ -559,11 +564,8 @@ public class JspDocumentHelper {
 						AnnotationAttributeValue<?> max = annotation.getAttribute(new JavaSymbolName("max"));
 						if(max != null) {
 							int maxValue = (Integer)max.getValue();
-							if(maxValue > 30) {
-								Element scriptElement = document.createElement("script");
-								scriptElement.setAttribute("type", "text/javascript");
-								scriptElement.setTextContent("dojo.require(\"dijit.form.Textarea\");");
-								divElement.appendChild(scriptElement);
+							if(maxValue > 30) {			
+								addDojoDepenency(document, "dijit.form.Textarea");
 								divElement.appendChild(getTextArea(document, field, maxValue));
 								divElement.appendChild(getTextAreaDojo(document, field));
 								divElement.appendChild(document.createElement("br"));
@@ -633,12 +635,31 @@ public class JspDocumentHelper {
 		return document;
 	}
 	
+	private Element getRequiredDateDojo(Document document, JavaSymbolName fieldName, String pattern) {		
+		addDojoDepenency(document, "dijit.form.DateTextBox");		
+		Element script = document.createElement("script");
+		script.setAttribute("type", "text/javascript");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName().toLowerCase()
+				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + pattern + "\", required : true}})); ");
+		return script;
+	} 
+	
 	private Element getDateDojo(Document document, FieldMetadata field, String pattern) {
+		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
 				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + pattern + "\", required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}})); ");
+		return script;
+	}
+	
+	private Element getSimpleValidationDojo(Document document, JavaSymbolName field) {
+		Element script = document.createElement("script");
+		script.setAttribute("type", "text/javascript");
+		String message = "Enter " + field.getReadableSymbolName() + " (required)";
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getSymbolName().toLowerCase()
+				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"" + message + "\", required : true}})); ");
 		return script;
 	}
 
@@ -676,6 +697,7 @@ public class JspDocumentHelper {
 	}
 	
 	private Element getTextAreaDojo(Document document, FieldMetadata field) {
+		addDojoDepenency(document, "dijit.form.Textarea");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
@@ -684,6 +706,7 @@ public class JspDocumentHelper {
 	}
 	
 	private Element getSelectDojo(Document document, FieldMetadata field) {
+		addDojoDepenency(document, "dijit.form.FilteringSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
@@ -692,6 +715,7 @@ public class JspDocumentHelper {
 	}
 	
 	private Element getMultiSelectDojo(Document document, FieldMetadata field) {
+		addDojoDepenency(document, "dijit.form.MultiSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
@@ -810,5 +834,26 @@ public class JspDocumentHelper {
 		  return true;
 		}		
 		return false;
+	}
+	
+	private void addDojoDepenency(Document document, String require) {
+		
+		boolean elementFound = true;
+		
+		Element script = XmlUtils.findFirstElement("//script[starts-with(text(),'dojo.require')]", document.getDocumentElement());
+		
+		if(script == null) {
+			elementFound = false;
+			script = document.createElement("script");
+			script.setAttribute("type", "text/javascript");
+		}
+		
+		if (!script.getTextContent().contains(require)) {
+			script.setTextContent(script.getTextContent() + "dojo.require(\"" + require + "\");");
+		}
+		
+		if (!elementFound) {			
+			document.getDocumentElement().insertBefore(script, XmlUtils.findFirstElement("//directive.include[2]", document.getDocumentElement()).getNextSibling());
+		}
 	}
 }
