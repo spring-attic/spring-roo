@@ -12,6 +12,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.springframework.roo.shell.internal.AbstractShell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -67,11 +68,11 @@ public final class SimpleParser {
 		// Locate the applicable targets which match this buffer
 		Set<MethodTarget> matchingTargets = locateTargets(buffer, true);
 		if (matchingTargets.size() == 0) {
-			logger.warning("Command '" + buffer + "' not found (for assistance press TAB or type \"hint\" then hit ENTER)");
+			logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 			return null;
 		}
 		if (matchingTargets.size() > 1) {
-			logger.warning("Ambigious command '" + buffer + "' (for assistance press TAB or type \"hint\" then hit ENTER)");
+			logger.warning("Ambigious command '" + buffer + "' (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 			return null;
 		}
 		MethodTarget methodTarget = matchingTargets.iterator().next(); 
