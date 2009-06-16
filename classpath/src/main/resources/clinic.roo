@@ -49,10 +49,12 @@ new controller automatic -name ~.web.PetTypeController -formBackingObject ~.refe
 new controller automatic -name ~.web.OwnerController -formBackingObject ~.domain.Owner
 new controller automatic -name ~.web.PetController -formBackingObject ~.domain.Pet 
 new controller automatic -name ~.web.VetController -formBackingObject ~.domain.Vet
+new controller automatic -name ~.web.VisitController -formBackingObject ~.domain.Visit
 
 new selenium test -controller ~.web.PetTypeController
 new selenium test -controller ~.web.OwnerController
 new selenium test -controller ~.web.PetController
 new selenium test -controller ~.web.VetController
+new selenium test -controller ~.web.VisitController
 
 configure logging -level DEBUG -package WEB
