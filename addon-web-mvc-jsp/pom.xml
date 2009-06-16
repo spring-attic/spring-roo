@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
@@ -10,7 +11,7 @@
 	<packaging>jar</packaging>
 	<name>Spring Roo - Addon - Web MVC JSP View</name>
 	<dependencies>
-        <!-- ROO modules -->
+		<!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.classpath</artifactId>
@@ -25,14 +26,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.configurable</artifactId>
-            <version>${roo.version}</version>
+			<artifactId>org.springframework.roo.addon.configurable</artifactId>
+			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.entity</artifactId>
-            <version>${roo.version}</version>
+			<artifactId>org.springframework.roo.addon.entity</artifactId>
+			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -80,6 +81,12 @@
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.web.menu</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.finder</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>

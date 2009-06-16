@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -9,12 +10,16 @@ import javax.xml.parsers.DocumentBuilder;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
@@ -40,10 +45,13 @@ public class JspDocumentHelper {
 	private EntityMetadata entityMetadata;
 	private String projectName;
 	private MetadataService metadataService;
-	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, String projectName) {
+	private FinderMetadata finderMetadata;
+	
+	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, String projectName) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.hasText(projectName, "Project name required");
 		Assert.notNull(metadataService, "Metadata service required");
 		this.fields = fields;
@@ -51,6 +59,7 @@ public class JspDocumentHelper {
 		this.entityMetadata = entityMetadata;
 		this.projectName = projectName;
 		this.metadataService = metadataService;
+		this.finderMetadata = finderMetadata;
 	}
 	
 	public Document getListDocument() {
@@ -96,6 +105,18 @@ public class JspDocumentHelper {
 		document.appendChild(document.createElement("div"));		
 		document = addHeaders(document);		
 		document = getUpdateContent(document);		
+		document = addFooter(document);
+		
+		return document;
+	}
+	
+	public Document getFinderDocument(String finderName) {
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();		
+		
+		document.appendChild(document.createElement("div"));		
+		document = addHeaders(document);		
+		document = getFinderContent(document, finderName);		
 		document = addFooter(document);
 		
 		return document;
@@ -379,6 +400,93 @@ public class JspDocumentHelper {
 		return document;
 	}
 	
+	private Document getFinderContent(Document document, String finderName) {
+		Assert.notNull(document, "Document required");
+		Assert.hasText(finderName, "finder name required");
+		
+		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		
+		Element root = (Element) document.getFirstChild();
+
+		Element scriptElement = document.createElement("script");
+		scriptElement.setAttribute("type", "text/javascript");
+		scriptElement.setTextContent("dojo.require(\"dijit.TitlePane\");");
+		root.appendChild(scriptElement);
+		
+		Element titleDivElement = document.createElement("div");
+		titleDivElement.setAttribute("dojoType", "dijit.TitlePane");
+		titleDivElement.setAttribute("title", "Find " + finderName);
+		titleDivElement.setAttribute("style", "width: 100%");	
+
+		Element formElement = document.createElement("form:form");
+		formElement.setAttribute("action", "/" + projectName + "/" + entityName + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
+		formElement.setAttribute("method", "GET");		
+
+		MethodMetadata methodMetadata = finderMetadata.getDynamicFinderMethod(finderName);
+		
+		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes());
+		List<JavaSymbolName> paramNames = methodMetadata.getParameterNames();
+		
+		for (int i = 0; i < types.size(); i++) {
+			Element divElement = document.createElement("div");
+			divElement.setAttribute("id", "roo_" + entityName + "_" + paramNames.get(i).getSymbolName().toLowerCase());
+
+			Element labelElement = document.createElement("label");
+			labelElement.setAttribute("for", "_" + paramNames.get(i).getSymbolName().toLowerCase());
+			labelElement.setTextContent(paramNames.get(i).getReadableSymbolName()  + ":");
+			
+			if (isSpecialType(types.get(i))) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(types.get(i), Path.SRC_MAIN_JAVA));
+				if (typeEntityMetadata != null) {
+					Element ifElement = document.createElement("c:if");
+					ifElement.setAttribute("test", "${not empty " + typeEntityMetadata.getPlural().toLowerCase() + "}");
+					divElement.appendChild(ifElement);
+					ifElement.appendChild(labelElement);
+
+					Element select = document.createElement("select");
+					select.setAttribute("style", "width:250px");
+					select.setAttribute("name", types.get(i).getSimpleTypeName().toLowerCase());
+					Element forEach = document.createElement("c:forEach");
+					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
+					forEach.setAttribute("var", types.get(i).getSimpleTypeName().toLowerCase());
+					select.appendChild(forEach);
+					Element option = document.createElement("option");
+					option.setAttribute("value", "${" + types.get(i).getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + types.get(i).getSimpleTypeName().toLowerCase() + "}");
+					forEach.appendChild(option);
+					ifElement.appendChild(select);		
+				}
+			} else {	
+				divElement.appendChild(labelElement);
+				Element formInput = document.createElement("input");
+				formInput.setAttribute("name", paramNames.get(i).getSymbolName().toLowerCase());
+				formInput.setAttribute("id", "_" + paramNames.get(i).getSymbolName().toLowerCase());
+				formInput.setAttribute("size", "0");
+				formInput.setAttribute("style", "width:250px");
+				divElement.appendChild(formInput);
+			}
+
+			formElement.appendChild(divElement);
+		}		
+		
+		Element divSubmitElement = document.createElement("div");
+		divSubmitElement.setAttribute("id", "roo_" + entityName + "_submit");
+		divSubmitElement.setAttribute("class", "submit");
+		
+		Element inputElement = document.createElement("input");
+		inputElement.setAttribute("type", "submit");
+		inputElement.setAttribute("value", "Find");
+		inputElement.setAttribute("id", "proceed");
+		divSubmitElement.appendChild(getSubmitButtonDojo(document, "proceed"));
+		divSubmitElement.appendChild(inputElement);
+		formElement.appendChild(divSubmitElement);
+
+		titleDivElement.appendChild(formElement);
+		root.appendChild(titleDivElement);
+	
+		return document;
+	}
+	
 	private void createFieldsForCreateAndUpdate(Document document, Element formElement) {
 		
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
@@ -459,12 +567,12 @@ public class JspDocumentHelper {
 								divElement.appendChild(getTextArea(document, field, maxValue));
 								divElement.appendChild(getTextAreaDojo(document, field));
 								divElement.appendChild(document.createElement("br"));
-								divElement.appendChild(getErrorsElement(document, field));
+								divElement.appendChild(getErrorsElement(document, field.getFieldName()));
 								//TODO: due to ROO-85 the validation Dojo element has been removed since it causes problems in conjunction with Textarea
 							} else {
-								divElement.appendChild(getInputBox(document, field, maxValue));
+								divElement.appendChild(getInputBox(document, field.getFieldName(), maxValue));
 								divElement.appendChild(document.createElement("br"));
-								divElement.appendChild(getErrorsElement(document, field));
+								divElement.appendChild(getErrorsElement(document, field.getFieldName()));
 								divElement.appendChild(getValidationDojo(document, field));
 							}							
 							formElement.appendChild(divElement);
@@ -475,16 +583,16 @@ public class JspDocumentHelper {
 						divElement.appendChild(getEnumSelectBox(document, field));		
 						divElement.appendChild(getSelectDojo(document, field));
 						divElement.appendChild(document.createElement("br"));
-						divElement.appendChild(getErrorsElement(document, field));
+						divElement.appendChild(getErrorsElement(document, field.getFieldName()));
 						formElement.appendChild(divElement);
 						formElement.appendChild(document.createElement("br"));	
 						specialAnnotation = true;
 					}
 				}
 				if (!specialAnnotation) {
-					divElement.appendChild(getInputBox(document, field, 30));
+					divElement.appendChild(getInputBox(document, field.getFieldName(), 30));
 					divElement.appendChild(document.createElement("br"));
-					divElement.appendChild(getErrorsElement(document, field));
+					divElement.appendChild(getErrorsElement(document, field.getFieldName()));
 					divElement.appendChild(getValidationDojo(document, field));
 					
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
@@ -598,10 +706,10 @@ public class JspDocumentHelper {
 		return script;
 	}
 	
-	private Element getInputBox(Document document, FieldMetadata field, Integer maxValue) {
+	private Element getInputBox(Document document, JavaSymbolName field, Integer maxValue) {
 		Element formInput = document.createElement("form:input");
-		formInput.setAttribute("path", field.getFieldName().getSymbolName());
-		formInput.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+		formInput.setAttribute("path", field.getSymbolName());
+		formInput.setAttribute("id", "_" + field.getSymbolName());
 		formInput.setAttribute("size", "0");
 		formInput.setAttribute("cssStyle", "width:250px");
 		formInput.setAttribute("maxlength", maxValue.toString());
@@ -609,10 +717,14 @@ public class JspDocumentHelper {
 	}
 	
 	private Element getSelectBox(Document document, FieldMetadata field, String pluralName) {
+		return getSelectBox(document, field.getFieldName().getSymbolName(), pluralName);
+	}
+	
+	private Element getSelectBox(Document document, String fieldName, String pluralName) {
 		Element formSelect = document.createElement("form:select");
-		formSelect.setAttribute("path", field.getFieldName().getSymbolName());
+		formSelect.setAttribute("path", fieldName);
 		formSelect.setAttribute("cssStyle", "width:250px");						
-		formSelect.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+		formSelect.setAttribute("id", "_" + fieldName);
 		Element formOptions = document.createElement("form:options");
 		formOptions.setAttribute("items", "${" + pluralName.toLowerCase() + "}");
 		formOptions.setAttribute("itemValue", "id");	
@@ -637,10 +749,10 @@ public class JspDocumentHelper {
 		return textArea;
 	}
 	
-	private Element getErrorsElement(Document document, FieldMetadata field) {
+	private Element getErrorsElement(Document document, JavaSymbolName field) {
 		Element errors = document.createElement("form:errors");
-		errors.setAttribute("path", field.getFieldName().getSymbolName());
-		errors.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+		errors.setAttribute("path", field.getSymbolName());
+		errors.setAttribute("id", "_" + field.getSymbolName());
 		errors.setAttribute("cssClass", "errors");
 		return errors;
 	}
@@ -688,6 +800,15 @@ public class JspDocumentHelper {
 				}
 			}
 		}
+		return false;
+	}
+	
+	private boolean isSpecialType(JavaType javaType) {
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		//we are only interested if the type is part of our application and if no editor exists for it already
+		if (metadataService.get(physicalTypeIdentifier) != null) {
+		  return true;
+		}		
 		return false;
 	}
 }

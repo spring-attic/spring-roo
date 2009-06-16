@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -56,10 +57,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
 		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(menuOperations, "Menu Operations required");
 		this.metadataService = metadataService;
 		this.metadataDependencyRegistry = metadataDependencyRegistry;
 		this.fileManager = fileManager;
-		this.menuOperations = menuOperations;
+		this.menuOperations = menuOperations;		
 
 		metadataService.register(this);
 		
@@ -86,15 +88,19 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// We need to lookup the metadata for the entity we are creating
 		String beanInfoMetadataKey = webScaffoldMetadata.getIdentifierForBeanInfoMetadata();
 		String entityMetadataKey = webScaffoldMetadata.getIdentifierForEntityMetadata();
+		
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-
+		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
 			// Can't get hold of the entity we are needing to build JSPs for
 			return null;
 		}
 		
+		String finderMetadataKey = FinderMetadata.createIdentifier(entityMetadata.getJavaType(entityMetadataKey), path);
+		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
+
 		this.beanInfoMetadata = beanInfoMetadata;
 		// We need to be informed if our dependent metadata changes
 		// Shouldn't need this, as notifications should trickle down through WebScaffoldMetadataKey
@@ -174,7 +180,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 		
-		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, projectMetadata.getProjectName());
+		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, projectMetadata.getProjectName());
 		// Make the holding directory for this controller
 		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 		if (!fileManager.exists(destinationDirectory)) {
@@ -190,17 +196,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			writeToDiskIfNecessary(listPath, helper.getListDocument().getFirstChild().getChildNodes());
 		} 
 		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
-			// By now we have a directory to put the JSPs inside
 			String listPath = destinationDirectory + "/show.jsp";
 			writeToDiskIfNecessary(listPath, helper.getShowDocument().getFirstChild().getChildNodes());
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
-			// By now we have a directory to put the JSPs inside
 			String listPath = destinationDirectory + "/create.jsp";
 			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getFirstChild().getChildNodes());
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
-			// By now we have a directory to put the JSPs inside
 			String listPath = destinationDirectory + "/update.jsp";
 			writeToDiskIfNecessary(listPath, helper.getUpdateDocument().getFirstChild().getChildNodes());
 		}
@@ -221,6 +224,19 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
 				"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
 		
+		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
+			for (String finderName : entityMetadata.getDynamicFinders()) {
+				String listPath = destinationDirectory + "/" + finderName + ".jsp";
+				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getFirstChild().getChildNodes());
+				//Add 'list all' menu item
+				menuOperations.addMenuItem(
+						"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
+						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
+						"finder_jsp_list_" + finderName.toLowerCase() + "_menu_item", 
+						"Find by " + finderName.replace("find" + entityMetadata.getPlural() + "By", ""),
+						"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
+			}
+		}
 		return md;
 	}
 	
