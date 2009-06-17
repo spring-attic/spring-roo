@@ -138,6 +138,8 @@ h4 {
 .errors {
 	color: red;
 	font-weight: bold;
+	display: block;
+	margin-left: 105px;
 }
 
 a {
