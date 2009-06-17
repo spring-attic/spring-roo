@@ -233,7 +233,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
 						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 						"finder_jsp_list_" + finderName.toLowerCase() + "_menu_item", 
-						"Find by " + finderName.replace("find" + entityMetadata.getPlural() + "By", ""),
+						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
 						"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 			}
 		}
