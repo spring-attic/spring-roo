@@ -12,7 +12,7 @@ add field date jpa confirmed -type java.util.Date
 
 new integration test
 new controller automatic ~.web.RsvpController
-new selenium test -controller ~.web.RsvpController
+// new selenium test -controller ~.web.RsvpController (currently disabled due to ROO-53)
 
 // (quit, mvn test, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
 

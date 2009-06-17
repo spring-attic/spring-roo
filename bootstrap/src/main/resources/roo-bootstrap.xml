@@ -26,14 +26,6 @@
 			</list>
 		</property>
 	</bean>
-
-	<bean class="org.springframework.roo.shell.converters.DateConverter">
-		<constructor-arg ref="dateFormat"/>
-	</bean>
-
-	<bean id="dateFormat" class="java.text.SimpleDateFormat">
-		<constructor-arg value="MM/dd/yyyy" />
-	</bean>
 	
 	<bean id="menuOperations" class="org.springframework.roo.addon.web.menu.MenuOperations" />
 

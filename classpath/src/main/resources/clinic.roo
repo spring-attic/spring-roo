@@ -41,6 +41,7 @@ add field date jpa -class ~.domain.AbstractPerson -fieldName birthDay -type java
 
 install finder -class ~.domain.Pet -finderName findPetsByNameAndWeight
 install finder -class ~.domain.Pet -finderName findPetsByOwner
+install finder -class ~.domain.Pet -finderName findPetsBySendRemindersAndWeightLessThan
 install finder -class ~.domain.Visit -finderName findVisitsByDescriptionAndVisitDate  
 install finder -class ~.domain.Visit -finderName findVisitsByVisitDateBetween 
 install finder -class ~.domain.Visit -finderName findVisitsByDescriptionLike
@@ -50,11 +51,5 @@ new controller automatic -name ~.web.OwnerController -formBackingObject ~.domain
 new controller automatic -name ~.web.PetController -formBackingObject ~.domain.Pet 
 new controller automatic -name ~.web.VetController -formBackingObject ~.domain.Vet
 new controller automatic -name ~.web.VisitController -formBackingObject ~.domain.Visit
-
-new selenium test -controller ~.web.PetTypeController
-new selenium test -controller ~.web.OwnerController
-new selenium test -controller ~.web.PetController
-new selenium test -controller ~.web.VetController
-new selenium test -controller ~.web.VisitController
 
 configure logging -level DEBUG -package WEB

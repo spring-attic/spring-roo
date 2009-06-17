@@ -43,19 +43,16 @@ public class SeleniumOperations {
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
 	private BeanInfoMetadata beanInfoMetadata;
-	private DateFormat dateFormat;
 	private MenuOperations menuOperations;
 	
-	public SeleniumOperations(MetadataService metadataService, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations, DateFormat dateFormat) {
+	public SeleniumOperations(MetadataService metadataService, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(menuOperations, "Menu operations required");
-		Assert.notNull(dateFormat, "Date format required");
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;
-		this.dateFormat = dateFormat;
 		this.menuOperations = menuOperations;
 	}
 	

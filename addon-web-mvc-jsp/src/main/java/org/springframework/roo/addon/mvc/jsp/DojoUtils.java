@@ -1,6 +1,9 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -22,21 +25,23 @@ public class DojoUtils {
 		return divElement;
 	}
 	
-	public static Element getRequiredDateDojo(Document document, JavaSymbolName fieldName, String pattern) {		
+	public static Element getRequiredDateDojo(Document document, JavaSymbolName fieldName) {	
+		SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		addDojoDepenency(document, "dijit.form.DateTextBox");		
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName().toLowerCase()
-				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + pattern + "\", required : true}})); ");
+				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + dateFormatLocalized.toLocalizedPattern() + "\", required : true}})); ");
 		return script;
 	} 
 	
-	public static Element getDateDojo(Document document, FieldMetadata field, String pattern) {
+	public static Element getDateDojo(Document document, FieldMetadata field) {
+		SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + pattern + "\", required : "
+				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + dateFormatLocalized.toLocalizedPattern() + "\", required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}})); ");
 		return script;
 	}
