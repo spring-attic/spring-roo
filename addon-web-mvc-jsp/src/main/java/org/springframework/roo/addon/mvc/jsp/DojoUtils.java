@@ -30,8 +30,9 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.DateTextBox");		
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName().toLowerCase()
-				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + dateFormatLocalized.toLocalizedPattern() + "\", required : true}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
+				+ "', widgetType : 'dijit.form.DateTextBox\", widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toLocalizedPattern() 
+				+ "', required : true}, datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "'}})); ");
 		return script;
 	} 
 	
@@ -40,9 +41,9 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType : \"dijit.form.DateTextBox\", widgetAttrs : {datePattern : \"" + dateFormatLocalized.toLocalizedPattern() + "\", required : "
-				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
+				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "', required : "
+				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "'}})); ");
 		return script;
 	}
 	
@@ -50,8 +51,8 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		String message = "Enter " + field.getReadableSymbolName() + " (required)";
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getSymbolName().toLowerCase()
-				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"" + message + "\", required : true}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getSymbolName().toLowerCase()
+				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '" + message + "', required : true}})); ");
 		return script;
 	}
 
@@ -93,7 +94,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
-				+ "\", widgetType: \"dijit.form.SimpleTextarea\"})); ");
+				+ "\", widgetType: 'dijit.form.SimpleTextarea'})); ");
 		return script;
 	}
 	
@@ -101,8 +102,8 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.FilteringSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
-				+ "\", widgetType: \"dijit.form.FilteringSelect\", widgetAttrs : {hasDownArrow : true}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
+				+ "', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); ");
 		return script;
 	}
 	
@@ -110,8 +111,8 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.MultiSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
-				+ "\", widgetType: \"dijit.form.MultiSelect\"})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
+				+ "', widgetType: 'dijit.form.MultiSelect'})); ");
 		return script;
 	}
 	
