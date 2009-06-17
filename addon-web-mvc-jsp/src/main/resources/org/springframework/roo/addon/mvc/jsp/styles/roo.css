@@ -25,11 +25,18 @@ label {
 	width:100px;
 	float:left;
 	margin-left: 5px;
-	margin-top: 5px;
+	margin-top: 0px;
+}
+
+input {
+	height:16px;
+}
+
+submit {
+	height:25px;roo.css
 }
 
 div {
-
 	text-align: left;
 }
 
