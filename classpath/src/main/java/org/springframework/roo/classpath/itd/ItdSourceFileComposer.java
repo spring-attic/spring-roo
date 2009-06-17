@@ -84,7 +84,9 @@ public class ItdSourceFileComposer {
 		
 		Assert.isTrue(introductionTo.getPackage().equals(aspect.getPackage()), "Aspect and introduction must be in identical packages");
 		
-		this.appendFormalLine("package " + aspect.getPackage().getFullyQualifiedPackageName() + ";");
+		if (!aspect.isDefaultPackage()) {
+			this.appendFormalLine("package " + aspect.getPackage().getFullyQualifiedPackageName() + ";");
+		}
 		this.newLine();
 		this.appendIndent();
 		if (privilegedAspect) {
@@ -105,6 +107,9 @@ public class ItdSourceFileComposer {
 	
 	private String getIntroductionTo() {
 		// Workaround to simpify type name, as per AspectJ bug # 280380 and ROO-94
+		if (introductionTo.isDefaultPackage()) {
+			return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames();
+		}
 		return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
 	}
 	
