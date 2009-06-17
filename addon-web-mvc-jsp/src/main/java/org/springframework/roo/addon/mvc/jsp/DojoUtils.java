@@ -89,11 +89,11 @@ public class DojoUtils {
 	}
 	
 	public static Element getTextAreaDojo(Document document, JavaSymbolName fieldName) {
-		addDojoDepenency(document, "dijit.form.Textarea");	
+		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
-				+ "\", widgetType: \"dijit.form.Textarea\"})); ");
+				+ "\", widgetType: \"dijit.form.SimpleTextarea\"})); ");
 		return script;
 	}
 	

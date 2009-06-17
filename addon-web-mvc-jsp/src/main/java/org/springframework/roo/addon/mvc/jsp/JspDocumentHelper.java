@@ -529,8 +529,7 @@ public class JspDocumentHelper {
 						AnnotationAttributeValue<?> max = annotation.getAttribute(new JavaSymbolName("max"));
 						if(max != null) {
 							int maxValue = (Integer)max.getValue();
-							if(maxValue > 30) {			
-								DojoUtils.addDojoDepenency(document, "dijit.form.Textarea");
+							if(maxValue > 30) {		
 								divElement.appendChild(JspUtils.getTextArea(document, field.getFieldName(), maxValue));
 								divElement.appendChild(DojoUtils.getTextAreaDojo(document, field.getFieldName()));
 								divElement.appendChild(document.createElement("br"));

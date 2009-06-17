@@ -15,15 +15,15 @@ add field string -class ~.reference.PetType -fieldName type -notNull -sizeMax 30
 add field string -class ~.reference.Specialty -fieldName name -notNull -sizeMax 30
 add field string -class ~.domain.AbstractPerson -fieldName firstName -sizeMin 3 -sizeMax 30
 add field string -class ~.domain.AbstractPerson -fieldName lastName -notNull -sizeMin 3 -sizeMax 30
-add field string -class ~.domain.AbstractPerson -fieldName address -notNull -sizeMax 50
+add field string -class ~.domain.AbstractPerson -fieldName address -notNull -sizeMax 50 -sizeMin 1
 add field string -class ~.domain.AbstractPerson -fieldName city -notNull -sizeMax 30
 add field number -class ~.domain.AbstractPerson -fieldName telephone -type java.lang.Integer -notNull -sizeMin 3 -sizeMax 30 
-add field string -class ~.domain.AbstractPerson -fieldName homePage -sizeMax 50
+add field string -class ~.domain.AbstractPerson -fieldName homePage -sizeMax 30
 add field string -class ~.domain.AbstractPerson -fieldName email -sizeMax 30 -sizeMin 6
 
 add field string -class ~.domain.Visit -fieldName description -sizeMax 255
 add field boolean -class ~.domain.Pet -fieldName sendReminders -notNull
-add field string -class ~.domain.Pet -fieldName name -notNull
+add field string -class ~.domain.Pet -fieldName name -notNull -sizeMin 1
 add field number -class ~.domain.Pet -fieldName weight -type java.lang.Float -notNull -min 0
 add field date jpa -class ~.domain.Vet -fieldName employedSince -type java.util.Date -notNull -past
 add field date jpa -class ~.domain.VetSpecialty -fieldName registered -type java.util.Date -notNull -past
