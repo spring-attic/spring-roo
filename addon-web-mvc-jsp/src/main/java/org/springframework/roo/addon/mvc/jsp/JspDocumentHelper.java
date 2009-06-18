@@ -422,10 +422,19 @@ public class JspDocumentHelper {
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName())
 					|| type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {	
 				divElement.appendChild(labelElement);
-				Element formCheck = document.createElement("input");
-				formCheck.setAttribute("type", "checkbox");
-				formCheck.setAttribute("id", "_" + paramName.getSymbolName());
-				divElement.appendChild(formCheck);
+				Element formCheckTrue = document.createElement("input");
+				formCheckTrue.setAttribute("type", "radio");
+				formCheckTrue.setAttribute("id", "_" + paramName.getSymbolName());
+				formCheckTrue.setAttribute("name", paramName.getSymbolName().toLowerCase());
+				formCheckTrue.setAttribute("value", "true");
+				formCheckTrue.setAttribute("checked", "checked");
+				formCheckTrue.setTextContent("(true)");
+				divElement.appendChild(formCheckTrue);
+				Element formCheckFalse = (Element)formCheckTrue.cloneNode(false);
+				formCheckFalse.setAttribute("value", "false");
+				formCheckFalse.setTextContent("(false)");
+				formCheckFalse.removeAttribute("checked");
+				divElement.appendChild(formCheckFalse);
 				formElement.appendChild(divElement);
 				formElement.appendChild(document.createElement("br"));
 			} else {	
