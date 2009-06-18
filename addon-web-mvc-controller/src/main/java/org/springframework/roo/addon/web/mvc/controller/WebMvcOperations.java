@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.maven;
+package org.springframework.roo.addon.web.mvc.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,26 +31,29 @@ import org.w3c.dom.Node;
  *
  */
 @ScopeDevelopment
-public class WebXmlOperations {
+public class WebMvcOperations {
 	
 	private FileManager fileManager;
 	private MetadataService metadataService;
 	
-	public WebXmlOperations(FileManager fileManager, MetadataService metadataService) {
+	public WebMvcOperations(FileManager fileManager, MetadataService metadataService) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(metadataService, "Metadata service required");
 		this.fileManager = fileManager;
 		this.metadataService = metadataService;
 	}
 	
-	public void copyUrlRewrite(){
-		
+	public void copyUrlRewrite(){		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.isTrue(projectMetadata != null, "Project metadata required");
 		
 		String urlrewriteFilename = "WEB-INF/urlrewrite.xml";
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.isTrue(!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename)), "'" + urlrewriteFilename + "' does already exist");
+	
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename))) {
+			//file exists, so nothing to do
+			return;
+		}		
 		
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "urlrewrite-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/urlrewrite.xml")).getOutputStream());
@@ -67,6 +70,11 @@ public class WebXmlOperations {
 		String servletCtxFilename = "WEB-INF/" + projectMetadata.getProjectName() + "-servlet.xml";
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
+		
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {
+			//file exists, so nothing to do
+			return;
+		}
 		
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "web-template.xml");
 		Document webXml;
@@ -103,6 +111,11 @@ public class WebXmlOperations {
 		// Verify the web.xml already exists
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")), "web.xml does not exist");
+		
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"))) {
+			//file exists, so nothing to do
+			return;
+		}
 		
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();		
 		Document jspDocument = builder.newDocument();	

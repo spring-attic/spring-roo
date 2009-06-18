@@ -17,15 +17,12 @@ public class MavenCommands implements CommandMarker {
 	
 	private MavenOperations mavenOperations;
 	private ApplicationContextOperations applicationContextOperations;
-	private WebXmlOperations webXmlOperations;
 	
-	public MavenCommands(MavenOperations mavenOperations, ApplicationContextOperations applicationContextOperations, WebXmlOperations webXmlOperations) {
+	public MavenCommands(MavenOperations mavenOperations, ApplicationContextOperations applicationContextOperations) {
 		Assert.notNull(mavenOperations, "Maven operations required");
 		Assert.notNull(applicationContextOperations, "Application context operations required");
-		Assert.notNull(webXmlOperations, "Web XML operations required");
 		this.mavenOperations = mavenOperations;
 		this.applicationContextOperations = applicationContextOperations;
-		this.webXmlOperations = webXmlOperations;
 	}
 
 	@CliAvailabilityIndicator("create project")
@@ -49,10 +46,6 @@ public class MavenCommands implements CommandMarker {
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "pom-template.xml");
 		mavenOperations.createProject(templateInputStream, topLevelPackage, projectName, majorJavaVersion);
 		applicationContextOperations.createMiddleTierApplicationContext();
-		applicationContextOperations.createWebApplicationContext();
-		webXmlOperations.createWebXml();
-		webXmlOperations.createIndexJsp();
-		webXmlOperations.copyUrlRewrite();
 	}
 	
 	@CliAvailabilityIndicator({"add dependency", "remove dependency"})
