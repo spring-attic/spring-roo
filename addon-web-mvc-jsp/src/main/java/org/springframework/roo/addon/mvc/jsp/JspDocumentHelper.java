@@ -1,8 +1,11 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -169,12 +172,12 @@ public class JspDocumentHelper {
 			Element tdElement = document.createElement("td");
 			if (field.getFieldType().isCommonCollectionType()) {
 				tdElement.setTextContent("${fn:length(" + entityName + "." + field.getFieldName().getSymbolName() + ")}");
-				
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
+				SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 				Element fmt = document.createElement("fmt:formatDate");
 				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
 				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", "MM/dd/yyyy");
+				fmt.setAttribute("pattern", dateFormatLocalized.toLocalizedPattern());
 				tdElement.appendChild(fmt);
 			} else {
 				tdElement.setTextContent("${fn:substring(" + entityName + "." + field.getFieldName().getSymbolName() + ", 0, 10)}");
