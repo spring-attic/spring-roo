@@ -4,6 +4,15 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * 
+ * This is a helper class which creates JSP form artifacts 
+ * used during view layer generation.
+ * 
+ * @author Stefan Schmidt
+ * @since 1.0
+ *
+ */
 public class JspUtils {
 
 	public static Element getInputBox(Document document, JavaSymbolName field, Integer maxValue) {

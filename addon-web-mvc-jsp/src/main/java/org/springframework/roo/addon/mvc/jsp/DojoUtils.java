@@ -14,6 +14,15 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * 
+ * This is a helper class which creates SpringJS / Dojo artifacts 
+ * used during jsp generation.
+ * 
+ * @author Stefan Schmidt
+ * @since 1.0
+ *
+ */
 public class DojoUtils {
 	
 	public static Element getTitlePaneDojo(Document document, String title) {
