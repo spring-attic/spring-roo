@@ -30,8 +30,11 @@ public @interface RooEntity {
 	/**
 	 * Creates an identifier, unless there is already a JPA @Id field annotation in a superclass
 	 * (either written in normal Java source or introduced by a superclass that uses the {@link RooEntity}
-	 * annotation. If you annotate a field with @Id, it is required that you provide a public accessor
-	 * in the same type as you declared that field.
+	 * annotation. 
+	 * 
+	 * <p>
+	 * If you annotate a field with JPA's @Id annotation, it is required that you provide a public accessor
+	 * for that field.
 	 * 
 	 * @return the name of the identifier field to use (defaults to "id"; must be provided)
 	 */
@@ -40,17 +43,21 @@ public @interface RooEntity {
 	/**
 	 * Creates an optimistic locking version field, unless there is already a JPA @Version field annotation
 	 * in a superclass (either written in normal Java source or introduced by a superclass that uses the
-	 * {@link RooEntity} annotation. The produced field will be a primitive integer and have a colum name
-	 * of "version".
+	 * {@link RooEntity} annotation. The produced field will be of the type specified by {@link #versionType()}.
 	 * 
 	 * <p>
-	 * If you provide a @Version field, it is required that you provide a public accessor in the same
-	 * type as you declared the field.
+	 * If you annotate a field with JPA's @Version annotation, it is required that you provide a public accessor
+	 * for that field.
 	 * 
-	 * @return true if an integer-based version should be added automatically for optimistic locking (defaults to true)
+	 * @return the name of the version field to use (defaults to "version"; must be provided)
 	 */
-	boolean version() default true;
+	String versionField() default "version";
 	
+	/**
+	 * @return the class of version that should be used (defaults to {@link Integer}; must be provided)
+	 */
+	Class<? extends Serializable> versionType() default Integer.class;
+
 	/**
 	 * @return the name of the "persist" method to generate (defaults to "persist"; mandatory)
 	 */

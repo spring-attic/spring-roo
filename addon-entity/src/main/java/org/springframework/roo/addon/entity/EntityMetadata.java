@@ -55,7 +55,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
 	@AutoPopulate private String identifierField = "id";
-	@AutoPopulate private boolean version = true;
+	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
+	@AutoPopulate private String versionField = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
 	@AutoPopulate private String mergeMethod = "merge";
@@ -301,7 +302,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Quit at this stage if the user doesn't want a version field
-		if (!version) {
+		if ("".equals(versionField)) {
 			return null;
 		}
 		
@@ -315,7 +316,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			for (int i = 0; i < index; i++) {
 				fieldName = fieldName + "_";
 			}
-			fieldName = fieldName + "version";
+			fieldName = fieldName + this.versionField;
 			
 			versionField = new JavaSymbolName(fieldName);
 			if (MemberFindingUtils.getField(governorTypeDetails, versionField) == null) {
@@ -334,7 +335,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 		
-		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, new JavaType("java.lang.Integer"), null, annotations);
+		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, versionType, null, annotations);
 		return field;
 	}
 
@@ -388,8 +389,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return parent.getVersionMutator();
 		}
 		
-		// Locate the version field, and compute the name of the accessor that will be produced
+		// Locate the version field, and compute the name of the mutator that will be produced
 		FieldMetadata version = getVersionField();
+		if (version == null) {
+			// There's no version field, so there certainly won't be a mutator for it 
+			return null;
+		}
 		String requiredMutatorName = "set" + StringUtils.capitalize(version.getFieldName().getSymbolName());
 		
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
