@@ -47,6 +47,7 @@ public class JspDocumentHelper {
 	private String projectName;
 	private MetadataService metadataService;
 	private FinderMetadata finderMetadata;
+	private SimpleDateFormat dateFormatLocalized;
 	
 	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, String projectName) {
 		Assert.notNull(fields, "List of fields required");
@@ -61,6 +62,8 @@ public class JspDocumentHelper {
 		this.projectName = projectName;
 		this.metadataService = metadataService;
 		this.finderMetadata = finderMetadata;
+		
+		dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 	}
 	
 	public Document getListDocument() {
@@ -173,7 +176,6 @@ public class JspDocumentHelper {
 			if (field.getFieldType().isCommonCollectionType()) {
 				tdElement.setTextContent("${fn:length(" + entityName + "." + field.getFieldName().getSymbolName() + ")}");
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 				Element fmt = document.createElement("fmt:formatDate");
 				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
 				fmt.setAttribute("type", "DATE");
@@ -267,7 +269,7 @@ public class JspDocumentHelper {
 				Element fmt = document.createElement("fmt:formatDate");
 				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
 				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", "MM/dd/yyyy");
+				fmt.setAttribute("pattern", dateFormatLocalized.toLocalizedPattern());
 				divContent.appendChild(fmt);
 			} else {
 				divContent.setTextContent("${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
