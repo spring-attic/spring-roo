@@ -1,9 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
 import java.lang.reflect.Modifier;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -159,8 +161,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(initBinder);
 				
+		DateFormat dateFormatLocalized = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("binder.registerCustomEditor(java.util.Date.class, new org.springframework.beans.propertyeditors.CustomDateEditor(new java.text.SimpleDateFormat(\"MM/dd/yyyy\"), false));");
+		bodyBuilder.appendFormalLine("binder.registerCustomEditor(java.util.Date.class, new org.springframework.beans.propertyeditors.CustomDateEditor(new java.text.SimpleDateFormat(\"" + dateFormatLocalized + "\"), false));");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, annotations, bodyBuilder.getOutput());
 	}
 
