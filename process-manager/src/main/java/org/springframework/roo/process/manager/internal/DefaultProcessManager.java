@@ -103,7 +103,16 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				if (developmentMode) {
 					logger.log(Level.FINE, root.getMessage(), root);
 				} else {
-					logger.log(Level.FINE, root.getMessage());
+					String message = root.getMessage();
+					if (message == null || "".equals(message)) {
+						StackTraceElement[] trace = root.getStackTrace();
+						if (trace != null && trace.length > 0) {
+							message = root.getClass().getSimpleName() + " at " + trace[0].toString();
+						} else {
+							message = root.getClass().getSimpleName();
+						}
+					}
+					logger.log(Level.FINE, message);
 				}
 				throw ex;
 			} finally {
