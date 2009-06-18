@@ -48,12 +48,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				// Register the initial monitoring request
 				doTransactionally(new MonitoringRequestCommand(fileMonitorService, initialMonitoringRequest.getMonitoringRequest(), true));
 			} catch (Throwable t) {
-				Throwable root = ExceptionUtils.extractRootCause(t);
-				if (developmentMode) {
-					logger.log(Level.FINE, root.getMessage(), root);
-				} else {
-					logger.log(Level.FINE, root.getMessage());
-				}
+				logException(t);
 			} finally {
 				setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
 			}
@@ -77,12 +72,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				doTransactionally(null);
 			} catch (Throwable t) {
 				// We don't want a poll failure to cause the background polling thread to die
-				Throwable root = ExceptionUtils.extractRootCause(t);
-				if (developmentMode) {
-					logger.log(Level.FINE, root.getMessage(), root);
-				} else {
-					logger.log(Level.FINE, root.getMessage());
-				}
+				logException(t);
 			} finally {
 				setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
 			}
@@ -99,25 +89,29 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 			try {
 				return doTransactionally(callback);
 			} catch (RuntimeException ex) {
-				Throwable root = ExceptionUtils.extractRootCause(ex);
-				if (developmentMode) {
-					logger.log(Level.FINE, root.getMessage(), root);
-				} else {
-					String message = root.getMessage();
-					if (message == null || "".equals(message)) {
-						StackTraceElement[] trace = root.getStackTrace();
-						if (trace != null && trace.length > 0) {
-							message = root.getClass().getSimpleName() + " at " + trace[0].toString();
-						} else {
-							message = root.getClass().getSimpleName();
-						}
-					}
-					logger.log(Level.FINE, message);
-				}
+				logException(ex);
 				throw ex;
 			} finally {
 				setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
 			}
+		}
+	}
+
+	private void logException(Throwable ex) {
+		Throwable root = ExceptionUtils.extractRootCause(ex);
+		if (developmentMode) {
+			logger.log(Level.FINE, root.getMessage(), root);
+		} else {
+			String message = root.getMessage();
+			if (message == null || "".equals(message)) {
+				StackTraceElement[] trace = root.getStackTrace();
+				if (trace != null && trace.length > 0) {
+					message = root.getClass().getSimpleName() + " at " + trace[0].toString();
+				} else {
+					message = root.getClass().getSimpleName();
+				}
+			}
+			logger.log(Level.FINE, message);
 		}
 	}
 	
