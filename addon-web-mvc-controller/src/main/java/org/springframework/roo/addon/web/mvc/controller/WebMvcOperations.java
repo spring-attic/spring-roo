@@ -145,6 +145,5 @@ public class WebMvcOperations {
 		
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"));
 		XmlUtils.writeMalformedXml(mutableFile.getOutputStream(), jspDocument.getFirstChild().getChildNodes());
-	}
-
+	}	
 }

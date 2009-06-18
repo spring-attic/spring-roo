@@ -24,49 +24,15 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</repository>
-		<!--
-			<repository> <id>com.springsource.repository.bundles.snapshot</id>
-			<name>SpringSource Enterprise Bundle Repository - Nightly
-			Snapshots</name> <url>
-			http://repository.springsource.com/maven/bundles/snapshot</url>
-			</repository>
-		-->
 	</repositories>
 
 	<dependencies>
-		<!--
-			No longer needed (use ROO command 'add dependency -groupId javax.ejb
-			-artifactId com.springsource.javax.ejb -version 3.0.0' instead)
-			<dependency> <groupId>javax.ejb</groupId>
-			<artifactId>com.springsource.javax.ejb</artifactId>
-			<version>3.0.0</version> </dependency>
-		-->
-		<!--
-			ASM is needed by Spring Framework (not since 3.0.0.M3) <dependency>
-			<groupId>org.objectweb.asm</groupId>
-			<artifactId>com.springsource.org.objectweb.asm</artifactId>
-			<version>2.2.3</version> </dependency> <dependency>
-			<groupId>org.objectweb.asm</groupId>
-			<artifactId>com.springsource.org.objectweb.asm.commons</artifactId>
-			<version>2.2.3</version> </dependency>
-		-->
-		<dependency>
-			<groupId>org.tuckey</groupId>
-			<artifactId>com.springsource.org.tuckey.web.filters.urlrewrite</artifactId>
-			<version>3.1.0</version>
-		</dependency>
 		<!-- General dependencies for standard applications -->
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>com.springsource.javax.transaction</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		<!--
-			Do we need transaction API? <dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>com.springsource.javax.annotation</artifactId>
-			<version>1.0.0</version> </dependency>
-		-->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>com.springsource.org.apache.commons.dbcp</artifactId>
@@ -95,11 +61,6 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>com.springsource.javax.servlet.jsp.jstl</artifactId>
-			<version>1.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
 			<artifactId>com.springsource.javax.servlet</artifactId>
 			<version>2.5.0</version>
 			<scope>provided</scope>
@@ -122,16 +83,6 @@
 			<artifactId>org.springframework.test</artifactId>
 			<version>${spring.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web</artifactId>
-			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>org.springframework.web.servlet</artifactId>
-			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -162,16 +113,6 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>org.springframework.transaction</artifactId>
 			<version>${spring.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.webflow</groupId>
-			<artifactId>org.springframework.js</artifactId>
-			<version>2.0.6.RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>com.springsource.org.apache.commons.fileupload</artifactId>
-			<version>1.2.0</version>
 		</dependency>
 	</dependencies>
 

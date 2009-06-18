@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<springWebMvc>
+		<dependency org="org.springframework" name="org.springframework.web" rev="${spring.version}" />
+		<dependency org="org.springframework" name="org.springframework.web.servlet" rev="${spring.version}" />
+		<dependency org="org.springframework.webflow" name="org.springframework.js" rev="2.0.7.RELEASE" />
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0" />
+		<dependency org="org.tuckey" name="com.springsource.org.tuckey.web.filters.urlrewrite" rev="3.1.0" />
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.2.0" />
+	</springWebMvc>
+</dependencies>
