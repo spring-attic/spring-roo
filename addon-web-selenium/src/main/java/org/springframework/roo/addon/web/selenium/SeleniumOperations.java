@@ -3,6 +3,7 @@ package org.springframework.roo.addon.web.selenium;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -343,13 +344,21 @@ public class SeleniumOperations {
 			initializer = "some@email.com";
 		} else if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
 			initializer = "some" + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + index;
-		} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
+		} else if (field.getFieldType().equals(new JavaType(Date.class.getName())) ||
+				field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+			Calendar cal = Calendar.getInstance();
 			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past"))) {
-				initializer = dateFormatLocalized.format(new Date(new Date().getTime() - 10000000L));
+				cal.add(Calendar.YEAR, -1);
+				cal.add(Calendar.MONTH, -1);
+				cal.add(Calendar.DAY_OF_MONTH, -1);
+				initializer = dateFormatLocalized.format(cal.getTime());
 			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
-				initializer = dateFormatLocalized.format(new Date(new Date().getTime() + 10000000L));
+				cal.add(Calendar.YEAR, +1);
+				cal.add(Calendar.MONTH, +1);
+				cal.add(Calendar.DAY_OF_MONTH, +1);
+				initializer = dateFormatLocalized.format(cal.getTime());
 			} else {
-				initializer = dateFormatLocalized.format(new Date());
+				initializer = dateFormatLocalized.format(cal.getTime());
 			}
 		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {		
 			initializer = new Boolean(true).toString();
