@@ -264,6 +264,7 @@ public class JspDocumentHelper {
 			
 			Element divContent = document.createElement("div");
 			divContent.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				Element fmt = document.createElement("fmt:formatDate");

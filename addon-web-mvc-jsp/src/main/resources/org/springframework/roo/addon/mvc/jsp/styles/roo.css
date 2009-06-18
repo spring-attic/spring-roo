@@ -40,6 +40,11 @@ div {
 	text-align: left;
 }
 
+div .box {
+	display:block;
+	margin-left:105px;
+}
+
 /* header and footer elements */
 
 #wrap {
