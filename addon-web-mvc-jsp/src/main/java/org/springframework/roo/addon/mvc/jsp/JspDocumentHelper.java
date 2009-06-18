@@ -179,7 +179,7 @@ public class JspDocumentHelper {
 				Element fmt = document.createElement("fmt:formatDate");
 				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
 				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", dateFormatLocalized.toLocalizedPattern());
+				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
 				tdElement.appendChild(fmt);
 			} else {
 				tdElement.setTextContent("${fn:substring(" + entityName + "." + field.getFieldName().getSymbolName() + ", 0, 10)}");
@@ -269,7 +269,7 @@ public class JspDocumentHelper {
 				Element fmt = document.createElement("fmt:formatDate");
 				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
 				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", dateFormatLocalized.toLocalizedPattern());
+				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
 				divContent.appendChild(fmt);
 			} else {
 				divContent.setTextContent("${" + entityName + "." + field.getFieldName().getSymbolName() + "}");

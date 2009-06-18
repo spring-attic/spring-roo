@@ -31,8 +31,8 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
-				+ "', widgetType : 'dijit.form.DateTextBox\", widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toLocalizedPattern() 
-				+ "', required : true}, datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "'}})); ");
+				+ "', widgetType : 'dijit.form.DateTextBox\", widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toPattern() 
+				+ "', required : true}, datePattern : '" + dateFormatLocalized.toPattern() + "'}})); ");
 		return script;
 	} 
 	
@@ -42,8 +42,8 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
-				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "', required : "
-				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + dateFormatLocalized.toLocalizedPattern() + "'}})); ");
+				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + dateFormatLocalized.toPattern() + "', required : "
+				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + dateFormatLocalized.toPattern() + "'}})); ");
 		return script;
 	}
 	
