@@ -12,6 +12,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -34,21 +35,21 @@ import org.w3c.dom.Node;
 public class WebMvcOperations {
 	
 	private FileManager fileManager;
+	private PathResolver pathResolver;
 	private MetadataService metadataService;
 	
-	public WebMvcOperations(FileManager fileManager, MetadataService metadataService) {
+	public WebMvcOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService) {
 		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");
+		
 		this.fileManager = fileManager;
+		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;
 	}
 	
-	public void copyUrlRewrite(){		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
-		
+	public void copyUrlRewrite(){
 		String urlrewriteFilename = "WEB-INF/urlrewrite.xml";
-		PathResolver pathResolver = projectMetadata.getPathResolver();
 	
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename))) {
 			//file exists, so nothing to do
@@ -62,13 +63,11 @@ public class WebMvcOperations {
 		}
 	}
 
-	public void createWebXml() {
+	public void createWebXml() {		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
-		
+		Assert.notNull(projectMetadata, "Project metadata required");
 		// Verify the servlet application context already exists
 		String servletCtxFilename = "WEB-INF/" + projectMetadata.getProjectName() + "-servlet.xml";
-		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
 		
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {
@@ -106,10 +105,8 @@ public class WebMvcOperations {
 	
 	public void createIndexJsp() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
-		
+		Assert.notNull(projectMetadata, "Project metadata required");
 		// Verify the web.xml already exists
-		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")), "web.xml does not exist");
 		
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"))) {
@@ -146,4 +143,52 @@ public class WebMvcOperations {
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"));
 		XmlUtils.writeMalformedXml(mutableFile.getOutputStream(), jspDocument.getFirstChild().getChildNodes());
 	}	
+	
+	public void updateJpaWebXml() {				
+		String persistence = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+				
+		if (!fileManager.exists(persistence)) {
+			// no persistence layer installed yet, nothing to do
+			return;
+		}
+		
+		String webXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+		MutableFile webXmlMutableFile = null;		
+		Document webXml;
+		
+		try {
+			webXmlMutableFile = fileManager.updateFile(webXmlPath);
+			webXml = XmlUtils.getDocumentBuilder().parse(webXmlMutableFile.getInputStream());			
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} 	
+		Element root = webXml.getDocumentElement();
+		
+		if (null != XmlUtils.findFirstElement("/web-app/filter[filter-class='org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter']", root)) {
+			//filter already installed, nothing to do
+			return;
+		}
+		
+		Element httpMethodFilter = XmlUtils.findRequiredElement("/web-app/filter-mapping[filter-name='httpMethodFilter']", root);
+
+		Element filter = webXml.createElement("filter");
+		Element filterName = webXml.createElement("filter-name");
+		filterName.setTextContent("Spring OpenEntityManagerInViewFilter");
+		filter.appendChild(filterName);
+		Element filterClass = webXml.createElement("filter-class");
+		filterClass.setTextContent("org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
+		filter.appendChild(filterClass);
+		root.insertBefore(filter, httpMethodFilter);
+		
+		Element filterMapping = webXml.createElement("filter-mapping");
+		Element filterName2 = webXml.createElement("filter-name");
+		filterName2.setTextContent("Spring OpenEntityManagerInViewFilter");
+		filterMapping.appendChild(filterName2);
+		Element urlMapping = webXml.createElement("url-pattern");
+		urlMapping.setTextContent("/*");
+		filterMapping.appendChild(urlMapping);
+		root.insertBefore(filterMapping, httpMethodFilter);
+		
+		XmlUtils.writeXml(webXmlMutableFile.getOutputStream(), webXml);
+	}
 }

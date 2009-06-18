@@ -122,9 +122,10 @@ public class ControllerOperations {
 		
 		webMvcOperations.createWebXml();
 		webMvcOperations.createIndexJsp();
-		webMvcOperations.copyUrlRewrite();	
+		webMvcOperations.copyUrlRewrite();
+		webMvcOperations.updateJpaWebXml();
 		
-		updateDependencies();
+		updateDependencies();		
 	}
 	
 	/**
@@ -214,6 +215,7 @@ public class ControllerOperations {
 		webMvcOperations.createWebXml();
 		webMvcOperations.createIndexJsp();
 		webMvcOperations.copyUrlRewrite();
+		webMvcOperations.updateJpaWebXml();
 		
 		updateDependencies();
 	}

@@ -67,4 +67,11 @@
 			<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.CR1" />
 		</provider>
 	</persistence>
+	<spring>
+		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" />
+		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" />
+		<dependency org="org.springframework" name="org.springframework.jdbc" rev="${spring.version}" />
+		<dependency org="org.springframework" name="org.springframework.orm" rev="${spring.version}" />
+		<dependency org="org.springframework" name="org.springframework.transaction" rev="${spring.version}" />
+	</spring>
 </dependencies>

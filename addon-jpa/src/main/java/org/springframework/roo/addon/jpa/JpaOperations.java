@@ -201,9 +201,16 @@ public class JpaOperations {
 		for(Element dependency : jpaDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}	
+
+		List<Element> springDependencies = XmlUtils.findElements("/dependencies/spring/dependency", dependencies);
+		for(Element dependency : springDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependency));
+		}		
 	}	
 	
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
+		Assert.notNull(ormProvider, "ORM provider required");
+		Assert.notNull(database, "JDBC database required");
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
 		

@@ -35,7 +35,7 @@ public class ControllerCommands implements CommandMarker {
 	
 	@CliCommand(value="new controller automatic", help="Create a new automatic Controller (ie where we maintain CRUD automatically)")
 	public void newController(
-			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
+			@CliOption(key="name", optionContext="update,project", mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
 			@CliOption(key="formBackingObject", mandatory=false, optionContext="update,project", unspecifiedDefaultValue="*", help="The name of the entity object which the controller exposes to the web tier") JavaType entity) {
 		controllerOperations.createAutomaticController(controller, entity);
 	}
