@@ -201,6 +201,12 @@ public class ControllerOperations {
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 
 		classpathOperations.generateClassFile(details);
+		
+		createWebApplicationContext();
+		
+		webXmlOperations.createWebXml();
+		webXmlOperations.createIndexJsp();
+		webXmlOperations.copyUrlRewrite();
 	}
 
 	public void createPropertyEditors(Set<JavaType> types) {
