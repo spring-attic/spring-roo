@@ -63,7 +63,7 @@ More detailed instructions are provided below.
   Roo supports Java 5 and above
   Refer to 'Known Issues' section for non-Sun JREs
 
-* unzip spring-roo-1.0.0.M2.zip
+* unzip spring-roo-1.0.0.RC1.zip
 
 * For Windows users, add \path\to\roo\bin to your path (NB: the \bin)
 
