@@ -45,6 +45,7 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
+	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
@@ -135,7 +136,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getFlushMethod());
 		builder.addMethod(getMergeMethod());
 		
-		// Add instance-specific methods
+		// Add static methods
+		builder.addMethod(getEntityManagerMethod());
 		builder.addMethod(getCountMethod());
 		builder.addMethod(getFindAllMethod());
 		builder.addMethod(getFindMethod());
@@ -604,6 +606,30 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
+	 * @return the static utility entityManager() method used by other methods to obtain
+	 * entity manager and available as a utility for user code (may return null)
+	 */
+	public MethodMetadata getEntityManagerMethod() {
+		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
+			return null;
+		}
+		
+		// Method definition to find or build
+		JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
+		JavaType returnType = new JavaType("javax.persistence.EntityManager", 0, false, null, null);
+		
+		// Create method
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
+		bodyBuilder.appendFormalLine("return em;");
+		int modifier = Modifier.PROTECTED;
+		modifier = modifier |= Modifier.STATIC;
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, null, null, 
+				new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+	}
+	
+	/**
 	 * @return the count method (may return null)
 	 */
 	public MethodMetadata getCountMethod() {
@@ -626,9 +652,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
-		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
-		bodyBuilder.appendFormalLine("return (Long) em.createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult();");
+		bodyBuilder.appendFormalLine("return (Long) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult();");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
@@ -663,9 +687,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
-		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
-		bodyBuilder.appendFormalLine("return em.createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
@@ -697,9 +719,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (id == null) throw new IllegalArgumentException(\"An identifier is required to retrieve an instance of " + governorTypeDetails.getName().getSimpleTypeName() +"\");");
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
-		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
-		bodyBuilder.appendFormalLine("return em.find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
@@ -734,9 +754,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
-		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
-		bodyBuilder.appendFormalLine("return em.createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
