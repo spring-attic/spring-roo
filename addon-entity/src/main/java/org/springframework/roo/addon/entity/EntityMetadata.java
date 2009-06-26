@@ -623,7 +623,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return em;");
-		int modifier = Modifier.PROTECTED;
+		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, null, null, 
 				new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
