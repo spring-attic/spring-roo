@@ -57,7 +57,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
 	private SortedSet<JavaType> specialDomainTypes;
-	private FinderMetadata finderMetadata;
 	
 	private String entityName;
 	
@@ -81,7 +80,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.entityMetadata = entityMetadata;
 		this.entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		this.metadataService = metadataService;
-		this.finderMetadata = finderMetadata;
 		
 		//now figure out if we need to create any custom property editors
 		
@@ -121,7 +119,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		itdTypeDetails = builder.build();
 		
-		ItdSourceFileComposer sfc = new ItdSourceFileComposer(itdTypeDetails);		
+		new ItdSourceFileComposer(itdTypeDetails);		
 	}
 	
 	public String getIdentifierForBeanInfoMetadata() {

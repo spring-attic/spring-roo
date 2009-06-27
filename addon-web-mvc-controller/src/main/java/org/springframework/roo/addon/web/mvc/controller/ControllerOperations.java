@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,19 +28,11 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * Provides Controller configuration operations.
@@ -55,24 +46,18 @@ public class ControllerOperations {
 	Logger logger = Logger.getLogger(ControllerOperations.class.getName());
 		
 	private PathResolver pathResolver;
-	private FileManager fileManager;
 	private MetadataService metadataService;
 	private ClasspathOperations classpathOperations;
-	private ProjectOperations projectOperations;
 	private WebMvcOperations webMvcOperations;
 	
-	public ControllerOperations(PathResolver pathResolver, FileManager fileManager, MetadataService metadataService, ClasspathOperations classpathOperations, ProjectOperations projectOperations, WebMvcOperations webMvcOperations) {		
+	public ControllerOperations(PathResolver pathResolver, MetadataService metadataService, ClasspathOperations classpathOperations, WebMvcOperations webMvcOperations) {		
 		Assert.notNull(pathResolver, "Path resolver required");
-		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(metadataService, "Metadata service required");		
 		Assert.notNull(classpathOperations, "ClassPath operations required");	
-		Assert.notNull(projectOperations, "Project operations required");	
 		Assert.notNull(webMvcOperations, "Web XML operations required");
 		this.pathResolver = pathResolver;
-		this.fileManager = fileManager;
 		this.metadataService = metadataService;		
 		this.classpathOperations = classpathOperations;
-		this.projectOperations = projectOperations;
 		this.webMvcOperations = webMvcOperations;
 	}
 	
@@ -118,14 +103,7 @@ public class ControllerOperations {
 
 		classpathOperations.generateClassFile(details);
 		
-		createWebApplicationContext();
-		
-		webMvcOperations.createWebXml();
-		webMvcOperations.createIndexJsp();
-		webMvcOperations.copyUrlRewrite();
-		webMvcOperations.updateJpaWebXml();
-		
-		updateDependencies();		
+		webMvcOperations.installMvcArtefacts();
 	}
 	
 	/**
@@ -210,14 +188,7 @@ public class ControllerOperations {
 
 		classpathOperations.generateClassFile(details);
 		
-		createWebApplicationContext();
-		
-		webMvcOperations.createWebXml();
-		webMvcOperations.createIndexJsp();
-		webMvcOperations.copyUrlRewrite();
-		webMvcOperations.updateJpaWebXml();
-		
-		updateDependencies();
+		webMvcOperations.installMvcArtefacts();
 	}
 
 	public void createPropertyEditors(Set<JavaType> types) {
@@ -254,54 +225,5 @@ public class ControllerOperations {
 			}
 		}
 		return false;
-	}
-	
-	public void createWebApplicationContext() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
-		
-		// Verify the middle tier application context already exists
-		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml")), "Application context does not exist");
-		
-		String servletCtxFilename = "WEB-INF/" + projectMetadata.getProjectName() + "-servlet.xml";
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename))) {
-			//this file already exists, nothing to do
-			return;
-		}
-		
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "roo-servlet-template.xml");
-		Document pom;
-		try {
-			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-
-		Element rootElement = (Element) pom.getFirstChild();
-		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-		
-		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename));
-		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
-
-		fileManager.scanAll();
-	}
-	
-	private void updateDependencies() {	
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "dependencies.xml");
-		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
-		Document dependencyDoc;
-		try {
-			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		Element dependenciesElement = (Element) dependencyDoc.getFirstChild();
-		
-		List<Element> springDependencies = XmlUtils.findElements("/dependencies/springWebMvc/dependency", dependenciesElement);
-		for(Element dependency : springDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependency));
-		}
 	}
 }

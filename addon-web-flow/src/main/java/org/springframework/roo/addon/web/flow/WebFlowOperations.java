@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.springframework.roo.addon.mvc.jsp.JspOperations;
 import org.springframework.roo.addon.web.menu.MenuOperations;
+import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -39,18 +41,24 @@ public class WebFlowOperations {
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
 	private MenuOperations menuOperations;
+	private WebMvcOperations webMvcOperations;
+	private JspOperations jspOperations;
 	
-	public WebFlowOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations, MenuOperations menuOperations) {
+	public WebFlowOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations, MenuOperations menuOperations, WebMvcOperations webMvcOperations, JspOperations jspOperations) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(projectOperations, "Project operations required");
 		Assert.notNull(menuOperations, "Menu operations required");
+		Assert.notNull(webMvcOperations, "Web MVC operations required");
+		Assert.notNull(jspOperations, "Jsp operations required");
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;
 		this.projectOperations = projectOperations;
 		this.menuOperations = menuOperations;
+		this.webMvcOperations = webMvcOperations;
+		this.jspOperations = jspOperations;
 	}
 	
 	public boolean isInstallWebFlowAvailable() {		
@@ -109,12 +117,12 @@ public class WebFlowOperations {
 		
 		Document mvcAppCtx;
 		try {
-			if (fileManager.exists(mvcContextPath)) {
-				mvcContextMutableFile = fileManager.updateFile(mvcContextPath);
-				mvcAppCtx = XmlUtils.getDocumentBuilder().parse(mvcContextMutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Could not find MVC servlet configuration file at " + mvcContextPath);
-			}
+			if (!fileManager.exists(mvcContextPath)) {
+				webMvcOperations.installMvcArtefacts();		
+				jspOperations.installCommonViewArtefacts();
+			} 
+			mvcContextMutableFile = fileManager.updateFile(mvcContextPath);
+			mvcAppCtx = XmlUtils.getDocumentBuilder().parse(mvcContextMutableFile.getInputStream());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} 				

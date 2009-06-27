@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -24,7 +25,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Provides web.xml project operations.
+ * Provides operations to create various view layer resources.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
@@ -37,18 +38,31 @@ public class WebMvcOperations {
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
+	private ProjectOperations projectOperations;
 	
-	public WebMvcOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService) {
+	public WebMvcOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");
+		Assert.notNull(projectOperations, "Project operations required");
 		
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;
+		this.projectOperations = projectOperations;
 	}
 	
-	public void copyUrlRewrite(){
+	public void installMvcArtefacts() {
+		//note that the sequence matters here as some of these artifacts are loaded further down the line
+		createWebApplicationContext();
+		copyUrlRewrite();
+		createWebXml();
+		createIndexJsp();		
+		updateJpaWebXml();
+		updateDependencies();
+	}
+	
+	private void copyUrlRewrite(){
 		String urlrewriteFilename = "WEB-INF/urlrewrite.xml";
 	
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename))) {
@@ -63,7 +77,7 @@ public class WebMvcOperations {
 		}
 	}
 
-	public void createWebXml() {		
+	private void createWebXml() {		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		// Verify the servlet application context already exists
@@ -103,7 +117,7 @@ public class WebMvcOperations {
 		fileManager.scanAll();
 	}
 	
-	public void createIndexJsp() {
+	private void createIndexJsp() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		// Verify the web.xml already exists
@@ -144,7 +158,7 @@ public class WebMvcOperations {
 		XmlUtils.writeMalformedXml(mutableFile.getOutputStream(), jspDocument.getFirstChild().getChildNodes());
 	}	
 	
-	public void updateJpaWebXml() {				
+	private void updateJpaWebXml() {				
 		String persistence = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 				
 		if (!fileManager.exists(persistence)) {
@@ -190,5 +204,54 @@ public class WebMvcOperations {
 		root.insertBefore(filterMapping, httpMethodFilter);
 		
 		XmlUtils.writeXml(webXmlMutableFile.getOutputStream(), webXml);
+	}
+	
+	private void createWebApplicationContext() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.isTrue(projectMetadata != null, "Project metadata required");
+		
+		// Verify the middle tier application context already exists
+		PathResolver pathResolver = projectMetadata.getPathResolver();
+		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml")), "Application context does not exist");
+		
+		String servletCtxFilename = "WEB-INF/" + projectMetadata.getProjectName() + "-servlet.xml";
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename))) {
+			//this file already exists, nothing to do
+			return;
+		}
+		
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "roo-servlet-template.xml");
+		Document pom;
+		try {
+			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+
+		Element rootElement = (Element) pom.getFirstChild();
+		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+		
+		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename));
+		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+
+		fileManager.scanAll();
+	}
+	
+	private void updateDependencies() {	
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "dependencies.xml");
+		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
+		Document dependencyDoc;
+		try {
+			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element dependenciesElement = (Element) dependencyDoc.getFirstChild();
+		
+		List<Element> springDependencies = XmlUtils.findElements("/dependencies/springWebMvc/dependency", dependenciesElement);
+		for(Element dependency : springDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependency));
+		}
 	}
 }

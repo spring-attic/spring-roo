@@ -55,6 +55,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.file.monitor</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.model</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
@@ -86,6 +92,18 @@
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.web.menu</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.web.controller</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>
 		</dependency>

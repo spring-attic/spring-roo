@@ -52,21 +52,27 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	private MetadataService metadataService;
 	private BeanInfoMetadata beanInfoMetadata;
 	private MenuOperations menuOperations;
+	private JspOperations jspOperations;
+	private PathResolver pathResolver;
 	
-	public JspMetadataListener(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, MenuOperations menuOperations) {
+	public JspMetadataListener(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(menuOperations, "Menu Operations required");
+		Assert.notNull(pathResolver, "Path resolver required");
 		this.metadataService = metadataService;
 		this.metadataDependencyRegistry = metadataDependencyRegistry;
 		this.fileManager = fileManager;
 		this.menuOperations = menuOperations;		
-
+		this.pathResolver = pathResolver;
+		
 		metadataService.register(this);
 		
 		// Ensure we're notified of all metadata related to web scaffold metadata, in particular their initial creation
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+	
+		jspOperations = new JspOperations(fileManager, metadataService);
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
@@ -98,7 +104,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			return null;
 		}
 		
-		String finderMetadataKey = FinderMetadata.createIdentifier(entityMetadata.getJavaType(entityMetadataKey), path);
+		String finderMetadataKey = FinderMetadata.createIdentifier(EntityMetadata.getJavaType(entityMetadataKey), path);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 
 		this.beanInfoMetadata = beanInfoMetadata;
@@ -107,77 +113,34 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 //		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 //		metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
 		
+		jspOperations.installCommonViewArtefacts();
+		
 		JspMetadata md = new JspMetadata(metadataIdentificationString, beanInfoMetadata, webScaffoldMetadata);
 		
 		if (!md.getAnnotationValues().isAutomaticallyMaintainView()) {
 			// we're not maintaining the view, so we have nothing to do
 			return md;
 		}
+				
+		if (webScaffoldMetadata.getAnnotationValues().isList()) { 
+			installImage("images/list.png");
+		}
+		if (webScaffoldMetadata.getAnnotationValues().isShow()) { 
+			installImage("images/show.png");
+		}
+		if (webScaffoldMetadata.getAnnotationValues().isCreate()) { 
+			installImage("images/create.png");
+		}
+		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) { 
+			installImage("images/update.png");
+		}
+		if (webScaffoldMetadata.getAnnotationValues().isDelete()) { 
+			installImage("images/delete.png");
+		}
 		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
+		Assert.notNull(projectMetadata, "Project metadata required");
 		
-		PathResolver pathResolver = projectMetadata.getPathResolver();
-		
-		String imagesDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images");
-		if (!fileManager.exists(imagesDirectory)) {
-			fileManager.createDirectory(imagesDirectory);
-		} 
-		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png");
-		if (!fileManager.exists(imageFile)) {
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/banner-graphic.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/springsource-logo.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/springsource-logo.png")).getOutputStream());
-				if (webScaffoldMetadata.getAnnotationValues().isList()) { 
-					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/list.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/list.png")).getOutputStream());
-				}
-				if (webScaffoldMetadata.getAnnotationValues().isShow()) { 
-					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/show.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/show.png")).getOutputStream());
-				}
-				if (webScaffoldMetadata.getAnnotationValues().isCreate()) { 
-					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/create.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/create.png")).getOutputStream());
-				}
-				if (webScaffoldMetadata.getAnnotationValues().isUpdate()) { 
-					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/update.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/update.png")).getOutputStream());
-				}
-				if (webScaffoldMetadata.getAnnotationValues().isDelete()) { 
-					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/delete.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/delete.png")).getOutputStream());
-				}
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}
-		} 
-		
-		String cssDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles");
-		if (!fileManager.exists(cssDirectory)) {
-			fileManager.createDirectory(cssDirectory);
-		} 
-		String cssFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo.css");
-		if (!fileManager.exists(cssFile)) {
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo.css"), fileManager.createFile(cssFile).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}			
-		}
-		
-		String jspDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp");
-		if (!fileManager.exists(jspDirectory)) {
-			fileManager.createDirectory(jspDirectory);
-		} 
-		String headerFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/header.jsp");
-		if (!fileManager.exists(headerFile)) {
-			try {				
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "header.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/header.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "footer.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/footer.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/includes.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "dataAccessFailure.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/dataAccessFailure.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "uncaughtException.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/uncaughtException.jsp")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}			
-		}
-
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 		
 		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, projectMetadata.getProjectName());
@@ -338,5 +301,16 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	
 	public String getProvidesType() {
 		return JspMetadata.getMetadataIdentiferType();
+	}
+	
+	private void installImage(String imagePath) {
+		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath);
+		if (!fileManager.exists(imageFile)) {
+			try {				
+					FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), imagePath), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath)).getOutputStream());		
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+			}
+		} 
 	}
 }
