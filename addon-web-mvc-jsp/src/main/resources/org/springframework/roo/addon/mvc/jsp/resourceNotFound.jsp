@@ -1,9 +1,9 @@
 <%@ include file="/WEB-INF/jsp/includes.jsp" %>
 <%@ include file="/WEB-INF/jsp/header.jsp" %>
 
-<h2>Data access failure</h2>
+<h2>Requested Resource Not Found</h2>
 <p/>
-Sorry, a problem occurred while accessing the database. 
+Sorry, we did not find the resource you were looking for. 
 <p/>
 <c:if test="${not empty exception}">
 <h4>Details</h4>
@@ -23,5 +23,4 @@ Sorry, a problem occurred while accessing the database.
 </div>
 
 </c:if>
-
 <%@ include file="/WEB-INF/jsp/footer.jsp" %>

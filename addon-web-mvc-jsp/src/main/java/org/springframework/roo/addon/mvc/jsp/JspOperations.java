@@ -76,7 +76,8 @@ public class JspOperations {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "footer.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/footer.jsp")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/includes.jsp")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "dataAccessFailure.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/dataAccessFailure.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "uncaughtException.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/uncaughtException.jsp")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "resourceNotFound.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/resourceNotFound.jsp")).getOutputStream());
+
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}

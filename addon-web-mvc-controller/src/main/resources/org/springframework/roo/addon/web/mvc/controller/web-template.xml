@@ -73,4 +73,9 @@
 		<exception-type>java.lang.Exception</exception-type>
 		<location>/WEB-INF/jsp/uncaughtException.jsp</location>
 	</error-page>
+	
+	<error-page>
+	    <error-code>404</error-code>
+	    <location>/WEB-INF/jsp/resourceNotFound.jsp</location>
+	</error-page> 
 </web-app>

@@ -19,7 +19,9 @@
 	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
 		<property name="exceptionMappings">
 			<props>
-				<prop key=".DataAccessException">dataAccessFailure</prop>				
+				<prop key=".DataAccessException">dataAccessFailure</prop>		
+				<prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>	
+				<prop key=".TypeMismatchException">resourceNotFound</prop>				
 				<prop key=".lang.Exception">uncaughtException</prop>				
 			</props>
 		</property>
