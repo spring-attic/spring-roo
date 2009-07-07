@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -27,14 +28,19 @@ import org.springframework.roo.model.JavaType;
  *
  */
 public class ReferenceField extends FieldDetails {
+	
+	private JavaType fieldType;
 
-	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
+	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {		
 		super(physicalTypeIdentifier, fieldType, fieldName);
+		this.fieldType = fieldType;
 	}
 
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), new ArrayList<AnnotationAttributeValue<?>>()));
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new ClassAttributeValue(new JavaSymbolName("targetEntity"), fieldType));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumn"), new ArrayList<AnnotationAttributeValue<?>>()));
 	}
 
