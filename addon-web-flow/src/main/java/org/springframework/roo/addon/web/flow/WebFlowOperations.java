@@ -200,7 +200,7 @@ public class WebFlowOperations {
 				flowName, 
 				"web_flow_" + flowName.toLowerCase() + "_menu_item", 
 				"Enter " + flowName + "Flow",
-				"/" + projectMetadata.getProjectName() + "/" + flowName.toLowerCase());
+				"/" + projectMetadata.getProjectName() + "/" + flowName);
 
 		updateDependencies();
 	}	
