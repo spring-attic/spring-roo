@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class FieldToken implements Token {
+public class FieldToken implements Token, Comparable<FieldToken> {
 	
 	private FieldMetadata field;	
 	
@@ -28,6 +28,10 @@ public class FieldToken implements Token {
 		this.fieldName = field.getFieldName();
 	}
 	
+	public String getValue() {
+		return field.getFieldName().getSymbolNameCapitalisedFirstLetter();
+	}
+	
 	public JavaSymbolName getFieldName() {
 		return fieldName;
 	}
@@ -38,6 +42,12 @@ public class FieldToken implements Token {
 
 	public FieldMetadata getField() {
 		return field;
+	}
+	
+	public int compareTo(FieldToken o) {
+		int l = o.getValue().length() - this.getValue().length();
+		if(l == 0) return  -1;
+		else return l;
 	}
 
 }

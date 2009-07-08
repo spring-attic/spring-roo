@@ -78,7 +78,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		boolean isFieldSet = false;
 		for (Token token : tokens) {
 			if (token instanceof ReservedToken) {
-				String s = ((ReservedToken) token).getToken();
+				String s = token.getValue();
 				String fieldName = lastFieldToken.getField().getFieldName().getSymbolName();
 				boolean setField = true;
 
@@ -166,7 +166,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				String fieldName = (((FieldToken) token).getField().getFieldName().getSymbolName());
 				names.add(new JavaSymbolName(fieldName));
 			} else {
-				if("Between".equals(((ReservedToken)token).getToken())) {
+				if("Between".equals(token.getValue())) {
 					Token field = tokens.get(i-1);
 					if(field instanceof FieldToken) {
 						JavaSymbolName fieldName = names.get(names.size() - 1);
@@ -176,7 +176,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						names.add(new JavaSymbolName("min" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 						names.add(new JavaSymbolName("max" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 					}
-				} else if("IsNull".equals(((ReservedToken)token).getToken()) || "IsNotNull".equals(((ReservedToken)token).getToken())) {
+				} else if("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
 					Token field = tokens.get(i-1);
 					if(field instanceof FieldToken) {
 						names.remove(names.size()-1);
@@ -203,12 +203,12 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			if (token instanceof FieldToken) {
 				types.add(((FieldToken) token).getField().getFieldType());
 			} else {
-				if("Between".equals(((ReservedToken)token).getToken())) {
+				if("Between".equals(token.getValue())) {
 					Token field = tokens.get(i-1);
 					if(field instanceof FieldToken) {
 						types.add(types.get(types.size() - 1));						
 					}
-				} else if("IsNull".equals(((ReservedToken)token).getToken()) || "IsNotNull".equals(((ReservedToken)token).getToken())) {
+				} else if("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
 					Token field = tokens.get(i-1);
 					if(field instanceof FieldToken) {
 						types.remove(types.size()-1);
@@ -223,16 +223,16 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		Set<JavaSymbolName> tempFinders = new HashSet<JavaSymbolName>();
 
 		if (isNumberOrDate(field.getFieldType().getFullyQualifiedTypeName())) {
-			for (String keyWord : ReservedToken.getNumericReservedTokens()) {
-				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord));
+			for (ReservedToken keyWord : ReservedTokenHolder.getNumericTokens()) {
+				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
 		} else if (field.getFieldType().getFullyQualifiedTypeName().equals(String.class.getName())) {
-			for (String keyWord : ReservedToken.getStringReservedTokens()) {
-				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord));
+			for (ReservedToken keyWord : ReservedTokenHolder.getStringTokens()) {
+				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
 		} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Boolean.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(boolean.class.getName())) {
-			for (String keyWord : ReservedToken.getBooleanReservedTokens()) {
-				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord));
+			for (ReservedToken keyWord : ReservedTokenHolder.getBooleanTokens()) {
+				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
 		}
 		return tempFinders;

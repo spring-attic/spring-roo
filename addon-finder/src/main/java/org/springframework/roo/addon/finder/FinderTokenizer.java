@@ -1,16 +1,14 @@
 package org.springframework.roo.addon.finder;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 
 /**
@@ -21,6 +19,12 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  */
 public final class FinderTokenizer {
+	
+	private SortedSet<FieldToken> fieldTokens;
+	
+	private BeanInfoMetadata beanInfoMetadata;
+	
+	private String completeFinder;
 
 	/**
 	 * Use this method to tokenize the finder method signature based on capital letters. This method asserts 
@@ -35,106 +39,51 @@ public final class FinderTokenizer {
 		Assert.notNull(finder, "finder method signature required");
 		Assert.hasText(finder, "Empty finder Strings not allowd");
 		Assert.hasText(plural, "Plural required");
-		Assert.notNull(beanInfoMetadata, "RooJpaMetadata required");
+		Assert.notNull(beanInfoMetadata, "BeanInfoMetadata required");
+		
+		this.beanInfoMetadata = beanInfoMetadata;		
+		this.completeFinder = finder;
+		
 		//just in case it starts with findBy we can remove it here
 		finder = finder.replace("find" + plural +"By", "");
-		
-		FinderTokenIterator tokenizer = new FinderTokenIterator(finder);
+
+		fieldTokens = new TreeSet<FieldToken>();
+		for(MethodMetadata metadata : beanInfoMetadata.getPublicMutators()) {
+			fieldTokens.add(new FieldToken(beanInfoMetadata.getFieldForPropertyName(metadata.getParameterNames().get(0))));
+		}
 		
 		List<Token> tokens = new ArrayList<Token>();
-		String partToken = null;
-		ReservedToken previousToken = null;
-		while (tokenizer.hasNext()) {
-			FieldMetadata field = null;
-			String singleToken = tokenizer.next();
-			
-			String token = singleToken;
-
-			if (partToken != null) {
-				token = partToken.concat(token);
+		
+		while(finder.length() > 0) {
+			Token token = getFirstToken(finder);
+			if(token != null) {
+				if(token instanceof FieldToken) {
+					tokens.add((FieldToken)token);					
+				}
+				if(token instanceof ReservedToken) {
+					tokens.add((ReservedToken)token);
+				}
+				finder = finder.substring(token.getValue().length());
 			}
-			if (ReservedToken.getAllReservedTokens().contains(token)) {
-				if(previousToken != null && ReservedToken.getAllReservedTokens().contains(previousToken.getToken().concat(token))) {
-					tokens.remove(previousToken);
-					previousToken = new ReservedToken(previousToken.getToken().concat(token));	
-				} else {
-					previousToken = new ReservedToken(token);
-				}				
-//				System.out.println("reserved token "+previousToken.getToken());
-				tokens.add(previousToken);		
-				partToken = null; //new
-			} else if ((field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(StringUtils.uncapitalize(token)))) != null) {
-				tokens.add(new FieldToken(field));
-				partToken = null;
-				previousToken = null;
-//				System.out.println("field token "+token);
-			} else {
-				partToken = token;
-//				System.out.println("part token "+token);
-			}
-		}
-		//test if there are leftovers, if so we cannot parse the presented finder signature completely
-		if (partToken != null) {
-			throw new IllegalArgumentException("Unable to match all fields of " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " for " + finder + " (remaining '" + partToken + "')");
 		}		
+		
 		return tokens;
 	}
 	
-	class FinderTokenIterator implements Iterator<String> {
-
-		private String finder;
-
-		private Matcher matcher;
-
-		private String match;
-
-		private int lastEnd = 0;
-
-		FinderTokenIterator(String finder) {
-
-			Assert.hasText(finder, "Non-empty finder String required");
-			this.finder = finder;
-
-			// Compile pattern and prepare input
-			Pattern pattern = Pattern.compile("[A-Z][a-z|0-9|_]+");
-			matcher = pattern.matcher(finder);
-		}
-
-		// Returns true if there are more tokens or delimiters.
-		public boolean hasNext() {
-			if (matcher == null) {
-				return false;
+	private Token getFirstToken(String finder) {
+		for(FieldToken fieldToken: fieldTokens) {
+			if (finder.startsWith(fieldToken.getValue())) {
+				return fieldToken;								
 			}
-			if (match != null) {
-				return true;
+		}	
+		for(ReservedToken reservedToken: ReservedTokenHolder.getAllTokens()) {
+			if (finder.startsWith(reservedToken.getValue())) {
+				return reservedToken;								
 			}
-			if (matcher.find()) {
-				match = finder.subSequence(lastEnd, matcher.end()).toString();
-				lastEnd = matcher.end();
-			} else if (lastEnd < finder.length()) {
-				lastEnd = finder.length();
-				matcher = null;
-			}
-			return match != null;
+		}	
+		if (finder.length() > 0) {
+			throw new IllegalStateException("Dynamic finder is unable to match '" + finder + "' token of '" + completeFinder + "' finder definition in " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + ".java");
 		}
-
-		public String next() {
-			String result = null;
-
-			if (match != null) {
-				result = match;
-				match = null;
-			}
-			return result;
-		}
-
-		public boolean isNextToken() {
-			return match != null;
-		}
-
-		// Not supported.
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-	}
+		return null; //finder does not start with reserved or field token
+	}	
 }
