@@ -56,21 +56,21 @@ public @interface RooWebScaffold {
 	 */
 	Class<?> formBackingObject();
 	
-	/**
-	 * Creates a list() method which exposes all entities this controller is responsible for. If enabled this 
-	 * list() method will return a {@link List} of entities.
-	 * 
-	 * @return indicates if the list() method should be provided (defaults to "true"; optional)
-	 */
-	boolean list() default true;
-	
-	/**
-	 * Creates a show() method which exposes the entity with a given id of the type this controller is responsible for. 
-	 * If enabled this show() method will return a single entity or null if an entity with this id cannot be found.
-	 * 
-	 * @return indicates if the show() method should be provided (defaults to "true"; optional)
-	 */
-	boolean show() default true;
+//	/**
+//	 * Creates a list() method which exposes all entities this controller is responsible for. If enabled this 
+//	 * list() method will return a {@link List} of entities.
+//	 * 
+//	 * @return indicates if the list() method should be provided (defaults to "true"; optional)
+//	 */
+//	boolean list() default true;
+//	
+//	/**
+//	 * Creates a show() method which exposes the entity with a given id of the type this controller is responsible for. 
+//	 * If enabled this show() method will return a single entity or null if an entity with this id cannot be found.
+//	 * 
+//	 * @return indicates if the show() method should be provided (defaults to "true"; optional)
+//	 */
+//	boolean show() default true;
 	
 	/**
 	 * Creates a delete() method which deletes an entity for a given id. 

@@ -13,6 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -48,20 +49,23 @@ public class JspDocumentHelper {
 	private MetadataService metadataService;
 	private FinderMetadata finderMetadata;
 	private SimpleDateFormat dateFormatLocalized;
+	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 	
-	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, String projectName) {
+	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, String projectName, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.hasText(projectName, "Project name required");
 		Assert.notNull(metadataService, "Metadata service required");
+		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		this.fields = fields;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.projectName = projectName;
 		this.metadataService = metadataService;
 		this.finderMetadata = finderMetadata;
+		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 		
 		dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 	}
@@ -203,33 +207,37 @@ public class JspDocumentHelper {
 		showElement.appendChild(showFormElement);
 		trElement2.appendChild(showElement);
 
-		Element updateElement = document.createElement("td");		
-		Element updateFormElement = document.createElement("form:form");
-		updateFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
-		updateFormElement.setAttribute("method", "GET");
-		Element updateSubmitElement = document.createElement("input");
-		updateSubmitElement.setAttribute("type", "image");
-		updateSubmitElement.setAttribute("title", "Update " + entityName);
-		updateSubmitElement.setAttribute("src", "/" + projectName + "/static/images/update.png");
-		updateSubmitElement.setAttribute("value", "Update " + entityName);
-		updateSubmitElement.setAttribute("alt", "Update " + entityName);
-		updateFormElement.appendChild(updateSubmitElement);
-		updateElement.appendChild(updateFormElement);
-		trElement2.appendChild(updateElement);
+		if(webScaffoldAnnotationValues.isUpdate()) {
+			Element updateElement = document.createElement("td");		
+			Element updateFormElement = document.createElement("form:form");
+			updateFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
+			updateFormElement.setAttribute("method", "GET");
+			Element updateSubmitElement = document.createElement("input");
+			updateSubmitElement.setAttribute("type", "image");
+			updateSubmitElement.setAttribute("title", "Update " + entityName);
+			updateSubmitElement.setAttribute("src", "/" + projectName + "/static/images/update.png");
+			updateSubmitElement.setAttribute("value", "Update " + entityName);
+			updateSubmitElement.setAttribute("alt", "Update " + entityName);
+			updateFormElement.appendChild(updateSubmitElement);
+			updateElement.appendChild(updateFormElement);
+			trElement2.appendChild(updateElement);
+		}
 
-		Element deleteElement = document.createElement("td");
-		Element deleteFormElement = document.createElement("form:form");
-		deleteFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
-		deleteFormElement.setAttribute("method", "DELETE");
-		Element deleteSubmitElement = document.createElement("input");
-		deleteSubmitElement.setAttribute("type", "image");
-		deleteSubmitElement.setAttribute("title", "Delete " + entityName);
-		deleteSubmitElement.setAttribute("src", "/" + projectName + "/static/images/delete.png");
-		deleteSubmitElement.setAttribute("value", "Delete " + entityName);
-		deleteSubmitElement.setAttribute("alt", "Delete " + entityName);
-		deleteFormElement.appendChild(deleteSubmitElement);
-		deleteElement.appendChild(deleteFormElement);
-		trElement2.appendChild(deleteElement);
+		if(webScaffoldAnnotationValues.isDelete()) {
+			Element deleteElement = document.createElement("td");
+			Element deleteFormElement = document.createElement("form:form");
+			deleteFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+			deleteFormElement.setAttribute("method", "DELETE");
+			Element deleteSubmitElement = document.createElement("input");
+			deleteSubmitElement.setAttribute("type", "image");
+			deleteSubmitElement.setAttribute("title", "Delete " + entityName);
+			deleteSubmitElement.setAttribute("src", "/" + projectName + "/static/images/delete.png");
+			deleteSubmitElement.setAttribute("value", "Delete " + entityName);
+			deleteSubmitElement.setAttribute("alt", "Delete " + entityName);
+			deleteFormElement.appendChild(deleteSubmitElement);
+			deleteElement.appendChild(deleteFormElement);
+			trElement2.appendChild(deleteElement);
+		}
 		
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityMetadata.getPlural().toLowerCase() + "}");

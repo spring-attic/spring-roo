@@ -75,14 +75,22 @@ public class ControllerOperations {
 	 * 
 	 * @param controller the controller class to create (required)
 	 * @param entity the entity this controller should edit (required)
+	 * @param set of disallowed operations (required, but can be empty)
 	 */
-	public void createAutomaticController(JavaType controller, JavaType entity) {
+	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations) {
+		Assert.notNull(controller, "Controller Java Type required");
+		Assert.notNull(entity, "Entity Java Type required");
+		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
+		
 		String ressourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);		
 		
 		//create annotation @RooWebScaffold(automaticallyMaintainView = true, formBackingObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyMaintainView"), true));
 		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
+		for(String operation: disallowedOperations) {
+			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
+		}
 		AnnotationMetadata rooWebScaffold = new DefaultAnnotationMetadata(new JavaType(RooWebScaffold.class.getName()), rooWebScaffoldAttributes);
 		
 		//create annotation @RequestMapping("/myobject/**")
@@ -118,6 +126,8 @@ public class ControllerOperations {
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
 	public void createManualController(JavaType controller, String preferredMapping) {
+		Assert.notNull(controller, "Controller Java Type required");
+		
 		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);		
 		
 		//create annotation @RequestMapping("/myobject/**")

@@ -150,6 +150,27 @@ public class MenuOperations {
 		writeToDiskIfNecessary(document.getChildNodes());
 	}
 	
+	public void cleanUpMenuItem(String menuCategoryId, String menuItemId) {
+		Assert.hasText(menuCategoryId, "Menu category identifier required");
+		Assert.hasText(menuItemId, "Menu item id required");
+		
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+		}
+		
+		//find menu item under this category if exists 
+		Element element = XmlUtils.findFirstElement("//li[@id='" + menuCategoryId + "']//li[@id='" + menuItemId + "']", document.getDocumentElement());
+		if(element==null) {
+			return;
+		}
+		element.getParentNode().removeChild(element);
+		
+		writeToDiskIfNecessary(document.getChildNodes());
+	}
+	
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {

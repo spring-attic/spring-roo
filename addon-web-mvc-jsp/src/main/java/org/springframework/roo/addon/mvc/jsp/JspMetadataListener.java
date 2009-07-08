@@ -122,12 +122,12 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			return md;
 		}
 				
-		if (webScaffoldMetadata.getAnnotationValues().isList()) { 
+//		if (webScaffoldMetadata.getAnnotationValues().isList()) { 
 			installImage("images/list.png");
-		}
-		if (webScaffoldMetadata.getAnnotationValues().isShow()) { 
+//		}
+//		if (webScaffoldMetadata.getAnnotationValues().isShow()) { 
 			installImage("images/show.png");
-		}
+//		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) { 
 			installImage("images/create.png");
 		}
@@ -143,7 +143,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 		
-		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, projectMetadata.getProjectName());
+		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, projectMetadata.getProjectName(), webScaffoldMetadata.getAnnotationValues());
 		// Make the holding directory for this controller
 		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 		if (!fileManager.exists(destinationDirectory)) {
@@ -153,18 +153,27 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			Assert.isTrue(file.isDirectory(), destinationDirectory + " is a file, when a directory was expected");
 		}
 		
-		if (webScaffoldMetadata.getAnnotationValues().isList()) {
+//		if (webScaffoldMetadata.getAnnotationValues().isList()) {
 			// By now we have a directory to put the JSPs inside
-			String listPath = destinationDirectory + "/list.jsp";
-			writeToDiskIfNecessary(listPath, helper.getListDocument().getFirstChild().getChildNodes());
-		} 
-		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
-			String listPath = destinationDirectory + "/show.jsp";
-			writeToDiskIfNecessary(listPath, helper.getShowDocument().getFirstChild().getChildNodes());
-		}
+			String listPath1 = destinationDirectory + "/list.jsp";
+			writeToDiskIfNecessary(listPath1, helper.getListDocument().getFirstChild().getChildNodes());
+//		} 
+//		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
+			String showPath = destinationDirectory + "/show.jsp";
+			writeToDiskIfNecessary(showPath, helper.getShowDocument().getFirstChild().getChildNodes());
+//		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jsp";
 			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getFirstChild().getChildNodes());
+			//add 'create new' menu item
+			menuOperations.addMenuItem(
+					"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
+					beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
+					"web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
+					"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
+					"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
+		} else {
+			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jsp";
@@ -178,15 +187,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"web_mvc_jsp_list_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
 				"List all " + entityMetadata.getPlural(),
 				"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
-		
-		//add 'create new' menu item
-		menuOperations.addMenuItem(
-				"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
-				beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
-				"web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
-				"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
-				"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
-		
+	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
 			for (String finderName : entityMetadata.getDynamicFinders()) {

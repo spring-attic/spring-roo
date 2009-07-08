@@ -94,12 +94,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getCreateMethod());
 			builder.addMethod(getCreateFormMethod());
 		}		
-		if (annotationValues.show) {
+//		if (annotationValues.show) {
 			builder.addMethod(getShowMethod());
-		}
-		if (annotationValues.list) {
+//		}
+//		if (annotationValues.list) {
 			builder.addMethod(getListMethod());
-		}
+//		}
 		if (annotationValues.update) {
 			builder.addMethod(getUpdateMethod());
 			builder.addMethod(getUpdateFormMethod());
