@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.util.List;
 
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -116,6 +117,34 @@ public class MenuOperations {
 			createLink.setTextContent(menuItemLabel);		
 			menuItem.appendChild(createLink);
 			categoryRoot.appendChild(menuItem);
+		}
+		
+		writeToDiskIfNecessary(document.getChildNodes());
+	}
+	
+	public void cleanUpMenuItems(String menuCategoryId, String menuItemIdPrefix, List<String> allowedMenuIds) {
+		Assert.hasText(menuCategoryId, "Menu category identifier required");
+		Assert.hasText(menuItemIdPrefix, "Menu item id prefix required (ie 'finder_')");
+		Assert.notNull(allowedMenuIds, "List of allowed menu items required");
+		
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+		}
+		
+		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
+		List<Element> elements = XmlUtils.findElements("//li[@id='" + menuCategoryId + "']//li[starts-with(@id,'" + menuItemIdPrefix + "')]", document.getDocumentElement());
+		if(elements.size()==0) {
+			return;
+		}
+		
+		for(Element element: elements) {
+			if(!allowedMenuIds.contains(element.getAttribute("id"))) {
+				System.out.println("removing " + element.getAttribute("id"));
+				element.getParentNode().removeChild(element);
+			}
 		}
 		
 		writeToDiskIfNecessary(document.getChildNodes());

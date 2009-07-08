@@ -187,19 +187,25 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
 				"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
 		
+		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jsp";
 				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getFirstChild().getChildNodes());
-				//Add 'list all' menu item
+				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
 						"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
 						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
-						"finder_jsp_list_" + finderName.toLowerCase() + "_menu_item", 
+						"finder_" + finderName.toLowerCase() + "_menu_item", 
 						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
 						"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
+				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
 			}
 		}
+		
+		//clean up links to finders which are removed by now
+		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "finder_", allowedMenuItems);
+		
 		return md;
 	}
 	
