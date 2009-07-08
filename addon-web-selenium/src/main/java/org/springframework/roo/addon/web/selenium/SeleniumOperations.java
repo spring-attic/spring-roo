@@ -204,31 +204,8 @@ public class SeleniumOperations {
 			return;
 		}
 		
-		//TODO: remove this (see http://jira.springframework.org/browse/ROO-5)
-		//install codehaus plugin snapshot repo until the selenium-maven-plugin (temporary solution until new version of the maven-selenium-plugin is released
-		Element pluginRepositories = pom.createElement("pluginRepositories");
-		Element pluginRepository = pom.createElement("pluginRepository");
-		pluginRepositories.appendChild(pluginRepository);
-		Element id = pom.createElement("id");
-		id.setTextContent("Codehaus Snapshots");
-		pluginRepository.appendChild(id);
-		Element url = pom.createElement("url");
-		url.setTextContent("http://snapshots.repository.codehaus.org");
-		pluginRepository.appendChild(url);
-		Element snapshots = pom.createElement("snapshots");
-		Element enabled = pom.createElement("enabled");
-		enabled.setTextContent("true");
-		snapshots.appendChild(enabled);
-		pluginRepository.appendChild(snapshots);
-		Element releases = pom.createElement("releases");
-		Element enabled2 = pom.createElement("enabled");
-		enabled2.setTextContent("true");
-		releases.appendChild(enabled2);
-		pluginRepository.appendChild(releases);
-		
 		Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
 		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
-		dependencies.getParentNode().insertBefore(pluginRepositories, dependencies);
 
 		//now install the plugin itself
 		Element plugin = pom.createElement("plugin");
@@ -239,7 +216,7 @@ public class SeleniumOperations {
 		artifactId.setTextContent("selenium-maven-plugin");
 		plugin.appendChild(artifactId);
 		Element version = pom.createElement("version");
-		version.setTextContent("1.0-rc-2-SNAPSHOT");
+		version.setTextContent("1.0");
 		plugin.appendChild(version);
 		Element configuration = pom.createElement("configuration");
 		Element suite = pom.createElement("suite");
