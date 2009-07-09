@@ -103,7 +103,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
-				+ "\", widgetType: 'dijit.form.SimpleTextarea'})); ");
+				+ "\", widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
 		return script;
 	}
 	
