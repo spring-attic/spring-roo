@@ -71,7 +71,7 @@ public class JpaOperations {
 		Assert.notNull(database, "JDBC database required");
 				
 		updatePersistenceXml(ormProvider, database);	
-		if(jndi == null || jndi.isEmpty()) updateDatabaseProperties(database);
+		if(jndi == null || jndi.length() == 0) updateDatabaseProperties(database);
 		if (install) updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
 	}
@@ -100,7 +100,7 @@ public class JpaOperations {
 		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 				
-		if(jndi == null || jndi.isEmpty()) {
+		if(jndi == null || jndi.length() == 0) {
 			Element dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
