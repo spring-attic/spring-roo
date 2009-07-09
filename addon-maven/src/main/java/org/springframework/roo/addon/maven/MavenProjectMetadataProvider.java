@@ -22,6 +22,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectMetadataProvider;
+import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -208,7 +209,36 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);	
 	}
-
+	
+	public void updateProjectType(ProjectType projectType) {
+		Assert.notNull(projectType, "Project type required");
+		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(md, "Project metadata is not yet available, so dependency addition is unavailable");
+		
+		MutableFile mutableFile = fileManager.updateFile(pom);
+		
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+		} catch (Exception ex) {
+			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
+		}
+		
+		Element packaging = XmlUtils.findFirstElement("/project/packaging", document.getDocumentElement());
+		
+		if (packaging == null) {
+			packaging = document.createElement("packaging");
+			document.getDocumentElement().appendChild(packaging);
+		} else if (packaging.getTextContent().equals(projectType.getType())) {
+			return;
+		}		
+		
+		packaging.setTextContent(projectType.getType());
+		
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+	}
+	
+	
 	public void onFileEvent(FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");
 

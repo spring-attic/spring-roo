@@ -37,4 +37,17 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 */
 	public void removeDependency(Dependency dependency);
 	
+	
+	/**
+	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the 
+	 * project packaging is not defined it will create a new definition.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param ProjectType to update (required)
+	 */
+	public void updateProjectType(ProjectType projectType);
+	
 }

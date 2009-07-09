@@ -93,5 +93,11 @@ public abstract class ProjectOperations {
 		// Add the dependency
 		projectMetadataProvider.addDependency(dependency);
 	}
+	
+	public void updateProjectType(ProjectType projectType) {
+		Assert.notNull(projectType, "ProjectType required");
+		
+		projectMetadataProvider.updateProjectType(projectType);
+	}
 
 }
