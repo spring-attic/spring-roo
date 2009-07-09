@@ -71,7 +71,7 @@ public class JpaOperations {
 		Assert.notNull(database, "JDBC database required");
 				
 		updatePersistenceXml(ormProvider, database);	
-		if(jndi.isEmpty()) updateDatabaseProperties(database);
+		if(jndi == null || jndi.isEmpty()) updateDatabaseProperties(database);
 		if (install) updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
 	}
@@ -100,10 +100,11 @@ public class JpaOperations {
 		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 				
-		if(jndi.isEmpty()) {
+		if(jndi == null || jndi.isEmpty()) {
 			Element dataSource = appCtx.createElement("bean");
-			dataSource.setAttribute("id", "dataSource");
-			dataSource.setAttribute("class", "org.springframework.jdbc.datasource.DriverManagerDataSource");
+			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
+			dataSource.setAttribute("destroy-method", "close");
+			dataSource.setAttribute("id", "dataSource");			
 			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
 			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
 			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
