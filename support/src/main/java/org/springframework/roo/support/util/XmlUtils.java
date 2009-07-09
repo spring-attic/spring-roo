@@ -159,7 +159,9 @@ public abstract class XmlUtils {
 		Assert.notNull(transformer, "Transformer required");
 		Assert.notNull(outputEntry, "Output entry required");
 		Assert.notNull(document, "Document required");
-
+		
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		
 		try {
 			transformer.transform(new DOMSource(document), new StreamResult(new OutputStreamWriter(outputEntry, "ISO-8859-1"/* "UTF-8" */)));
 		} catch (Exception ex) {
