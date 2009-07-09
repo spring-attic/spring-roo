@@ -66,17 +66,17 @@ public class JpaOperations {
 	 * @param ormProvider the ORM provider selected (Hibernate, OpenJpa, EclipseLink)
 	 * @param database the database (HSQL, H2, MySql, etc)
 	 */
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, boolean install) {
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, boolean install) {
 		Assert.notNull(ormProvider, "ORM provider required");
-		Assert.notNull(database, "Database required");
-		
+		Assert.notNull(database, "JDBC database required");
+				
 		updatePersistenceXml(ormProvider, database);	
-		updateDatabaseProperties(database);
-		if (install) updateApplicationContext();
+		if(jndi.isEmpty()) updateDatabaseProperties(database);
+		if (install) updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
 	}
 	
-	private void updateApplicationContext() {		
+	private void updateApplicationContext(JdbcDatabase database, String jndi) {		
 		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
@@ -100,14 +100,21 @@ public class JpaOperations {
 		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
 				
-		Element dataSource = appCtx.createElement("bean");
-		dataSource.setAttribute("id", "dataSource");
-		dataSource.setAttribute("class", "org.springframework.jdbc.datasource.DriverManagerDataSource");
-		dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
-		dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
-		dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
-		dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
-		root.appendChild(dataSource);
+		if(jndi.isEmpty()) {
+			Element dataSource = appCtx.createElement("bean");
+			dataSource.setAttribute("id", "dataSource");
+			dataSource.setAttribute("class", "org.springframework.jdbc.datasource.DriverManagerDataSource");
+			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
+			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
+			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
+			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
+			root.appendChild(dataSource);
+		} else {
+			Element dataSource = appCtx.createElement("jee:jndi-lookup");
+			dataSource.setAttribute("id", "dataSource");
+			dataSource.setAttribute("jndi-name", jndi);
+			root.appendChild(dataSource);
+		}
 	
 		Element transactionManager = appCtx.createElement("bean");
 		transactionManager.setAttribute("id", "transactionManager");
@@ -209,8 +216,7 @@ public class JpaOperations {
 	}	
 	
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
-		Assert.notNull(ormProvider, "ORM provider required");
-		Assert.notNull(database, "JDBC database required");
+
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
 		

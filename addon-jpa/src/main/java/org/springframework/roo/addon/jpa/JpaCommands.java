@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.project.Path;
@@ -22,6 +23,8 @@ import org.springframework.roo.support.util.Assert;
  */
 @ScopeDevelopmentShell
 public class JpaCommands implements CommandMarker {
+	
+	private final static Logger log = Logger.getLogger(JpaCommands.class.getName());
 	
 	private JpaOperations jpaOperations;
 	private PropFileOperations propFileOperations;
@@ -46,8 +49,9 @@ public class JpaCommands implements CommandMarker {
 	
 	@CliCommand(value="install jpa", help="Install a JPA persistence provider in your project")
 	public void installJpa(@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
-			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase) {
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, true);
+			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
+			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, true);
 	}
 	
 	@CliCommand(value="database properties", help="Shows database configuration details")
@@ -74,8 +78,9 @@ public class JpaCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="update jpa", help="Update the JPA persistence provider in your project")
-	public void updateJpa(@CliOption(key={"","provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
-			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase) {
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, false);
+	public void updateJpa(@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
+			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
+			@CliOption(key={"","jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, false);
 	}
 }
