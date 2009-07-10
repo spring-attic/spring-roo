@@ -72,7 +72,7 @@ public class JpaOperations {
 				
 		updatePersistenceXml(ormProvider, database);	
 		if(jndi == null || jndi.length() == 0) updateDatabaseProperties(database);
-		if (install) updateApplicationContext(database, jndi);
+		updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
 	}
 	
@@ -92,16 +92,14 @@ public class JpaOperations {
 			throw new IllegalStateException(e);
 		} 	
 		
-		Element root = (Element) appCtx.getFirstChild();
+		Element root = appCtx.getDocumentElement();
 
 		//checking for existence of configurations, if found abort
-		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='dataSource']", root), "'<bean id=\"dataSource\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='transactionManager']", root), "'<bean id=\"transactionManager\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-		Assert.isNull(XmlUtils.findFirstElement("//tx:annotation-driven", root), "'<tx:annotation-driven' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-		Assert.isNull(XmlUtils.findFirstElement("//bean[@id='entityManagerFactory']", root), "'<bean id=\"entityManagerFactory\"' element discovered in " + contextPath +". Aborting operation (assuming manual persistence configuration)");
-				
-		if(jndi == null || jndi.length() == 0) {
-			Element dataSource = appCtx.createElement("bean");
+		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id='dataSource']", root);
+		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id='dataSource']", root);
+						
+		if ((jndi == null || jndi.length() == 0) && dataSource == null) {
+			dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
 			dataSource.setAttribute("id", "dataSource");			
@@ -110,29 +108,46 @@ public class JpaOperations {
 			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
 			dataSource.appendChild(createPropertyElement("password", "${database.password}", appCtx));
 			root.appendChild(dataSource);
-		} else {
-			Element dataSource = appCtx.createElement("jee:jndi-lookup");
-			dataSource.setAttribute("id", "dataSource");
-			dataSource.setAttribute("jndi-name", jndi);
-			root.appendChild(dataSource);
+			if (dataSourceJndi != null) {
+				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
+			}
+		} else if (jndi != null && jndi.length() > 0){			
+			if (dataSourceJndi == null) {
+				dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
+				dataSourceJndi.setAttribute("id", "dataSource");
+				root.appendChild(dataSourceJndi);
+			}			
+			dataSourceJndi.setAttribute("jndi-name", jndi);			
+			if (dataSource != null) {
+				dataSource.getParentNode().removeChild(dataSource);
+			} 
 		}
 	
-		Element transactionManager = appCtx.createElement("bean");
-		transactionManager.setAttribute("id", "transactionManager");
-		transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
-		transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
-		root.appendChild(transactionManager);
+		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id='transactionManager']", root);
+		if (transactionManager == null) {	
+			transactionManager = appCtx.createElement("bean");
+			transactionManager.setAttribute("id", "transactionManager");
+			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
+			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
+			root.appendChild(transactionManager);
+		}
 		
-		Element aspectJTxManager = appCtx.createElement("tx:annotation-driven");
-		aspectJTxManager.setAttribute("mode", "aspectj");
-		aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
-		root.appendChild(aspectJTxManager);
+		Element aspectJTxManager = XmlUtils.findFirstElement("/beans/annotation-driven", root);
+		if (aspectJTxManager == null) {
+			aspectJTxManager = appCtx.createElement("tx:annotation-driven");
+			aspectJTxManager.setAttribute("mode", "aspectj");
+			aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
+			root.appendChild(aspectJTxManager);
+		}		
 		
-		Element entityManagerFactory = appCtx.createElement("bean");
-		entityManagerFactory.setAttribute("id", "entityManagerFactory");
-		entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-		entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));			
-		root.appendChild(entityManagerFactory);		
+		Element entityManagerFactory = XmlUtils.findFirstElement("/beans/bean[@id='entityManagerFactory']", root);
+		if (entityManagerFactory == null) {
+			entityManagerFactory = appCtx.createElement("bean");
+			entityManagerFactory.setAttribute("id", "entityManagerFactory");
+			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
+			entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));			
+			root.appendChild(entityManagerFactory);		
+		}
 		
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
@@ -245,9 +260,9 @@ public class JpaOperations {
 			throw new IllegalStateException(e);
 		} 	
 
-		Element rootElement = (Element) persistence.getFirstChild();
+		Element rootElement = persistence.getDocumentElement();
 		
-		Element persistenceUnit = XmlUtils.findFirstElement("//persistence-unit", rootElement);
+		Element persistenceUnit = XmlUtils.findFirstElement("/persistence/persistence-unit", rootElement);
 		
 		while (persistenceUnit.getFirstChild()!=null) {
 			persistenceUnit.removeChild(persistenceUnit.getFirstChild());

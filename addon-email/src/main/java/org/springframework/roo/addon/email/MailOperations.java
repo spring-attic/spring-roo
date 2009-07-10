@@ -113,7 +113,7 @@ public class MailOperations {
 		
 		boolean installDependencies = true;
 		
-		Element mailBean = XmlUtils.findFirstElement("//bean[@class='org.springframework.mail.javamail.JavaMailSenderImpl']", root);
+		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.javamail.JavaMailSenderImpl']", root);
 		
 		if (mailBean != null) {
 			root.removeChild(mailBean);
@@ -237,7 +237,7 @@ public class MailOperations {
 		Element root = (Element) appCtx.getFirstChild();
 		
 		if ((null != from && from.length() > 0) || (null != subject && subject.length() > 0)) {
-			Element smmBean = XmlUtils.findFirstElement("//bean[@class='org.springframework.mail.SimpleMailMessage']", root);
+			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
 			
 			if (smmBean == null) {
 				smmBean = appCtx.createElement("bean");
@@ -246,7 +246,7 @@ public class MailOperations {
 			}
 			
 			if (null != from && from.length() > 0) {
-				Element smmProperty = XmlUtils.findFirstElement("//property[@name='from']", root);
+				Element smmProperty = XmlUtils.findFirstElement("//property[@name='from']", smmBean);
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
 				}
@@ -258,7 +258,7 @@ public class MailOperations {
 			}
 			
 			if (null != subject && subject.length() > 0) {
-				Element smmProperty = XmlUtils.findFirstElement("//property[@name='subject']", root);
+				Element smmProperty = XmlUtils.findFirstElement("//property[@name='subject']", smmBean);
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
 				}
@@ -319,7 +319,7 @@ public class MailOperations {
 		
 		Element root = (Element) appCtx.getFirstChild();		
 		
-		Element smmBean = XmlUtils.findFirstElement("//bean[@class='org.springframework.mail.SimpleMailMessage']", root);
+		Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
 		
 		//create some method content to get the user started			
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

@@ -74,10 +74,10 @@ public class MavenOperations extends ProjectOperations {
 			throw new IllegalStateException(ex);
 		}
 
-		Element rootElement = (Element) pom.getFirstChild();
-		XmlUtils.findRequiredElement("//artifactId", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("//groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-		XmlUtils.findRequiredElement("//name", rootElement).setTextContent(projectName);
+		Element rootElement = pom.getDocumentElement();
+		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
 		
 		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement) ;
 		for (Element e : versionElements) {

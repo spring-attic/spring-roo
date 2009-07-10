@@ -115,7 +115,7 @@ public class JmsOperations {
 			needsPersisted = true;
 		}
 		
-		Element listenerContainer = XmlUtils.findFirstElement("/beans/jms:listener-container[@destination-type='" + destinationType.getType().toLowerCase() + "']", root);
+		Element listenerContainer = XmlUtils.findFirstElement("/beans/listener-container[@destination-type='" + destinationType.getType().toLowerCase() + "']", root);
 		
 		if (listenerContainer == null) {
 			listenerContainer = appCtx.createElement("jms:listener-container");
