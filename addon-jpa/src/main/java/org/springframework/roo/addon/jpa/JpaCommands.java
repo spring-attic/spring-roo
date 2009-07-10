@@ -80,7 +80,7 @@ public class JpaCommands implements CommandMarker {
 	@CliCommand(value="update jpa", help="Update the JPA persistence provider in your project")
 	public void updateJpa(@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
 			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
-			@CliOption(key={"","jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
+			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, false);
 	}
 }
