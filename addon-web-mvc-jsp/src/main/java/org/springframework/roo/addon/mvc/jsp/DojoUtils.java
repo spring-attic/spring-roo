@@ -121,7 +121,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
-				+ "', widgetType: 'dijit.form.MultiSelect'})); ");
+				+ "', widgetType: 'dijit.form.MultiSelect', widgetAttrs: {}})); ");
 		return script;
 	}
 	
