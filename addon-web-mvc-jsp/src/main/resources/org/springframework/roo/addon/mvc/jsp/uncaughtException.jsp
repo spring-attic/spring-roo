@@ -38,7 +38,6 @@ try {
 	} 
 
 	// Display cookies
-	out.println("\nCookies:\n");
 	Cookie[] cookies = request.getCookies();
 	if (cookies != null) {
     	for (int i = 0; i < cookies.length; i++) {
