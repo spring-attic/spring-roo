@@ -61,7 +61,7 @@ More detailed instructions are provided below.
 
 * java -version
   Roo supports Java 5 and above
-  Refer to 'Known Issues' section for non-Sun JREs
+  Refer to 'Known Issues' section for formally supported JREs
 
 * unzip spring-roo-1.0.0.RC1.zip
 
@@ -75,7 +75,7 @@ More detailed instructions are provided below.
   some code assist limitations and no automatic aspects library import
 
 * We highly recommend you download the SpringSource Tool Suite (STS)
-  2.1.0.M2 or above, which is a free Eclipse-based IDE offered by
+  2.1.0.RC1 or above, which is a free Eclipse-based IDE offered by
   SpringSource that includes significant inbuilt Roo integration
 
 Installation should now be complete.
@@ -179,20 +179,12 @@ KNOWN ISSUES
   Having said that, given Roo isn't part of your runtime, it isn't a
   major issue if it doesn't work perfectly.
 
-* There appears to be an incompatibility with OpenJDK. We recommend
-  ensuring JAVA_HOME points to a Sun JDK until this is investigated.
+* Roo officially supports Sun, IBM, JRockit and Apache Harmony JVMs
+  (version 1.5 and 1.6). We do not formally support other JVMs or other
+  versions, although some may work. There is a known issue with
+  OpenJDK (see ROO-106 for a full list of tested JDKs).
 
 * Pluralisation will always be performed in English.
-
-* Do not run more than one concurrent instance of Roo on the same
-  project directory. Multiple instances will compete to manage the
-  files in the directory. As both instances are guaranteed to always
-  emit identical files, it isn't a major problem if you happen to run
-  two concurrent instances by accident. Your machine will just be a
-  little slower (unnecessary file monitoring will be occurring) and
-  some advanced and uncommon events (eg file undo operation) will not
-  behave as designed. You may also not receive reliable shell messages
-  regarding which file resources were created, managed or deleted.
 
 * In certain cases the shell's TAB completion may not parse the
   current line correctly. This happens mainly when skipping mandatory
@@ -203,13 +195,6 @@ KNOWN ISSUES
 * Only Hibernate is supported as a JPA provider, despite multiple JPA
   providers being shown. Issue reports have been logged the relevant
   JPA provider projects.
-  
-* If using a database other than H2 or Hypersonic, you should edit the
-  generated src/main/resources/database.properties file to reflect the
-  applicable connection string, username, password etc. Note the
-  H2_PERSISTENT and HYPERSONIC_PERSISTENT will by default make the
-  persistent database in your home directory (you can use Roo's
-  "database properties" command to view your present configuration).
 
 * Using DEBUG level logging with Spring's BeanConfigurerSupport will
   yield a significant number of exception traces. Nothing is wrong
