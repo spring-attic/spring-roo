@@ -40,4 +40,11 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
 	 * @param fileCanonicalPath required (not null)
 	 */
 	void notifyChanged(String fileCanonicalPath);
+	
+	/**
+	 * Forces the {@link FileMonitorService#isDirty()} to return true. Has no effect if the file monitor is already
+	 * dirty. The flag is automatically cleared (that is, set to false) when the next {@link #scanAll()} is called.
+	 */
+	void markDirty();
+	
 }

@@ -58,6 +58,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private Set<MonitoringRequest> requests = Collections.synchronizedSet(new CopyOnWriteArraySet<MonitoringRequest>());
 	private Map<MonitoringRequest,Map<File,Long>> priorExecution = Collections.synchronizedMap(new WeakHashMap<MonitoringRequest,Map<File,Long>>());
 	private Set<String> notifyChanged = Collections.synchronizedSet(new HashSet<String>());
+	private boolean dirty = false;
 	
 	public List<FileDetails> getMonitored() {
 		List<FileDetails> monitored = new ArrayList<FileDetails>();
@@ -82,10 +83,11 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	}
 
 	public boolean isDirty() {
-		return notifyChanged.size() > 0;
+		return dirty || notifyChanged.size() > 0;
 	}
 	
 	public int scanAll() {
+		dirty = false;
 		if (requests.size() == 0) {
 			return 0;
 		}
@@ -124,7 +126,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 									// This file did not exist last execution, so it must be new
 									eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentExecution.get(thisFile)), FileOperation.CREATED, null));
 									continue;
-								}
+								} 
 								
 								Long currentTimestamp = currentExecution.get(thisFile);
 								Long previousTimestamp = priorFiles.get(thisFile);
@@ -311,4 +313,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			notifyChanged.add(fileCanoncialPath);
 		}
 	}
+
+	public void markDirty() {
+		this.dirty = true;
+	}
+	
+	
 }

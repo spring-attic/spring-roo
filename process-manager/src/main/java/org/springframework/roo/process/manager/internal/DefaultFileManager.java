@@ -84,6 +84,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
+		this.notifiableFileMonitorService.markDirty();
 		new CreateDirectory(undoManager, filenameResolver, actual);
 		FileDetails fileDetails = new FileDetails(actual, actual.lastModified());
 		return fileDetails;
@@ -93,6 +94,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
+		this.notifiableFileMonitorService.markDirty();
 		File parentDirectory = new File(actual.getParent());
 		if (!parentDirectory.exists()) {
 			createDirectory(FileDetails.getCanonicalPath(parentDirectory));
@@ -105,6 +107,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
+		this.notifiableFileMonitorService.markDirty();
 		if (actual.isDirectory()) {
 			new DeleteDirectory(undoManager, filenameResolver, actual);
 		} else {
@@ -116,6 +119,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
+		this.notifiableFileMonitorService.markDirty();
 		new UpdateFile(undoManager, filenameResolver, actual);
 		return new DefaultMutableFile(actual, notifiableFileMonitorService);
 	}
