@@ -45,6 +45,12 @@ public class ControllerCommands implements CommandMarker {
 			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
 			@CliOption(key="formBackingObject", mandatory=false, optionContext="update,project", unspecifiedDefaultValue="*", help="The name of the entity object which the controller exposes to the web tier") JavaType entity,
 			@CliOption(key="disallowedOperations", mandatory=false, help="A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
+		
+		if (controller.getSimpleTypeName().equalsIgnoreCase(entity.getSimpleTypeName())) {
+			logger.warning("Controller class name needs to be different from the class name of the form backing object (suggestion: '" + entity.getSimpleTypeName() + "Controller')");
+			return;
+		}
+		
 		Set<String> disallowedOperationSet = new HashSet<String>();
 		if (!"".equals(disallowedOperations)) {
 			for (String operation : StringUtils.commaDelimitedListToSet(disallowedOperations)) {
