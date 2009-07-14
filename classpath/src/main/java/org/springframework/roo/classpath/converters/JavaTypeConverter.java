@@ -216,8 +216,11 @@ public class JavaTypeConverter implements Converter {
 			boolean include = false;
 			boolean directory = false;
 			if (fileIdentifier.getFile().isDirectory()) {
-				include = true;
-				directory = true;
+				// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
+				if (!fileIdentifier.getFile().getName().startsWith(".")) {
+					include = true;
+					directory = true;
+				}
 			} else {
 				// a file
 				if (candidate.endsWith(".java")) {

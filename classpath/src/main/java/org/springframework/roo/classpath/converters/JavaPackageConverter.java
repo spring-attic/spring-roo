@@ -108,7 +108,8 @@ public class JavaPackageConverter implements Converter {
 		for (FileDetails fileIdentifier : entries) {
 			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // drop the leading "/"
 			boolean include = false;
-			if (fileIdentifier.getFile().isDirectory()) {
+			// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
+			if (fileIdentifier.getFile().isDirectory() && !fileIdentifier.getFile().getName().startsWith(".")) {
 				include = true;
 			}
 			
