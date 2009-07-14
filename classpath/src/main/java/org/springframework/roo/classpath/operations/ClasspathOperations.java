@@ -12,7 +12,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -182,35 +181,7 @@ public class ClasspathOperations {
 			projectOperations.dependencyUpdate(new Dependency("javax.validation", "com.springsource.javax.validation", "1.0.0.CR1"));
 		}
 		
-		//since it is not desirable to have several annotations of the same type but the list may encounter annotations of the same type 
-		//with different parameters configured, we should attempt to perform a best efforts merge
-		List<AnnotationMetadata> scannedAnnotations = new ArrayList<AnnotationMetadata>();
-		boolean replaceAnnotations = false;
-		
-		for (AnnotationMetadata newAnnotation: fieldMetadata.getAnnotations()) {			
-			for (AnnotationMetadata scannedAnnotation : scannedAnnotations) {
-				if (scannedAnnotation.getAnnotationType().equals(newAnnotation.getAnnotationType())) {
-					List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-					for (JavaSymbolName attribute : scannedAnnotation.getAttributeNames()) {
-						attrs.add(scannedAnnotation.getAttribute(attribute));
-					}
-					for (JavaSymbolName attribute : newAnnotation.getAttributeNames()) {
-						attrs.add(scannedAnnotation.getAttribute(attribute));
-					}
-					scannedAnnotations.remove(scannedAnnotation);
-					newAnnotation = new DefaultAnnotationMetadata(newAnnotation.getAnnotationType(), attrs);
-					replaceAnnotations = true;
-				}
-			}
-			scannedAnnotations.add(newAnnotation);
-		}
-	
-		
-		if (replaceAnnotations) {
-			mutableTypeDetails.addField(new DefaultFieldMetadata(fieldMetadata.getDeclaredByMetadataId(), fieldMetadata.getModifier(), fieldMetadata.getFieldName(), fieldMetadata.getFieldType(), fieldMetadata.getFieldInitializer(), scannedAnnotations));
-		} else {		
-			mutableTypeDetails.addField(fieldMetadata);
-		}
+		mutableTypeDetails.addField(fieldMetadata);
 	}
 
 	/**
