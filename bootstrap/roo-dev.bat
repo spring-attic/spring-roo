@@ -28,5 +28,4 @@ set ROO_CP="%ROO_CP%"
     
 echo Using Roo classpath [%ROO_CP%]
 
-java -cp %ROO_CP% org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml"
-
+java -DdevelopmentMode=true -cp %ROO_CP% org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml"

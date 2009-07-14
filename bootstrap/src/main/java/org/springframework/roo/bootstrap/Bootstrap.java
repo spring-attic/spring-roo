@@ -43,12 +43,21 @@ public class Bootstrap {
         }
         String executeThenQuit = sb.toString();
         
+        boolean successful = true;
         try {
         	bootstrap = new Bootstrap(applicationContextLocation);
-            bootstrap.run(executeThenQuit);
+            successful = bootstrap.run(executeThenQuit);
+        } catch (RuntimeException t) {
+        	successful = false;
+        	throw t;
         } finally {
     		HandlerUtils.flushAllHandlers(Logger.getLogger(""));
         }
+        
+        if (successful) {
+        	System.exit(0);
+        }
+        System.exit(1);
     }
 
 	public Bootstrap(String applicationContextLocation) {
@@ -91,14 +100,16 @@ public class Bootstrap {
 		rooLogger.setLevel(Level.FINE);
 }
 	
-	protected void run(String executeThenQuit) {
-        if (!"".equals(executeThenQuit)) {
-        	shell.executeCommand(executeThenQuit);
+	protected boolean run(String executeThenQuit) {
+        boolean successful = true;
+		if (!"".equals(executeThenQuit)) {
+        	successful = shell.executeCommand(executeThenQuit);
         	shell.requestExit();
         } else {
            	shell.promptLoop();
         }
         
         ctx.close();
+        return successful;
 	}
 }

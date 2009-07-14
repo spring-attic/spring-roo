@@ -38,6 +38,11 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		this.undoManager = undoManager;
 		this.fileMonitorService = fileMonitorService;
 		this.initialMonitoringRequest = initialMonitoringRequest;
+		
+		if (!"false".equals(System.getProperty("developmentMode", "false").toLowerCase())) {
+			developmentMode = true;
+		}
+		
 	}
 	
 	public void completeStartup() {
