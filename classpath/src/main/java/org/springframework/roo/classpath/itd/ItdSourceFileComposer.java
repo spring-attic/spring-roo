@@ -108,9 +108,11 @@ public class ItdSourceFileComposer {
 	private String getIntroductionTo() {
 		// Workaround to simpify type name, as per AspectJ bug # 280380 and ROO-94
 		if (introductionTo.isDefaultPackage()) {
-			return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames();
+			return introductionTo.getFullyQualifiedTypeName();
+			//return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames();
 		}
-		return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
+		return introductionTo.getFullyQualifiedTypeName().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
+		//return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
 	}
 	
 	public void appendTypeAnnotations(List<? extends AnnotationMetadata> typeAnnotations) {
