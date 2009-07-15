@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faqs id="FAQ" title="Frequently Asked Questions">
+	<part id="General">
+		<faq id="release">
+			<question>
+				What's the current release and what are the plans for
+				future releases?
+			</question>
+			<answer>
+				You can track the progress and planning in JIRA
+				(http://jira.springframework.org/browse/ROO).
+			</answer>
+		</faq>
+	</part>
+</faqs>

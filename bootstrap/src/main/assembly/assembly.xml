@@ -20,6 +20,18 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<outputDirectory>/docs/pdf</outputDirectory>
+			<directory>target/site/reference/pdf</directory>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>/docs/html</outputDirectory>
+			<directory>target/site/reference/html</directory>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>/docs/html-single</outputDirectory>
+			<directory>target/site/reference/html-single</directory>
+		</fileSet>
+		<fileSet>
 			<outputDirectory>/samples</outputDirectory>
 			<directory>classpath/src/main/resources</directory>
 			<lineEnding>unix</lineEnding>

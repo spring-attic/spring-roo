@@ -243,7 +243,7 @@ release, ensure you perform an "svn update" first and then run
 
 the following command is used from the root SVN location:
 
-  mvn clean install assembly:assembly
+  mvn clean install site assembly:assembly
 
 This will create a ZIP in the "target" directory.
 

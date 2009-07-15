@@ -252,6 +252,121 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- DocBook (with thanks to Spring Batch's config!) -->
+			<plugin>
+				<groupId>com.agilejava.docbkx</groupId>
+				<artifactId>docbkx-maven-plugin</artifactId>
+				<version>2.0.8</version>
+				<executions>
+					<execution>
+						<id>single-page</id>
+						<goals>
+							<goal>generate-html</goal>
+						</goals>
+						<configuration>
+							<htmlCustomization>${basedir}/src/docbkx/resources/xsl/html.xsl</htmlCustomization>
+							<postProcess>
+								<move todir="${basedir}/target/site/reference/html-single">
+									<fileset dir="${basedir}/target/docbkx/html">
+										<include name="index.html" />
+									</fileset>
+								</move>
+								<copy todir="${basedir}/target/site/reference/html-single">
+									<fileset dir="${basedir}/src/docbkx/resources">
+										<include name="**/*.css" />
+										<include name="**/*.png" />
+										<include name="**/*.gif" />
+										<include name="**/*.jpg" />
+									</fileset>
+								</copy>
+								<copy todir="${basedir}/target/site/reference/html-single">
+									<fileset dir="${basedir}/src/site/docbook/reference">
+										<include name="**/*.png" />
+										<include name="**/*.gif" />
+										<include name="**/*.jpg" />
+									</fileset>
+								</copy>
+							</postProcess>
+						</configuration>
+						<phase>pre-site</phase>
+					</execution>
+					<execution>
+						<id>single-pdf</id>
+						<goals>
+							<goal>generate-pdf</goal>
+						</goals>
+						<configuration>
+							<imgSrcPath>src/site/docbook/reference/</imgSrcPath>
+							<admonGraphicsPath>src/docbkx/resources/images/</admonGraphicsPath>
+							<postProcess>
+								<copy file="${basedir}/target/docbkx/pdf/index.pdf" tofile="${basedir}/target/site/reference/pdf/spring-roo-docs.pdf" failonerror="false" />
+							</postProcess>
+						</configuration>
+						<phase>pre-site</phase>
+					</execution>
+					<execution>
+						<id>multi-page</id>
+						<goals>
+							<goal>generate-html</goal>
+						</goals>
+						<configuration>
+							<chunkedOutput>true</chunkedOutput>
+							<htmlCustomization>${basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
+							<postProcess>
+								<move todir="${basedir}/target/site/reference">
+									<fileset dir="${basedir}/target/docbkx">
+										<include name="**/*.html" />
+									</fileset>
+								</move>
+								<copy todir="${basedir}/target/site/reference/html">
+									<fileset dir="${basedir}/src/docbkx/resources">
+										<include name="**/*.css" />
+										<include name="**/*.png" />
+										<include name="**/*.gif" />
+										<include name="**/*.jpg" />
+									</fileset>
+								</copy>
+								<copy todir="${basedir}/target/site/reference/html">
+									<fileset dir="${basedir}/src/site/docbook/reference">
+										<include name="**/*.png" />
+										<include name="**/*.gif" />
+										<include name="**/*.jpg" />
+									</fileset>
+								</copy>
+							</postProcess>
+						</configuration>
+						<phase>pre-site</phase>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.docbook</groupId>
+						<artifactId>docbook-xml</artifactId>
+						<version>4.4</version>
+						<scope>runtime</scope>
+					</dependency>
+					<dependency>
+						<groupId>org.apache.xmlgraphics</groupId>
+						<artifactId>fop</artifactId>
+						<version>0.93</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<includes>index.xml</includes>
+					<chunkedOutput>false</chunkedOutput>
+					<draftWatermarkImage />
+					<htmlStylesheet>css/html.css</htmlStylesheet>
+					<sourceDirectory>${basedir}/src/site/docbook/reference</sourceDirectory>
+					<foCustomization>${basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+					<xincludeSupported>true</xincludeSupported>
+					<entities>
+						<entity>
+							<name>version</name>
+							<value>${project.version}</value>
+						</entity>
+					</entities>
+				</configuration>
+			</plugin>
             <!-- Other -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -314,57 +429,16 @@
     </build>
 
     <reporting>
+		<excludeDefaults>true</excludeDefaults>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.4.3</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>                    
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <aggregate>true</aggregate>
-                    <header>Spring Roo</header>
-                    <quiet>true</quiet>
-                    <excludePackageNames>sample,bigbank,zzz</excludePackageNames>                                        
-                    <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
-                        <link>http://static.springframework.org/spring/docs/2.5.x/api/</link>
-                        <link>http://asm.objectweb.org/current/doc/javadoc/user/</link>
-                        <link>http://junit.sourceforge.net/javadoc/</link>
-                        <link>http://jline.sourceforge.net/apidocs/index.html</link>
-                        <link>http://logging.apache.org/log4j/1.2/apidocs/index.html</link>
-                    </links>
-                </configuration>
-                <reportSets>
-                  <reportSet>
-                    <reports>
-                      <report>javadoc</report>
-                    </reports>
-                  </reportSet>
-                </reportSets>                
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-				<version>2.2</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.1</version>
+                <reportSets>
+                  <reportSet>
+                  </reportSet>
+                </reportSets>
             </plugin>           
         </plugins>
     </reporting>

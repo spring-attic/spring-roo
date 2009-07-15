@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<chapter id="spring-roo-intro">
+  <title>Spring Roo Introduction</title>
+
+  <para>Spring Roo provides interactive, lightweight, user customizable tooling that enables rapid delivery of high performance enterprise Java applications.</para>
+
+  <para>We will be adding documentation shortly.</para>
+
+</chapter>

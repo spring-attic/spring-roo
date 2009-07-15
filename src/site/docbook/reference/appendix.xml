@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<appendix id="listOfAddOns">
+  <title>List of Add-Ons</title>
+
+  <section id="bundledAddOns">
+    <title>Add-Ons</title>
+
+    <table>
+      <title>Bundled Roo Add-Ons</title>
+
+      <tgroup cols="2">
+        <colspec align="center" />
+
+        <thead>
+          <row>
+            <entry align="center">Add-On</entry>
+            <entry align="center">Description</entry>
+          </row>
+        </thead>
+
+        <tbody>
+          <row>
+            <entry align="left">addon-beaninfo</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-configurable</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-dod</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-email</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-entity</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-finder</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-javabean</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-jms</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-jpa</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-logging</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-maven</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-plural</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-property-editor</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-propfiles</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-security</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-test</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-tostring</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-web-flow</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-web-menu</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-web-mvc-controller</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-web-mvc-jsp</entry>
+            <entry align="left"></entry>
+          </row>
+          <row>
+            <entry align="left">addon-web-selenium</entry>
+            <entry align="left"></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </table>
+  </section>
+
+</appendix>
+
