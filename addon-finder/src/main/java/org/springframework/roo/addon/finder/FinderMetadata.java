@@ -95,8 +95,29 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		for (JavaSymbolName name : paramNames) {
-			bodyBuilder.appendFormalLine("if (" + name + " == null) throw new IllegalArgumentException(\"The " + name+ " argument is required\");");
+		for (int i = 0; i < paramTypes.size(); i++) {
+			String name = paramNames.get(i).getSymbolName();
+			
+			StringBuilder length = new StringBuilder();
+			if (paramTypes.get(i).equals(new JavaType("java.lang.String"))) {
+				length.append(" || ").append(paramNames.get(i)).append(".length() == 0");
+			}
+			
+			bodyBuilder.appendFormalLine("if (" + name + " == null" + length.toString() + ") throw new IllegalArgumentException(\"The " + name + " argument is required\");");
+			
+			if (length.length() > 0 && dynamicFinderMethodName.substring(dynamicFinderMethodName.indexOf(paramNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")){
+				bodyBuilder.appendFormalLine(name + " = " + name + ".replace('*', '%');");
+				bodyBuilder.appendFormalLine("if (" + name + ".charAt(0) != '%') {");
+				bodyBuilder.indent();
+				bodyBuilder.appendFormalLine(name + " = \"%\" + " + name + ";");
+				bodyBuilder.indentRemove();
+				bodyBuilder.appendFormalLine("}");
+				bodyBuilder.appendFormalLine("if (" + name + ".charAt(" + name + ".length() -1) != '%') {");
+				bodyBuilder.indent();
+				bodyBuilder.appendFormalLine(name + " = " + name + " + \"%\";");
+				bodyBuilder.indentRemove();
+				bodyBuilder.appendFormalLine("}");
+			}
 		}
 		
 		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + entityMetadata.getEntityManagerField().getFieldName().getSymbolName() + ";");

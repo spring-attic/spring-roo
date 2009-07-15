@@ -42,6 +42,7 @@ add field date jpa -class ~.domain.AbstractPerson -fieldName birthDay -type java
 install finder -class ~.domain.Pet -finderName findPetsByNameAndWeight
 install finder -class ~.domain.Pet -finderName findPetsByOwner
 install finder -class ~.domain.Pet -finderName findPetsBySendRemindersAndWeightLessThan
+install finder -class ~.domain.Pet -finderName findPetsByTypeAndNameLike
 install finder -class ~.domain.Visit -finderName findVisitsByDescriptionAndVisitDate  
 install finder -class ~.domain.Visit -finderName findVisitsByVisitDateBetween 
 install finder -class ~.domain.Visit -finderName findVisitsByDescriptionLike
