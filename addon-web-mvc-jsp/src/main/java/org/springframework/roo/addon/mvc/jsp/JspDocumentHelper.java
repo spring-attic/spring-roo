@@ -409,14 +409,14 @@ public class JspDocumentHelper {
 
 					Element select = document.createElement("select");
 					select.setAttribute("style", "width:250px");
-					select.setAttribute("name", type.getSimpleTypeName().toLowerCase());
+					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
-					forEach.setAttribute("var", type.getSimpleTypeName().toLowerCase());
+					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase());
 					select.appendChild(forEach);
 					Element option = document.createElement("option");
-					option.setAttribute("value", "${" + type.getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
-					option.setTextContent("${" + type.getSimpleTypeName().toLowerCase() + "}");
+					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + paramName.getSymbolName().toLowerCase() + "}");
 					forEach.appendChild(option);
 					ifElement.appendChild(select);		
 				}
