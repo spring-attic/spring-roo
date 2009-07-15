@@ -66,7 +66,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		String tablename = beanInfoMetadata.getJavaBean().getSimpleTypeName();
 		
 		StringBuilder builder = new StringBuilder();
-		builder.append("FROM ").append(tablename);
+		builder.append("SELECT ").append(tablename);
+		builder.append(" FROM ").append(tablename);
 		builder.append(" AS ").append(tablename.toLowerCase());
 		builder.append(" WHERE ");
 
