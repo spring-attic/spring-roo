@@ -35,6 +35,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 		for (int i = 0; i < maxDepth; i++) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
+				
 				JavaSymbolName propertyName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
 				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 				if (field == null) {
@@ -234,6 +235,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			for (ReservedToken keyWord : ReservedTokenHolder.getBooleanTokens()) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
+		} else {
+			tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
 		}
 		return tempFinders;
 	}
