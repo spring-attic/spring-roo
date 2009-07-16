@@ -591,15 +591,26 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(annotation);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
+		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + getEntityManagerMethod().getMethodName().getSymbolName() + "();");
 		if ("flush".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 		} else if ("merge".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " merged = this." + getEntityManagerField().getFieldName().getSymbolName() + ".merge(this);");
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 			bodyBuilder.appendFormalLine("this." + getIdentifierField().getFieldName().getSymbolName() + " = merged." + getIdentifierAccessor().getMethodName().getSymbolName() + "();");
+		} else if ("remove".equals(entityManagerDelegate)) {
+			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + ".contains(this)) {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(this);");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("} else {");
+			bodyBuilder.indent();
+			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = this." + getEntityManagerField().getFieldName().getSymbolName() + ".find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, this." + getIdentifierField().getFieldName().getSymbolName() + ");");
+			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(attached);");
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}");
 		} else {
-			// persist or remove
+			// persist
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, bodyBuilder.getOutput());
