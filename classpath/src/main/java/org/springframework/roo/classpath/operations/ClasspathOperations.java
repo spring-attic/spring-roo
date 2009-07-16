@@ -71,6 +71,10 @@ public class ClasspathOperations {
 		return getPathResolver() != null;
 	}
 	
+	public boolean isPersistentClassAvailable() {
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+	}
+	
 	public String getPhysicalLocationCanonicalPath(JavaType javaType, Path path) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");

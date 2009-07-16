@@ -37,9 +37,14 @@ public class ClasspathCommands implements CommandMarker {
 		this.classpathOperations = classpathOperations;
 	}
 	
-	@CliAvailabilityIndicator({"generate class file", "new java file", "new test file", "new persistent class jpa"})
+	@CliAvailabilityIndicator({"generate class file", "new java file", "new test file"})
 	public boolean isProjectAvailable() {
 		return classpathOperations.isProjectAvailable();
+	}
+	
+	@CliAvailabilityIndicator({"new persistent class jpa"})
+	public boolean isPersistentClassAvailable() {
+		return classpathOperations.isPersistentClassAvailable();
 	}
 	
 	@CliCommand(value="generate class file", help="Creates a new Java source file in any project path")
