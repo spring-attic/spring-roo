@@ -78,10 +78,10 @@ public class MenuOperations {
 		Assert.hasText(link, "Link required");
 		
 		Document document;
-		try {
+		try {			
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+			throw new IllegalArgumentException("Unable to parse menu.jsp" + (e.getMessage() == null || "".equals(e.getMessage()) ? "" : " (" + e.getMessage() + ")"));
 		}
 		
 		//make the root element of the menu the one with the menu identifier allowing for different decorations of menu
