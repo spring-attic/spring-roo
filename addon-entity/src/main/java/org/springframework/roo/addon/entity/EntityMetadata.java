@@ -591,7 +591,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(annotation);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + getEntityManagerMethod().getMethodName().getSymbolName() + "();");
+		
+		// Address non-injected entity manager field
+		MethodMetadata entityManagerMethod = getEntityManagerMethod();
+		if (entityManagerMethod == null) {
+			// Likely to be an abstract class; in any event we cannot attempt to "new" this class, so let's just output an error
+			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
+		} else {
+			// Use the getEntityManager() method to acquire an entity manager (the method will throw an exception if it cannot be acquired)
+			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
+		}
+		
 		if ("flush".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 		} else if ("merge".equals(entityManagerDelegate)) {
