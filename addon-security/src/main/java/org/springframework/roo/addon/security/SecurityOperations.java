@@ -62,7 +62,7 @@ public class SecurityOperations {
 		projectOperations.dependencyUpdate(DEPENDENCY);
 		
 		// copy the template across
-		String destination = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-security.xml");
+		String destination = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
 		if (!fileManager.exists(destination)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-security-template.xml"), fileManager.createFile(destination).getOutputStream());

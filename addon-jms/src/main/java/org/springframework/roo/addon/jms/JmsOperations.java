@@ -80,12 +80,12 @@ public class JmsOperations {
 	}
 	
 	public boolean isManageJmsAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml"));
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml"));
 	}
 	
 	public void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType) {
 		Assert.notNull(jmsProvider, "Jms provider required");
-		String jmsContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml");
+		String jmsContextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		MutableFile jmsContextMutableFile = null;
 		
 		Document appCtx;
@@ -94,7 +94,7 @@ public class JmsOperations {
 				jmsContextMutableFile = fileManager.updateFile(jmsContextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(jmsContextMutableFile.getInputStream());
 			} else {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-jms-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml")).getOutputStream());
 				jmsContextMutableFile = fileManager.updateFile(jmsContextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(jmsContextMutableFile.getInputStream());
 			}
@@ -195,7 +195,7 @@ public class JmsOperations {
 		
 		physicalTypeMetadataProvider.createPhysicalType(toCreate);
 		
-		String jmsContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-jms.xml");
+		String jmsContextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-jms.xml");
 		MutableFile jmsContextMutableFile = null;
 		
 		Document appCtx;

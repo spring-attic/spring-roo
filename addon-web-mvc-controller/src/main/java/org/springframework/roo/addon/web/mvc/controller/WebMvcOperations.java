@@ -213,7 +213,7 @@ public class WebMvcOperations {
 		
 		// Verify the middle tier application context already exists
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml")), "Application context does not exist");
+		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 		
 		String servletCtxFilename = "WEB-INF/" + projectMetadata.getProjectName() + "-servlet.xml";
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename))) {

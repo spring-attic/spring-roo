@@ -77,7 +77,7 @@ public class JpaOperations {
 	}
 	
 	private void updateApplicationContext(JdbcDatabase database, String jndi) {		
-		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
+		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
 		Document appCtx;
@@ -153,7 +153,7 @@ public class JpaOperations {
 	}
 
 	private void updateDatabaseProperties(JdbcDatabase database) {
-		String databasePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "database.properties");
+		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 		MutableFile databaseMutableFile = null;
 		
 		Properties props = new Properties();

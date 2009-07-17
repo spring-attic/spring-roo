@@ -10,39 +10,40 @@
     <modules>
         <module>annotations</module>
         <module>support</module>
-	<module>model</module>
+		<module>model</module>
         <module>shell</module>
         <module>shell-jline</module>
-	<module>metadata</module>
+		<module>metadata</module>
         <module>file-undo</module>
         <module>file-monitor</module>
         <module>file-monitor-polling</module>
         <module>project</module>
         <module>process-manager</module>
-	<module>classpath</module>
-	<module>classpath-javaparser</module>
-	<module>addon-maven</module>
-	<module>addon-plural</module>
-	<module>addon-propfiles</module>
-	<module>addon-beaninfo</module>
-	<module>addon-configurable</module>
-	<module>addon-email</module>
-	<module>addon-javabean</module>
-	<module>addon-jpa</module>
-	<module>addon-jms</module>
-	<module>addon-finder</module>
-	<module>addon-logging</module>
-	<module>addon-entity</module>
-	<module>addon-property-editor</module>
-	<module>addon-security</module>
-	<module>addon-tostring</module>
-	<module>addon-web-flow</module>
-	<module>addon-web-mvc-controller</module>
-	<module>addon-web-mvc-jsp</module>
-	<module>addon-web-menu</module>
-	<module>addon-web-selenium</module>
-	<module>addon-dod</module>
-	<module>addon-test</module>
+		<module>classpath</module>
+		<module>classpath-javaparser</module>
+		<module>addon-maven</module>
+		<module>addon-plural</module>
+		<module>addon-propfiles</module>
+		<module>addon-beaninfo</module>
+		<module>addon-configurable</module>
+		<module>addon-email</module>
+		<module>addon-javabean</module>
+		<module>addon-jpa</module>
+		<module>addon-jms</module>
+		<module>addon-finder</module>
+		<module>addon-logging</module>
+		<module>addon-entity</module>
+		<module>addon-property-editor</module>
+		<module>addon-security</module>
+		<module>addon-tostring</module>
+		<module>addon-web-flow</module>
+		<module>addon-web-mvc-controller</module>
+		<module>addon-web-mvc-jsp</module>
+		<module>addon-web-menu</module>
+		<module>addon-web-selenium</module>
+		<module>addon-dod</module>
+		<module>addon-test</module>
+		<module>addon-bundlor</module>
         <module>bootstrap</module>
     </modules>
 

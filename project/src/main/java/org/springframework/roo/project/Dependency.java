@@ -94,7 +94,14 @@ public class Dependency implements Comparable<Dependency> {
         if(dependency.hasChildNodes()) {
         	this.groupId = new JavaPackage(dependency.getElementsByTagName("groupId").item(0).getTextContent());
 	        this.artifactId = new JavaSymbolName(dependency.getElementsByTagName("artifactId").item(0).getTextContent());
-	        this.versionId = dependency.getElementsByTagName("version").item(0).getTextContent();	
+
+	        NodeList versionElements = dependency.getElementsByTagName("version");
+	        if (versionElements.getLength() > 0) {
+	        	this.versionId = dependency.getElementsByTagName("version").item(0).getTextContent();
+	        }
+	        else {
+	        	this.versionId = "";
+	        }
 	        
 	        //parsing for exclusions
 	        NodeList exclusionList = dependency.getElementsByTagName("exclusions");

@@ -56,17 +56,17 @@ public class JpaCommands implements CommandMarker {
 	
 	@CliCommand(value="database properties", help="Shows database configuration details")
 	public SortedSet<String> databaseProperties() {
-		return propFileOperations.getPropertyKeys(Path.SRC_MAIN_RESOURCES, "database.properties", true);
+		return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
 	}
 	
 	@CliCommand(value="database set", help="Changes a particular database property")
 	public void databaseSet(@CliOption(key="key", mandatory=true, help="The property key that should be changed") String key, @CliOption(key="value", mandatory=true, help="The new vale for this property key") String value) {
-		propFileOperations.changeProperty(Path.SRC_MAIN_RESOURCES, "database.properties", key, value);
+		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key, value);
 	}
 
 	@CliCommand(value="database remove", help="Removes a particular database property")
 	public void databaseRemove(@CliOption(key={"","key"}, mandatory=true, help="The property key that should be removed") String key) {
-		propFileOperations.removeProperty(Path.SRC_MAIN_RESOURCES, "database.properties", key);
+		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key);
 	}
 	
 	/**

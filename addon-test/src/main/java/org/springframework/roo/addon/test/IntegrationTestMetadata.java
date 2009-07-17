@@ -112,7 +112,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
 			List<AnnotationAttributeValue<?>> ctxCfg = new ArrayList<AnnotationAttributeValue<?>>();
-			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/applicationContext.xml"));
+			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/META-INF/spring/applicationContext.xml"));
 			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
 		}
 	

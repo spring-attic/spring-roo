@@ -52,7 +52,7 @@ public class ApplicationContextOperations {
 		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml"));
+		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
 		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 
 		fileManager.scanAll();

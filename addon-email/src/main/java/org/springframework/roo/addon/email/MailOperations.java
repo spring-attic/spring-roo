@@ -71,13 +71,13 @@ public class MailOperations {
 	}
 	
 	public boolean isManageEmailAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml"));
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
 	}
 	
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
 		Assert.hasText(hostServer, "Host server name required");		
 		
-		String emailPropsPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "email.properties");
+		String emailPropsPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "email.properties");
 		MutableFile databaseMutableFile = null;
 		
 		Properties props = new Properties();
@@ -94,7 +94,7 @@ public class MailOperations {
 			throw new IllegalStateException(ioe);
 		}
 		
-		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
+		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
 		Document appCtx = null;
@@ -202,7 +202,7 @@ public class MailOperations {
 	
 	public void configureTemplateMessage(String from, String subject) {		
 		
-		String emailPropsPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "email.properties");
+		String emailPropsPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "email.properties");
 		MutableFile databaseMutableFile = null;
 		
 		Properties props = new Properties();
@@ -219,7 +219,7 @@ public class MailOperations {
 			throw new IllegalStateException(ioe);
 		}	
 		
-		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
+		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
 		Document appCtx = null;
@@ -302,7 +302,7 @@ public class MailOperations {
 		
 		mutableTypeDetails.addField(fieldMetadata);
 		
-		String contextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext.xml");
+		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 		
 		Document appCtx = null;

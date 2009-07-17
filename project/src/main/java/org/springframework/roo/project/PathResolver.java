@@ -112,6 +112,7 @@ public interface PathResolver {
 	 * <li>{@link Path#SRC_TEST_JAVA}</li>
 	 * <li>{@link Path#SRC_TEST_RESOURCES}</li>
 	 * <li>{@link Path#ROOT}</li>
+	 * <li>{@link Path#SPRING_CONFIG_ROOT}</li>
 	 * </ul>
 	 * 
 	 * @return all supported paths (never null and never empty)

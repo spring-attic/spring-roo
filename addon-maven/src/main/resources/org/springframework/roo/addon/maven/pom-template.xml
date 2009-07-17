@@ -24,7 +24,38 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</repository>
+
+		<!--  required for some plugins that depend on snapshots :( -->
+		<repository>
+			<id>com.springsource.repository.bundles.snapshot</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Snapshots</name>
+			<url>http://repository.springsource.com/maven/bundles/snapshot</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external.snapshots</id>
+			<name>SpringSource Enterprise Bundle Repository - Third Party External Bundle Snapshots</name>
+			<url>http://private.repository.springsource.com.s3.amazonaws.com/maven/bundles/external</url>
+		</repository>
+
 	</repositories>
+	
+	<pluginRepositories>
+		<pluginRepository>
+			<id>com.springsource.repository.bundles.release</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>com.springsource.repository.bundles.milestone</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
+			<url>http://repository.springsource.com/maven/bundles/milestone</url>
+		</pluginRepository>	
+	</pluginRepositories>
 
 	<dependencies>
 		<!-- General dependencies for standard applications -->

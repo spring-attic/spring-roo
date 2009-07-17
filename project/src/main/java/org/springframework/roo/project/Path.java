@@ -26,6 +26,7 @@ public class Path implements Comparable<Path> {
 	public static final Path SRC_TEST_RESOURCES = new Path("SRC_TEST_RESOURCES");
 	public static final Path SRC_MAIN_WEBAPP = new Path("SRC_MAIN_WEBAPP");
 	public static final Path ROOT = new Path("ROOT");
+	public static final Path SPRING_CONFIG_ROOT = new Path("SPRING_CONFIG_ROOT");
 	
 	private String name;
 	

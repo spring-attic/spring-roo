@@ -37,17 +37,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private JavaPackage topLevelPackage;
 	private String projectName;
 	private Set<Dependency> dependencies;
+	private Set<Dependency> buildPluginDependencies;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Dependency> buildPluginDependencies, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
 		Assert.notNull(dependencies, "Dependencies required");
+		Assert.notNull(buildPluginDependencies, "Build plugin dependencies required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
 		this.dependencies = dependencies;
+		this.buildPluginDependencies = buildPluginDependencies;
 		this.pathResolver = pathResolver;
 	}
 
@@ -64,6 +67,18 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isDependencyRegistered(Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to check is required");
 		return dependencies.contains(dependency);
+	}
+	
+	/**
+	 * Convenience method for determining whether a particular build plugin dependency
+	 * is registered.
+	 * 
+	 * @param dependency to check (required)
+	 * @return whether the build plugin dependency is currently registered or not
+	 */
+	public boolean isBuildPluginDependencyRegistered(Dependency dependency) {
+		Assert.notNull(dependency, "Dependency to check is required");
+		return buildPluginDependencies.contains(dependency);
 	}
 
 	public JavaPackage getTopLevelPackage() {
@@ -104,6 +119,34 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return result;
 	}
 	
+	/**
+	 * @return an unmodifiable collection of the build plugin dependencies (never null, but
+	 * may be empty).
+	 */
+	public Set<Dependency> getBuildPluginDependencies() {
+		return Collections.unmodifiableSet(buildPluginDependencies);
+	}
+
+	/**
+	 * Locates any build plugin dependencies which match the presented dependency, excluding the version number.
+	 * This is useful for upgrade use cases, where it is necessary to locate any build plugin dependencies with
+	 * the same group, artifact and type identifications so that they can be removed.
+	 * 
+	 * @param dependency to locate (required; note the version number is ignored in comparisons)
+	 * @return any matching dependencies (never returns null, but may return an empty {@link Set})
+	 */
+	public Set<Dependency> getBuildPluginDependenciesExcludingVersion(Dependency dependency) {
+		Assert.notNull(dependency, "Dependency to locate is required");
+		Set<Dependency> result = new HashSet<Dependency>();
+		for (Dependency d : buildPluginDependencies) {
+			if (dependency.getArtifactId().equals(d.getArtifactId()) && dependency.getGroupId().equals(d.getGroupId()) && dependency.getType().equals(d.getType())) {
+				result.add(d);
+			}
+		}
+		return result;
+	}
+
+	
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -111,6 +154,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("topLevelPackage", topLevelPackage);
 		tsc.append("projectName", projectName);
 		tsc.append("dependencies", dependencies);
+		tsc.append("buildPluginDependencies", buildPluginDependencies);
 		tsc.append("pathResolver", pathResolver);
 		return tsc.toString();
 	}

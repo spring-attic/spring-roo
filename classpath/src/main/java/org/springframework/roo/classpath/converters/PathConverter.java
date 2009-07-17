@@ -28,6 +28,7 @@ public class PathConverter implements Converter {
 		legalValues.add(Path.SRC_MAIN_WEBAPP.getName());
 		legalValues.add(Path.SRC_TEST_JAVA.getName());
 		legalValues.add(Path.SRC_TEST_RESOURCES.getName());
+		legalValues.add(Path.SPRING_CONFIG_ROOT.getName());
 	}
 	
 	// TODO: Allow context to limit to source paths only, limit to resource paths only 

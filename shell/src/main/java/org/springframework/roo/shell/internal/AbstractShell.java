@@ -152,14 +152,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	@CliCommand(value={"/*"}, help="Start of block comment")
 	public void blockCommentBegin() {
 		Assert.isTrue(!inBlockComment, "Cannot open a new block comment when one already active");
-		logger.fine("Started comment");
 		inBlockComment = true;
 	}
 
 	@CliCommand(value={"*/"}, help="End of block comment")
 	public void blockCommentFinish() {
 		Assert.isTrue(inBlockComment, "Cannot close a block comment when it has not been opened");
-		logger.fine("Ended comment");
 		inBlockComment = false;
 	}
 

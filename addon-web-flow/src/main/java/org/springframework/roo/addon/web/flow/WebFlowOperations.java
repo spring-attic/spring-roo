@@ -63,11 +63,11 @@ public class WebFlowOperations {
 	}
 	
 	public boolean isInstallWebFlowAvailable() {		
-		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-webflow.xml"));
+		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml"));
 	}
 	
 	public boolean isManageWebFlowAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-webflow.xml"));
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml"));
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class WebFlowOperations {
 		//install Web flow config
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 			
-		String flowContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-webflow.xml");
+		String flowContextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml");
 		MutableFile webflowContextMutableFile = null;
 		
 		Document appCtx;
@@ -95,7 +95,7 @@ public class WebFlowOperations {
 				webflowContextMutableFile = fileManager.updateFile(flowContextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(webflowContextMutableFile.getInputStream());
 			} else {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-webflow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "applicationContext-webflow.xml")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-webflow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml")).getOutputStream());
 				webflowContextMutableFile = fileManager.updateFile(flowContextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(webflowContextMutableFile.getInputStream());
 			}

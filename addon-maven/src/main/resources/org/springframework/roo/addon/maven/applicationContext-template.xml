@@ -10,7 +10,7 @@
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<context:property-placeholder location="classpath*:*.properties"/>
+	<context:property-placeholder location="classpath*:META-INF/spring/*.properties"/>
 	
 	<!-- Turn on AspectJ @Configurable support -->
 	<context:spring-configured />

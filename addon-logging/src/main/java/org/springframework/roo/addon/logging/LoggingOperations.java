@@ -54,7 +54,7 @@ public class LoggingOperations {
 	}
 	
 	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
-		String filePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+		String filePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
 		
