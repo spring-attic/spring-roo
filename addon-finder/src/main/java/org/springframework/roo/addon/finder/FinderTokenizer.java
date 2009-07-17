@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.support.util.Assert;
 
@@ -48,8 +49,14 @@ public final class FinderTokenizer {
 		finder = finder.replace("find" + plural +"By", "");
 
 		fieldTokens = new TreeSet<FieldToken>();
+		
 		for(MethodMetadata metadata : beanInfoMetadata.getPublicMutators()) {
-			fieldTokens.add(new FieldToken(beanInfoMetadata.getFieldForPropertyName(metadata.getParameterNames().get(0))));
+			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(metadata.getParameterNames().get(0));
+			
+			//if we did find a field matching the first parameter name of the mutator method we can add it to the finder ITD
+			if(fieldMetadata != null) {
+				fieldTokens.add(new FieldToken(fieldMetadata));
+			}
 		}
 		
 		List<Token> tokens = new ArrayList<Token>();
