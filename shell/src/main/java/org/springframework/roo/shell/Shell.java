@@ -41,5 +41,13 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 * @return the parser (never null)
 	 */
 	SimpleParser getParser();
+	
+	/**
+	 * Indicates the shell should switch into a lower-level development mode. The exact meaning varies by
+	 * shell implementation.
+	 * 
+	 * @param developmentMode true if development mode should be enabled, false otherwise
+	 */
+	void setDevelopmentMode(boolean developmentMode);
 
 }

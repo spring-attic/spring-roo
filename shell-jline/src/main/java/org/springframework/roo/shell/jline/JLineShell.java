@@ -90,4 +90,8 @@ public class JLineShell extends AbstractShell implements Shell {
 		return parser;
 	}
 
+	public void setDevelopmentMode(boolean developmentMode) {
+		JLineLogHandler.setIncludeThreadName(developmentMode);
+	}
+
 }

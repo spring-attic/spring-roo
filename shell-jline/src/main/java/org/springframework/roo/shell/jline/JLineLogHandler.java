@@ -25,12 +25,16 @@ public class JLineLogHandler extends Handler {
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
 	private String lastMessage;
+	private static boolean includeThreadName = true;
+	private boolean ansiSupported;
 	
 	public JLineLogHandler(ConsoleReader reader, ShellPromptAccessor shellPromptAccessor) {
 		Assert.notNull(reader, "Console reader required");
 		Assert.notNull(shellPromptAccessor, "Shell prompt accessor required");
 		this.reader = reader;
 		this.shellPromptAccessor = shellPromptAccessor;
+		
+		this.ansiSupported = reader.getTerminal().isANSISupported();
 		
 		setFormatter(new Formatter() {
 			public String format(LogRecord record) {
@@ -69,12 +73,16 @@ public class JLineLogHandler extends Handler {
 	public static void cancelRedrawProhibition() {
 		redrawProhibit.remove();
 	}
-
+	
+	public static void setIncludeThreadName(boolean include) {
+		includeThreadName = include;
+	}
+	
 	@Override
 	public void publish(LogRecord record) {
 		try {
 			// Avoid repeating the same message that displayed immediately before the current message (ROO-30)
-			String toDisplay = toDisplay(record, reader.getTerminal().isANSISupported());
+			String toDisplay = toDisplay(record);
 			if (toDisplay.equals(lastMessage)) {
 				return;
 			}
@@ -113,22 +121,44 @@ public class JLineLogHandler extends Handler {
 			reportError("Could not publish log message", e, Level.SEVERE.intValue());
 		}
 	}
-
-	private String toDisplay(LogRecord event, boolean ansiSupported) {
+	
+	private String toDisplay(LogRecord event) {
 	    StringBuilder sb = new StringBuilder();
 		
+	    String threadName;
+	    String eventString;
+	    if (includeThreadName && !"main".equals(Thread.currentThread().getName())) {
+	    	threadName = "[" + Thread.currentThread().getName() + "]";
+	    	
+	    	// Build an event string that will indent nicely given the left hand side now contains a thread name
+	    	StringBuilder lineSeparatorAndIndentingString = new StringBuilder();
+	    	for (int i = 0; i <= threadName.length(); i++) {
+	    		lineSeparatorAndIndentingString.append(" ");
+	    	}
+	    	
+	    	eventString = " " + getFormatter().format(event).replace(System.getProperty("line.separator"), System.getProperty("line.separator") + lineSeparatorAndIndentingString.toString());
+	    	
+	    	if (eventString.endsWith(lineSeparatorAndIndentingString.toString())) {
+	    		eventString = eventString.substring(0, eventString.length() - lineSeparatorAndIndentingString.length());
+	    	}
+	    	
+	    } else {
+	    	threadName = "";
+	    	eventString = getFormatter().format(event);
+	    }
+	    
 		if (ansiSupported) {
 			if (event.getLevel().intValue() >= Level.SEVERE.intValue()) {
-				sb.append(new ANSIBuffer().red(getFormatter().format(event)));
+				sb.append(new ANSIBuffer().reverse(threadName).red(eventString));
 			} else if (event.getLevel().intValue() >= Level.WARNING.intValue()) {
-				sb.append(new ANSIBuffer().magenta(getFormatter().format(event)));
+				sb.append(new ANSIBuffer().reverse(threadName).magenta(eventString));
 			} else if (event.getLevel().intValue() >= Level.INFO.intValue()) {
-				sb.append(new ANSIBuffer().green(getFormatter().format(event)));
+				sb.append(new ANSIBuffer().reverse(threadName).green(eventString));
 			} else {
-				sb.append(getFormatter().format(event));
+				sb.append(new ANSIBuffer().reverse(threadName).append(eventString));
 			}
 		} else {
-			sb.append(getFormatter().format(event));
+			sb.append(threadName).append(eventString);
 		}
 	    
 		return sb.toString();
