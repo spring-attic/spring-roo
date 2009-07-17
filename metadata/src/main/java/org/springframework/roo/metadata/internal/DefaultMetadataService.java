@@ -46,7 +46,7 @@ public final class DefaultMetadataService extends AbstractMetadataCache implemen
 	private int cachePuts = 0;
 	private int cacheHits = 0;
 	private int cacheMisses = 0;
-	private int cacheEvictions = 0;
+	private int cacheEvictions = 0; 
 	
 	public DefaultMetadataService(MetadataDependencyRegistry metadataDependencyRegistry) {
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
@@ -167,6 +167,11 @@ public final class DefaultMetadataService extends AbstractMetadataCache implemen
 		
 		if (p != null && p instanceof MetadataCache) {
 			((MetadataCache)p).evict(metadataIdentificationString);
+		}
+		
+		// Finally, evict downstream dependencies (ie metadata that previously depended on this now-evicted metadata)
+		for (String downstream : metadataDependencyRegistry.getDownstream(metadataIdentificationString)) {
+			evict(downstream);
 		}
 	}
 
