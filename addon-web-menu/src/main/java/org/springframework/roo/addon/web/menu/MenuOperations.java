@@ -146,7 +146,6 @@ public class MenuOperations {
 		
 		for(Element element: elements) {
 			if(!allowedMenuIds.contains(element.getAttribute("id"))) {
-				System.out.println("removing " + element.getAttribute("id"));
 				element.getParentNode().removeChild(element);
 			}
 		}
