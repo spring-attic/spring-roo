@@ -171,7 +171,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 					"web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
 					"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
-					"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
+					"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
 		} else {
 			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item");
 		}
@@ -186,7 +186,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 				"web_mvc_jsp_list_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
 				"List all " + entityMetadata.getPlural(),
-				"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
+				"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
@@ -199,7 +199,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
 						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
-						"/" + projectMetadata.getProjectName() + "/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
+						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
 			}
 		}

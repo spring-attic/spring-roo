@@ -112,8 +112,12 @@ public class MenuOperations {
 		if(menuItem == null) {		
 			menuItem = document.createElement("li");
 			menuItem.setAttribute("id", menuItemId);
+			Element url = document.createElement("c:url");
+			url.setAttribute("var", menuItemId + "_url");
+			url.setAttribute("value", link);
+			menuItem.appendChild(url);
 			Element createLink = document.createElement("a");				
-			createLink.setAttribute("href", link);				
+			createLink.setAttribute("href", "${" + menuItemId + "_url}");				
 			createLink.setTextContent(menuItemLabel);		
 			menuItem.appendChild(createLink);
 			categoryRoot.appendChild(menuItem);

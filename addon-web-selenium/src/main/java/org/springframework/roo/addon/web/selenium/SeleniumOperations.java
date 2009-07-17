@@ -177,7 +177,7 @@ public class SeleniumOperations {
 				"Selenium Tests", 
 				"selenium_test_suite_menu_item", 
 				"Test suite", 
-				"/" + projectMetadata.getProjectName().toLowerCase() + "/static/" + relativeTestFilePath);		
+				"/static/" + relativeTestFilePath);		
 	}
 	
 	private void installMavenPlugin(){

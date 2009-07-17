@@ -195,12 +195,20 @@ public class JspDocumentHelper {
 
 		Element showElement = document.createElement("td");
 		Element showFormElement = document.createElement("form:form");
-		showFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		Element showUrl = document.createElement("c:url");
+		showUrl.setAttribute("var", "show_form_url");
+		showUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		showElement.appendChild(showUrl);
+		showFormElement.setAttribute("action", "${show_form_url}");
 		showFormElement.setAttribute("method", "GET");
+		Element showImageUrl = document.createElement("c:url");
+		showImageUrl.setAttribute("var", "show_image_url");
+		showImageUrl.setAttribute("value", "/static/images/show.png");
+		showElement.appendChild(showImageUrl);
 		Element showSubmitElement = document.createElement("input");
 		showSubmitElement.setAttribute("type", "image");
 		showSubmitElement.setAttribute("title", "Show " + entityName);
-		showSubmitElement.setAttribute("src", "/" + projectName + "/static/images/show.png");
+		showSubmitElement.setAttribute("src", "${show_image_url}");
 		showSubmitElement.setAttribute("value", "Show " + entityName);
 		showSubmitElement.setAttribute("alt", "Show " + entityName);
 		showFormElement.appendChild(showSubmitElement);
@@ -210,12 +218,20 @@ public class JspDocumentHelper {
 		if(webScaffoldAnnotationValues.isUpdate()) {
 			Element updateElement = document.createElement("td");		
 			Element updateFormElement = document.createElement("form:form");
-			updateFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
+			Element updateUrl = document.createElement("c:url");
+			updateUrl.setAttribute("var", "update_form_url");
+			updateUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
+			updateElement.appendChild(updateUrl);
+			updateFormElement.setAttribute("action", "${update_form_url}");
 			updateFormElement.setAttribute("method", "GET");
+			Element updateImageUrl = document.createElement("c:url");
+			updateImageUrl.setAttribute("var", "update_image_url");
+			updateImageUrl.setAttribute("value", "/static/images/update.png");
+			updateElement.appendChild(updateImageUrl);
 			Element updateSubmitElement = document.createElement("input");
 			updateSubmitElement.setAttribute("type", "image");
 			updateSubmitElement.setAttribute("title", "Update " + entityName);
-			updateSubmitElement.setAttribute("src", "/" + projectName + "/static/images/update.png");
+			updateSubmitElement.setAttribute("src", "${update_image_url}");
 			updateSubmitElement.setAttribute("value", "Update " + entityName);
 			updateSubmitElement.setAttribute("alt", "Update " + entityName);
 			updateFormElement.appendChild(updateSubmitElement);
@@ -226,12 +242,20 @@ public class JspDocumentHelper {
 		if(webScaffoldAnnotationValues.isDelete()) {
 			Element deleteElement = document.createElement("td");
 			Element deleteFormElement = document.createElement("form:form");
-			deleteFormElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+			Element deleteUrl = document.createElement("c:url");
+			deleteUrl.setAttribute("var", "delete_form_url");
+			deleteUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+			deleteElement.appendChild(deleteUrl);
+			deleteFormElement.setAttribute("action", "${delete_form_url}");
 			deleteFormElement.setAttribute("method", "DELETE");
+			Element deleteImageUrl = document.createElement("c:url");
+			deleteImageUrl.setAttribute("var", "delete_image_url");
+			deleteImageUrl.setAttribute("value", "/static/images/delete.png");
+			deleteElement.appendChild(deleteImageUrl);
 			Element deleteSubmitElement = document.createElement("input");
 			deleteSubmitElement.setAttribute("type", "image");
 			deleteSubmitElement.setAttribute("title", "Delete " + entityName);
-			deleteSubmitElement.setAttribute("src", "/" + projectName + "/static/images/delete.png");
+			deleteSubmitElement.setAttribute("src", "${delete_image_url}");
 			deleteSubmitElement.setAttribute("value", "Delete " + entityName);
 			deleteSubmitElement.setAttribute("alt", "Delete " + entityName);
 			deleteFormElement.appendChild(deleteSubmitElement);
@@ -305,9 +329,14 @@ public class JspDocumentHelper {
 		
 		Element divElement = DojoUtils.getTitlePaneDojo(document, "Create New " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
+		Element url = document.createElement("c:url");
+		url.setAttribute("var", "form_url");
+		url.setAttribute("value", "/" + entityName);
+		divElement.appendChild(url);
+		
 		Element formElement = document.createElement("form:form");
 		formElement.setAttribute("modelAttribute", entityName);
-		formElement.setAttribute("action", "/" + projectName + "/" + entityName);
+		formElement.setAttribute("action", "${form_url}");
 		formElement.setAttribute("method", "POST");
 
 		createFieldsForCreateAndUpdate(document, formElement);
@@ -336,9 +365,14 @@ public class JspDocumentHelper {
 		
 		Element divElement = DojoUtils.getTitlePaneDojo(document, "Update " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 
+		Element url = document.createElement("c:url");
+		url.setAttribute("var", "form_url");
+		url.setAttribute("value", "/" + entityName + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		divElement.appendChild(url);
+		
 		Element formElement = document.createElement("form:form");
 		formElement.setAttribute("modelAttribute", entityName);
-		formElement.setAttribute("action", "/" + projectName + "/" + entityName + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		formElement.setAttribute("action", "${form_url}");
 		formElement.setAttribute("method", "PUT");		
 
 		createFieldsForCreateAndUpdate(document, formElement);
@@ -378,8 +412,13 @@ public class JspDocumentHelper {
 		
 		Element titleDivElement = DojoUtils.getTitlePaneDojo(document, new JavaSymbolName(finderName).getReadableSymbolName());
 		
+		Element url = document.createElement("c:url");
+		url.setAttribute("var", "form_url");
+		url.setAttribute("value", "/" + entityName + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
+		titleDivElement.appendChild(url);
+		
 		Element formElement = document.createElement("form:form");
-		formElement.setAttribute("action", "/" + projectName + "/" + entityName + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
+		formElement.setAttribute("action", "${form_url}");
 		formElement.setAttribute("method", "GET");		
 
 		MethodMetadata methodMetadata = finderMetadata.getDynamicFinderMethod(finderName);
