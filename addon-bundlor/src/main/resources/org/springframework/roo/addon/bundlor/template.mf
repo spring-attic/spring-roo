@@ -2,7 +2,7 @@ Bundle-ManifestVersion: 2
 Bundle-SymbolicName: #topLevelPackage#
 Bundle-Name: #bundleName#
 Bundle-Version: 0.1.0.BUILD-SNAPSHOT
-Bundle-Classpath: .,META-INF/spring
+Bundle-Classpath: .
 Excluded-Exports: *.internal.*
 Import-Template: org.tuckey.web.filters.urlrewrite.*;version="[3.1.0,3.2.0)",
   org.springframework.web.*;version="${spring.version:spring}",
@@ -21,6 +21,8 @@ Import-Template: org.tuckey.web.filters.urlrewrite.*;version="[3.1.0,3.2.0)",
   org.hibernate.ejb.*;version="[3.3.2.GA,3.3.3)",
   org.aspectj.*;version="${aspectj.version:[=.=.=.=,=.+1.0)}",
   org.springframework.js.*;version="[2.0.7,2.1.0)"
+Import-Package: org.springframework.stereotype;version="[3.0.0,3.1.0)",
+  javax.sql;version="0.0.0"
 Version-Patterns:
   spring;pattern="[=.=.=,=.+1.0)",
   hibernate;pattern="[=.=.=.=,=.=.+1)"
