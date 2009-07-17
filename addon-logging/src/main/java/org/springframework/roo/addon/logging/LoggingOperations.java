@@ -114,7 +114,7 @@ public class LoggingOperations {
 				Element log4jContextParamName = document.createElement("param-name");
 				log4jContextParamName.setTextContent("log4jConfigLocation");
 				Element log4jContextParamValue = document.createElement("param-value");
-				log4jContextParamValue.setTextContent("classpath:log4j.properties");
+				log4jContextParamValue.setTextContent("classpath:META-INF/spring/log4j.properties");
 				log4jContextParam.appendChild(log4jContextParamName);
 				log4jContextParam.appendChild(log4jContextParamValue);
 				
