@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -51,10 +52,20 @@ public class MetadataCommands implements CommandMarker {
 		if (upstream.size() == 0) {
 			sb.append("Upstream   : ").append(System.getProperty("line.separator"));
 		}
+
 		for (String s : upstream) {
 			sb.append("Upstream   : ").append(s).append(System.getProperty("line.separator"));
 		}
 		
+		// Include any "class level" notifications that this instance would receive (useful for debugging)
+		// Only necessary if the ID doesn't already represent a class (as such dependencies would have been listed earlier)
+		if (!MetadataIdentificationUtils.isIdentifyingClass(metadataId)) {
+			String asClass = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataId));
+			for (String s : metadataDependencyRegistry.getUpstream(asClass)) {
+				sb.append("Upstream   : ").append(s).append(" (via class)").append(System.getProperty("line.separator"));
+			}
+		}
+
 		Set<String> downstream = metadataDependencyRegistry.getDownstream(metadataId);
 		if (downstream.size() == 0) {
 			sb.append("Downstream : ").append(System.getProperty("line.separator"));
@@ -63,7 +74,18 @@ public class MetadataCommands implements CommandMarker {
 			sb.append("Downstream : ").append(s).append(System.getProperty("line.separator"));
 		}
 		
-		sb.append("Metadata   : ").append(metadataService.get(metadataId));
+		// Include any "class level" notifications that this instance would receive (useful for debugging)
+		// Only necessary if the ID doesn't already represent a class (as such dependencies would have been listed earlier)
+		if (!MetadataIdentificationUtils.isIdentifyingClass(metadataId)) {
+			String asClass = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataId));
+			for (String s : metadataDependencyRegistry.getDownstream(asClass)) {
+				sb.append("Downstream : ").append(s).append(" (via class)").append(System.getProperty("line.separator"));
+			}
+		}
+
+		if (MetadataIdentificationUtils.isIdentifyingInstance(metadataId)) {
+			sb.append("Metadata   : ").append(metadataService.get(metadataId));
+		}
 		return sb.toString();
 	}
 	

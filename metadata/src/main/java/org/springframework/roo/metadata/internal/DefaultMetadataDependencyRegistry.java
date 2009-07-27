@@ -220,7 +220,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 						// (such a condition is only possible if an instance registered to receive class-specific notifications and that instance
 						// caused an event to fire)
 						if (!notifiedDownstreams.contains(downstream) && !upstreamDependency.equals(downstream)) {
-							log(currentNotification, upstreamDependency + " -> " + downstream);
+							log(currentNotification, upstreamDependency + " -> " + downstream + " [via class]");
 							metadataService.notify(upstreamDependency, downstream);
 						}
 					}
