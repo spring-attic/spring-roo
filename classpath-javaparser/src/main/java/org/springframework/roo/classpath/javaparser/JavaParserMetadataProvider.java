@@ -164,7 +164,10 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 				} else {
 					// We have a dependency on the superclass, but no metadata is available
 					// We're left with no choice but to register for every physical type change, in the hope we discover our parent someday (sad, isn't it? :-) )
-					metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), result.getId());
+					for (Path sourcePath : getPathResolver().getSourcePaths()) {
+						String possibleSuperclass = PhysicalTypeIdentifier.createIdentifier(details.getExtendsTypes().get(0), sourcePath);
+						metadataDependencyRegistry.registerDependency(possibleSuperclass, result.getId());
+					}
 				}
 			}
 		}
