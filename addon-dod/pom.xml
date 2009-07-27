@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.roo</groupId>
 		<artifactId>org.springframework.roo.parent</artifactId>
-		<version>1.0.0.RC1</version>
+		<version>1.0.0.RC2</version>
 	</parent>
 	<artifactId>org.springframework.roo.addon.dod</artifactId>
 	<packaging>jar</packaging>
