@@ -132,7 +132,7 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.newDod(entity);
 	}
 
-	@CliCommand(value="new integration test", help="Creates a new data on demand for the specified entity")
+	@CliCommand(value="new integration test", help="Creates a new integration test for the specified entity")
 	public void newIntegrationTest(
 			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
