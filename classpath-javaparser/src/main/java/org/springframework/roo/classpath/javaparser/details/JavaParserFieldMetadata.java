@@ -58,7 +58,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		
 		// Convert into an array if this variable ID uses array notation
 		if (var.getId().getArrayCount() > 0) {
-			this.fieldType = new JavaType(fieldType.getFullyQualifiedTypeName(), var.getId().getArrayCount() + fieldType.getArray(), fieldType.isPrimitive(), fieldType.getArgName(), fieldType.getParameters());
+			this.fieldType = new JavaType(fieldType.getFullyQualifiedTypeName(), var.getId().getArrayCount() + fieldType.getArray(), fieldType.getDataType(), fieldType.getArgName(), fieldType.getParameters());
 		}
 		
 		this.fieldName = new JavaSymbolName(var.getId().getName());

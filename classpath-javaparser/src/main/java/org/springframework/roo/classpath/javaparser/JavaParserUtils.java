@@ -27,6 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -43,99 +45,7 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public class JavaParserUtils  {
-	private static final List<String> javaLangSimpleTypeNames = new ArrayList<String>();
 	
-	static {
-		javaLangSimpleTypeNames.add("Appendable");
-		javaLangSimpleTypeNames.add("CharSequence");
-		javaLangSimpleTypeNames.add("Cloneable");
-		javaLangSimpleTypeNames.add("Comparable");
-		javaLangSimpleTypeNames.add("Iterable");
-		javaLangSimpleTypeNames.add("Readable");
-		javaLangSimpleTypeNames.add("Runnable");
-		javaLangSimpleTypeNames.add("Boolean");
-		javaLangSimpleTypeNames.add("Byte");
-		javaLangSimpleTypeNames.add("Character");
-		javaLangSimpleTypeNames.add("Class");
-		javaLangSimpleTypeNames.add("ClassLoader");
-		javaLangSimpleTypeNames.add("Compiler");
-		javaLangSimpleTypeNames.add("Double");
-		javaLangSimpleTypeNames.add("Enum");
-		javaLangSimpleTypeNames.add("Float");
-		javaLangSimpleTypeNames.add("InheritableThreadLocal");
-		javaLangSimpleTypeNames.add("Integer");
-		javaLangSimpleTypeNames.add("Long");
-		javaLangSimpleTypeNames.add("Math");
-		javaLangSimpleTypeNames.add("Number");
-		javaLangSimpleTypeNames.add("Object");
-		javaLangSimpleTypeNames.add("Package");
-		javaLangSimpleTypeNames.add("Process");
-		javaLangSimpleTypeNames.add("ProcessBuilder");
-		javaLangSimpleTypeNames.add("Runtime");
-		javaLangSimpleTypeNames.add("RuntimePermission");
-		javaLangSimpleTypeNames.add("SecurityManager");
-		javaLangSimpleTypeNames.add("Short");
-		javaLangSimpleTypeNames.add("StackTraceElement");
-		javaLangSimpleTypeNames.add("StrictMath");
-		javaLangSimpleTypeNames.add("String");
-		javaLangSimpleTypeNames.add("StringBuffer");
-		javaLangSimpleTypeNames.add("StringBuilder");
-		javaLangSimpleTypeNames.add("System");
-		javaLangSimpleTypeNames.add("Thread");
-		javaLangSimpleTypeNames.add("ThreadGroup");
-		javaLangSimpleTypeNames.add("ThreadLocal");
-		javaLangSimpleTypeNames.add("Throwable");
-		javaLangSimpleTypeNames.add("Void");
-		javaLangSimpleTypeNames.add("ArithmeticException");
-		javaLangSimpleTypeNames.add("ArrayIndexOutOfBoundsException");
-		javaLangSimpleTypeNames.add("ArrayStoreException");
-		javaLangSimpleTypeNames.add("ClassCastException");
-		javaLangSimpleTypeNames.add("ClassNotFoundException");
-		javaLangSimpleTypeNames.add("CloneNotSupportedException");
-		javaLangSimpleTypeNames.add("EnumConstantNotPresentException");
-		javaLangSimpleTypeNames.add("Exception");
-		javaLangSimpleTypeNames.add("IllegalAccessException");
-		javaLangSimpleTypeNames.add("IllegalArgumentException");
-		javaLangSimpleTypeNames.add("IllegalMonitorStateException");
-		javaLangSimpleTypeNames.add("IllegalStateException");
-		javaLangSimpleTypeNames.add("IllegalThreadStateException");
-		javaLangSimpleTypeNames.add("IndexOutOfBoundsException");
-		javaLangSimpleTypeNames.add("InstantiationException");
-		javaLangSimpleTypeNames.add("InterruptedException");
-		javaLangSimpleTypeNames.add("NegativeArraySizeException");
-		javaLangSimpleTypeNames.add("NoSuchFieldException");
-		javaLangSimpleTypeNames.add("NoSuchMethodException");
-		javaLangSimpleTypeNames.add("NullPointerException");
-		javaLangSimpleTypeNames.add("NumberFormatException");
-		javaLangSimpleTypeNames.add("RuntimeException");
-		javaLangSimpleTypeNames.add("SecurityException");
-		javaLangSimpleTypeNames.add("StringIndexOutOfBoundsException");
-		javaLangSimpleTypeNames.add("TypeNotPresentException");
-		javaLangSimpleTypeNames.add("UnsupportedOperationException");
-		javaLangSimpleTypeNames.add("AbstractMethodError");
-		javaLangSimpleTypeNames.add("AssertionError");
-		javaLangSimpleTypeNames.add("ClassCircularityError");
-		javaLangSimpleTypeNames.add("ClassFormatError");
-		javaLangSimpleTypeNames.add("Error");
-		javaLangSimpleTypeNames.add("ExceptionInInitializerError");
-		javaLangSimpleTypeNames.add("IllegalAccessError");
-		javaLangSimpleTypeNames.add("IncompatibleClassChangeError");
-		javaLangSimpleTypeNames.add("InstantiationError");
-		javaLangSimpleTypeNames.add("InternalError");
-		javaLangSimpleTypeNames.add("LinkageError");
-		javaLangSimpleTypeNames.add("NoClassDefFoundError");
-		javaLangSimpleTypeNames.add("NoSuchFieldError");
-		javaLangSimpleTypeNames.add("NoSuchMethodError");
-		javaLangSimpleTypeNames.add("OutOfMemoryError");
-		javaLangSimpleTypeNames.add("StackOverflowError");
-		javaLangSimpleTypeNames.add("ThreadDeath");
-		javaLangSimpleTypeNames.add("UnknownError");
-		javaLangSimpleTypeNames.add("UnsatisfiedLinkError");
-		javaLangSimpleTypeNames.add("UnsupportedClassVersionError");
-		javaLangSimpleTypeNames.add("VerifyError");
-		javaLangSimpleTypeNames.add("VirtualMachineError");
-	}
-
 	/**
 	 * Converts the presented class name into a name expression (either a {@link NamedExpr} or
 	 * {@link QualifiedNameExpr} depending on whether a package was presented).
@@ -332,28 +242,28 @@ public class JavaParserUtils  {
 		if (internalType instanceof PrimitiveType) {
 			PrimitiveType pt = (PrimitiveType) internalType;
 			if (pt.getType().equals(Primitive.Boolean)) {
-				return new JavaType(Boolean.class.getName(), array, true, null, null);
+				return new JavaType(Boolean.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Char)) {
-				return new JavaType(Character.class.getName(), array, true, null, null);
+				return new JavaType(Character.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Byte)) {
-				return new JavaType(Byte.class.getName(), array, true, null, null);
+				return new JavaType(Byte.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Short)) {
-				return new JavaType(Short.class.getName(), array, true, null, null);
+				return new JavaType(Short.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Int)) {
-				return new JavaType(Integer.class.getName(), array, true, null, null);
+				return new JavaType(Integer.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Long)) {
-				return new JavaType(Long.class.getName(), array, true, null, null);
+				return new JavaType(Long.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Float)) {
-				return new JavaType(Float.class.getName(), array, true, null, null);
+				return new JavaType(Float.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			if (pt.getType().equals(Primitive.Double)) {
-				return new JavaType(Double.class.getName(), array, true, null, null);
+				return new JavaType(Double.class.getName(), array, DataType.PRIMITIVE, null, null);
 			}
 			throw new IllegalStateException("Unsupported primitive '" + pt.getType() + "'");
 		}
@@ -366,14 +276,14 @@ public class JavaParserUtils  {
 				ReferenceType rt = (ReferenceType) wt.getSuper();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
-				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), false, JavaType.WILDCARD_SUPER, effectiveType.getParameters());
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_SUPER, effectiveType.getParameters());
 			} else if (wt.getExtends() != null) {
 				ReferenceType rt = (ReferenceType) wt.getExtends();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
 				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
-				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), false, JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
+				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
 			} else {
-				return new JavaType("java.lang.Object", 0, false, JavaType.WILDCARD_NEITHER, null);
+				return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
 			}
 		}
 		
@@ -388,7 +298,7 @@ public class JavaParserUtils  {
 
 		JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
 		if (array > 0) {
-			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.isPrimitive(), effectiveType.getArgName(), effectiveType.getParameters());
+			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.getDataType(), effectiveType.getArgName(), effectiveType.getParameters());
 		}
 		
 		return effectiveType;
@@ -406,7 +316,7 @@ public class JavaParserUtils  {
 	 * If a name expression is unqualified, the imports are scanned. If the unqualified name expression is found in the
 	 * imports, that import declaration represents the fully-qualified name. If the unqualified name expression is not
 	 * found in the imports, it indicates the name to find is either in the same package as the qualified name expression,
-	 * or the type relates to a member of java.lang. If part of java.lang (according to {@link #isPartOfJavaLang(String)}, the
+	 * or the type relates to a member of java.lang. If part of java.lang, the
 	 * fully qualified name is treated as part of java.lang. Otherwise the compilation unit package plus unqualified name
 	 * expression represents the fully qualified name expression.
 	 * 
@@ -428,12 +338,12 @@ public class JavaParserUtils  {
 		
 		// Unqualified name detected, so check if it's in the type parameter list
 		if (typeParameters != null && typeParameters.contains(new JavaSymbolName(nameToFind.getName()))) {
-			return new JavaType(nameToFind.getName());
+			return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE, null, null);
 		}
 		
 		ImportDeclaration importDeclaration = getImportDeclarationFor(imports, nameToFind);
 		if (importDeclaration  == null) {
-			if (javaLangSimpleTypeNames.contains(nameToFind.getName())) {
+			if (ImportRegistrationResolverImpl.isPartOfJavaLang(nameToFind.getName())) {
 				return new JavaType("java.lang." + nameToFind.getName());
 			}
 			String name = compilationUnitPackage.getFullyQualifiedPackageName() == "" ? nameToFind.getName() : compilationUnitPackage.getFullyQualifiedPackageName() + "." + nameToFind.getName();
@@ -543,7 +453,7 @@ public class JavaParserUtils  {
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.isPrimitive(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, typeParams);
 	}
 	
 	/**
@@ -574,17 +484,17 @@ public class JavaParserUtils  {
 				locatedTypeParams.add(currentTypeParam);
 				JavaType javaType = null;
 				if (candidate.getTypeBound() == null) {
-					javaType = new JavaType("java.lang.Object", 0, false, currentTypeParam, null);
+					javaType = new JavaType("java.lang.Object", 0, DataType.TYPE, currentTypeParam, null);
 				} else {
 					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
 					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, cit, locatedTypeParams);
-					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.isPrimitive(), currentTypeParam, javaType.getParameters());
+					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
 				}
 				typeParams.add(javaType);
 			}
 		}
 		
-		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.isPrimitive(), null, typeParams);
+		return new JavaType(effectiveType.getFullyQualifiedTypeName(), effectiveType.getArray(), effectiveType.getDataType(), null, typeParams);
 	}
 
 	/**

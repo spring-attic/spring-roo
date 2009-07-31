@@ -25,6 +25,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -637,7 +638,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
-		JavaType returnType = new JavaType("javax.persistence.EntityManager", 0, false, null, null);
+		JavaType returnType = new JavaType("javax.persistence.EntityManager", 0, DataType.TYPE, null, null);
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -662,7 +663,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaSymbolName methodName = new JavaSymbolName(countMethod + plural);
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		JavaType returnType = new JavaType("java.lang.Long", 0, true, null, null);
+		JavaType returnType = new JavaType("java.lang.Long", 0, DataType.PRIMITIVE, null, null);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
@@ -697,7 +698,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
-		JavaType returnType = new JavaType("java.util.List", 0, false, null, typeParams);
+		JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
@@ -757,14 +758,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findEntriesMethod + governorTypeDetails.getName().getSimpleTypeName() + "Entries");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		paramTypes.add(new JavaType("java.lang.Integer", 0, true, null, null));
-		paramTypes.add(new JavaType("java.lang.Integer", 0, true, null, null));
+		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
+		paramTypes.add(new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("firstResult"));
 		paramNames.add(new JavaSymbolName("maxResults"));
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
-		JavaType returnType = new JavaType("java.util.List", 0, false, null, typeParams);
+		JavaType returnType = new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams);
 		
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);

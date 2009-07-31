@@ -33,26 +33,26 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	private List<JavaType> parameters = new ArrayList<JavaType>();
 	private JavaSymbolName argName = null;
 	private int array = 0;
-	private boolean primitive = false;
+	private DataType dataType;
 	private String fullyQualifiedTypeName;
-	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, false, null, null);
-	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, false, null, null);
-	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, false, null, null);
-	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", 0, false, null, null);
-	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", 0, false, null, null);
-	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", 0, false, null, null);
-	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", 0, false, null, null);
-	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", 0, false, null, null);
-	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", 0, false, null, null);
-	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, true, null, null);
-	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, true, null, null);
-	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, true, null, null);
-	public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", 0, true, null, null);
-	public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0, true, null, null);
-	public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0, true, null, null);
-	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, true, null, null);
-	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, true, null, null);
-	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, true, null, null);
+	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
+	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
+	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, DataType.TYPE, null, null);
+	public static final JavaType SHORT_OBJECT = new JavaType("java.lang.Short", 0, DataType.TYPE, null, null);
+	public static final JavaType INT_OBJECT = new JavaType("java.lang.Integer", 0, DataType.TYPE, null, null);
+	public static final JavaType LONG_OBJECT = new JavaType("java.lang.Long", 0, DataType.TYPE, null, null);
+	public static final JavaType FLOAT_OBJECT = new JavaType("java.lang.Float", 0, DataType.TYPE, null, null);
+	public static final JavaType DOUBLE_OBJECT = new JavaType("java.lang.Double", 0, DataType.TYPE, null, null);
+	public static final JavaType VOID_OBJECT = new JavaType("java.lang.Void", 0, DataType.TYPE, null, null);
+	public static final JavaType BOOLEAN_PRIMITIVE = new JavaType("java.lang.Boolean", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType CHAR_PRIMITIVE = new JavaType("java.lang.Character", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType BYTE_PRIMITIVE = new JavaType("java.lang.Byte", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType SHORT_PRIMITIVE = new JavaType("java.lang.Short", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType INT_PRIMITIVE = new JavaType("java.lang.Integer", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType LONG_PRIMITIVE = new JavaType("java.lang.Long", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType FLOAT_PRIMITIVE = new JavaType("java.lang.Float", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
+	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
 
 	private static final Set<String> commonCollectionTypes = new HashSet<String>();
 
@@ -85,7 +85,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param fullyQualifiedTypeName the name (as per the above rules; mandatory)
 	 */
 	public JavaType(String fullyQualifiedTypeName) {
-		this(fullyQualifiedTypeName, 0, false, null, null);
+		this(fullyQualifiedTypeName, 0, DataType.TYPE, null, null);
 	}
 
 	/**
@@ -98,7 +98,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
-	public JavaType(String fullyQualifiedTypeName, int array, boolean primitive, JavaSymbolName argName, List<JavaType> parameters) {
+	public JavaType(String fullyQualifiedTypeName, int array, DataType primitive, JavaSymbolName argName, List<JavaType> parameters) {
 		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
 			throw new IllegalArgumentException("Fully qualified type name required");
 		}
@@ -109,7 +109,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		}
 		
 		this.array = array;
-		this.primitive = primitive;
+		this.dataType = primitive;
 		if (parameters != null) {
 			this.parameters = parameters;
 		}
@@ -139,9 +139,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");
 
-	public String getFullyQualifiedTypeNameIncludingTypeParameterNames() {
+	private String getFullyQualifiedTypeNameIncludingTypeParameterNames() {
 		StringBuilder sb = new StringBuilder();
-		if (primitive) {
+		if (DataType.PRIMITIVE == dataType) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
 				return "int" + getArraySuffix();
@@ -182,13 +182,16 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return sb.toString();
 	}
 	
-	/**
-	 * @return the fully qualified name, including fully-qualified name of
-	 * each type parameter
-	 */
 	public String getFullyQualifiedTypeNameIncludingTypeParameters() {
+		return getFullyQualifiedTypeNameIncludingTypeParameters(false);
+	}
+	
+	/**
+	 * @return the fully qualified name, including fully-qualified name of each type parameter
+	 */
+	public String getFullyQualifiedTypeNameIncludingTypeParameters(boolean staticCompatible) {
 		StringBuilder sb = new StringBuilder();
-		if (primitive) {
+		if (DataType.PRIMITIVE == dataType) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
 				return "int" + getArraySuffix();
@@ -211,7 +214,12 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			}
 		}
 		if (!WILDCARD_NEITHER.equals(argName)) {
-			sb.append(fullyQualifiedTypeName);
+			if (dataType == DataType.VARIABLE) {
+				sb.append(fullyQualifiedTypeName);
+			} else {
+				sb.append(fullyQualifiedTypeName);
+			}
+			
 			if (this.parameters.size() > 0) {
 				sb.append("<");
 				int counter = 0;
@@ -254,7 +262,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 	
 	public boolean isPrimitive() {
-		return primitive;
+		return DataType.PRIMITIVE == dataType;
 	}
 
 	public boolean isCommonCollectionType() {
@@ -297,6 +305,11 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return argName;
 	}
 
+	public DataType getDataType() {
+		return dataType;
+	}
+
+	
 // Shouldn't be required given JavaType is immutable!
 //	@Override
 //	public JavaType clone() throws CloneNotSupportedException {

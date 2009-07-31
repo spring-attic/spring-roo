@@ -248,7 +248,8 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(method.getModifier()));
 				this.append(" ");
 			}
-			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameterNames());
+//			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameterNames());
+			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameters());
 			this.append(" ");
 			this.append(getIntroductionTo());
 			this.append(".");

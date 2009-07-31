@@ -8,6 +8,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -51,7 +52,7 @@ public class SetField extends CollectionField {
 	public JavaType getInitializer() {
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(getGenericParameterTypeName());
-		return new JavaType("java.util.HashSet", 0, false, null, params);
+		return new JavaType("java.util.HashSet", 0, DataType.TYPE, null, params);
 	}
 
 	public JavaSymbolName getMappedBy() {
