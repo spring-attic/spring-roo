@@ -1,0 +1,4 @@
+<tiles:insertDefinition name="dataAccessFailure" xmlns:tiles="http://tiles.apache.org/tags-tiles" xmlns:jsp="http://java.sun.com/JSP/Page">
+	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
+</tiles:insertDefinition>
+

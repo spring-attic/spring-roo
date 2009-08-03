@@ -28,22 +28,19 @@ public class JspOperations {
 		Assert.notNull(metadataService, "Metadata service required");
 
 		this.fileManager = fileManager;
-		this.metadataService = metadataService;
+		this.metadataService = metadataService;			
 	}
 
-	public void installCommonViewArtefacts() {
+	public void installCommonViewArtefacts() {			
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.notNull(projectMetadata, "Unable to obtain path resolver");
+		Assert.notNull(projectMetadata, "Unable to obtain path resolver");	
 
 		String imagesDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images");
 		if (!fileManager.exists(imagesDirectory)) {
 			fileManager.createDirectory(imagesDirectory);
-		}
-		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png");
-		if (!fileManager.exists(imageFile)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/banner-graphic.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/springsource-logo.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/springsource-logo.png")).getOutputStream());
@@ -55,33 +52,47 @@ public class JspOperations {
 		String cssDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles");
 		if (!fileManager.exists(cssDirectory)) {
 			fileManager.createDirectory(cssDirectory);
-		}
-		String cssFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo.css");
-		if (!fileManager.exists(cssFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo.css"), fileManager.createFile(cssFile).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo.css")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for view layer.", e);
 			}
 		}
+		
+		String layoutsDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts");
+		if (!fileManager.exists(layoutsDirectory)) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/layouts.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/layouts.xml")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/admin.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default/admin.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/public.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default/public.jspx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+			}
+		}		
 
 		String jspDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp");
 		if (!fileManager.exists(jspDirectory)) {
-			fileManager.createDirectory(jspDirectory);
-		}
-		String headerFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/header.jsp");
-		if (!fileManager.exists(headerFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "header.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/header.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "footer.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/footer.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/includes.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "dataAccessFailure.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/dataAccessFailure.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "resourceNotFound.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/resourceNotFound.jsp")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "uncaughtException.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/uncaughtException.jsp")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "dataAccessFailure.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/dataAccessFailure.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "resourceNotFound.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/resourceNotFound.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "uncaughtException.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/uncaughtException.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/index.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/views.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/views.xml")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		}
-	}
-
+		
+		String includesDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/includes");
+		if (!fileManager.exists(includesDirectory)) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/dataAccessFailure.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/dataAccessFailure.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/resourceNotFound.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/resourceNotFound.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/uncaughtException.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/uncaughtException.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/index.jspx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+			}
+		}
+	}	
 }

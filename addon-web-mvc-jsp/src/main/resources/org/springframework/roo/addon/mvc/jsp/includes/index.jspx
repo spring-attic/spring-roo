@@ -1,0 +1,7 @@
+<div>	
+	<script type="text/javascript">dojo.require("dijit.TitlePane")</script>
+    <div style="width: 100%" id="_title">
+    	<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: 'Welcome'}})); </script>
+		<h3>Welcome</h3>
+	</div>
+</div>

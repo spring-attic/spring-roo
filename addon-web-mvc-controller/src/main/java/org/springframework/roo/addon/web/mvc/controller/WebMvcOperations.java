@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -18,12 +16,10 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * Provides operations to create various view layer resources.
@@ -57,8 +53,7 @@ public class WebMvcOperations {
 		//note that the sequence matters here as some of these artifacts are loaded further down the line
 		createWebApplicationContext();
 		copyUrlRewrite();
-		createWebXml();
-		createIndexJsp();		
+		createWebXml();	
 		updateJpaWebXml();
 		updateDependencies();
 	}
@@ -117,47 +112,6 @@ public class WebMvcOperations {
 
 		fileManager.scanAll();
 	}
-	
-	private void createIndexJsp() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata required");
-		// Verify the web.xml already exists
-		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml")), "web.xml does not exist");
-		
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"))) {
-			//file exists, so nothing to do
-			return;
-		}
-		
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();		
-		Document jspDocument = builder.newDocument();	
-
-		//this node is just for temporary purpose - it will not be in the final result
-		Node documentRoot = jspDocument.createElement("tempNode");
-		
-		jspDocument.appendChild(documentRoot);
-		
-		documentRoot.appendChild(jspDocument.createComment("WARNING: This file is maintained by ROO! IT WILL BE OVERWRITTEN!"));
-		
-		Element includeIncludes = jspDocument.createElement("jsp:directive.include");
-		includeIncludes.setAttribute("file", "/WEB-INF/jsp/includes.jsp");
-		documentRoot.appendChild(includeIncludes);
-		
-		Element includeHeader = jspDocument.createElement("jsp:directive.include");
-		includeHeader.setAttribute("file", "/WEB-INF/jsp/header.jsp");
-		documentRoot.appendChild(includeHeader);
-		
-		Element h3 = jspDocument.createElement("h3");
-		h3.setTextContent("Welcome to " + StringUtils.capitalize(projectMetadata.getProjectName()) + "!");
-		documentRoot.appendChild(h3);
-		
-		Element includeFooter = jspDocument.createElement("jsp:directive.include");
-		includeFooter.setAttribute("file", "/WEB-INF/jsp/footer.jsp");
-		documentRoot.appendChild(includeFooter);
-		
-		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/index.jsp"));
-		XmlUtils.writeMalformedXml(mutableFile.getOutputStream(), jspDocument.getFirstChild().getChildNodes());
-	}	
 	
 	private void updateJpaWebXml() {				
 		String persistence = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");

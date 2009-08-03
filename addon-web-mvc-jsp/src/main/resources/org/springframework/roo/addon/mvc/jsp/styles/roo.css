@@ -68,9 +68,6 @@ div .box {
   	text-align:left;
 }
 
-
-
-
 .footer {
 	background:#fff;
 	border:none;
@@ -115,38 +112,6 @@ h4 {
 	line-height: 20px;
 }
 
-.roo_icon_search {
-	background-image: url(../images/search.png);
-}
-
-.roo_icon_update {
-	background-image: url(../images/update.png);
-}
-
-.roo_icon_delete {
-	background-image: url(../images/delete.png);
-}
-
-.roo_icon_create {
-	background-image: url(../images/create.png);
-}
-
-.roo_icon_show {
-	background-image: url(../images/show.png);
-}
-
-.roo_icon_list {
-	background-image: url(../images/list.png);
-}
-
-.roo_icon_statistics {
-	background-image: url(../images/statistics.png);
-}
-
-.roo_icon_selenium {
-	background-image: url(../images/selenium.png);
-}
-
 .errors {
 	color: red;
 	font-weight: bold;
@@ -185,13 +150,17 @@ li {
 }
 
 li ul {
-	list-style: square url(images/sub-bullet.gif);
+	list-style: square url(../images/sub-bullet.gif);
 }
 
 li ul li ul {
 	list-style: circle none;
 }
 
+ul li {
+margin:0 0 0.25em 0;
+padding:0;
+}
 /* table elements */
 
 table {
@@ -308,16 +277,13 @@ fieldset th {
 	color:#888888;
 }
 
-
-
-
 #menu {
     background: #eee;
   	position:relative;
   	float:left;  	
   	top: 35px;
   	left:0px;
-  	width:200px;
+  	width:250px;
 }
 
 #menu ul{

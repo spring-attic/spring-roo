@@ -44,12 +44,12 @@ public class MenuOperations {
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		
-		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/menu.jsp");
+		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/menu.jspx");
 	}
 	
-	public void setMenuFile(String menuFile) {
-		this.menuFile = menuFile;
-	}
+//	public void setMenuFile(String menuFile) {
+//		this.menuFile = menuFile;
+//	}
 
 	/**
 	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
@@ -81,7 +81,7 @@ public class MenuOperations {
 		try {			
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jsp" + (e.getMessage() == null || "".equals(e.getMessage()) ? "" : " (" + e.getMessage() + ")"));
+			throw new IllegalArgumentException("Unable to parse menu.jspx" + (e.getMessage() == null || "".equals(e.getMessage()) ? "" : " (" + e.getMessage() + ")"));
 		}
 		
 		//make the root element of the menu the one with the menu identifier allowing for different decorations of menu
@@ -135,7 +135,7 @@ public class MenuOperations {
 		try {
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
 		}
 		
 		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
@@ -177,7 +177,7 @@ public class MenuOperations {
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/menu.jsp")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/menu.jspx")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}			

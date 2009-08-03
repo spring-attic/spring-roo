@@ -7,5 +7,9 @@
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.fileupload" rev="1.2.0" />
 		<dependency org="org.tuckey" name="com.springsource.org.tuckey.web.filters.urlrewrite" rev="3.1.0" />
 		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.2.0" />
+		<!-- //TODO: The tiles dependency should be updated once Spring 3 RC1 is out (SPR-5411) -->
+		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.0.5" />
+		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.0.5" />
+		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.0.5.osgi" />
 	</springWebMvc>
 </dependencies>

@@ -10,9 +10,11 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * 
@@ -26,15 +28,18 @@ import org.w3c.dom.Element;
 public class DojoUtils {
 	
 	public static Element getTitlePaneDojo(Document document, String title) {
+		Assert.notNull(document, "Document required");
+		Assert.hasText(title, "Title required");
 		addDojoDepenency(document, "dijit.TitlePane");		
-		Element divElement = document.createElement("div");
-		divElement.setAttribute("dojoType", "dijit.TitlePane");
-		divElement.setAttribute("title", title);
-		divElement.setAttribute("style", "width: 100%");
-		return divElement;
+		Element script = document.createElement("script");
+		script.setAttribute("type", "text/javascript");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '" + title + "'}})); ");
+		return script;
 	}
 	
-	public static Element getRequiredDateDojo(Document document, JavaSymbolName fieldName) {	
+	public static Element getRequiredDateDojo(Document document, JavaSymbolName fieldName) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(fieldName, "Field name required");
 		SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		addDojoDepenency(document, "dijit.form.DateTextBox");		
 		Element script = document.createElement("script");
@@ -46,6 +51,8 @@ public class DojoUtils {
 	} 
 	
 	public static Element getDateDojo(Document document, FieldMetadata field) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(field, "Field required");
 		SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
@@ -57,6 +64,8 @@ public class DojoUtils {
 	}
 	
 	public static Element getSimpleValidationDojo(Document document, JavaSymbolName field) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(field, "Field name required");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		String message = "Enter " + field.getReadableSymbolName() + " (required)";
@@ -66,6 +75,8 @@ public class DojoUtils {
 	}
 
 	public static Element getValidationDojo(Document document, FieldMetadata field) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(field, "Field metadata required");
 		String regex = "";
 		String invalid = "";
 		int min = getMinSize(field);
@@ -86,7 +97,7 @@ public class DojoUtils {
 			}
 			invalid = "Number with '-' or '.' allowed" + (isRequired ? ", required" : "");
 		} else if (field.getFieldName().getSymbolName().contains("email")) {
-			regex = ", regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
+			regex = "";//", regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
 			invalid = "Valid email only";
 		}	
 		Element script = document.createElement("script");
@@ -99,6 +110,8 @@ public class DojoUtils {
 	}
 	
 	public static Element getTextAreaDojo(Document document, JavaSymbolName fieldName) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(fieldName, "Field name required");
 		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
@@ -108,6 +121,8 @@ public class DojoUtils {
 	}
 	
 	public static Element getSelectDojo(Document document, JavaSymbolName fieldName) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(fieldName, "Field name required");
 		addDojoDepenency(document, "dijit.form.FilteringSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
@@ -117,6 +132,8 @@ public class DojoUtils {
 	}
 	
 	public static Element getMultiSelectDojo(Document document, JavaSymbolName fieldName) {
+		Assert.notNull(document, "Document required");
+		Assert.notNull(fieldName, "Field name required");
 		addDojoDepenency(document, "dijit.form.MultiSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
@@ -126,30 +143,33 @@ public class DojoUtils {
 	}
 	
 	public static Element getSubmitButtonDojo(Document document, String buttonId) {
+		Assert.notNull(document, "Document required");
+		Assert.hasText(buttonId, "Button ID required");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'" + buttonId + "', event:'onclick'}));");
 		return script;
 	}
 	
-	public static void addDojoDepenency(Document document, String require) {
-		
-		boolean elementFound = true;
-		
+	public static void addDojoDepenency(Document document, String require) {	
+		Assert.notNull(document, "Document required");
+		Assert.notNull(require, "Dojo import required");
+		boolean elementFound = true;		
 		Element script = XmlUtils.findFirstElement("//script[starts-with(text(),'dojo.require')]", document.getDocumentElement());
-		
 		if(script == null) {
 			elementFound = false;
 			script = document.createElement("script");
 			script.setAttribute("type", "text/javascript");
-		}
-		
+		}		
 		if (!script.getTextContent().contains(require)) {
 			script.setTextContent(script.getTextContent() + "dojo.require(\"" + require + "\");");
-		}
-		
-		if (!elementFound) {			
-			document.getDocumentElement().insertBefore(script, XmlUtils.findFirstElement("//directive.include[2]", document.getDocumentElement()).getNextSibling());
+		}		
+		if (!elementFound) {	
+			if (document.getDocumentElement().getFirstChild() == null) {
+				document.getDocumentElement().appendChild(script);
+			} else {
+				document.getDocumentElement().getFirstChild().insertBefore(script, document.getDocumentElement().getFirstChild());
+			}			
 		}
 	}
 

@@ -32,7 +32,6 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * Helper class which generates the contents of the various jsp documents
@@ -45,24 +44,24 @@ public class JspDocumentHelper {
 	private List<FieldMetadata> fields; 
 	private BeanInfoMetadata beanInfoMetadata; 
 	private EntityMetadata entityMetadata;
-	private String projectName;
 	private MetadataService metadataService;
 	private FinderMetadata finderMetadata;
 	private SimpleDateFormat dateFormatLocalized;
 	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 	
-	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, String projectName, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+	private final String warning = "WARNING: This file is maintained by ROO! IT WILL BE OVERWRITTEN unless you specify "
+		+ System.getProperty("line.seperator") + "\t@RooWebScaffold(automaticallyMaintainView = false) in the governing controller";
+	
+	public JspDocumentHelper(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.notNull(finderMetadata, "Finder metadata required");
-		Assert.hasText(projectName, "Project name required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		this.fields = fields;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
-		this.projectName = projectName;
 		this.metadataService = metadataService;
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
@@ -72,72 +71,24 @@ public class JspDocumentHelper {
 	
 	public Document getListDocument() {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();		
+		Document document = builder.newDocument();
 		
-		document.appendChild(document.createElement("div"));		
-		document = addHeaders(document);		
-		document = getListContent(document);		
-		document = addFooter(document);
+		document.createComment(warning);
 		
-		return document;
-	}
-	
-	public Document getShowDocument() {
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();		
+		Element div = document.createElement("div");
+		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
+		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		div.setAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt");
+		div.setAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions");
+		document.appendChild(div);
 		
-		document.appendChild(document.createElement("div"));		
-		document = addHeaders(document);		
-		document = getShowContent(document);		
-		document = addFooter(document);
+		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();	
+		Element divElement = document.createElement("div");
+		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "List all " + entityMetadata.getPlural()));
 		
-		return document;
-	}
-	
-	public Document getCreateDocument() {
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();		
-		
-		document.appendChild(document.createElement("div"));		
-		document = addHeaders(document);		
-		document = getCreateContent(document);		
-		document = addFooter(document);
-		
-		return document;
-	}
-	
-	public Document getUpdateDocument() {
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();		
-		
-		document.appendChild(document.createElement("div"));		
-		document = addHeaders(document);		
-		document = getUpdateContent(document);		
-		document = addFooter(document);
-		
-		return document;
-	}
-	
-	public Document getFinderDocument(String finderName) {
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		Document document = builder.newDocument();		
-		
-		document.appendChild(document.createElement("div"));		
-		document = addHeaders(document);		
-		document = getFinderContent(document, finderName);		
-		document = addFooter(document);
-		
-		return document;
-	}
-	
-	private Document getListContent(Document document) {
-		Assert.notNull(document, "Document required");
-		
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
-		
-		Element divElement = DojoUtils.getTitlePaneDojo(document, "List all " + entityMetadata.getPlural());
-
-		Element ifElement = document.createElement("c:if");
+		Element ifElement = document.createElementNS("http://java.sun.com/jsp/jstl/core", "c:if");
 		ifElement.setAttribute("test", "${not empty " + entityMetadata.getPlural().toLowerCase() + "}");
 		Element tableElement = document.createElement("table");
 		tableElement.setAttribute("width", "300px");
@@ -269,22 +220,30 @@ public class JspDocumentHelper {
 
 		divElement.appendChild(ifElement);
 		divElement.appendChild(elseElement);
-		document.getDocumentElement().appendChild(divElement);
+		div.appendChild(divElement);
 		
 		return document;
-	}	
-
-	private Document getShowContent(Document document) {
-		Assert.notNull(document, "Document required");
+	}
+	
+	public Document getShowDocument() {
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();		
 		
+		Element div = document.createElement("div");
+		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
+		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		div.setAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt");
+		document.appendChild(div);
+
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
-		Element divElement = DojoUtils.getTitlePaneDojo(document, "Show " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
-			
+		Element divElement = document.createElement("div");
+		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "Show " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
+
 		Element ifElement = document.createElement("c:if");
 		ifElement.setAttribute("test", "${not empty " + entityName + "}");
-		divElement.appendChild(ifElement);		
-
 		for (FieldMetadata field : fields) {
 			Element divSubmitElement = document.createElement("div");
 			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + field.getFieldName().getSymbolName());
@@ -311,23 +270,32 @@ public class JspDocumentHelper {
 			ifElement.appendChild(divSubmitElement);
 			ifElement.appendChild(document.createElement("br"));
 		}
+		divElement.appendChild(ifElement);
 
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityName + "}");
 		elseElement.setTextContent("No " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " found with this id.");
 		divElement.appendChild(elseElement);
-		
-		document.getDocumentElement().appendChild(divElement);
+		div.appendChild(divElement);
 		
 		return document;
 	}
 	
-	private Document getCreateContent(Document document) {
-		Assert.notNull(document, "Document required");
-		
+	public Document getCreateDocument() {
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();		
+
+		Element div = document.createElement("div");
+		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
+		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		document.appendChild(div);		
+
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
-		Element divElement = DojoUtils.getTitlePaneDojo(document, "Create New " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		Element divElement = document.createElement("div");
+		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "Create New " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -354,16 +322,25 @@ public class JspDocumentHelper {
 		formElement.appendChild(divSubmitElement);
 
 		divElement.appendChild(formElement);
-		document.getDocumentElement().appendChild(divElement);	
+		div.appendChild(divElement);	
 		return document;
 	}
 	
-	private Document getUpdateContent(Document document) {
-		Assert.notNull(document, "Document required");
-		
+	public Document getUpdateDocument() {
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();		
+
+		Element div = document.createElement("div");
+		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
+		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		document.appendChild(div);
+
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
-		Element divElement = DojoUtils.getTitlePaneDojo(document, "Update " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		Element divElement = document.createElement("div");
+		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "Update " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
 
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -399,18 +376,26 @@ public class JspDocumentHelper {
 		formElement.appendChild(formHiddenVersion);
 
 		divElement.appendChild(formElement);
-		document.getDocumentElement().appendChild(divElement);
+		div.appendChild(divElement);
 	
 		return document;
 	}
 	
-	private Document getFinderContent(Document document, String finderName) {
-		Assert.notNull(document, "Document required");
-		Assert.hasText(finderName, "finder name required");
-		
+	public Document getFinderDocument(String finderName) {
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();		
+
+		Element div = document.createElement("div");
+		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
+		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		document.appendChild(div);
+
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
-		Element titleDivElement = DojoUtils.getTitlePaneDojo(document, new JavaSymbolName(finderName).getReadableSymbolName());
+		Element titleDivElement = document.createElement("div");
+		titleDivElement.setAttribute("id", "_title");
+		titleDivElement.setAttribute("style", "width: 100%");
+		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, new JavaSymbolName(finderName).getReadableSymbolName()));
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -518,10 +503,10 @@ public class JspDocumentHelper {
 		formElement.appendChild(divSubmitElement);
 
 		titleDivElement.appendChild(formElement);
-		document.getDocumentElement().appendChild(titleDivElement);
+		div.appendChild(titleDivElement);
 	
 		return document;
-	}
+	}	
 	
 	private void createFieldsForCreateAndUpdate(Document document, Element formElement) {
 		
@@ -634,31 +619,6 @@ public class JspDocumentHelper {
 				}
 			}
 		}
-	}
-	
-	private Document addHeaders(Document document) {		
-		// this node is just for temporary purpose - it will not be in the final result
-		Node documentRoot = document.getFirstChild();
-
-		documentRoot.appendChild(document.createComment("WARNING: This file is maintained by ROO! IT WILL BE OVERWRITTEN unless you specify "
-				+ System.getProperty("line.seperator") + "\t@RooWebScaffold(automaticallyMaintainView = false) in the governing controller"));
-
-		Element includeIncludes = document.createElement("jsp:directive.include");
-		includeIncludes.setAttribute("file", "/WEB-INF/jsp/includes.jsp");
-		documentRoot.appendChild(includeIncludes);
-
-		Element includeHeader = document.createElement("jsp:directive.include");
-		includeHeader.setAttribute("file", "/WEB-INF/jsp/header.jsp");
-		documentRoot.appendChild(includeHeader);	
-
-		return document;
-	}	
-
-	private Document addFooter(Document document) {
-		Element includeFooter = document.createElement("jsp:directive.include");
-		includeFooter.setAttribute("file", "/WEB-INF/jsp/footer.jsp");
-		document.getFirstChild().appendChild(includeFooter);
-		return document;
 	}
 	
 	private boolean isEnumType(JavaType type) {
