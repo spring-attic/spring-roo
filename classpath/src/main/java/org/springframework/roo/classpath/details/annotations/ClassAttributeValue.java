@@ -29,7 +29,7 @@ public class ClassAttributeValue extends AbstractAnnotationAttributeValue<JavaTy
 		return value;
 	}
 	public String toString() {
-		return getName() + " -> " + value.getFullyQualifiedTypeNameIncludingTypeParameters();
+		return getName() + " -> " + value.getNameIncludingTypeParameters();
 	}
 
 }

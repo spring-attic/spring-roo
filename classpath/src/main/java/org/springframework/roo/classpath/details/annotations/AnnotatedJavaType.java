@@ -52,7 +52,7 @@ public final class AnnotatedJavaType {
 			sb.append(AnnotationMetadataUtils.toSourceForm(annotation));
 			sb.append(" ");
 		}
-		sb.append(javaType.getFullyQualifiedTypeNameIncludingTypeParameters());
+		sb.append(javaType.getNameIncludingTypeParameters());
 		return sb.toString();
 	}
 	

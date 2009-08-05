@@ -2,7 +2,9 @@ package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -30,9 +32,10 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
+	private Set<JavaType> registeredImports = new HashSet<JavaType>();
 	
 	public DefaultItdTypeDetails(ClassOrInterfaceTypeDetails governor, JavaType aspect,
-			boolean privilegedAspect,
+			boolean privilegedAspect, Set<JavaType> registeredImports,
 			List<ConstructorMetadata> declaredConstructors,
 			List<FieldMetadata> declaredFields,
 			List<MethodMetadata> declaredMethods,
@@ -41,11 +44,15 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			List<AnnotationMetadata> typeAnnotations) {
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
-
+		
 		this.governor = governor;
 		this.aspect = aspect;
 		this.privilegedAspect = privilegedAspect;
 		
+		if (registeredImports != null) {
+			this.registeredImports = registeredImports;
+		}
+
 		if (declaredConstructors != null) {
 			this.declaredConstructors = declaredConstructors;
 		}
@@ -73,6 +80,10 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	
 	public static DefaultItdTypeDetailsBuilder getBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
 		return new DefaultItdTypeDetailsBuilder(declaredByMetadataId, governor, aspect, privilegedAspect);
+	}
+
+	public Set<JavaType> getRegisteredImports() {
+		return Collections.unmodifiableSet(registeredImports);
 	}
 
 	public List<JavaType> getImplementsTypes() {
@@ -125,6 +136,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		tsc.append("aspect", aspect);
 		tsc.append("physicalTypeCategory", physicalTypeCategory);
 		tsc.append("privilegedAspect", privilegedAspect);
+		tsc.append("registeredImports", registeredImports);
 		tsc.append("declaredConstructors", declaredConstructors);
 		tsc.append("declaredFields", declaredFields);
 		tsc.append("declaredMethods", declaredMethods);

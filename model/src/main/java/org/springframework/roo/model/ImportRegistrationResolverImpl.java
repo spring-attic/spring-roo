@@ -133,6 +133,11 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 			return false;
 		}
 		
+		if (javaType.isDefaultPackage()) {
+			// Cannot import types from the default package
+			return false;
+		}
+		
 		// Must be a class, so it's legal if there isn't an existing registration that conflicts
 		for (JavaType candidate : registeredImports) {
 			if (candidate.getSimpleTypeName().equals(javaType.getSimpleTypeName())) {
@@ -166,6 +171,18 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		return true;
 	}
 	
+	public boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType) {
+		Assert.notNull(javaType, "Java type required");
+		
+		// Try to add import if possible
+		if (isAdditionLegal(javaType)) {
+			addImport(javaType);
+		}
+		
+		// Indicate whether we can use in a simple or need a fully-qualified form
+		return isFullyQualifiedFormRequired(javaType);
+	}
+
 	/**
 	 * Determines whether the presented simple type name is part of java.lang or not.
 	 *  

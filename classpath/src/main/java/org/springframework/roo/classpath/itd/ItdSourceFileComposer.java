@@ -2,6 +2,8 @@ package org.springframework.roo.classpath.itd;
 
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -10,6 +12,8 @@ import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -28,68 +32,81 @@ public class ItdSourceFileComposer {
 	private JavaType introductionTo;
 	private StringBuilder pw = new StringBuilder();
 	private boolean content;
+	private ItdTypeDetails itdTypeDetails;
+	private ImportRegistrationResolver resolver;
+	private JavaType aspect;
 
 	/**
 	 * Constructs an {@link ItdSourceFileComposer} containing the members that were requested in
-	 * the passed object. If no members were requested, the {@link #isContent()} will be false.
-	 * The type is {@link #appendTerminator()} if the append terminator is true.
-	 * 
-	 * @param itdTypeDetails to construct (required)
-	 */
-	public ItdSourceFileComposer(ItdTypeDetails itdTypeDetails, boolean appendTerminator) {
-		appendItdTypeDetails(itdTypeDetails);
-		if (appendTerminator) {
-			appendTerminator();
-		}
-	}
-	
-	/**
-	 * Constructs an {@link ItdSourceFileComposer} and automatically appends the terminator.
+	 * the passed object.
 	 * 
 	 * @param itdTypeDetails to construct (required)
 	 */
 	public ItdSourceFileComposer(ItdTypeDetails itdTypeDetails) {
-		appendItdTypeDetails(itdTypeDetails);
-		appendTerminator();
-	}
-	
-	private void appendItdTypeDetails(ItdTypeDetails itdTypeDetails) {
 		Assert.notNull(itdTypeDetails, "ITD type details required");
-		appendDeclaration(itdTypeDetails.isPrivilegedAspect(), itdTypeDetails.getAspect(), itdTypeDetails.getName());
-		appendExtendsTypes(itdTypeDetails.getExtendsTypes());
-		appendImplementsTypes(itdTypeDetails.getImplementsTypes());
-		appendTypeAnnotations(itdTypeDetails.getTypeAnnotations());
-		appendFields(itdTypeDetails.getDeclaredFields());
-		appendConstructors(itdTypeDetails.getDeclaredConstructors());
-		appendMethods(itdTypeDetails.getDeclaredMethods());
-	}
-	
-	/**
-	 * Used to create an {@link ItdSourceFileComposer} by hand. It is recommended instead that
-	 * one of the alternate constructors be used, as they are more automatic.
-	 * 
-	 * @param privilegedAspect whether the aspect is declared as privileged or not
-	 * @param aspect the type of the aspect itself (required)
-	 * @param introductionTo the type that will receive introductions (required)
-	 */
-	public ItdSourceFileComposer(boolean privilegedAspect, JavaType aspect, JavaType introductionTo) {
-		appendDeclaration(privilegedAspect, aspect, introductionTo);
-	}
-	
-	private void appendDeclaration(boolean privilegedAspect, JavaType aspect, JavaType introductionTo) {
-		Assert.notNull(aspect, "Aspect is required");
-		Assert.notNull(introductionTo, "Introduction to is required");
 
-		this.introductionTo = introductionTo;
+		this.itdTypeDetails = itdTypeDetails;
+		Assert.notNull(itdTypeDetails.getName(), "Introduction to is required");
+		this.introductionTo = itdTypeDetails.getName();
 		
+		this.aspect = itdTypeDetails.getAspect();
+
+		// Create my own resolver, so we can add items to it as we process
+		resolver = new ImportRegistrationResolverImpl(itdTypeDetails.getAspect().getPackage());
+		
+		for (JavaType registeredImport : itdTypeDetails.getRegisteredImports()) {
+			// Do a sanity check in case the user misused it
+			if (resolver.isAdditionLegal(registeredImport)) {
+				resolver.addImport(registeredImport);
+			}
+		}
+
+		appendTypeDeclaration();
+		appendExtendsTypes();
+		appendImplementsTypes();
+		appendTypeAnnotations();
+		appendFields();
+		appendConstructors();
+		appendMethods();
+		appendTerminator();
+		
+		// Now prepend the package declaration and any imports
+		// We need to do this ** at the end ** so we can ensure our compilation unit imports are correct, as they're built as we traverse over the other members
+		prependCompilationUnitDetails();
+	}
+	
+	private void prependCompilationUnitDetails() {
+		StringBuilder topOfFile = new StringBuilder();
+
+		// Note we're directly interacting with the top of file string builder
+		if (!aspect.isDefaultPackage()) {
+			topOfFile.append("package " + aspect.getPackage().getFullyQualifiedPackageName() + ";").append(getNewLine());
+			topOfFile.append(getNewLine());
+		}
+		
+		// Ordered to ensure consistency of output
+		SortedSet<JavaType> types = new TreeSet<JavaType>();
+		types.addAll(resolver.getRegisteredImports());
+		if (types.size() > 0) {
+			for (JavaType importType : types) {
+				topOfFile.append("import " + importType.getFullyQualifiedTypeName() + ";").append(getNewLine());
+			}
+			
+			topOfFile.append(getNewLine());
+		}
+		
+		// Now append the normal file to the bottom
+		topOfFile.append(pw.toString());
+		
+		// Replace the old writer with out new writer
+		this.pw = topOfFile;
+	}
+	
+	private void appendTypeDeclaration() {
 		Assert.isTrue(introductionTo.getPackage().equals(aspect.getPackage()), "Aspect and introduction must be in identical packages");
 		
-		if (!aspect.isDefaultPackage()) {
-			this.appendFormalLine("package " + aspect.getPackage().getFullyQualifiedPackageName() + ";");
-		}
-		this.newLine();
 		this.appendIndent();
-		if (privilegedAspect) {
+		if (itdTypeDetails.isPrivilegedAspect()) {
 			this.append("privileged ");
 		}
 		this.append("aspect " + aspect.getSimpleTypeName() + " {");
@@ -102,20 +119,11 @@ public class ItdSourceFileComposer {
 	}
 
 	private void outputAnnotation(AnnotationMetadata annotation) {
-		this.append(AnnotationMetadataUtils.toSourceForm(annotation));
+		this.append(AnnotationMetadataUtils.toSourceForm(annotation, resolver));
 	}
 	
-	private String getIntroductionTo() {
-		// Workaround to simpify type name, as per AspectJ bug # 280380 and ROO-94
-		if (introductionTo.isDefaultPackage()) {
-			return introductionTo.getFullyQualifiedTypeName();
-			//return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames();
-		}
-		return introductionTo.getFullyQualifiedTypeName().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
-		//return introductionTo.getFullyQualifiedTypeNameIncludingTypeParameterNames().substring(introductionTo.getPackage().getFullyQualifiedPackageName().length()+1);
-	}
-	
-	public void appendTypeAnnotations(List<? extends AnnotationMetadata> typeAnnotations) {
+	private void appendTypeAnnotations() {
+		List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails.getTypeAnnotations();
 		if (typeAnnotations == null || typeAnnotations.size() == 0) {
 			return;
 		}
@@ -125,7 +133,7 @@ public class ItdSourceFileComposer {
 		for (AnnotationMetadata typeAnnotation : typeAnnotations) {
 			this.appendIndent();
 			this.append("declare @type: ");
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(": ");
 			outputAnnotation(typeAnnotation);
 			this.append(";");
@@ -134,7 +142,8 @@ public class ItdSourceFileComposer {
 		}
 	}
 
-	public void appendExtendsTypes(List<JavaType> extendsTypes) {
+	private void appendExtendsTypes() {
+		List<JavaType> extendsTypes = itdTypeDetails.getExtendsTypes();
 		if (extendsTypes == null || extendsTypes.size() == 0) {
 			return;
 		}
@@ -144,16 +153,22 @@ public class ItdSourceFileComposer {
 		for (JavaType extendsType : extendsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(" extends ");
-			this.append(extendsType.getFullyQualifiedTypeNameIncludingTypeParameters());
+			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+				this.append(extendsType.getFullyQualifiedTypeName());
+			} else {
+				this.append(extendsType.getSimpleTypeName());
+			}
 			this.append(";");
 			this.newLine();
 			this.newLine();
 		}
 	}
 
-	public void appendImplementsTypes(List<JavaType> implementsTypes) {
+	private void appendImplementsTypes() {
+		List<JavaType> implementsTypes = itdTypeDetails.getImplementsTypes();
+		
 		if (implementsTypes == null || implementsTypes.size() == 0) {
 			return;
 		}
@@ -163,16 +178,21 @@ public class ItdSourceFileComposer {
 		for (JavaType extendsType : implementsTypes) {
 			this.appendIndent();
 			this.append("declare parents: ");
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(" implements ");
-			this.append(extendsType.getFullyQualifiedTypeNameIncludingTypeParameters());
+			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
+				this.append(extendsType.getFullyQualifiedTypeName());
+			} else {
+				this.append(extendsType.getSimpleTypeName());
+			}
 			this.append(";");
 			this.newLine();
 			this.newLine();
 		}
 	}
 
-	public void appendConstructors(List<? extends ConstructorMetadata> constructors) {
+	private void appendConstructors() {
+		List<? extends ConstructorMetadata> constructors = itdTypeDetails.getDeclaredConstructors();
 		if (constructors == null || constructors.size() == 0) {
 			return;
 		}
@@ -193,7 +213,7 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(constructor.getModifier()));
 				this.append(" ");
 			}
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(".");
 			this.append("new");
 
@@ -208,7 +228,7 @@ public class ItdSourceFileComposer {
 					this.append(AnnotationMetadataUtils.toSourceForm(methodParameterAnnotation));
 					this.append(" ");
 				}
-				this.append(paramType.getJavaType().getFullyQualifiedTypeNameIncludingTypeParameters());
+				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
 				this.append(" ");
 				this.append(paramName.getSymbolName());
 				if (i < paramTypes.size() - 1) {
@@ -227,7 +247,8 @@ public class ItdSourceFileComposer {
 		}
 	}
 	
-	public void appendMethods(List<? extends MethodMetadata> methods) {
+	private void appendMethods() {
+		List<? extends MethodMetadata> methods = itdTypeDetails.getDeclaredMethods();
 		if (methods == null || methods.size() == 0) {
 			return;
 		}
@@ -248,10 +269,12 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(method.getModifier()));
 				this.append(" ");
 			}
-//			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameterNames());
-			this.append(method.getReturnType().getFullyQualifiedTypeNameIncludingTypeParameters());
+
+			// return type
+			boolean staticMethod = Modifier.isStatic(method.getModifier());
+			this.append(method.getReturnType().getNameIncludingTypeParameters(staticMethod, resolver));
 			this.append(" ");
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(".");
 			this.append(method.getMethodName().getSymbolName());
 
@@ -266,7 +289,7 @@ public class ItdSourceFileComposer {
 					this.append(AnnotationMetadataUtils.toSourceForm(methodParameterAnnotation));
 					this.append(" ");
 				}
-				this.append(paramType.getJavaType().getFullyQualifiedTypeNameIncludingTypeParameters());
+				this.append(paramType.getJavaType().getNameIncludingTypeParameters(false, resolver));
 				this.append(" ");
 				this.append(paramName.getSymbolName());
 				if (i < paramTypes.size() - 1) {
@@ -285,7 +308,8 @@ public class ItdSourceFileComposer {
 		}
 	}
 	
-	public void appendFields(List<? extends FieldMetadata> fields) {
+	private void appendFields() {
+		List<? extends FieldMetadata> fields = itdTypeDetails.getDeclaredFields();
 		if (fields == null || fields.size() == 0) {
 			return;
 		}
@@ -305,16 +329,16 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(field.getModifier()));
 				this.append(" ");
 			}
-			this.append(field.getFieldType().getFullyQualifiedTypeNameIncludingTypeParameters());
+			this.append(field.getFieldType().getNameIncludingTypeParameters());
 			this.append(" ");
-			this.append(getIntroductionTo());
+			this.append(introductionTo.getSimpleTypeName());
 			this.append(".");
 			this.append(field.getFieldName().getSymbolName());
 
 			// Append initializer, if present
 			if (field.getFieldInitializer() != null) {
 				this.append(" = new ");
-				this.append(field.getFieldInitializer().getFullyQualifiedTypeNameIncludingTypeParameters());
+				this.append(field.getFieldInitializer().getNameIncludingTypeParameters());
 				this.append("()");
 			}
 			
@@ -328,23 +352,15 @@ public class ItdSourceFileComposer {
 	/**
 	 * Increases the indent by one level.
 	 */
-	public ItdSourceFileComposer indent() {
+	private ItdSourceFileComposer indent() {
 		indentLevel++;
-		return this;
-	}
-	
-	/**
-	 * Resets the indent to zero.
-	 */
-	public ItdSourceFileComposer reset() {
-		indentLevel = 0;
 		return this;
 	}
 
 	/**
 	 * Decreases the indent by one level.
 	 */
-	public ItdSourceFileComposer indentRemove() {
+	private ItdSourceFileComposer indentRemove() {
 		indentLevel--;
 		return this;
 	}
@@ -352,18 +368,23 @@ public class ItdSourceFileComposer {
 	/**
 	 * Prints a blank line, ensuring any indent is included before doing so.
 	 */
-	public ItdSourceFileComposer newLine() {
+	private ItdSourceFileComposer newLine() {
 		appendIndent();
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
-		pw.append("\n");
+		pw.append(getNewLine());
 		//pw.append(System.getProperty("line.separator"));
 		return this;
+	}
+	
+	private String getNewLine() {
+        // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
+		return ("\n");
 	}
 	
 	/**
 	 * Prints the message, WITHOUT ANY INDENTATION.
 	 */
-	public ItdSourceFileComposer append(String message) {
+	private ItdSourceFileComposer append(String message) {
 		if (message != null && !"".equals(message)) {
 			pw.append(message);
 			content = true;
@@ -374,7 +395,7 @@ public class ItdSourceFileComposer {
 	/**
 	 * Prints the message, after adding indents and returns to a new line. This is the most commonly used method.
 	 */
-	public ItdSourceFileComposer appendFormalLine(String message) {
+	private ItdSourceFileComposer appendFormalLine(String message) {
 		appendIndent();
 		if (message != null && !"".equals(message)) {
 			pw.append(message);
@@ -386,14 +407,14 @@ public class ItdSourceFileComposer {
 	/**
 	 * Prints the relevant number of indents.
 	 */
-	public ItdSourceFileComposer appendIndent() {
+	private ItdSourceFileComposer appendIndent() {
 		for (int i = 0 ; i < indentLevel; i++) {
 			pw.append("    ");
 		}
 		return this;
 	}
 	
-	public void appendTerminator() {
+	private void appendTerminator() {
 		Assert.isTrue(this.indentLevel == 1, "Indent level must be 1 (not " + indentLevel + ") to conclude!");
 		this.indentRemove();
 		

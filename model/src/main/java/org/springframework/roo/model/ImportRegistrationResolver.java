@@ -39,11 +39,22 @@ public interface ImportRegistrationResolver {
 	boolean isFullyQualifiedFormRequired(JavaType javaType);
 	
 	/**
+	 * Automatically invokes {@link #isAdditionLegal(JavaType)}, then {@link #addImport(JavaType)}, and
+	 * finally {@link #isFullyQualifiedFormRequired(JavaType)}, returning the result of the final method.
+	 * This method is the main method that should be used by callers, as it will automatically attempt to
+	 * cause a {@link JavaType} to be used in its simple form if at all possible.
+	 * 
+	 * @param javaType to automatically register (if possible) and lookup whether simplified used is available (required)
+	 * @return true if a fully-qualified form must be used, or false if a simple form can be used 
+	 */
+	boolean isFullyQualifiedFormRequiredAfterAutoImport(JavaType javaType);
+	
+	/**
 	 * Indicates whether the presented {@link JavaType} can be legally presented to {@link #addImport(JavaType)}.
-	 * It is considered legal only if the presented {@link JavaType} is of type {@link DataType#TYPE} and
-	 * there is not an existing conflicting registered import. Note it is legal to add types from the same package
-	 * as the compilation unit, and indeed may be required by implementations that are otherwise unaware of all
-	 * the types available in a particular package.
+	 * It is considered legal only if the presented {@link JavaType} is of type {@link DataType#TYPE},
+	 * there is not an existing conflicting registered import, and the proposed type is not within the default
+	 * package. Note it is legal to add types from the same package as the compilation unit, and indeed may be 
+	 * required by implementations that are otherwise unaware of all the types available in a particular package.
 	 * 
 	 * @param javaType
 	 * @return

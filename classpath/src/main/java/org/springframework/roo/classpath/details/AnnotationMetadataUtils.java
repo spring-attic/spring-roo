@@ -12,7 +12,10 @@ import org.springframework.roo.classpath.details.annotations.IntegerAttributeVal
 import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.ImportRegistrationResolver;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Utilities to use with {@link AnnotationMetadata}.
@@ -23,10 +26,38 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public abstract class AnnotationMetadataUtils {
 
+	/**
+	 * Converts the annotation into a string-based form.
+	 * 
+	 * @param annotation to covert (required)
+	 * @return a string-based representation (never null)
+	 */
 	public static final String toSourceForm(AnnotationMetadata annotation) {
+		return toSourceForm(annotation, null);
+	}
+	
+	/**
+	 * Converts the annotation into a string-based form.
+	 * 
+	 * @param annotation to covert (required)
+	 * @param resolver to use for automatic addition of used types (may be null)
+	 * @return a string-based representation (never null)
+	 */
+	public static final String toSourceForm(AnnotationMetadata annotation, ImportRegistrationResolver resolver) {
+		Assert.notNull(annotation, "Annotation required");
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append("@");
-		sb.append(annotation.getAnnotationType().getFullyQualifiedTypeName());
+		
+		if (resolver != null) {
+			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(annotation.getAnnotationType())) {
+				sb.append(annotation.getAnnotationType().getFullyQualifiedTypeName());
+			} else {
+				sb.append(annotation.getAnnotationType().getSimpleTypeName());
+			}
+		} else {
+			sb.append(annotation.getAnnotationType().getFullyQualifiedTypeName());
+		}
 		
 		if (annotation.getAttributeNames().size() == 0) {
 			return sb.toString();
@@ -44,7 +75,7 @@ public abstract class AnnotationMetadataUtils {
 			// Compute the value
 			AnnotationAttributeValue<? extends Object> value = annotation.getAttribute(attributeName);
 			
-			String attributeValue = computeAttributeValue(value);
+			String attributeValue = computeAttributeValue(value, resolver);
 			
 			if (attributeValue != null) {
 				// We have a supported attribute
@@ -60,14 +91,19 @@ public abstract class AnnotationMetadataUtils {
 		return sb.toString();
 	}
 
-	private static String computeAttributeValue(AnnotationAttributeValue<? extends Object> value) {
+	private static String computeAttributeValue(AnnotationAttributeValue<? extends Object> value, ImportRegistrationResolver resolver) {
 		String attributeValue = null;
 		if (value instanceof BooleanAttributeValue) {
 			attributeValue = ((BooleanAttributeValue)value).getValue().toString();
 		} else if (value instanceof CharAttributeValue) {
 			attributeValue = "'" + ((CharAttributeValue)value).getValue().toString() + "'";
 		} else if (value instanceof ClassAttributeValue) {
-			attributeValue = ((ClassAttributeValue)value).getValue().getFullyQualifiedTypeName() + ".class";
+			JavaType clazz = ((ClassAttributeValue)value).getValue();
+			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
+				attributeValue = clazz.getFullyQualifiedTypeName() + ".class";
+			} else {
+				attributeValue = clazz.getSimpleTypeName() + ".class";
+			}
 		} else if (value instanceof DoubleAttributeValue) {
 			DoubleAttributeValue dbl = (DoubleAttributeValue) value;
 			if (dbl.isFloatingPrecisionOnly()) {
@@ -77,7 +113,12 @@ public abstract class AnnotationMetadataUtils {
 			}
 		} else if (value instanceof EnumAttributeValue) {
 			EnumDetails enumDetails = ((EnumAttributeValue)value).getValue();
-			attributeValue = enumDetails.getType().getFullyQualifiedTypeName() + "." + enumDetails.getField().getSymbolName();
+			JavaType clazz = enumDetails.getType();
+			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
+				attributeValue = clazz.getFullyQualifiedTypeName() + "." + enumDetails.getField().getSymbolName();
+			} else {
+				attributeValue = clazz.getSimpleTypeName() + "." + enumDetails.getField().getSymbolName();
+			}
 		} else if (value instanceof IntegerAttributeValue) {
 			attributeValue = ((IntegerAttributeValue)value).getValue().toString();
 		} else if (value instanceof LongAttributeValue) {
@@ -93,7 +134,7 @@ public abstract class AnnotationMetadataUtils {
 				if (i > 1) {
 					data.append(", ");
 				}
-				data.append(computeAttributeValue(val));
+				data.append(computeAttributeValue(val, resolver));
 			}
 			attributeValue = "{" + data.toString() + "}";
 		}

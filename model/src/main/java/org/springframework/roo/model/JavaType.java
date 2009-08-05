@@ -135,12 +135,34 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 
 	// used for wildcard type parameters; it must be one or the other
-	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_");
-	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");
-	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");
+	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");  // List<? extends YY>
+	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");      // List<? super XXXX>
+	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_");  // List<?>
 
-	private String getFullyQualifiedTypeNameIncludingTypeParameterNames() {
-		StringBuilder sb = new StringBuilder();
+	/**
+	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with non-static use.
+	 * No type name import resolution will take place. This is a side-effect free method.
+	 * 
+	 * @return the type name, including parameters, as legal Java code (never null or empty)
+	 */
+	public String getNameIncludingTypeParameters() {
+		return getNameIncludingTypeParameters(false, null, new HashMap<String, String>());
+	}
+
+	/**
+	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with either static
+	 * or non-static usage, as per the passed argument. Type names will attempt to be resolved (and automatically registered)
+	 * using the passed resolver. This method will have side-effects on the passed resolver.
+	 * 
+	 * @param staticForm true if the output should be compatible with static use
+	 * @param resolver the resolver to use (may be null in which case no import resolution will occur)
+	 * @return the type name, including parameters, as legal Java code (never null or empty)
+	 */
+	public String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver) {
+		return getNameIncludingTypeParameters(staticForm, resolver, new HashMap<String, String>());
+	}
+	
+	private String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver, Map<String, String> types) {
 		if (DataType.PRIMITIVE == dataType) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
@@ -152,75 +174,49 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			}
 			return StringUtils.uncapitalize(this.getSimpleTypeName() + getArraySuffix());
 		}
+		
+		StringBuilder sb = new StringBuilder();
+		
 		if (WILDCARD_EXTENDS.equals(argName)) {
-			sb.append("? extends ").append(fullyQualifiedTypeName);
+			sb.append("?");
+			if (dataType == DataType.TYPE || !staticForm) {
+				sb.append(" extends ");
+			} else if (types.containsKey(fullyQualifiedTypeName)) {
+				sb.append(" extends ").append(types.get(fullyQualifiedTypeName));
+			}
 		} else if (WILDCARD_SUPER.equals(argName)) {
-			sb.append("? super ").append(fullyQualifiedTypeName);
+			sb.append("?");
+			if (dataType == DataType.TYPE || !staticForm) {
+				sb.append(" super ");
+			} else if (types.containsKey(fullyQualifiedTypeName)) {
+				sb.append(" extends ").append(types.get(fullyQualifiedTypeName));
+			}
 		} else if (WILDCARD_NEITHER.equals(argName)) {
 			sb.append("?");
-		} else {
-			if (argName == null) {
-				sb.append(fullyQualifiedTypeName);
-			} else {
-				sb.append(argName);
+		} else if (argName != null && !staticForm) {
+			sb.append(argName);
+			if (dataType == DataType.TYPE) {
+				sb.append(" extends ");
 			}
 		}
-		if (this.parameters.size() > 0 && argName == null) {
-			sb.append("<");
-			int counter = 0;
-			for (JavaType param : this.parameters) {
-				counter++;
-				if (counter > 1) {
-					sb.append(", ");
-				}
-				sb.append(param.getFullyQualifiedTypeNameIncludingTypeParameterNames());
-				counter++;
-			}
-			sb.append(">");
-		}
-		sb.append(getArraySuffix());
-		return sb.toString();
-	}
-	
-	public String getFullyQualifiedTypeNameIncludingTypeParameters() {
-		return getFullyQualifiedTypeNameIncludingTypeParameters(false);
-	}
-	
-	/**
-	 * @return the fully qualified name, including fully-qualified name of each type parameter
-	 */
-	public String getFullyQualifiedTypeNameIncludingTypeParameters(boolean staticCompatible) {
-		StringBuilder sb = new StringBuilder();
-		if (DataType.PRIMITIVE == dataType) {
-			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
-			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
-				return "int" + getArraySuffix();
-			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char" + getArraySuffix();
-			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
-				return "void";
-			}
-			return StringUtils.uncapitalize(this.getSimpleTypeName() + getArraySuffix());
-		}
-		if (argName != null) {
-			if (WILDCARD_EXTENDS.equals(argName)) {
-				sb.append("? extends ");
-			} else if (WILDCARD_SUPER.equals(argName)) {
-				sb.append("? super ");
-			} else if (WILDCARD_NEITHER.equals(argName)) {
-				sb.append("?");
-			} else {
-				sb.append(argName).append(" extends ");
-			}
-		}
+		
 		if (!WILDCARD_NEITHER.equals(argName)) {
-			if (dataType == DataType.VARIABLE) {
-				sb.append(fullyQualifiedTypeName);
-			} else {
-				sb.append(fullyQualifiedTypeName);
+			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
+			
+			if (dataType == DataType.TYPE || !staticForm) {
+				// TODO: Use the import registration resolver
+				if (resolver != null) {
+					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
+						sb.append(fullyQualifiedTypeName);
+					} else {
+						sb.append(getSimpleTypeName());
+					}
+				} else {
+					sb.append(fullyQualifiedTypeName);
+				}
 			}
 			
-			if (this.parameters.size() > 0) {
+			if (this.parameters.size() > 0 && (dataType == DataType.TYPE || !staticForm)) {
 				sb.append("<");
 				int counter = 0;
 				for (JavaType param : this.parameters) {
@@ -228,13 +224,19 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 					if (counter > 1) {
 						sb.append(", ");
 					}
-					sb.append(param.getFullyQualifiedTypeNameIncludingTypeParameters());
+					sb.append(param.getNameIncludingTypeParameters(staticForm, resolver, types));
 					counter++;
 				}
 				sb.append(">");
 			}
+			
 			sb.append(getArraySuffix());
 		}
+
+		if (argName != null && !argName.equals(WILDCARD_EXTENDS) && !argName.equals(WILDCARD_SUPER) && !argName.equals(WILDCARD_NEITHER)) {
+			types.put(this.argName.getSymbolName(), sb.toString());
+		}
+		
 		return sb.toString();
 	}
 	
@@ -298,7 +300,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 	
 	public final String toString() {
-		return getFullyQualifiedTypeNameIncludingTypeParameters();
+		return getNameIncludingTypeParameters();
 	}
 
 	public JavaSymbolName getArgName() {

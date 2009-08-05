@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.ImportRegistrationResolver;
+import org.springframework.roo.model.ImportRegistrationResolverImpl;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
@@ -34,6 +36,7 @@ public final class DefaultItdTypeDetailsBuilder {
 	private JavaType aspect;
 	private boolean privilegedAspect;
 	
+	private ImportRegistrationResolver importRegistrationResolver;
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
@@ -50,15 +53,20 @@ public final class DefaultItdTypeDetailsBuilder {
 		this.governor = governor;
 		this.aspect = aspect;
 		this.privilegedAspect = privilegedAspect;
+		this.importRegistrationResolver = new ImportRegistrationResolverImpl(aspect.getPackage());
 	}
 	
 	/**
 	 * @return an immutable {@link DefaultItdTypeDetails} representing the current state of the builder (never null)
 	 */
 	public DefaultItdTypeDetails build() {
-		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations);
+		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations);
 	}
 
+	public ImportRegistrationResolver getImportRegistrationResolver() {
+		return importRegistrationResolver;
+	}
+	
 	public void addConstructor(ConstructorMetadata md) {
 		if (md == null || !declaredByMetadataId.equals(md.getDeclaredByMetadataId())) {
 			return;

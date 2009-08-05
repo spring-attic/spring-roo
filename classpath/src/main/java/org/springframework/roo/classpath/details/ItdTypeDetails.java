@@ -1,5 +1,7 @@
 package org.springframework.roo.classpath.details;
 
+import java.util.Set;
+
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -27,5 +29,10 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 	 * @return the aspect {@link JavaType} (never null)
 	 */
 	JavaType getAspect();
+	
+	/**
+	 * @return the explicitly-registered imports this user wishes to have defined in the ITD (cannot be null, but may be empty)
+	 */
+	Set<JavaType> getRegisteredImports();
 	
 }
