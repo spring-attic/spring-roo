@@ -30,21 +30,24 @@ public abstract class AbstractInvocableMemberMetadata implements InvocableMember
 		this.declaredByMetadataId = declaredByMetadataId;
 
 		if (parameters != null) {
-			this.parameters = parameters;
+			this.parameters = new ArrayList<AnnotatedJavaType>(parameters.size());
+			this.parameters.addAll(parameters);
 		}
 		
 		if (parameterNames != null) {
-			this.parameterNames = parameterNames;
+			this.parameterNames = new ArrayList<JavaSymbolName>(parameterNames.size());
+			this.parameterNames.addAll(parameterNames);
 		}
 		
 		this.body = body;
 		this.modifier = modifier;
 		
 		if (annotations != null) {
-			this.annotations = annotations;
+			this.annotations = new ArrayList<AnnotationMetadata>(annotations.size());
+			this.annotations.addAll(annotations);
 		}
 	}
-
+	
 	public String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}
@@ -60,7 +63,7 @@ public abstract class AbstractInvocableMemberMetadata implements InvocableMember
 	public List<AnnotatedJavaType> getParameterTypes() {
 		return Collections.unmodifiableList(parameters);
 	}
-
+	
 	public int getModifier() {
 		return modifier;
 	}
