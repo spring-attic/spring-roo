@@ -6,19 +6,19 @@
 <tiles-definitions>
 	
 	<definition name="index" extends="admin">
-		<put-attribute name="body" value="/WEB-INF/includes/index.jspx" />
+		<put-attribute name="body" value="/WEB-INF/jsp/index.jspx" />
 	</definition>
 	
 	<definition name="dataAccessFailure" extends="admin">
-		<put-attribute name="body" value="/WEB-INF/includes/dataAccessFailure.jspx" />
+		<put-attribute name="body" value="/WEB-INF/jsp/dataAccessFailure.jspx" />
 	</definition>
 	
 	<definition name="resourceNotFound" extends="admin">
-		<put-attribute name="body" value="/WEB-INF/includes/resourceNotFound.jspx" />
+		<put-attribute name="body" value="/WEB-INF/jsp/resourceNotFound.jspx" />
 	</definition>
 	
 	<definition name="uncaughtException" extends="admin">
-		<put-attribute name="body" value="/WEB-INF/includes/uncaughtException.jspx" />
+		<put-attribute name="body" value="/WEB-INF/jsp/uncaughtException.jspx" />
 	</definition>
 	
 </tiles-definitions>

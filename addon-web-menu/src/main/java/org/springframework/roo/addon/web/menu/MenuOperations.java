@@ -44,7 +44,7 @@ public class MenuOperations {
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		
-		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/menu.jspx");
+		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/menu.jspx");
 	}
 	
 //	public void setMenuFile(String menuFile) {
@@ -70,11 +70,11 @@ public class MenuOperations {
 	 * @param menuItemLabel the menu item label (required)
 	 * @param link the menu item link (required)
 	 */
-	public void addMenuItem(String menuCategoryId, String menuCategoryLabel, String menuItemId, String menuItemLabel, String link) {
+	public void addMenuItem(String menuCategoryId, String menuCategoryLabel, String menuItemId, String menuItemLabel, String messageCode, String link) {
 		Assert.hasText(menuCategoryId, "Menu category label identifier required");
 		Assert.hasText(menuCategoryLabel, "Menu category label required");
 		Assert.hasText(menuItemId, "Menu item label identifier required");
-		Assert.hasText(menuItemLabel, "Menu item label required");
+		Assert.notNull(menuItemLabel, "Menu item object required");
 		Assert.hasText(link, "Link required");
 		
 		Document document;
@@ -118,7 +118,12 @@ public class MenuOperations {
 			menuItem.appendChild(url);
 			Element createLink = document.createElement("a");				
 			createLink.setAttribute("href", "${" + menuItemId + "_url}");				
-			createLink.setTextContent(menuItemLabel);		
+			Element message = document.createElement("spring:message");
+			message.setAttribute("code", messageCode);
+			if (menuItemLabel.length() > 0) {
+				message.setAttribute("arguments", menuItemLabel);
+			}
+			createLink.appendChild(message);
 			menuItem.appendChild(createLink);
 			categoryRoot.appendChild(menuItem);
 		}
@@ -177,7 +182,7 @@ public class MenuOperations {
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/menu.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/menu.jspx")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}			

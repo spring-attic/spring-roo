@@ -200,7 +200,8 @@ public class WebFlowOperations {
 				"web_flow_category", 
 				flowName, 
 				"web_flow_" + flowName.toLowerCase() + "_menu_item", 
-				"Enter " + flowName + "Flow",
+				flowName,
+				"webflow.menu.enter",
 				"/" + flowName);
 
 		updateDependencies();

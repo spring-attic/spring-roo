@@ -170,7 +170,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
 					beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 					"web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
-					"Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName(),
+					beanInfoMetadata.getJavaBean().getSimpleTypeName(),
+					"global.menu.new",
 					"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
 			tilesOperations.addViewDefinition("create", "admin");
 		} else {
@@ -193,7 +194,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
 				beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 				"web_mvc_jsp_list_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
-				"List all " + entityMetadata.getPlural(),
+				entityMetadata.getPlural(),
+				"global.menu.list",
 				"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
@@ -207,6 +209,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
 						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
+						"global.menu.find",
 						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
 			}

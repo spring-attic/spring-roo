@@ -1,3 +1,9 @@
-<tiles:insertDefinition name="index" xmlns:tiles="http://tiles.apache.org/tags-tiles" xmlns:jsp="http://java.sun.com/JSP/Page">
-	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
-</tiles:insertDefinition>
+<div xmlns:spring="http://www.springframework.org/tags">	
+	<script type="text/javascript">dojo.require("dijit.TitlePane")</script>
+    <div style="width: 100%" id="_title">
+    	<spring:message var="title" code="welcome.titlepane" />
+    	<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
+		<h3><spring:message code="welcome.h3" /></h3>
+		<p><spring:message code="welcome.text" /></p>
+	</div>
+</div>

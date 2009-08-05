@@ -176,7 +176,8 @@ public class SeleniumOperations {
 				"selenium_category", 
 				"Selenium Tests", 
 				"selenium_test_suite_menu_item", 
-				"Test suite", 
+				"",
+				"selenium.menu.test.suite",
 				"/static/" + relativeTestFilePath);		
 	}
 	

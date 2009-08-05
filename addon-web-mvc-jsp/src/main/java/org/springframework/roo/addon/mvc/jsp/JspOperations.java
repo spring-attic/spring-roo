@@ -1,7 +1,14 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Properties;
+
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -83,16 +90,33 @@ public class JspOperations {
 			}
 		}
 		
-		String includesDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/includes");
-		if (!fileManager.exists(includesDirectory)) {
+		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n");
+		if (!fileManager.exists(i18nDirectory)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/dataAccessFailure.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/dataAccessFailure.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/resourceNotFound.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/resourceNotFound.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/uncaughtException.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/uncaughtException.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "includes/index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/includes/index.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties")).getOutputStream());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_de.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties")).getOutputStream());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		}
 	}	
+	
+	private void changeProperties(String fileIdentifier, String propKey, String replace, String with) {
+		MutableFile mutableFile = fileManager.updateFile(fileIdentifier);
+		Properties props = new Properties();
+		try {
+			props.load(mutableFile.getInputStream());
+			String welcome = (String) props.get(propKey);
+			if(null != welcome && welcome.length() > 0) {
+				props.setProperty(propKey, welcome.replace(replace, with));
+				props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
+			}
+		} catch (IOException e) {
+			new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+		}	
+	}
 }

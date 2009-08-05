@@ -1,4 +1,28 @@
-<tiles:insertDefinition name="dataAccessFailure" xmlns:tiles="http://tiles.apache.org/tags-tiles" xmlns:jsp="http://java.sun.com/JSP/Page">
-	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
-</tiles:insertDefinition>
+<div xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<script type="text/javascript">dojo.require("dijit.TitlePane")</script>
+    <div style="width: 100%" id="_title">
+    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: 'Data access failure'}})); </script>
+  		<h2>Data access failure</h2>
+		<p>Sorry, a problem occurred while accessing the database.</p>
+		<c:if test="${not empty exception}">
+			<p>
+				<h4>Details</h4>
+				<script type="text/javascript">dojo.require("dijit.Dialog");dojo.require("dijit.form.Button");</script>
+				<button dojoType="dijit.form.Button" onclick="dijit.byId('dialog1').show()">Show Message</button>
+		
+				<div dojoType="dijit.Dialog" id="dialog1" title="Exception Message"	style="width: 800px">
+					<c:out value="${exception.localizedMessage}" />
+				</div>
+		
+				<button dojoType="dijit.form.Button" onclick="dijit.byId('dialog2').show()">Show Stack Trace</button>
+		
+				<div dojoType="dijit.Dialog" id="dialog2" title="Exception Stack Trace" style="width: 800px">				
+					<c:forEach items="${exception.stackTrace}" var="trace">
+						<c:out value="${trace}" />
+					</c:forEach>
+				</div>
+			</p>
+		</c:if>
+	</div>
+</div>
 

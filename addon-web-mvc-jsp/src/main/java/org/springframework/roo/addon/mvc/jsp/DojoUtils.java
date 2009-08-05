@@ -14,7 +14,6 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * 
@@ -68,9 +67,8 @@ public class DojoUtils {
 		Assert.notNull(field, "Field name required");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		String message = "Enter " + field.getReadableSymbolName() + " (required)";
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getSymbolName().toLowerCase()
-				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '" + message + "', required : true}})); ");
+				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${validation_required}', required : true}})); ");
 		return script;
 	}
 
@@ -78,7 +76,7 @@ public class DojoUtils {
 		Assert.notNull(document, "Document required");
 		Assert.notNull(field, "Field metadata required");
 		String regex = "";
-		String invalid = "";
+		String invalid = "${field_invalid}";
 		int min = getMinSize(field);
 		int max = getMaxSize(field);
 		boolean isRequired = isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations());
@@ -88,23 +86,19 @@ public class DojoUtils {
 			} else {
 				regex = ", regExp: \"-?[0-9]*\"";
 			}
-			invalid = "Integer numbers only";
 		} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().equals(new JavaType(Float.class.getName()))) {			
 			if (min != Integer.MIN_VALUE || max != Integer.MAX_VALUE) {
 				regex = ", regExp: \"-?[0-9]{" + (min == Integer.MIN_VALUE ? "1," : min) + (max == Integer.MAX_VALUE ? "" : max) + "}(\\.?[0-9]*)?\"";
 			} else {
 				regex = ", regExp: \"-?[0-9]*\\.[0-9]*\"";
 			}
-			invalid = "Number with '-' or '.' allowed" + (isRequired ? ", required" : "");
 		} else if (field.getFieldName().getSymbolName().contains("email")) {
 			regex = "";//", regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
-			invalid = "Valid email only";
 		}	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		String message = "Enter " + field.getFieldName().getReadableSymbolName() + (isRequired ? " (required)" : "");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"" + message + "\", invalidMessage: \"" + invalid 
+				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"${field_validation}\", invalidMessage: \"" + invalid 
 				+ "\"" + regex + ", required : " + isRequired + "}})); ");
 		return script;
 	}

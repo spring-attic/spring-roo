@@ -12,7 +12,7 @@
 	</rule>
 	<rule>
 		<from>/</from>
-		<to last="true">/WEB-INF/jsp/index.jspx</to>		
+		<to last="true">/app/index</to>		
 	</rule>
 	<rule>
 		<from>/app/**</from>
