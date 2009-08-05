@@ -4,43 +4,27 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-	<!--
-		- The controllers are autodetected POJOs labeled with the @Controller
-		annotation.
-	-->
+	<!-- The controllers are autodetected POJOs labeled with the @Controller annotation. -->
 	<context:component-scan base-package="TO_BE_CHANGED_BY_LISTENER" use-default-filters="false">
 		<context:include-filter type="annotation"
 			expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
 	
+	<!-- map a few default URLs to tiles definitions, this is needed to enable localization of messages -->
+	<bean name="/index" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	<bean name="/dataAccessFailure" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	<bean name="/resourceNotFound" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	<bean name="/uncaughtException" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	
+	<!-- register locale change interceptor which allows language change by appending ?lang=de to a URL -->
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 		<property name="interceptors">
 			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
 		</property>
-	</bean>
+	</bean>	
 
-	<!--
-		- This bean resolves specific types of exceptions to corresponding
-		logical - view names for error views. The default behaviour of
-		DispatcherServlet - is to propagate all exceptions to the servlet
-		container: this will happen - here with all other types of exceptions.
-	-->
-	<bean
-		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-		<property name="exceptionMappings">
-			<props>
-				<prop key=".DataAccessException">dataAccessFailure</prop>
-				<prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>
-				<prop key=".TypeMismatchException">resourceNotFound</prop>
-				<prop key=".lang.Exception">uncaughtException</prop>
-			</props>
-		</property>
-	</bean>
-
-	<!--
-		Resolves logical view names returned by Controllers to Tiles; a view
-		name to resolve is treated as the name of a tiles definition
-	-->
+	<!-- Resolves logical view names returned by Controllers to Tiles; a view
+		 name to resolve is treated as the name of a tiles definition -->
 	<bean id="tilesViewResolver" class="org.springframework.js.ajax.AjaxUrlBasedViewResolver">
 		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
 	</bean>
@@ -55,18 +39,25 @@
 		</property>
 	</bean>
 
-	<!--
-		resolves localized messages.properties files in the application to
-		allow for internationalization
-	-->
+	<!-- resolves localized messages.properties files in the application to	allow for internationalization -->
 	<bean id="messageSource" p:basename="WEB-INF/i18n/messages" class="org.springframework.context.support.ReloadableResourceBundleMessageSource" />
-
-	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>	
 	
-	<bean name="/index" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
-	<bean name="/dataAccessFailure" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
-	<bean name="/resourceNotFound" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
-	<bean name="/uncaughtException" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
+	<!-- store preferred language configuration in a cookie -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>	
+
+	<!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
+	     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet container: 
+	     this will happen - here with all other types of exceptions. -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="exceptionMappings">
+			<props>
+				<prop key=".DataAccessException">dataAccessFailure</prop>
+				<prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>
+				<prop key=".TypeMismatchException">resourceNotFound</prop>
+				<prop key=".lang.Exception">uncaughtException</prop>
+			</props>
+		</property>
+	</bean>
 
 	<!-- allows for integration of file upload functionality -->
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />

@@ -185,9 +185,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		} else {
 			tilesOperations.removeViewDefinition("update");
 		}
-		
-		//finally write the tiles definition if necessary
-		tilesOperations.writeToDiskIfNecessary();
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
@@ -212,11 +209,15 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"global.menu.find",
 						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
+				tilesOperations.addViewDefinition(finderName, "admin");
 			}
 		}
 		
 		//clean up links to finders which are removed by now
 		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "finder_", allowedMenuItems);
+		
+		//finally write the tiles definition if necessary
+		tilesOperations.writeToDiskIfNecessary();
 		
 		return md;
 	}

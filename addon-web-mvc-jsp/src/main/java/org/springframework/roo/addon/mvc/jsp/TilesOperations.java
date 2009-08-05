@@ -90,6 +90,8 @@ public class TilesOperations {
 		Assert.hasText(name, "View name required");
 		Assert.hasText(template, "Template name required");
 		
+		name = name.startsWith("/") ? name.replaceFirst("/", "") : name;
+		
 		Element definition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + simpleBeanName + "/" + name + "']", root);
 		
 		if(definition != null) {

@@ -574,7 +574,7 @@ public class JspDocumentHelper {
 		
 		Element inputElement = document.createElement("input");
 		inputElement.setAttribute("type", "submit");
-		inputElement.setAttribute("value", "${find_button");
+		inputElement.setAttribute("value", "${find_button}");
 		inputElement.setAttribute("id", "proceed");
 		divSubmitElement.appendChild(DojoUtils.getSubmitButtonDojo(document, "proceed"));
 		divSubmitElement.appendChild(inputElement);
