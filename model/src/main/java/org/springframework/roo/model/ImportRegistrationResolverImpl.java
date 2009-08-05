@@ -125,27 +125,44 @@ public class ImportRegistrationResolverImpl implements ImportRegistrationResolve
 		return Collections.unmodifiableSet(registeredImports);
 	}
 
+	public boolean isAdditionLegal(JavaType javaType) {
+		Assert.notNull(javaType, "Java type required");
+		
+		if (javaType.getDataType() != DataType.TYPE) {
+			// It's a type variable or primitive
+			return false;
+		}
+		
+		// Must be a class, so it's legal if there isn't an existing registration that conflicts
+		for (JavaType candidate : registeredImports) {
+			if (candidate.getSimpleTypeName().equals(javaType.getSimpleTypeName())) {
+				// conflict detected
+				return false;
+			}
+		}
+
+		return true;
+	}
+	
 	public boolean isFullyQualifiedFormRequired(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		
+		if (javaType.getDataType() == DataType.PRIMITIVE || javaType.getDataType() == DataType.VARIABLE) {
+			// Primitives and type variables do not need to be used in fully-qualified form
+			return false;
+		}
+
 		if (registeredImports.contains(javaType)) {
 			// Already know about this one
-			return true;
+			return false;
 		}
 		
 		if (compilationUnitPackage.equals(javaType.getPackage())) {
 			// No need for an explicit registration, given it's in the same package
-			return true;
+			return false;
 		}
 		
-		// Loop through and see if any short names conflict
-		for (JavaType candidate : registeredImports) {
-			if (candidate.getSimpleTypeName().equals(javaType.getSimpleTypeName())) {
-				return false;
-			}
-		}
-		
-		// To get this far, allow short form use
+		// To get this far, it must need a fully-qualified name
 		return true;
 	}
 	
