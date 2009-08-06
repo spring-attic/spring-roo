@@ -6,37 +6,19 @@
 
 	<!-- The controllers are autodetected POJOs labeled with the @Controller annotation. -->
 	<context:component-scan base-package="TO_BE_CHANGED_BY_LISTENER" use-default-filters="false">
-		<context:include-filter type="annotation"
-			expression="org.springframework.stereotype.Controller" />
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
 	</context:component-scan>
 	
-	<!-- register locale change interceptor which allows language change by appending ?lang=de to a URL -->
+	<!-- Maps request paths to @Controller classes; e.g. a path of /owner looks for a controller named OwnerController -->
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 		<property name="interceptors">
-			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
+			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang"/>
 		</property>
-		<property name="order" value="2"></property>
+		<property name="defaultHandler">
+			<!-- If no @Controller match, map path to a view to render; e.g. the "/index" path would map to the view named "index" -->	
+			<bean class="org.springframework.web.servlet.mvc.UrlFilenameViewController" />
+		</property>
 	</bean>	
-	
-	<!-- in addition to mapping of Pojo's annotated with @Controller we also want to map a few static 
-		 resources such as index -->
-	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
-		<property name="interceptors">
-			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
-		</property>
-		<property name="mappings">
-			<value>
-				/index=noOpController
-				/dataAccessFailure=noOpController
-				/resourceNotFound=noOpController
-				/uncaughtException=noOpController
-			</value>
-		</property>
-		<property name="order" value="1"></property>
-	</bean>
-	
-	<!-- map a few default URLs to tiles definitions, this is needed to enable localization of messages -->
-	<bean id="noOpController" class="org.springframework.web.servlet.mvc.UrlFilenameViewController" />
 
 	<!-- Resolves logical view names returned by Controllers to Tiles; a view
 		 name to resolve is treated as the name of a tiles definition -->
