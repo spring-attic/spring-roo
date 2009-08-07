@@ -37,7 +37,7 @@ public class TilesOperations {
 	 * 
 	 * @param folderName The name of the folder where the view artifacts for a specific add-on or domain object are stored (located under WEB-INF/views)
 	 * @param fileManager The file manager to be used for virtual filesystem operations
-	 * @param pathResolver The path reslver
+	 * @param pathResolver The path resolver
 	 * @param webMvcConfigName The configuration where the TilesConfigurer resides
 	 */
 	public TilesOperations(String folderName, FileManager fileManager, PathResolver pathResolver, String webMvcConfigName) {
@@ -49,9 +49,11 @@ public class TilesOperations {
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		
+		folderName = (folderName.length() > 0 && !folderName.startsWith("/")) ? "/" + folderName : folderName;
+		
 		Document tilesView;
 		
-		String viewFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + folderName + "/views.xml");
+		String viewFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views" + folderName + "/views.xml");
 		if (!fileManager.exists(viewFile)) {			
 			tilesView = XmlUtils.getDocumentBuilder().newDocument();
 			tilesView.appendChild(tilesView.createElement("tiles-definitions"));			

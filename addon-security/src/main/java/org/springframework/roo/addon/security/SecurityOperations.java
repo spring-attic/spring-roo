@@ -3,6 +3,7 @@ package org.springframework.roo.addon.security;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.springframework.roo.addon.mvc.jsp.TilesOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -72,15 +73,22 @@ public class SecurityOperations {
 		}
 		
 		// copy the template across
-		String loginPage = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "login.jsp");
+		String loginPage = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/login.jspx");
 		if (!fileManager.exists(loginPage)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "login-template.jsp"), fileManager.createFile(loginPage).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "login.jspx"), fileManager.createFile(loginPage).getOutputStream());
 			} catch (IOException ioe) {
 				throw new IllegalStateException(ioe);
 			}
 		}
 		
+		//TODO this should be reviewed after the add-on API restructure
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml"))) {
+			TilesOperations tilesOperations = new TilesOperations("/", fileManager, pathResolver, "config/webmvc-config.xml");
+			tilesOperations.addViewDefinition("login", "public", "/WEB-INF/views/login.jspx");
+			tilesOperations.writeToDiskIfNecessary();
+		}
+				
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		
 		MutableFile mutableWebXml = null;
