@@ -32,23 +32,32 @@ public class TilesOperations {
 	private PathResolver pathResolver;
 	private String simpleBeanName;
 	
-	public TilesOperations(String simpleBeanName, FileManager fileManager, PathResolver pathResolver, String servletName) {
+	/**
+	 * Creates configuration object to setup artifacts for the Tiles layout engine.
+	 * 
+	 * @param folderName The name of the folder where the view artifacts for a specific add-on or domain object are stored (located under WEB-INF/views)
+	 * @param fileManager The file manager to be used for virtual filesystem operations
+	 * @param pathResolver The path reslver
+	 * @param webMvcConfigName The configuration where the TilesConfigurer resides
+	 */
+	public TilesOperations(String folderName, FileManager fileManager, PathResolver pathResolver, String webMvcConfigName) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
-		Assert.hasText(simpleBeanName, "Simple bean name required");
+		Assert.hasText(folderName, "Simple bean name required");
+		Assert.hasText(webMvcConfigName, "Web MVC config filename rquired");
 		
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		
 		Document tilesView;
 		
-		String viewFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/" + simpleBeanName + "/views.xml");
+		String viewFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + folderName + "/views.xml");
 		if (!fileManager.exists(viewFile)) {			
 			tilesView = XmlUtils.getDocumentBuilder().newDocument();
 			tilesView.appendChild(tilesView.createElement("tiles-definitions"));			
 			
 			//register new tiles view configuration in TilesConfigurer within project servlet configuration
-			String servletPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/" + servletName);
+			String servletPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/" + webMvcConfigName);
 			if (!fileManager.exists(servletPath)) {
 				throw new IllegalStateException("Unable to find project servlet configuration under " + servletPath);
 			}			
@@ -61,9 +70,9 @@ public class TilesOperations {
 				throw new IllegalStateException("Unable to parse project servlet configuration");
 			}
 			Element tilesDefinitionList = XmlUtils.findRequiredElement("/beans/bean[@id='tilesConfigurer']/property/list", servletDefinition.getDocumentElement());
-			if (null == XmlUtils.findFirstElement("//value[text()='/WEB-INF/jsp/" + simpleBeanName + "/views.xml']", tilesDefinitionList)){
+			if (null == XmlUtils.findFirstElement("//value[text()='/WEB-INF/views/" + folderName + "/views.xml']", tilesDefinitionList)){
 				Element value = servletDefinition.createElement("value");
-				value.setTextContent("/WEB-INF/jsp/" + simpleBeanName + "/views.xml");
+				value.setTextContent("/WEB-INF/views/" + folderName + "/views.xml");
 				tilesDefinitionList.appendChild(value);
 			}
 			XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), mutableServletDefinition.getOutputStream(), servletDefinition);
@@ -77,22 +86,24 @@ public class TilesOperations {
 		}
 		
 		root = tilesView.getDocumentElement(); 
-		this.simpleBeanName = simpleBeanName;
+		this.simpleBeanName = folderName;
 	}
 
 	/**
 	 * Adds a new view definition to the views.xml tiles configuration
 	 * 
-	 * @param name The simple name of the view (ie 'list', 'show', 'update', etc)
-	 * @param template The template name (ie 'admin', 'public')
+	 * @param tilesViewName The simple name of the view (ie 'list', 'show', 'update', etc) or, if views are nested in sub-folders the name should be 'owner/list', 'owner/show', etc
+	 * @param tilesTemplateName The template name (ie 'admin', 'public')
+	 * @param templateLocation The location of the template in the Web application (ie "/WEB-INF/views/owner/list.jspx")
 	 */
-	public void addViewDefinition(String name, String template) {
-		Assert.hasText(name, "View name required");
-		Assert.hasText(template, "Template name required");
+	public void addViewDefinition(String tilesViewName, String tilesTemplateName, String viewLocation) {
+		Assert.hasText(tilesViewName, "View name required");
+		Assert.hasText(tilesTemplateName, "Template name required");
+		Assert.hasText(viewLocation, "View location required");
 		
-		name = name.startsWith("/") ? name.replaceFirst("/", "") : name;
+		tilesViewName = tilesViewName.startsWith("/") ? tilesViewName.replaceFirst("/", "") : tilesViewName;
 		
-		Element definition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + simpleBeanName + "/" + name + "']", root);
+		Element definition = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + tilesViewName + "']", root);
 		
 		if(definition != null) {
 			//a definition with this name does already exist - nothing to do
@@ -100,12 +111,12 @@ public class TilesOperations {
 		}
 		
 		definition = root.getOwnerDocument().createElement("definition");
-		definition.setAttribute("name", simpleBeanName + "/" + name);
-		definition.setAttribute("extends", template);
+		definition.setAttribute("name", tilesViewName);
+		definition.setAttribute("extends", tilesTemplateName);
 		
 		Element putAttribute = root.getOwnerDocument().createElement("put-attribute");
 		putAttribute.setAttribute("name", "body");
-		putAttribute.setAttribute("value", "/WEB-INF/jsp/" + simpleBeanName + "/" + name + ".jspx");
+		putAttribute.setAttribute("value", viewLocation);
 		
 		definition.appendChild(putAttribute);
 		root.appendChild(definition);
@@ -120,7 +131,7 @@ public class TilesOperations {
 		Assert.hasText(name, "View name required");
 		
 		//find menu item under this category if exists 
-		Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + simpleBeanName + "/" + name + "']", root);
+		Element element = XmlUtils.findFirstElement("/tiles-definitions/definition[@name = '" + name + "']", root);
 		if(element==null) {
 			return;
 		}
@@ -141,7 +152,7 @@ public class TilesOperations {
 		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN");
 		XmlUtils.writeXml(transformer, byteArrayOutputStream, root.getOwnerDocument());
 		String jspContent = byteArrayOutputStream.toString();
-		String tilesDefinition = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + simpleBeanName + "/views.xml"); 
+		String tilesDefinition = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + simpleBeanName + "/views.xml"); 
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;

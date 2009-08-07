@@ -1,0 +1,15 @@
+<div xmlns:spring="http://www.springframework.org/tags">
+	<script type="text/javascript">dojo.require("dijit.TitlePane");</script>
+	<spring:message var="title" code="webflow.state2.title" />
+	<div id="_title" style="width: 100%">
+		<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
+		<h1>${title}</h1>	
+		<p><spring:message code="webflow.state2.message" /></p>	
+		<form method="POST" >
+			<div class="submit">
+				<spring:message var="end" code="button.end" />
+				<input type="submit" id="cancel" name="_eventId_cancel" value="${end}"/>	
+			</div>		
+		</form>
+	</div>
+</div>

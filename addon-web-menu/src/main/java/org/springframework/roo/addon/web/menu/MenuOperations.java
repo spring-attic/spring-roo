@@ -44,7 +44,7 @@ public class MenuOperations {
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
 		
-		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/menu.jspx");
+		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
 	}
 	
 //	public void setMenuFile(String menuFile) {
@@ -182,7 +182,7 @@ public class MenuOperations {
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/menu.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}			

@@ -48,7 +48,7 @@
    	<body class="tundra spring">		
   		<div id="wrap">  
 		  	<div id="menu">
-		    	<jsp:directive.include file="../../jsp/menu.jspx"/>
+		    	<jsp:directive.include file="/WEB-INF/views/menu.jspx"/>
 		    </div>	    
 	    	<div id="main">
 	    		<tiles:insertAttribute name="body" />

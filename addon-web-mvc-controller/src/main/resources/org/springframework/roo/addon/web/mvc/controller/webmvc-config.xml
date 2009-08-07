@@ -3,10 +3,10 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 				http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
-
+				
 	<!-- The controllers are autodetected POJOs labeled with the @Controller annotation. -->
-	<context:component-scan base-package="TO_BE_CHANGED_BY_LISTENER" use-default-filters="false">
-		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	<context:component-scan base-package="com.springsource.petclinic" use-default-filters="false">
+		<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation"/>
 	</context:component-scan>
 	
 	<!-- Maps request paths to @Controller classes; e.g. a path of /owner looks for a controller named OwnerController -->
@@ -16,31 +16,31 @@
 		</property>
 		<property name="defaultHandler">
 			<!-- If no @Controller match, map path to a view to render; e.g. the "/index" path would map to the view named "index" -->	
-			<bean class="org.springframework.web.servlet.mvc.UrlFilenameViewController" />
+			<bean class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 		</property>
 	</bean>	
 
 	<!-- Resolves logical view names returned by Controllers to Tiles; a view
 		 name to resolve is treated as the name of a tiles definition -->
-	<bean id="tilesViewResolver" class="org.springframework.js.ajax.AjaxUrlBasedViewResolver">
-		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
+	<bean class="org.springframework.js.ajax.AjaxUrlBasedViewResolver" id="tilesViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
 	</bean>
 
 	<!-- Configures the Tiles layout system -->
-	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+	<bean class="org.springframework.web.servlet.view.tiles2.TilesConfigurer" id="tilesConfigurer">
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/layouts/layouts.xml</value>
-				<value>/WEB-INF/jsp/views.xml</value>
-			</list>
+				<value>/WEB-INF/views/views.xml</value>
+            </list>
 		</property>
 	</bean>
 
 	<!-- resolves localized messages.properties files in the application to	allow for internationalization -->
-	<bean id="messageSource" p:basename="WEB-INF/i18n/messages" class="org.springframework.context.support.ReloadableResourceBundleMessageSource" />
+	<bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="messageSource" p:basename="WEB-INF/i18n/messages"/>
 	
 	<!-- store preferred language configuration in a cookie -->
-	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver"/>	
+	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver"/>	
 
 	<!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
 	     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet container: 
@@ -57,5 +57,5 @@
 	</bean>
 
 	<!-- allows for integration of file upload functionality -->
-	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
 </beans>

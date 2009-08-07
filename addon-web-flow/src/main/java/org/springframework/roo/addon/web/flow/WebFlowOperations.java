@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.springframework.roo.addon.mvc.jsp.JspOperations;
+import org.springframework.roo.addon.mvc.jsp.TilesOperations;
 import org.springframework.roo.addon.web.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.metadata.MetadataService;
@@ -63,11 +64,11 @@ public class WebFlowOperations {
 	}
 	
 	public boolean isInstallWebFlowAvailable() {		
-		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml"));
+		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"));
 	}
 	
 	public boolean isManageWebFlowAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml"));
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"));
 	}
 	
 	/**
@@ -83,37 +84,16 @@ public class WebFlowOperations {
 			flowName = flowName.substring(1);
 		}
 		
-		//install Web flow config
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			
-		String flowContextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml");
-		MutableFile webflowContextMutableFile = null;
-		
-		Document appCtx;
 		try {
-			if (fileManager.exists(flowContextPath)) {
-				webflowContextMutableFile = fileManager.updateFile(flowContextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(webflowContextMutableFile.getInputStream());
-			} else {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "applicationContext-webflow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-webflow.xml")).getOutputStream());
-				webflowContextMutableFile = fileManager.updateFile(flowContextPath);
-				appCtx = XmlUtils.getDocumentBuilder().parse(webflowContextMutableFile.getInputStream());
+			if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"))) {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "webflow-config.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml")).getOutputStream());
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} 	
 		
-		//register custom directory if needed
-		if(!"sample-flow".equals(flowName)) {	
-			Element root = (Element) appCtx.getFirstChild();	
-			Element flowViewResolver = XmlUtils.findRequiredElement("/beans/bean[@class='org.springframework.web.servlet.view.InternalResourceViewResolver']", root);
-			flowViewResolver.removeAttribute("p:prefix");
-			flowViewResolver.setAttribute("p:prefix", "/WEB-INF/jsp/" + flowName + "/");
-			XmlUtils.writeXml(webflowContextMutableFile.getOutputStream(), appCtx);
-		}
-		
-		//adjust MVC servlet config to accommodate Spring Web Flow
-		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/" + projectMetadata.getProjectName().toLowerCase() + "-servlet.xml");
+		//adjust MVC config to accommodate Spring Web Flow
+		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webmvc-config.xml");
 		MutableFile mvcContextMutableFile = null;
 		
 		Document mvcAppCtx;
@@ -128,50 +108,16 @@ public class WebFlowOperations {
 			throw new IllegalStateException(e);
 		} 				
 		
-		Element root = (Element) mvcAppCtx.getFirstChild();	
-		boolean writeXml = false;
+		Element root = mvcAppCtx.getDocumentElement();
 
-		if (null == XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.webflow.mvc.servlet.FlowHandlerMapping']", root)) {
-			root.appendChild(mvcAppCtx.createComment("Maps request paths to flows in the flowRegistry"));
-			Element bean = mvcAppCtx.createElement("bean");
-			bean.setAttribute("class", "org.springframework.webflow.mvc.servlet.FlowHandlerMapping");
-			bean.appendChild(getValueProperty("order", "0", mvcAppCtx));
-			bean.appendChild(getRefProperty("flowRegistry", "flowRegistry", mvcAppCtx));
-			root.appendChild(bean);
-			writeXml = true;
-		}
-		
-		if (null == XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping']", root)) {
-			root.appendChild(mvcAppCtx.createComment("Maps request paths to @Controller classes"));
-			Element bean = mvcAppCtx.createElement("bean");
-			bean.setAttribute("class", "org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping");
-			bean.appendChild(getValueProperty("order", "1", mvcAppCtx));
-			root.appendChild(bean);
-			writeXml = true;
-		}
-		
-		if (null == XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.webflow.mvc.servlet.FlowHandlerAdapter']", root)) {
-			root.appendChild(mvcAppCtx.createComment("Dispatches requests mapped to flows to FlowHandler implementations"));
-			Element bean = mvcAppCtx.createElement("bean");
-			bean.setAttribute("class", "org.springframework.webflow.mvc.servlet.FlowHandlerAdapter");
-			bean.appendChild(getRefProperty("flowExecutor", "flowExecutor", mvcAppCtx));
-			root.appendChild(bean);
-			writeXml = true;
-		}
-		
-		if (null == XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter']", root)) {
-			root.appendChild(mvcAppCtx.createComment("Dispatches requests mapped to POJO @Controllers implementations"));
-			Element bean = mvcAppCtx.createElement("bean");
-			bean.setAttribute("class", "org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter");
-			root.appendChild(bean);
-			writeXml = true;
-		}
-		
-		if (writeXml) {
+		if (null == XmlUtils.findFirstElement("/beans/import[@resource='webflow-config.xml']", root)) {
+			Element importSWF = mvcAppCtx.createElement("import");
+			importSWF.setAttribute("resource", "webflow-config.xml");
+			root.appendChild(importSWF);
 			XmlUtils.writeXml(mvcContextMutableFile.getOutputStream(), mvcAppCtx);	
 		}
 		
-		String flowDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName);
+		String flowDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName);
 		
 		//install flow directory
 		if (!fileManager.exists(flowDirectory)) {			
@@ -181,16 +127,16 @@ public class WebFlowOperations {
 		String flowConfig = flowDirectory.concat("/" + flowName + "-flow.xml");
 		if (!fileManager.exists(flowConfig)) {			
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/" + flowName + "-flow.xml")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/" + flowName + "-flow.xml")).getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
 		
 		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-1.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/view-state-1.jsp")).getOutputStream());
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-2.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/view-state-2.jsp")).getOutputStream());		
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "end-state.jsp"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/jsp/" + flowName + "/end-state.jsp")).getOutputStream());	
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-1.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/view-state-1.jspx")).getOutputStream());
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-2.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/view-state-2.jspx")).getOutputStream());		
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "end-state.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/end-state.jspx")).getOutputStream());	
 		} catch (IOException e) {
 			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
@@ -199,10 +145,16 @@ public class WebFlowOperations {
 		menuOperations.addMenuItem(
 				"web_flow_category", 
 				flowName, 
-				"web_flow_" + flowName.toLowerCase() + "_menu_item", 
+				"web_flow_" + flowName.toLowerCase().replaceAll("-", "_") + "_menu_item", 
 				flowName,
 				"webflow.menu.enter",
 				"/" + flowName);
+		
+		TilesOperations tilesOperations = new TilesOperations(flowName, fileManager, pathResolver, "config/webmvc-config.xml");
+		tilesOperations.addViewDefinition("view-state-1", "admin", "/WEB-INF/views/" + flowName + "/view-state-1.jspx");
+		tilesOperations.addViewDefinition("view-state-2", "admin", "/WEB-INF/views/" + flowName + "/view-state-2.jspx");
+		tilesOperations.addViewDefinition("end-state", "admin", "/WEB-INF/views/" + flowName + "/end-state.jspx");
+		tilesOperations.writeToDiskIfNecessary();
 
 		updateDependencies();
 	}	
@@ -226,20 +178,6 @@ public class WebFlowOperations {
 		
 		projectOperations.updateProjectType(ProjectType.WAR);
 	}	
-	
-	private Element getValueProperty(String name, String value, Document doc) {
-		Element property = doc.createElement("property");
-		property.setAttribute("name", name);
-		property.setAttribute("value", value);
-		return property;
-	}
-	
-	private Element getRefProperty(String name, String ref, Document doc) {
-		Element property = doc.createElement("property");
-		property.setAttribute("name", name);
-		property.setAttribute("ref", ref);
-		return property;
-	}
 	
 	private PathResolver getPathResolver() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());

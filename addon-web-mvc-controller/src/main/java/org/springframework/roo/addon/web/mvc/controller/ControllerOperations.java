@@ -28,7 +28,6 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -50,20 +49,17 @@ public class ControllerOperations {
 	private MetadataService metadataService;
 	private ClasspathOperations classpathOperations;
 	private WebMvcOperations webMvcOperations;
-	private FileManager fileManager;
 	
-	public ControllerOperations(PathResolver pathResolver, MetadataService metadataService, ClasspathOperations classpathOperations, WebMvcOperations webMvcOperations, FileManager fileManager) {		
+	public ControllerOperations(PathResolver pathResolver, MetadataService metadataService, ClasspathOperations classpathOperations, WebMvcOperations webMvcOperations) {		
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");		
 		Assert.notNull(classpathOperations, "ClassPath operations required");	
 		Assert.notNull(webMvcOperations, "Web XML operations required");
-		Assert.notNull(fileManager, "File manager required");
 		
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;		
 		this.classpathOperations = classpathOperations;
 		this.webMvcOperations = webMvcOperations;
-		this.fileManager = fileManager;
 	}
 	
 	public boolean isNewControllerAvailable() {
@@ -240,14 +236,5 @@ public class ControllerOperations {
 			}
 		}
 		return false;
-	}
-	
-	private MethodMetadata getSimpleMethod(String methodName, String id) {
-		List<AnnotationMetadata> methodAnnotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> methodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		methodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), methodAttributes));
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		return new DefaultMethodMetadata(id, Modifier.PUBLIC, new JavaSymbolName(methodName), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, methodAnnotations, null);
 	}
 }

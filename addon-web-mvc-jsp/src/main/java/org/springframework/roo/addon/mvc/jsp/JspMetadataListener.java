@@ -140,7 +140,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
 		// Make the holding directory for this controller
-		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/jsp/" + simpleBeanName);
+		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + simpleBeanName);
 		if (!fileManager.exists(destinationDirectory)) {
 			fileManager.createDirectory(destinationDirectory);
 		} else {
@@ -148,19 +148,19 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			Assert.isTrue(file.isDirectory(), destinationDirectory + " is a file, when a directory was expected");
 		}
 		
-		TilesOperations tilesOperations = new TilesOperations(simpleBeanName, fileManager, pathResolver, projectMetadata.getProjectName().toLowerCase() + "-servlet.xml");
+		TilesOperations tilesOperations = new TilesOperations(simpleBeanName, fileManager, pathResolver, "config/webmvc-config.xml");
 		
 //		if (webScaffoldMetadata.getAnnotationValues().isList()) {
 			// By now we have a directory to put the JSPs inside
 			String listPath1 = destinationDirectory + "/list.jspx";
 			writeToDiskIfNecessary(listPath1, helper.getListDocument().getChildNodes());
-			tilesOperations.addViewDefinition("list", "admin");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "list", "admin", "/WEB-INF/views/" + simpleBeanName + "/list.jspx");
 			
 //		} 
 //		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
 			String showPath = destinationDirectory + "/show.jspx";
 			writeToDiskIfNecessary(showPath, helper.getShowDocument().getChildNodes());
-			tilesOperations.addViewDefinition("show", "admin");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "show", "admin", "/WEB-INF/views/" + simpleBeanName + "/show.jspx");
 //		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
@@ -173,17 +173,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					beanInfoMetadata.getJavaBean().getSimpleTypeName(),
 					"global.menu.new",
 					"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
-			tilesOperations.addViewDefinition("create", "admin");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "create", "admin", "/WEB-INF/views/" + simpleBeanName + "/create.jspx");
 		} else {
 			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item");
-			tilesOperations.removeViewDefinition("create");
+			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "create");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			writeToDiskIfNecessary(listPath, helper.getUpdateDocument().getChildNodes());
-			tilesOperations.addViewDefinition("update", "admin");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "update", "admin", "/WEB-INF/views/" + simpleBeanName + "/update.jspx");
 		} else {
-			tilesOperations.removeViewDefinition("update");
+			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "update");
 		}
 
 		//Add 'list all' menu item
@@ -209,7 +209,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"global.menu.find",
 						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
-				tilesOperations.addViewDefinition(finderName, "admin");
+				tilesOperations.addViewDefinition(simpleBeanName + "/" + finderName, "admin", "/WEB-INF/views/" + simpleBeanName + "/" + finderName +".jspx");
 			}
 		}
 		
