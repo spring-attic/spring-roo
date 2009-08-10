@@ -14,22 +14,7 @@
 		
 		<c:url var="tundra_css" value="/resources/dijit/themes/tundra/tundra.css"/>	
 		<link rel="stylesheet" type="text/css" href="${tundra_css}"><!-- //required for FF3 and Opera --></link>
-			
-		<c:url var="tools" value="/resources/css-framework/css/tools.css"/>
-		<link rel="stylesheet" type="text/css" media="screen" href="${tools}"><!-- //required for FF3 and Opera --></link>
-		
-		<c:url var="typo" value="/resources/css-framework/css/typo.css"/>
-		<link rel="stylesheet" type="text/css" media="screen" href="${typo}"><!-- //required for FF3 and Opera --></link>
-		
-		<c:url var="forms" value="/resources/css-framework/css/forms.css"/>
-		<link rel="stylesheet" type="text/css" media="screen" href="${forms}"><!-- //required for FF3 and Opera --></link>
-		
-		<c:url var="layout_navtop_localleft" value="/resources/css-framework/css/layout-navtop-localleft.css" />
-		<link rel="stylesheet" type="text/css" media="screen" href="${layout_navtop_localleft}"><!-- //required for FF3 and Opera --></link>
-		
-		<c:url var="layout" value="/resources/css-framework/css/layout.css"/>
-		<link rel="stylesheet" type="text/css" media="screen" href="${layout}"><!-- //required for FF3 and Opera --></link>
-			
+					
 		<c:url var="roo_css" value="/resources/styles/roo.css"/>	 
 		<link rel="stylesheet" type="text/css" media="screen" href="${roo_css}"><!-- //required for FF3 and Opera --></link>
 		

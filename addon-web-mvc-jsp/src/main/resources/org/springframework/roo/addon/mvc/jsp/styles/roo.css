@@ -21,6 +21,7 @@ body {
 .formContainer {
 	height:400px;
 }
+
 label {
 	width:100px;
 	float:left;
@@ -29,7 +30,10 @@ label {
 }
 
 input {
-	height:16px;
+	height:20px;
+}
+input, textarea, select {
+	border:1px solid #B3B3B3;
 }
 
 submit {
@@ -54,18 +58,67 @@ div .box {
   	top: 0px;
   	left:0px;
   	width:800px;
+  	height:400px;
   	text-align:left;  	
 
 }
+
 #main {
   	margin:0 auto;
   	position:relative;
   	float:right;  	
   	top: 35px;
   	left:0px;
-  	width:550px;
-  	height:550px; 
+  	width:525px;
+  	height:400px; 
   	text-align:left;
+}
+
+#menu {
+    background: #eee;
+  	position:relative;
+  	float:left;  	
+  	top: 35px;
+  	left:0px;
+  	width:250px;
+}
+
+#menu ul{
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#menu ul li{
+	padding: 0px;
+}
+
+
+#menu a, #menu h2 {
+	display: block;
+	margin: 0;
+	padding: 2px 6px;
+	color:#FFFFFF;
+}
+
+#menu h2 {
+	color: #fff;
+	background: #648C1D;
+	text-transform: uppercase;
+	font-weight:bold;
+	font-size: 1em;
+}
+
+#menu a {
+	color: #666666;
+	background: #efefef;
+	text-decoration: none;
+	padding: 2px 12px;
+}
+
+#menu a:hover {
+	color: #648C1D;
+	background: #fff;
 }
 
 .footer {
@@ -277,49 +330,4 @@ fieldset th {
 	color:#888888;
 }
 
-#menu {
-    background: #eee;
-  	position:relative;
-  	float:left;  	
-  	top: 35px;
-  	left:0px;
-  	width:250px;
-}
 
-#menu ul{
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-#menu ul li{
-	padding: 0px;
-}
-
-
-#menu a, #menu h2 {
-	display: block;
-	margin: 0;
-	padding: 2px 6px;
-	color:#FFFFFF;
-}
-
-#menu h2 {
-	color: #fff;
-	background: #648C1D;
-	text-transform: uppercase;
-	font-weight:bold;
-	font-size: 1em;
-}
-
-#menu a {
-	color: #666666;
-	background: #efefef;
-	text-decoration: none;
-	padding: 2px 12px;
-}
-
-#menu a:hover {
-	color: #648C1D;
-	background: #fff;
-}
