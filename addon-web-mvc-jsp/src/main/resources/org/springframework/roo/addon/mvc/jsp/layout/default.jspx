@@ -15,7 +15,7 @@
 		<c:url var="tundra_css" value="/resources/dijit/themes/tundra/tundra.css"/>	
 		<link rel="stylesheet" type="text/css" href="${tundra_css}"><!-- //required for FF3 and Opera --></link>
 					
-		<c:url var="roo_css" value="/resources/styles/roo.css"/>	 
+		<spring:theme code="styleSheet" var="roo_css"/> 
 		<link rel="stylesheet" type="text/css" media="screen" href="${roo_css}"><!-- //required for FF3 and Opera --></link>
 		
 		<c:url var="dojo_js" value="/resources/dojo/dojo.js"/>

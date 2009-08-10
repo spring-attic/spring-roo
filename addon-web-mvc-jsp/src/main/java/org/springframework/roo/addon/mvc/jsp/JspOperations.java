@@ -60,7 +60,10 @@ public class JspOperations {
 		if (!fileManager.exists(cssDirectory)) {
 			fileManager.createDirectory(cssDirectory);
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo.css")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo-menu-left.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo-menu-left.css")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo-menu-right.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo-menu-right.css")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/left.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes/left.properties")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/right.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes/right.properties")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for view layer.", e);
 			}

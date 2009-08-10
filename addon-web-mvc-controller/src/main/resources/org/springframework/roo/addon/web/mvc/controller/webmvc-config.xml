@@ -12,7 +12,10 @@
 	<!-- Maps request paths to @Controller classes; e.g. a path of /owner looks for a controller named OwnerController -->
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
 		<property name="interceptors">
-			<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang"/>
+			<list>
+				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang"/>
+				<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" p:paramName="theme"/>
+			</list>
 		</property>
 		<property name="defaultHandler">
 			<!-- If no @Controller match, map path to a view to render; e.g. the "/index" path would map to the view named "index" -->	
@@ -41,6 +44,12 @@
 	
 	<!-- store preferred language configuration in a cookie -->
 	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver"/>	
+	
+	<!-- resolves localized <theme_name>.properties files in the classpath to allow for theme support -->
+	<bean class="org.springframework.ui.context.support.ResourceBundleThemeSource" id="themeSource" />
+	
+	<!-- store preferred theme configuration in a cookie -->
+	<bean class="org.springframework.web.servlet.theme.CookieThemeResolver" id="themeResolver" p:defaultThemeName="left" />
 
 	<!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
 	     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet container: 
