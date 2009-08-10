@@ -100,26 +100,26 @@ public class JspDocumentHelper {
 		Element tableElement = document.createElement("table");
 		tableElement.setAttribute("width", "300px");
 		ifElement.appendChild(tableElement);
-		Element trElement = document.createElement("tr");
-		tableElement.appendChild(trElement);
 		Element theadElement = document.createElement("thead");
-		trElement.appendChild(theadElement);
+		tableElement.appendChild(theadElement);
+		Element trElement = document.createElement("tr");
+		theadElement.appendChild(trElement);		
 
 		Element idThElement = document.createElement("th");
 		idThElement.setTextContent(entityMetadata.getIdentifierField().getFieldName().getReadableSymbolName());
-		theadElement.appendChild(idThElement);
+		trElement.appendChild(idThElement);
 		
 		int fieldCounter = 0;
 		for (FieldMetadata field : fields) {
 			Element thElement = document.createElement("th");
 			thElement.setTextContent(field.getFieldName().getReadableSymbolName());
 			if(++fieldCounter < 7) {
-				theadElement.appendChild(thElement);
+				trElement.appendChild(thElement);
 			}
 		}
-		theadElement.appendChild(document.createElement("th"));
-		theadElement.appendChild(document.createElement("th"));
-		theadElement.appendChild(document.createElement("th"));
+		trElement.appendChild(document.createElement("th"));
+		trElement.appendChild(document.createElement("th"));
+		trElement.appendChild(document.createElement("th"));
 
 		Element forEachElement = document.createElement("c:forEach");
 		forEachElement.setAttribute("var", entityName);
