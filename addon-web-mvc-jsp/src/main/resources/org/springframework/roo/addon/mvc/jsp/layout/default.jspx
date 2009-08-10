@@ -49,25 +49,24 @@
    	<body class="tundra spring">		
   		<div id="wrap">  
 		  	<div id="menu">
-		    	<jsp:directive.include file="/WEB-INF/views/menu.jspx"/>
+		    	<tiles:insertAttribute name="menu" ignore="true" />
 		    </div>	    
 	    	<div id="main">
 	    		<tiles:insertAttribute name="body" />
-	    		<table class="footer">
-				  <tr>
+	    		<div class="footer">				
 				  	<c:url var="home" value="/" />
-				    <td><a href="${home}"><spring:message code="button.home"/></a></td>				    
-				    <c:if test="${not empty request.userPrincipal}">	
-				    	<td align="right">			    
+				    <span><a href="${home}"><spring:message code="button.home"/></a></span>				    
+				    <c:if test="${pageContext.request.userPrincipal != null}">	
+				    	<span>&#160;</span>
+				    	<span>			    
 						    <c:url var="logout" value="/static/j_spring_security_logout" />
 						    <a href="${logout}">Logout</a>
-					    </td>
+					    </span>
 					</c:if>					 
 				    <c:url var="logo" value="/static/images/springsource-logo.png" />
-				    <td align="right"><img src="${logo}" alt="Sponsored by SpringSource"/></td>
-				  </tr>
-				</table>
-	    	</div>
+				    <span><img src="${logo}" alt="Sponsored by SpringSource" align="right"/></span>
+				</div>
+			</div>
 		</div>		
 	</body>
 </html>

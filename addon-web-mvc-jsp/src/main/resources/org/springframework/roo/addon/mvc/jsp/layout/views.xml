@@ -16,8 +16,8 @@
 	<definition name="resourceNotFound" extends="public">
 		<put-attribute name="body" value="/WEB-INF/views/resourceNotFound.jspx" />
 	</definition>
-	
-	<definition name="uncaughtException" extends="public">
+	 
+	<definition name="uncaughtException" extends="public" >
 		<put-attribute name="body" value="/WEB-INF/views/uncaughtException.jspx" />
 	</definition>
 	

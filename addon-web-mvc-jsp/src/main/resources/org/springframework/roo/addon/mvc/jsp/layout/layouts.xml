@@ -6,11 +6,10 @@
 <tiles-definitions>
 	
 	<definition name="default" template="/WEB-INF/layouts/default.jspx">
-		<put-attribute name="title" value="${welcome}" />
 		<put-attribute name="menu" value="/WEB-INF/views/menu.jspx" />
 	</definition>
 	
-	<definition name="public" template="default">
+	<definition name="public" template="/WEB-INF/layouts/default.jspx">
 		<put-attribute name="menu" value="" />
 	</definition>
 	
