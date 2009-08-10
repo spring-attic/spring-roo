@@ -294,7 +294,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("for(javax.validation.ConstraintViolation<" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "> constraint : javax.validation.Validation.buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath(), null, constraint.getMessage());");
+		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath().toString(), \"" + entityName + ".error.\" + constraint.getPropertyPath(), constraint.getMessage());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
@@ -379,7 +379,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("for(javax.validation.ConstraintViolation<" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "> constraint : javax.validation.Validation.buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath(), null, constraint.getMessage());");
+		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath().toString(), \"" + entityName + ".error.\" + constraint.getPropertyPath(), constraint.getMessage());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
