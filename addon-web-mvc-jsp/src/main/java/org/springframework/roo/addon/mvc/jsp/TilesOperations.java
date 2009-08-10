@@ -31,6 +31,8 @@ public class TilesOperations {
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private String simpleBeanName;
+	public static final String DEFAULT_TEMPLATE = "default";
+	public static final String PUBLIC_TEMPLATE = "public";
 	
 	/**
 	 * Creates configuration object to setup artifacts for the Tiles layout engine.

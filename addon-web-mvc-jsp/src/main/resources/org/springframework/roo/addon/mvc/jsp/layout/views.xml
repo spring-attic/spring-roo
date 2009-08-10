@@ -5,19 +5,19 @@
 	
 <tiles-definitions>
 	
-	<definition name="index" extends="admin">
+	<definition name="index" extends="default">
 		<put-attribute name="body" value="/WEB-INF/views/index.jspx" />
 	</definition>
 	
-	<definition name="dataAccessFailure" extends="admin">
+	<definition name="dataAccessFailure" extends="public">
 		<put-attribute name="body" value="/WEB-INF/views/dataAccessFailure.jspx" />
 	</definition>
 	
-	<definition name="resourceNotFound" extends="admin">
+	<definition name="resourceNotFound" extends="public">
 		<put-attribute name="body" value="/WEB-INF/views/resourceNotFound.jspx" />
 	</definition>
 	
-	<definition name="uncaughtException" extends="admin">
+	<definition name="uncaughtException" extends="public">
 		<put-attribute name="body" value="/WEB-INF/views/uncaughtException.jspx" />
 	</definition>
 	

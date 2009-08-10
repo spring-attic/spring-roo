@@ -70,8 +70,7 @@ public class JspOperations {
 		if (!fileManager.exists(layoutsDirectory)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/layouts.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/layouts.xml")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/admin.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default/admin.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/public.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default/public.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/default.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx")).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}

@@ -151,9 +151,9 @@ public class WebFlowOperations {
 				"/" + flowName);
 		
 		TilesOperations tilesOperations = new TilesOperations(flowName, fileManager, pathResolver, "config/webmvc-config.xml");
-		tilesOperations.addViewDefinition("view-state-1", "admin", "/WEB-INF/views/" + flowName + "/view-state-1.jspx");
-		tilesOperations.addViewDefinition("view-state-2", "admin", "/WEB-INF/views/" + flowName + "/view-state-2.jspx");
-		tilesOperations.addViewDefinition("end-state", "admin", "/WEB-INF/views/" + flowName + "/end-state.jspx");
+		tilesOperations.addViewDefinition("view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/view-state-1.jspx");
+		tilesOperations.addViewDefinition("view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/view-state-2.jspx");
+		tilesOperations.addViewDefinition("end-state", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/end-state.jspx");
 		tilesOperations.writeToDiskIfNecessary();
 
 		updateDependencies();

@@ -154,13 +154,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			// By now we have a directory to put the JSPs inside
 			String listPath1 = destinationDirectory + "/list.jspx";
 			writeToDiskIfNecessary(listPath1, helper.getListDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "list", "admin", "/WEB-INF/views/" + simpleBeanName + "/list.jspx");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/list.jspx");
 			
 //		} 
 //		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
 			String showPath = destinationDirectory + "/show.jspx";
 			writeToDiskIfNecessary(showPath, helper.getShowDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "show", "admin", "/WEB-INF/views/" + simpleBeanName + "/show.jspx");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/show.jspx");
 //		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
@@ -173,7 +173,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					beanInfoMetadata.getJavaBean().getSimpleTypeName(),
 					"global.menu.new",
 					"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "create", "admin", "/WEB-INF/views/" + simpleBeanName + "/create.jspx");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/create.jspx");
 		} else {
 			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item");
 			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "create");
@@ -181,7 +181,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			writeToDiskIfNecessary(listPath, helper.getUpdateDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "update", "admin", "/WEB-INF/views/" + simpleBeanName + "/update.jspx");
+			tilesOperations.addViewDefinition(simpleBeanName + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "update");
 		}
@@ -209,7 +209,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"global.menu.find",
 						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
-				tilesOperations.addViewDefinition(simpleBeanName + "/" + finderName, "admin", "/WEB-INF/views/" + simpleBeanName + "/" + finderName +".jspx");
+				tilesOperations.addViewDefinition(simpleBeanName + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/" + finderName +".jspx");
 			}
 		}
 		

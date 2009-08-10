@@ -85,7 +85,7 @@ public class SecurityOperations {
 		//TODO this should be reviewed after the add-on API restructure
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml"))) {
 			TilesOperations tilesOperations = new TilesOperations("/", fileManager, pathResolver, "config/webmvc-config.xml");
-			tilesOperations.addViewDefinition("login", "public", "/WEB-INF/views/login.jspx");
+			tilesOperations.addViewDefinition("login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
 			tilesOperations.writeToDiskIfNecessary();
 		}
 				
