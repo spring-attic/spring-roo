@@ -20,3 +20,5 @@ configure logging -level DEBUG -package WEB
 install security
 
 list finders for -class com.springsource.vote.domain.Vote -depth 2 -filter reg,betw,IpEq
+
+configure logging -level DEBUG

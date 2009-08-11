@@ -29,3 +29,4 @@ add field email template -class ~.web.PublicRsvpController
 
 // complete manual configuration as described at http://blog.springsource.com/roo-part-2/
 
+configure logging -level DEBUG

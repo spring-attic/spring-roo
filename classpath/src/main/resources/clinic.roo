@@ -59,4 +59,4 @@ new selenium test -controller ~.web.PetController
 new selenium test -controller ~.web.VetController
 new selenium test -controller ~.web.VisitController
 
-configure logging -level DEBUG -package WEB
+configure logging -level DEBUG

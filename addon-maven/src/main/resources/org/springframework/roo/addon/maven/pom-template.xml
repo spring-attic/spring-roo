@@ -321,8 +321,8 @@
 	</build>
 
 	<properties>
-		<spring.version>3.0.0.M3</spring.version>
-		<aspectj.version>1.6.3.RELEASE</aspectj.version>
+		<spring.version>3.0.0.M4</spring.version>
+		<aspectj.version>1.6.5.RELEASE</aspectj.version>
 	</properties>
 
 </project>
