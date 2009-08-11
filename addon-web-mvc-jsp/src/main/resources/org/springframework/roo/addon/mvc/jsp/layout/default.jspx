@@ -10,26 +10,15 @@
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
 		
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />		
-		
-		<c:url var="tundra_css" value="/resources/dijit/themes/tundra/tundra.css"/>	
-		<link rel="stylesheet" type="text/css" href="${tundra_css}"><!-- //required for FF3 and Opera --></link>
-					
-		<c:url var="roo_css" value="/static/styles/roo-menu-left.css"/>	
-	<!-- <spring:theme code="styleSheet" var="roo_css"/>  -->	
-		<link rel="stylesheet" type="text/css" media="screen" href="${roo_css}"><!-- //required for FF3 and Opera --></link>
-		
-		<c:url var="dojo_js" value="/resources/dojo/dojo.js"/>
-		<script src="${dojo_js}" type="text/javascript" ><!-- //required for FF3 and Opera --></script>
-		
-		<c:url var="spring_js" value="/resources/spring/Spring.js" />
-		<script src="${spring_js}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
-		
-		<c:url var="spring_dojo_js" value="/resources/spring/Spring-Dojo.js" />	 
-		<script src="${spring_dojo_js}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
-			
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />				
+		<c:url var="root" value="/" />
+		<link rel="stylesheet" type="text/css" href="${root}resources/dijit/themes/tundra/tundra.css"><!-- //required for FF3 and Opera --></link>
+		<spring:theme code="styleSheet" var="roo_css"/>	
+		<link rel="stylesheet" type="text/css" media="screen" href="${root}${roo_css}"><!-- //required for FF3 and Opera --></link>
+		<script src="${root}resources/dojo/dojo.js" type="text/javascript" ><!-- //required for FF3 and Opera --></script>
+		<script src="${root}resources/spring/Spring.js" type="text/javascript"><!-- //required for FF3 and Opera --></script>
+		<script src="${root}resources/spring/Spring-Dojo.js" type="text/javascript"><!-- //required for FF3 and Opera --></script>
 		<script language="JavaScript" type="text/javascript">dojo.require("dojo.parser");</script>
-
 		<title><spring:message code="welcome.h3" /></title>
 	</head>
    	<body class="tundra spring">		
