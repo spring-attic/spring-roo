@@ -1,6 +1,7 @@
 create project -topLevelPackage com.springsource.petclinic
 
 install jpa -provider HIBERNATE -database HYPERSONIC_IN_MEMORY
+install jpa exception translation -package ~.domain
 
 new persistent class jpa -name ~.reference.PetType -testAutomatically
 new persistent class jpa -name ~.reference.Specialty -testAutomatically

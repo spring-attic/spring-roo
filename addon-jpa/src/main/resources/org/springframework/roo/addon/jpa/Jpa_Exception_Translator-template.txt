@@ -1,0 +1,20 @@
+package <package-placeholder>;
+
+import javax.persistence.EntityManager;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+
+public aspect Jpa_Exception_Translator {
+	
+	pointcut entityManagerCall(): call(* EntityManager.*(..));
+
+	after() throwing(RuntimeException re): entityManagerCall() {     
+    	DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(re);
+    	if (dex != null) {
+    		throw dex;
+    	} else {
+    		throw re;
+    	}        
+    }
+}

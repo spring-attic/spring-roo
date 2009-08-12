@@ -1,13 +1,20 @@
 package org.springframework.roo.addon.jpa;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
@@ -17,6 +24,8 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -74,6 +83,37 @@ public class JpaOperations {
 		if(jndi == null || jndi.length() == 0) updateDatabaseProperties(database);
 		updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
+	}
+	
+	/**
+	 * This method is responsible for installing a JPA exception translator into a Roo project.
+	 * 
+	 * @param aspectPackage the package under which this aspect should be installed
+	 */
+	public void installExceptionTranslation(JavaPackage aspectPackage) {
+		Assert.notNull(aspectPackage, "Package definition required");
+		String aspectFilePath = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, aspectPackage.getFullyQualifiedPackageName().replaceAll("\\.", "/") + "/Jpa_Exception_Translator.aj");
+		MutableFile aspectMutableFile = null;
+		try {
+			if (!fileManager.exists(aspectFilePath)) {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "Jpa_Exception_Translator-template.txt"), fileManager.createFile(aspectFilePath).getOutputStream());
+
+				aspectMutableFile = fileManager.updateFile(aspectFilePath);
+				String line;
+				StringBuffer sb = new StringBuffer();
+				BufferedReader reader = new BufferedReader ( new InputStreamReader(aspectMutableFile.getInputStream()));
+				while((line = reader.readLine()) != null) {
+					line = line.replaceAll("<package-placeholder>", aspectPackage.getFullyQualifiedPackageName());
+					sb.append(line+"\n");
+				}
+				reader.close();
+				DataOutputStream dos = new DataOutputStream(aspectMutableFile.getOutputStream());
+				dos.writeBytes(sb.toString());
+				dos.close();
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("Could not install Jpa_Exception_Translator.aj", e);
+		} 			
 	}
 	
 	private void updateApplicationContext(JdbcDatabase database, String jndi) {		

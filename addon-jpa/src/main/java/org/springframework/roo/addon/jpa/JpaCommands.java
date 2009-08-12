@@ -1,10 +1,12 @@
 package org.springframework.roo.addon.jpa;
 
 import java.util.SortedSet;
-import java.util.logging.Logger;
 
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -24,19 +26,20 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopmentShell
 public class JpaCommands implements CommandMarker {
 	
-	private final static Logger log = Logger.getLogger(JpaCommands.class.getName());
-	
 	private JpaOperations jpaOperations;
 	private PropFileOperations propFileOperations;
+	private MetadataService metadataService;
 	
-	public JpaCommands(StaticFieldConverter staticFieldConverter, JpaOperations jpaOperations, PropFileOperations propFileOperations) {
+	public JpaCommands(StaticFieldConverter staticFieldConverter, JpaOperations jpaOperations, PropFileOperations propFileOperations, MetadataService metadataService) {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(jpaOperations, "JPA operations required");
 		Assert.notNull(propFileOperations, "Property file operations required");
+		Assert.notNull(metadataService, "Metadata service required");
 		staticFieldConverter.add(JdbcDatabase.class);
 		staticFieldConverter.add(OrmProvider.class);
 		this.jpaOperations = jpaOperations;
 		this.propFileOperations = propFileOperations;
+		this.metadataService = metadataService;
 	}
 	
 	/**
@@ -52,6 +55,15 @@ public class JpaCommands implements CommandMarker {
 			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
 			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, true);
+	}
+	
+	@CliCommand(value="install jpa exception translation", help="Installs support for JPA exception translation")
+	public void exceptionTranslation(@CliOption(key={"package"}, mandatory=false, help="The package in which the JPA exception translation aspect will be installed") JavaPackage aspectPackage) {		
+		if (aspectPackage == null) {
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			aspectPackage = projectMetadata.getTopLevelPackage();
+		} 
+		jpaOperations.installExceptionTranslation(aspectPackage);
 	}
 	
 	@CliCommand(value="database properties", help="Shows database configuration details")
@@ -70,9 +82,9 @@ public class JpaCommands implements CommandMarker {
 	}
 	
 	/**
-	 * @return true if the "update jpa" command is available at this moment
+	 * @return true if the commands are available at this moment
 	 */
-	@CliAvailabilityIndicator("update jpa")
+	@CliAvailabilityIndicator({"update jpa", "database remove", "database set", "database properties", "install jpa exception translation"})
 	public boolean isUpdateJpaAvailable() {
 		return jpaOperations.isUpdateJpaAvailable();
 	}
