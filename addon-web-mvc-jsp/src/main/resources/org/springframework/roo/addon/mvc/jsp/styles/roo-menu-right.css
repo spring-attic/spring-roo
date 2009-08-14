@@ -36,6 +36,11 @@ input, textarea, select {
 	border:1px solid #B3B3B3;
 }
 
+input.image {
+	border: none;
+	height: auto;
+}
+
 submit {
 	height:25px;roo.css
 }

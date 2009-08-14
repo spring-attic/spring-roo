@@ -170,6 +170,7 @@ public class JspDocumentHelper {
 		showFormElement.appendChild(showMessage);
 		Element showSubmitElement = document.createElement("input");
 		showSubmitElement.setAttribute("type", "image");
+		showSubmitElement.setAttribute("class", "image");
 		showSubmitElement.setAttribute("title", "${show_label}");
 		showSubmitElement.setAttribute("src", "${show_image_url}");
 		showSubmitElement.setAttribute("value", "${show_label}");
@@ -198,6 +199,7 @@ public class JspDocumentHelper {
 			updateFormElement.appendChild(updateMessage);
 			Element updateSubmitElement = document.createElement("input");
 			updateSubmitElement.setAttribute("type", "image");
+			updateSubmitElement.setAttribute("class", "image");
 			updateSubmitElement.setAttribute("title", "${update_label}");
 			updateSubmitElement.setAttribute("src", "${update_image_url}");
 			updateSubmitElement.setAttribute("value", "${update_label}");
@@ -227,6 +229,7 @@ public class JspDocumentHelper {
 			deleteFormElement.appendChild(deleteMessage);
 			Element deleteSubmitElement = document.createElement("input");
 			deleteSubmitElement.setAttribute("type", "image");
+			deleteSubmitElement.setAttribute("class", "image");
 			deleteSubmitElement.setAttribute("title", "${delete_label}");
 			deleteSubmitElement.setAttribute("src", "${delete_image_url}");
 			deleteSubmitElement.setAttribute("value", "${delete_label}");
