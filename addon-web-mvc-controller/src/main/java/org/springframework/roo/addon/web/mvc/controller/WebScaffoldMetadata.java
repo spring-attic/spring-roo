@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -205,22 +206,48 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 		
+		List<AnnotationAttributeValue<?>> firstResultAttributeValue = new ArrayList<AnnotationAttributeValue<?>>();
+		firstResultAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "firstResult"));
+		firstResultAttributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));		
+		
+		List<AnnotationMetadata> paramAnnotationsFirstResult = new ArrayList<AnnotationMetadata>();
+		paramAnnotationsFirstResult.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), firstResultAttributeValue));
+		
+		List<AnnotationAttributeValue<?>> maxResultsAttributeValue = new ArrayList<AnnotationAttributeValue<?>>();
+		maxResultsAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "maxResults"));
+		maxResultsAttributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));		
+		
+		List<AnnotationMetadata> paramAnnotationsMaxResults = new ArrayList<AnnotationMetadata>();
+		paramAnnotationsMaxResults.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), maxResultsAttributeValue));
+		
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsFirstResult));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsMaxResults));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));	
 		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();		
+		paramNames.add(new JavaSymbolName("firstResult"));
+		paramNames.add(new JavaSymbolName("maxResults"));
 		paramNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + entityName));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
-		
+				
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
 				
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 
+		bodyBuilder.appendFormalLine("if(firstResult != null || maxResults != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(firstResult == null ? 0 : firstResult.intValue(), maxResults == null ? 10 : maxResults.intValue()));");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} else {");
+		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return \"" + entityName + "/list\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
