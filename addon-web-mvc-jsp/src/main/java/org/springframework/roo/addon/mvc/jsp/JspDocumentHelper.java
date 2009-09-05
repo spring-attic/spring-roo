@@ -29,6 +29,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -75,25 +76,15 @@ public class JspDocumentHelper {
 		
 		document.createComment(warning);
 		
-		Element div = document.createElement("div");
-		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
-		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
-		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
-		div.setAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt");
-		div.setAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions");
+		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
 		document.appendChild(div);
-		
+				
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();	
 
-		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title");
-		divElement.setAttribute("style", "width: 100%");
-		Element message = document.createElement("spring:message");
-		message.setAttribute("code", "entity.list.all");
-		message.setAttribute("arguments", entityMetadata.getPlural());
-		message.setAttribute("var", "title");
-		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title}"));
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title").addAttribute("style", "width: 100%")
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", entityMetadata.getPlural()).addAttribute("var", "title").build())
+								.addChild(DojoUtils.getTitlePaneDojo(document, "${title}"))
+								.build();
 		
 		Element ifElement = document.createElementNS("http://java.sun.com/jsp/jstl/core", "c:if");
 		ifElement.setAttribute("test", "${not empty " + entityMetadata.getPlural().toLowerCase() + "}");
@@ -149,36 +140,15 @@ public class JspDocumentHelper {
 			if(++fieldCounter < 7) {
 				trElement2.appendChild(tdElement);
 			}
-		}
-
-		Element showElement = document.createElement("td");
-		Element showFormElement = document.createElement("form:form");
-		Element showUrl = document.createElement("c:url");
-		showUrl.setAttribute("var", "show_form_url");
-		showUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
-		showElement.appendChild(showUrl);
-		showFormElement.setAttribute("action", "${show_form_url}");
-		showFormElement.setAttribute("method", "GET");
-		Element showImageUrl = document.createElement("c:url");
-		showImageUrl.setAttribute("var", "show_image_url");
-		showImageUrl.setAttribute("value", "/static/images/show.png");
-		showElement.appendChild(showImageUrl);
-		Element showMessage = document.createElement("spring:message");
-		showMessage.setAttribute("code", "entity.show");
-		showMessage.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		showMessage.setAttribute("var", "show_label");
-		showFormElement.appendChild(showMessage);
-		Element showSubmitElement = document.createElement("input");
-		showSubmitElement.setAttribute("type", "image");
-		showSubmitElement.setAttribute("class", "image");
-		showSubmitElement.setAttribute("title", "${show_label}");
-		showSubmitElement.setAttribute("src", "${show_image_url}");
-		showSubmitElement.setAttribute("value", "${show_label}");
-		showSubmitElement.setAttribute("alt", "${show_label}");
-		showFormElement.appendChild(showSubmitElement);
-		showElement.appendChild(showFormElement);
-		trElement2.appendChild(showElement);
-
+		}		
+		
+		Element showUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
+		Element showImageUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
+		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "show_label").build();
+		Element showSubmitElement = new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${show_label}").addAttribute("src", "${show_image_url}").addAttribute("value", "${show_label}").addAttribute("alt", "${show_label}").build();
+		Element showFormElement = new XmlElementBuilder("form:form", document).addAttribute("action", "${show_form_url}").addAttribute("method", "GET").addChild(showMessage).addChild(showSubmitElement).build();
+		trElement2.appendChild(new XmlElementBuilder("td", document).addChild(showUrl).addChild(showImageUrl).addChild(showFormElement).build());
+		
 		if(webScaffoldAnnotationValues.isUpdate()) {
 			Element updateElement = document.createElement("td");		
 			Element updateFormElement = document.createElement("form:form");
@@ -227,17 +197,11 @@ public class JspDocumentHelper {
 			deleteMessage.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
 			deleteMessage.setAttribute("var", "delete_label");
 			deleteFormElement.appendChild(deleteMessage);
-			Element deleteSubmitElement = document.createElement("input");
-			deleteSubmitElement.setAttribute("type", "image");
-			deleteSubmitElement.setAttribute("class", "image");
-			deleteSubmitElement.setAttribute("title", "${delete_label}");
-			deleteSubmitElement.setAttribute("src", "${delete_image_url}");
-			deleteSubmitElement.setAttribute("value", "${delete_label}");
-			deleteSubmitElement.setAttribute("alt", "${delete_label}");
-			deleteFormElement.appendChild(deleteSubmitElement);
+			deleteFormElement.appendChild(new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${delete_label}").addAttribute("src", "${delete_image_url}").addAttribute("value", "${delete_label}").addAttribute("alt", "${delete_label}").build());
 			deleteElement.appendChild(deleteFormElement);
 			trElement2.appendChild(deleteElement);
 		}
+		
 		Element notFoundMessage = document.createElement("spring:message");
 		notFoundMessage.setAttribute("code", "entity.not.found");
 		notFoundMessage.setAttribute("arguments", entityMetadata.getPlural());
@@ -245,8 +209,60 @@ public class JspDocumentHelper {
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityMetadata.getPlural().toLowerCase() + "}");
 		elseElement.appendChild(notFoundMessage);	
-
 		divElement.appendChild(ifElement);
+		
+		//pagination: first result
+		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset != 0}")
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "first")
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "0").build())
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
+									.build())
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_first.png").addAttribute("var", "first_image_url").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.first").addAttribute("var", "first_label").build())
+									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${first}").addAttribute("class", "image").addAttribute("title", "${first_label}")
+										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${first_label}").addAttribute("src", "${first_image_url}").build())
+									.build())
+								.build());
+
+		//pagination: previous result
+		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset gt 0}")
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "previous")
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${(param.offset - param.size) gt 0 ? param.offset - param.size : 0}").build())
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
+									.build())
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_previous.png").addAttribute("var", "previous_image_url").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.previous").addAttribute("var", "previous_label").build())
+									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${previous}").addAttribute("class", "image").addAttribute("title", "${previous_label}")
+										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${previous_label}").addAttribute("src", "${previous_image_url}").build())
+									.build())	
+								.build());
+		
+		//pagination: next result
+		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${" +entityMetadata.getPlural().toLowerCase() + "ListSize gt (param.offset + param.size)}")
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "next")
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${param.offset + param.size}").build())
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
+									.build())
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_next.png").addAttribute("var", "next_image_url").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.next").addAttribute("var", "next_label").build())
+									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${next}").addAttribute("class", "image").addAttribute("title", "${next_label}")
+										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${next_label}").addAttribute("src", "${next_image_url}").build())
+									.build())								
+								.build());
+
+		//pagination: last result
+		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset lt (choicesListSize - param.size)}")
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "last")
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${choicesListSize - param.size}").build())
+										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
+									.build())
+									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_last.png").addAttribute("var", "last_image_url").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.last").addAttribute("var", "last_label").build())
+									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${last}").addAttribute("class", "image").addAttribute("title", "${last_label}")
+										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${last_label}").addAttribute("src", "${last_image_url}").build())
+									.build())
+								.build());
+		
 		divElement.appendChild(elseElement);
 		div.appendChild(divElement);
 		

@@ -51,6 +51,11 @@ public class JspOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/banner-graphic.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/springsource-logo.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/springsource-logo.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_first.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_first.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_next.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_next.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_previous.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_previous.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_last.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_last.png")).getOutputStream());
+
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}

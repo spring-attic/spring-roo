@@ -42,7 +42,7 @@ input.image {
 }
 
 submit {
-	height:25px;roo.css
+	height:25px;
 }
 
 div {
@@ -182,6 +182,18 @@ a {
 	font-size: 13px;
 }
 
+a img {
+	border: 0 none;
+}
+
+tr:nth-child(odd) {
+	background-color: #FFFFFF;
+}
+
+tr:nth-child(even) {
+	background-color: #EFEFEF;
+}
+
 a:link {
 	color: #7db223;
 }
@@ -216,8 +228,8 @@ li ul li ul {
 }
 
 ul li {
-margin:0 0 0.25em 0;
-padding:0;
+	margin:0 0 0.25em 0;
+	padding:0;
 }
 /* table elements */
 
@@ -226,6 +238,7 @@ table {
 	margin: 2px 0 0 0;
 	border: 1px solid #BBBBBB;
 	border-collapse: collapse;
+	width: 100%
 }
 
 table table {
@@ -236,13 +249,21 @@ table table {
 
 table td,table th {
 	padding: 2px;
+	border: 1px solid #CCCCCC;
+}
+
+table td form {
+	text-align:center;
+	vertical-align: middle;
+	margin: 0px;
 }
 
 table th {
-	font-size: 11px;
+	font-size: 0.75em;
 	text-align: left;
 	font-weight: bold;
-	color: #FFFFFF;
+	color: #FFF;
+	background: #999;
 }
 
 table thead {

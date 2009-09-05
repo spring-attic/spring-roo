@@ -207,14 +207,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (method != null) return method;
 		
 		List<AnnotationAttributeValue<?>> firstResultAttributeValue = new ArrayList<AnnotationAttributeValue<?>>();
-		firstResultAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "firstResult"));
+		firstResultAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "offset"));
 		firstResultAttributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));		
 		
 		List<AnnotationMetadata> paramAnnotationsFirstResult = new ArrayList<AnnotationMetadata>();
 		paramAnnotationsFirstResult.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), firstResultAttributeValue));
 		
 		List<AnnotationAttributeValue<?>> maxResultsAttributeValue = new ArrayList<AnnotationAttributeValue<?>>();
-		maxResultsAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "maxResults"));
+		maxResultsAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "size"));
 		maxResultsAttributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));		
 		
 		List<AnnotationMetadata> paramAnnotationsMaxResults = new ArrayList<AnnotationMetadata>();
@@ -226,8 +226,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));	
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();		
-		paramNames.add(new JavaSymbolName("firstResult"));
-		paramNames.add(new JavaSymbolName("maxResults"));
+		paramNames.add(new JavaSymbolName("offset"));
+		paramNames.add(new JavaSymbolName("size"));
 		paramNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -239,15 +239,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 
-		bodyBuilder.appendFormalLine("if(firstResult != null || maxResults != null) {");
+		bodyBuilder.appendFormalLine("if(offset != null || size != null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(firstResult == null ? 0 : firstResult.intValue(), maxResults == null ? 10 : maxResults.intValue()));");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(offset == null ? 0 : offset.intValue(), size == null ? 10 : size.intValue()));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "ListSize\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getCountMethod().getMethodName() + "());");
 		bodyBuilder.appendFormalLine("return \"" + entityName + "/list\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
