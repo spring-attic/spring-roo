@@ -1,0 +1,52 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<jsp:directive.attribute name="maxPages" type="java.lang.Integer" required="true" />
+	<jsp:directive.attribute name="page" type="java.lang.Integer" required="true" />
+	<jsp:directive.attribute name="size" type="java.lang.Integer" required="true" />
+
+	<c:if test="${page ne 1}">
+		<c:url value="/choice" var="first">
+			<c:param name="page" value="1" />
+			<c:param name="size" value="${size}" />
+		</c:url>
+		<c:url value="/static/images/resultset_first.png" var="first_image_url" />
+		<spring:message code="list.first" var="first_label" />
+		<a class="image" href="${first}" title="${first_label}">
+		<img alt="${first_label}" src="${first_image_url}" />
+		</a>
+	</c:if>
+	<c:if test="${page gt 1}">
+		<c:url value="/choice" var="previous">
+			<c:param name="page" value="${page - 1}" />
+			<c:param name="size" value="${size}" />
+		</c:url>
+		<c:url value="/static/images/resultset_previous.png" var="previous_image_url" />
+		<spring:message code="list.previous" var="previous_label" />
+		<a class="image" href="${previous}" title="${previous_label}">
+		<img alt="${previous_label}" src="${previous_image_url}" />
+		</a>
+	</c:if>
+	<spring:message code="list.page" arguments="${page},${maxPages}" argumentSeparator=","/>
+	<c:if test="${page lt maxPages}">
+		<c:url value="/choice" var="next">
+			<c:param name="page" value="${page + 1}" />
+			<c:param name="size" value="${size}" />
+		</c:url>
+		<c:url value="/static/images/resultset_next.png" var="next_image_url" />
+		<spring:message code="list.next" var="next_label" />
+		<a class="image" href="${next}" title="${next_label}">
+		<img alt="${next_label}" src="${next_image_url}" />
+		</a>
+	</c:if>
+	<c:if test="${page ne maxPages}">
+		<c:url value="/choice" var="last">
+			<c:param name="page" value="${maxPages}" />
+			<c:param name="size" value="${size}" />
+		</c:url>
+		<c:url value="/static/images/resultset_last.png" var="last_image_url" />
+		<spring:message code="list.last" var="last_label" />
+		<a class="image" href="${last}" title="${last_label}">
+		<img alt="${last_label}" src="${last_image_url}" />
+		</a>
+	</c:if>
+</jsp:root>

@@ -97,6 +97,15 @@ public class JspOperations {
 			}
 		}
 		
+		String tagsDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags");
+		if (!fileManager.exists(tagsDirectory)) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/pagination.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/pagination.tagx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+			}
+		}
+		
 		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {

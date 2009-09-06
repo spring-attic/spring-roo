@@ -76,7 +76,7 @@ public class JspDocumentHelper {
 		
 		document.createComment(warning);
 		
-		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
+		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:roo", "urn:jsptagdir:/WEB-INF/tags").addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
 		document.appendChild(div);
 				
 		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();	
@@ -211,58 +211,14 @@ public class JspDocumentHelper {
 		elseElement.appendChild(notFoundMessage);	
 		divElement.appendChild(ifElement);
 		
-		//pagination: first result
-		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset != 0}")
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "first")
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "0").build())
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
-									.build())
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_first.png").addAttribute("var", "first_image_url").build())
-									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.first").addAttribute("var", "first_label").build())
-									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${first}").addAttribute("class", "image").addAttribute("title", "${first_label}")
-										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${first_label}").addAttribute("src", "${first_image_url}").build())
-									.build())
-								.build());
-
-		//pagination: previous result
-		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset gt 0}")
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "previous")
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${(param.offset - param.size) gt 0 ? param.offset - param.size : 0}").build())
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
-									.build())
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_previous.png").addAttribute("var", "previous_image_url").build())
-									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.previous").addAttribute("var", "previous_label").build())
-									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${previous}").addAttribute("class", "image").addAttribute("title", "${previous_label}")
-										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${previous_label}").addAttribute("src", "${previous_image_url}").build())
-									.build())	
-								.build());
+		//pagination
+		tableElement.appendChild(
+				new XmlElementBuilder("tr", document).addAttribute("class", "footer").addChild(
+						new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4))).addChild(
+								new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}").addChild(
+										new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${(empty param.page) ? 1 : param.page}").addAttribute("size", "${(empty param.size) ? 10 : param.size}").build()).build()).build()).build());
 		
-		//pagination: next result
-		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${" +entityMetadata.getPlural().toLowerCase() + "ListSize gt (param.offset + param.size)}")
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "next")
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${param.offset + param.size}").build())
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
-									.build())
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_next.png").addAttribute("var", "next_image_url").build())
-									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.next").addAttribute("var", "next_label").build())
-									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${next}").addAttribute("class", "image").addAttribute("title", "${next_label}")
-										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${next_label}").addAttribute("src", "${next_image_url}").build())
-									.build())								
-								.build());
 
-		//pagination: last result
-		divElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${param.offset lt (choicesListSize - param.size)}")
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + entityName).addAttribute("var", "last")
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "offset").addAttribute("value", "${choicesListSize - param.size}").build())
-										.addChild(new XmlElementBuilder("c:param", document).addAttribute("name", "size").addAttribute("value", "${param.size}").build())
-									.build())
-									.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/resultset_last.png").addAttribute("var", "last_image_url").build())
-									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "list.last").addAttribute("var", "last_label").build())
-									.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${last}").addAttribute("class", "image").addAttribute("title", "${last_label}")
-										.addChild(new XmlElementBuilder("img", document).addAttribute("alt", "${last_label}").addAttribute("src", "${last_image_url}").build())
-									.build())
-								.build());
-		
 		divElement.appendChild(elseElement);
 		div.appendChild(divElement);
 		

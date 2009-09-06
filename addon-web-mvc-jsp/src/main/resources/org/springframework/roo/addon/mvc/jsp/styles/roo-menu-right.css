@@ -134,7 +134,11 @@ div .box {
 	width:100%;
 }
 
-.footer td {color:#999999;}
+.footer td {
+	color: #666666;
+	background: #dcdcdc;	
+	text-align: right;
+}
 
 .footer a:link {color: #7db223;}
 

@@ -207,7 +207,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (method != null) return method;
 		
 		List<AnnotationAttributeValue<?>> firstResultAttributeValue = new ArrayList<AnnotationAttributeValue<?>>();
-		firstResultAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "offset"));
+		firstResultAttributeValue.add(new StringAttributeValue(new JavaSymbolName("value"), "page"));
 		firstResultAttributeValue.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));		
 		
 		List<AnnotationMetadata> paramAnnotationsFirstResult = new ArrayList<AnnotationMetadata>();
@@ -226,7 +226,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));	
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();		
-		paramNames.add(new JavaSymbolName("offset"));
+		paramNames.add(new JavaSymbolName("page"));
 		paramNames.add(new JavaSymbolName("size"));
 		paramNames.add(new JavaSymbolName("modelMap"));
 		
@@ -237,18 +237,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
-				
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 
-		bodyBuilder.appendFormalLine("if(offset != null || size != null) {");
+		bodyBuilder.appendFormalLine("if(page != null || size != null) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(offset == null ? 0 : offset.intValue(), size == null ? 10 : size.intValue()));");
+		bodyBuilder.appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");		
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
+		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getCountMethod().getMethodName() + "() / sizeNo;");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "ListSize\", " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getCountMethod().getMethodName() + "());");
 		bodyBuilder.appendFormalLine("return \"" + entityName + "/list\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, bodyBuilder.getOutput());
