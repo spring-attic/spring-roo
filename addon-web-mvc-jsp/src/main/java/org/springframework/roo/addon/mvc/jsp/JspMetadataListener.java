@@ -193,7 +193,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"web_mvc_jsp_list_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
 				entityMetadata.getPlural(),
 				"global.menu.list",
-				"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "?page=1&size=10");
+				"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
