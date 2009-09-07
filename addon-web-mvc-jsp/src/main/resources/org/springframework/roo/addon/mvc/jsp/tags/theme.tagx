@@ -1,0 +1,33 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+	<span>
+    	<c:out value="&#160;|&#160;"/>
+    	<spring:message code="global.theme" />
+    	<c:out value=":&#160;"/>
+    	<c:url var="url_theme1" value="">
+    		<c:param name="theme" value="left" />
+    		<c:if test="${not empty param.page}">
+    			<c:param name="page" value="${param.page}" />
+    		</c:if>
+    		<c:if test="${not empty param.size}">
+    			<c:param name="size" value="${param.size}" />
+    		</c:if>
+    	</c:url>
+    	<spring:message code="global.theme.left" var="theme_left" />
+    	<a href="${url_theme1}" title="${theme_left}">${theme_left}</a>
+    	<c:out value="&#160;|&#160;"/>
+
+    	<c:url var="url_theme2" value="">
+    		<c:param name="theme" value="right" />
+    		<c:if test="${not empty param.page}">
+    			<c:param name="page" value="${param.page}" />
+    		</c:if>
+    		<c:if test="${not empty param.size}">
+    			<c:param name="size" value="${param.size}" />
+    		</c:if>
+    	</c:url>
+    	<spring:message code="global.theme.right" var="theme_right" />
+    	<a href="${url_theme2}" title="${theme_right}">${theme_right}</a>
+    </span>
+    
+ </jsp:root>

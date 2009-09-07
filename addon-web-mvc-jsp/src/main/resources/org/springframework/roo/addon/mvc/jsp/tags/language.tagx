@@ -1,0 +1,35 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+
+    <span>
+    	<c:out value="&#160;|&#160;"/>
+    	<spring:message code="global.language" />
+    	<c:out value=":&#160;"/>
+    	<c:url var="img_en" value="/static/images/us.png" />
+    	<c:url var="url_en" value="">
+    		<c:param name="lang" value="us" />
+    		<c:if test="${not empty param.page}">
+    			<c:param name="page" value="${param.page}" />
+    		</c:if>
+    		<c:if test="${not empty param.size}">
+    			<c:param name="size" value="${param.size}" />
+    		</c:if>
+    	</c:url>
+    	<spring:message code="global.language.switch" arguments="English" var="lang_en"/>
+    	<a href="${url_en}" title="${lang_en}"><img src="${img_en}" alt="${lang_en}"/></a>
+    	<c:out value="&#160;|&#160;"/>
+    	
+    	<c:url var="img_de" value="/static/images/de.png" />
+    	<c:url var="url_de" value="">
+    		<c:param name="lang" value="de" />
+    		<c:if test="${not empty param.page}">
+    			<c:param name="page" value="${param.page}" />
+    		</c:if>
+    		<c:if test="${not empty param.size}">
+    			<c:param name="size" value="${param.size}" />
+    		</c:if>
+    	</c:url>	
+    	<spring:message code="global.language.switch" arguments="Deutsch" var="lang_de"/>			    	
+    	<a href="${url_de}" title="${lang_de}"><img src="${img_de}" alt="${lang_de}"/></a>
+    </span>
+    
+ </jsp:root>

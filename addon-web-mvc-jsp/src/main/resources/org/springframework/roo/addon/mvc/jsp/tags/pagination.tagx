@@ -28,9 +28,9 @@
 				<a href="${sizeUrl}">${i}</a>
 			</c:otherwise>
 		</c:choose>
-		<c:out value=" "/>		
+		<c:out value="&#160;"/>		
 	</c:forEach>	
-	<c:out value="| "/>
+	<c:out value="|&#160;"/>
 	
 	<c:if test="${page ne 1}">
 		<c:url value="" var="first">
@@ -54,9 +54,9 @@
 		<img alt="${previous_label}" src="${previous_image_url}" />
 		</a>
 	</c:if>
-	<c:out value=" "/>
+	<c:out value="&#160;"/>
 	<spring:message code="list.page" arguments="${page},${maxPages}" argumentSeparator=","/>
-	<c:out value=" "/>
+	<c:out value="&#160;"/>
 	<c:if test="${page lt maxPages}">
 		<c:url value="" var="next">
 			<c:param name="page" value="${page + 1}" />

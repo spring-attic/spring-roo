@@ -3,7 +3,8 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core"
 	xmlns:tiles="http://tiles.apache.org/tags-tiles"
 	xmlns:form="http://www.springframework.org/tags/form"
-	xmlns:spring="http://www.springframework.org/tags">  
+	xmlns:spring="http://www.springframework.org/tags"
+	xmlns:roo="urn:jsptagdir:/WEB-INF/tags" >  
  	
  	<jsp:output omit-xml-declaration="yes"/>  
 	
@@ -36,14 +37,19 @@
 				  	<c:url var="home" value="/" />
 				    <span><a href="${home}"><spring:message code="button.home"/></a></span>				    
 				    <c:if test="${pageContext.request.userPrincipal != null}">	
-				    	<span>&#160;</span>
+				    	<c:out value="&#160;|&#160;"/>
 				    	<span>			    
 						    <c:url var="logout" value="/static/j_spring_security_logout" />
-						    <a href="${logout}">Logout</a>
-					    </span>
-					</c:if>					 
+						    <a href="${logout}"><spring:message code="security.logout" /></a>
+					    </span>					    
+					</c:if>			    
+				    
+				    <roo:language />
+				    <roo:theme />
+				    				    
 				    <c:url var="logo" value="/static/images/springsource-logo.png" />
-				    <span><img src="${logo}" alt="Sponsored by SpringSource" align="right"/></span>
+				    <spring:message code="global.sponsored" var="sponsored"/>
+				    <span><a href="http://springsource.com" title="${sponsored}"><img src="${logo}" alt="${sponsored}" align="right"/></a></span>
 				</div>
 			</div>
 		</div>		
