@@ -216,7 +216,7 @@ public class JspDocumentHelper {
 				new XmlElementBuilder("tr", document).addAttribute("class", "footer").addChild(
 						new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4))).addChild(
 								new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}").addChild(
-										new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${(empty param.page) ? 1 : param.page}").addAttribute("size", "${(empty param.size) ? 10 : param.size}").build()).build()).build()).build());
+										new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${param.page}").addAttribute("size", "${param.size}").build()).build()).build()).build());
 		
 
 		divElement.appendChild(elseElement);

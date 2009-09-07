@@ -1,11 +1,39 @@
 <jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 
-	<jsp:directive.attribute name="maxPages" type="java.lang.Integer" required="true" />
-	<jsp:directive.attribute name="page" type="java.lang.Integer" required="true" />
-	<jsp:directive.attribute name="size" type="java.lang.Integer" required="true" />
+	<jsp:directive.attribute name="maxPages" type="java.lang.Integer" required="true" description="The maximum number of pages available (ie tableRecordCount / size)"/>
+	<jsp:directive.attribute name="page" type="java.lang.Integer" required="false" description="The current page (not required, defaults to 1)"/>
+	<jsp:directive.attribute name="size" type="java.lang.Integer" required="false" description="The number of records per page (not required, defaults to 10)"/>
+	
+	<c:if test="${empty page || page lt 1}">
+		<c:set var="page" value="1" />
+	</c:if>
+	
+	<c:if test="${empty size || size lt 1}">
+		<c:set var="size" value="10" />
+	</c:if>
+	
+	<spring:message code="list.size" var="list_size"/>
+	<c:out value="${list_size} "/>
 
+	<c:forEach var="i" begin="5" end="25" step="5">	
+		<c:choose>
+			<c:when test="${size == i}">
+				<c:out value="${i}" />
+			</c:when>
+			<c:otherwise>
+				<c:url value="" var="sizeUrl">
+					<c:param name="page" value="${page}" />
+					<c:param name="size" value="${i}" />
+				</c:url>		
+				<a href="${sizeUrl}">${i}</a>
+			</c:otherwise>
+		</c:choose>
+		<c:out value=" "/>		
+	</c:forEach>	
+	<c:out value="| "/>
+	
 	<c:if test="${page ne 1}">
-		<c:url value="/choice" var="first">
+		<c:url value="" var="first">
 			<c:param name="page" value="1" />
 			<c:param name="size" value="${size}" />
 		</c:url>
@@ -16,7 +44,7 @@
 		</a>
 	</c:if>
 	<c:if test="${page gt 1}">
-		<c:url value="/choice" var="previous">
+		<c:url value="" var="previous">
 			<c:param name="page" value="${page - 1}" />
 			<c:param name="size" value="${size}" />
 		</c:url>
@@ -26,9 +54,11 @@
 		<img alt="${previous_label}" src="${previous_image_url}" />
 		</a>
 	</c:if>
+	<c:out value=" "/>
 	<spring:message code="list.page" arguments="${page},${maxPages}" argumentSeparator=","/>
+	<c:out value=" "/>
 	<c:if test="${page lt maxPages}">
-		<c:url value="/choice" var="next">
+		<c:url value="" var="next">
 			<c:param name="page" value="${page + 1}" />
 			<c:param name="size" value="${size}" />
 		</c:url>
@@ -39,7 +69,7 @@
 		</a>
 	</c:if>
 	<c:if test="${page ne maxPages}">
-		<c:url value="/choice" var="last">
+		<c:url value="" var="last">
 			<c:param name="page" value="${maxPages}" />
 			<c:param name="size" value="${size}" />
 		</c:url>

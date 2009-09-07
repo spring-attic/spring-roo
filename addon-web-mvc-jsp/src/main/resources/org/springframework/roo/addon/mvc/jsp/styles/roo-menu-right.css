@@ -188,6 +188,7 @@ a {
 
 a img {
 	border: 0 none;
+	vertical-align: middle;
 }
 
 tr:nth-child(odd) {
