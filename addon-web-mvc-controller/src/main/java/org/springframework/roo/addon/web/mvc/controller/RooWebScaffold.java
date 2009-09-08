@@ -4,7 +4,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.List;
+
+import org.springframework.roo.addon.entity.RooEntity;
 
 /**
  * Indicates a type that requires ROO controller support.
@@ -49,6 +50,17 @@ public @interface RooWebScaffold {
 	 * @return indicator if ROO should maintain view artifacts
 	 */
 	boolean automaticallyMaintainView() default true;
+	
+	
+	/**
+	 * All view-related artifacts for a specific controller are stored in a sub-directory under 
+	 * WEB-INF/views/<em>path</em>. The path parameter defines the name of this sub-directory or path. 
+	 * This path is also used to define the restful resource in the URL to which the controller is 
+	 * mapped. 
+	 * 
+	 * @return The view path.
+	 */
+	String path();
 	
 	/**
 	 * Every controller is responsible for a single form backing object. The form backing object defined 
@@ -100,4 +112,5 @@ public @interface RooWebScaffold {
 	 * @return indicates if the finders methods should be provided (defaults to "true"; optional)
 	 */
 	boolean exposeFinders() default true;
+
 }

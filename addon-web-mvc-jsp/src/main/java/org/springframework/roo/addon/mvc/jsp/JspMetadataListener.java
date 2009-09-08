@@ -136,11 +136,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(projectMetadata, "Project metadata required");
 		
 		List<FieldMetadata> elegibleFields = getElegibleFields();
-		String simpleBeanName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
-		
+	
 		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
+		
+		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
+		
+		if (controllerPath.startsWith("/")) {
+			controllerPath = controllerPath.substring(1);
+		}
+		
 		// Make the holding directory for this controller
-		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + simpleBeanName);
+		String destinationDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + controllerPath);
 		if (!fileManager.exists(destinationDirectory)) {
 			fileManager.createDirectory(destinationDirectory);
 		} else {
@@ -148,52 +154,52 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			Assert.isTrue(file.isDirectory(), destinationDirectory + " is a file, when a directory was expected");
 		}
 		
-		TilesOperations tilesOperations = new TilesOperations(simpleBeanName, fileManager, pathResolver, "config/webmvc-config.xml");
+		TilesOperations tilesOperations = new TilesOperations(controllerPath, fileManager, pathResolver, "config/webmvc-config.xml");
 		
 //		if (webScaffoldMetadata.getAnnotationValues().isList()) {
 			// By now we have a directory to put the JSPs inside
 			String listPath1 = destinationDirectory + "/list.jspx";
 			writeToDiskIfNecessary(listPath1, helper.getListDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/list.jspx");
+			tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
 			
 //		} 
 //		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
 			String showPath = destinationDirectory + "/show.jspx";
 			writeToDiskIfNecessary(showPath, helper.getShowDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/show.jspx");
+			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 //		}
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getChildNodes());
 			//add 'create new' menu item
 			menuOperations.addMenuItem(
-					"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
-					beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
-					"web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
+					"web_mvc_jsp_" + controllerPath + "_category", 
+					controllerPath, 
+					"web_mvc_jsp_create_" + controllerPath + "_menu_item", 
 					beanInfoMetadata.getJavaBean().getSimpleTypeName(),
 					"global.menu.new",
-					"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/form");
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/create.jspx");
+					"/" + controllerPath + "/form");
+			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} else {
-			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "web_mvc_jsp_create_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item");
-			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "create");
+			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerPath + "_category", "web_mvc_jsp_create_" + controllerPath + "_menu_item");
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "create");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			writeToDiskIfNecessary(listPath, helper.getUpdateDocument().getChildNodes());
-			tilesOperations.addViewDefinition(simpleBeanName + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/update.jspx");
+			tilesOperations.addViewDefinition(controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
 		} else {
-			tilesOperations.removeViewDefinition(simpleBeanName + "/" + "update");
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
 		}
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
-				"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
-				beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
-				"web_mvc_jsp_list_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_menu_item", 
+				"web_mvc_jsp_" + controllerPath + "_category", 
+				controllerPath, 
+				"web_mvc_jsp_list_" + controllerPath + "_menu_item", 
 				entityMetadata.getPlural(),
 				"global.menu.list",
-				"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
+				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
@@ -202,19 +208,19 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getChildNodes());
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
-						"web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", 
-						beanInfoMetadata.getJavaBean().getSimpleTypeName(), 
+						"web_mvc_jsp_" + controllerPath + "_category", 
+						controllerPath, 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
 						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
 						"global.menu.find",
-						"/" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
+						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
-				tilesOperations.addViewDefinition(simpleBeanName + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + simpleBeanName + "/" + finderName +".jspx");
+				tilesOperations.addViewDefinition(controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}
 		}
 		
 		//clean up links to finders which are removed by now
-		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_category", "finder_", allowedMenuItems);
+		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + controllerPath + "_category", "finder_", allowedMenuItems);
 		
 		//finally write the tiles definition if necessary
 		tilesOperations.writeToDiskIfNecessary();

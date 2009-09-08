@@ -49,6 +49,8 @@ public class JspDocumentHelper {
 	private FinderMetadata finderMetadata;
 	private SimpleDateFormat dateFormatLocalized;
 	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
+	private final String entityName;
+	private final String controllerPath;
 	
 	private final String warning = "WARNING: This file is maintained by ROO! IT WILL BE OVERWRITTEN unless you specify "
 		+ System.getProperty("line.seperator") + "\t@RooWebScaffold(automaticallyMaintainView = false) in the governing controller";
@@ -68,6 +70,13 @@ public class JspDocumentHelper {
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 		
 		dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
+		entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		
+		if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
+			controllerPath = webScaffoldAnnotationValues.getPath().substring(1);
+		} else {
+			controllerPath = webScaffoldAnnotationValues.getPath();
+		}	
 	}
 	
 	public Document getListDocument() {
@@ -78,8 +87,6 @@ public class JspDocumentHelper {
 		
 		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:roo", "urn:jsptagdir:/WEB-INF/tags").addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
 		document.appendChild(div);
-				
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();	
 
 		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title").addAttribute("style", "width: 100%")
 								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", entityMetadata.getPlural()).addAttribute("var", "title").build())
@@ -154,7 +161,7 @@ public class JspDocumentHelper {
 			Element updateFormElement = document.createElement("form:form");
 			Element updateUrl = document.createElement("c:url");
 			updateUrl.setAttribute("var", "update_form_url");
-			updateUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
+			updateUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
 			updateElement.appendChild(updateUrl);
 			updateFormElement.setAttribute("action", "${update_form_url}");
 			updateFormElement.setAttribute("method", "GET");
@@ -184,7 +191,7 @@ public class JspDocumentHelper {
 			Element deleteFormElement = document.createElement("form:form");
 			Element deleteUrl = document.createElement("c:url");
 			deleteUrl.setAttribute("var", "delete_form_url");
-			deleteUrl.setAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+			deleteUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
 			deleteElement.appendChild(deleteUrl);
 			deleteFormElement.setAttribute("action", "${delete_form_url}");
 			deleteFormElement.setAttribute("method", "DELETE");
@@ -235,8 +242,6 @@ public class JspDocumentHelper {
 		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
 		div.setAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt");
 		document.appendChild(div);
-
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title");
@@ -301,8 +306,6 @@ public class JspDocumentHelper {
 		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
 		document.appendChild(div);		
 
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
-		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title");
 		divElement.setAttribute("style", "width: 100%");
@@ -315,7 +318,7 @@ public class JspDocumentHelper {
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
-		url.setAttribute("value", "/" + entityName);
+		url.setAttribute("value", "/" + controllerPath);
 		divElement.appendChild(url);
 		
 		Element formElement = document.createElement("form:form");
@@ -356,8 +359,6 @@ public class JspDocumentHelper {
 		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
 		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
 		document.appendChild(div);
-
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title");
@@ -371,7 +372,7 @@ public class JspDocumentHelper {
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
-		url.setAttribute("value", "/" + entityName + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		url.setAttribute("value", "/" + controllerPath + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
 		divElement.appendChild(url);
 		
 		Element formElement = document.createElement("form:form");
@@ -422,8 +423,6 @@ public class JspDocumentHelper {
 		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
 		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
 		document.appendChild(div);
-
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		Element titleDivElement = document.createElement("div");
 		titleDivElement.setAttribute("id", "_title");
@@ -437,7 +436,7 @@ public class JspDocumentHelper {
 			
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
-		url.setAttribute("value", "/" + entityName + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
+		url.setAttribute("value", "/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
 		titleDivElement.appendChild(url);
 		
 		Element formElement = document.createElement("form:form");
@@ -562,8 +561,6 @@ public class JspDocumentHelper {
 	}	
 	
 	private void createFieldsForCreateAndUpdate(Document document, Element formElement) {
-		
-		String entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		for (FieldMetadata field : fields) {
 			

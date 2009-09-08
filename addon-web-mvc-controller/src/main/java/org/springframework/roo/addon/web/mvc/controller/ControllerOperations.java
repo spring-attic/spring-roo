@@ -78,15 +78,17 @@ public class ControllerOperations {
 	 * @param entity the entity this controller should edit (required)
 	 * @param set of disallowed operations (required, but can be empty)
 	 */
-	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations) {
+	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path) {		
 		Assert.notNull(controller, "Controller Java Type required");
 		Assert.notNull(entity, "Entity Java Type required");
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
+		Assert.hasText(path, "Controller base path required");
 		
 		String ressourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);		
 		
 		//create annotation @RooWebScaffold(automaticallyMaintainView = true, formBackingObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		rooWebScaffoldAttributes.add(new StringAttributeValue(new JavaSymbolName("path"), path));
 		rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyMaintainView"), true));
 		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
 		for(String operation: disallowedOperations) {
@@ -96,7 +98,7 @@ public class ControllerOperations {
 		
 		//create annotation @RequestMapping("/myobject/**")
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + entity.getSimpleTypeName().toLowerCase() + "/**"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path + "/**"));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 		
 		//create annotation @Controller

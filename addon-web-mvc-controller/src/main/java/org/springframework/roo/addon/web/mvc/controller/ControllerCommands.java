@@ -44,6 +44,7 @@ public class ControllerCommands implements CommandMarker {
 	public void newController(
 			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
 			@CliOption(key="formBackingObject", mandatory=false, optionContext="update,project", unspecifiedDefaultValue="*", help="The name of the entity object which the controller exposes to the web tier") JavaType entity,
+			@CliOption(key="path", mandatory=false, help="The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
 			@CliOption(key="disallowedOperations", mandatory=false, help="A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations) {
 		
 		if (controller.getSimpleTypeName().equalsIgnoreCase(entity.getSimpleTypeName())) {
@@ -61,7 +62,11 @@ public class ControllerCommands implements CommandMarker {
 				disallowedOperationSet.add(operation.toLowerCase());
 			}
 		}
-		controllerOperations.createAutomaticController(controller, entity, disallowedOperationSet);
+		
+		if (path == null || path.length() == 0) {
+			path = entity.getSimpleTypeName().toLowerCase();
+		}
+		controllerOperations.createAutomaticController(controller, entity, disallowedOperationSet, path);
 	}
 
 	@CliCommand(value="new controller manual", help="Create a new manual Controller (ie where you write the methods)")

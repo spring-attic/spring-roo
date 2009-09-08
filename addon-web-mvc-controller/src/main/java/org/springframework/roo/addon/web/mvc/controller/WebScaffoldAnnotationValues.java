@@ -9,14 +9,15 @@ import org.springframework.roo.model.JavaType;
 /**
  * Represents a parsed {@link RooWebScaffold} annotation.
  * 
- * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Ben Alex
  * @since 1.0
  *
  */
 public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	
 	// From annotation
+	@AutoPopulate String path;
 	@AutoPopulate boolean automaticallyMaintainView = true;
 	@AutoPopulate JavaType formBackingObject = null;
 //	@AutoPopulate boolean list = true;
@@ -29,6 +30,10 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	public WebScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooWebScaffold.class.getName()));
 		AutoPopulationUtils.populate(this, annotationMetadata);
+	}
+	
+	public String getPath() {
+		return path;
 	}
 
 	public boolean isAutomaticallyMaintainView() {
