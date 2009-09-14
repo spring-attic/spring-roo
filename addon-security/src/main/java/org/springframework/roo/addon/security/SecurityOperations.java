@@ -36,7 +36,7 @@ public class SecurityOperations {
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
 	
-	private static final Dependency DEPENDENCY = new Dependency("org.springframework.security", "org.springframework.security", "2.0.4.A");
+	private static final Dependency DEPENDENCY = new Dependency("org.springframework.security", "org.springframework.security.core", "2.0.5.RELEASE");
 	
 	public SecurityOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
