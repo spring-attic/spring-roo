@@ -1,10 +1,13 @@
 package org.springframework.roo.metadata.internal;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
@@ -12,6 +15,7 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
@@ -33,6 +37,9 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 	private int trace = 0;
 	private int level = 0;
 	private int notificationNumber = 0;
+	private long started;
+	private String responsibleClass;
+	private Map<String,Long> timings = new HashMap<String, Long>();
 	
 	/** key: upstream dependency; value: list<downstream dependencies> */
 	private Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();
@@ -193,9 +200,28 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		logger.fine(sb.toString());
 	}
 	
+	private void stopCounting(long duration) {
+		Long existing = timings.get(responsibleClass);
+		if (existing == null) {
+			existing = duration;
+		} else {
+			existing = existing + duration;
+		}
+		timings.put(responsibleClass, existing);
+	}
+	
 	public void notifyDownstream(String upstreamDependency) {
 		try {
 			notificationNumber++;
+			
+			long now = new Date().getTime();
+
+			if (level > 0) {
+				long duration = now - started;
+				stopCounting(duration);
+			}
+			
+			started = now;
 			level++;
 
 			int currentNotification = notificationNumber;
@@ -206,6 +232,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 				for (String downstream : getDownstream(upstreamDependency)) {
 					log(currentNotification, upstreamDependency + " -> " + downstream);
 					// No need to ensure upstreamDependency is different from downstream, as that's taken care of in the isValidDependency() method
+					responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
 					metadataService.notify(upstreamDependency, downstream);
 					notifiedDownstreams.add(downstream);
 				}
@@ -221,6 +248,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 						// caused an event to fire)
 						if (!notifiedDownstreams.contains(downstream) && !upstreamDependency.equals(downstream)) {
 							log(currentNotification, upstreamDependency + " -> " + downstream + " [via class]");
+							responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
 							metadataService.notify(upstreamDependency, downstream);
 						}
 					}
@@ -234,15 +262,31 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 				if (trace > 1) {
 					log(currentNotification, upstreamDependency + " -> " + upstreamDependency + " [" + listener.getClass().getSimpleName() + "]");
 				}
+				responsibleClass = listener.getClass().getName();
 				listener.notify(upstreamDependency, null);
 			}
 		} finally {
 			level--;
+			
+			if (level == 0) {
+				long now = new Date().getTime();
+				long duration = now - started;
+				stopCounting(duration);
+				started = 0;
+			}
 		}
 	}
 
 	public void setTrace(int trace) {
 		this.trace = trace;
+	}
+
+	public SortedSet<MetadataTimingStatistic> getTimings() {
+		SortedSet<MetadataTimingStatistic> result = new TreeSet<MetadataTimingStatistic>();
+		for (String key : timings.keySet()) {
+			result.add(new StandardMetadataTimingStatistic(key, timings.get(key)));
+		}
+		return result;
 	}
 
 }

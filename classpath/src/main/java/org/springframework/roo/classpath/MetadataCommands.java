@@ -7,6 +7,7 @@ import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -41,6 +42,15 @@ public class MetadataCommands implements CommandMarker {
 	@CliCommand(value="metadata summary", help="Shows statistics on the metadata system")
 	public String metadataSummary() {
 		return metadataService.toString();
+	}
+	
+	@CliCommand(value="metadata timings", help="Shows metadata notification statistics")
+	public String metadataTimings() {
+		StringBuilder sb = new StringBuilder();
+		for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
+			sb.append(stat.toString()).append(System.getProperty("line.separator"));
+		}
+		return sb.toString();
 	}
 	
 	@CliCommand(value="metadata for id", help="Shows detailed information about the metadata item")
