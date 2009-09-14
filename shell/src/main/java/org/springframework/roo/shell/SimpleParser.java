@@ -290,6 +290,15 @@ public final class SimpleParser {
 				for (int candidate = lastCommandWordUsed; candidate < commandWords.length; candidate++) {
 					if (lastWord != null && lastWord.length() > 0 && commandWords[candidate].startsWith(lastWord)) {
 						
+						if (bufferToReturn == null) {
+							// This is the first match, so ensure the intended match really represents the start of a command and not a later word within it
+							if (lastCommandWordUsed == 0 && candidate > 0) {
+								// This is not a valid match
+								bufferToReturn = null;
+								break next_buffer_loop;
+							}
+						}
+						
 						if (bufferToReturn != null) {
 							// We already matched something earlier, so ensure we didn't skip any word
 							if (candidate != lastCommandWordUsed + 1) {
