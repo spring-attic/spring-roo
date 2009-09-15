@@ -12,6 +12,7 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.util.StopWatch;
 
 /**
  * Loads a {@link Shell} using Spring IoC container.
@@ -25,8 +26,10 @@ public class Bootstrap {
 	private static Bootstrap bootstrap;
 	private Shell shell;
 	private ConfigurableApplicationContext ctx;
+	private static StopWatch sw = new StopWatch("Roo");
 	
 	public static void main(String[] args) throws IOException {
+		sw.start();
 		String applicationContextLocation = "classpath:roo-bootstrap.xml";
         if (args.length > 0) {
         	applicationContextLocation = args[0];
@@ -60,7 +63,7 @@ public class Bootstrap {
         System.exit(1);
     }
 
-	public Bootstrap(String applicationContextLocation) {
+	public Bootstrap(String applicationContextLocation) throws IOException {
 		Assert.hasText(applicationContextLocation, "Application context location required");
         
 		setupLogging();
@@ -110,6 +113,10 @@ public class Bootstrap {
         }
         
         ctx.close();
+        sw.stop();
+        if (shell.isDevelopmentMode()) {
+        	System.out.println("Total execution time: " + sw.getLastTaskTimeMillis() + " ms");
+        }
         return successful;
 	}
 }

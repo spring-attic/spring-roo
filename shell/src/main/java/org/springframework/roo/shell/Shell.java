@@ -50,4 +50,5 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 */
 	void setDevelopmentMode(boolean developmentMode);
 
+	boolean isDevelopmentMode();
 }

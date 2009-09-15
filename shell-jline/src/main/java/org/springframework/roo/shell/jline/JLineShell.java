@@ -28,6 +28,7 @@ public class JLineShell extends AbstractShell implements Shell {
 
     private ConsoleReader reader;
     private SimpleParser parser;
+    private boolean developmentMode = false;
     
 	public JLineShell(ExecutionStrategy executionStrategy) {
 		super(executionStrategy);
@@ -92,6 +93,11 @@ public class JLineShell extends AbstractShell implements Shell {
 
 	public void setDevelopmentMode(boolean developmentMode) {
 		JLineLogHandler.setIncludeThreadName(developmentMode);
+		this.developmentMode = developmentMode;
+	}
+
+	public boolean isDevelopmentMode() {
+		return this.developmentMode;
 	}
 
 }
