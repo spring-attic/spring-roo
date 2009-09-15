@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 
@@ -15,9 +16,12 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 /**
  * Provides operations to manage tiles view definitions.
@@ -83,7 +87,9 @@ public class TilesOperations {
 			
 		} else {
 			try {
-				tilesView = XmlUtils.getDocumentBuilder().parse(viewFile);
+				DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+				builder.setEntityResolver(new TilesDtdResolver());
+				tilesView = builder.parse(viewFile);
 			} catch (Exception e) {
 				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file");
 			}
@@ -189,5 +195,16 @@ public class TilesOperations {
 		
 		// A file existed, but it contained the same content, so we return false
 		return false;
+	}
+	
+	private class TilesDtdResolver implements EntityResolver {		
+		public InputSource resolveEntity (String publicId, String systemId) {
+			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_0.dtd")) {				
+				return new InputSource(TemplateUtils.getTemplate(TilesOperations.class, "layout/tiles-config_2_0.dtd"));
+			} else {
+				// use the default behaviour
+				return null;
+			}
+		}
 	}
 }
