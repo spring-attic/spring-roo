@@ -70,10 +70,12 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof JavaSymbolName && this.compareTo((JavaSymbolName)obj) == 0;
+		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
+		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName)obj).symbolName);
 	}
 
 	public final int compareTo(JavaSymbolName o) {
+		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
 		if (o == null) return -1;
 		return this.symbolName.compareTo(o.symbolName);
 	}

@@ -37,6 +37,8 @@ public abstract class XmlUtils {
 
 	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
+	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
@@ -186,11 +188,10 @@ public abstract class XmlUtils {
 	public static final Transformer createIndentingTransformer() {
 		Transformer xformer;
 		try {
-			xformer = TransformerFactory.newInstance().newTransformer();
+			xformer = transformerFactory.newTransformer();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-
 		xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 		return xformer;
@@ -200,7 +201,6 @@ public abstract class XmlUtils {
 	 * @return a new document builder (never null)
 	 */
 	public static final DocumentBuilder getDocumentBuilder() {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 //		factory.setNamespaceAware(true);
 		try {
 			return factory.newDocumentBuilder();

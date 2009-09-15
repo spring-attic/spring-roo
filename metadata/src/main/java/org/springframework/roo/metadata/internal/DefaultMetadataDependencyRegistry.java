@@ -1,7 +1,6 @@
 package org.springframework.roo.metadata.internal;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -199,7 +198,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		sb.append(message);
 		logger.fine(sb.toString());
 	}
-	
+
 	private void stopCounting(long duration) {
 		Long existing = timings.get(responsibleClass);
 		if (existing == null) {
@@ -214,7 +213,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		try {
 			notificationNumber++;
 			
-			long now = new Date().getTime();
+			long now = System.currentTimeMillis();
 
 			if (level > 0) {
 				long duration = now - started;
@@ -230,7 +229,9 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 				// First dispatch the fine-grained, instance-specific dependencies.
 				Set<String> notifiedDownstreams = new HashSet<String>();
 				for (String downstream : getDownstream(upstreamDependency)) {
-					log(currentNotification, upstreamDependency + " -> " + downstream);
+					if (trace > 0) {
+						log(currentNotification, upstreamDependency + " -> " + downstream);
+					}
 					// No need to ensure upstreamDependency is different from downstream, as that's taken care of in the isValidDependency() method
 					responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
 					metadataService.notify(upstreamDependency, downstream);
@@ -247,7 +248,9 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 						// (such a condition is only possible if an instance registered to receive class-specific notifications and that instance
 						// caused an event to fire)
 						if (!notifiedDownstreams.contains(downstream) && !upstreamDependency.equals(downstream)) {
-							log(currentNotification, upstreamDependency + " -> " + downstream + " [via class]");
+							if (trace > 0) {
+								log(currentNotification, upstreamDependency + " -> " + downstream + " [via class]");
+							}
 							responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
 							metadataService.notify(upstreamDependency, downstream);
 						}
@@ -269,7 +272,7 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			level--;
 			
 			if (level == 0) {
-				long now = new Date().getTime();
+				long now = System.currentTimeMillis();
 				long duration = now - started;
 				stopCounting(duration);
 				started = 0;

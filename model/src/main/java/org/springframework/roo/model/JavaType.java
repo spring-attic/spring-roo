@@ -33,8 +33,10 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	private List<JavaType> parameters = new ArrayList<JavaType>();
 	private JavaSymbolName argName = null;
 	private int array = 0;
+	private boolean defaultPackage;
 	private DataType dataType;
 	private String fullyQualifiedTypeName;
+	private String simpleTypeName;
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
 	public static final JavaType BYTE_OBJECT = new JavaType("java.lang.Byte", 0, DataType.TYPE, null, null);
@@ -104,7 +106,14 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		}
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
-		if (!Character.isUpperCase(getSimpleTypeName().charAt(0))) {
+		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
+		if (defaultPackage) {
+			simpleTypeName = fullyQualifiedTypeName;
+		} else {
+			int offset = fullyQualifiedTypeName.lastIndexOf(".");
+			simpleTypeName = fullyQualifiedTypeName.substring(offset+1);
+		}
+		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
 			throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
 		}
 		
@@ -120,11 +129,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @return the name (does not contain any periods; never null or empty)
 	 */
 	public String getSimpleTypeName() {
-		if (isDefaultPackage()) {
-			return fullyQualifiedTypeName;
-		}
-		int offset = fullyQualifiedTypeName.lastIndexOf(".");
-		return fullyQualifiedTypeName.substring(offset+1);
+		return simpleTypeName;
 	}
 
 	/**
@@ -252,17 +257,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 	
 	public boolean isDefaultPackage() {
-		return !fullyQualifiedTypeName.contains(".");
+		return defaultPackage;
 	}
 	
 	public final int hashCode() {
 		return this.fullyQualifiedTypeName.hashCode();
 	}
 
-	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof JavaType && this.compareTo((JavaType)obj) == 0;
-	}
-	
 	public boolean isPrimitive() {
 		return DataType.PRIMITIVE == dataType;
 	}
@@ -294,7 +295,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return sb.toString();
 	}
 
+	public final boolean equals(Object obj) {
+		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
+		return obj != null && obj instanceof JavaType && this.fullyQualifiedTypeName.equals(((JavaType)obj).fullyQualifiedTypeName);
+	}
+
 	public final int compareTo(JavaType o) {
+		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
 		if (o == null) return -1;
 		return this.fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
 	}
