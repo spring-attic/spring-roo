@@ -27,10 +27,14 @@ public class MonitoringRequestCommand implements CommandCallback<Boolean> {
 	}
 
 	public Boolean callback() {
+		boolean result;
 		if (add) {
-			return this.fileMonitorService.add(monitoringRequest);
+			result = this.fileMonitorService.add(monitoringRequest);
+		} else {
+			result = this.fileMonitorService.remove(monitoringRequest);
 		}
-		return this.fileMonitorService.remove(monitoringRequest);
+		this.fileMonitorService.scanAll();
+		return result;
 	}
 
 }

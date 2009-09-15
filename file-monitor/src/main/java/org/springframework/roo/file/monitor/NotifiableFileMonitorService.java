@@ -1,14 +1,11 @@
 package org.springframework.roo.file.monitor;
 
 import org.springframework.roo.file.monitor.event.FileEventListener;
-import org.springframework.roo.file.monitor.event.FileOperation;
 
 /**
  * A {@link FileMonitorService} that permits callers to explicitly indicate they have
  * changed a specific file. These files are guaranteed to be included in a change notification
- * when the next {@link FileMonitorService#scanAll()} is performed. The change notification will
- * always be an {@link FileOperation#UPDATED} notification, and the timestamp will be equal to the
- * actual timestamp on disk.
+ * when the next {@link FileMonitorService#scanAll()} or {@link #scanNotified()} is called.
  * 
  * <p>
  * This interface works around the practical problem that many file systems only provide
@@ -18,6 +15,10 @@ import org.springframework.roo.file.monitor.event.FileOperation;
  * Failure to do so will mean some files can be updated in the same whole second but not be detected as
  * updated.
  * 
+ * <p>
+ * This interface also exists so there are lightweight methods available for explicitly recording
+ * disk changes and then publishing those changes without requiring a full scan.
+ * 
  * @author Ben Alex
  * @since 1.0
  *
@@ -25,13 +26,26 @@ import org.springframework.roo.file.monitor.event.FileOperation;
 public interface NotifiableFileMonitorService extends FileMonitorService {
 	
 	/**
+	 * Similar to {@link #scanAll()} except will only notify those files explicitly advised
+	 * via notification methods on {@link NotifiableFileMonitorService}. This is designed to allow
+	 * faster operation where a full disk scan (as would be provided by {@link #scanAll()} is unnecessary.
+	 * 
+	 * <p>
+	 * Note that executing this method will result in change notifications 
+	 * 
+	 * @return the number of changes detected during this invocation (can be 0 or above)
+	 */
+	int scanNotified();
+	
+	/**
 	 * Indicates the canonical path specified should be treated as if it had changed.
 	 * The last update time will become equal to actual disk timestamp.
 	 * 
 	 * <p>
 	 * The implementation must only present the indicated file once in a given
-	 * {@link FileMonitorService#scanAll()} invocation, even if this method has been repeatedly
-	 * called and/or the file was detected as changed using normal last updated timestamps.
+	 * {@link FileMonitorService#scanAll()} or {@link #scanNotified()} invocation, even if this
+	 * method has been repeatedly called and/or the file was detected as changed using normal
+	 * last updated timestamps.
 	 * 
 	 * <p>
 	 * No attempt is made to verify whether the presented path is subject to monitoring or not.
@@ -41,10 +55,8 @@ public interface NotifiableFileMonitorService extends FileMonitorService {
 	 */
 	void notifyChanged(String fileCanonicalPath);
 	
-	/**
-	 * Forces the {@link FileMonitorService#isDirty()} to return true. Has no effect if the file monitor is already
-	 * dirty. The flag is automatically cleared (that is, set to false) when the next {@link #scanAll()} is called.
-	 */
-	void markDirty();
+	void notifyDeleted(String fileCanonicalPath);
+	
+	void notifyCreated(String fileCanonicalPath);
 	
 }

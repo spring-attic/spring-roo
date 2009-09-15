@@ -87,7 +87,7 @@ public class MavenOperations extends ProjectOperations {
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 		
-		fileManager.scanAll();
+		fileManager.scan();
 		
 		// Finally, Java 5 needs the javax.annotation library (it's included in Java 6 and above)
 		if (majorJavaVersion == 5) {

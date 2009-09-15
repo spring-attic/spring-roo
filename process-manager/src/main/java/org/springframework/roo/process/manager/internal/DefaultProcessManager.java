@@ -4,6 +4,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.roo.file.monitor.FileMonitorService;
+import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.CommandCallback;
@@ -129,7 +130,11 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 			
 			// guarantee scans repeat until there are no more changes detected
 			while (fileMonitorService.isDirty()) {
-				fileMonitorService.scanAll();
+				if (fileMonitorService instanceof NotifiableFileMonitorService) {
+					((NotifiableFileMonitorService)fileMonitorService).scanNotified();
+				} else {
+					fileMonitorService.scanAll();
+				}
 			}
 			
 			// it all seems to have worked, so clear the undo history

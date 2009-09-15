@@ -110,7 +110,7 @@ public class WebMvcOperations {
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 		XmlUtils.writeXml(mutableFile.getOutputStream(), webXml);
 
-		fileManager.scanAll();
+		fileManager.scan();
 	}
 	
 	private void updateJpaWebXml() {				
@@ -188,7 +188,7 @@ public class WebMvcOperations {
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/config/webmvc-config.xml"));
 		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 
-		fileManager.scanAll();
+		fileManager.scan();
 	}
 	
 	private void updateDependencies() {	

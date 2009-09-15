@@ -55,6 +55,6 @@ public class ApplicationContextOperations {
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
 		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 
-		fileManager.scanAll();
+		fileManager.scan();
 	}
 }

@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.SortedSet;
 
 import org.springframework.roo.file.monitor.FileMonitorService;
+import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.project.ProjectMetadata;
@@ -117,11 +118,11 @@ public interface FileManager {
 	MutableFile updateFile(String fileIdentifier);
 	
 	/**
-	 * Delegates to {@link FileMonitorService#scanAll()}.
+	 * Delegates to {@link FileMonitorService#scanAll()} or {@link NotifiableFileMonitorService#scanNotified()} if available.
      *
 	 * @return the number of changes detected (can be 0 or above)
 	 */
-	int scanAll();
+	int scan();
 	
 	/**
 	 * Delegates to {@link FileMonitorService#findMatchingAntPath(String)}.

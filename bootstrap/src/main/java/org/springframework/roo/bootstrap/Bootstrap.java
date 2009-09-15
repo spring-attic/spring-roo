@@ -27,7 +27,8 @@ public class Bootstrap {
 	private ConfigurableApplicationContext ctx;
 	
 	public static void main(String[] args) throws IOException {
-        String applicationContextLocation = "classpath:roo-bootstrap.xml";
+        System.in.read();
+		String applicationContextLocation = "classpath:roo-bootstrap.xml";
         if (args.length > 0) {
         	applicationContextLocation = args[0];
         }

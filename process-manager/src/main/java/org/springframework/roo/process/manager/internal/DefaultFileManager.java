@@ -84,7 +84,9 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
-		this.notifiableFileMonitorService.markDirty();
+		try {
+			this.notifiableFileMonitorService.notifyCreated(actual.getCanonicalPath());
+		} catch (IOException ignored) {}
 		new CreateDirectory(undoManager, filenameResolver, actual);
 		FileDetails fileDetails = new FileDetails(actual, actual.lastModified());
 		return fileDetails;
@@ -94,7 +96,9 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(!actual.exists(), "File '" + fileIdentifier + "' already exists");
-		this.notifiableFileMonitorService.markDirty();
+		try {
+			this.notifiableFileMonitorService.notifyCreated(actual.getCanonicalPath());
+		} catch (IOException ignored) {}
 		File parentDirectory = new File(actual.getParent());
 		if (!parentDirectory.exists()) {
 			createDirectory(FileDetails.getCanonicalPath(parentDirectory));
@@ -107,7 +111,9 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
-		this.notifiableFileMonitorService.markDirty();
+		try {
+			this.notifiableFileMonitorService.notifyDeleted(actual.getCanonicalPath());
+		} catch (IOException ignored) {}
 		if (actual.isDirectory()) {
 			new DeleteDirectory(undoManager, filenameResolver, actual);
 		} else {
@@ -119,7 +125,6 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
-		this.notifiableFileMonitorService.markDirty();
 		new UpdateFile(undoManager, filenameResolver, actual);
 		return new DefaultMutableFile(actual, notifiableFileMonitorService);
 	}
@@ -169,6 +174,9 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 				}
 			}
 			
+			// Explicitly perform a scan now that we've added all the directories we wish to monitor
+			fileMonitorService.scanAll();
+			
 			// Avoid doing this operation again unless the validity changes
 			pathsRegistered = md.isValid();
 		}
@@ -178,8 +186,12 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
 	
-	public int scanAll() {
-		return fileMonitorService.scanAll();
+	public int scan() {
+		if (fileMonitorService instanceof NotifiableFileMonitorService) {
+			return ((NotifiableFileMonitorService)fileMonitorService).scanNotified();
+		} else {
+			return fileMonitorService.scanAll();
+		}
 	}
 	
 }
