@@ -31,6 +31,10 @@ public abstract class ProjectOperations {
 	public final boolean isDependencyModificationAllowed() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
+
+	public final boolean isPerformCommandAllowed() {
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+	}
 	
 	/**
 	 * Allows addition of a JAR dependency to the POM. 

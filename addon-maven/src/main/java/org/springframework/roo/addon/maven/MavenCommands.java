@@ -1,6 +1,11 @@
 package org.springframework.roo.addon.maven;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -17,7 +22,8 @@ public class MavenCommands implements CommandMarker {
 	
 	private MavenOperations mavenOperations;
 	private ApplicationContextOperations applicationContextOperations;
-	
+	protected final Logger logger = Logger.getLogger(getClass().getName());
+
 	public MavenCommands(MavenOperations mavenOperations, ApplicationContextOperations applicationContextOperations) {
 		Assert.notNull(mavenOperations, "Maven operations required");
 		Assert.notNull(applicationContextOperations, "Application context operations required");
@@ -62,4 +68,53 @@ public class MavenCommands implements CommandMarker {
 	public void removeDependency(@CliOption(key="groupId", mandatory=true) JavaPackage groupId, @CliOption(key="artifactId", mandatory=true) JavaSymbolName artifactId, @CliOption(key="version", mandatory=true) String version) {
 		mavenOperations.removeDependency(groupId, artifactId, version);
 	}
+	
+	@CliAvailabilityIndicator({"perform package", "perform eclipse", "perform tests", "perform clean", "perform command"})
+	public boolean isPerformCommandAllowed() {
+		return mavenOperations.isPerformCommandAllowed();
+	}
+
+	@CliCommand(value={"perform package"}, help="Packages the application using Maven, but does not execute any tests")
+	public void runPackage() throws IOException {
+		mvn("-Dmaven.test.skip=true package");
+	}
+
+	@CliCommand(value={"perform eclipse"}, help="Sets up Eclipse configuration via Maven")
+	public void runEclipse() throws IOException {
+		mvn("eclipse:clean eclipse:eclipse");
+	}
+
+	@CliCommand(value={"perform tests"}, help="Executes the tests via Maven")
+	public void runTest() throws IOException {
+		mvn("test");
+	}
+
+	@CliCommand(value={"perform clean"}, help="Executes a full clean (including Eclipse files) via Maven")
+	public void runClean() throws IOException {
+		mvn("clean eclipse:clean");
+	}
+	
+	@CliCommand(value={"perform command"}, help="Executes a user-specified Maven command")
+	public void mvn(@CliOption(key="mavenCommand", mandatory=true) String extra) throws IOException {
+		BufferedReader input = null;
+		try {
+			Process p = Runtime.getRuntime().exec("mvn " + extra);
+		    input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		    String line;
+		    while ((line = input.readLine()) != null) {
+		    	logger.info(line);
+		    }
+	    } catch (IOException ioe) {
+	    	if (ioe.getMessage().contains("No such file or directory")) {
+	    		logger.log(Level.SEVERE, "Could not locate Maven executable; please ensure mvn command is in your path");
+	    		return;
+	    	}
+	    	throw ioe;
+	    } finally {
+	    	if (input != null) {
+	    		input.close();
+	    	}
+	    }
+	}
+
 }
