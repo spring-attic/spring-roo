@@ -103,6 +103,15 @@
 			</includes>
 		</fileSet>
 		<fileSet>
+			<outputDirectory>/legal</outputDirectory>
+			<directory>addon-web-mvc-jsp</directory>
+			<lineEnding>unix</lineEnding>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<includes>
+				<include>legal-*.txt</include>
+			</includes>
+		</fileSet>
+		<fileSet>
 			<outputDirectory>bin</outputDirectory>
 			<directory>bootstrap/src/main/bin</directory>
 			<fileMode>775</fileMode>
