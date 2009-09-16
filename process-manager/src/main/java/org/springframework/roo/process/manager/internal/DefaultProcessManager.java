@@ -31,6 +31,9 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private UndoManager undoManager;
 	private FileMonitorService fileMonitorService;
 	private InitialMonitoringRequest initialMonitoringRequest;
+	private long minimumDelayBetweenPoll = -1; // how many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
+	private long lastPollTime = 0; // what time the last poll was completed
+	private long lastPollDuration = 0; // how many ms the last poll actually took
 	
 	public DefaultProcessManager(UndoManager undoManager, FileMonitorService fileMonitorService, InitialMonitoringRequest initialMonitoringRequest) {
 		Assert.notNull(undoManager, "Undo manager is required");
@@ -160,7 +163,35 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	public void run() {
 		try {
+			if (minimumDelayBetweenPoll == 0) {
+				// Manual polling only, we never allow the timer to kick of a poll
+				return;
+			}
+			
+			long effectiveMinimumDelayBetweenPoll = minimumDelayBetweenPoll;
+			if (effectiveMinimumDelayBetweenPoll < 0) {
+				// A negative minimum delay between poll means auto-scaling is used
+				if (lastPollDuration < 500) {
+					// We've never done a poll, or they are very fast
+					effectiveMinimumDelayBetweenPoll = 0;
+				} else {
+					// Use the last duration (we might make this sliding scale in the future)
+					effectiveMinimumDelayBetweenPoll = lastPollDuration;
+				}
+			}
+			long started = System.currentTimeMillis();
+			if (started < lastPollTime + effectiveMinimumDelayBetweenPoll) {
+				// Too soon to re-poll
+				return;
+			}
 			backgroundPoll();
+			// record the completion time so we can ensure we don't re-poll too soon
+			lastPollTime = System.currentTimeMillis();
+			// compute how many milliseconds it took to run
+			lastPollDuration = lastPollTime - started;
+			if (lastPollDuration == 0) {
+				lastPollDuration = 1; // ensure it correctly reflects that it has ever run
+			}
 		} catch (Throwable t) {
 			logger.log(Level.SEVERE, t.getMessage(), t);
 		}
@@ -172,6 +203,27 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	public void setDevelopmentMode(boolean developmentMode) {
 		this.developmentMode = developmentMode;
+	}
+
+	/**
+	 * @param minimumDelayBetweenPoll how many milliseconds must pass between each poll
+	 */
+	public void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll) {
+		this.minimumDelayBetweenPoll = minimumDelayBetweenPoll;
+	}
+
+	/**
+	 * @return how many milliseconds must pass between each poll (0 = manual only; <0 = auto-scaled; >0 = interval)
+	 */
+	public long getMinimumDelayBetweenPoll() {
+		return minimumDelayBetweenPoll;
+	}
+
+	/**
+	 * @return how many milliseconds the last poll execution took to complete (0 = never ran; >0 = last execution time)
+	 */
+	public long getLastPollDuration() {
+		return lastPollDuration;
 	}
 
 }

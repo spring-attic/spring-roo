@@ -38,4 +38,45 @@ public class BootstrapCommands implements CommandMarker {
 		shell.setDevelopmentMode(enabled);
 		return "Development mode set to " + enabled;
 	}
+	
+	
+	@CliCommand(value="polling information", help="Display file system polling information")
+	public String pollingInfo() {
+		StringBuilder sb = new StringBuilder("File system polling ");
+		long duration = processManager.getLastPollDuration();
+		if (duration == 0) {
+			sb.append("never executed; ");
+		} else {
+			sb.append("last took ").append(duration).append(" ms; ");
+		}
+		long minimum = processManager.getMinimumDelayBetweenPoll();
+		if (minimum == 0) {
+			sb.append("automatic polling is disabled");
+		} else if (minimum < 0) {
+			sb.append("auto-scaled polling is enabled");
+		} else {
+			sb.append("polling frequency has a minimum interval of ").append(minimum).append(" ms");
+		}
+		return sb.toString();
+	}
+	
+	@CliCommand(value="polling speed", help="Changes the file system polling speed")
+	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true) long minimumDelayBetweenPoll) {
+		processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
+		return pollingInfo();
+	}
+	
+	@CliCommand(value="poll now", help="Perform a manual file system poll")
+	public String poll() {
+		long originalSetting = processManager.getMinimumDelayBetweenPoll();
+		try {
+			processManager.setMinimumDelayBetweenPoll(1);
+			processManager.run();
+		} finally {
+			// switch on manual polling again
+			processManager.setMinimumDelayBetweenPoll(originalSetting);
+		}
+		return "Manual poll completed";
+	}
+	
 }
