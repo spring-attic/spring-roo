@@ -140,6 +140,10 @@ div .box {
 	text-align: right;
 }
 
+.footer .new {
+	float:left;
+}
+
 .footer a:link {color: #7db223;}
 
 /* menu elements*/

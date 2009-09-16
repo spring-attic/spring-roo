@@ -220,10 +220,21 @@ public class JspDocumentHelper {
 		
 		//pagination
 		tableElement.appendChild(
-				new XmlElementBuilder("tr", document).addAttribute("class", "footer").addChild(
-						new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4))).addChild(
-								new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}").addChild(
-										new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${param.page}").addAttribute("size", "${param.size}").build()).build()).build()).build());
+				new XmlElementBuilder("tr", document).addAttribute("class", "footer")
+					.addChild(new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4)))
+						.addChild(new XmlElementBuilder("span", document).addAttribute("class", "new")
+							.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
+							.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${create_url}")
+								.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "add_message").build())
+								.addChild(new XmlElementBuilder("img", document).addAttribute("src", "${create_img_url}").addAttribute("title", "${add_message}").addAttribute("alt", "${add_message}").build())
+							.build())
+						.build())
+						.addChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}")
+								.addChild(new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${param.page}").addAttribute("size", "${param.size}").build())
+						.build())
+					.build())
+				.build());
 		
 
 		divElement.appendChild(elseElement);
