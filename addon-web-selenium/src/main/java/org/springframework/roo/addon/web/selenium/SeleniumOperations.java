@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Logger;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
@@ -46,6 +47,8 @@ public class SeleniumOperations {
 	private BeanInfoMetadata beanInfoMetadata;
 	private MenuOperations menuOperations;
 	
+	private Logger logger = Logger.getLogger(SeleniumOperations.class.getName());
+	
 	public SeleniumOperations(MetadataService metadataService, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(fileManager, "File manager required");
@@ -66,15 +69,21 @@ public class SeleniumOperations {
 	public void generateTest(JavaType controller, String name, String serverURL) {
 		Assert.notNull(controller, "Controller type required");	
 		
-		if(!serverURL.endsWith("/")) {
-			serverURL = serverURL + "/";
-		}
-		
 		String webScaffoldMetadataIdentifier = WebScaffoldMetadata.createIdentifier(controller, Path.SRC_MAIN_JAVA);
 		
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName()  + "' does not appear to be an automatic, scaffolded controller");
 		this.beanInfoMetadata = (BeanInfoMetadata) metadataService.get(webScaffoldMetadata.getIdentifierForBeanInfoMetadata());
+		
+		//we abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
+		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
+			logger.warning("The controller you specified does not allow the creation of new instances of the form backing object. No Selenium tests created.");
+			return;
+		}
+		
+		if(!serverURL.endsWith("/")) {
+			serverURL = serverURL + "/";
+		}
 		
 		String relativeTestFilePath = "selenium/test-" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
@@ -112,8 +121,8 @@ public class SeleniumOperations {
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
 		
-		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName().toLowerCase() + "/"));							
-		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
+		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName().toLowerCase() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/form"));							
+//		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
 		
 		for (FieldMetadata field : getEligableFields()) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
