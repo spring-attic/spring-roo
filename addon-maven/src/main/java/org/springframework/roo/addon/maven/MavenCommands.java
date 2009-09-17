@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.maven;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -98,7 +99,14 @@ public class MavenCommands implements CommandMarker {
 	public void mvn(@CliOption(key="mavenCommand", mandatory=true) String extra) throws IOException {
 		BufferedReader input = null;
 		try {
-			Process p = Runtime.getRuntime().exec("mvn " + extra);
+			String cmd = null;
+			if (File.separatorChar == '\\') {
+				// Windows platform requires the cmd /c prefix
+				cmd = "cmd /c mvn " + extra;
+			} else {
+				cmd = "mvn " + extra;
+			}
+			Process p = Runtime.getRuntime().exec(cmd);
 		    input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		    String line;
 		    while ((line = input.readLine()) != null) {
