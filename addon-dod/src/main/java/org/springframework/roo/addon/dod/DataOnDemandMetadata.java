@@ -420,16 +420,28 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 				} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 					initializer = "new Boolean(true)";
+				} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+					initializer = "true";
 				} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
 					initializer = "new Integer(index)";
+				} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
+					initializer = "1";
 				} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
 					initializer = "new Double(index)";
+				} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+					initializer = "1.0";
 				} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
 					initializer = "new Float(index)";
+				} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+					initializer = "1.0";
 				} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
 					initializer = "new Long(index)";
+				} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+					initializer = "1";
 				} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
 					initializer = "new Short(index)";
+				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
+					initializer = "1";
 				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null) {
 					requiredDataOnDemandCollaborators.add(field.getFieldType());
 					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
