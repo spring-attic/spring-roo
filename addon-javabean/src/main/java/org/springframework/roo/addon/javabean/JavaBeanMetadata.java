@@ -81,12 +81,12 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		
 		// Compute the accessor method name
 		JavaSymbolName methodName;
-		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future (see bug ROO-199)
-//		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-//			methodName = new JavaSymbolName("is" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-//		} else {
+
+		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+			methodName = new JavaSymbolName("is" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
+		} else {
 			methodName = new JavaSymbolName("get" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
-//		}
+		}
 		
 		// See if the type itself declared the accessor
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);

@@ -103,7 +103,9 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				length.append(" || ").append(paramNames.get(i)).append(".length() == 0");
 			}
 			
-			bodyBuilder.appendFormalLine("if (" + name + " == null" + length.toString() + ") throw new IllegalArgumentException(\"The " + name + " argument is required\");");
+			if (!paramTypes.get(i).isPrimitive()) {
+				bodyBuilder.appendFormalLine("if (" + name + " == null" + length.toString() + ") throw new IllegalArgumentException(\"The " + name + " argument is required\");");
+			}
 			
 			if (length.length() > 0 && dynamicFinderMethodName.substring(dynamicFinderMethodName.indexOf(paramNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")){
 				bodyBuilder.appendFormalLine(name + " = " + name + ".replace('*', '%');");
