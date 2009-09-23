@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -578,7 +579,7 @@ public class JspDocumentHelper {
 			JavaType fieldType = field.getFieldType();
 			if(fieldType.isCommonCollectionType() && fieldType.equals(new JavaType(Set.class.getName()))) {
 				if (fieldType.getParameters().size() != 1) {
-					throw new IllegalArgumentException();
+					throw new IllegalArgumentException("A set is defined without specification of its type (via generics) - unable to create view for it");
 				}
 				fieldType = fieldType.getParameters().get(0);
 			}
@@ -605,14 +606,23 @@ public class JspDocumentHelper {
 						EntityMetadata typeEntityMetadata = null;
 						
 						if (field.getFieldType().isCommonCollectionType()) {
+							
+							//currently there is no scaffolding available for Maps (see ROO-194)
+							if(field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+								formElement.appendChild(divElement);
+								formElement.appendChild(document.createElement("br"));
+								return;
+							}
+							
 							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType().getParameters().get(0), Path.SRC_MAIN_JAVA));
 						} else {
 							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
 						}
 	
 						if(typeEntityMetadata == null) {
-							throw new IllegalStateException("Could not determine the plural name for the " + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + " field");
+							throw new IllegalStateException("Could not determine the plural name for the '" + field.getFieldName().getSymbolName() + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 						}
+						
 						String plural = typeEntityMetadata.getPlural().toLowerCase();
 						
 						Element ifElement = document.createElement("c:if");
