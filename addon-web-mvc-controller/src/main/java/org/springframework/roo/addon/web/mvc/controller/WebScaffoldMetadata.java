@@ -312,10 +312,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));	
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), noAnnotations));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
+		paramNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath));
@@ -334,6 +336,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		if(specialDomainTypes.size() > 0) {
+			for (JavaType type: specialDomainTypes) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				if (typeEntityMetadata != null) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				} else if(isEnumType(type)){
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + ".class.getEnumConstants());");
+				}				
+			}
+		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
@@ -398,10 +412,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));	
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), noAnnotations));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
+		paramNames.add(new JavaSymbolName("modelMap"));
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("PUT"))));
@@ -419,6 +435,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		if(specialDomainTypes.size() > 0) {
+			for (JavaType type: specialDomainTypes) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				if (typeEntityMetadata != null) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				} else if(isEnumType(type)){
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getFullyQualifiedTypeName() + ".class.getEnumConstants());");
+				}				
+			}
+		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
