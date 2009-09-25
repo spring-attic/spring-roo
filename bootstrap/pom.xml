@@ -141,6 +141,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.backup</artifactId>
+			<version>${roo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.javabean</artifactId>
 			<version>${roo.version}</version>
 			<scope>provided</scope>

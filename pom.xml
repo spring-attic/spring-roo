@@ -44,6 +44,8 @@
 		<module>addon-dod</module>
 		<module>addon-test</module>
 		<module>addon-bundlor</module>
+		<module>addon-backup</module>
+
         <module>bootstrap</module>
     </modules>
 
