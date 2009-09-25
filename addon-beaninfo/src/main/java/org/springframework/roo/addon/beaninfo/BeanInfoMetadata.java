@@ -70,10 +70,10 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		Assert.notNull(methodMetadata, "Method metadata is required");
 		String name = methodMetadata.getMethodName().getSymbolName();
 		if (name.startsWith("set") || name.startsWith("get")) {
-			return new JavaSymbolName(StringUtils.uncapitalize(name.substring(3)));
+			return new JavaSymbolName(name.substring(3));
 		}
 		if (name.startsWith("is")) {
-			return new JavaSymbolName(StringUtils.uncapitalize(name.substring(2)));
+			return new JavaSymbolName(name.substring(2));
 		}
 		throw new IllegalStateException("Method name '" + name + "' does not observe JavaBean method naming conventions");
 	}
@@ -92,6 +92,12 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		Assert.notNull(propertyName, "Property name required");
 		for (MemberHoldingTypeDetails holder : memberHoldingTypeDetails) {
 			FieldMetadata result = MemberFindingUtils.getDeclaredField(holder, propertyName);
+			if (result != null) {
+				return result;
+			}
+			// To get here means we couldn't find the property using the exact same case;
+			// try to scan with a lowercase first character (see ROO-203)
+			result = MemberFindingUtils.getDeclaredField(holder, new JavaSymbolName(StringUtils.uncapitalize(propertyName.getSymbolName())));
 			if (result != null) {
 				return result;
 			}
