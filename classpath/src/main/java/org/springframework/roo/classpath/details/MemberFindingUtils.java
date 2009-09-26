@@ -117,6 +117,24 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
+	 * Locates all methods on this class and its superclasses.
+	 * 
+	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @return zero or more methods (never null)
+	 */
+	public static final List<MethodMetadata> getMethods(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
+		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		while (current != null) {
+			for (MethodMetadata methods : current.getDeclaredMethods()) {
+				result.add(methods);
+			}
+			current = current.getSuperclass();
+		}
+		return result;
+	}
+	
+	/**
 	 * Searches up the inheritance hierarchy until the first field with the specified name is located.
 	 * 
 	 * @param classOrInterfaceTypeDetails to search (required)
