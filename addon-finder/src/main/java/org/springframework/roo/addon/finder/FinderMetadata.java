@@ -122,8 +122,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}
 		}
 		
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + entityMetadata.getEntityManagerField().getFieldName().getSymbolName() + ";");
-		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
+		// Get the entityManager() method (as per ROO-216)
+		MethodMetadata entityManagerMethod = entityMetadata.getEntityManagerMethod();
+		Assert.notNull(entityManagerMethod, "Entity manager method incorrectly returned null");
+		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
 		bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(\"" + jpaQuery + "\");");
 		
