@@ -226,7 +226,7 @@ public class JavaParserUtils  {
 		Assert.notNull(type, "The reference type must be provided");
 		
 		if (type instanceof VoidType) {
-			return new JavaType(Void.class.getName());
+			return JavaType.VOID_PRIMITIVE;
 		}
 		
 		int array = 0;
