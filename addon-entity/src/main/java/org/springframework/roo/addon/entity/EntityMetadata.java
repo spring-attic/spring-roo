@@ -638,7 +638,28 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
 			// create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
-			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){}." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){");
+			// handle any abstract methods in this class
+			bodyBuilder.indent();
+			for (MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
+				if (Modifier.isAbstract(method.getModifier())) {
+					StringBuilder params = new StringBuilder();
+					int i = -1;
+					List<AnnotatedJavaType> types = method.getParameterTypes();
+					for (JavaSymbolName name : method.getParameterNames()) {
+						i++;
+						if (i > 0) {
+							params.append(", ");
+						}
+						AnnotatedJavaType type = types.get(i);
+						params.append(type.toString()).append(" ").append(name);
+					}
+					int newModifier = method.getModifier() - Modifier.ABSTRACT;
+					bodyBuilder.appendFormalLine(Modifier.toString(newModifier) + " " + method.getReturnType().getNameIncludingTypeParameters() + " " + method.getMethodName().getSymbolName() + "(" + params.toString() + ") { throw new UnsupportedOperationException(); }");
+				}
+			}
+			bodyBuilder.indentRemove();
+			bodyBuilder.appendFormalLine("}." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		} else {
 			// instantiate using the no-argument constructor (we know this is available as the entity must comply with the JPA no-arg constructor requirement)
 			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
