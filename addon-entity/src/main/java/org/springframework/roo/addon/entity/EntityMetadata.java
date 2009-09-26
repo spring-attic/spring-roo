@@ -656,10 +656,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the count method (may return null)
 	 */
 	public MethodMetadata getCountMethod() {
-		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			return null;
-		}
-		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(countMethod + plural);
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -685,10 +681,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find all method (may return null)
 	 */
 	public MethodMetadata getFindAllMethod() {
-		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			return null;
-		}
-
 		if ("".equals(findAllMethod)) {
 			return null;
 		}
@@ -720,10 +712,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find (by ID) method (may return null)
 	 */
 	public MethodMetadata getFindMethod() {
-		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			return null;
-		}
-
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findMethod + governorTypeDetails.getName().getSimpleTypeName());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -752,10 +740,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find entries method (may return null)
 	 */
 	public MethodMetadata getFindEntriesMethod() {
-		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			return null;
-		}
-
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findEntriesMethod + governorTypeDetails.getName().getSimpleTypeName() + "Entries");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
