@@ -595,13 +595,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Address non-injected entity manager field
 		MethodMetadata entityManagerMethod = getEntityManagerMethod();
-		if (entityManagerMethod == null) {
-			// Likely to be an abstract class; in any event we cannot attempt to "new" this class, so let's just output an error
-			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
-		} else {
-			// Use the getEntityManager() method to acquire an entity manager (the method will throw an exception if it cannot be acquired)
-			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
-		}
+		Assert.notNull(entityManagerMethod, "Entity manager method should not have returned null");
+		
+		// Use the getEntityManager() method to acquire an entity manager (the method will throw an exception if it cannot be acquired)
+		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
 		
 		if ("flush".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
@@ -629,20 +626,24 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	
 	/**
 	 * @return the static utility entityManager() method used by other methods to obtain
-	 * entity manager and available as a utility for user code (may return null)
+	 * entity manager and available as a utility for user code (never returns nulls)
 	 */
 	public MethodMetadata getEntityManagerMethod() {
-		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			return null;
-		}
-		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
 		JavaType returnType = new JavaType("javax.persistence.EntityManager", 0, DataType.TYPE, null, null);
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+
+		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
+			// create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
+			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){}." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+		} else {
+			// instantiate using the no-argument constructor (we know this is available as the entity must comply with the JPA no-arg constructor requirement)
+			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+		}
+		
 		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return em;");
 		int modifier = Modifier.PUBLIC;
