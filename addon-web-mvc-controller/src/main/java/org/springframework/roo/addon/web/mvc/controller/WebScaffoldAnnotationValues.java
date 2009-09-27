@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AbstractAnnotationValues;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -26,10 +30,15 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate boolean create = true;
 	@AutoPopulate boolean update = true;
 	@AutoPopulate boolean exposeFinders = true;
+	@AutoPopulate String dateFormat = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault())).toPattern(); 
 
+	private SimpleDateFormat simpleDateFormat;
+	
 	public WebScaffoldAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooWebScaffold.class.getName()));
 		AutoPopulationUtils.populate(this, annotationMetadata);
+		
+		this.simpleDateFormat = new SimpleDateFormat(dateFormat);
 	}
 	
 	public String getPath() {
@@ -67,5 +76,8 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	public boolean isExposeFinders() {
 		return exposeFinders;
 	}
-	
+
+	public SimpleDateFormat getDateFormat() {
+		return simpleDateFormat;
+	}	
 }

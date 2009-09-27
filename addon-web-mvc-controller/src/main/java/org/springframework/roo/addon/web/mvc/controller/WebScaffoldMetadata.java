@@ -161,10 +161,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(initBinder);
-				
-		SimpleDateFormat dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("binder.registerCustomEditor(java.util.Date.class, new org.springframework.beans.propertyeditors.CustomDateEditor(new java.text.SimpleDateFormat(\"" + dateFormatLocalized.toPattern() + "\"), true));");
+		bodyBuilder.appendFormalLine("binder.registerCustomEditor(java.util.Date.class, new org.springframework.beans.propertyeditors.CustomDateEditor(new java.text.SimpleDateFormat(\"" + annotationValues.getDateFormat().toPattern() + "\"), true));");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, annotations, bodyBuilder.getOutput());
 	}
 

@@ -70,7 +70,7 @@ public class JspDocumentHelper {
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 		
-		dateFormatLocalized = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
+		dateFormatLocalized = webScaffoldAnnotationValues.getDateFormat();
 		entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
@@ -541,7 +541,7 @@ public class JspDocumentHelper {
 				if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 						// should be tested with instanceof
 						type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-							divElement.appendChild(DojoUtils.getRequiredDateDojo(document, paramName));
+							divElement.appendChild(DojoUtils.getRequiredDateDojo(document, paramName, dateFormatLocalized));
 				}
 			}
 
@@ -718,7 +718,7 @@ public class JspDocumentHelper {
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 							// should be tested with instanceof
 									fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-								divElement.appendChild(DojoUtils.getDateDojo(document, field));
+								divElement.appendChild(DojoUtils.getDateDojo(document, field, dateFormatLocalized));
 					}
 					
 					formElement.appendChild(divElement);

@@ -1,12 +1,11 @@
 package org.springframework.roo.addon.web.selenium;
 
 import java.io.InputStream;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
@@ -46,6 +45,7 @@ public class SeleniumOperations {
 	private MetadataService metadataService;
 	private BeanInfoMetadata beanInfoMetadata;
 	private MenuOperations menuOperations;
+	private SimpleDateFormat simpleDateFormat;
 	
 	private Logger logger = Logger.getLogger(SeleniumOperations.class.getName());
 	
@@ -74,6 +74,8 @@ public class SeleniumOperations {
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName()  + "' does not appear to be an automatic, scaffolded controller");
 		this.beanInfoMetadata = (BeanInfoMetadata) metadataService.get(webScaffoldMetadata.getIdentifierForBeanInfoMetadata());
+		
+		this.simpleDateFormat = webScaffoldMetadata.getAnnotationValues().getDateFormat();
 		
 		//we abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
 		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
@@ -309,24 +311,23 @@ public class SeleniumOperations {
 		return tr;
 	}
 	
-	private Node typeKeyCommand(Document document, FieldMetadata field){
-		Node tr = document.createElement("tr");				
-		
-		Node td1 = tr.appendChild(document.createElement("td"));
-		td1.setTextContent("typeKey");
-		
-		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent(field.getFieldName().getSymbolName());		
-		
-		Node td3 = tr.appendChild(document.createElement("td"));	
-		td3.setTextContent("1");		
-			
-		return tr;
-	}
-	
+//	private Node typeKeyCommand(Document document, FieldMetadata field){
+//		Node tr = document.createElement("tr");				
+//		
+//		Node td1 = tr.appendChild(document.createElement("td"));
+//		td1.setTextContent("typeKey");
+//		
+//		Node td2 = tr.appendChild(document.createElement("td"));
+//		td2.setTextContent(field.getFieldName().getSymbolName());		
+//		
+//		Node td3 = tr.appendChild(document.createElement("td"));	
+//		td3.setTextContent("1");		
+//			
+//		return tr;
+//	}
+//	
 	private String convertToInitializer(FieldMetadata field) {
 		String initializer = " ";
-		DateFormat dateFormatLocalized = DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault());
 		short index = 1;
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
@@ -339,14 +340,14 @@ public class SeleniumOperations {
 				cal.add(Calendar.YEAR, -1);
 				cal.add(Calendar.MONTH, -1);
 				cal.add(Calendar.DAY_OF_MONTH, -1);
-				initializer = dateFormatLocalized.format(cal.getTime());
+				initializer = simpleDateFormat.format(cal.getTime());
 			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
 				cal.add(Calendar.YEAR, +1);
 				cal.add(Calendar.MONTH, +1);
 				cal.add(Calendar.DAY_OF_MONTH, +1);
-				initializer = dateFormatLocalized.format(cal.getTime());
+				initializer = simpleDateFormat.format(cal.getTime());
 			} else {
-				initializer = dateFormatLocalized.format(cal.getTime());
+				initializer = simpleDateFormat.format(cal.getTime());
 			}
 		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {		
 			initializer = new Boolean(true).toString();
