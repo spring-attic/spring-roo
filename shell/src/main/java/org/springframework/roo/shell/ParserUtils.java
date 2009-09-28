@@ -81,7 +81,7 @@ public class ParserUtils {
 				continue;
 			}
 			
-			if (currentToken.startsWith("-")) {
+			if (currentToken.startsWith("--")) {
 				// We're about to start a new option marker
 				// First strip of the - or -- or however many there are
 				int lastIndex = currentToken.lastIndexOf("-");
@@ -122,7 +122,7 @@ public class ParserUtils {
 					break;
 				}
 				
-				if (split[i+1].startsWith("-")) {
+				if (split[i+1].startsWith("--")) {
 					// A new token is being started next iteration, so store this one now
 					store(result, currentOption, currentValue);
 					currentOption = new StringBuilder();

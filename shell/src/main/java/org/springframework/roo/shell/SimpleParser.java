@@ -471,7 +471,7 @@ public final class SimpleParser {
 
 		// Handle if they are trying to find out the available option keys; always present option keys in order
 		// of their declaration on the method signature, thus we can stop when mandatory options are filled in
-		if (methodTarget.remainingBuffer.endsWith("-")) {
+		if (methodTarget.remainingBuffer.endsWith("--")) {
 
 			boolean showAllRemaining = true;
 			for (CliOption include : unspecified) {
@@ -505,9 +505,9 @@ public final class SimpleParser {
 				for (String value : include.key()) {
 					if (!"".equals(value) && include.mandatory()) {
 						if (translated.endsWith(" ")) {
-							results.add(translated + "-" + value + " ");
+							results.add(translated + "--" + value + " ");
 						} else {
-							results.add(translated + " -" + value + " ");
+							results.add(translated + " --" + value + " ");
 						}
 					}
 				}

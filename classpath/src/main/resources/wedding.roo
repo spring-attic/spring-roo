@@ -1,32 +1,32 @@
-create project -topLevelPackage com.wedding
-install jpa -provider HIBERNATE -database HYPERSONIC_PERSISTENT
+create project --topLevelPackage com.wedding
+install jpa --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 database properties
-database set -key database.url -value jdbc:hsqldb:${user.home}/my-wedding
+database set --key database.url --value jdbc:hsqldb:${user.home}/my-wedding
 
-new persistent class jpa -name ~.domain.Rsvp
-add field string code -notNull -sizeMin 1 -sizeMax 30
-add field string email -sizeMax 30
-add field number attending -type java.lang.Integer
-add field string specialRequests -sizeMax 100
-add field date jpa confirmed -type java.util.Date
+new persistent class jpa --name ~.domain.Rsvp
+add field string code --notNull --sizeMin 1 --sizeMax 30
+add field string email --sizeMax 30
+add field number attending --type java.lang.Integer
+add field string specialRequests --sizeMax 100
+add field date jpa confirmed --type java.util.Date
 
 new integration test
 new controller automatic ~.web.RsvpController
-new selenium test -controller ~.web.RsvpController
+new selenium test --controller ~.web.RsvpController
 
 // (quit, mvn test, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
 
-configure logging -level DEBUG -package WEB
+configure logging --level DEBUG --package WEB
 install security
 
-new controller manual -name ~.web.PublicRsvpController
-list finders for -class ~.domain.Rsvp -filter code,equ
-install finder -finderName findRsvpsByCodeEquals
-install email provider -hostServer 127.0.0.1
-add field email template -class ~.web.PublicRsvpController
+new controller manual --name ~.web.PublicRsvpController
+list finders for --class ~.domain.Rsvp --filter code,equ
+install finder --finderName findRsvpsByCodeEquals
+install email provider --hostServer 127.0.0.1
+add field email template --class ~.web.PublicRsvpController
 
 // quit, mvn eclipse:eclipse; import project into Eclipse
 
 // complete manual configuration as described at http://blog.springsource.com/roo-part-2/
 
-configure logging -level DEBUG
+configure logging --level DEBUG

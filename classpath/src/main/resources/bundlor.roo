@@ -8,14 +8,14 @@ install bundlor
 
 
 ; let's make an entity to represent a CD
-install jpa -database HYPERSONIC_IN_MEMORY -provider HIBERNATE 
-new persistent class jpa -name ~.CompactDisc 
-add field string -fieldName title -notNull  
-add field string -fieldName artist -notNull
-install finder -finderName  findCompactDiscsByTitleLike
-install finder -finderName  findCompactDiscsByArtistLike
+install jpa --database HYPERSONIC_IN_MEMORY --provider HIBERNATE 
+new persistent class jpa --name ~.CompactDisc 
+add field string --fieldName title --notNull  
+add field string --fieldName artist --notNull
+install finder --finderName  findCompactDiscsByTitleLike
+install finder --finderName  findCompactDiscsByArtistLike
 
-configure logging -level DEBUG
+configure logging --level DEBUG
   
 ; Now you can create a bundle ready to deploy by quitting roo and 
 ; running  "mvn clean package".
