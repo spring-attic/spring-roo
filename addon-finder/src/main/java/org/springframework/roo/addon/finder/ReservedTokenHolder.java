@@ -67,9 +67,9 @@ public abstract class ReservedTokenHolder {
 			reservedTokens.add(new ReservedToken("LessThan"));	
 			reservedTokens.add(new ReservedToken("NotEquals"));
 			reservedTokens.add(new ReservedToken("IsNotNull"));
-			reservedTokens.add(new ReservedToken("GreaterThan"));
-			
+			reservedTokens.add(new ReservedToken("GreaterThan"));			
 			reservedTokens.add(new ReservedToken("GreaterThanEquals"));
+			reservedTokens.add(new ReservedToken("Member"));
 		}
 		return reservedTokens;
 	}

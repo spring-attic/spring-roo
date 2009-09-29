@@ -211,7 +211,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"web_mvc_jsp_" + controllerPath + "_category", 
 						controllerPath, 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
-						"Find by " + new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
+						new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
 						"global.menu.find",
 						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");

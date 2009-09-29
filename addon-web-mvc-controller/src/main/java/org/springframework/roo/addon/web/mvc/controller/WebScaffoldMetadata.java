@@ -114,8 +114,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}		
 		if (annotationValues.exposeFinders) {			
 			for (String finderName : entityMetadata.getDynamicFinders()) {
-				builder.addMethod(getFinderFormMethod(finderMetadata.getDynamicFinderMethod(finderName)));
-				builder.addMethod(getFinderMethod(finderMetadata.getDynamicFinderMethod(finderName)));
+				builder.addMethod(getFinderFormMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
+				builder.addMethod(getFinderMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
 			}
 		}
 		
@@ -516,13 +516,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		boolean needModelMap = false;
 		for (JavaType javaType : types) {
-			if (isSpecialType(javaType)) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-				if (typeEntityMetadata != null) {
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + javaType.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
-				}
-				needModelMap = true;
+			EntityMetadata typeEntityMetadata = null;
+			if (javaType.isCommonCollectionType() && isSpecialType(javaType.getParameters().get(0))) {
+				javaType = javaType.getParameters().get(0);
+				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			}
+			else if (isSpecialType(javaType)) {
+				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+			}
+			if (typeEntityMetadata != null) {
+				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + javaType.getFullyQualifiedTypeName() + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+			}
+			needModelMap = true;
 		}		
 		
 		if (needModelMap) {

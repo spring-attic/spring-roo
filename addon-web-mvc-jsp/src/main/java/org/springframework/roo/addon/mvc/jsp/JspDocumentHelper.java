@@ -455,7 +455,7 @@ public class JspDocumentHelper {
 		formElement.setAttribute("action", "${form_url}");
 		formElement.setAttribute("method", "GET");		
 
-		MethodMetadata methodMetadata = finderMetadata.getDynamicFinderMethod(finderName);
+		MethodMetadata methodMetadata = finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 		
 		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes());
 		List<JavaSymbolName> paramNames = methodMetadata.getParameterNames();
@@ -472,7 +472,30 @@ public class JspDocumentHelper {
 			labelElement.setAttribute("for", "_" + paramName.getSymbolName().toLowerCase());
 			labelElement.setTextContent(paramName.getReadableSymbolName()  + ":");
 			
-			if (isSpecialType(type)) {
+			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type.getParameters().get(0), Path.SRC_MAIN_JAVA));
+				if (typeEntityMetadata != null) {
+					Element ifElement = document.createElement("c:if");
+					ifElement.setAttribute("test", "${not empty " + typeEntityMetadata.getPlural().toLowerCase() + "}");
+					divElement.appendChild(ifElement);
+					ifElement.appendChild(labelElement);
+
+					Element select = document.createElement("select");
+					select.setAttribute("style", "width:250px");
+					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
+					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase());
+					Element forEach = document.createElement("c:forEach");
+					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
+					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
+					select.appendChild(forEach);
+					Element option = document.createElement("option");
+					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + paramName.getSymbolName().toLowerCase()  + "_item}");
+					forEach.appendChild(option);
+					ifElement.appendChild(select);
+					ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, new JavaSymbolName(paramName.getSymbolName())));
+				}
+			} else if (isSpecialType(type)) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					Element ifElement = document.createElement("c:if");
@@ -485,13 +508,14 @@ public class JspDocumentHelper {
 					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
-					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase());
+					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
 					select.appendChild(forEach);
 					Element option = document.createElement("option");
-					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName() + "}");
-					option.setTextContent("${" + paramName.getSymbolName().toLowerCase() + "}");
-					forEach.appendChild(option);
-					ifElement.appendChild(select);		
+					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + paramName.getSymbolName().toLowerCase()  + "_item}");
+					forEach.appendChild(option);					
+					ifElement.appendChild(select);
+					ifElement.appendChild(DojoUtils.getSelectDojo(document, new JavaSymbolName(paramName.getSymbolName())));
 				}
 			} else if (isEnumType(type)) {
 				divElement.appendChild(labelElement);
@@ -632,7 +656,7 @@ public class JspDocumentHelper {
 						divElement.removeChild(labelElement);
 						ifElement.appendChild(labelElement);
 						
-						ifElement.appendChild(JspUtils.getSelectBox(document, field.getFieldName(), plural));		
+						ifElement.appendChild(JspUtils.getSelectBox(document, field.getFieldName(), plural, entityMetadata.getIdentifierField()));		
 
 						specialAnnotation = true;
 						formElement.appendChild(divElement);

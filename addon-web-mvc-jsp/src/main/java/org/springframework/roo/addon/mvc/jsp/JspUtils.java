@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -25,14 +26,14 @@ public class JspUtils {
 		return formInput;
 	}
 	
-	public static Element getSelectBox(Document document, JavaSymbolName fieldName, String pluralName) {
+	public static Element getSelectBox(Document document, JavaSymbolName fieldName, String pluralName, FieldMetadata identifierField) {
 		Element formSelect = document.createElement("form:select");
 		formSelect.setAttribute("path", fieldName.getSymbolName());
 		formSelect.setAttribute("cssStyle", "width:250px");						
 		formSelect.setAttribute("id", "_" + fieldName);
 		Element formOptions = document.createElement("form:options");
 		formOptions.setAttribute("items", "${" + pluralName.toLowerCase() + "}");
-		formOptions.setAttribute("itemValue", "id");	
+		formOptions.setAttribute("itemValue", identifierField.getFieldName().getSymbolName());	
 		formSelect.appendChild(formOptions);		
 		return formSelect;
 	}

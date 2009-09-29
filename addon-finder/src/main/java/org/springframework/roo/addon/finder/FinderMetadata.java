@@ -55,7 +55,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.entityMetadata = entityMetadata;
 		
 		for (String method : entityMetadata.getDynamicFinders()) {
-			builder.addMethod(getDynamicFinderMethod(method));
+			builder.addMethod(getDynamicFinderMethod(method, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
 		}
 		
 		// Create a representation of the desired output ITD
@@ -71,7 +71,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
-	public MethodMetadata getDynamicFinderMethod(String dynamicFinderMethodName) {
+	public MethodMetadata getDynamicFinderMethod(String dynamicFinderMethodName, String tableName) {
 		Assert.hasText(dynamicFinderMethodName, "Dynamic finder method name is required");
 		Assert.isTrue(entityMetadata.getDynamicFinders().contains(dynamicFinderMethodName), "Undefined method name '" + dynamicFinderMethodName + "'");
 		
@@ -94,6 +94,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		boolean containsCollectionType = false;
 
 		for (int i = 0; i < paramTypes.size(); i++) {
 			String name = paramNames.get(i).getSymbolName();
@@ -120,6 +122,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 			}
+			
+			if (paramTypes.get(i).isCommonCollectionType()) {
+				containsCollectionType = true;
+			}
 		}
 		
 		// Get the entityManager() method (as per ROO-216)
@@ -127,10 +133,37 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		Assert.notNull(entityManagerMethod, "Entity manager method incorrectly returned null");
 		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
-		bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(\"" + jpaQuery + "\");");
-		
-		for (JavaSymbolName name : paramNames) {
-			bodyBuilder.appendFormalLine("q.setParameter(\"" + name + "\", " + name + ");");
+		if (containsCollectionType) {
+			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + " AND\");");
+			for (int i = 0; i < paramTypes.size(); i++) {
+				if (paramTypes.get(i).isCommonCollectionType()) {
+					bodyBuilder.appendFormalLine("for (int i = 0; i < " + paramNames.get(i) + ".size(); i++) {");
+					bodyBuilder.indent();
+					bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
+					bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + paramNames.get(i) + "_item\").append(i).append(\" MEMBER OF " + tableName + "." + paramNames.get(i) + "\");");
+					bodyBuilder.indentRemove();
+					bodyBuilder.appendFormalLine("}");
+				} 
+			}
+			bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(queryBuilder.toString());");
+			bodyBuilder.appendFormalLine("int i = 0;");
+			for (int i = 0; i < paramTypes.size(); i++) {
+				if (paramTypes.get(i).isCommonCollectionType()) {
+					bodyBuilder.appendFormalLine("for (" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName() + " " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + paramNames.get(i) + ") {");
+					bodyBuilder.indent();
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + i++, " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
+					bodyBuilder.indentRemove();
+					bodyBuilder.appendFormalLine("}");
+				} else {
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "\", " + paramNames.get(i) + ");");
+				}
+			}				
+		} else {
+			bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(\"" + jpaQuery + "\");");
+			
+			for (JavaSymbolName name : paramNames) {
+				bodyBuilder.appendFormalLine("q.setParameter(\"" + name + "\", " + name + ");");
+			}
 		}
 		
 		bodyBuilder.appendFormalLine("return q;");

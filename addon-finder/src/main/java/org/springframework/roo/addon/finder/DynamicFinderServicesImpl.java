@@ -80,74 +80,80 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		boolean isFieldSet = false;
 		for (Token token : tokens) {
 			if (token instanceof ReservedToken) {
-				String s = token.getValue();
+				String reservedToken = token.getValue();
 				String fieldName = lastFieldToken.getField().getFieldName().getSymbolName();
 				boolean setField = true;
 
-				if(isNewField){
-					builder.append(tablename.toLowerCase()).append(".").append(fieldName);
-					isNewField = false;
-					isFieldSet = false;
-				} 
-				if (s.equalsIgnoreCase("And")) {
-					if(!isFieldSet){
-						builder.append(" = :").append(fieldName).append(" ");
+				if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+					if(isNewField){
+						builder.append(tablename.toLowerCase()).append(".").append(fieldName);
+						isNewField = false;
+						isFieldSet = false;
+					} 
+					if (reservedToken.equalsIgnoreCase("And")) {
+						if(!isFieldSet){
+							builder.append(" = :").append(fieldName).append(" ");
+							isFieldSet = true;
+						}
+						builder.append("AND ");
+						setField = false;
+					} else if (reservedToken.equalsIgnoreCase("Or")) {
+						if(!isFieldSet){
+							builder.append(" = :").append(fieldName).append(" ");
+							isFieldSet = true;
+						}					
+						builder.append("OR ");
+						setField = false;
+					} else if (reservedToken.equalsIgnoreCase("Between")) {
+						builder.append(" BETWEEN ").append(":min").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" AND ").append(":max").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" ");
+						setField = false;
 						isFieldSet = true;
-					}
-					builder.append("AND ");
-					setField = false;
-				} else if (s.equalsIgnoreCase("Or")) {
-					if(!isFieldSet){
-						builder.append(" = :").append(fieldName).append(" ");
+					} else if (reservedToken.equalsIgnoreCase("Like")) {
+						builder.append(" LIKE ");					
+						setField = true;
+					} else if (reservedToken.equalsIgnoreCase("IsNotNull")) {
+						builder.append(" is not NULL ");
+						setField = false;
 						isFieldSet = true;
-					}					
-					builder.append("OR ");
-					setField = false;
-				} else if (s.equalsIgnoreCase("Between")) {
-					builder.append(" BETWEEN ").append(":min").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" AND ").append(":max").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" ");
-					setField = false;
-					isFieldSet = true;
-				} else if (s.equalsIgnoreCase("Like")) {
-					builder.append(" LIKE ");					
-					setField = true;
-				} else if (s.equalsIgnoreCase("IsNotNull")) {
-					builder.append(" is not NULL ");
-					setField = false;
-					isFieldSet = true;
-				} else if (s.equalsIgnoreCase("IsNull")) {
-					builder.append(" is NULL ");
-					setField = false;
-					isFieldSet = true;
-				} else if (s.equalsIgnoreCase("Not")) {
-					builder.append(" NOT ");
-				} else if (s.equalsIgnoreCase("NotEquals")) {
-					builder.append(" != ");
-				} else if (s.equalsIgnoreCase("LessThan")) {
-					builder.append(" < ");
-				} else if (s.equalsIgnoreCase("LessThanEquals")) {
-					builder.append(" <= ");
-				} else if (s.equalsIgnoreCase("GreaterThan")) {
-					builder.append(" > ");
-				} else if (s.equalsIgnoreCase("GreaterThanEquals")) {
-					builder.append(" >= ");
-				} else if (s.equalsIgnoreCase("Equals")) {
-					builder.append(" = ");
-				} 
-				if(setField) {
-					builder.append(":").append(fieldName).append(" ");
-					isFieldSet = true;
-				}			
+					} else if (reservedToken.equalsIgnoreCase("IsNull")) {
+						builder.append(" is NULL ");
+						setField = false;
+						isFieldSet = true;
+					} else if (reservedToken.equalsIgnoreCase("Not")) {
+						builder.append(" NOT ");
+					} else if (reservedToken.equalsIgnoreCase("NotEquals")) {
+						builder.append(" != ");
+					} else if (reservedToken.equalsIgnoreCase("LessThan")) {
+						builder.append(" < ");
+					} else if (reservedToken.equalsIgnoreCase("LessThanEquals")) {
+						builder.append(" <= ");
+					} else if (reservedToken.equalsIgnoreCase("GreaterThan")) {
+						builder.append(" > ");
+					} else if (reservedToken.equalsIgnoreCase("GreaterThanEquals")) {
+						builder.append(" >= ");
+					} else if (reservedToken.equalsIgnoreCase("Equals")) {
+						builder.append(" = ");
+					} 
+					if(setField) {
+						builder.append(":").append(fieldName).append(" ");
+						isFieldSet = true;
+					}		
+				}
 			} else {
 				lastFieldToken = (FieldToken) token;
 				isNewField = true;
 			}
 		}
 		if(isNewField){
-			builder.append(tablename.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
+			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+				builder.append(tablename.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
+			}
 			isFieldSet = false;
 		}
-		if(!isFieldSet){
-			builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
+		if(!isFieldSet) {
+			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
+			}
 		}
 		return builder.toString().trim();
 	}
