@@ -57,6 +57,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
 	@AutoPopulate private String identifierField = "id";
+	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
 	@AutoPopulate private String versionField = "version";
 	@AutoPopulate private String persistMethod = "persist";
@@ -202,8 +203,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
 		annotations.add(generatedValueAnnotation);
 		
+		// Compute the column name, as required
+		String columnName = idField.getSymbolName();
+		if (!"".equals(this.identifierColumn)) {
+			// User has specified an alternate column name
+			columnName = this.identifierColumn;
+		}
+		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), idField.getSymbolName()));
+		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 		

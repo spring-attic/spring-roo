@@ -7,6 +7,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -19,6 +20,9 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public abstract class FieldDetails {
+	/** The JPA @Column value */
+	private String column = null;
+	
 	/** The type that will receive the field */
 	private String physicalTypeIdentifier;
 	
@@ -54,6 +58,11 @@ public abstract class FieldDetails {
 		if (nullRequired) {
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Null"), new ArrayList<AnnotationAttributeValue<?>>()));
 		}
+		if (column != null) {
+			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), column));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attrs));
+		}
 	}
 	
 	public boolean isNotNull() {
@@ -72,6 +81,14 @@ public abstract class FieldDetails {
 		if (comment != null) {
 			this.comment = comment;
 		}
+	}
+
+	public String getColumn() {
+		return column;
+	}
+
+	public void setColumn(String column) {
+		this.column = column;
 	}
 
 	public boolean isNullRequired() {
