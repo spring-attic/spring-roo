@@ -230,6 +230,7 @@ public class FieldCommands implements CommandMarker {
 		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
+		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails, permitReservedWords);
 	}
