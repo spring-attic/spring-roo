@@ -24,7 +24,7 @@ field string --class ~.domain.AbstractPerson --fieldName homePage --sizeMax 30
 field string --class ~.domain.AbstractPerson --fieldName email --sizeMax 30 --sizeMin 6
 
 field string --class ~.domain.Visit --fieldName description --sizeMax 255
-field boolean --class ~.domain.Pet --fieldName sendReminders --notNull
+field boolean --class ~.domain.Pet --fieldName sendReminders --notNull --primitive
 field string --class ~.domain.Pet --fieldName name --notNull --sizeMin 1
 field number --class ~.domain.Pet --fieldName weight --type java.lang.Float --notNull --min 0
 field date --class ~.domain.Vet --fieldName employedSince --type java.util.Date --notNull --past
