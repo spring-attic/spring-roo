@@ -18,7 +18,7 @@ field string --class ~.domain.AbstractPerson --fieldName firstName --sizeMin 3 -
 field string --class ~.domain.AbstractPerson --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
 field string --class ~.domain.AbstractPerson --fieldName address --notNull --sizeMax 50 --sizeMin 1
 field string --class ~.domain.AbstractPerson --fieldName city --notNull --sizeMax 30
-field number --class ~.domain.AbstractPerson --fieldName telephone --type java.lang.Integer --notNull --min 3 --max 30
+field number --class ~.domain.AbstractPerson --fieldName telephone --type java.lang.Integer --notNull
 
 field string --class ~.domain.AbstractPerson --fieldName homePage --sizeMax 30
 field string --class ~.domain.AbstractPerson --fieldName email --sizeMax 30 --sizeMin 6
