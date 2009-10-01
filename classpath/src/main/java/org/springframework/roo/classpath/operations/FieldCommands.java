@@ -2,7 +2,9 @@ package org.springframework.roo.classpath.operations;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
@@ -39,10 +41,17 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopmentShell
 public class FieldCommands implements CommandMarker {
 	private ClasspathOperations classpathOperations;
+	private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
 	public FieldCommands(ClasspathOperations classpathOperations) {
 		Assert.notNull(classpathOperations, "Classpath operations required");
 		this.classpathOperations = classpathOperations;
+		this.legalNumericPrimitives.add(Short.class.getName());
+		this.legalNumericPrimitives.add(Byte.class.getName());
+		this.legalNumericPrimitives.add(Integer.class.getName());
+		this.legalNumericPrimitives.add(Long.class.getName());
+		this.legalNumericPrimitives.add(Float.class.getName());
+		this.legalNumericPrimitives.add(Double.class.getName());
 	}
 	
 	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean"})
@@ -103,9 +112,14 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="max", mandatory=false, help="The maximum value") Long max,
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="primitive", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to use a primitive type if possible") boolean primitive,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		NumericField fieldDetails = new NumericField(physicalTypeIdentifier, fieldType, fieldName);
+		JavaType useType = fieldType;
+		if (primitive && this.legalNumericPrimitives.contains(fieldType.getFullyQualifiedTypeName())) {
+			useType = new JavaType(fieldType.getFullyQualifiedTypeName(), 0, DataType.PRIMITIVE, null, null);
+		}
+		NumericField fieldDetails = new NumericField(physicalTypeIdentifier, useType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (decimalMin != null) fieldDetails.setDecimalMin(decimalMin);
@@ -181,9 +195,10 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="assertTrue", mandatory=false, specifiedDefaultValue="true", help="Whether this value must assert true") Boolean assertTrue,
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="primitive", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to use a primitive type") boolean primitive,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		BooleanField fieldDetails = new BooleanField(physicalTypeIdentifier, new JavaType("java.lang.Boolean"), fieldName);
+		BooleanField fieldDetails = new BooleanField(physicalTypeIdentifier, primitive ? JavaType.BOOLEAN_PRIMITIVE : JavaType.BOOLEAN_OBJECT, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (assertFalse != null) fieldDetails.setAssertFalse(assertFalse);
