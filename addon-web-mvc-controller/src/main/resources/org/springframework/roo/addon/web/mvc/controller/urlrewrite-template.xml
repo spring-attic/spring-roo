@@ -4,11 +4,11 @@
 <urlrewrite default-match-type="wildcard">
 	<rule>
 		<from>/resources/**</from>
-		<to>/resources/$1</to>
+		<to last="true">/resources/$1</to>
 	</rule>
 	<rule>
 		<from>/static/**</from>
-		<to>/$1</to>
+		<to last="true">/$1</to>
 	</rule>
 	<rule>
 		<from>/</from>
