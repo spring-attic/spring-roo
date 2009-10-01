@@ -32,12 +32,12 @@ public class MavenCommands implements CommandMarker {
 		this.applicationContextOperations = applicationContextOperations;
 	}
 
-	@CliAvailabilityIndicator("create project")
+	@CliAvailabilityIndicator("project")
 	public boolean isCreateProjectAvailable() {
 		return mavenOperations.isCreateProjectAvailable();
 	}
 	
-	@CliCommand(value="create project", help="Creates a new project")
+	@CliCommand(value="project", help="Creates a new project")
 	public void createProject(@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name") JavaPackage topLevelPackage,
 			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName,
 			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
@@ -55,17 +55,17 @@ public class MavenCommands implements CommandMarker {
 		applicationContextOperations.createMiddleTierApplicationContext();
 	}
 	
-	@CliAvailabilityIndicator({"add dependency", "remove dependency"})
+	@CliAvailabilityIndicator({"dependency add", "dependency remove"})
 	public boolean isDependencyModificationAllowed() {
 		return mavenOperations.isDependencyModificationAllowed();
 	}
 
-	@CliCommand(value="add dependency", help="Adds a new dependency to the Maven project object model (POM)")
+	@CliCommand(value="dependency add", help="Adds a new dependency to the Maven project object model (POM)")
 	public void addDependency(@CliOption(key="groupId", mandatory=true) JavaPackage groupId, @CliOption(key="artifactId", mandatory=true) JavaSymbolName artifactId, @CliOption(key="version", mandatory=true) String version) {
 		mavenOperations.addDependency(groupId, artifactId, version);
 	}
 	
-	@CliCommand(value="remove dependency", help="Removes an existing dependency from the Maven project object model (POM)")
+	@CliCommand(value="dependency remove", help="Removes an existing dependency from the Maven project object model (POM)")
 	public void removeDependency(@CliOption(key="groupId", mandatory=true) JavaPackage groupId, @CliOption(key="artifactId", mandatory=true) JavaSymbolName artifactId, @CliOption(key="version", mandatory=true) String version) {
 		mavenOperations.removeDependency(groupId, artifactId, version);
 	}

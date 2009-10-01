@@ -32,12 +32,12 @@ public class FinderCommands implements CommandMarker {
 		this.finderOperations = finderOperations;
 	}
 
-	@CliAvailabilityIndicator({"list finders for", "install finder"})
+	@CliAvailabilityIndicator({"finder list", "finder add"})
 	public boolean isFinderCommandAvailable() {
 		return finderOperations.isFinderCommandAvailable();
 	}
 	
-	@CliCommand(value="list finders for", help="List all finders for a given target (must be an entity")
+	@CliCommand(value="finder list", help="List all finders for a given target (must be an entity")
 	public SortedSet<String> listFinders(@CliOption(key="class", mandatory=true, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
 			@CliOption(key={"","depth"}, mandatory=false, unspecifiedDefaultValue="1", specifiedDefaultValue="1", help="The depth of attribute combinations to be generated for the finders") Integer depth,
 			@CliOption(key="filter", mandatory=false, help="A comma separated list of strings that must be present in a filter to be included") String filter) {
@@ -67,7 +67,7 @@ public class FinderCommands implements CommandMarker {
 		return result;
 	}
 	
-	@CliCommand(value="install finder", help="Install finders in the given target (must be an entity)")
+	@CliCommand(value="finder add", help="Install finders in the given target (must be an entity)")
 	public void installFinders(
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
 			@CliOption(key={"finderName",""}, mandatory=true, help="The finder string as generated with 'list finders for'") JavaSymbolName finderName){

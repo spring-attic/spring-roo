@@ -32,18 +32,15 @@ public class ControllerCommands implements CommandMarker {
 		this.controllerOperations = controllerOperations;
 	}
 	
-	/**
-	 * @return true if the "new controller" command is available at this moment
-	 */
-	@CliAvailabilityIndicator({"new controller automatic", "new controller manu"})
+	@CliAvailabilityIndicator({"controller automatic", "controller manual"})
 	public boolean isNewControllerAvailable() {
 		return controllerOperations.isNewControllerAvailable();
 	}
 	
-	@CliCommand(value="new controller automatic", help="Create a new automatic Controller (ie where we maintain CRUD automatically)")
+	@CliCommand(value="controller scaffold", help="Create a new scaffold Controller (ie where we maintain CRUD automatically)")
 	public void newController(
 			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
-			@CliOption(key="formBackingObject", mandatory=false, optionContext="update,project", unspecifiedDefaultValue="*", help="The name of the entity object which the controller exposes to the web tier") JavaType entity,
+			@CliOption(key="entity", mandatory=false, optionContext="update,project", unspecifiedDefaultValue="*", help="The name of the entity object which the controller exposes to the web tier") JavaType entity,
 			@CliOption(key="path", mandatory=false, help="The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)") String path,
 			@CliOption(key="disallowedOperations", mandatory=false, help="A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller") String disallowedOperations,
 			@CliOption(key="dateFormat", mandatory=false, help="The date format defaults to the current locale, use this parameter to customize the date format") String dateFormat) {
@@ -70,7 +67,7 @@ public class ControllerCommands implements CommandMarker {
 		controllerOperations.createAutomaticController(controller, entity, disallowedOperationSet, path, dateFormat);
 	}
 
-	@CliCommand(value="new controller manual", help="Create a new manual Controller (ie where you write the methods)")
+	@CliCommand(value="controller class", help="Create a new manual Controller (ie where you write the methods)")
 	public void newController(
 			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
 			@CliOption(key="preferredMapping", mandatory=false, help="Indicates a specific request mapping path for this controller (eg /foo/)") String preferredMapping) {

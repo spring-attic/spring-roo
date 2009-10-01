@@ -29,12 +29,12 @@ public class IntegrationTestCommands implements CommandMarker {
 		this.classpathOperations = classpathOperations;
 	}
 	
-	@CliAvailabilityIndicator({"new mock test"})
+	@CliAvailabilityIndicator({"test mock"})
 	public boolean isAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}
 	
-	@CliCommand(value="new mock test", help="Creates a mock test for the specified entity")
+	@CliCommand(value="test mock", help="Creates a mock test for the specified entity")
 	public void newMockTest(
 			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {

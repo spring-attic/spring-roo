@@ -1,24 +1,24 @@
-create project --topLevelPackage com.springsource.vote
+project --topLevelPackage com.springsource.vote
 
-install jpa --provider HIBERNATE --database HYPERSONIC_PERSISTENT
+persistence setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
-new persistent class jpa --name ~.domain.Choice --testAutomatically
-add field string namingChoice --notNull --sizeMin 1 --sizeMax 30
-add field string description --sizeMax 80
-new controller automatic ~.web.ChoiceController
+entity --name ~.domain.Choice --testAutomatically
+field string namingChoice --notNull --sizeMin 1 --sizeMax 30
+field string description --sizeMax 80
+controller scaffold ~.web.ChoiceController
 
-new persistent class jpa --name Vote --testAutomatically
-add field reference jpa choice --type Choice
-add field string ip --notNull --sizeMin 7 --sizeMax 15 
-add field date jpa registered --type java.util.Date --notNull --past
-new controller automatic ~.web.VoteController
+entity --name Vote --testAutomatically
+field reference choice --type Choice
+field string ip --notNull --sizeMin 7 --sizeMax 15 
+field date registered --type java.util.Date --notNull --past
+controller scaffold ~.web.VoteController
 
-new controller manual ~.web.PublicVoteController
+controller class ~.web.PublicVoteController
 
-configure logging --level DEBUG --package WEB
+logging setup --level DEBUG --package WEB
 
-install security
+security setup
 
-list finders for --class com.springsource.vote.domain.Vote --depth 2 --filter reg,betw,IpEq
+finder list --class com.springsource.vote.domain.Vote --depth 2 --filter reg,betw,IpEq
 
-configure logging --level DEBUG
+logging setup --level DEBUG

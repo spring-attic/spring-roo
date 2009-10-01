@@ -28,14 +28,14 @@ public class PropFileCommands implements CommandMarker {
 		this.propFileOperations = loggingOperations;
 	}
 	
-	@CliCommand(value="property file details", help="Shows the details of a particular properties file")
+	@CliCommand(value="properties list", help="Shows the details of a particular properties file")
 	public SortedSet<String> propertyFileKeys(
 			@CliOption(key="name", mandatory=true) String name, 
 			@CliOption(key="path", mandatory=true) Path path) {
 		return propFileOperations.getPropertyKeys(path, name, true);
 	}
 	
-	@CliCommand(value="property file set", help="Changes a particular properties file property")
+	@CliCommand(value="properties set", help="Changes a particular properties file property")
 	public void databaseSet(
 			@CliOption(key="name", mandatory=true) String name, 
 			@CliOption(key="path", mandatory=true) Path path,
@@ -43,7 +43,7 @@ public class PropFileCommands implements CommandMarker {
 		propFileOperations.changeProperty(path, name, key, value);
 	}
 
-	@CliCommand(value="property file remove", help="Removes a particular properties file property")
+	@CliCommand(value="properties remove", help="Removes a particular properties file property")
 	public void databaseRemove(
 			@CliOption(key="name", mandatory=true) String name, 
 			@CliOption(key="path", mandatory=true) Path path,

@@ -40,7 +40,7 @@ public class BootstrapCommands implements CommandMarker {
 	}
 	
 	
-	@CliCommand(value="polling information", help="Display file system polling information")
+	@CliCommand(value="poll status", help="Display file system polling information")
 	public String pollingInfo() {
 		StringBuilder sb = new StringBuilder("File system polling ");
 		long duration = processManager.getLastPollDuration();
@@ -60,7 +60,7 @@ public class BootstrapCommands implements CommandMarker {
 		return sb.toString();
 	}
 	
-	@CliCommand(value="polling speed", help="Changes the file system polling speed")
+	@CliCommand(value="poll speed", help="Changes the file system polling speed")
 	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true) long minimumDelayBetweenPoll) {
 		processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
 		return pollingInfo();

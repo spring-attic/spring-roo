@@ -39,17 +39,17 @@ public class ClasspathCommands implements CommandMarker {
 		this.classpathOperations = classpathOperations;
 	}
 	
-	@CliAvailabilityIndicator({"generate class file", "new java file", "new test file"})
+	@CliAvailabilityIndicator({"class", "dod", "test integration"})
 	public boolean isProjectAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}
 	
-	@CliAvailabilityIndicator({"new persistent class jpa"})
+	@CliAvailabilityIndicator({"entity"})
 	public boolean isPersistentClassAvailable() {
 		return classpathOperations.isPersistentClassAvailable();
 	}
 	
-	@CliCommand(value="generate class file", help="Creates a new Java source file in any project path")
+	@CliCommand(value="class", help="Creates a new Java source file in any project path")
 	public void createType(
 			@CliOption(key="name", mandatory=true) JavaType name, 
 			@CliOption(key="path", mandatory=true) Path path, 
@@ -74,55 +74,7 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.generateClassFile(details);
 	}
 	
-	@CliCommand(value="new java file", help="Creates a new Java source file in SRC_MAIN_JAVA")
-	public void newJavaFile(
-			@CliOption(key="name", mandatory=true) JavaType name, 
-			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
-			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
-			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
-		
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(name);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
-
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		extendsTypes.add(superclass);
-		
-		int modifier = Modifier.PUBLIC;
-		if (createAbstract) {
-			modifier = modifier |= Modifier.ABSTRACT;
-		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
-		classpathOperations.generateClassFile(details);
-	}
-	
-	@CliCommand(value="new test file", help="Creates a new Java source file in SRC_TEST_JAVA")
-	public void newTestFile(
-			@CliOption(key="name", mandatory=true) JavaType name, 
-			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
-			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
-			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
-		
-		if (!permitReservedWords) {
-			ReservedWords.verifyReservedWordsNotPresent(name);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
-
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		extendsTypes.add(superclass);
-
-		int modifier = Modifier.PUBLIC;
-		if (createAbstract) {
-			modifier = modifier |= Modifier.ABSTRACT;
-		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
-		classpathOperations.generateClassFile(details);
-	}
-
-	@CliCommand(value="new dod", help="Creates a new data on demand for the specified entity")
+	@CliCommand(value="dod", help="Creates a new data on demand for the specified entity")
 	public void newDod(
 			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -134,7 +86,7 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.newDod(entity);
 	}
 
-	@CliCommand(value="new integration test", help="Creates a new integration test for the specified entity")
+	@CliCommand(value="test integration", help="Creates a new integration test for the specified entity")
 	public void newIntegrationTest(
 			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -146,7 +98,7 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.newIntegrationTest(entity);
 	}
 
-	@CliCommand(value="new persistent class jpa", help="Creates a new JPA persistent entity in SRC_MAIN_JAVA")
+	@CliCommand(value="entity", help="Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
 			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,

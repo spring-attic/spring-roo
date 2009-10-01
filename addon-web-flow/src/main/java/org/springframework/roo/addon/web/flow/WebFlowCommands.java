@@ -8,7 +8,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Commands for the 'install web flow' add-on to be used by the ROO shell.
+ * Commands for the 'web flow' add-on to be used by the Roo shell.
  * 
  * @author Stefan Schmidt
  * @since 1.0
@@ -24,15 +24,12 @@ public class WebFlowCommands implements CommandMarker {
 		this.webFlowOperations = webFlowOperations;
 	}
 	
-	/**
-	 * @return true if the "install web flow" command is available at this moment
-	 */
-	@CliAvailabilityIndicator("install web flow")
+	@CliAvailabilityIndicator("web flow")
 	public boolean isInstallWebFlowAvailable() {
 		return webFlowOperations.isInstallWebFlowAvailable();
 	}
 	
-	@CliCommand(value="install web flow", help="Install Spring Web Flow configuration artifacts into your project")
+	@CliCommand(value="web flow", help="Install Spring Web Flow configuration artifacts into your project")
 	public void installWebFlow(
 			@CliOption(key={"flowName"}, mandatory=false, help="The name for your web flow") String flowName) {
 		webFlowOperations.installWebFlow(flowName);

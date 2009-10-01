@@ -24,7 +24,7 @@ public class SeleniumCommands implements CommandMarker {
 		this.seleniumOperations = seleniumOperations;
 	}
 	
-	@CliCommand(value="new selenium test", help="Creates a new Selenium test for a particular controller")
+	@CliCommand(value="selenium test", help="Creates a new Selenium test for a particular controller")
 	public void generateTest(
 			@CliOption(key="controller", mandatory=true) JavaType controller, 
 			@CliOption(key="name", mandatory=false) String name,

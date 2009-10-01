@@ -39,17 +39,13 @@ public class MetadataCommands implements CommandMarker {
 		metadataDependencyRegistry.setTrace(level);
 	}
 	
-	@CliCommand(value="metadata summary", help="Shows statistics on the metadata system")
-	public String metadataSummary() {
-		return metadataService.toString();
-	}
-	
-	@CliCommand(value="metadata timings", help="Shows metadata notification statistics")
+	@CliCommand(value="metadata status", help="Shows metadata statistics")
 	public String metadataTimings() {
 		StringBuilder sb = new StringBuilder();
 		for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
 			sb.append(stat.toString()).append(System.getProperty("line.separator"));
 		}
+		sb.append(metadataService.toString());
 		return sb.toString();
 	}
 	

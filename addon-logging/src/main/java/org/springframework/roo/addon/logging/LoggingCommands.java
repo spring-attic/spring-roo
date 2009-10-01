@@ -28,15 +28,12 @@ public class LoggingCommands implements CommandMarker {
 		this.loggingOperations = loggingOperations;
 	}
 	
-	/**
-	 * @return true if the "configure logging" command is available at this moment
-	 */
-	@CliAvailabilityIndicator("configure logging")
+	@CliAvailabilityIndicator("logging setup")
 	public boolean isConfigureLoggingAvailable() {
 		return loggingOperations.isConfigureLoggingAvailable();
 	}
 	
-	@CliCommand(value="configure logging", help="Configure logging in your project")
+	@CliCommand(value="logging setup", help="Configure logging in your project")
 	public void configureLogging(@CliOption(key={"","level"}, mandatory=true, help="The log level to configure") LogLevel logLevel,
 			@CliOption(key="package", mandatory=false, help="The package to append the logging level to (all by default)") LoggerPackage loggerAppender) {
 		

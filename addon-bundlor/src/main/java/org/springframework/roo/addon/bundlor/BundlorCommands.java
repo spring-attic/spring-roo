@@ -26,12 +26,12 @@ public class BundlorCommands implements CommandMarker {
 	
 	// install bundlor
 	
-	@CliAvailabilityIndicator("install bundlor")
+	@CliAvailabilityIndicator("bundlor setup")
 	public boolean isInstallBundlorAvailable() {
 		return bundlorOperations.isInstallBundlorAvailable();	 
 	}
 	
-	@CliCommand(value="install bundlor", 
+	@CliCommand(value="bundlor setup", 
 			   help="automatically create and manage an OSGi manifest for this project using Bundlor")
 	public void installBundlor(
 		@CliOption(key={"bundleName"},mandatory=false,help="Human readable name for the bundle") String bundleName)

@@ -11,7 +11,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Commands for the 'install email' add-on to be used by the ROO shell.
+ * Commands for the 'email' add-on to be used by the Roo shell.
  * 
  * @author Stefan Schmidt
  * @since 1.0
@@ -29,15 +29,12 @@ public class MailCommands implements CommandMarker {
 		this.mailOperations = mailOperations;
 	}
 	
-	/**
-	 * @return true if the "install email" command is available at this moment
-	 */
-	@CliAvailabilityIndicator("install email provider")
+	@CliAvailabilityIndicator("email sender setup")
 	public boolean isInstallEmailAvailable() {
 		return mailOperations.isInstallEmailAvailable();
 	}
 	
-	@CliCommand(value="install email provider", help="Install a Email provider in your project")
+	@CliCommand(value="email sender setup", help="Install a Spring JavaMailSender in your project")
 	public void installEmail(
 			@CliOption(key={"hostServer"}, mandatory=true, help="The host server") String hostServer,
 			@CliOption(key={"protocol"}, mandatory=false, help="The protocol used by mail server") MailProtocol protocol,
@@ -48,22 +45,19 @@ public class MailCommands implements CommandMarker {
 		mailOperations.installEmail(hostServer, protocol, port, encoding, username, password);
 	}
 	
-	/**
-	 * @return true if the "add field mail template" command is available at this moment
-	 */
-	@CliAvailabilityIndicator({"add field email template","configure email template"})
+	@CliAvailabilityIndicator({"field email template","email template setup"})
 	public boolean isInsertJmsAvailable() {
 		return mailOperations.isManageEmailAvailable();
 	}
 	
-	@CliCommand(value="add field email template", help="insert a MailTemplate field into an existing type")
+	@CliCommand(value="field email template", help="Inserts a MailTemplate field into an existing type")
 	public void injectEmailTemplate(
 			@CliOption(key={"","fieldName"}, mandatory=false, specifiedDefaultValue="mailTemplate", unspecifiedDefaultValue="mailTemplate", help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName) {
 		mailOperations.injectEmailTemplate(typeName, fieldName);
 	}
 	
-	@CliCommand(value="configure email template", help="configure a template for a SimpleMailMessage")
+	@CliCommand(value="email template setup", help="Configures a template for a SimpleMailMessage")
 	public void configureEmailTemplate(
 			@CliOption(key={"from"}, mandatory=false, help="The 'from' email (optional)") String from,
 			@CliOption(key={"subject"}, mandatory=false, help="The message subject (obtional)") String subject) {

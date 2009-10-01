@@ -58,12 +58,12 @@ public class JpaOperations {
 		this.projectOperations = projectOperations;
 	}
 	
-	public boolean isInstallJpaAvailable() {
+	public boolean isJpaInstallationPossible() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && 
 			!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 	
-	public boolean isUpdateJpaAvailable() {
+	public boolean isJpaInstalled() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && 
 			fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}

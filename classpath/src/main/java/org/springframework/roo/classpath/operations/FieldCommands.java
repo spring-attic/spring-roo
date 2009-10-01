@@ -45,18 +45,18 @@ public class FieldCommands implements CommandMarker {
 		this.classpathOperations = classpathOperations;
 	}
 	
-	@CliAvailabilityIndicator({"insert field", "add field number", "add field string", "add field date jdk", "add field boolean"})
+	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean"})
 	public boolean isJdkFieldManagementAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}
 
-	@CliAvailabilityIndicator({"add field date jpa", "add field reference jpa", "add field set jpa"})
+	@CliAvailabilityIndicator({"field reference", "field set"})
 	public boolean isJpaFieldManagementAvailable() {
 		// in a separate method in case we decide to check for JPA registration in the future
 		return classpathOperations.isProjectAvailable();
 	}
 
-	@CliCommand(value="insert field", help="Inserts a private field into the specified file")
+	@CliCommand(value="field other", help="Inserts a private field into the specified file")
 	public void insertField(
 			@CliOption(key="class", mandatory=true, help="The class to receive the field (class must exist)") JavaType name, 
 			@CliOption(key="path", mandatory=true, help="The path where the class can be found") Path path, 
@@ -90,7 +90,7 @@ public class FieldCommands implements CommandMarker {
 		classpathOperations.addField(fieldMetadata);
 	}
 	
-	@CliCommand(value="add field number", help="Adds a private numeric field to an existing Java source file")
+	@CliCommand(value="field number", help="Adds a private numeric field to an existing Java source file")
 	public void addFieldNumber(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, optionContext="java-number", help="The Java type of the entity") JavaType fieldType,
@@ -117,7 +117,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords);
 	}
 
-	@CliCommand(value="add field string", help="Adds a private string field to an existing Java source file")
+	@CliCommand(value="field string", help="Adds a private string field to an existing Java source file")
 	public void addFieldString(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
@@ -145,7 +145,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords);
 	}
 
-	@CliCommand(value="add field date jpa", help="Adds a private JPA-specific date field to an existing Java source file")
+	@CliCommand(value="field date", help="Adds a private date field to an existing Java source file")
 	public void addFieldDateJpa(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, optionContext="java-date", help="The Java type of the entity") JavaType fieldType,
@@ -171,30 +171,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords);
 	}
 
-	@CliCommand(value="add field date jdk", help="Adds a private date field to an existing Java source file")
-	public void addFieldDateJdk(
-			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
-			@CliOption(key="type", mandatory=true, optionContext="java-date", help="The Java type of the entity") JavaType fieldType,
-			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
-			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
-			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
-			@CliOption(key="future", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the future") Boolean future,
-			@CliOption(key="past", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the past") Boolean past,
-			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
-			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
-			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
-		if (notNull != null) fieldDetails.setNotNull(notNull);
-		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
-		if (future != null) fieldDetails.setFuture(future);
-		if (past != null) fieldDetails.setPast(past);
-		if (column != null) fieldDetails.setColumn(column);
-		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
-	}
-
-	@CliCommand(value="add field boolean", help="Adds a private boolean field to an existing Java source file")
+	@CliCommand(value="field boolean", help="Adds a private boolean field to an existing Java source file")
 	public void addFieldBoolean(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
@@ -216,7 +193,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords);
 	}
 
-	@CliCommand(value="add field reference jpa", help="Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)")
+	@CliCommand(value="field reference", help="Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)")
 	public void addFieldReferenceJpa(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, optionContext="project", help="The Java type of the entity to reference") JavaType fieldType,
@@ -235,7 +212,7 @@ public class FieldCommands implements CommandMarker {
 		insertField(fieldDetails, permitReservedWords);
 	}
 
-	@CliCommand(value="add field set jpa", help="Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)")
+	@CliCommand(value="field set", help="Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)")
 	public void addFieldSetJpa(
 			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
 			@CliOption(key="element", mandatory=true, help="The entity which will be contained within the Set") JavaType element,

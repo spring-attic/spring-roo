@@ -23,12 +23,9 @@ public class BackupCommands implements CommandMarker {
 		this.backupOperations = backupOperations;
 	}
 	
-	/**
-	 * @return true if the "install email" command is available at this moment
-	 */
 	@CliAvailabilityIndicator("backup")
 	public boolean isBackupCommandAvailable() {		
-		return true;//backupOperations.isBackupAvailable();
+		return backupOperations.isBackupAvailable();
 	}
 	
 	@CliCommand(value="backup", help="Backup your project to a zip file")
