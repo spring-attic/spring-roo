@@ -1,11 +1,9 @@
 package org.springframework.roo.addon.mvc.jsp;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -681,14 +679,20 @@ public class JspDocumentHelper {
 								divElement.appendChild(JspUtils.getInputBox(document, field.getFieldName(), maxValue));
 								divElement.appendChild(document.createElement("br"));
 								divElement.appendChild(JspUtils.getErrorsElement(document, field.getFieldName()));
-								String fieldCode = "";
-								if(field.getFieldType().equals(new JavaType(Integer.class.getName()))) {
-									fieldCode = "field.valid.integer";
+								String fieldCode = "field.invalid";
+								if(field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())) {
+									fieldCode = "field.invalid.integer";
 								} else if (field.getFieldName().getSymbolName().contains("email")) {
-									fieldCode = "field.valid.email";
-								} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().equals(new JavaType(Float.class.getName()))) {
-									fieldCode = "field.valid.number";
+									fieldCode = "field.invalid.email";
+								} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName())
+										|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
+									fieldCode = "field.invalid.number";
 								}
+								Element message = document.createElement("spring:message");
+								message.setAttribute("code", fieldCode);
+								if ("field.invalid".equals(fieldCode))
+									message.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
+								message.setAttribute("var", "field_invalid");
 								Element invalidMessage = document.createElement("spring:message");
 								invalidMessage.setAttribute("code", "entity.find");
 								invalidMessage.setAttribute("arguments", fieldCode);
@@ -724,19 +728,27 @@ public class JspDocumentHelper {
 					divElement.appendChild(JspUtils.getInputBox(document, field.getFieldName(), 30));
 					divElement.appendChild(document.createElement("br"));
 					divElement.appendChild(JspUtils.getErrorsElement(document, field.getFieldName()));
-					String fieldCode = "";
-					if(field.getFieldType().equals(new JavaType(Integer.class.getName()))) {
-						fieldCode = "field.valid.integer";
+					String fieldCode = "field.invalid";
+					if(field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())) {
+						fieldCode = "field.invalid.integer";
 					} else if (field.getFieldName().getSymbolName().contains("email")) {
-						fieldCode = "field.valid.email";
-					} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().equals(new JavaType(Float.class.getName()))) {
-						fieldCode = "field.valid.number";
+						fieldCode = "field.invalid.email";
+					} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName())
+							|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
+						fieldCode = "field.invalid.number";
 					}
 					Element message = document.createElement("spring:message");
-					message.setAttribute("code", "entity.find");
-					message.setAttribute("arguments", fieldCode);
+					message.setAttribute("code", fieldCode);
+					if ("field.invalid".equals(fieldCode))
+						message.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
 					message.setAttribute("var", "field_invalid");
 					divElement.appendChild(message);
+					Element validMessage = document.createElement("spring:message");
+					validMessage.setAttribute("code", "field.simple.validation");
+					validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
+					validMessage.setAttribute("argumentSeparator", ",");
+					validMessage.setAttribute("var", "field_validation");
+					divElement.appendChild(validMessage);
 					divElement.appendChild(DojoUtils.getValidationDojo(document, field));
 					
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
@@ -744,7 +756,7 @@ public class JspDocumentHelper {
 									fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 								divElement.appendChild(DojoUtils.getDateDojo(document, field, dateFormatLocalized));
 					}
-					
+
 					formElement.appendChild(divElement);
 					formElement.appendChild(document.createElement("br"));				
 				}
