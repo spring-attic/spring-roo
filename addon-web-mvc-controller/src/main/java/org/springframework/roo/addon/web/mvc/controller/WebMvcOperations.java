@@ -138,7 +138,7 @@ public class WebMvcOperations {
 			return;
 		}
 		
-		Element httpMethodFilter = XmlUtils.findRequiredElement("/web-app/filter-mapping[filter-name='httpMethodFilter']", root);
+		Element firstFilterMapping = XmlUtils.findRequiredElement("/web-app/filter-mapping", root);
 
 		Element filter = webXml.createElement("filter");
 		Element filterName = webXml.createElement("filter-name");
@@ -147,7 +147,7 @@ public class WebMvcOperations {
 		Element filterClass = webXml.createElement("filter-class");
 		filterClass.setTextContent("org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter");
 		filter.appendChild(filterClass);
-		root.insertBefore(filter, httpMethodFilter);
+		root.insertBefore(filter, firstFilterMapping.getPreviousSibling());
 		
 		Element filterMapping = webXml.createElement("filter-mapping");
 		Element filterName2 = webXml.createElement("filter-name");
@@ -156,7 +156,7 @@ public class WebMvcOperations {
 		Element urlMapping = webXml.createElement("url-pattern");
 		urlMapping.setTextContent("/*");
 		filterMapping.appendChild(urlMapping);
-		root.insertBefore(filterMapping, httpMethodFilter);
+		root.insertBefore(filterMapping, firstFilterMapping);
 		
 		XmlUtils.writeXml(webXmlMutableFile.getOutputStream(), webXml);
 	}
