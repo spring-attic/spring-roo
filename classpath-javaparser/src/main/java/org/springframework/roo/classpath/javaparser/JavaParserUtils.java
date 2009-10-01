@@ -559,7 +559,12 @@ public class JavaParserUtils  {
 		Assert.notNull(compilationUnitPackage, "Compilation unit package is required");
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(typeToImport, "Java type to import is required");
-	
+		
+		// If it's a primitive, it's really easy
+		if (typeToImport.isPrimitive()) {
+			return new NameExpr(typeToImport.getNameIncludingTypeParameters());
+		}
+		
 		// Handle if the type doesn't have a package at all
 		if (typeToImport.isDefaultPackage()) {
 			return new NameExpr(typeToImport.getSimpleTypeName());
