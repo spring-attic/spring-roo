@@ -126,7 +126,10 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
 
 			// Determine the type name, adding type parameters if possible
-			this.name = JavaParserUtils.getJavaType(compilationUnitPackage, imports, this.clazz);
+			JavaType newName = JavaParserUtils.getJavaType(compilationUnitPackage, imports, this.clazz);
+			
+			// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
+			this.name = new JavaType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
 			
 			if (this.clazz.isInterface()) {
 				physicalTypeCategory = PhysicalTypeCategory.INTERFACE;
