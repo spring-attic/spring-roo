@@ -113,6 +113,11 @@ public class ClasspathCommands implements CommandMarker {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
 		
+		if (testAutomatically && createAbstract) {
+			// we can't test an abstract class
+			throw new IllegalArgumentException("Automatic tests cannot be created for an abstract entity; remove the --testAutomatically or --abstract option");
+		}
+		
 		// Reject attempts to name the entity "Test", due to possible clashes with data on demand (see ROO-50)
 		if (name.getSimpleTypeName().startsWith("Test") || name.getSimpleTypeName().endsWith("TestCase") || name.getSimpleTypeName().endsWith("Test")) {
 			throw new IllegalArgumentException("Entity name rejected as conflicts with test execution defaults; please remove 'Test' and/or 'TestCase'");
