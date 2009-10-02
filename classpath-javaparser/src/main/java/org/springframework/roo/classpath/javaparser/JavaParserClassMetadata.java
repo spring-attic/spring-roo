@@ -71,6 +71,13 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 			}
 		} catch (Throwable ex) {
 			// non-fatal, it just means the type could not be parsed
+			
+			if (ex.getMessage() != null && ex.getMessage().startsWith(JavaParserMutableClassOrInterfaceTypeDetails.UNSUPPORTED_MESSAGE_PREFIX)) {
+				// we don't want the limitation of the metadata parsing subsystem to confuse the user into thinking there is a problem with their source code
+				valid = false;
+				return;
+			}
+			
 			ProcessManager pm = ActiveProcessManager.getActiveProcessManager();
 			if (pm != null && pm.isDevelopmentMode()) {
 				ex.printStackTrace();

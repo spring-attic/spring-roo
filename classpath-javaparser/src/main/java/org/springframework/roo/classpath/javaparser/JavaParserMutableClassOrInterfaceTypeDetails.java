@@ -91,6 +91,8 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private JavaPackage compilationUnitPackage;
 	private Set<JavaSymbolName> typeParameterNames;
 	
+	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
+	
 	private int modifier = 0;
 	
 	public JavaParserMutableClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, FileManager fileManager, String declaredByMetadataId, String fileIdentifier, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
@@ -143,7 +145,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			// NB: JavaParser does not parse the actual enum constants, so this is not available
 		}
 		
-		Assert.notNull(physicalTypeCategory, "Only enum, class and interface files are supported");
+		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
 		
 		// Verify the package declaration appears to be correct
 		Assert.isTrue(compilationUnitPackage.equals(name.getPackage()), "Compilation unit package '" + compilationUnitPackage + "' unexpected for type '" + name.getPackage() + "'");
