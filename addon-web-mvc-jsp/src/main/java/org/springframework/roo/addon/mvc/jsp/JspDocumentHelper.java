@@ -744,6 +744,10 @@ public class JspDocumentHelper {
 						message.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
 					message.setAttribute("var", "field_invalid");
 					divElement.appendChild(message);
+					Element required = document.createElement("spring:message");
+					required.setAttribute("code", "field.required");
+					required.setAttribute("var", "required");
+					divElement.appendChild(required);
 					Element validMessage = document.createElement("spring:message");
 					validMessage.setAttribute("code", "field.simple.validation");
 					validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
