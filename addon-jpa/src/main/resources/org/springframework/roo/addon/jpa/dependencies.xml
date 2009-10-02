@@ -29,24 +29,19 @@
 			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
 		</provider>
 		<provider id="OPENJPA">
+			<!-- using maven central for now -->
+			<dependency org="org.apache.openjpa" name="openjpa" rev="1.2.1" />
+		<!-- 
+			EBR does not include the latest version yet: https://issuetracker.springsource.com/browse/EBR-229
 			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" />
 			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
-		<!-- 
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.lib.java5" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.jdbc.java5" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.java5" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.jdbc" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.lib" rev="1.0.2" />
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa.persistence.jdbc" rev="1.0.2" />
 		 -->
 		</provider>
-		<provider id="ECLIPSELINK">
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.antlr" rev="1.0.1" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.asm" rev="1.0.1" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" />
+		<provider id="ECLIPSELINK">	 
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.1.0" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.antlr" rev="1.1.0" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.asm" rev="1.1.0" />
+			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.1.0" />
 		</provider>
 	</ormProviders>
 	<persistence>
