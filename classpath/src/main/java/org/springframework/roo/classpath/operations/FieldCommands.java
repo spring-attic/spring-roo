@@ -86,6 +86,9 @@ public class FieldCommands implements CommandMarker {
 	private void insertField(FieldDetails fieldDetails, boolean permitReservedWords) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
+			if (fieldDetails.getColumn() != null) {
+				ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getColumn());
+			}
 		}
 		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();

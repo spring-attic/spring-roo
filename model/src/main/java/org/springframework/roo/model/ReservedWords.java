@@ -34,6 +34,11 @@ public abstract class ReservedWords {
 		verifyReservedSqlKeywordsNotPresent(javaSymbolName);
 	}
 	
+	public static void verifyReservedWordsNotPresent(String string) {
+		verifyReservedJavaKeywordsNotPresent(string);
+		verifyReservedSqlKeywordsNotPresent(string);
+	}
+
 	public static void verifyReservedJavaKeywordsNotPresent(JavaType javaType) {
 		Assert.notNull(javaType, "Java type required");
 		for (String s : javaType.getFullyQualifiedTypeName().split("\\.")) {
@@ -64,4 +69,17 @@ public abstract class ReservedWords {
 		}
 	}
 
+	public static void verifyReservedJavaKeywordsNotPresent(String string) {
+		Assert.notNull(string, "String required");
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(string.toLowerCase())) {
+			throw new IllegalStateException("Reserved Java keyword '" + string.toLowerCase() + "' is not permitted");
+		}
+	}
+
+	public static void verifyReservedSqlKeywordsNotPresent(String string) {
+		Assert.notNull(string, "String required");
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(string.toLowerCase())) {
+			throw new IllegalStateException("Reserved SQL keyword '" + string.toLowerCase() + "' is not permitted");
+		}
+	}
 }
