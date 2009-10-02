@@ -58,7 +58,7 @@ public class JavaTypeConverter implements Converter {
 		if ("*".equals(value)) {
 			JavaType result = lastUsed.getJavaType();
 			if (result == null) {
-				throw new IllegalStateException("Cannot determine the JavaType to use, as there is no record of which JavaType was last used");
+				throw new IllegalStateException("Unknown type; please indicate the type as a command option (ie --xxxx)");
 			}
 			return result;
 		}

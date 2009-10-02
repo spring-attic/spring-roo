@@ -196,6 +196,9 @@ public final class SimpleParser {
 				arguments.add(result);
 			} catch (RuntimeException ex) {
 				logger.warning("Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
+				if (ex.getMessage() != null && ex.getMessage().length() > 0) {
+					logger.warning(ex.getMessage());
+				}
 				return null;
 			} finally {
 				CliOptionContext.resetOptionContext();
