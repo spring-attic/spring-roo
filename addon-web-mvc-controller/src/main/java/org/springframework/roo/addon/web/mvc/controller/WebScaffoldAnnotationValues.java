@@ -30,7 +30,7 @@ public class WebScaffoldAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate boolean create = true;
 	@AutoPopulate boolean update = true;
 	@AutoPopulate boolean exposeFinders = true;
-	@AutoPopulate String dateFormat = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault())).toPattern(); 
+	@AutoPopulate String dateFormat = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).toPattern(); 
 
 	private SimpleDateFormat simpleDateFormat;
 	

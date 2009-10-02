@@ -117,7 +117,7 @@ public @interface RooWebScaffold {
 	/**
 	 * Allows the configuration of a custom date format used by this controller.
 	 * 
-	 * @return returns the date format. If not set this will default to ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, Locale.getDefault())).toPattern(); 
+	 * @return returns the date format. If not set this will default to ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).toPattern(); 
 	 */
 	String dateFormat() default "";
 }
