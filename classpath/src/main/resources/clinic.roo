@@ -46,12 +46,14 @@ finder add --class ~.domain.Visit --finderName findVisitsByVisitDateBetween
 finder add --class ~.domain.Visit --finderName findVisitsByDescriptionLike
 
 controller scaffold --name ~.web.PetTypeController --entity ~.reference.PetType
+controller scaffold --name ~.web.SpecialtyController --entity ~.reference.Specialty
 controller scaffold --name ~.web.OwnerController --entity ~.domain.Owner
 controller scaffold --name ~.web.PetController --entity ~.domain.Pet 
 controller scaffold --name ~.web.VetController --entity ~.domain.Vet
 controller scaffold --name ~.web.VisitController --entity ~.domain.Visit
 
 selenium test --controller ~.web.PetTypeController
+selenium test --controller ~.web.SpecialtyController
 selenium test --controller ~.web.OwnerController
 selenium test --controller ~.web.PetController
 selenium test --controller ~.web.VetController
