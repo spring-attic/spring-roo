@@ -8,6 +8,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -35,8 +36,11 @@ public class SetField extends CollectionField {
 	/** Whether the JSR 220 @OneToMany.mappedBy annotation attribute will be added */
 	private JavaSymbolName mappedBy = null;
 	
-	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName) {
+	private Cardinality cardinality = null;
+	
+	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName, Cardinality cardinality) {
 		super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
+		this.cardinality = cardinality;
 	}
 
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
@@ -46,7 +50,11 @@ public class SetField extends CollectionField {
 		if (mappedBy != null) {
 			attrs.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
 		}
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attrs));
+		if (cardinality.equals(Cardinality.ONE_TO_MANY)) {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attrs));
+		} else {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attrs));
+		}
 	}
 
 	public JavaType getInitializer() {

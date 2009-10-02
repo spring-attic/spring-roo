@@ -28,6 +28,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
@@ -43,8 +44,10 @@ public class FieldCommands implements CommandMarker {
 	private ClasspathOperations classpathOperations;
 	private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
-	public FieldCommands(ClasspathOperations classpathOperations) {
+	public FieldCommands(StaticFieldConverter staticFieldConverter, ClasspathOperations classpathOperations) {
+		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(classpathOperations, "Classpath operations required");
+		staticFieldConverter.add(Cardinality.class);
 		this.classpathOperations = classpathOperations;
 		this.legalNumericPrimitives.add(Short.class.getName());
 		this.legalNumericPrimitives.add(Byte.class.getName());
@@ -240,12 +243,13 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="sizeMin", mandatory=false, help="The minimum string length") Integer sizeMin,
 			@CliOption(key="sizeMax", mandatory=false, help="The maximum string length") Integer sizeMax,
+			@CliOption(key="cardinality", mandatory=false, unspecifiedDefaultValue="MANY_TO_MANY", specifiedDefaultValue="MANY_TO_MANY", help="The relationship cardinarily at a JPA level") Cardinality cardinality,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(element);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);

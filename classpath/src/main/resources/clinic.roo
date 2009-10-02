@@ -10,7 +10,6 @@ entity --name ~.domain.Visit --testAutomatically
 entity --name ~.domain.AbstractPerson --abstract
 entity --name ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
 entity --name ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
-entity --name ~.domain.VetSpecialty --testAutomatically
 
 field string --class ~.reference.PetType --fieldName type --notNull --sizeMax 30
 field string --class ~.reference.Specialty --fieldName name --notNull --sizeMax 30
@@ -28,17 +27,14 @@ field boolean --class ~.domain.Pet --fieldName sendReminders --notNull --primiti
 field string --class ~.domain.Pet --fieldName name --notNull --sizeMin 1
 field number --class ~.domain.Pet --fieldName weight --type java.lang.Float --notNull --min 0
 field date --class ~.domain.Vet --fieldName employedSince --type java.util.Date --notNull --past
-field date --class ~.domain.VetSpecialty --fieldName registered --type java.util.Date --notNull --past
 field date --class ~.domain.Visit --fieldName visitDate --type java.util.Date --notNull --past
 
 field reference --class ~.domain.Visit --fieldName pet --type ~.domain.Pet --notNull
 field reference --class ~.domain.Visit --fieldName vet --type ~.domain.Vet
 field reference --class ~.domain.Pet --fieldName owner --type ~.domain.Owner
 field reference --class ~.domain.Pet --fieldName type --type ~.reference.PetType
-field reference --class ~.domain.VetSpecialty --fieldName specialty --type ~.reference.Specialty
-field reference --class ~.domain.VetSpecialty --fieldName vet --type ~.domain.Vet
 field set --class ~.domain.Owner --fieldName pets --element ~.domain.Pet --mappedBy owner --notNull false
-field set --class ~.domain.Vet --fieldName specialties --element ~.domain.VetSpecialty --mappedBy vet --notNull false
+field set --class ~.domain.Vet --fieldName specialties --element ~.reference.Specialty --cardinality MANY_TO_MANY --notNull false
 field date --class ~.domain.AbstractPerson --fieldName birthDay --type java.util.Date --notNull
 
 finder add --class ~.domain.Pet --finderName findPetsByNameAndWeight
