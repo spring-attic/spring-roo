@@ -368,6 +368,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("junit.framework.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to provide a new transient entity\", obj);");
 			bodyBuilder.appendFormalLine("junit.framework.Assert.assertNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
 			bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("junit.framework.Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
 
 			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, bodyBuilder.getOutput());
