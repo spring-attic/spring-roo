@@ -33,7 +33,7 @@ field reference --class ~.domain.Visit --fieldName pet --type ~.domain.Pet --not
 field reference --class ~.domain.Visit --fieldName vet --type ~.domain.Vet
 field reference --class ~.domain.Pet --fieldName owner --type ~.domain.Owner
 field reference --class ~.domain.Pet --fieldName type --type ~.reference.PetType
-field set --class ~.domain.Owner --fieldName pets --element ~.domain.Pet --mappedBy owner --notNull false
+field set --class ~.domain.Owner --fieldName pets --element ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
 field set --class ~.domain.Vet --fieldName specialties --element ~.reference.Specialty --cardinality MANY_TO_MANY --notNull false
 field date --class ~.domain.AbstractPerson --fieldName birthDay --type java.util.Date --notNull
 
