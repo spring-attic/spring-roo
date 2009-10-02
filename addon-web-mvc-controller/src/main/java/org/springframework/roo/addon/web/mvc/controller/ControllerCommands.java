@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -32,9 +33,14 @@ public class ControllerCommands implements CommandMarker {
 		this.controllerOperations = controllerOperations;
 	}
 	
-	@CliAvailabilityIndicator({"controller automatic", "controller manual"})
+	@CliAvailabilityIndicator({"controller automatic", "controller manual", "controller all"})
 	public boolean isNewControllerAvailable() {
 		return controllerOperations.isNewControllerAvailable();
+	}
+
+	@CliCommand(value="controller all", help="Scaffold a controller for all entities without an existing controller")
+	public void generateAll(@CliOption(key="package", mandatory=true, help="The package in which new controllers will be placed") JavaPackage javaPackage) {
+		controllerOperations.generateAll(javaPackage);
 	}
 	
 	@CliCommand(value="controller scaffold", help="Create a new scaffold Controller (ie where we maintain CRUD automatically)")

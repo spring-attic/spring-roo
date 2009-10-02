@@ -1,16 +1,21 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.logging.Logger;
 
+import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
@@ -23,11 +28,17 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -49,17 +60,79 @@ public class ControllerOperations {
 	private MetadataService metadataService;
 	private ClasspathOperations classpathOperations;
 	private WebMvcOperations webMvcOperations;
+	private FileManager fileManager;
+	private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	private ItdMetadataScanner itdMetadataScanner;
+	private MetadataDependencyRegistry dependencyRegistry;
 	
-	public ControllerOperations(PathResolver pathResolver, MetadataService metadataService, ClasspathOperations classpathOperations, WebMvcOperations webMvcOperations) {		
+	public ControllerOperations(PathResolver pathResolver, MetadataService metadataService, ClasspathOperations classpathOperations, WebMvcOperations webMvcOperations, FileManager fileManager, PhysicalTypeMetadataProvider physicalTypeMetadataProvider, ItdMetadataScanner itdMetadataScanner, MetadataDependencyRegistry dependencyRegistry) {		
 		Assert.notNull(pathResolver, "Path resolver required");
 		Assert.notNull(metadataService, "Metadata service required");		
 		Assert.notNull(classpathOperations, "ClassPath operations required");	
 		Assert.notNull(webMvcOperations, "Web XML operations required");
+		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
+		Assert.notNull(itdMetadataScanner, "ITD metadata scanner required");
+		Assert.notNull(dependencyRegistry, "Dependency registry required");
 		
 		this.pathResolver = pathResolver;
 		this.metadataService = metadataService;		
 		this.classpathOperations = classpathOperations;
 		this.webMvcOperations = webMvcOperations;
+		this.fileManager = fileManager;
+		this.physicalTypeMetadataProvider = physicalTypeMetadataProvider;
+		this.itdMetadataScanner = itdMetadataScanner;
+		this.dependencyRegistry = dependencyRegistry;
+	}
+	
+	public void generateAll(JavaPackage javaPackage) {
+		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
+		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
+		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
+
+		each_file:
+		for (FileDetails file : entries) {
+			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
+			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
+			JavaType javaType = new JavaType(fullPath);
+			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
+			if (id != null) {
+				PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
+				if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+					continue;
+				}
+				
+				ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
+				if (Modifier.isAbstract(cid.getModifier())) {
+					continue;
+				}
+				
+				Set<MetadataItem> metadata = itdMetadataScanner.getMetadata(id);
+				for (MetadataItem item : metadata) {
+					if (item instanceof EntityMetadata) {
+						EntityMetadata em = (EntityMetadata) item;
+						Set<String> downstream = dependencyRegistry.getDownstream(em.getId());
+						// check to see if this entity metadata has a web scaffold metadata listening to it
+						for (String ds : downstream) {
+							if (WebScaffoldMetadata.isValid(ds)) {
+								// there is already a controller for this entity
+								continue each_file;
+							}
+						}
+						// to get here, there is no listening controller, so add on
+						JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
+						JavaType entity = javaType;
+						Set<String> disallowedOperations = new HashSet<String>();
+						String path = entity.getSimpleTypeName().toLowerCase();
+						String dateFormat = null;
+						createAutomaticController(controller, entity, disallowedOperations, path, dateFormat);
+						break;
+					}
+				}
+				
+			}
+		}
+		return;
 	}
 	
 	public boolean isNewControllerAvailable() {
