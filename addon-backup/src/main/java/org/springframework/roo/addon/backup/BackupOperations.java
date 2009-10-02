@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -23,6 +22,14 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Operations for the 'backup' add-on.
+ * 
+ * @author Stefan Schmidt
+ * @author Ben Alex
+ * @since 1.0
+ *
+ */
 @ScopeDevelopment
 public class BackupOperations {
 
