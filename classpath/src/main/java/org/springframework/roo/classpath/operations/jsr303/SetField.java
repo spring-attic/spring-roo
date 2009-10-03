@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMe
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.Cardinality;
+import org.springframework.roo.classpath.operations.Fetch;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -37,16 +38,33 @@ public class SetField extends CollectionField {
 	private JavaSymbolName mappedBy = null;
 	
 	private Cardinality cardinality = null;
+
+	private Fetch fetch = null;
 	
 	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName, Cardinality cardinality) {
 		super(physicalTypeIdentifier, fieldType, fieldName, genericParameterTypeName);
 		this.cardinality = cardinality;
 	}
 
+	public Fetch getFetch() {
+		return fetch;
+	}
+
+	public void setFetch(Fetch fetch) {
+		this.fetch = fetch;
+	}
+
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 		attrs.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
+		if (fetch != null) {
+			JavaSymbolName value = new JavaSymbolName("EAGER");
+			if (fetch.equals(Fetch.LAZY)) {
+				value = new JavaSymbolName("LAZY");
+			}
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
+		}
 		if (mappedBy != null) {
 			attrs.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
 		}

@@ -48,6 +48,7 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(classpathOperations, "Classpath operations required");
 		staticFieldConverter.add(Cardinality.class);
+		staticFieldConverter.add(Fetch.class);
 		this.classpathOperations = classpathOperations;
 		this.legalNumericPrimitives.add(Short.class.getName());
 		this.legalNumericPrimitives.add(Byte.class.getName());
@@ -231,6 +232,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="joinColumnName", mandatory=false, help="The JPA Join Column name") String joinColumnName,
+			@CliOption(key="fetch", mandatory=false, help="The fetch semantics at a JPA level") Fetch fetch,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -239,6 +241,7 @@ public class FieldCommands implements CommandMarker {
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);
+		if (fetch != null) fieldDetails.setFetch(fetch);
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
@@ -254,6 +257,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="sizeMin", mandatory=false, help="The minimum string length") Integer sizeMin,
 			@CliOption(key="sizeMax", mandatory=false, help="The maximum string length") Integer sizeMax,
 			@CliOption(key="cardinality", mandatory=false, unspecifiedDefaultValue="MANY_TO_MANY", specifiedDefaultValue="MANY_TO_MANY", help="The relationship cardinarily at a JPA level") Cardinality cardinality,
+			@CliOption(key="fetch", mandatory=false, help="The fetch semantics at a JPA level") Fetch fetch,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -266,6 +270,7 @@ public class FieldCommands implements CommandMarker {
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);
 		if (sizeMax != null) fieldDetails.setSizeMax(sizeMax);
 		if (mappedBy != null) fieldDetails.setMappedBy(mappedBy);
+		if (fetch != null) fieldDetails.setFetch(fetch);
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}

@@ -7,7 +7,10 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.Fetch;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -32,6 +35,7 @@ public class ReferenceField extends FieldDetails {
 	
 	private JavaType fieldType;
 	private String joinColumnName;
+	private Fetch fetch =null;
 
 	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {		
 		super(physicalTypeIdentifier, fieldType, fieldName);
@@ -46,10 +50,27 @@ public class ReferenceField extends FieldDetails {
 		this.joinColumnName = joinColumnName;
 	}
 
+	public Fetch getFetch() {
+		return fetch;
+	}
+
+	public void setFetch(Fetch fetch) {
+		this.fetch = fetch;
+	}
+
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new ClassAttributeValue(new JavaSymbolName("targetEntity"), fieldType));
+		
+		if (fetch != null) {
+			JavaSymbolName value = new JavaSymbolName("EAGER");
+			if (fetch.equals(Fetch.LAZY)) {
+				value = new JavaSymbolName("LAZY");
+			}
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
+		}
+		
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
 		
 		List<AnnotationAttributeValue<?>> jcAttrs = new ArrayList<AnnotationAttributeValue<?>>();
