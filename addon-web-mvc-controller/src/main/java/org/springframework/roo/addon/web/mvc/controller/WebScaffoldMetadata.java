@@ -50,6 +50,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType JAVAX_CONSTRAINT = new JavaType("javax.validation.ConstraintViolation");
+	private static final JavaType JAVAX_VALIDATION = new JavaType("javax.validation.Validation");
 
 	private WebScaffoldAnnotationValues annotationValues;
 	private BeanInfoMetadata beanInfoMetadata;
@@ -325,8 +327,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		JavaType JAVAX_CONSTRAINT = new JavaType("javax.validation.ConstraintViolation");
-		JavaType JAVAX_VALIDATION = new JavaType("javax.validation.Validation");
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("for (" + JAVAX_CONSTRAINT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "> constraint : " + JAVAX_VALIDATION.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
 		bodyBuilder.indent();
@@ -427,7 +427,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
-		bodyBuilder.appendFormalLine("for(javax.validation.ConstraintViolation<" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "> constraint : javax.validation.Validation.buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
+		bodyBuilder.appendFormalLine("for (" + JAVAX_CONSTRAINT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "> constraint : " + JAVAX_VALIDATION.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath().toString(), \"" + entityName + ".error.\" + constraint.getPropertyPath(), constraint.getMessage());");
 		bodyBuilder.indentRemove();
