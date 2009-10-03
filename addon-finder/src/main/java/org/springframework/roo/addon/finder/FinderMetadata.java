@@ -37,6 +37,8 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+	private static final JavaType QUERY = new JavaType("javax.persistence.Query");
 
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
@@ -131,7 +133,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Get the entityManager() method (as per ROO-216)
 		MethodMetadata entityManagerMethod = entityMetadata.getEntityManagerMethod();
 		Assert.notNull(entityManagerMethod, "Entity manager method incorrectly returned null");
-		bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
 		if (containsCollectionType) {
 			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + " AND\");");
@@ -145,7 +147,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					bodyBuilder.appendFormalLine("}");
 				} 
 			}
-			bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(queryBuilder.toString());");
+			bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
 			bodyBuilder.appendFormalLine("int i = 0;");
 			for (int i = 0; i < paramTypes.size(); i++) {
 				if (paramTypes.get(i).isCommonCollectionType()) {
@@ -159,7 +161,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}				
 		} else {
-			bodyBuilder.appendFormalLine("javax.persistence.Query q = em.createQuery(\"" + jpaQuery + "\");");
+			bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
 			
 			for (JavaSymbolName name : paramNames) {
 				bodyBuilder.appendFormalLine("q.setParameter(\"" + name + "\", " + name + ");");
@@ -170,7 +172,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, new JavaType("javax.persistence.Query"), AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 	
 	public String toString() {

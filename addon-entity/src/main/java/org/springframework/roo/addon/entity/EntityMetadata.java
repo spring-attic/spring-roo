@@ -49,6 +49,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
 
 	private EntityMetadata parent;
 	private boolean noArgConstructor;
@@ -473,7 +474,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					continue;
 				}
 				
-				if (!candidate.getFieldType().equals(new JavaType("javax.persistence.EntityManager"))) {
+				if (!candidate.getFieldType().equals(ENTITY_MANAGER)) {
 					// Candidate isn't an EntityManager, so give up
 					continue;
 				}
@@ -492,7 +493,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.PersistenceContext"), new ArrayList<AnnotationAttributeValue<?>>());
 			annotations.add(annotation);
 			
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, new JavaType("javax.persistence.EntityManager"), null, annotations);
+			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
 			return field;
 		}
 	}
@@ -639,14 +640,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public MethodMetadata getEntityManagerMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
-		JavaType returnType = new JavaType("javax.persistence.EntityManager", 0, DataType.TYPE, null, null);
+		JavaType returnType = ENTITY_MANAGER;
 		
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
 			// create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
-			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){");
+			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){");
 			// handle any abstract methods in this class
 			bodyBuilder.indent();
 			for (MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
@@ -670,7 +671,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("}." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		} else {
 			// instantiate using the no-argument constructor (we know this is available as the entity must comply with the JPA no-arg constructor requirement)
-			bodyBuilder.appendFormalLine("javax.persistence.EntityManager em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
+			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		}
 		
 		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");

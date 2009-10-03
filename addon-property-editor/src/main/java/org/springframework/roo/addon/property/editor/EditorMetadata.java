@@ -61,7 +61,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addImplementsType(new JavaType("java.beans.PropertyEditorSupport"));
 		
 		JavaType typeConverter = new JavaType("org.springframework.beans.SimpleTypeConverter");
-		builder.addField(new DefaultFieldMetadata(getId(), 0, new JavaSymbolName("typeConverter"), typeConverter, typeConverter, null));
+		builder.addField(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName("typeConverter"), typeConverter, typeConverter, null));
 
 		builder.addMethod(getGetAsTextMethod());		
 		builder.addMethod(getSetAsTextMethod());
@@ -79,7 +79,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return null;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + ") obj)." + entityMetadata.getIdentifierAccessor().getMethodName() + "() , String.class);");
+		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + entityMetadata.getIdentifierAccessor().getMethodName() + "(), String.class);");
 
 		List<AnnotatedJavaType> types = new ArrayList<AnnotatedJavaType>();			
 		List<JavaSymbolName> names = new ArrayList<JavaSymbolName>();
@@ -88,7 +88,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
  
 	private MethodMetadata getSetAsTextMethod() {
 		
-		String identifierTypeName = entityMetadata.getIdentifierField().getFieldType().getFullyQualifiedTypeName();
+		String identifierTypeName = entityMetadata.getIdentifierField().getFieldType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (text == null || 0 == text.length()) {");
@@ -106,7 +106,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.newLine();
-		bodyBuilder.appendFormalLine("setValue(" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + entityMetadata.getFindMethod().getMethodName() + "(identifier));");
+		bodyBuilder.appendFormalLine("setValue(" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(identifier));");
 		
 		List<AnnotatedJavaType> types = new ArrayList<AnnotatedJavaType>();		
 		types.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));
