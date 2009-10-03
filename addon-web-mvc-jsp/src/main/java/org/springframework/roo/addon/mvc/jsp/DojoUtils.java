@@ -89,7 +89,7 @@ public class DojoUtils {
 				regex = ", regExp: \"-?[0-9]*\\.[0-9]*\"";
 			}
 		} else if (field.getFieldName().getSymbolName().contains("email")) {
-			regex = "";//", regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
+			regex = "";//, regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
 		}	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");

@@ -689,20 +689,19 @@ public class JspDocumentHelper {
 										|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
 									fieldCode = "field.invalid.number";
 								}
-								Element message = document.createElement("spring:message");
-								message.setAttribute("code", fieldCode);
-								if ("field.invalid".equals(fieldCode))
-									message.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
-								message.setAttribute("var", "field_invalid");
+								
 								Element invalidMessage = document.createElement("spring:message");
-								invalidMessage.setAttribute("code", "entity.find");
-								invalidMessage.setAttribute("arguments", fieldCode);
+								invalidMessage.setAttribute("code", fieldCode);
+								if ("field.invalid".equals(fieldCode))
+									invalidMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
 								invalidMessage.setAttribute("var", "field_invalid");
 								divElement.appendChild(invalidMessage);
+								
 								Element required = document.createElement("spring:message");
 								required.setAttribute("code", "field.required");
 								required.setAttribute("var", "required");
 								divElement.appendChild(required);
+								
 								Element validMessage = document.createElement("spring:message");
 								validMessage.setAttribute("code", "field.simple.validation");
 								validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
@@ -738,21 +737,24 @@ public class JspDocumentHelper {
 							|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
 						fieldCode = "field.invalid.number";
 					}
-					Element message = document.createElement("spring:message");
-					message.setAttribute("code", fieldCode);
+					Element invalidMessage = document.createElement("spring:message");
+					invalidMessage.setAttribute("code", fieldCode);
 					if ("field.invalid".equals(fieldCode))
-						message.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
-					message.setAttribute("var", "field_invalid");
-					divElement.appendChild(message);
+						invalidMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName());
+					invalidMessage.setAttribute("var", "field_invalid");
+					divElement.appendChild(invalidMessage);
+					
 					Element required = document.createElement("spring:message");
 					required.setAttribute("code", "field.required");
 					required.setAttribute("var", "required");
 					divElement.appendChild(required);
+					
 					Element validMessage = document.createElement("spring:message");
 					validMessage.setAttribute("code", "field.simple.validation");
 					validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
 					validMessage.setAttribute("argumentSeparator", ",");
 					validMessage.setAttribute("var", "field_validation");
+					
 					divElement.appendChild(validMessage);
 					divElement.appendChild(DojoUtils.getValidationDojo(document, field));
 					
