@@ -622,8 +622,11 @@ public class JspDocumentHelper {
 			} else {
 				boolean specialAnnotation = false;
 				for (AnnotationMetadata annotation : field.getAnnotations()) {
+					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
+						//OneToMany relationships are not managed from the one side, therefore we skip this field
+						return;
+					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
-							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
 
 						EntityMetadata typeEntityMetadata = null;
