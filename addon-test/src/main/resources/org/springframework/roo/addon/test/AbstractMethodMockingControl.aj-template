@@ -142,7 +142,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 	private Expectations expectations = new Expectations();
 
-	after() : mockStaticsTestMethod() {
+	after() returning : mockStaticsTestMethod() {
 		//System.out.println("Verifying; after: " + thisJoinPointStaticPart);
 		if (recording && (expectations.hasCalls())) {
 			throw new IllegalStateException(
