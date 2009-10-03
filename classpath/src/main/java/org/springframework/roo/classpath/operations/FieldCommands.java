@@ -74,6 +74,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="path", mandatory=true, help="The path where the class can be found") Path path, 
 			@CliOption(key="name", mandatory=true, help="The name of the field") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, help="The Java type of this field") JavaType fieldType,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
@@ -82,11 +83,13 @@ public class FieldCommands implements CommandMarker {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(declaredByMetadataId, Modifier.PRIVATE, fieldName, fieldType, null, null);
+		int mod = Modifier.PRIVATE;
+		if (transientModifier) mod += Modifier.TRANSIENT;
+		FieldMetadata fieldMetadata = new DefaultFieldMetadata(declaredByMetadataId, mod, fieldName, fieldType, null, null);
 		classpathOperations.addField(fieldMetadata);
 	}
 
-	private void insertField(FieldDetails fieldDetails, boolean permitReservedWords) {
+	private void insertField(FieldDetails fieldDetails, boolean permitReservedWords, boolean transientModifier) {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(fieldDetails.getFieldName());
 			if (fieldDetails.getColumn() != null) {
@@ -101,7 +104,9 @@ public class FieldCommands implements CommandMarker {
 			CollectionField collectionField = (CollectionField) fieldDetails;
 			initializer = collectionField.getInitializer();
 		}
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(fieldDetails.getPhysicalTypeIdentifier(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), initializer, annotations);
+		int mod = Modifier.PRIVATE;
+		if (transientModifier) mod += Modifier.TRANSIENT;
+		FieldMetadata fieldMetadata = new DefaultFieldMetadata(fieldDetails.getPhysicalTypeIdentifier(), mod, fieldDetails.getFieldName(), fieldDetails.getFieldType(), initializer, annotations);
 		classpathOperations.addField(fieldMetadata);
 	}
 	
@@ -118,6 +123,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="max", mandatory=false, help="The maximum value") Long max,
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="primitive", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to use a primitive type if possible") boolean primitive,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
@@ -134,7 +140,7 @@ public class FieldCommands implements CommandMarker {
 		if (max != null) fieldDetails.setMax(max);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	@CliCommand(value="field string", help="Adds a private string field to an existing Java source file")
@@ -150,6 +156,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="regexp", mandatory=false, help="The required regular expression pattern") String regexp,
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		StringField fieldDetails = new StringField(physicalTypeIdentifier, new JavaType("java.lang.String"), fieldName);
@@ -162,7 +169,7 @@ public class FieldCommands implements CommandMarker {
 		if (regexp != null) fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	@CliCommand(value="field date", help="Adds a private date field to an existing Java source file")
@@ -177,6 +184,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="past", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be in the past") Boolean past,
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
@@ -188,7 +196,7 @@ public class FieldCommands implements CommandMarker {
 		if (persistenceType == null) fieldDetails.setPersistenceType(DateFieldPersistenceType.JPA_TIMESTAMP);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	@CliCommand(value="field boolean", help="Adds a private boolean field to an existing Java source file")
@@ -202,6 +210,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="primitive", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to use a primitive type") boolean primitive,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		BooleanField fieldDetails = new BooleanField(physicalTypeIdentifier, primitive ? JavaType.BOOLEAN_PRIMITIVE : JavaType.BOOLEAN_OBJECT, fieldName);
@@ -211,7 +220,7 @@ public class FieldCommands implements CommandMarker {
 		if (assertTrue != null) fieldDetails.setAssertTrue(assertTrue);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	@CliCommand(value="field reference", help="Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)")
@@ -223,6 +232,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="joinColumnName", mandatory=false, help="The JPA Join Column name") String joinColumnName,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName);
@@ -230,7 +240,7 @@ public class FieldCommands implements CommandMarker {
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	@CliCommand(value="field set", help="Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)")
@@ -245,6 +255,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="sizeMax", mandatory=false, help="The maximum string length") Integer sizeMax,
 			@CliOption(key="cardinality", mandatory=false, unspecifiedDefaultValue="MANY_TO_MANY", specifiedDefaultValue="MANY_TO_MANY", help="The relationship cardinarily at a JPA level") Cardinality cardinality,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
@@ -256,6 +267,6 @@ public class FieldCommands implements CommandMarker {
 		if (sizeMax != null) fieldDetails.setSizeMax(sizeMax);
 		if (mappedBy != null) fieldDetails.setMappedBy(mappedBy);
 		if (comment != null) fieldDetails.setComment(comment);
-		insertField(fieldDetails, permitReservedWords);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 }
