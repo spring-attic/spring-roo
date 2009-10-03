@@ -329,7 +329,7 @@ public class ItdSourceFileComposer {
 				this.append(Modifier.toString(field.getModifier()));
 				this.append(" ");
 			}
-			this.append(field.getFieldType().getNameIncludingTypeParameters());
+			this.append(field.getFieldType().getNameIncludingTypeParameters(false, resolver));
 			this.append(" ");
 			this.append(introductionTo.getSimpleTypeName());
 			this.append(".");
@@ -338,7 +338,7 @@ public class ItdSourceFileComposer {
 			// Append initializer, if present
 			if (field.getFieldInitializer() != null) {
 				this.append(" = new ");
-				this.append(field.getFieldInitializer().getNameIncludingTypeParameters());
+				this.append(field.getFieldInitializer().getNameIncludingTypeParameters(false, resolver));
 				this.append("()");
 			}
 			
