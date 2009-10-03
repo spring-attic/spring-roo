@@ -24,7 +24,7 @@ public class JLineLogHandler extends Handler {
 	private ConsoleReader reader;
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
-	private String lastMessage;
+	private static String lastMessage;
 	private static boolean includeThreadName = true;
 	private boolean ansiSupported;
 	
@@ -78,6 +78,10 @@ public class JLineLogHandler extends Handler {
 		includeThreadName = include;
 	}
 	
+	public static void resetMessageTracking() {
+		lastMessage = null; // see ROO-251
+	}
+		
 	@Override
 	public void publish(LogRecord record) {
 		try {
