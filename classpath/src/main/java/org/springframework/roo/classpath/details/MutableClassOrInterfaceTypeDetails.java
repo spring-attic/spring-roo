@@ -50,6 +50,8 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 */
 	void removeField(JavaSymbolName fieldName);
 	
+	void addEnumConstant(JavaSymbolName name);
+	
 	/**
 	 * Adds a new method. A method with the same name are parameter types must not already exist.
 	 * 

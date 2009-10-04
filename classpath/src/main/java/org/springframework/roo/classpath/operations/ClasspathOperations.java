@@ -151,6 +151,25 @@ public class ClasspathOperations {
 		physicalTypeMetadataProvider.createPhysicalType(toCreate);
 	}
 	
+	public void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName) {
+		Assert.notNull(isProjectAvailable(), "Cannot add a constant at this time");
+		Assert.hasText(physicalTypeIdentifier, "Type identifier not provided");
+		Assert.notNull(constantName, "Constant name required");
+		
+		// Obtain the physical type and itd mutable details
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
+
+		// Ensure it's an enum
+		Assert.isTrue(mutableTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION,  PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not an enum");
+		
+		mutableTypeDetails.addEnumConstant(constantName);
+	}
+	
 	/**
 	 * Adds a new field to an existing class.
 	 * 

@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
+import org.springframework.roo.classpath.operations.jsr303.EnumField;
 import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
@@ -49,6 +50,7 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(classpathOperations, "Classpath operations required");
 		staticFieldConverter.add(Cardinality.class);
 		staticFieldConverter.add(Fetch.class);
+		staticFieldConverter.add(EnumType.class);
 		this.classpathOperations = classpathOperations;
 		this.legalNumericPrimitives.add(Short.class.getName());
 		this.legalNumericPrimitives.add(Byte.class.getName());
@@ -71,7 +73,7 @@ public class FieldCommands implements CommandMarker {
 
 	@CliCommand(value="field other", help="Inserts a private field into the specified file")
 	public void insertField(
-			@CliOption(key="class", mandatory=true, help="The class to receive the field (class must exist)") JavaType name, 
+			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType name,
 			@CliOption(key="path", mandatory=true, help="The path where the class can be found") Path path, 
 			@CliOption(key="name", mandatory=true, help="The name of the field") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, help="The Java type of this field") JavaType fieldType,
@@ -274,4 +276,25 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
+
+	@CliCommand(value="field enum", help="Adds a private enum field to an existing Java source file")
+	public void addFieldEnum(
+			@CliOption(key={"","fieldName"}, mandatory=true, help="The name of the field to add") JavaSymbolName fieldName,
+			@CliOption(key="type", mandatory=true, help="The enum type of this field") JavaType fieldType,
+			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
+			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
+			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
+			@CliOption(key="enumType", mandatory=false, help="The fetch semantics at a JPA level") EnumType enumType,
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
+			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
+		if (notNull != null) fieldDetails.setNotNull(notNull);
+		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
+		if (enumType != null) fieldDetails.setEnumType(enumType);
+		if (comment != null) fieldDetails.setComment(comment);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
+	}
+
 }

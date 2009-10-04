@@ -142,7 +142,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		} else if (typeDeclaration instanceof EnumDeclaration) {
 			this.enumClazz = (EnumDeclaration) typeDeclaration;
 			this.physicalTypeCategory = PhysicalTypeCategory.ENUMERATION;
-			// NB: JavaParser does not parse the actual enum constants, so this is not available
 		}
 		
 		Assert.notNull(physicalTypeCategory, UNSUPPORTED_MESSAGE_PREFIX + " (" + typeDeclaration.getClass().getSimpleName() + " for " + name + ")");
@@ -316,6 +315,26 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		}
 		JavaParserFieldMetadata.addField(this, members, fieldMetadata, true);
 	}
+	
+	public void addEnumConstant(JavaSymbolName name) {
+		Assert.notNull(name, "Name required");
+		Assert.isTrue(this.enumClazz != null, "Enum constants can only be added to an enum class");
+		List<EnumConstantDeclaration> constants = this.enumClazz.getEntries();
+		if (constants == null) {
+			constants = new ArrayList<EnumConstantDeclaration>();
+			this.enumClazz.setEntries(constants);
+		}
+		addEnumConstant(this, constants, name, true);
+	}
+	
+	private static void addEnumConstant(CompilationUnitServices compilationUnitServices, List<EnumConstantDeclaration> constants, JavaSymbolName name, boolean permitFlush) {
+		// Determine location to insert
+		EnumConstantDeclaration newEntry = new EnumConstantDeclaration(name.getSymbolName());
+		constants.add(constants.size(), newEntry);
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
+	}
 
 	public void removeField(JavaSymbolName fieldName) {
 		List<BodyDeclaration> members = clazz == null ? enumClazz.getMembers() : clazz.getMembers();
@@ -357,42 +376,49 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
             compilationUnit.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(cit.getName().getPackage().getFullyQualifiedPackageName())));
         }
 		
-		boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE ? true : false;
-		
 		// Create a class or interface declaration to represent this actual type
 		int javaParserModifier = JavaParserUtils.getJavaParserModifier(cit.getModifier());
-		ClassOrInterfaceDeclaration cid = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getSimpleTypeName());
-		cid.setMembers(new ArrayList<BodyDeclaration>());
+		TypeDeclaration typeDeclaration;
 		
-		// Add the class of interface declaration to the compilation unit
-		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
-		types.add(cid);
-		compilationUnit.setTypes(types);
-		
-        // Superclass handling
-    	List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
-		for (JavaType current : cit.getExtendsTypes()) {
-			if (!"java.lang.Object".equals(current.getFullyQualifiedTypeName())) {
+		if (cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE || cit.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
+			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE ? true : false;
+			typeDeclaration = new ClassOrInterfaceDeclaration(javaParserModifier, isInterface, cit.getName().getSimpleTypeName());
+			ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) typeDeclaration;
+			
+	        // Superclass handling
+	    	List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
+			for (JavaType current : cit.getExtendsTypes()) {
+				if (!"java.lang.Object".equals(current.getFullyQualifiedTypeName())) {
+					NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
+		        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+		        	extendsList.add(resolvedName);
+				}
+			}
+	    	if (extendsList.size() > 0) {
+	    		classOrInterfaceDeclaration.setExtends(extendsList);
+	    	}
+			
+	        // Implements handling
+	    	List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
+			for (JavaType current : cit.getImplementsTypes()) {
 				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
 	        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
 	        	extendsList.add(resolvedName);
 			}
-		}
-    	if (extendsList.size() > 0) {
-    		cid.setExtends(extendsList);
-    	}
+	    	if (implementsList.size() > 0) {
+	    		classOrInterfaceDeclaration.setImplements(implementsList);
+	    	}
 		
-        // Implements handling
-    	List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
-		for (JavaType current : cit.getImplementsTypes()) {
-			NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
-        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
-        	extendsList.add(resolvedName);
+		} else {
+			typeDeclaration = new EnumDeclaration(javaParserModifier, cit.getName().getSimpleTypeName());
 		}
-    	if (implementsList.size() > 0) {
-    		cid.setImplements(implementsList);
-    	}
-        
+		typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
+		
+		// Add the class of interface declaration to the compilation unit
+		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
+		types.add(typeDeclaration);
+		compilationUnit.setTypes(types);
+		
         // Create a compilation unit so that we can use JavaType*Metadata static methods directly
         CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
 			public List<ImportDeclaration> getImports() {
@@ -408,21 +434,33 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
         
         // Add type annotations
         List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
-        cid.setAnnotations(annotations);
+        typeDeclaration.setAnnotations(annotations);
         for (AnnotationMetadata candidate : cit.getTypeAnnotations()) {
         	JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, candidate, false);
         }
         
+        // Add enum constants
+        if (typeDeclaration instanceof EnumDeclaration && cit.getEnumConstants().size() > 0) {
+			EnumDeclaration enumDeclaration = (EnumDeclaration) typeDeclaration;
+			
+	       	List<EnumConstantDeclaration> constants = new ArrayList<EnumConstantDeclaration>();
+	       	enumDeclaration.setEntries(constants);
+	       	
+            for (JavaSymbolName constant : cit.getEnumConstants()) {
+            	addEnumConstant(compilationUnitServices, constants, constant, false);
+            }
+        }
+        
         // Add fields
         for (FieldMetadata candidate : cit.getDeclaredFields()) {
-        	JavaParserFieldMetadata.addField(compilationUnitServices, cid.getMembers(), candidate, false);
+        	JavaParserFieldMetadata.addField(compilationUnitServices, typeDeclaration.getMembers(), candidate, false);
         }
 
         // Add methods
         for (MethodMetadata candidate : cit.getDeclaredMethods()) {
-        	JavaParserMethodMetadata.addMethod(compilationUnitServices, cid.getMembers(), candidate, false, null);
+        	JavaParserMethodMetadata.addMethod(compilationUnitServices, typeDeclaration.getMembers(), candidate, false, null);
         }
-
+        
         // Write to disk
 		MutableFile mutableFile = fileManager.createFile(fileIdentifier);
 		try {
