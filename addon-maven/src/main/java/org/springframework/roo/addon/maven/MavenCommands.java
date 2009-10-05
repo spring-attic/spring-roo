@@ -92,7 +92,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value={"perform clean"}, help="Executes a full clean (including Eclipse files) via Maven")
 	public void runClean() throws IOException {
-		mvn("clean eclipse:clean");
+		mvn("clean");
 	}
 	
 	@CliCommand(value={"perform command"}, help="Executes a user-specified Maven command")
