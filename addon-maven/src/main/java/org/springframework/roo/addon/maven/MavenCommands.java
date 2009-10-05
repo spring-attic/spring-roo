@@ -97,6 +97,8 @@ public class MavenCommands implements CommandMarker {
 	
 	@CliCommand(value={"perform command"}, help="Executes a user-specified Maven command")
 	public void mvn(@CliOption(key="mavenCommand", mandatory=true) String extra) throws IOException {
+		File root = new File(mavenOperations.getProjectRoot());
+		Assert.isTrue(root.isDirectory() && root.exists(), "Project root does not currently exist as a directory ('" + root.getCanonicalPath() + "')");
 		BufferedReader input = null;
 		try {
 			String cmd = null;
@@ -106,7 +108,7 @@ public class MavenCommands implements CommandMarker {
 			} else {
 				cmd = "mvn " + extra;
 			}
-			Process p = Runtime.getRuntime().exec(cmd);
+			Process p = Runtime.getRuntime().exec(cmd, new String[0], root);
 		    input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		    String line;
 		    while ((line = input.readLine()) != null) {

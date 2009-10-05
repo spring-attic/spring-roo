@@ -46,6 +46,10 @@ public class MavenOperations extends ProjectOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
 	}
 	
+	public String getProjectRoot() {
+		return pathResolver.getRoot(Path.ROOT);
+	}
+	
 	public void createProject(InputStream templateInputStream, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
 		Assert.notNull(templateInputStream, "Could not acquire template POM");
