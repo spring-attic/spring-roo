@@ -221,7 +221,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return sb.toString();
 	}
 
-	protected String versionInfo() {
+	public static String versionInfo() {
 		// Try to determine the SVN version
 		String svnRev = null;
 		try {

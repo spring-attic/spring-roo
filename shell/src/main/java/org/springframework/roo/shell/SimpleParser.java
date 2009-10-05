@@ -1,21 +1,42 @@
 package org.springframework.roo.shell;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 
 import org.springframework.roo.shell.internal.AbstractShell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
+import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Comment;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public final class SimpleParser {
 	private static final Logger logger = Logger.getLogger(SimpleParser.class.getName());
@@ -644,6 +665,169 @@ public final class SimpleParser {
 		return 0;
 	}
 
+	@CliCommand(value="reference guide", help="Writes the reference guide XML fragments (in DocBook format) into the current working directory")
+	public void helpReferenceGuide() {
+		File f = new File(".");
+		File[] existing = f.listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.getName().startsWith("appendix_");
+			}
+		});
+		for (File e : existing) {
+			e.delete();
+			System.out.println("Deleted " + e);
+		}
+		
+		// Compute the sections we'll be outputting, and get them into a nice order
+		SortedMap<String, Object> sections = new TreeMap<String,Object>();
+		next_target:
+		for (Object target : targets) {
+			Method[] methods = target.getClass().getMethods();
+			for (Method m : methods) {
+				CliCommand cmd = m.getAnnotation(CliCommand.class);
+				if (cmd != null) {
+					String sectionName = target.getClass().getSimpleName();
+					Pattern p = Pattern.compile("[A-Z][^A-Z]*");
+			        Matcher matcher = p.matcher(sectionName);
+					StringBuilder string = new StringBuilder();
+			        while (matcher.find()) {
+			            string.append(matcher.group()).append(" ");
+			        }
+					sectionName = string.toString().trim();
+					if (sections.containsKey(sectionName)) {
+						throw new IllegalStateException("Section name '" + sectionName + "' not unique");
+					}
+					sections.put(sectionName, target);
+					continue next_target;
+				}
+			}
+		}
+		
+		// Build each section of the appendix
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		Document document = builder.newDocument();
+		List<Element> builtSections = new ArrayList<Element>();
+		
+		for (String section : sections.keySet()) {
+			Object target = sections.get(section);
+			SortedMap<String, Element> individualCommands = new TreeMap<String, Element>();
+			
+			Method[] methods = target.getClass().getMethods();
+			for (Method m : methods) {
+				CliCommand cmd = m.getAnnotation(CliCommand.class);
+				if (cmd != null) {
+					StringBuilder cmdSyntax = new StringBuilder();
+					cmdSyntax.append(cmd.value()[0]);
+					
+					// Build the syntax list
+					
+					// Store the order options appear
+					List<String> optionKeys = new ArrayList<String>();
+					// key: option key, value: help text
+					Map<String, String> optionDetails = new HashMap<String, String>();
+					for (Annotation[] ann : m.getParameterAnnotations()) {
+						for (Annotation a : ann) {
+							if (a instanceof CliOption) {
+								CliOption option = (CliOption) a;
+								
+								// Figure out which key we want to use (use first non-empty string, or make it "(default)" if needed)
+								String key = option.key()[0];
+								if ("".equals(key)) {
+									for (String otherKey : option.key()) {
+										if (!"".equals(otherKey)) {
+											key = otherKey;
+											break;
+										}
+									}
+									if ("".equals(key)) {
+										key = "[default]";
+									}
+								}
+								String help = "".equals(option.help()) ? "(no help available)" : option.help();
+								// Store details for later
+								key = "--" + key;
+								optionKeys.add(key);
+								optionDetails.put(key, help);
+								
+								// Include it in the mandatory syntax
+								if (option.mandatory()) {
+									cmdSyntax.append(" ").append(key);
+								}
+							}
+						}
+					}
+					
+					// Make a variable list element
+					Element variableListElement = document.createElement("variablelist");
+					boolean anyVars = false;
+					for (String optionKey : optionKeys) {
+						anyVars = true;
+						String help = optionDetails.get(optionKey);
+						variableListElement.appendChild(new XmlElementBuilder("varlistentry", document)
+												.addChild(new XmlElementBuilder("term", document).setText(optionKey).build())
+												.addChild(new XmlElementBuilder("listitem", document)
+													.addChild(new XmlElementBuilder("para", document).setText(help).build())
+												.build())
+											.build());
+					}
+					
+					if (!anyVars) {
+						variableListElement = new XmlElementBuilder("para", document).setText("This command does not accept any options.").build();
+					}
+					
+					// Now we've figured out the options, store this individual command
+					Element element = new XmlElementBuilder("section", document).addAttribute("id", "command-index-" + cmd.value()[0].toLowerCase().replace(' ', '-'))
+											.addChild(new XmlElementBuilder("title", document).setText(cmd.value()[0]).build())
+											.addChild(new XmlElementBuilder("para", document).setText(cmd.help()).build())
+											.addChild(new XmlElementBuilder("programlisting", document).setText(cmdSyntax.toString()).build())
+											.addChild(variableListElement)
+											.build();
+
+					individualCommands.put(cmd.value()[0], element);
+					
+				}
+			}
+			
+			Element topSection = document.createElement("section");
+			topSection.setAttribute("id", "command-index-" + section.toLowerCase().replace(' ', '-'));
+			topSection.appendChild(new XmlElementBuilder("title", document).setText(section).build());
+			topSection.appendChild(new XmlElementBuilder("para", document).setText(section + " are contained in " + target.getClass().getName() + ".").build());
+			
+			for (String cmd : individualCommands.keySet()) {
+				Element value = individualCommands.get(cmd);
+				topSection.appendChild(value);
+			}
+			
+			builtSections.add(topSection);
+		}
+		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Element appendix = document.createElement("appendix");
+		appendix.setAttribute("id", "command-index");
+		appendix.appendChild(new XmlElementBuilder("title", document).setText("Command Index").build());
+		appendix.appendChild(new XmlElementBuilder("para", document).setText("This appendix was automatically built from Roo " + AbstractShell.versionInfo() + ".").build());
+
+		for (Element section : builtSections) {
+			appendix.appendChild(section);
+		}
+		document.appendChild(appendix);
+
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		
+		Transformer transformer = XmlUtils.createIndentingTransformer();
+		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//OASIS//DTD DocBook XML V4.5//EN");
+		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
+		
+		XmlUtils.writeXml(transformer, byteArrayOutputStream, document);
+		try {
+			File output = new File(f, "appendix-command-index.xml");
+			FileCopyUtils.copy(byteArrayOutputStream.toByteArray(), output);
+			System.out.println("Written to " + output.getCanonicalPath());
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+	}
+	
 	@CliCommand(value="help", help="Shows system help")
 	public void obtainHelp(@CliOption(key={"","command"}, optionContext="availableCommands") String buffer) {
 		if (buffer == null) {

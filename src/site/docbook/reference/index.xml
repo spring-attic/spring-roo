@@ -24,7 +24,7 @@
 
 	<xi:include href="spring-roo-intro.xml" />
 
-	<xi:include href="appendix.xml" />
+	<xi:include href="appendix-command-index.xml" />
 
 	<xi:include href="glossary.xml" />
 

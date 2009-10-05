@@ -1,0 +1,1795 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<appendix id="command-index">
+    <title>Command Index</title>
+    <para>This appendix was automatically built from Roo ENGINEERING BUILD [rev 319M].</para>
+    <section id="command-index-backup-commands">
+        <title>Backup Commands</title>
+        <para>Backup Commands are contained in org.springframework.roo.addon.backup.BackupCommands.</para>
+        <section id="command-index-backup">
+            <title>backup</title>
+            <para>Backup your project to a zip file</para>
+            <programlisting>backup</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section id="command-index-bootstrap-commands">
+        <title>Bootstrap Commands</title>
+        <para>Bootstrap Commands are contained in org.springframework.roo.bootstrap.BootstrapCommands.</para>
+        <section id="command-index-development-mode">
+            <title>development mode</title>
+            <para>Switches the system into development mode (greater diagnostic information)</para>
+            <programlisting>development mode</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--enabled</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-poll-now">
+            <title>poll now</title>
+            <para>Perform a manual file system poll</para>
+            <programlisting>poll now</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-poll-speed">
+            <title>poll speed</title>
+            <para>Changes the file system polling speed</para>
+            <programlisting>poll speed --ms</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--ms</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-poll-status">
+            <title>poll status</title>
+            <para>Display file system polling information</para>
+            <programlisting>poll status</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section id="command-index-bundlor-commands">
+        <title>Bundlor Commands</title>
+        <para>Bundlor Commands are contained in org.springframework.roo.addon.bundlor.BundlorCommands.</para>
+        <section id="command-index-bundlor-add-explicit-import">
+            <title>bundlor add explicit import</title>
+            <para>Add an explicit import for a dependency Bundlor cannot detect</para>
+            <programlisting>bundlor add explicit import --package --fromVersion --toVersion</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>package to import</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fromVersion</term>
+                    <listitem>
+                        <para>minimum version to accept</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--toVersion</term>
+                    <listitem>
+                        <para>version range ceiling, use INF for infinity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--inclusiveUpperBound</term>
+                    <listitem>
+                        <para>should upper version be inclusive (default = exclusive)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--optional</term>
+                    <listitem>
+                        <para>treat package import as optional (default = mandatory)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-bundlor-configure-imports">
+            <title>bundlor configure imports</title>
+            <para>specify version range for package imports, and whether they are optional</para>
+            <programlisting>bundlor configure imports --packagePattern --fromVersion --toVersion</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--packagePattern</term>
+                    <listitem>
+                        <para>package name with optional .* postfix</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fromVersion</term>
+                    <listitem>
+                        <para>minimum version to accept</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--toVersion</term>
+                    <listitem>
+                        <para>version range ceiling, use INF for infinity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--inclusiveUpperBound</term>
+                    <listitem>
+                        <para>should upper version be inclusive (default = exclusive)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--optional</term>
+                    <listitem>
+                        <para>treat package import as optional (default = mandatory)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-bundlor-non-exported-packages">
+            <title>bundlor non-exported packages</title>
+            <para>specify packages that should not be exported by the bundle</para>
+            <programlisting>bundlor non-exported packages --packagePattern</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--packagePattern</term>
+                    <listitem>
+                        <para>package name with optional .* postfix</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-bundlor-setup">
+            <title>bundlor setup</title>
+            <para>automatically create and manage an OSGi manifest for this project using Bundlor</para>
+            <programlisting>bundlor setup</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleName</term>
+                    <listitem>
+                        <para>Human readable name for the bundle</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-bundlor-version-package-exports">
+            <title>bundlor version package exports</title>
+            <para>specify version to export individual packages at (defaults to bundle version)</para>
+            <programlisting>bundlor version package exports --packagePattern --version</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--packagePattern</term>
+                    <listitem>
+                        <para>package name with optional .* postfix</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--version</term>
+                    <listitem>
+                        <para>version to export package at</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-classpath-commands">
+        <title>Classpath Commands</title>
+        <para>Classpath Commands are contained in org.springframework.roo.classpath.operations.ClasspathCommands.</para>
+        <section id="command-index-class">
+            <title>class</title>
+            <para>Creates a new Java class source file in any project path</para>
+            <programlisting>class --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--extends</term>
+                    <listitem>
+                        <para>The superclass (defaults to java.lang.Object)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--abstract</term>
+                    <listitem>
+                        <para>Whether the generated class should be marked as abstract</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-dod">
+            <title>dod</title>
+            <para>Creates a new data on demand for the specified entity</para>
+            <programlisting>dod</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-entity">
+            <title>entity</title>
+            <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
+            <programlisting>entity --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--extends</term>
+                    <listitem>
+                        <para>The superclass (defaults to java.lang.Object)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--abstract</term>
+                    <listitem>
+                        <para>Whether the generated class should be marked as abstract</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--testAutomatically</term>
+                    <listitem>
+                        <para>Create automatic integration tests for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--table</term>
+                    <listitem>
+                        <para>The JPA table name to use for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierField</term>
+                    <listitem>
+                        <para>The JPA identifier field name to use for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierColumn</term>
+                    <listitem>
+                        <para>The JPA identifier field column to use for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-enum-constant">
+            <title>enum constant</title>
+            <para>Inserts a new enum constant into an enum</para>
+            <programlisting>enum constant --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the enum class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The name of the constant</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-enum-type">
+            <title>enum type</title>
+            <para>Creates a new Java enum source file in any project path</para>
+            <programlisting>enum type --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-interface">
+            <title>interface</title>
+            <para>Creates a new Java interface source file in any project path</para>
+            <programlisting>interface --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-test-integration">
+            <title>test integration</title>
+            <para>Creates a new integration test for the specified entity</para>
+            <programlisting>test integration</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-controller-commands">
+        <title>Controller Commands</title>
+        <para>Controller Commands are contained in org.springframework.roo.addon.web.mvc.controller.ControllerCommands.</para>
+        <section id="command-index-controller-all">
+            <title>controller all</title>
+            <para>Scaffold a controller for all entities without an existing controller</para>
+            <programlisting>controller all --package</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which new controllers will be placed</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-controller-class">
+            <title>controller class</title>
+            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <programlisting>controller class --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--preferredMapping</term>
+                    <listitem>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-controller-scaffold">
+            <title>controller scaffold</title>
+            <para>Create a new scaffold Controller (ie where we maintain CRUD automatically)</para>
+            <programlisting>controller scaffold --name</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The name of the entity object which the controller exposes to the web tier</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--disallowedOperations</term>
+                    <listitem>
+                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--dateFormat</term>
+                    <listitem>
+                        <para>The date format defaults to the current locale, use this parameter to customize the date format</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-field-commands">
+        <title>Field Commands</title>
+        <para>Field Commands are contained in org.springframework.roo.classpath.operations.FieldCommands.</para>
+        <section id="command-index-field-boolean">
+            <title>field boolean</title>
+            <para>Adds a private boolean field to an existing Java source file</para>
+            <programlisting>field boolean --fieldName</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--assertFalse</term>
+                    <listitem>
+                        <para>Whether this value must assert false</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--assertTrue</term>
+                    <listitem>
+                        <para>Whether this value must assert true</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA column name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--primitive</term>
+                    <listitem>
+                        <para>Indicates to use a primitive type</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-date">
+            <title>field date</title>
+            <para>Adds a private date field to an existing Java source file</para>
+            <programlisting>field date --fieldName --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The Java type of the entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--persistenceType</term>
+                    <listitem>
+                        <para>The type of persistent storage to be used</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--future</term>
+                    <listitem>
+                        <para>Whether this value must be in the future</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--past</term>
+                    <listitem>
+                        <para>Whether this value must be in the past</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA column name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-enum">
+            <title>field enum</title>
+            <para>Adds a private enum field to an existing Java source file</para>
+            <programlisting>field enum --fieldName --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The enum type of this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--enumType</term>
+                    <listitem>
+                        <para>The fetch semantics at a JPA level</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-number">
+            <title>field number</title>
+            <para>Adds a private numeric field to an existing Java source file</para>
+            <programlisting>field number --fieldName --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The Java type of the entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--decimalMin</term>
+                    <listitem>
+                        <para>The BigDecimal string-based representation of the minimum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--decimalMax</term>
+                    <listitem>
+                        <para>The BigDecimal string based representation of the maximum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--min</term>
+                    <listitem>
+                        <para>The minimum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--max</term>
+                    <listitem>
+                        <para>The maximum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA column name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--primitive</term>
+                    <listitem>
+                        <para>Indicates to use a primitive type if possible</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-other">
+            <title>field other</title>
+            <para>Inserts a private field into the specified file</para>
+            <programlisting>field other --path --name --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>The path where the class can be found</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>The name of the field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The Java type of this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-reference">
+            <title>field reference</title>
+            <para>Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)</para>
+            <programlisting>field reference --fieldName --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The Java type of the entity to reference</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--joinColumnName</term>
+                    <listitem>
+                        <para>The JPA Join Column name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fetch</term>
+                    <listitem>
+                        <para>The fetch semantics at a JPA level</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-set">
+            <title>field set</title>
+            <para>Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)</para>
+            <programlisting>field set --fieldName --element</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--element</term>
+                    <listitem>
+                        <para>The entity which will be contained within the Set</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--mappedBy</term>
+                    <listitem>
+                        <para>The field name on the referenced type which owns the relationship</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMin</term>
+                    <listitem>
+                        <para>The minimum string length</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMax</term>
+                    <listitem>
+                        <para>The maximum string length</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--cardinality</term>
+                    <listitem>
+                        <para>The relationship cardinarily at a JPA level</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--fetch</term>
+                    <listitem>
+                        <para>The fetch semantics at a JPA level</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-string">
+            <title>field string</title>
+            <para>Adds a private string field to an existing Java source file</para>
+            <programlisting>field string --fieldName</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--decimalMin</term>
+                    <listitem>
+                        <para>The BigDecimal string-based representation of the minimum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--decimalMax</term>
+                    <listitem>
+                        <para>The BigDecimal string based representation of the maximum value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMin</term>
+                    <listitem>
+                        <para>The minimum string length</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--sizeMax</term>
+                    <listitem>
+                        <para>The maximum string length</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--regexp</term>
+                    <listitem>
+                        <para>The required regular expression pattern</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA column name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--transient</term>
+                    <listitem>
+                        <para>Indicates to mark the field as transient</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-finder-commands">
+        <title>Finder Commands</title>
+        <para>Finder Commands are contained in org.springframework.roo.addon.finder.FinderCommands.</para>
+        <section id="command-index-finder-add">
+            <title>finder add</title>
+            <para>Install finders in the given target (must be an entity)</para>
+            <programlisting>finder add --finderName</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The controller or entity for which the finders are generated</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--finderName</term>
+                    <listitem>
+                        <para>The finder string as generated with 'list finders for'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-finder-list">
+            <title>finder list</title>
+            <para>List all finders for a given target (must be an entity</para>
+            <programlisting>finder list --class</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The controller or entity for which the finders are generated</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--depth</term>
+                    <listitem>
+                        <para>The depth of attribute combinations to be generated for the finders</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--filter</term>
+                    <listitem>
+                        <para>A comma separated list of strings that must be present in a filter to be included</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-hint-commands">
+        <title>Hint Commands</title>
+        <para>Hint Commands are contained in org.springframework.roo.classpath.operations.HintCommands.</para>
+        <section id="command-index-hint">
+            <title>hint</title>
+            <para>Provides step-by-step hints and context-sensitive guidance</para>
+            <programlisting>hint</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topic</term>
+                    <listitem>
+                        <para>The topic for which advice should be provided</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-integration-test-commands">
+        <title>Integration Test Commands</title>
+        <para>Integration Test Commands are contained in org.springframework.roo.addon.test.IntegrationTestCommands.</para>
+        <section id="command-index-test-mock">
+            <title>test mock</title>
+            <para>Creates a mock test for the specified entity</para>
+            <programlisting>test mock</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-j-line-shell">
+        <title>J Line Shell</title>
+        <para>J Line Shell are contained in org.springframework.roo.shell.jline.JLineShell.</para>
+        <section id="command-index-*/">
+            <title>*/</title>
+            <para>End of block comment</para>
+            <programlisting>*/</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-/*">
+            <title>/*</title>
+            <para>Start of block comment</para>
+            <programlisting>/*</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-//">
+            <title>//</title>
+            <para>Inline comment markers</para>
+            <programlisting>//</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-date">
+            <title>date</title>
+            <para>Displays the local date and time</para>
+            <programlisting>date</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-exit">
+            <title>exit</title>
+            <para>Exits the shell</para>
+            <programlisting>exit</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-props">
+            <title>props</title>
+            <para>Shows the shell's properties</para>
+            <programlisting>props</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-script">
+            <title>script</title>
+            <para>Parses the specified resource file and executes its commands</para>
+            <programlisting>script --file</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--file</term>
+                    <listitem>
+                        <para>The file to locate and execute</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--lineNumbers</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-version">
+            <title>version</title>
+            <para>Displays shell version</para>
+            <programlisting>version</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--[default]</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-jms-commands">
+        <title>Jms Commands</title>
+        <para>Jms Commands are contained in org.springframework.roo.addon.jms.JmsCommands.</para>
+        <section id="command-index-field-jms-template">
+            <title>field jms template</title>
+            <para>insert a JmsTemplate field into an existing type</para>
+            <programlisting>field jms template</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-jms-listener-class">
+            <title>jms listener class</title>
+            <para>Create a new class which is a asynchronous JMS consumer</para>
+            <programlisting>jms listener class --class</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to create</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--destinationName</term>
+                    <listitem>
+                        <para>The name of the destination</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--destinationType</term>
+                    <listitem>
+                        <para>The type of the destination</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-jms-setup">
+            <title>jms setup</title>
+            <para>Install a JMS provider in your project</para>
+            <programlisting>jms setup --provider</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The persistence provider to support</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--destinationName</term>
+                    <listitem>
+                        <para>The name of the destination</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--destinationType</term>
+                    <listitem>
+                        <para>The type of the destination</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-jpa-commands">
+        <title>Jpa Commands</title>
+        <para>Jpa Commands are contained in org.springframework.roo.addon.jpa.JpaCommands.</para>
+        <section id="command-index-database-properties-list">
+            <title>database properties list</title>
+            <para>Shows database configuration details</para>
+            <programlisting>database properties list</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-database-properties-remove">
+            <title>database properties remove</title>
+            <para>Removes a particular database property</para>
+            <programlisting>database properties remove --key</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--key</term>
+                    <listitem>
+                        <para>The property key that should be removed</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-database-properties-set">
+            <title>database properties set</title>
+            <para>Changes a particular database property</para>
+            <programlisting>database properties set --key --value</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--key</term>
+                    <listitem>
+                        <para>The property key that should be changed</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>The new vale for this property key</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-persistence-exception-translation">
+            <title>persistence exception translation</title>
+            <para>Installs support for JPA exception translation</para>
+            <programlisting>persistence exception translation</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which the JPA exception translation aspect will be installed</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-persistence-setup">
+            <title>persistence setup</title>
+            <para>Install or updates a JPA persistence provider in your project</para>
+            <programlisting>persistence setup --provider --database</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The persistence provider to support</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--database</term>
+                    <listitem>
+                        <para>The database to support</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--jndiDataSource</term>
+                    <listitem>
+                        <para>The JNDI datasource to use</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-logging-commands">
+        <title>Logging Commands</title>
+        <para>Logging Commands are contained in org.springframework.roo.addon.logging.LoggingCommands.</para>
+        <section id="command-index-logging-setup">
+            <title>logging setup</title>
+            <para>Configure logging in your project</para>
+            <programlisting>logging setup --level</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--level</term>
+                    <listitem>
+                        <para>The log level to configure</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package to append the logging level to (all by default)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-mail-commands">
+        <title>Mail Commands</title>
+        <para>Mail Commands are contained in org.springframework.roo.addon.email.MailCommands.</para>
+        <section id="command-index-email-sender-setup">
+            <title>email sender setup</title>
+            <para>Install a Spring JavaMailSender in your project</para>
+            <programlisting>email sender setup --hostServer</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--hostServer</term>
+                    <listitem>
+                        <para>The host server</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--protocol</term>
+                    <listitem>
+                        <para>The protocol used by mail server</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--port</term>
+                    <listitem>
+                        <para>The port used by mail server</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--encoding</term>
+                    <listitem>
+                        <para>The encoding used for mail</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--username</term>
+                    <listitem>
+                        <para>The mail account username</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--password</term>
+                    <listitem>
+                        <para>The mail account password</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-email-template-setup">
+            <title>email template setup</title>
+            <para>Configures a template for a SimpleMailMessage</para>
+            <programlisting>email template setup</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--from</term>
+                    <listitem>
+                        <para>The 'from' email (optional)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--subject</term>
+                    <listitem>
+                        <para>The message subject (obtional)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-field-email-template">
+            <title>field email template</title>
+            <para>Inserts a MailTemplate field into an existing type</para>
+            <programlisting>field email template</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-maven-commands">
+        <title>Maven Commands</title>
+        <para>Maven Commands are contained in org.springframework.roo.addon.maven.MavenCommands.</para>
+        <section id="command-index-dependency-add">
+            <title>dependency add</title>
+            <para>Adds a new dependency to the Maven project object model (POM)</para>
+            <programlisting>dependency add --groupId --artifactId --version</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--groupId</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--artifactId</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--version</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-dependency-remove">
+            <title>dependency remove</title>
+            <para>Removes an existing dependency from the Maven project object model (POM)</para>
+            <programlisting>dependency remove --groupId --artifactId --version</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--groupId</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--artifactId</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--version</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-perform-clean">
+            <title>perform clean</title>
+            <para>Executes a full clean (including Eclipse files) via Maven</para>
+            <programlisting>perform clean</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-perform-command">
+            <title>perform command</title>
+            <para>Executes a user-specified Maven command</para>
+            <programlisting>perform command --mavenCommand</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--mavenCommand</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-perform-eclipse">
+            <title>perform eclipse</title>
+            <para>Sets up Eclipse configuration via Maven</para>
+            <programlisting>perform eclipse</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-perform-package">
+            <title>perform package</title>
+            <para>Packages the application using Maven, but does not execute any tests</para>
+            <programlisting>perform package</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-perform-tests">
+            <title>perform tests</title>
+            <para>Executes the tests via Maven</para>
+            <programlisting>perform tests</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-project">
+            <title>project</title>
+            <para>Creates a new project</para>
+            <programlisting>project --topLevelPackage</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The uppermost package name</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--projectName</term>
+                    <listitem>
+                        <para>The name of the project (last segment of package name used as default)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--java</term>
+                    <listitem>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-metadata-commands">
+        <title>Metadata Commands</title>
+        <para>Metadata Commands are contained in org.springframework.roo.classpath.MetadataCommands.</para>
+        <section id="command-index-metadata-for-id">
+            <title>metadata for id</title>
+            <para>Shows detailed information about the metadata item</para>
+            <programlisting>metadata for id --metadataId</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--metadataId</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-metadata-for-type">
+            <title>metadata for type</title>
+            <para>Shows detailed metadata for the indicated type</para>
+            <programlisting>metadata for type --type</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-metadata-status">
+            <title>metadata status</title>
+            <para>Shows metadata statistics</para>
+            <programlisting>metadata status</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section id="command-index-metadata-trace">
+            <title>metadata trace</title>
+            <para>Traces metadata event delivery notifications (0=none, 1=some, 2=all)</para>
+            <programlisting>metadata trace --level</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--level</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-prop-file-commands">
+        <title>Prop File Commands</title>
+        <para>Prop File Commands are contained in org.springframework.roo.addon.propfiles.PropFileCommands.</para>
+        <section id="command-index-properties-list">
+            <title>properties list</title>
+            <para>Shows the details of a particular properties file</para>
+            <programlisting>properties list --name --path</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-properties-remove">
+            <title>properties remove</title>
+            <para>Removes a particular properties file property</para>
+            <programlisting>properties remove --name --path --key</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--key</term>
+                    <listitem>
+                        <para>The property key that should be removed</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-properties-set">
+            <title>properties set</title>
+            <para>Changes a particular properties file property</para>
+            <programlisting>properties set --name --path --key --value</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--key</term>
+                    <listitem>
+                        <para>The property key that should be changed</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>The new vale for this property key</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-security-commands">
+        <title>Security Commands</title>
+        <para>Security Commands are contained in org.springframework.roo.addon.security.SecurityCommands.</para>
+        <section id="command-index-security-setup">
+            <title>security setup</title>
+            <para>Install Spring Security into your project</para>
+            <programlisting>security setup</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section id="command-index-selenium-commands">
+        <title>Selenium Commands</title>
+        <para>Selenium Commands are contained in org.springframework.roo.addon.web.selenium.SeleniumCommands.</para>
+        <section id="command-index-selenium-test">
+            <title>selenium test</title>
+            <para>Creates a new Selenium test for a particular controller</para>
+            <programlisting>selenium test --controller</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--controller</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--name</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serverUrl</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section id="command-index-simple-parser">
+        <title>Simple Parser</title>
+        <para>Simple Parser are contained in org.springframework.roo.shell.SimpleParser.</para>
+        <section id="command-index-help">
+            <title>help</title>
+            <para>Shows system help</para>
+            <programlisting>help</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--command</term>
+                    <listitem>
+                        <para>(no help available)</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section id="command-index-reference-guide">
+            <title>reference guide</title>
+            <para>Writes the reference guide XML fragments (in DocBook format) into the current working directory</para>
+            <programlisting>reference guide</programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section id="command-index-web-flow-commands">
+        <title>Web Flow Commands</title>
+        <para>Web Flow Commands are contained in org.springframework.roo.addon.web.flow.WebFlowCommands.</para>
+        <section id="command-index-web-flow">
+            <title>web flow</title>
+            <para>Install Spring Web Flow configuration artifacts into your project</para>
+            <programlisting>web flow</programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--flowName</term>
+                    <listitem>
+                        <para>The name for your web flow</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+</appendix>
