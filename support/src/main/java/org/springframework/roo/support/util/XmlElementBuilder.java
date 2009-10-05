@@ -2,6 +2,7 @@ package org.springframework.roo.support.util;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Very simple convenience Builder for XML {@code Element}s
@@ -41,14 +42,14 @@ public class XmlElementBuilder {
 	}
 
 	/**
-	 * Add a child element to the current element.
+	 * Add a child node to the current element.
 	 * 
-	 * @param element The new element (required)
+	 * @param node The new node (required)
 	 * @return The builder for the current element
 	 */
-	public XmlElementBuilder addChild(Element element) {
-		Assert.notNull(element, "Element required.");
-		this.element.appendChild(element);
+	public XmlElementBuilder addChild(Node node) {
+		Assert.notNull(node, "Node required.");
+		this.element.appendChild(node);
 		return this;
 	}
 

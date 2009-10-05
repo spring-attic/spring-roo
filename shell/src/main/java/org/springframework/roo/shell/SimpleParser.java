@@ -34,6 +34,7 @@ import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -743,7 +744,7 @@ public final class SimpleParser {
 										key = "[default]";
 									}
 								}
-								String help = "".equals(option.help()) ? "(no help available)" : option.help();
+								String help = "".equals(option.help()) ? "No help available" : option.help();
 								// Store details for later
 								key = "--" + key;
 								optionKeys.add(key);
@@ -776,15 +777,16 @@ public final class SimpleParser {
 					}
 					
 					// Now we've figured out the options, store this individual command
-					Element element = new XmlElementBuilder("section", document).addAttribute("id", "command-index-" + cmd.value()[0].toLowerCase().replace(' ', '-'))
+					CDATASection progList = document.createCDATASection(cmdSyntax.toString());
+					String safeName = cmd.value()[0].replace("\\", "BCK").replace("/", "FWD").replace("*", "ASX");
+					Element element = new XmlElementBuilder("section", document).addAttribute("id", "command-index-" + safeName.toLowerCase().replace(' ', '-'))
 											.addChild(new XmlElementBuilder("title", document).setText(cmd.value()[0]).build())
 											.addChild(new XmlElementBuilder("para", document).setText(cmd.help()).build())
-											.addChild(new XmlElementBuilder("programlisting", document).setText(cmdSyntax.toString()).build())
+											.addChild(new XmlElementBuilder("programlisting", document).addChild(progList).build())
 											.addChild(variableListElement)
 											.build();
-
-					individualCommands.put(cmd.value()[0], element);
 					
+					individualCommands.put(cmdSyntax.toString(), element);
 				}
 			}
 			
@@ -806,6 +808,7 @@ public final class SimpleParser {
 		appendix.setAttribute("id", "command-index");
 		appendix.appendChild(new XmlElementBuilder("title", document).setText("Command Index").build());
 		appendix.appendChild(new XmlElementBuilder("para", document).setText("This appendix was automatically built from Roo " + AbstractShell.versionInfo() + ".").build());
+		appendix.appendChild(new XmlElementBuilder("para", document).setText("Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.").build());
 
 		for (Element section : builtSections) {
 			appendix.appendChild(section);
@@ -815,8 +818,9 @@ public final class SimpleParser {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		
 		Transformer transformer = XmlUtils.createIndentingTransformer();
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//OASIS//DTD DocBook XML V4.5//EN");
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
+		// causes an "Error reported by XML parser: Multiple notations were used which had the name 'linespecific', but which were not determined to be duplicates." when creating the DocBook
+		//transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//OASIS//DTD DocBook XML V4.5//EN");
+		//transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd");
 		
 		XmlUtils.writeXml(transformer, byteArrayOutputStream, document);
 		try {
