@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo ENGINEERING BUILD [rev 319:320M].</para>
+    <para>This appendix was automatically built from Roo 1.0.0.RC2 [rev 321].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section id="command-index-backup-commands">
         <title>Backup Commands</title>
