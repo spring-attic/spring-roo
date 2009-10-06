@@ -71,6 +71,8 @@ public class JspDocumentHelper {
 		dateFormatLocalized = webScaffoldAnnotationValues.getDateFormat();
 		entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
+		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
+		
 		if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
 			controllerPath = webScaffoldAnnotationValues.getPath().substring(1);
 		} else {
