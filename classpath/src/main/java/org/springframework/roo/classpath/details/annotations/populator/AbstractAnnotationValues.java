@@ -23,6 +23,8 @@ public abstract class AbstractAnnotationValues {
 	
 	protected AnnotationMetadata annotationMetadata = null;
 	
+	protected ClassOrInterfaceTypeDetails governorTypeDetails = null;
+	
 	/**
 	 * Parses the {@link PhysicalTypeMetadata} for the requested annotation {@link JavaType}. If found, makes
 	 * the annotation available via the {@link #annotationMetadata} field. Subclasses will then generally use
@@ -48,13 +50,20 @@ public abstract class AbstractAnnotationValues {
 			classParsed = true;
 			
 			// We have reliable physical type details
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
+			this.governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 			
 			// Process values from the annotation, if present
 			this.annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType);
 		}
 	}
 	
+	/**
+	 * @return the type which declared the annotation (ie the governor; never returns null) 
+	 */
+	public ClassOrInterfaceTypeDetails getGovernorTypeDetails() {
+		return governorTypeDetails;
+	}
+
 	public boolean isClassParsed() {
 		return classParsed;
 	}
