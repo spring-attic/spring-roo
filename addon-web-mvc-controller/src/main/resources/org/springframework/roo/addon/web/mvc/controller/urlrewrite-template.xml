@@ -7,6 +7,11 @@
 		<to last="true">/resources/$1</to>
 	</rule>
 	<rule>
+		<from>/static/WEB-INF/**</from>
+		<set type="status">403</set>
+		<to last="true">/static/WEB-INF/$1</to>
+	</rule>
+	<rule>
 		<from>/static/**</from>
 		<to last="true">/$1</to>
 	</rule>
