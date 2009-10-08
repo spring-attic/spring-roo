@@ -36,7 +36,10 @@ public class SecurityOperations {
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
 	
-	private static final Dependency DEPENDENCY = new Dependency("org.springframework.security", "org.springframework.security.core", "2.0.5.RELEASE");
+	private static final Dependency DEPENDENCY_CORE = new Dependency("org.springframework.security", "org.springframework.security.core", "3.0.0.M2");
+	private static final Dependency DEPENDENCY_CONFIG = new Dependency("org.springframework.security", "org.springframework.security.config", "3.0.0.M2");
+	private static final Dependency DEPENDENCY_WEB = new Dependency("org.springframework.security", "org.springframework.security.web", "3.0.0.M2");
+	private static final Dependency DEPENDENCY_TAGLIBS = new Dependency("org.springframework.security", "org.springframework.security.taglibs", "3.0.0.M2");
 	
 	public SecurityOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
@@ -55,12 +58,15 @@ public class SecurityOperations {
 			return false;
 		}
 		// only permit installation if they don't already have some version of Spring Security installed
-		return project.getDependenciesExcludingVersion(DEPENDENCY).size() == 0;
+		return project.getDependenciesExcludingVersion(DEPENDENCY_CORE).size() == 0;
 	}
 	
 	public void installSecurity() {
 		// add to POM
-		projectOperations.dependencyUpdate(DEPENDENCY);
+		projectOperations.dependencyUpdate(DEPENDENCY_CORE);
+		projectOperations.dependencyUpdate(DEPENDENCY_CONFIG);
+		projectOperations.dependencyUpdate(DEPENDENCY_WEB);
+		projectOperations.dependencyUpdate(DEPENDENCY_TAGLIBS);
 		
 		// copy the template across
 		String destination = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
