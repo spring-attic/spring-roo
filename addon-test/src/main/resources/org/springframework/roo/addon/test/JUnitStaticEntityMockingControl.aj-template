@@ -52,6 +52,6 @@ public aspect JUnitStaticEntityMockingControl extends AbstractMethodMockingContr
 	// @MockStatics classes to invoke each other without resetting the mocking environment
 	protected pointcut mockStaticsTestMethod() : execution(@Test public * (@MockStaticEntityMethods *).*(..));
 
-	protected pointcut methodToMock() : execution(public static * (@Entity *).*(..));
+	protected pointcut methodToMock() : call(public static * (@Entity *).*(..));
 
 }
