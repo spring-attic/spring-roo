@@ -54,6 +54,7 @@ public class ClasspathCommands implements CommandMarker {
 	@CliCommand(value="class", help="Creates a new Java class source file in any project path")
 	public void createClass(
 			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="rooAnnotations", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should have common Roo annotations") boolean rooAnnotations,
 			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
 			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
@@ -67,12 +68,18 @@ public class ClasspathCommands implements CommandMarker {
 		
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
+
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		if (rooAnnotations) {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
+		}
 		
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, null, null);
+		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, annotations, null);
 		classpathOperations.generateClassFile(details);
 	}
 	
