@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public abstract class FieldDetails {
+public class FieldDetails {
 	/** The JPA @Column value */
 	private String column = null;
 	

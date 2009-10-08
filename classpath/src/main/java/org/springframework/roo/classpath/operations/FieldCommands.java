@@ -73,23 +73,21 @@ public class FieldCommands implements CommandMarker {
 
 	@CliCommand(value="field other", help="Inserts a private field into the specified file")
 	public void insertField(
-			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType name,
-			@CliOption(key="path", mandatory=true, help="The path where the class can be found") Path path, 
-			@CliOption(key="name", mandatory=true, help="The name of the field") JavaSymbolName fieldName,
+			@CliOption(key="fieldName", mandatory=true, help="The name of the field") JavaSymbolName fieldName,
 			@CliOption(key="type", mandatory=true, help="The Java type of this field") JavaType fieldType,
+			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the class to receive this field") JavaType typeName,
+			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
+			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
+			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
-		
-		if (!permitReservedWords) {
-			// no need to check the "name" as if the class exists it is assumed it is a legal name
-			ReservedWords.verifyReservedWordsNotPresent(fieldName);
-		}
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-		int mod = Modifier.PRIVATE;
-		if (transientModifier) mod += Modifier.TRANSIENT;
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(declaredByMetadataId, mod, fieldName, fieldType, null, null);
-		classpathOperations.addField(fieldMetadata);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		JavaType useType = fieldType;
+		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, useType, fieldName);
+		if (notNull != null) fieldDetails.setNotNull(notNull);
+		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
+		if (comment != null) fieldDetails.setComment(comment);
+		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
 	private void insertField(FieldDetails fieldDetails, boolean permitReservedWords, boolean transientModifier) {
