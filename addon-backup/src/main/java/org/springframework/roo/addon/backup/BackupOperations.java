@@ -55,6 +55,11 @@ public class BackupOperations {
 		
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 		
+		if (File.separatorChar == '\\') {
+			// Windows, so make a date format that can legally form part of a filename (ROO-277)
+			df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
+		}
+		
 		long start = System.nanoTime();
 		try {
 			File projectDirectory = new File(getPathResolver().getIdentifier(Path.ROOT, "."));
