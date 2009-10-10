@@ -13,6 +13,30 @@
         <developerConnection>scm:svn:https://src.springsource.com/svn/roo/trunk</developerConnection>
     </scm>
 
+    <distributionManagement>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Milestone Repository</name>
+            <url>s3://maven.springframework.org/milestone</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>spring-snapshot</id>
+            <name>Spring Snapshot Repository</name>
+            <url>s3://maven.springframework.org/snapshot</url>
+        </snapshotRepository>
+
+        <site>
+            <id>local</id>
+            <name>Local Site Directory</name>
+            <!--
+            This variable is set by the build release script. You can also set it on the command line if
+            you are running maven directly. e.g. mvn site -DsiteDirectory=file:///home/joe/mysite
+            -->
+            <url>${siteDirectory}</url>
+        </site>
+    </distributionManagement>
+
 	<build>
 		<plugins>
       		<plugin>
