@@ -100,7 +100,7 @@ public class IntegrationTestOperations {
 				imbb.appendFormalLine(countMethod + ";");
 				imbb.appendFormalLine(mockPackageWithTrailingDot + "JUnitStaticEntityMockingControl.expectReturn(expectedCount);");
 				imbb.appendFormalLine(mockPackageWithTrailingDot + "JUnitStaticEntityMockingControl.playback();");
-				imbb.appendFormalLine("junit.framework.Assert.assertEquals(expectedCount, " + countMethod + ");");
+				imbb.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
 			}
 		}
 		
