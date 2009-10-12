@@ -91,7 +91,7 @@ public class Dependency implements Comparable<Dependency> {
 			}
         }
         //test if it has Maven format
-        if(dependency.hasChildNodes()) {
+        if (dependency.hasChildNodes() && dependency.getElementsByTagName("groupId").getLength() > 0 && dependency.getElementsByTagName("artifactId").getLength() > 0) {
         	this.groupId = new JavaPackage(dependency.getElementsByTagName("groupId").item(0).getTextContent());
 	        this.artifactId = new JavaSymbolName(dependency.getElementsByTagName("artifactId").item(0).getTextContent());
 
@@ -124,7 +124,7 @@ public class Dependency implements Comparable<Dependency> {
         	this.versionId = dependency.getAttribute("rev");
         	//TODO: implement exclusions parser for IVY format
         } else {
-        	throw new IllegalStateException("Depenency XML format not supported");
+        	throw new IllegalStateException("Depenency XML format not supported or is missing a mandatory node ('" + dependency + "')");
         }
 	}
 	

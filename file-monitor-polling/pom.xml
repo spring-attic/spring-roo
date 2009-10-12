@@ -15,13 +15,11 @@
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.file.monitor</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

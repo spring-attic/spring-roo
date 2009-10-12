@@ -15,6 +15,7 @@ import org.springframework.roo.project.ProjectMetadataProvider;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -31,15 +32,21 @@ public class MavenOperations extends ProjectOperations {
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
-	
-	public MavenOperations(MetadataService metadataService, ProjectMetadataProvider projectMetadataProvider, FileManager fileManager, PathResolver pathResolver) {
+	private ApplicationContextOperations applicationContextOperations;
+	private AddOnJumpstartOperations addOnJumpstartOperations;
+
+	public MavenOperations(MetadataService metadataService, ProjectMetadataProvider projectMetadataProvider, FileManager fileManager, PathResolver pathResolver, ApplicationContextOperations applicationContextOperations, AddOnJumpstartOperations addOnJumpstartOperations) {
 		super(metadataService, projectMetadataProvider);
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
+		Assert.notNull(applicationContextOperations, "Application context operations required");
+		Assert.notNull(addOnJumpstartOperations, "Add-on jumpstart operations required");
 		this.metadataService = metadataService;
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
+		this.applicationContextOperations = applicationContextOperations;
+		this.addOnJumpstartOperations = addOnJumpstartOperations;
 	}
 	
 	public boolean isCreateProjectAvailable() {
@@ -50,12 +57,14 @@ public class MavenOperations extends ProjectOperations {
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	public void createProject(InputStream templateInputStream, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
+	public void createProject(Template template, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
-		Assert.notNull(templateInputStream, "Could not acquire template POM");
+		Assert.notNull(template, "Template required");
 		Assert.notNull(topLevelPackage, "Top level package required");
-		Assert.hasText(projectName, "Project name required");
 		
+		// Note the Template.getKey() provides the Maven POM template filename to read
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), template.getKey());
+
 		if (majorJavaVersion == null || (majorJavaVersion < 5 || majorJavaVersion > 7)) {
 			// We need to detect the major Java version to use
 			String ver = System.getProperty("java.version");
@@ -69,8 +78,34 @@ public class MavenOperations extends ProjectOperations {
 				// To be running Roo they must be on Java 5 or above
 				majorJavaVersion = 5;
 			}
+			// Always discard the above and use Java 5 if this is an add-on
+			if (template.isAddOn()) {
+				majorJavaVersion = 5;
+			}
 		}
-		
+
+		if (projectName == null) {
+			String packageName = topLevelPackage.getFullyQualifiedPackageName();
+			int lastIndex = packageName.lastIndexOf(".");
+			if (lastIndex == -1) {
+				projectName = packageName;
+			} else {
+				projectName = packageName.substring(lastIndex+1);
+			}
+			// Always discard the above and use the package name as the name if this is an add-on
+			if (template.isAddOn()) {
+				projectName = topLevelPackage.getFullyQualifiedPackageName();
+			}
+		}
+
+		// Apply special add-on convention rules
+		if (Template.ROO_ADDON_SIMPLE.equals(template)) {
+			Assert.isTrue(majorJavaVersion == 5, "Roo add-ons must be Java 5 only");
+			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().startsWith("com.") || topLevelPackage.getFullyQualifiedPackageName().startsWith("org.") || topLevelPackage.getFullyQualifiedPackageName().startsWith("net."), "Roo add-ons must have a top-level package starting with .com or .net or .org; eg com.mycompany.myproject.roo.addon");
+			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().endsWith(".roo.addon"), "Roo add-ons must have a package name ending in .roo.addon; eg com.mycompany.myproject.roo.addon");
+			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().equals(projectName), "Roo add-ons must have the same project name as the top-level-package name");
+		}
+
 		Document pom;
 		try {
 			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
@@ -91,12 +126,18 @@ public class MavenOperations extends ProjectOperations {
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 		
-		fileManager.scan();
-		
-		// Finally, Java 5 needs the javax.annotation library (it's included in Java 6 and above)
-		if (majorJavaVersion == 5) {
+		// Java 5 needs the javax.annotation library (it's included in Java 6 and above)
+		if (majorJavaVersion == 5 && !template.isAddOn()) {
 			dependencyUpdate(new Dependency("javax.annotation", "com.springsource.javax.annotation", "1.0.0"));
 		}
+
+		if (template.isAddOn()) {
+			addOnJumpstartOperations.install(template);
+		}
+		
+		fileManager.scan();
+		
+		applicationContextOperations.createMiddleTierApplicationContext();
 	}
 	
 }

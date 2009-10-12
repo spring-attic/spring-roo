@@ -4,16 +4,11 @@
 	xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
                     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd'>
 
-	<!--
-		Temporary component scanning only supports ROO components in the CLI
-		classpath under the org.springframework.roo package
-	-->
-	<context:component-scan base-package="org.springframework.roo"
+	<!-- See PathMatchingResourcePatternResolver for background on why a first-level directory is mandatory for classpath-derived resources -->
+	<context:component-scan base-package="com.**.roo.,org.**.roo.,net.**.roo."
 		use-default-filters="false">
-		<context:include-filter type="annotation"
-			expression="org.springframework.roo.support.lifecycle.ScopeDevelopment" />
-		<context:include-filter type="annotation"
-			expression="org.springframework.roo.support.lifecycle.ScopeDevelopmentShell" />
+		<context:include-filter type="annotation" expression="org.springframework.roo.support.lifecycle.ScopeDevelopment" />
+		<context:include-filter type="annotation" expression="org.springframework.roo.support.lifecycle.ScopeDevelopmentShell" />
 	</context:component-scan>
 
 	<bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
@@ -27,8 +22,6 @@
 		</property>
 	</bean>
 	
-	<bean id="menuOperations" class="org.springframework.roo.addon.web.menu.MenuOperations" />
-
 	<!--
 		Used by DefaultProcessManager to monitor the current working directory
 		for project metadata files (eg pom.xml)

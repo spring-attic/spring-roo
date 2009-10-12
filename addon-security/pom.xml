@@ -11,48 +11,40 @@
 	<name>Spring Roo - Addon - Spring Security</name>
 	<dependencies>
         <!-- ROO modules -->
-        <!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.shell</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.process.manager</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.project</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.metadata</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.model</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
 			<version>${roo.version}</version>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

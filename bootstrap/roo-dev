@@ -1,0 +1,23 @@
+#/bin/shell
+ 
+if [ -z "$ROO_CLASSPATH_FILE" ]; then
+    echo "WARNING: ROO_CLASSPATH_FILE environment variable is not set"
+    quit
+fi
+ 
+while true; do
+ 
+    read ROO_CP <$ROO_CLASSPATH_FILE
+
+    if [ -e "$ROO_ADDON_CLASSPATH_FILE" ]; then
+    read ADDON_CP <$ROO_ADDON_CLASSPATH_FILE
+    ROO_CP=$ROO_CP:$ADDON_CP
+    fi
+
+    ROO_CP=$ROO_CP:`echo $HOME/roo-dev/work/*.jar | sed 's/ /:/g'`
+
+    java -DdevelopmentMode=true -Droo.home="$HOME/roo-dev" -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" $@
+    if [ $? -ne 100 ]; then
+		break
+	fi
+done

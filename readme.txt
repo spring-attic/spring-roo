@@ -53,7 +53,7 @@ instructions above and are on a *nix machine, you can just type:
 
 You're almost finished. You just need to wrap up with a symbolic link:
 
-  sudo ln -s ~/spring-roo/trunk/bootstrap/roo-mvn /usr/bin/roo-dev
+  sudo ln -s ~/spring-roo/trunk/bootstrap/roo-dev /usr/bin/roo-dev
   sudo chmod +x /usr/bin/roo-dev
 
 ======================================================================

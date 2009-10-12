@@ -3,7 +3,6 @@ package org.springframework.roo.addon.maven;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,22 +13,21 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
 
 @ScopeDevelopmentShell
 public class MavenCommands implements CommandMarker {
 	
 	private MavenOperations mavenOperations;
-	private ApplicationContextOperations applicationContextOperations;
 	protected final Logger logger = Logger.getLogger(getClass().getName());
 
-	public MavenCommands(MavenOperations mavenOperations, ApplicationContextOperations applicationContextOperations) {
+	public MavenCommands(StaticFieldConverter staticFieldConverter, MavenOperations mavenOperations) {
+		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(mavenOperations, "Maven operations required");
-		Assert.notNull(applicationContextOperations, "Application context operations required");
+		staticFieldConverter.add(Template.class);
 		this.mavenOperations = mavenOperations;
-		this.applicationContextOperations = applicationContextOperations;
 	}
 
 	@CliAvailabilityIndicator("project")
@@ -38,21 +36,12 @@ public class MavenCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="project", help="Creates a new project")
-	public void createProject(@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name") JavaPackage topLevelPackage,
+	public void createProject(
+			@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name") JavaPackage topLevelPackage,
 			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName,
-			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
-		if (projectName == null) {
-			String packageName = topLevelPackage.getFullyQualifiedPackageName();
-			int lastIndex = packageName.lastIndexOf(".");
-			if (lastIndex == -1) {
-				projectName = packageName;
-			} else {
-				projectName = packageName.substring(lastIndex+1);
-			}
-		}
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "pom-template.xml");
-		mavenOperations.createProject(templateInputStream, topLevelPackage, projectName, majorJavaVersion);
-		applicationContextOperations.createMiddleTierApplicationContext();
+			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
+			@CliOption(key="template", mandatory=false, specifiedDefaultValue="STANDARD_PROJECT", unspecifiedDefaultValue="STANDARD_PROJECT", help="The type of project to create (defaults to STANDARD_PROJECT)") Template template) {
+		mavenOperations.createProject(template, topLevelPackage, projectName, majorJavaVersion);
 	}
 	
 	@CliAvailabilityIndicator({"dependency add", "dependency remove"})
