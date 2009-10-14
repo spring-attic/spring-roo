@@ -9,6 +9,5 @@
 	<artifactId>org.springframework.roo.support</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Support</name>
-	<dependencies>
-	</dependencies>
+	<dependencies/>
 </project>

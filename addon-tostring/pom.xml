@@ -13,36 +13,6 @@
         <!-- ROO modules -->
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.classpath</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.process.manager</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.support</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.metadata</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.model</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.project</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
 			<version>${roo.version}</version>
 		</dependency>

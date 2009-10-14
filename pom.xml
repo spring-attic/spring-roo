@@ -434,6 +434,22 @@
     <reporting>
 		<excludeDefaults>true</excludeDefaults>
         <plugins>
+              <plugin>
+                <groupId>com.googlecode.maven-overview-plugin</groupId>
+                <artifactId>maven-overview-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <scopes><scope>compile</scope></scopes>
+                    <height>2000</height>
+                    <width>2000</width>
+                    <exclusions>
+					    <exclusion>
+						    <groupId>org.springframework.roo</groupId>
+						    <artifactId>org.springframework.roo.bootstrap</artifactId>
+					    </exclusion>
+                    </exclusions>
+                </configuration>
+              </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
