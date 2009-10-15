@@ -9,6 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
+import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -46,21 +47,17 @@ public class Bootstrap {
         }
         String executeThenQuit = sb.toString();
         
-        boolean successful = true;
+        ExitShellRequest exitShellRequest;
         try {
         	bootstrap = new Bootstrap(applicationContextLocation);
-            successful = bootstrap.run(executeThenQuit);
+            exitShellRequest = bootstrap.run(executeThenQuit);
         } catch (RuntimeException t) {
-        	successful = false;
         	throw t;
         } finally {
     		HandlerUtils.flushAllHandlers(Logger.getLogger(""));
         }
         
-        if (successful) {
-        	System.exit(0);
-        }
-        System.exit(1);
+       	System.exit(exitShellRequest.getExitCode());
     }
 
 	public Bootstrap(String applicationContextLocation) throws IOException {
@@ -101,15 +98,24 @@ public class Bootstrap {
 		// Set a suitable priority level on ROO log messages
 		Logger rooLogger = Logger.getLogger("org.springframework.roo");
 		rooLogger.setLevel(Level.FINE);
-}
+	}
 	
-	protected boolean run(String executeThenQuit) {
-        boolean successful = true;
+	protected ExitShellRequest run(String executeThenQuit) {
+		ExitShellRequest exitShellRequest;
 		if (!"".equals(executeThenQuit)) {
-        	successful = shell.executeCommand(executeThenQuit);
-        	shell.requestExit();
+        	boolean successful = shell.executeCommand(executeThenQuit);
+        	if (successful) {
+        		exitShellRequest = ExitShellRequest.NORMAL_EXIT;
+        	} else {
+        		exitShellRequest = ExitShellRequest.FATAL_EXIT;
+        	}
         } else {
            	shell.promptLoop();
+           	exitShellRequest = shell.getExitShellRequest();
+           	if (exitShellRequest == null) {
+           		// shouldn't really happen, but we'll fallback to this anyway
+           		exitShellRequest = ExitShellRequest.NORMAL_EXIT;
+           	}
         }
         
         ctx.close();
@@ -117,6 +123,6 @@ public class Bootstrap {
         if (shell.isDevelopmentMode()) {
         	System.out.println("Total execution time: " + sw.getLastTaskTimeMillis() + " ms");
         }
-        return successful;
+        return exitShellRequest;
 	}
 }

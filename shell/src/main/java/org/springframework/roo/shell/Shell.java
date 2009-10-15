@@ -25,6 +25,11 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	void promptLoop();
 
 	/**
+	 * @return null if no exit was requested, otherwise the last exit code indicated to the shell to use
+	 */
+	ExitShellRequest getExitShellRequest();
+	
+	/**
 	 * Runs the specified command. Control will return to the caller after the command is run. 
 	 * 
 	 * @param line to execute (required)
@@ -32,11 +37,6 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 */
 	boolean executeCommand(String line);
 
-	/**
-	 * Only attempts to exit after user's next command has been completed.
-	 */
-	void requestExit();
-	
 	/**
 	 * @return the parser (never null)
 	 */

@@ -71,7 +71,7 @@ public class JLineShell extends AbstractShell implements Shell {
     	setShellStatus(ShellStatus.USER_INPUT);
     	String line;
         try {
-            while (!requestShutdown && ( (line = reader.readLine() ) != null) ) {
+            while (exitShellRequest == null && ( (line = reader.readLine() ) != null) ) {
             	JLineLogHandler.resetMessageTracking();
             	setShellStatus(ShellStatus.USER_INPUT);
 

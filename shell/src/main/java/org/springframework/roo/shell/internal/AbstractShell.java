@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.ExecutionStrategy;
+import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.ParseResult;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
@@ -35,7 +36,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 
 	protected final Logger logger = Logger.getLogger(getClass().getName());
     protected boolean inBlockComment = false;
-    protected boolean requestShutdown = false;
+    protected ExitShellRequest exitShellRequest = null;
     protected ExecutionStrategy executionStrategy;
 	public static String shellPrompt = "roo> ";
 	public static String completionKeys = "TAB";
@@ -77,13 +78,14 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		        	boolean success = executeCommand(line);
 		        	if (!success) {
 		        		// Abort script processing, given something went wrong
-		        		logger.fine("Script execution aborted");
-		        		return;
+		        		throw new IllegalStateException("Script execution aborted");
 		        	}
 	        	}
 	        }
 	        in.close();
-	    } catch (IOException e) {}
+	    } catch (IOException e) {
+	    	throw new IllegalStateException(e);
+	    }
 	    logger.fine("Milliseconds required: " + (new Date().getTime() - started));
 	}
 	
@@ -115,12 +117,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				return true;
 			}
 			ParseResult parseResult = getParser().parse(line);
-		    if (parseResult != null) {
+			if (parseResult == null) {
+				return false;
+			} else {
 		    	setShellStatus(ShellStatus.EXECUTING);
 		    	Object result = executionStrategy.execute(parseResult);
 		    	setShellStatus(ShellStatus.EXECUTION_RESULT_PROCESSING);
 		    	if (result != null) {
-		    		if (result instanceof Iterable<?>) {
+		    		if (result instanceof ExitShellRequest) {
+		    			exitShellRequest = (ExitShellRequest) result;
+		    		} else if (result instanceof Iterable<?>) {
 		    			for (Object o : (Iterable<?>)result) {
 		    				logger.info(o.toString());
 		    			}
@@ -141,9 +147,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return true;
 	}
 
+	public ExitShellRequest getExitShellRequest() {
+		return exitShellRequest;
+	}
+
 	@CliCommand(value={"exit", "quit"}, help="Exits the shell")
-	public void requestExit() {
-		requestShutdown = true;
+	public ExitShellRequest requestExit() {
+		return ExitShellRequest.NORMAL_EXIT;
 	}
 
 	@CliCommand(value={"//", ";"}, help="Inline comment markers")

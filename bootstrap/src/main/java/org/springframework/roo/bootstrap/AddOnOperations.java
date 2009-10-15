@@ -65,7 +65,10 @@ public class AddOnOperations {
 		return dir;
 	}
 
-	public void cleanUp() {
+	/**
+	 * @return true if a shell restart is desired
+	 */
+	public boolean cleanUp() {
 		File rooHome = getRooHome();
 		File addonDir = getDir("add-ons");
 		File workDir = getDir("work");
@@ -163,11 +166,13 @@ public class AddOnOperations {
 		// an exit code of 100 means we want the Roo startup script to reload Roo
 		if (changesPending) {
 			logger.log(Level.SEVERE, "Restarting Spring Roo");
-			System.exit(100);
+			return true;
 		}
+		
+		return false;
 	}
 
-	public void install(String url) {
+	public boolean install(String url) {
 		Assert.hasText(url, "URL required");
 		Assert.isTrue(url.endsWith(".zip"), "Add-ons URLs must end with .zip");
 		
@@ -217,17 +222,17 @@ public class AddOnOperations {
 		
 		logger.fine("Performing clean");
 		logger.fine("");
-		cleanUp();
+		return cleanUp();
 	}
 
-	public void uninstall(String pattern) {
+	public boolean uninstall(String pattern) {
 		Assert.hasText(pattern, "Deletion pattern required");
 		File addonDir = getDir("add-ons");
 		logger.fine("Add-ons dir..: " + addonDir.getAbsolutePath());
 		File[] addons = addonDir.listFiles();
 		if (addons.length == 0) {
 			logger.fine("No add-ons installed");
-			return;
+			return false;
 		}
 		
 		boolean changesPending = false;
@@ -244,9 +249,10 @@ public class AddOnOperations {
 		if (changesPending) {
 			logger.fine("Performing clean");
 			logger.fine("");
-			cleanUp();
+			return cleanUp();
 		}
 
+		return false;
 	}
 
 	public void list() {
