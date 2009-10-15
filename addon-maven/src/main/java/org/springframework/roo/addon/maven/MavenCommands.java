@@ -59,7 +59,7 @@ public class MavenCommands implements CommandMarker {
 		mavenOperations.removeDependency(groupId, artifactId, version);
 	}
 	
-	@CliAvailabilityIndicator({"perform package", "perform eclipse", "perform tests", "perform clean", "perform command"})
+	@CliAvailabilityIndicator({"perform package", "perform eclipse", "perform tests", "perform clean", "perform assembly", "perform command"})
 	public boolean isPerformCommandAllowed() {
 		return mavenOperations.isPerformCommandAllowed();
 	}
@@ -77,6 +77,11 @@ public class MavenCommands implements CommandMarker {
 	@CliCommand(value={"perform tests"}, help="Executes the tests via Maven")
 	public void runTest() throws IOException {
 		mvn("test");
+	}
+
+	@CliCommand(value={"perform assembly"}, help="Executes the assembly goal via Maven")
+	public void runAssembly() throws IOException {
+		mvn("assembly:assembly");
 	}
 
 	@CliCommand(value={"perform clean"}, help="Executes a full clean (including Eclipse files) via Maven")

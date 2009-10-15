@@ -1,6 +1,6 @@
 project --topLevelPackage com.mycompany.myproject.roo.addon --template ROO_ADDON_SIMPLE
 perform eclipse
-perform command --mavenCommand assembly:assembly
+perform assembly
 
 ; Now you can use addon install --url file:/the/path/target/the_zip_as_per_above.zip
 ; Roo will magically restart and you'll have the new add-on (use the 'welcome' commands)
