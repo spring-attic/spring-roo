@@ -123,7 +123,7 @@ public class SeleniumOperations {
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
 		
-		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName().toLowerCase() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/form"));							
+		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/form"));							
 //		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
 		
 		for (FieldMetadata field : getEligableFields()) {
@@ -175,7 +175,7 @@ public class SeleniumOperations {
 		Element td = suite.createElement("td");
 		tr.appendChild(td);
 		Element a = suite.createElement("a");
-		a.setAttribute("href", serverURL + projectMetadata.getProjectName().toLowerCase() + "/static/" + testPath);
+		a.setAttribute("href", serverURL + projectMetadata.getProjectName() + "/static/" + testPath);
 		a.setTextContent(name);
 		td.appendChild(a);
 		
@@ -349,17 +349,17 @@ public class SeleniumOperations {
 			} else {
 				initializer = simpleDateFormat.format(cal.getTime());
 			}
-		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {		
+		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {		
 			initializer = new Boolean(true).toString();
-		} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
+		} else if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
 			initializer = new Integer(index).toString();
-		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
+		} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
 			initializer = new Double(index).toString();
-		} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
+		} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
 			initializer = new Float(index).toString();
-		} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
+		} else if (field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
 			initializer = new Long(index).toString();
-		} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
+		} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 			initializer = new Short(index).toString();
 		} 
 		return initializer;		
