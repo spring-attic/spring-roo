@@ -89,9 +89,9 @@ public class JspDocumentHelper {
 		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:roo", "urn:jsptagdir:/WEB-INF/tags").addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
 		document.appendChild(div);
 
-		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title").addAttribute("style", "width: 100%")
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", entityMetadata.getPlural()).addAttribute("var", "title").build())
-								.addChild(DojoUtils.getTitlePaneDojo(document, "${title}"))
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", entityMetadata.getPlural()).addAttribute("var", "title_msg").build())
+								.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
 								.build();
 		
 		Element ifElement = document.createElementNS("http://java.sun.com/jsp/jstl/core", "c:if");
@@ -256,14 +256,14 @@ public class JspDocumentHelper {
 		document.appendChild(div);
 		
 		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.show");
 		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		message.setAttribute("var", "title");
+		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title}"));
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 		
 		Element ifElement = document.createElement("c:if");
 		ifElement.setAttribute("test", "${not empty " + entityName + "}");
@@ -319,14 +319,14 @@ public class JspDocumentHelper {
 		document.appendChild(div);		
 
 		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.create");
 		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		message.setAttribute("var", "title");
+		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title}"));
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -373,14 +373,14 @@ public class JspDocumentHelper {
 		document.appendChild(div);
 		
 		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title");
+		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.update");
 		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		message.setAttribute("var", "title");
+		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title}"));
+		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 		
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -437,14 +437,14 @@ public class JspDocumentHelper {
 		document.appendChild(div);
 		
 		Element titleDivElement = document.createElement("div");
-		titleDivElement.setAttribute("id", "_title");
+		titleDivElement.setAttribute("id", "_title_div");
 		titleDivElement.setAttribute("style", "width: 100%");
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.find");
 		message.setAttribute("arguments", new JavaSymbolName(finderName).getReadableSymbolName());
-		message.setAttribute("var", "title");
+		message.setAttribute("var", "title_msg");
 		titleDivElement.appendChild(message);
-		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title}"));
+		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 			
 		Element url = document.createElement("c:url");
 		url.setAttribute("var", "form_url");
@@ -552,11 +552,11 @@ public class JspDocumentHelper {
 				divElement.appendChild(formInput);
 				Element required = document.createElement("spring:message");
 				required.setAttribute("code", "field.required");
-				required.setAttribute("var", "required");
+				required.setAttribute("var", "field_required");
 				divElement.appendChild(required);
 				Element dojoMessage = document.createElement("spring:message");
 				dojoMessage.setAttribute("code", "field.simple.validation");
-				dojoMessage.setAttribute("arguments", paramName.getReadableSymbolName() + ",(${required})");
+				dojoMessage.setAttribute("arguments", paramName.getReadableSymbolName() + ",(${field_required})");
 				dojoMessage.setAttribute("argumentSeparator", ",");
 				dojoMessage.setAttribute("var", "validation_required");
 				divElement.appendChild(dojoMessage);				
@@ -704,12 +704,12 @@ public class JspDocumentHelper {
 								
 								Element required = document.createElement("spring:message");
 								required.setAttribute("code", "field.required");
-								required.setAttribute("var", "required");
+								required.setAttribute("var", "field_required");
 								divElement.appendChild(required);
 								
 								Element validMessage = document.createElement("spring:message");
 								validMessage.setAttribute("code", "field.simple.validation");
-								validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
+								validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${field_required})" : ","));
 								validMessage.setAttribute("argumentSeparator", ",");
 								validMessage.setAttribute("var", "field_validation");
 								divElement.appendChild(validMessage);
@@ -751,12 +751,12 @@ public class JspDocumentHelper {
 					
 					Element required = document.createElement("spring:message");
 					required.setAttribute("code", "field.required");
-					required.setAttribute("var", "required");
+					required.setAttribute("var", "field_required");
 					divElement.appendChild(required);
 					
 					Element validMessage = document.createElement("spring:message");
 					validMessage.setAttribute("code", "field.simple.validation");
-					validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${required})" : ","));
+					validMessage.setAttribute("arguments", field.getFieldName().getReadableSymbolName() + (isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations()) ? ",(${field_required})" : ","));
 					validMessage.setAttribute("argumentSeparator", ",");
 					validMessage.setAttribute("var", "field_validation");
 					

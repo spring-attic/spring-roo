@@ -30,7 +30,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.TitlePane");		
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '" + title + "'}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_div', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '" + title + "'}})); ");
 		return script;
 	}
 	

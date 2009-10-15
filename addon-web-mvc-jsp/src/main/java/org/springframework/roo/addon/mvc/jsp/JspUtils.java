@@ -65,7 +65,7 @@ public class JspUtils {
 	public static Element getErrorsElement(Document document, JavaSymbolName field) {
 		Element errors = document.createElement("form:errors");
 		errors.setAttribute("path", field.getSymbolName());
-		errors.setAttribute("id", "_" + field.getSymbolName());
+		errors.setAttribute("id", "_" + field.getSymbolName() + "_error");
 		errors.setAttribute("cssClass", "errors");
 		return errors;
 	}
