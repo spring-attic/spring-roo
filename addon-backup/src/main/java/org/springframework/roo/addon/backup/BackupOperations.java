@@ -97,6 +97,10 @@ public class BackupOperations {
 		int read = 0;
 		for (int i = 0, n = files.length; i < n; i++) {
 			if (files[i].isDirectory()) {
+				if (files[i].listFiles().length == 0) {
+					ZipEntry dirEntry = new ZipEntry(files[i].getPath().substring(base.getPath().length() + 1) + System.getProperty("file.separator"));
+					zos.putNextEntry(dirEntry);
+				}
 				zip(files[i], base, zos);
 			} else {
 				FileInputStream in = new FileInputStream(files[i]);
