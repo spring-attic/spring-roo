@@ -150,7 +150,7 @@ public class JspDocumentHelper {
 			}
 		}		
 		
-		Element showUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + entityName + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
+		Element showUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
 		Element showImageUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
 		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "show_label").build();
 		Element showSubmitElement = new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${show_label}").addAttribute("src", "${show_image_url}").addAttribute("value", "${show_label}").addAttribute("alt", "${show_label}").build();
@@ -219,24 +219,25 @@ public class JspDocumentHelper {
 		elseElement.appendChild(notFoundMessage);	
 		divElement.appendChild(ifElement);
 		
-		//pagination
-		tableElement.appendChild(
-				new XmlElementBuilder("tr", document).addAttribute("class", "footer")
-					.addChild(new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4)))
-						.addChild(new XmlElementBuilder("span", document).addAttribute("class", "new")
-							.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
-							.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${create_url}")
-								.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "add_message").build())
-								.addChild(new XmlElementBuilder("img", document).addAttribute("src", "${create_img_url}").addAttribute("title", "${add_message}").addAttribute("alt", "${add_message}").build())
-							.build())
-						.build())
-						.addChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}")
-								.addChild(new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${param.page}").addAttribute("size", "${param.size}").build())
-						.build())
-					.build())
-				.build());
 		
+		Element bottomTd = new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4))).build();
+		if(webScaffoldAnnotationValues.isCreate()) {
+			//create new entity
+			bottomTd.appendChild(new XmlElementBuilder("span", document).addAttribute("class", "new")
+				.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
+				.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${create_url}")
+					.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
+					.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "add_message").build())
+					.addChild(new XmlElementBuilder("img", document).addAttribute("src", "${create_img_url}").addAttribute("title", "${add_message}").addAttribute("alt", "${add_message}").build())
+				.build())
+			.build());
+		}
+		//pagination
+		bottomTd.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty maxPages}")
+				.addChild(new XmlElementBuilder("roo:pagination", document).addAttribute("maxPages", "${maxPages}").addAttribute("page", "${param.page}").addAttribute("size", "${param.size}").build())
+		.build());
+		
+		tableElement.appendChild(new XmlElementBuilder("tr", document).addAttribute("class", "footer").addChild(bottomTd).build());
 
 		divElement.appendChild(elseElement);
 		div.appendChild(divElement);

@@ -77,6 +77,8 @@ public class MenuOperations {
 		Assert.notNull(menuItemLabel, "Menu item object required");
 		Assert.hasText(link, "Link required");
 		
+		menuItemId = menuItemId.replaceAll("/", "_");
+		
 		Document document;
 		try {			
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());

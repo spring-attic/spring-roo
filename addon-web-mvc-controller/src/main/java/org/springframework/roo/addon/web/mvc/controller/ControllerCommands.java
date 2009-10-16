@@ -69,7 +69,10 @@ public class ControllerCommands implements CommandMarker {
 		
 		if (path == null || path.length() == 0) {
 			path = entity.getSimpleTypeName().toLowerCase();
+		} else if (path.startsWith("/")) {
+			path = path.substring(1);
 		}
+		
 		controllerOperations.createAutomaticController(controller, entity, disallowedOperationSet, path, dateFormat);
 	}
 
