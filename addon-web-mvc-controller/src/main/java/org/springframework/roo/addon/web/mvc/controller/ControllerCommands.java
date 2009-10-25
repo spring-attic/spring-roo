@@ -29,14 +29,14 @@ public class ControllerCommands implements CommandMarker {
 	private static Logger logger = Logger.getLogger(ControllerCommands.class.getName());
 	
 	private ControllerOperations controllerOperations;
-	private ProjectMetadata projectMetadata;
+	private MetadataService metadataService;
 	
 	public ControllerCommands(ControllerOperations controllerOperations, MetadataService metadataService) {
 		Assert.notNull(controllerOperations, "ControllerOperations instance required");
+		Assert.notNull(metadataService, "MetadataService instance required");
+		
 		this.controllerOperations = controllerOperations;
-		ProjectMetadata metadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(metadata, "Could not obtain Project Metadata");
-		this.projectMetadata = metadata;
+		this.metadataService = metadataService;
 	}
 	
 	@CliAvailabilityIndicator({"controller automatic", "controller manual", "controller all"})
@@ -46,6 +46,8 @@ public class ControllerCommands implements CommandMarker {
 
 	@CliCommand(value="controller all", help="Scaffold a controller for all entities without an existing controller")
 	public void generateAll(@CliOption(key="package", mandatory=true, help="The package in which new controllers will be placed") JavaPackage javaPackage) {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(projectMetadata, "Could not obtain ProjectMetadata");
 		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {
 			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
 		}
