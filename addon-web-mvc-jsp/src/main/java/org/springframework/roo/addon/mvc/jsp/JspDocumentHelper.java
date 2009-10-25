@@ -570,7 +570,7 @@ public class JspDocumentHelper {
 							divElement.appendChild(DojoUtils.getRequiredDateDojo(document, paramName, dateFormatLocalized));
 				}
 			}
-
+			
 			formElement.appendChild(divElement);
 			formElement.appendChild(document.createElement("br"));
 		}		

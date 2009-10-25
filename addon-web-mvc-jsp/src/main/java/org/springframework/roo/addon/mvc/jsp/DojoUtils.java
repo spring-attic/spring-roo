@@ -42,7 +42,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
-				+ "', widgetType : 'dijit.form.DateTextBox\", widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() 
+				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() 
 				+ "', required : true}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
 		return script;
 	} 
