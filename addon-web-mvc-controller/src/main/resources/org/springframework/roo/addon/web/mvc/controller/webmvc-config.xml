@@ -40,7 +40,7 @@
 	</bean>
 
 	<!-- resolves localized messages.properties files in the application to	allow for internationalization -->
-	<bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="messageSource" p:basename="WEB-INF/i18n/messages"/>
+	<bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="messageSource" p:basename="WEB-INF/i18n/messages" p:fallbackToSystemLocale="false"/>
 	
 	<!-- store preferred language configuration in a cookie -->
 	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver"/>	
