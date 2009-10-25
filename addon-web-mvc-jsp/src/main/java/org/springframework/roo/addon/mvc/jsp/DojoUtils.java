@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,7 +53,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName())
 				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() + "', required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
 		return script;
@@ -88,7 +89,7 @@ public class DojoUtils {
 			} else {
 				regex = ", regExp: \"-?[0-9]*\\.[0-9]*\"";
 			}
-		} else if (field.getFieldName().getSymbolName().contains("email")) {
+		} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			regex = "";//, regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
 		}	
 		Element script = document.createElement("script");
@@ -105,7 +106,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + fieldName.getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + StringUtils.uncapitalize(fieldName.getSymbolName())
 				+ "\", widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
 		return script;
 	}
@@ -116,7 +117,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.FilteringSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
 				+ "', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); ");
 		return script;
 	}
@@ -127,7 +128,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.MultiSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
 				+ "', widgetType: 'dijit.form.MultiSelect', widgetAttrs: {}})); ");
 		return script;
 	}

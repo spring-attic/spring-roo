@@ -28,6 +28,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -62,6 +63,7 @@ public class JspDocumentHelper {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		this.fields = fields;
+		
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.metadataService = metadataService;
@@ -130,20 +132,19 @@ public class JspDocumentHelper {
 		Element idTdElement = document.createElement("td");
 		idTdElement.setTextContent("${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
 		trElement2.appendChild(idTdElement);
-		
 		fieldCounter = 0;
 		for (FieldMetadata field : fields) {
 			Element tdElement = document.createElement("td");
 			if (field.getFieldType().isCommonCollectionType()) {
-				tdElement.setTextContent("${fn:length(" + entityName + "." + field.getFieldName().getSymbolName() + ")}");
+				tdElement.setTextContent("${fn:length(" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + ")}");
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
+				fmt.setAttribute("value", "${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
 				fmt.setAttribute("type", "DATE");
 				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
 				tdElement.appendChild(fmt);
 			} else {
-				tdElement.setTextContent("${fn:substring(" + entityName + "." + field.getFieldName().getSymbolName() + ", 0, 10)}");
+				tdElement.setTextContent("${fn:substring(" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + ", 0, 10)}");
 			}
 			if(++fieldCounter < 7) {
 				trElement2.appendChild(tdElement);
@@ -270,25 +271,25 @@ public class JspDocumentHelper {
 		ifElement.setAttribute("test", "${not empty " + entityName + "}");
 		for (FieldMetadata field : fields) {
 			Element divSubmitElement = document.createElement("div");
-			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + field.getFieldName().getSymbolName());
+			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 				
 			Element label = document.createElement("label");
-			label.setAttribute("for", "_" + field.getFieldName().getSymbolName());
+			label.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 			label.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divSubmitElement.appendChild(label);
 			
 			Element divContent = document.createElement("div");
-			divContent.setAttribute("id", "_" + field.getFieldName().getSymbolName());
+			divContent.setAttribute("id", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
+				fmt.setAttribute("value", "${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
 				fmt.setAttribute("type", "DATE");
 				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
 				divContent.appendChild(fmt);
 			} else {
-				divContent.setTextContent("${" + entityName + "." + field.getFieldName().getSymbolName() + "}");
+				divContent.setTextContent("${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
 			}
 			divSubmitElement.appendChild(divContent);
 			ifElement.appendChild(divSubmitElement);
@@ -600,7 +601,6 @@ public class JspDocumentHelper {
 	private void createFieldsForCreateAndUpdate(Document document, Element formElement) {
 		
 		for (FieldMetadata field : fields) {
-			
 			JavaType fieldType = field.getFieldType();
 			if(fieldType.isCommonCollectionType() && fieldType.equals(new JavaType(Set.class.getName()))) {
 				if (fieldType.getParameters().size() != 1) {
@@ -610,10 +610,10 @@ public class JspDocumentHelper {
 			}
 			
 			Element divElement = document.createElement("div");
-			divElement.setAttribute("id", "roo_" + entityName + "_" + field.getFieldName().getSymbolName());
+			divElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 						
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + field.getFieldName().getSymbolName());
+			labelElement.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 			labelElement.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divElement.appendChild(labelElement);
 			
@@ -649,7 +649,7 @@ public class JspDocumentHelper {
 						}
 	
 						if(typeEntityMetadata == null) {
-							throw new IllegalStateException("Could not determine the plural name for the '" + field.getFieldName().getSymbolName() + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+							throw new IllegalStateException("Could not determine the plural name for the '" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 						}
 						
 						String plural = typeEntityMetadata.getPlural().toLowerCase();
@@ -689,7 +689,7 @@ public class JspDocumentHelper {
 								String fieldCode = "field.invalid";
 								if(field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())) {
 									fieldCode = "field.invalid.integer";
-								} else if (field.getFieldName().getSymbolName().contains("email")) {
+								} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 									fieldCode = "field.invalid.email";
 								} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName())
 										|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
@@ -737,7 +737,7 @@ public class JspDocumentHelper {
 					String fieldCode = "field.invalid";
 					if(field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())) {
 						fieldCode = "field.invalid.integer";
-					} else if (field.getFieldName().getSymbolName().contains("email")) {
+					} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 						fieldCode = "field.invalid.email";
 					} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName())
 							|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())) {
