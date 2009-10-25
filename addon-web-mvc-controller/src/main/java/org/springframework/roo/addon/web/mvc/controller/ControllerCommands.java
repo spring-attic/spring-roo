@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -27,10 +29,14 @@ public class ControllerCommands implements CommandMarker {
 	private static Logger logger = Logger.getLogger(ControllerCommands.class.getName());
 	
 	private ControllerOperations controllerOperations;
+	private ProjectMetadata projectMetadata;
 	
-	public ControllerCommands(ControllerOperations controllerOperations) {
+	public ControllerCommands(ControllerOperations controllerOperations, MetadataService metadataService) {
 		Assert.notNull(controllerOperations, "ControllerOperations instance required");
 		this.controllerOperations = controllerOperations;
+		ProjectMetadata metadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(metadata, "Could not obtain Project Metadata");
+		this.projectMetadata = metadata;
 	}
 	
 	@CliAvailabilityIndicator({"controller automatic", "controller manual", "controller all"})
@@ -40,6 +46,9 @@ public class ControllerCommands implements CommandMarker {
 
 	@CliCommand(value="controller all", help="Scaffold a controller for all entities without an existing controller")
 	public void generateAll(@CliOption(key="package", mandatory=true, help="The package in which new controllers will be placed") JavaPackage javaPackage) {
+		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {
+			logger.warning("Your controller was created outside of the project's top level package and is therefore not included in the preconfigured component scanning. Please adjust your component scanning manually in webmvc-config.xml");
+		}
 		controllerOperations.generateAll(javaPackage);
 	}
 	
