@@ -56,11 +56,20 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Compute the plural form, if needed
 		if ("".equals(this.value)) {
-			value = Noun.pluralOf(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
+			value = pluralize(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+	
+	private String pluralize(String what, Locale locale) {
+		try {
+			return Noun.pluralOf(what, locale);
+		} catch (RuntimeException re) {
+			// Inflector failed (see for example ROO-305), so don't pluralize it
+			return what;
+		}
 	}
 	
 	/**
@@ -94,7 +103,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		if ("".equals(thePlural)) {
 			// Manually compute the plural, as the user did not provided one
-			thePlural = Noun.pluralOf(symbolName, Locale.ENGLISH);
+			thePlural = pluralize(symbolName, Locale.ENGLISH);
 		}
 		if (cache == null) {
 			// Create the cache (we defer this in case there is no field plural retrieval ever required for this instance)
