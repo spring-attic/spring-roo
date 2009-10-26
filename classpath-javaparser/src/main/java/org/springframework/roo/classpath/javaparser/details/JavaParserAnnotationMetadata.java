@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.javaparser.details;
 
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.ArrayInitializerExpr;
+import japa.parser.ast.expr.BinaryExpr;
 import japa.parser.ast.expr.BooleanLiteralExpr;
 import japa.parser.ast.expr.CharLiteralExpr;
 import japa.parser.ast.expr.ClassExpr;
@@ -152,6 +153,26 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			return new DoubleAttributeValue(annotationName, d, floatingPrecisionOnly);
 		} 
 
+		if (expression instanceof BinaryExpr) {
+			String result = "";
+			BinaryExpr current = (BinaryExpr) expression;
+			while (current instanceof BinaryExpr) {
+				Assert.isInstanceOf(StringLiteralExpr.class, current.getRight());
+				String right = ((StringLiteralExpr)current.getRight()).getValue();
+				result = right + result;
+				if (current.getLeft() instanceof StringLiteralExpr) {
+					String left = ((StringLiteralExpr)current.getLeft()).getValue();
+					result = left + result;
+				}
+				if (current.getLeft() instanceof BinaryExpr) {
+					current = (BinaryExpr) current.getLeft();
+				} else {
+					current = null;
+				}
+			}
+			return new StringAttributeValue(annotationName, result);
+		}
+		
 		if (expression instanceof StringLiteralExpr) {
 			String value = ((StringLiteralExpr)expression).getValue();
 			return new StringAttributeValue(annotationName, value);
