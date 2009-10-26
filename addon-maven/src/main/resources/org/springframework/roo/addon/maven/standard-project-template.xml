@@ -271,11 +271,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
-				<!--
-					WARNING: Do not use 2.6 or above due to
-					http://jira.codehaus.org/browse/MECLIPSE-538
-				-->
-				<version>2.5.1</version>
+				<version>2.7</version>
 				<configuration>
 					<downloadSources>true</downloadSources>
 					<downloadJavadocs>false</downloadJavadocs>
