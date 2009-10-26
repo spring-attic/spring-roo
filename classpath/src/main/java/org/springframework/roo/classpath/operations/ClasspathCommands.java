@@ -8,12 +8,12 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
@@ -22,6 +22,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
@@ -36,9 +37,10 @@ import org.springframework.roo.support.util.Assert;
 public class ClasspathCommands implements CommandMarker {
 	private ClasspathOperations classpathOperations;
 
-	public ClasspathCommands(ClasspathOperations classpathOperations) {
+	public ClasspathCommands(StaticFieldConverter converter, ClasspathOperations classpathOperations) {
 		Assert.notNull(classpathOperations, "Classpath operations required");
 		this.classpathOperations = classpathOperations;
+		converter.add(InheritanceType.class);
 	}
 	
 	@CliAvailabilityIndicator({"class", "dod", "test integration"})
@@ -163,6 +165,7 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="table", mandatory=false, help="The JPA table name to use for this entity") String table,
 			@CliOption(key="identifierField", mandatory=false, help="The JPA identifier field name to use for this entity") String identifierField,
 			@CliOption(key="identifierColumn", mandatory=false, help="The JPA identifier field column to use for this entity") String identifierColumn,
+			@CliOption(key="inheritanceType", mandatory=false, help="The JPA @Inheritance value") InheritanceType inheritanceType,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
@@ -205,6 +208,12 @@ public class ClasspathCommands implements CommandMarker {
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
+		if (inheritanceType != null && !"java.lang.Object".equals(superclass.getFullyQualifiedTypeName())) {
+			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.getKey()))));
+			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Inheritance"), attrs));
+		}
+		
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
