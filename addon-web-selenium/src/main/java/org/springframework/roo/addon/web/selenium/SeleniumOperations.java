@@ -134,7 +134,7 @@ public class SeleniumOperations {
 			}
 		}
 
-		tbody.appendChild(clickAndWaitCommand(selenium, "//input[@value='Save']" ));	
+		tbody.appendChild(clickAndWaitCommand(selenium, "//input[@id='proceed']" ));	
 		
 		XmlUtils.writeXml(seleniumMutableFile.getOutputStream(), selenium);
 		
