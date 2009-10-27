@@ -75,7 +75,7 @@ public class JpaOperations {
 	 * @param ormProvider the ORM provider selected (Hibernate, OpenJpa, EclipseLink)
 	 * @param database the database (HSQL, H2, MySql, etc)
 	 */
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, boolean install) {
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 				

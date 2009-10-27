@@ -48,10 +48,27 @@ public class JpaCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="persistence setup", help="Install or updates a JPA persistence provider in your project")
-	public void installJpa(@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
+	public void installJpa(
+			@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
 			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
-			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi) {
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, !jpaOperations.isJpaInstalled());
+			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi,
+			@CliOption(key={"databaseName"}, mandatory=false, help="The database name to use") String databaseName,
+			@CliOption(key={"userName"}, mandatory=false, help="The username to use") String userName,
+			@CliOption(key={"password"}, mandatory=false, help="The password to use") String password
+			) {
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi);
+		
+		if (jndi != null && 0 != jndi.length()) {
+			if (null != databaseName && 0 != databaseName.length()) {
+				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.url", jdbcDatabase.getConnectionString() + (databaseName.startsWith("/") ? databaseName : "/" + databaseName));
+			}
+			if (null != userName && 0 != userName.length()) {
+				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.username", userName);
+			}
+			if (null != password && 0 != password.length()) {
+				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.password", password);
+			}
+		}
 	}
 	
 	@CliCommand(value="persistence exception translation", help="Installs support for JPA exception translation")
