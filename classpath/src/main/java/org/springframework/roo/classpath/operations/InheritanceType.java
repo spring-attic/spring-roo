@@ -14,9 +14,14 @@ public class InheritanceType implements Comparable<InheritanceType> {
 
 	private String key;
 
+	/** @Inheritance(strategy=) */
 	public static final InheritanceType SINGLE_TABLE = new InheritanceType("SINGLE_TABLE");
-	public static final InheritanceType TABLE_PER_CLASS = new InheritanceType("TABLE_PER_CLAS");
+	/** @Inheritance(strategy=) */
+	public static final InheritanceType TABLE_PER_CLASS = new InheritanceType("TABLE_PER_CLASS");
+	/** @Inheritance(strategy=) */
 	public static final InheritanceType JOINED = new InheritanceType("JOINED");
+	/** @MappedSuperclass */
+	public static final InheritanceType MAPPED_SUPERCLASS = new InheritanceType("MAPPED_SUPERCLASS");
 
 	public InheritanceType(String key) {
 		Assert.hasText(key, "Key required");
