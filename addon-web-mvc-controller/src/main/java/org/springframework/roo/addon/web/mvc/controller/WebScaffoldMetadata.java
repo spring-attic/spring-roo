@@ -343,7 +343,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 				}				
 			}
 		}
@@ -384,7 +384,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 				}				
 			}
 		}
@@ -442,7 +442,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 				}				
 			}
 		}
@@ -492,8 +492,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
-				} else if (isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"_" + type.getSimpleTypeName().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+				} else if (isEnumType(type)) {
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 				}
 			}
 		}

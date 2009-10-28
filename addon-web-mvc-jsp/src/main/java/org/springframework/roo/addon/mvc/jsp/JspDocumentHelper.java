@@ -521,7 +521,7 @@ public class JspDocumentHelper {
 				}
 			} else if (isEnumType(type)) {
 				divElement.appendChild(labelElement);
-				divElement.appendChild(JspUtils.getEnumSelectBox(document, paramName));		
+				divElement.appendChild(JspUtils.getEnumSelectBox(document, type, paramName));		
 				divElement.appendChild(DojoUtils.getSelectDojo(document, paramName));
 				divElement.appendChild(document.createElement("br"));
 				formElement.appendChild(divElement);
@@ -721,7 +721,7 @@ public class JspDocumentHelper {
 							specialAnnotation = true;
 						}
 					} else if (isEnumType(field.getFieldType())) {
-						divElement.appendChild(JspUtils.getEnumSelectBox(document, field.getFieldName()));		
+						divElement.appendChild(JspUtils.getEnumSelectBox(document, fieldType, field.getFieldName()));		
 						divElement.appendChild(DojoUtils.getSelectDojo(document, field.getFieldName()));
 						divElement.appendChild(document.createElement("br"));
 						divElement.appendChild(JspUtils.getErrorsElement(document, field.getFieldName()));

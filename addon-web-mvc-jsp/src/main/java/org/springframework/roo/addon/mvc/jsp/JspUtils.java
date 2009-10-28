@@ -2,6 +2,7 @@ package org.springframework.roo.addon.mvc.jsp;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,12 +40,12 @@ public class JspUtils {
 		return formSelect;
 	}
 	
-	public static Element getEnumSelectBox(Document document, JavaSymbolName fieldName) {
+	public static Element getEnumSelectBox(Document document, JavaType javaType, JavaSymbolName fieldName) {
 		Element formSelect = document.createElement("form:select");
 		formSelect.setAttribute("path", StringUtils.uncapitalize(fieldName.getSymbolName()));
 		formSelect.setAttribute("cssStyle", "width:250px");						
 		formSelect.setAttribute("id", "_" + fieldName.getSymbolName());
-		formSelect.setAttribute("items", "${_" + fieldName.getSymbolName() + "}");		
+		formSelect.setAttribute("items", "${" + javaType.getSimpleTypeName().toLowerCase() + "_enum}");		
 		return formSelect;
 	}
 	
