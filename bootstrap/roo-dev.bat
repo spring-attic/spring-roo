@@ -32,4 +32,4 @@ rem echo Using Roo classpath [%ROO_CP%]
 :launch
 java -DdevelopmentMode=true -Droo.home="%USERPROFILE%\roo-dev" -cp %ROO_CP% -Djava.ext.dirs="%USERPROFILE%\roo-dev\work" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" %*
 
-if "%errorlevel%" == "999" goto launch
+if "%errorlevel%" == "100" goto launch
