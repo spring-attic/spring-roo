@@ -630,7 +630,8 @@ public class JspDocumentHelper {
 						return;
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
-							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
+							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")
+							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToOne")) {
 
 						EntityMetadata typeEntityMetadata = null;
 						
@@ -667,7 +668,8 @@ public class JspDocumentHelper {
 						formElement.appendChild(divElement);
 						formElement.appendChild(document.createElement("br"));
 						
-						if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")) {
+						if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
+								|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToOne")) {
 							ifElement.appendChild(DojoUtils.getSelectDojo(document, field.getFieldName()));
 						} else {
 							ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, field.getFieldName()));
