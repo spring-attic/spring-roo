@@ -4,9 +4,7 @@ import java.util.SortedSet;
 
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -71,15 +69,6 @@ public class JpaCommands implements CommandMarker {
 		}
 	}
 	
-	@CliCommand(value="persistence exception translation", help="Installs support for JPA exception translation")
-	public void exceptionTranslation(@CliOption(key={"package"}, mandatory=false, help="The package in which the JPA exception translation aspect will be installed") JavaPackage aspectPackage) {		
-		if (aspectPackage == null) {
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			aspectPackage = projectMetadata.getTopLevelPackage();
-		} 
-		jpaOperations.installExceptionTranslation(aspectPackage);
-	}
-	
 	@CliCommand(value="database properties list", help="Shows database configuration details")
 	public SortedSet<String> databaseProperties() {
 		return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
@@ -95,7 +84,7 @@ public class JpaCommands implements CommandMarker {
 		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key);
 	}
 	
-	@CliAvailabilityIndicator({"database properties remove", "database properties set", "database properties list", "persistence exception translation"})
+	@CliAvailabilityIndicator({"database properties remove", "database properties set", "database properties list"})
 	public boolean isJpaInstalled() {
 		return jpaOperations.isJpaInstalled();
 	}
