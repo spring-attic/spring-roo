@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +20,9 @@ import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
-import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Provides convenience methods that can be used to create mock tests.
@@ -43,20 +35,16 @@ import org.springframework.roo.support.util.TemplateUtils;
 public class IntegrationTestOperations {
 	private ClasspathOperations classpathOperations;
 	private MetadataService metadataService;
-	private FileManager fileManager;
 	
-	public IntegrationTestOperations(ClasspathOperations classpathOperations, MetadataService metadataService, FileManager fileManager) {
+	public IntegrationTestOperations(ClasspathOperations classpathOperations, MetadataService metadataService) {
 		Assert.notNull(classpathOperations, "Classpath operations required");
 		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(fileManager, "File manager required");
 		this.classpathOperations = classpathOperations;
 		this.metadataService = metadataService;
-		this.fileManager = fileManager;
 	}
 
 	/**
-	 * Creates a mock test for the entity. Automatically adds mocking classes if they don't already exist.
-	 * Silently returns if the mock test file already exists.
+	 * Creates a mock test for the entity. Silently returns if the mock test file already exists.
 	 * 
 	 * @param entity to produce a mock test for (required)
 	 */
@@ -72,18 +60,12 @@ public class IntegrationTestOperations {
 		}
 
 		// Determine if the mocking infrastructure needs installing
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
-		installIfNeeded("AbstractMethodMockingControl.aj", projectMetadata);
-		installIfNeeded("JUnitStaticEntityMockingControl.aj", projectMetadata);
-		installIfNeeded("MockStaticEntityMethods.java", projectMetadata);
 		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.runner.RunWith"), config));
-		String mockPackageWithTrailingDot = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".mock.";
-		annotations.add(new DefaultAnnotationMetadata(new JavaType(mockPackageWithTrailingDot + "MockStaticEntityMethods"), new ArrayList<AnnotationAttributeValue<?>>()));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.mock.staticmock.MockStaticEntityMethods"), new ArrayList<AnnotationAttributeValue<?>>()));
 
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		List<AnnotationMetadata> methodAnnotations = new ArrayList<AnnotationMetadata>();
@@ -98,8 +80,8 @@ public class IntegrationTestOperations {
 				String countMethod = entity.getSimpleTypeName() + "." + mm.getMethodName().getSymbolName() + "()";
 				imbb.appendFormalLine("int expectedCount = 13;");
 				imbb.appendFormalLine(countMethod + ";");
-				imbb.appendFormalLine(mockPackageWithTrailingDot + "JUnitStaticEntityMockingControl.expectReturn(expectedCount);");
-				imbb.appendFormalLine(mockPackageWithTrailingDot + "JUnitStaticEntityMockingControl.playback();");
+				imbb.appendFormalLine("org.springframework.mock.staticmock.JUnitStaticEntityMockingControl.expectReturn(expectedCount);");
+				imbb.appendFormalLine("org.springframework.mock.staticmock.JUnitStaticEntityMockingControl.playback();");
 				imbb.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
 			}
 		}
@@ -109,26 +91,6 @@ public class IntegrationTestOperations {
 
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 		classpathOperations.generateClassFile(details);
-	}
-	
-	private void installIfNeeded(String targetFilename, ProjectMetadata projectMetadata) {
-		String packagePath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', '/');
-		String destinationFile = projectMetadata.getPathResolver().getIdentifier(Path.SRC_TEST_JAVA, packagePath + "/" + "mock/" + targetFilename);
-		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), targetFilename + "-template");
-			try {
-				// Read template and insert the user's package
-				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
-				input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-				
-				// Output the file for the user
-				MutableFile mutableFile = fileManager.createFile(destinationFile);
-				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
-			} catch (IOException ioe) {
-				throw new IllegalStateException("Unable to create '" + targetFilename + "'", ioe);
-			}
-		}
-		
 	}
 	
 }
