@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -58,11 +59,13 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		
-		builder.addImplementsType(new JavaType("java.beans.PropertyEditorSupport"));
+		// Only make the ITD cause PropertyEditorSupport to be subclasses if the governor doesn't already subclass it
+		JavaType requiredSuperclass = new JavaType("java.beans.PropertyEditorSupport");
+		if (!governorTypeDetails.getExtendsTypes().contains(requiredSuperclass)) {
+			builder.addImplementsType(requiredSuperclass);
+		}
 		
-		JavaType typeConverter = new JavaType("org.springframework.beans.SimpleTypeConverter");
-		builder.addField(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName("typeConverter"), typeConverter, typeConverter, null));
-
+		builder.addField(getField());
 		builder.addMethod(getGetAsTextMethod());		
 		builder.addMethod(getSetAsTextMethod());
 		
@@ -70,7 +73,32 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 
+	private FieldMetadata getField() {
+		JavaSymbolName fieldName = new JavaSymbolName("typeConverter");
+		JavaType fieldType = new JavaType("org.springframework.beans.SimpleTypeConverter");
+		
+		// Locate user-defined field
+		FieldMetadata userField = MemberFindingUtils.getField(governorTypeDetails, fieldName);
+		if (userField != null) {
+			Assert.isTrue(userField.getFieldType().equals(fieldType), "Field '" + fieldName + "' on '" + governorTypeDetails.getName() + "' must be of type '" + fieldType.getNameIncludingTypeParameters() + "'");
+			return userField;
+		}
+		
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, fieldType, null);
+	}
+	
 	private MethodMetadata getGetAsTextMethod() {
+		JavaType returnType = new JavaType(String.class.getName());
+		JavaSymbolName methodName = new JavaSymbolName("getAsText");
+		List<JavaType> paramTypes = new ArrayList<JavaType>();			
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+
+		// Locate user-defined method
+		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		if (userMethod != null) {
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			return userMethod;
+		}
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("Object obj = getValue();");
@@ -81,12 +109,25 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + entityMetadata.getIdentifierAccessor().getMethodName() + "(), String.class);");
 
-		List<AnnotatedJavaType> types = new ArrayList<AnnotatedJavaType>();			
-		List<JavaSymbolName> names = new ArrayList<JavaSymbolName>();
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("getAsText"), new JavaType(String.class.getName()), types, names, null, bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, null, bodyBuilder.getOutput());
 	}
  
 	private MethodMetadata getSetAsTextMethod() {
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();		
+		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));
+		
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("text"));
+		
+		JavaSymbolName methodName = new JavaSymbolName("setAsText");
+		JavaType returnType = JavaType.VOID_PRIMITIVE;
+
+		// Locate user-defined method
+		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
+		if (userMethod != null) {
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			return userMethod;
+		}
 		
 		String identifierTypeName = entityMetadata.getIdentifierField().getFieldType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		
@@ -108,13 +149,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(identifier));");
 		
-		List<AnnotatedJavaType> types = new ArrayList<AnnotatedJavaType>();		
-		types.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));
-		
-		List<JavaSymbolName> names = new ArrayList<JavaSymbolName>();
-		names.add(new JavaSymbolName("text"));
-		
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("setAsText"), JavaType.VOID_PRIMITIVE, types, names, null, bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, null, bodyBuilder.getOutput());
 	}	
 
 	public String toString() {
