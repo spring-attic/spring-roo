@@ -1,7 +1,6 @@
 project --topLevelPackage com.springsource.petclinic
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
-persistence exception translation --package ~.domain
 
 entity --name ~.reference.PetType --testAutomatically
 entity --name ~.reference.Specialty --testAutomatically
