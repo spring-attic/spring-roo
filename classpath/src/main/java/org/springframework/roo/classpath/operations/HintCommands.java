@@ -12,6 +12,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.internal.AbstractShell;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
@@ -46,7 +47,7 @@ public class HintCommands implements CommandMarker {
 		}
 		try {
 			String message = bundle.getString(topic);
-			return message.replace("\r", System.getProperty("line.separator"));
+			return message.replace("\r", System.getProperty("line.separator")).replace("${completion_key}", AbstractShell.completionKeys);
 		} catch (MissingResourceException exception) {
 			return "Cannot find topic '" + topic + "'";
 		}
