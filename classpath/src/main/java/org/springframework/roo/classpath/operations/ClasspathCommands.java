@@ -166,6 +166,7 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="identifierField", mandatory=false, help="The JPA identifier field name to use for this entity") String identifierField,
 			@CliOption(key="identifierColumn", mandatory=false, help="The JPA identifier field column to use for this entity") String identifierColumn,
 			@CliOption(key="inheritanceType", mandatory=false, help="The JPA @Inheritance value") InheritanceType inheritanceType,
+			@CliOption(key="mappedSuperclass", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Apply @MappedSuperclass for this entity") boolean mappedSuperclass,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
@@ -208,14 +209,20 @@ public class ClasspathCommands implements CommandMarker {
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
-		if (inheritanceType != null && !"java.lang.Object".equals(superclass.getFullyQualifiedTypeName())) {
-			if (InheritanceType.MAPPED_SUPERCLASS.equals(inheritanceType)) {
-				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.MappedSuperclass"), new ArrayList<AnnotationAttributeValue<?>>()));
-			} else {
-				List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-				attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.getKey()))));
-				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Inheritance"), attrs));
+		if (mappedSuperclass) {
+			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.MappedSuperclass"), new ArrayList<AnnotationAttributeValue<?>>()));
+		}
+		
+		if (inheritanceType != null) {
+			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.getKey()))));
+			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Inheritance"), attrs));
+			
+			if (InheritanceType.SINGLE_TABLE.equals(inheritanceType)) {
+				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
+				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.DiscriminatorColumn"), new ArrayList<AnnotationAttributeValue<?>>()));
 			}
+			
 		}
 		
 		int modifier = Modifier.PUBLIC;
