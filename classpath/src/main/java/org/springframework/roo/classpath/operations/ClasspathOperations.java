@@ -216,8 +216,12 @@ public class ClasspathOperations {
 	 */
 	public void newIntegrationTest(JavaType entity) {
 		Assert.notNull(entity, "Entity to produce an integration test for is required");
+
+		// Verify the requested entity actually exists as a class and is not abstract
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
+		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + entity.getFullyQualifiedTypeName() + " is abstract");
 		
-		newDod(entity);
+		newDod(entity, new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 		
 		JavaType name = new JavaType(entity + "IntegrationTest");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
@@ -246,25 +250,21 @@ public class ClasspathOperations {
 	 * Creates a new data on demand provider for the entity. Silently returns if the DOD already exists.
 	 * 
 	 * @param entity to produce a data on demand provider for (required)
+	 * @param name the name of the new data on demand class (required)
+	 * @param path the location for the new data on demand class (required)
 	 */
-	public void newDod(JavaType entity) {
+	public void newDod(JavaType entity, JavaType name, Path path) {
 		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
+		Assert.notNull(name, "Name of the new data on demand provider is required");
+		Assert.notNull(path, "Location of the new data on demand provider is required");
 
 		// Verify the requested entity actually exists as a class and is not abstract
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
-		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not a class");
-		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is abstract");
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " must be an @Entity");
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
+		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
+		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
 		
 		// Everything is OK to proceed
-		JavaType name = new JavaType(entity + "DataOnDemand");
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 
 		if (metadataService.get(declaredByMetadataId) != null) {
 			// The file already exists
@@ -280,4 +280,17 @@ public class ClasspathOperations {
 		generateClassFile(details);
 	}
 	
+	/**
+	 * @param entity the entity to lookup required 
+	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)
+	 */
+	private ClassOrInterfaceTypeDetails getEntity(JavaType entity) {
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		return (ClassOrInterfaceTypeDetails) ptd;
+	}
 }

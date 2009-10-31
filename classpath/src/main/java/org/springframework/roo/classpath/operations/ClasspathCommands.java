@@ -134,14 +134,19 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="dod", help="Creates a new data on demand for the specified entity")
 	public void newDod(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The entity which will this data on demand class will create and modify as required") JavaType entity,
+			@CliOption(key="class", mandatory=false, help="The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')") JavaType clazz,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
 		}
 
-		classpathOperations.newDod(entity);
+		if (clazz == null) {
+			clazz = new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
+		}
+		
+		classpathOperations.newDod(entity, clazz, Path.SRC_TEST_JAVA);
 	}
 
 	@CliCommand(value="test integration", help="Creates a new integration test for the specified entity")

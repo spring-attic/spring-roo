@@ -24,7 +24,9 @@ import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMe
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -64,13 +66,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	/** Other entities requiring a data on demand instance; fields must exist for each of these in the class */
 	private List<JavaType> requiredDataOnDemandCollaborators = new ArrayList<JavaType>();
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata findEntriesMethod, MethodMetadata persistMethod) {
+	// Needed to lookup other DataOnDemand metadata we depend on
+	private MetadataService metadataService;
+	private MetadataDependencyRegistry metadataDependencyRegistry;
+	
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(findEntriesMethod, "Find entries method required");
 		Assert.notNull(persistMethod, "Persist method required");
+		Assert.notNull(metadataService, "Metadata service required");
+		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
 		
 		if (!isValid()) {
 			return;
@@ -80,6 +88,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.findEntriesMethod = findEntriesMethod;
 		this.persistMethod = persistMethod;
+		this.metadataService = metadataService;
+		this.metadataDependencyRegistry = metadataDependencyRegistry;
 		
 		mutatorDiscovery();
 		
@@ -446,7 +456,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null) {
 					requiredDataOnDemandCollaborators.add(field.getFieldType());
 					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
-					initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+					
+					// Look up the metadata we are relying on
+					String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+					metadataDependencyRegistry.registerDependency(otherProvider, getId());
+					DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
+					if (otherMd == null || !otherMd.isValid()) {
+						// There is no metadata around, so we'll just make some basic assumptions
+						initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+					} else {
+						// We can use the correct name
+						initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
+					}
+					
 				}
 				
 				mandatoryMutators.add(mutatorMethod);
