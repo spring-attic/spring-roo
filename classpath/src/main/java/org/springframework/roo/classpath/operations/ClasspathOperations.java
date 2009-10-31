@@ -15,6 +15,7 @@ import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -248,6 +249,20 @@ public class ClasspathOperations {
 	 */
 	public void newDod(JavaType entity) {
 		Assert.notNull(entity, "Entity to produce a data on demand provider for is required");
+
+		// Verify the requested entity actually exists as a class and is not abstract
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
+		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is not a class");
+		Assert.isTrue(!Modifier.isAbstract(classOrInterfaceTypeDetails.getModifier()), "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " is abstract");
+		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier) + " must be an @Entity");
+		
+		// Everything is OK to proceed
 		JavaType name = new JavaType(entity + "DataOnDemand");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
 
