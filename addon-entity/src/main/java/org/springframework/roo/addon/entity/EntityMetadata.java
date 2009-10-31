@@ -469,8 +469,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			if (candidate != null) {
 				// Verify if candidate is suitable
 				
-				if (!Modifier.isPublic(candidate.getModifier()) && !Modifier.isProtected(candidate.getModifier())) {
-					// Candidate is not public and not protected, so any subsequent subclasses won't be able to see it. Give up!
+				if (!Modifier.isPublic(candidate.getModifier()) && !Modifier.isProtected(candidate.getModifier()) && (Modifier.TRANSIENT != candidate.getModifier())) {
+					// Candidate is not public and not protected and not simply a transient field (in which case subclasses
+					// will see the inherited field), so any subsequent subclasses won't be able to see it. Give up!
 					continue;
 				}
 				
@@ -638,10 +639,23 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * entity manager and available as a utility for user code (never returns nulls)
 	 */
 	public MethodMetadata getEntityManagerMethod() {
+		if (parent != null) {
+			// the parent is required to guarantee this is available
+			return parent.getEntityManagerMethod();
+		}
+		
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(ENTITY_MANAGER_METHOD_NAME);
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		JavaType returnType = ENTITY_MANAGER;
 		
+		// Locate user-defined method
+		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		if (userMethod != null) {
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			return userMethod;
+		}
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
@@ -678,7 +692,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return em;");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, null, null, 
+		modifier = modifier |= Modifier.FINAL;
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), null, 
 				new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 	
