@@ -136,7 +136,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
 		if (containsCollectionType) {
-			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + " AND\");");
+			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + (jpaQuery.endsWith("AND") ? "" : " AND") + "\");");
 			for (int i = 0; i < paramTypes.size(); i++) {
 				if (paramTypes.get(i).isCommonCollectionType()) {
 					bodyBuilder.appendFormalLine("for (int i = 0; i < " + paramNames.get(i) + ".size(); i++) {");
