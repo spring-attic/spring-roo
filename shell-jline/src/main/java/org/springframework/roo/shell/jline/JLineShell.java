@@ -100,5 +100,16 @@ public class JLineShell extends AbstractShell implements Shell {
 	public boolean isDevelopmentMode() {
 		return this.developmentMode;
 	}
+	
+	/**
+	 * Obtains the "roo.home" from the system property, throwing an exception if missing.
+	 *
+	 * @return the 'roo.home' system property
+	 */
+	protected String getHomeAsString() {
+		String rooHome = System.getProperty("roo.home");
+		Assert.hasText(rooHome, "roo.home system property is not set");
+		return rooHome;
+	}
 
 }

@@ -286,5 +286,37 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	public String getShellPrompt() {
 		return shellPrompt;
 	}
+	
+	/**
+	 * Obtains the home directory for the current shell instance.
+	 *
+	 * <p>
+	 * Note: calls the {@link #getHomeAsString()} method to allow subclasses to provide the home directory location as 
+	 * string using different environment-specific strategies. 
+ 	 *
+	 * <p>
+	 * If the path indicated by {@link #getHomeAsString()} exists and refers to a directory, that directory
+	 * is returned.
+	 * 
+	 * <p>
+	 * If the path indicated by {@link #getHomeAsString()} exists and refers to a file, an exception is thrown.
+	 * 
+	 * <p>
+	 * If the path indicated by {@link #getHomeAsString()} does not exist, it will be created as a directory.
+	 * If this fails, an exception will be thrown.
+	 * 
+	 * @return the home directory for the current shell instance (which is guaranteed to exist and be a directory)
+	 */
+	public File getHome() {
+		String rooHome = getHomeAsString();
+		File f = new File(rooHome);
+		Assert.isTrue(!f.exists() || (f.exists() && f.isDirectory()), "Path '" + f.getAbsolutePath() + "' must be a directory, or it must not exist");
+		if (!f.exists()) {
+			f.mkdirs();
+		}
+		Assert.isTrue(f.exists() && f.isDirectory(), "Path '" + f.getAbsolutePath() + "' is not a directory; please specify roo.home system property correctly");
+		return f;
+	}
 
+	protected abstract String getHomeAsString();
 }

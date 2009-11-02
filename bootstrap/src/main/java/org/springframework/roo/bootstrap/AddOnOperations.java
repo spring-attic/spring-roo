@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -21,33 +22,20 @@ import org.springframework.roo.support.util.FileCopyUtils;
 @ScopeDevelopment
 public class AddOnOperations {
 	private Logger logger = Logger.getLogger(AddOnOperations.class.getName());
-
+	
+	private final Shell shell;
+	
+	public AddOnOperations(Shell shell) {
+		this.shell = shell;
+	}
+	
 	/**
-	 * Obtains the "roo.home" from the system property, throwing an exception if missing.
+	 * Returns the home directory of the Roo installation obtained from the current {@link Shell} implementation.
 	 * 
-	 * <p>
-	 * If the path indicated by ROO_HOME exists and refers to a directory, that directory
-	 * is returned.
-	 * 
-	 * <p>
-	 * If the path indicated by ROO_HOME exists and refers to a file, an exception is thrown.
-	 * 
-	 * <p>
-	 * If the path indicated by ROO_HOME does not exist, it will be created as a directory.
-	 * If this fails, an exception will be thrown.
-	 * 
-	 * @return the 'roo.home' (which is guaranteed to exist and be a directory)
+	 * @return the ROO_HOME directory
 	 */
 	private File getRooHome() {
-		String rooHome = System.getProperty("roo.home", "");
-		Assert.hasText(rooHome, "roo.home system property is not set");
-		File f = new File(rooHome);
-		Assert.isTrue(!f.exists() || (f.exists() && f.isDirectory()), "Path '" + f.getAbsolutePath() + "' must be a directory, or it must not exist");
-		if (!f.exists()) {
-			f.mkdirs();
-		}
-		Assert.isTrue(f.exists() && f.isDirectory(), "Path '" + f.getAbsolutePath() + "' is not a directory; please specify roo.home system property correctly");
-		return f;
+		return shell.getHome();
 	}
 	
 	/**

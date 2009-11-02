@@ -1,5 +1,7 @@
 package org.springframework.roo.shell;
 
+import java.io.File;
+
 import org.springframework.roo.shell.event.ShellStatusProvider;
 
 /**
@@ -51,4 +53,11 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	void setDevelopmentMode(boolean developmentMode);
 
 	boolean isDevelopmentMode();
+	
+	/**
+	 * Returns the home directory of the current running shell instance 
+     *	
+	 * @return the home directory of the current shell instance
+	 */
+	File getHome();
 }
