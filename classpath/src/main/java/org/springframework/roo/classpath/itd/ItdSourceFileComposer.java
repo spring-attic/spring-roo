@@ -296,7 +296,22 @@ public class ItdSourceFileComposer {
 					this.append(", ");
 				}
 			}
-			this.append(") {");
+			
+			// add exceptions to be thrown
+			List<JavaType> throwsTypes = method.getThrowsTypes();
+			if (throwsTypes.size() > 0) {
+				this.append(") throws ");
+				for (int i = 0; i < throwsTypes.size(); i++) {
+					this.append(throwsTypes.get(i).getNameIncludingTypeParameters(false, resolver));
+					if (throwsTypes.size() > (i+1)) {
+						this.append(", ");
+					}
+				}
+				this.append(" {");
+			} else {
+				this.append(") {");
+			}
+			
 			this.newLine();
 			this.indent();
 

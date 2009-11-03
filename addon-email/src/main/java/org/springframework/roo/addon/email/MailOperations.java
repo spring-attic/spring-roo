@@ -355,7 +355,7 @@ public class MailOperations {
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine(fieldName + ".send(simpleMailMessage);");				
 		
-		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
+		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput()));
 	}
 	
 	private void updateDependencies() {		

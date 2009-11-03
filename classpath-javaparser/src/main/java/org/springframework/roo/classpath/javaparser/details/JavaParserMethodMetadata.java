@@ -27,6 +27,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserClassMetadata;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -45,6 +46,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private JavaType returnType;
 	private JavaSymbolName methodName;
 	private String body;
@@ -100,6 +102,12 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 			}
 		}
 		
+		if (methodDeclaration.getThrows() != null) {
+			for (NameExpr throwsType: methodDeclaration.getThrows()) {
+				throwsTypes.add(new JavaType(JavaParserUtils.getClassOrInterfaceType(throwsType).getName()));
+			}
+		}
+		
 		if (methodDeclaration.getAnnotations() != null) {
 			for (AnnotationExpr annotation : methodDeclaration.getAnnotations()) {
 				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
@@ -134,6 +142,10 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 
 	public JavaSymbolName getMethodName() {
 		return methodName;
+	}
+
+	public List<JavaType> getThrowsTypes() {
+		return throwsTypes;
 	}
 
 	public String getBody() {
@@ -228,6 +240,16 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 					
 				}
 				parameterType = cit;
+			}
+
+			// Add exceptions which the method my throw
+			if (method.getThrowsTypes().size() > 0) {
+				List<NameExpr> throwsTypes = new ArrayList<NameExpr>();
+				for (JavaType javaType: method.getThrowsTypes()) {
+					NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), javaType);
+					throwsTypes.add(importedType);
+				}
+				d.setThrows(throwsTypes);
 			}
 			
 			// Create a Java Parser method parameter and add it to the list of parameters

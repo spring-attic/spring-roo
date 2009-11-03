@@ -162,7 +162,7 @@ public class JmsOperations {
 		bodyBuilder.appendFormalLine(fieldName + ".convertAndSend(messageObject);");
 
 		mutableTypeDetails.addField(fieldMetadata);
-		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
+		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), null, bodyBuilder.getOutput()));
 	}
 	
 	public void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType) {
@@ -180,7 +180,7 @@ public class JmsOperations {
 		//create some method content to get people started
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
-		methods.add(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput()));
+		methods.add(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), null, bodyBuilder.getOutput()));
 		
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, targetType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, null, null);
 		

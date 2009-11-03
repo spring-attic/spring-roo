@@ -109,7 +109,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + entityMetadata.getIdentifierAccessor().getMethodName() + "(), String.class);");
 
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, null, bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, null, null, bodyBuilder.getOutput());
 	}
  
 	private MethodMetadata getSetAsTextMethod() {
@@ -149,7 +149,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine("setValue(" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(identifier));");
 		
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, null, bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, null, null, bodyBuilder.getOutput());
 	}	
 
 	public String toString() {

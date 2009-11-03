@@ -250,7 +250,7 @@ public class ControllerOperations {
 		getParamNames.add(new JavaSymbolName("modelMap"));
 		getParamNames.add(new JavaSymbolName("request"));
 		getParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata getMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, getMethodAnnotations, null);
+		MethodMetadata getMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, getMethodAnnotations, null, null);
 		methods.add(getMethod);
 
 		List<AnnotationMetadata> postMethodAnnotations = new ArrayList<AnnotationMetadata>();
@@ -270,7 +270,7 @@ public class ControllerOperations {
 		postParamNames.add(new JavaSymbolName("modelMap"));
 		postParamNames.add(new JavaSymbolName("request"));
 		postParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata postMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, postMethodAnnotations, null);
+		MethodMetadata postMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, postMethodAnnotations, null, null);
 		methods.add(postMethod);
 
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);

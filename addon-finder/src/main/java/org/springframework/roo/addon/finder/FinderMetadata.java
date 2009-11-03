@@ -172,7 +172,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	public String toString() {

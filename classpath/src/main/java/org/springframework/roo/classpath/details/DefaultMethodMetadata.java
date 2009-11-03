@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -21,13 +22,19 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 
 	private JavaSymbolName methodName;
 	private JavaType returnType;
+	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	
-	public DefaultMethodMetadata(String declaredByMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
+	public DefaultMethodMetadata(String declaredByMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, List<JavaType> throwsTypes, String body) {
 		super(declaredByMetadataId, modifier, parameters, parameterNames, annotations, body);
 		Assert.notNull(methodName, "Method name required");
 		Assert.notNull(returnType, "Return type required");
 		this.methodName = methodName;
 		this.returnType = returnType;
+		
+		if (throwsTypes != null) {
+			this.throwsTypes = new ArrayList<JavaType>(throwsTypes.size());
+			this.throwsTypes.addAll(throwsTypes);
+		}
 	}
 
 	public JavaSymbolName getMethodName() {
@@ -36,6 +43,10 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 
 	public JavaType getReturnType() {
 		return returnType;
+	}
+
+	public List<JavaType> getThrowsTypes() {
+		return throwsTypes;
 	}
 
 	public String toString() {
@@ -47,6 +58,7 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 		tsc.append("parameterNames", getParameterNames());
 		tsc.append("returnType", returnType);
 		tsc.append("annotations", getAnnotations());
+		tsc.append("throwsTypes", throwsTypes);
 		tsc.append("body", getBody());
 		return tsc.toString();
 	}

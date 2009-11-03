@@ -128,7 +128,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 					
 			builder.appendFormalLine("return sb.toString();");
 			
-			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), builder.getOutput());
+			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, builder.getOutput());
  		}
 		
 		return result;

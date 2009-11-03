@@ -239,7 +239,7 @@ public class ClasspathOperations {
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		List<AnnotationMetadata> methodAnnotations = new ArrayList<AnnotationMetadata>();
 		methodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-		MethodMetadata method = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, null, null, methodAnnotations, null);
+		MethodMetadata method = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, null, null, methodAnnotations, null, null);
 		methods.add(method);
 
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
