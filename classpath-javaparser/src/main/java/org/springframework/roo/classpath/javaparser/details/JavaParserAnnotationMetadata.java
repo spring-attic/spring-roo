@@ -324,6 +324,9 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	    			// they specified only a single member-value pair, and it is the default anyway, so we need not do anything except update the value
 	    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 	    			smae.setMemberValue(toUse);
+	    			if (permitFlush) {
+	    				compilationUnitServices.flush();
+	    			}
 	    			return;
 	    		} else {
 	    			// there is >1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
