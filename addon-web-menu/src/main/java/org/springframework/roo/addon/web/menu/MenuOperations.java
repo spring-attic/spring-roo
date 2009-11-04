@@ -114,7 +114,7 @@ public class MenuOperations {
 		if(menuItem == null) {		
 			menuItem = document.createElement("li");
 			menuItem.setAttribute("id", menuItemId);
-			Element url = document.createElement("c:url");
+			Element url = document.createElement("spring:url");
 			url.setAttribute("var", menuItemId + "_url");
 			url.setAttribute("value", link);
 			menuItem.appendChild(url);

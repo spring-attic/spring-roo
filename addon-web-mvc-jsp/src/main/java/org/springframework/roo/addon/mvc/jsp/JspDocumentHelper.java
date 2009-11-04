@@ -151,8 +151,8 @@ public class JspDocumentHelper {
 			}
 		}		
 		
-		Element showUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
-		Element showImageUrl = new XmlElementBuilder("c:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
+		Element showUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
+		Element showImageUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
 		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "show_label").build();
 		Element showSubmitElement = new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${show_label}").addAttribute("src", "${show_image_url}").addAttribute("value", "${show_label}").addAttribute("alt", "${show_label}").build();
 		Element showFormElement = new XmlElementBuilder("form:form", document).addAttribute("action", "${show_form_url}").addAttribute("method", "GET").addChild(showMessage).addChild(showSubmitElement).build();
@@ -161,13 +161,13 @@ public class JspDocumentHelper {
 		if(webScaffoldAnnotationValues.isUpdate()) {
 			Element updateElement = document.createElement("td");		
 			Element updateFormElement = document.createElement("form:form");
-			Element updateUrl = document.createElement("c:url");
+			Element updateUrl = document.createElement("spring:url");
 			updateUrl.setAttribute("var", "update_form_url");
 			updateUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
 			updateElement.appendChild(updateUrl);
 			updateFormElement.setAttribute("action", "${update_form_url}");
 			updateFormElement.setAttribute("method", "GET");
-			Element updateImageUrl = document.createElement("c:url");
+			Element updateImageUrl = document.createElement("spring:url");
 			updateImageUrl.setAttribute("var", "update_image_url");
 			updateImageUrl.setAttribute("value", "/static/images/update.png");
 			updateElement.appendChild(updateImageUrl);
@@ -191,13 +191,13 @@ public class JspDocumentHelper {
 		if(webScaffoldAnnotationValues.isDelete()) {
 			Element deleteElement = document.createElement("td");
 			Element deleteFormElement = document.createElement("form:form");
-			Element deleteUrl = document.createElement("c:url");
+			Element deleteUrl = document.createElement("spring:url");
 			deleteUrl.setAttribute("var", "delete_form_url");
 			deleteUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
 			deleteElement.appendChild(deleteUrl);
 			deleteFormElement.setAttribute("action", "${delete_form_url}");
 			deleteFormElement.setAttribute("method", "DELETE");
-			Element deleteImageUrl = document.createElement("c:url");
+			Element deleteImageUrl = document.createElement("spring:url");
 			deleteImageUrl.setAttribute("var", "delete_image_url");
 			deleteImageUrl.setAttribute("value", "/static/images/delete.png");
 			deleteElement.appendChild(deleteImageUrl);
@@ -225,9 +225,9 @@ public class JspDocumentHelper {
 		if(webScaffoldAnnotationValues.isCreate()) {
 			//create new entity
 			bottomTd.appendChild(new XmlElementBuilder("span", document).addAttribute("class", "new")
-				.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
+				.addChild(new XmlElementBuilder("spring:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
 				.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${create_url}")
-					.addChild(new XmlElementBuilder("c:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
+					.addChild(new XmlElementBuilder("spring:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
 					.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "add_message").build())
 					.addChild(new XmlElementBuilder("img", document).addAttribute("src", "${create_img_url}").addAttribute("title", "${add_message}").addAttribute("alt", "${add_message}").build())
 				.build())
@@ -330,7 +330,7 @@ public class JspDocumentHelper {
 		divElement.appendChild(message);
 		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 		
-		Element url = document.createElement("c:url");
+		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
 		url.setAttribute("value", "/" + controllerPath);
 		divElement.appendChild(url);
@@ -384,7 +384,7 @@ public class JspDocumentHelper {
 		divElement.appendChild(message);
 		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 		
-		Element url = document.createElement("c:url");
+		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
 		url.setAttribute("value", "/" + controllerPath + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
 		divElement.appendChild(url);
@@ -448,7 +448,7 @@ public class JspDocumentHelper {
 		titleDivElement.appendChild(message);
 		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 			
-		Element url = document.createElement("c:url");
+		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
 		url.setAttribute("value", "/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));
 		titleDivElement.appendChild(url);
