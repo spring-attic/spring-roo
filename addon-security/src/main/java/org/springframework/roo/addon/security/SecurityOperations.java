@@ -57,6 +57,10 @@ public class SecurityOperations {
 		if (project == null) {
 			return false;
 		}
+		// do not permit installation unless they have a web project (as per ROO-342)
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
+			return false;
+		}
 		// only permit installation if they don't already have some version of Spring Security installed
 		return project.getDependenciesExcludingVersion(DEPENDENCY_CORE).size() == 0;
 	}
