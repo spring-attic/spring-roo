@@ -63,28 +63,6 @@ public class TilesOperations {
 		if (!fileManager.exists(viewFile)) {			
 			tilesView = XmlUtils.getDocumentBuilder().newDocument();
 			tilesView.appendChild(tilesView.createElement("tiles-definitions"));			
-			
-			//register new tiles view configuration in TilesConfigurer within project servlet configuration
-			String servletPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/" + webMvcConfigName);
-			if (!fileManager.exists(servletPath)) {
-				throw new IllegalStateException("Unable to find project servlet configuration under " + servletPath);
-			}			
-			MutableFile mutableServletDefinition = null;
-			Document servletDefinition;
-			try {
-				mutableServletDefinition = fileManager.updateFile(servletPath);
-				servletDefinition = XmlUtils.getDocumentBuilder().parse(mutableServletDefinition.getInputStream());
-			} catch (Exception e) {
-				throw new IllegalStateException("Unable to parse project servlet configuration");
-			}
-			Element tilesDefinitionList = XmlUtils.findRequiredElement("/beans/bean[@id='tilesConfigurer']/property/list", servletDefinition.getDocumentElement());
-			if (null == XmlUtils.findFirstElement("//value[text()='/WEB-INF/views/" + folderName + "/views.xml']", tilesDefinitionList)){
-				Element value = servletDefinition.createElement("value");
-				value.setTextContent("/WEB-INF/views/" + folderName + "/views.xml");
-				tilesDefinitionList.appendChild(value);
-			}
-			XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), mutableServletDefinition.getOutputStream(), servletDefinition);
-			
 		} else {
 			try {
 				DocumentBuilder builder = XmlUtils.getDocumentBuilder();

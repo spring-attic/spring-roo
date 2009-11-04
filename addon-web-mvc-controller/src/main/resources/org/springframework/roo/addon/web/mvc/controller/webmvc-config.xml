@@ -34,8 +34,9 @@
 		<property name="definitions">
 			<list>
 				<value>/WEB-INF/layouts/layouts.xml</value>
-				<value>/WEB-INF/views/views.xml</value>
-            </list>
+				<!-- Scan views directory for Tiles configurations -->
+				<value>/WEB-INF/views/**/views.xml</value>
+			</list>
 		</property>
 	</bean>
 
