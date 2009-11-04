@@ -80,8 +80,8 @@ public class IntegrationTestOperations {
 				String countMethod = entity.getSimpleTypeName() + "." + mm.getMethodName().getSymbolName() + "()";
 				imbb.appendFormalLine("int expectedCount = 13;");
 				imbb.appendFormalLine(countMethod + ";");
-				imbb.appendFormalLine("org.springframework.mock.staticmock.JUnitStaticEntityMockingControl.expectReturn(expectedCount);");
-				imbb.appendFormalLine("org.springframework.mock.staticmock.JUnitStaticEntityMockingControl.playback();");
+				imbb.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn(expectedCount);");
+				imbb.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.playback();");
 				imbb.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
 			}
 		}
