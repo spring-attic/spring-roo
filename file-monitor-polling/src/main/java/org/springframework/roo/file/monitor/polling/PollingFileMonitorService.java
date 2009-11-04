@@ -372,7 +372,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
 				if (dmr.isWatchSubtree()) {
 					for (MonitoringRequest existing : requests) {
-						if (request instanceof DirectoryMonitoringRequest) {
+						if (existing instanceof DirectoryMonitoringRequest) {
 							DirectoryMonitoringRequest existingDmr = (DirectoryMonitoringRequest) existing;
 							if (existingDmr.isWatchSubtree()) {
 								// We have a new request and an existing request, both for directories, and both which monitor sub-trees
