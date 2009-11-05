@@ -185,9 +185,9 @@ public class SeleniumOperations {
 		
 		menuOperations.addMenuItem(
 				"selenium_category", 
-				"Selenium Tests", 
+				new JavaSymbolName("SeleniumTests"), 
 				"selenium_test_suite_menu_item", 
-				"",
+				new JavaSymbolName("Test"),
 				"selenium.menu.test.suite",
 				"/static/" + relativeTestFilePath);		
 	}

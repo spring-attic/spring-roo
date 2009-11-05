@@ -92,7 +92,9 @@ public class JspDocumentHelper {
 		document.appendChild(div);
 
 		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", entityMetadata.getPlural()).addAttribute("var", "title_msg").build())
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + entityMetadata.getPlural().toLowerCase()).addAttribute("var", "entity_label_plural").build())
+								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", "${entity_label_plural}").addAttribute("var", "title_msg").build())
 								.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
 								.build();
 		
@@ -153,7 +155,7 @@ public class JspDocumentHelper {
 		
 		Element showUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
 		Element showImageUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
-		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "show_label").build();
+		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", "${entity_label}").addAttribute("var", "show_label").build();
 		Element showSubmitElement = new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${show_label}").addAttribute("src", "${show_image_url}").addAttribute("value", "${show_label}").addAttribute("alt", "${show_label}").build();
 		Element showFormElement = new XmlElementBuilder("form:form", document).addAttribute("action", "${show_form_url}").addAttribute("method", "GET").addChild(showMessage).addChild(showSubmitElement).build();
 		trElement2.appendChild(new XmlElementBuilder("td", document).addChild(showUrl).addChild(showImageUrl).addChild(showFormElement).build());
@@ -173,7 +175,7 @@ public class JspDocumentHelper {
 			updateElement.appendChild(updateImageUrl);
 			Element updateMessage = document.createElement("spring:message");
 			updateMessage.setAttribute("code", "entity.update");
-			updateMessage.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+			updateMessage.setAttribute("arguments", "${entity_label}");
 			updateMessage.setAttribute("var", "update_label");
 			updateFormElement.appendChild(updateMessage);
 			Element updateSubmitElement = document.createElement("input");
@@ -203,7 +205,7 @@ public class JspDocumentHelper {
 			deleteElement.appendChild(deleteImageUrl);
 			Element deleteMessage = document.createElement("spring:message");
 			deleteMessage.setAttribute("code", "entity.delete");
-			deleteMessage.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+			deleteMessage.setAttribute("arguments", "${entity_label}");
 			deleteMessage.setAttribute("var", "delete_label");
 			deleteFormElement.appendChild(deleteMessage);
 			deleteFormElement.appendChild(new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${delete_label}").addAttribute("src", "${delete_image_url}").addAttribute("value", "${delete_label}").addAttribute("alt", "${delete_label}").build());
@@ -213,13 +215,12 @@ public class JspDocumentHelper {
 		
 		Element notFoundMessage = document.createElement("spring:message");
 		notFoundMessage.setAttribute("code", "entity.not.found");
-		notFoundMessage.setAttribute("arguments", entityMetadata.getPlural());
+		notFoundMessage.setAttribute("arguments", "${entity_label_plural}");
 		
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityMetadata.getPlural().toLowerCase() + "}");
 		elseElement.appendChild(notFoundMessage);	
 		divElement.appendChild(ifElement);
-		
 		
 		Element bottomTd = new XmlElementBuilder("td", document).addAttribute("colspan", "" + (fields.size() > 7 ? 10 : (fields.size() + 4))).build();
 		if(webScaffoldAnnotationValues.isCreate()) {
@@ -228,7 +229,7 @@ public class JspDocumentHelper {
 				.addChild(new XmlElementBuilder("spring:url", document).addAttribute("value", "/" + controllerPath + "/form").addAttribute("var", "create_url").build())
 				.addChild(new XmlElementBuilder("a", document).addAttribute("href", "${create_url}")
 					.addChild(new XmlElementBuilder("spring:url", document).addAttribute("value", "/static/images/add.png").addAttribute("var", "create_img_url").build())
-					.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName()).addAttribute("var", "add_message").build())
+					.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "global.menu.new").addAttribute("arguments", "${entity_label}").addAttribute("var", "add_message").build())
 					.addChild(new XmlElementBuilder("img", document).addAttribute("src", "${create_img_url}").addAttribute("title", "${add_message}").addAttribute("alt", "${add_message}").build())
 				.build())
 			.build());
@@ -260,9 +261,10 @@ public class JspDocumentHelper {
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.show");
-		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		message.setAttribute("arguments", "${entity_label}");
 		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
 		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
@@ -299,7 +301,7 @@ public class JspDocumentHelper {
 		
 		Element notFoundMessage = document.createElement("spring:message");
 		notFoundMessage.setAttribute("code", "entity.not.found.single");
-		notFoundMessage.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		notFoundMessage.setAttribute("arguments", "${entity_label}");
 		
 		Element elseElement = document.createElement("c:if");
 		elseElement.setAttribute("test", "${empty " + entityName + "}");
@@ -323,9 +325,10 @@ public class JspDocumentHelper {
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.create");
-		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		message.setAttribute("arguments", "${entity_label}");
 		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
 		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
@@ -377,9 +380,10 @@ public class JspDocumentHelper {
 		Element divElement = document.createElement("div");
 		divElement.setAttribute("id", "_title_div");
 		divElement.setAttribute("style", "width: 100%");
+		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.update");
-		message.setAttribute("arguments", beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		message.setAttribute("arguments", "${entity_label}");
 		message.setAttribute("var", "title_msg");
 		divElement.appendChild(message);
 		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
@@ -441,9 +445,10 @@ public class JspDocumentHelper {
 		Element titleDivElement = document.createElement("div");
 		titleDivElement.setAttribute("id", "_title_div");
 		titleDivElement.setAttribute("style", "width: 100%");
+		titleDivElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + finderName.replace("find" + entityMetadata.getPlural() + "By", "").toLowerCase()).addAttribute("var", "entity_label").build());
 		Element message = document.createElement("spring:message");
 		message.setAttribute("code", "entity.find");
-		message.setAttribute("arguments", new JavaSymbolName(finderName).getReadableSymbolName());
+		message.setAttribute("arguments", "${entity_label}");
 		message.setAttribute("var", "title_msg");
 		titleDivElement.appendChild(message);
 		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));

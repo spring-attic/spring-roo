@@ -10,6 +10,7 @@ import org.springframework.roo.addon.mvc.jsp.TilesOperations;
 import org.springframework.roo.addon.web.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
@@ -144,9 +145,9 @@ public class WebFlowOperations {
 		//add 'create new' menu item
 		menuOperations.addMenuItem(
 				"web_flow_category", 
-				flowName, 
+				new JavaSymbolName(flowName), 
 				"web_flow_" + flowName.toLowerCase().replaceAll("-", "_") + "_menu_item", 
-				flowName,
+				new JavaSymbolName(flowName),
 				"webflow.menu.enter",
 				"/" + flowName);
 		

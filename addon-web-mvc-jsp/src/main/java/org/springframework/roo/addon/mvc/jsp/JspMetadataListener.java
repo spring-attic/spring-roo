@@ -174,9 +174,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			//add 'create new' menu item
 			menuOperations.addMenuItem(
 					"web_mvc_jsp_" + controllerPath + "_category", 
-					controllerPath, 
+					new JavaSymbolName(controllerPath), 
 					"web_mvc_jsp_create_" + controllerPath + "_menu_item", 
-					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName(),
+					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
 					"/" + controllerPath + "/form");
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
@@ -195,9 +195,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
 				"web_mvc_jsp_" + controllerPath + "_category", 
-				controllerPath, 
+				new JavaSymbolName(controllerPath), 
 				"web_mvc_jsp_list_" + controllerPath + "_menu_item", 
-				entityMetadata.getPlural(),
+				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
 	
@@ -209,9 +209,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
 						"web_mvc_jsp_" + controllerPath + "_category", 
-						controllerPath, 
+						new JavaSymbolName(controllerPath), 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
-						new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")).getReadableSymbolName(),
+						new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")),
 						"global.menu.find",
 						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");

@@ -7,8 +7,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
@@ -46,10 +49,6 @@ public class MenuOperations {
 		
 		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
 	}
-	
-//	public void setMenuFile(String menuFile) {
-//		this.menuFile = menuFile;
-//	}
 
 	/**
 	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
@@ -70,9 +69,9 @@ public class MenuOperations {
 	 * @param menuItemLabel the menu item label (required)
 	 * @param link the menu item link (required)
 	 */
-	public void addMenuItem(String menuCategoryId, String menuCategoryLabel, String menuItemId, String menuItemLabel, String messageCode, String link) {
+	public void addMenuItem(String menuCategoryId, JavaSymbolName menuCategoryLabel, String menuItemId, JavaSymbolName menuItemLabel, String messageCode, String link) {
 		Assert.hasText(menuCategoryId, "Menu category label identifier required");
-		Assert.hasText(menuCategoryLabel, "Menu category label required");
+		Assert.notNull(menuCategoryLabel, "Menu category label required");
 		Assert.hasText(menuItemId, "Menu item label identifier required");
 		Assert.notNull(menuItemLabel, "Menu item object required");
 		Assert.hasText(link, "Link required");
@@ -98,7 +97,13 @@ public class MenuOperations {
 			categoryWrapper = document.createElement("li");
 			categoryWrapper.setAttribute("id", menuCategoryId);
 			Element h2 = document.createElement("h2");
-			h2.setTextContent(menuCategoryLabel);
+			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label")) {
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+			}
+			Element categoryLabel = document.createElement("spring:message");
+			categoryLabel.setAttribute("code", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label");
+			h2.appendChild(categoryLabel);
 			categoryWrapper.appendChild(h2);
 			categoryRoot = document.createElement("ul");
 			categoryWrapper.appendChild(categoryRoot);
@@ -122,8 +127,16 @@ public class MenuOperations {
 			createLink.setAttribute("href", "${" + menuItemId + "_url}");				
 			Element message = document.createElement("spring:message");
 			message.setAttribute("code", messageCode);
-			if (menuItemLabel.length() > 0) {
-				message.setAttribute("arguments", menuItemLabel);
+			if (menuItemLabel.getSymbolName().length() > 0) {
+				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "label." + menuItemLabel.getSymbolName().toLowerCase())) {
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", "label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+				}
+				Element entityLabel = document.createElement("spring:message");
+				entityLabel.setAttribute("code", "label." + menuItemLabel.getSymbolName().toLowerCase());
+				entityLabel.setAttribute("var", "label_" + menuItemLabel.getSymbolName().toLowerCase());
+				createLink.appendChild(entityLabel);
+				message.setAttribute("arguments", "${" + "label_" + menuItemLabel.getSymbolName().toLowerCase() + "}");
 			}
 			createLink.appendChild(message);
 			menuItem.appendChild(createLink);
@@ -239,5 +252,73 @@ public class MenuOperations {
 		
 		// A file existed, but it contained the same content, so we return false
 		return false;
+	}
+	
+	/**
+	 * Changes the specified property, throwing an exception if the file does not exist.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to update (required)
+	 * @param value the property value to set into the property key (required)
+	 */
+	private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+		Assert.notNull(propertyFilePath, "Property file path required");
+		Assert.hasText(propertyFilename, "Property filename required");
+		Assert.hasText(key, "Key required");
+		Assert.hasText(value, "Value required");
+		
+		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		MutableFile mutableFile = null;
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(filePath)) {
+				mutableFile = fileManager.updateFile(filePath);
+				props.load(mutableFile.getInputStream());
+			} else {
+				throw new IllegalStateException("Properties file not found");
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+		props.setProperty(key, value);
+		
+		try {
+			props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+	}
+
+	/**
+	 * Retrieves the specified property, returning null if the property or file does not exist.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to retrieve (required)
+	 * @return the property value (may return null if the property file or requested property does not exist)
+	 */
+	private String getProperty(Path propertyFilePath, String propertyFilename, String key) {
+		Assert.notNull(propertyFilePath, "Property file path required");
+		Assert.hasText(propertyFilename, "Property filename required");
+		Assert.hasText(key, "Key required");
+		
+		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		MutableFile mutableFile = null;
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(filePath)) {
+				mutableFile = fileManager.updateFile(filePath);
+				props.load(mutableFile.getInputStream());
+			} else {
+				return null;
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+		
+		return props.getProperty(key);
 	}
 }
