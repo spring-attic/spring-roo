@@ -176,7 +176,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					"web_mvc_jsp_" + controllerPath + "_category", 
 					controllerPath, 
 					"web_mvc_jsp_create_" + controllerPath + "_menu_item", 
-					beanInfoMetadata.getJavaBean().getSimpleTypeName(),
+					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName(),
 					"global.menu.new",
 					"/" + controllerPath + "/form");
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
