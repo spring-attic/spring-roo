@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  * Provides operations to manage tiles view definitions.
@@ -64,12 +65,14 @@ public class TilesOperations {
 			tilesView = XmlUtils.getDocumentBuilder().newDocument();
 			tilesView.appendChild(tilesView.createElement("tiles-definitions"));			
 		} else {
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setEntityResolver(new TilesDtdResolver());
 			try {
-				DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-				builder.setEntityResolver(new TilesDtdResolver());
 				tilesView = builder.parse(viewFile);
-			} catch (Exception e) {
-				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file");
+			} catch (SAXException se) {
+				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file", se);
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Unable to read the tiles " + viewFile + " file (reason: " + ioe.getMessage() + ")", ioe);
 			}
 		}
 		
