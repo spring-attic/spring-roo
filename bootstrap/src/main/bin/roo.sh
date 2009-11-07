@@ -19,7 +19,7 @@ ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 # echo Resolved ROO_HOME: $ROO_HOME
 
 while true; do
-	java -Djava.ext.dirs="$ROO_HOME/dist:$ROO_HOME/lib:$ROO_HOME/work:$JAVA_HOME/jre/lib/ext" -Droo.home="$ROO_HOME" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" $@
+	java -Djava.ext.dirs="$ROO_HOME/dist:$ROO_HOME/lib:$ROO_HOME/work:$JAVA_HOME/jre/lib/ext" $ROO_OPTS -Droo.home="$ROO_HOME" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" $@
 	if [ $? -ne 100 ]; then
 		break
 	fi

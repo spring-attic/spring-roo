@@ -30,6 +30,6 @@ set ROO_CP="%ROO_CP%"
 rem echo Using Roo classpath [%ROO_CP%]
 
 :launch
-java -DdevelopmentMode=true -Droo.home="%USERPROFILE%\roo-dev" -cp %ROO_CP% -Djava.ext.dirs="%USERPROFILE%\roo-dev\work" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" %*
+java -DdevelopmentMode=true %ROO_OPTS% -Droo.home="%USERPROFILE%\roo-dev" -cp %ROO_CP% -Djava.ext.dirs="%USERPROFILE%\roo-dev\work" org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" %*
 
 if "%errorlevel%" == "100" goto launch
