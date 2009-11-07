@@ -21,6 +21,9 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JLineLogHandler extends Handler {
 
+	static final boolean WINDOWS_OS = System.getProperty("os.name").toLowerCase().contains("windows");
+	private static final boolean BRIGHT_COLORS = Boolean.getBoolean("roo.bright");
+	
 	private ConsoleReader reader;
 	private ShellPromptAccessor shellPromptAccessor;
 	private static ThreadLocal<Boolean> redrawProhibit = new ThreadLocal<Boolean>();
@@ -153,19 +156,45 @@ public class JLineLogHandler extends Handler {
 	    
 		if (ansiSupported) {
 			if (event.getLevel().intValue() >= Level.SEVERE.intValue()) {
-				sb.append(new ANSIBuffer().reverse(threadName).red(eventString));
+				sb.append(getANSIBuffer().reverse(threadName).red(eventString));
 			} else if (event.getLevel().intValue() >= Level.WARNING.intValue()) {
-				sb.append(new ANSIBuffer().reverse(threadName).magenta(eventString));
+				sb.append(getANSIBuffer().reverse(threadName).magenta(eventString));
 			} else if (event.getLevel().intValue() >= Level.INFO.intValue()) {
-				sb.append(new ANSIBuffer().reverse(threadName).green(eventString));
+				sb.append(getANSIBuffer().reverse(threadName).green(eventString));
 			} else {
-				sb.append(new ANSIBuffer().reverse(threadName).append(eventString));
+				sb.append(getANSIBuffer().reverse(threadName).append(eventString));
 			}
 		} else {
 			sb.append(threadName).append(eventString);
 		}
 	    
 		return sb.toString();
+	}
+	
+	/**
+	 * Makes text brighter if requested through system property 'roo.bright' and
+	 * works around issue on Windows in using reverse() in combination with the 
+	 * Jansi lib, which leaves its 'negative' flag set unless reset explicitly. 
+	 * 
+	 * @return new patched ANSIBuffer
+	 */
+	static ANSIBuffer getANSIBuffer() {
+		final char esc = (char) 27; 
+		return new ANSIBuffer() {
+			public ANSIBuffer reverse(String str) {
+				if (WINDOWS_OS) {
+					return super.reverse(str).append(ANSICodes.attrib(esc));
+				}
+				return super.reverse(str);
+			};
+			public ANSIBuffer attrib(String str, int code) {
+				if (BRIGHT_COLORS && 30 <= code && code <= 37) {
+					// this is a color code: add a 'bright' code
+					return append(esc + "[" + code + ";1m").append(str).append(ANSICodes.attrib(0));
+				}
+				return super.attrib(str, code);
+			}
+		};
 	}
 	
 }
