@@ -87,7 +87,6 @@ public class Dependency implements Comparable<Dependency> {
 			} else if (t.equals("ZIP")) {
 			    this.type = DependencyType.ZIP;
 			} else {
-				System.out.println("WARN " + t + " is not recognized");
 			    this.type = DependencyType.OTHER;
 			}
         }
