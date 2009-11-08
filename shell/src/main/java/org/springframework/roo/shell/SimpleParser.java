@@ -6,10 +6,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 
 import org.springframework.roo.shell.internal.AbstractShell;
@@ -35,7 +31,6 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.CDATASection;
-import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -779,7 +774,7 @@ public final class SimpleParser {
 					// Now we've figured out the options, store this individual command
 					CDATASection progList = document.createCDATASection(cmdSyntax.toString());
 					String safeName = cmd.value()[0].replace("\\", "BCK").replace("/", "FWD").replace("*", "ASX");
-					Element element = new XmlElementBuilder("section", document).addAttribute("id", "command-index-" + safeName.toLowerCase().replace(' ', '-'))
+					Element element = new XmlElementBuilder("section", document).addAttribute("xml:id", "command-index-" + safeName.toLowerCase().replace(' ', '-'))
 											.addChild(new XmlElementBuilder("title", document).setText(cmd.value()[0]).build())
 											.addChild(new XmlElementBuilder("para", document).setText(cmd.help()).build())
 											.addChild(new XmlElementBuilder("programlisting", document).addChild(progList).build())
@@ -791,7 +786,7 @@ public final class SimpleParser {
 			}
 			
 			Element topSection = document.createElement("section");
-			topSection.setAttribute("id", "command-index-" + section.toLowerCase().replace(' ', '-'));
+			topSection.setAttribute("xml:id", "command-index-" + section.toLowerCase().replace(' ', '-'));
 			topSection.appendChild(new XmlElementBuilder("title", document).setText(section).build());
 			topSection.appendChild(new XmlElementBuilder("para", document).setText(section + " are contained in " + target.getClass().getName() + ".").build());
 			
@@ -803,9 +798,10 @@ public final class SimpleParser {
 			builtSections.add(topSection);
 		}
 		
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		Element appendix = document.createElement("appendix");
-		appendix.setAttribute("id", "command-index");
+		appendix.setAttribute("xmlns", "http://docbook.org/ns/docbook");
+		appendix.setAttribute("version", "5.0");
+		appendix.setAttribute("xml:id", "command-index");
 		appendix.appendChild(new XmlElementBuilder("title", document).setText("Command Index").build());
 		appendix.appendChild(new XmlElementBuilder("para", document).setText("This appendix was automatically built from Roo " + AbstractShell.versionInfo() + ".").build());
 		appendix.appendChild(new XmlElementBuilder("para", document).setText("Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.").build());

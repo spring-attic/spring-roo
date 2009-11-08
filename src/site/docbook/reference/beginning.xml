@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="beginning"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/2000/svg"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>Beginning With Roo: The Tutorial</title>
+
+  <para>In this chapter we'll build an app step-by-step together in a
+  relatively fast manner so that you can see how to typically use Roo in a
+  normal project. We'll leave detailed features and side-steps to other
+  sections of this manual.</para>
+
+  <section xml:id="beginning-what-you-will-learn">
+    <title>What You'll Learn</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-wedding-tutorial">
+    <title>Alternative Tutorial: The Wedding RSVP Application</title>
+
+    <para>In addition to the tutorial in this chapter, we've published a
+    separate step-by-step tutorial in the form of a blog entry. This blog
+    entry covers the process of building a wedding RSVP application. It is
+    kept updated to reflect the current major version of Roo, and features a
+    number of interesting Roo capabilities:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Standard MVC web application with JPA entities etc</para>
+      </listitem>
+
+      <listitem>
+        <para>Spring Security usage, including login page customisation</para>
+      </listitem>
+
+      <listitem>
+        <para>Sending emails via SMTP</para>
+      </listitem>
+
+      <listitem>
+        <para>Testing both via JUnit and Selenium</para>
+      </listitem>
+
+      <listitem>
+        <para>Usage with Eclipse</para>
+      </listitem>
+
+      <listitem>
+        <para>Creating a WAR for deployment</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>You can find the wedding tutorial at <link
+    xlink:href="http://blog.springsource.com/2009/05/27/roo-part-2/">http://blog.springsource.com/2009/05/27/roo-part-2/</link>.</para>
+  </section>
+
+  <section xml:id="beginning-tutorial-application-use-cases">
+    <title>Tutorial Application Use Cases</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-1">
+    <title>Step 1: Starting a Typical Project</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-2">
+    <title>Step 2: Creating Entities and Fields</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-3">
+    <title>Step 3: Integration Tests</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-4">
+    <title>Step 4: Using Your IDE</title>
+
+    <para>We'll assume you're using STS. Write a test and try out code
+    assist.</para>
+  </section>
+
+  <section xml:id="beginning-step-5">
+    <title>Step 5: Creating A Web Tier</title>
+
+    <para>Performed within the IDE.</para>
+  </section>
+
+  <section xml:id="beginning-step-6">
+    <title>Step 6: Loading the Web Server</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-7">
+    <title>Step 7: Selenium Tests</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="beginning-step-8">
+    <title>Step 8: Backups and Deployment</title>
+
+    <para>Make a ZIP and make a WAR; refer to version control section.</para>
+  </section>
+
+  <section xml:id="beginning-where-to-next">
+    <title>Where To Next</title>
+
+    <para>TBC</para>
+  </section>
+</chapter>

@@ -1,0 +1,12 @@
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="existing" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Existing Building Blocks</title>
+  <para>Smetimes you have an existing project or database. This chapter covers how to make Roo work with it.</para>
+  <section xml:id="existing-project">
+    <title>Existing Projects</title>
+    <para>TBC</para>
+  </section>
+  <section xml:id="existing-database">
+    <title>Existing Databases</title>
+    <para>TBC</para>
+  </section>
+</chapter>

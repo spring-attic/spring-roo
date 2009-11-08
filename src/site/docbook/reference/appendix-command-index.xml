@@ -1,22 +1,64 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<appendix id="command-index">
+<appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.0.0.RC2 [rev 321].</para>
+    <para>This appendix was automatically built from Roo ENGINEERING BUILD [rev 398M].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
-    <section id="command-index-backup-commands">
+    <section xml:id="command-index-add-on-commands">
+        <title>Add On Commands</title>
+        <para>Add On Commands are contained in org.springframework.roo.bootstrap.AddOnCommands.</para>
+        <section xml:id="command-index-addon-cleanup">
+            <title>addon cleanup</title>
+            <para>Cleans the $ROO_HOME/work directory so it only contains correct JARs as per $ROO_HOME/add-ons</para>
+            <programlisting><![CDATA[addon cleanup]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-addon-install">
+            <title>addon install</title>
+            <para>Installs a new add-on to the $ROO_HOME/add-ons directory</para>
+            <programlisting><![CDATA[addon install --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to obtain the add-on ZIP file from</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-list">
+            <title>addon list</title>
+            <para>Lists add-ons installed in the $ROO_HOME/add-ons directory</para>
+            <programlisting><![CDATA[addon list]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-addon-uninstall">
+            <title>addon uninstall</title>
+            <para>Removes an existing add-on from the $ROO_HOME/add-ons directory</para>
+            <programlisting><![CDATA[addon uninstall --pattern]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--pattern</term>
+                    <listitem>
+                        <para>The filename pattern to remove</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-backup-commands">
         <title>Backup Commands</title>
         <para>Backup Commands are contained in org.springframework.roo.addon.backup.BackupCommands.</para>
-        <section id="command-index-backup">
+        <section xml:id="command-index-backup">
             <title>backup</title>
             <para>Backup your project to a zip file</para>
             <programlisting><![CDATA[backup]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
-    <section id="command-index-bootstrap-commands">
+    <section xml:id="command-index-bootstrap-commands">
         <title>Bootstrap Commands</title>
         <para>Bootstrap Commands are contained in org.springframework.roo.bootstrap.BootstrapCommands.</para>
-        <section id="command-index-development-mode">
+        <section xml:id="command-index-development-mode">
             <title>development mode</title>
             <para>Switches the system into development mode (greater diagnostic information)</para>
             <programlisting><![CDATA[development mode]]></programlisting>
@@ -29,13 +71,13 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-poll-now">
+        <section xml:id="command-index-poll-now">
             <title>poll now</title>
             <para>Perform a manual file system poll</para>
             <programlisting><![CDATA[poll now]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-poll-speed">
+        <section xml:id="command-index-poll-speed">
             <title>poll speed</title>
             <para>Changes the file system polling speed</para>
             <programlisting><![CDATA[poll speed --ms]]></programlisting>
@@ -48,17 +90,17 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-poll-status">
+        <section xml:id="command-index-poll-status">
             <title>poll status</title>
             <para>Display file system polling information</para>
             <programlisting><![CDATA[poll status]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
-    <section id="command-index-bundlor-commands">
+    <section xml:id="command-index-bundlor-commands">
         <title>Bundlor Commands</title>
-        <para>Bundlor Commands are contained in org.springframework.roo.addon.bundlor.BundlorCommands.</para>
-        <section id="command-index-bundlor-add-explicit-import">
+        <para>Bundlor Commands are contained in com.springsource.bundlor.roo.addon.BundlorCommands.</para>
+        <section xml:id="command-index-bundlor-add-explicit-import">
             <title>bundlor add explicit import</title>
             <para>Add an explicit import for a dependency Bundlor cannot detect</para>
             <programlisting><![CDATA[bundlor add explicit import --package --fromVersion --toVersion]]></programlisting>
@@ -95,7 +137,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-bundlor-configure-imports">
+        <section xml:id="command-index-bundlor-configure-imports">
             <title>bundlor configure imports</title>
             <para>specify version range for package imports, and whether they are optional</para>
             <programlisting><![CDATA[bundlor configure imports --packagePattern --fromVersion --toVersion]]></programlisting>
@@ -132,7 +174,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-bundlor-non-exported-packages">
+        <section xml:id="command-index-bundlor-non-exported-packages">
             <title>bundlor non-exported packages</title>
             <para>specify packages that should not be exported by the bundle</para>
             <programlisting><![CDATA[bundlor non-exported packages --packagePattern]]></programlisting>
@@ -145,7 +187,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-bundlor-setup">
+        <section xml:id="command-index-bundlor-setup">
             <title>bundlor setup</title>
             <para>automatically create and manage an OSGi manifest for this project using Bundlor</para>
             <programlisting><![CDATA[bundlor setup]]></programlisting>
@@ -158,7 +200,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-bundlor-version-package-exports">
+        <section xml:id="command-index-bundlor-version-package-exports">
             <title>bundlor version package exports</title>
             <para>specify version to export individual packages at (defaults to bundle version)</para>
             <programlisting><![CDATA[bundlor version package exports --packagePattern --version]]></programlisting>
@@ -178,10 +220,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-classpath-commands">
+    <section xml:id="command-index-classpath-commands">
         <title>Classpath Commands</title>
         <para>Classpath Commands are contained in org.springframework.roo.classpath.operations.ClasspathCommands.</para>
-        <section id="command-index-class">
+        <section xml:id="command-index-class">
             <title>class</title>
             <para>Creates a new Java class source file in any project path</para>
             <programlisting><![CDATA[class --name]]></programlisting>
@@ -190,6 +232,12 @@
                     <term>--name</term>
                     <listitem>
                         <para>No help available</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--rooAnnotations</term>
+                    <listitem>
+                        <para>Whether the generated class should have common Roo annotations</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -218,7 +266,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-dod">
+        <section xml:id="command-index-dod">
             <title>dod</title>
             <para>Creates a new data on demand for the specified entity</para>
             <programlisting><![CDATA[dod]]></programlisting>
@@ -226,7 +274,13 @@
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The entity which will this data on demand class will create and modify as required</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -237,7 +291,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-entity">
+        <section xml:id="command-index-entity">
             <title>entity</title>
             <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
             <programlisting><![CDATA[entity --name]]></programlisting>
@@ -285,6 +339,18 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--inheritanceType</term>
+                    <listitem>
+                        <para>The JPA @Inheritance value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--mappedSuperclass</term>
+                    <listitem>
+                        <para>Apply @MappedSuperclass for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo</para>
@@ -292,7 +358,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-enum-constant">
+        <section xml:id="command-index-enum-constant">
             <title>enum constant</title>
             <para>Inserts a new enum constant into an enum</para>
             <programlisting><![CDATA[enum constant --name]]></programlisting>
@@ -317,7 +383,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-enum-type">
+        <section xml:id="command-index-enum-type">
             <title>enum type</title>
             <para>Creates a new Java enum source file in any project path</para>
             <programlisting><![CDATA[enum type --name]]></programlisting>
@@ -342,7 +408,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-interface">
+        <section xml:id="command-index-interface">
             <title>interface</title>
             <para>Creates a new Java interface source file in any project path</para>
             <programlisting><![CDATA[interface --name]]></programlisting>
@@ -367,7 +433,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-test-integration">
+        <section xml:id="command-index-test-integration">
             <title>test integration</title>
             <para>Creates a new integration test for the specified entity</para>
             <programlisting><![CDATA[test integration]]></programlisting>
@@ -387,10 +453,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-controller-commands">
+    <section xml:id="command-index-controller-commands">
         <title>Controller Commands</title>
         <para>Controller Commands are contained in org.springframework.roo.addon.web.mvc.controller.ControllerCommands.</para>
-        <section id="command-index-controller-all">
+        <section xml:id="command-index-controller-all">
             <title>controller all</title>
             <para>Scaffold a controller for all entities without an existing controller</para>
             <programlisting><![CDATA[controller all --package]]></programlisting>
@@ -403,7 +469,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-controller-class">
+        <section xml:id="command-index-controller-class">
             <title>controller class</title>
             <para>Create a new manual Controller (ie where you write the methods)</para>
             <programlisting><![CDATA[controller class --name]]></programlisting>
@@ -422,7 +488,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-controller-scaffold">
+        <section xml:id="command-index-controller-scaffold">
             <title>controller scaffold</title>
             <para>Create a new scaffold Controller (ie where we maintain CRUD automatically)</para>
             <programlisting><![CDATA[controller scaffold --name]]></programlisting>
@@ -460,10 +526,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-field-commands">
+    <section xml:id="command-index-field-commands">
         <title>Field Commands</title>
         <para>Field Commands are contained in org.springframework.roo.classpath.operations.FieldCommands.</para>
-        <section id="command-index-field-boolean">
+        <section xml:id="command-index-field-boolean">
             <title>field boolean</title>
             <para>Adds a private boolean field to an existing Java source file</para>
             <programlisting><![CDATA[field boolean --fieldName]]></programlisting>
@@ -536,7 +602,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-date">
+        <section xml:id="command-index-field-date">
             <title>field date</title>
             <para>Adds a private date field to an existing Java source file</para>
             <programlisting><![CDATA[field date --fieldName --type]]></programlisting>
@@ -615,7 +681,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-enum">
+        <section xml:id="command-index-field-enum">
             <title>field enum</title>
             <para>Adds a private enum field to an existing Java source file</para>
             <programlisting><![CDATA[field enum --fieldName --type]]></programlisting>
@@ -676,7 +742,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-number">
+        <section xml:id="command-index-field-number">
             <title>field number</title>
             <para>Adds a private numeric field to an existing Java source file</para>
             <programlisting><![CDATA[field number --fieldName --type]]></programlisting>
@@ -767,25 +833,13 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-other">
+        <section xml:id="command-index-field-other">
             <title>field other</title>
             <para>Inserts a private field into the specified file</para>
-            <programlisting><![CDATA[field other --path --name --type]]></programlisting>
+            <programlisting><![CDATA[field other --fieldName --type]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The name of the class to receive this field</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--path</term>
-                    <listitem>
-                        <para>The path where the class can be found</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--name</term>
+                    <term>--fieldName</term>
                     <listitem>
                         <para>The name of the field</para>
                     </listitem>
@@ -794,6 +848,30 @@
                     <term>--type</term>
                     <listitem>
                         <para>The Java type of this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to receive this field</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--notNull</term>
+                    <listitem>
+                        <para>Whether this value cannot be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--nullRequired</term>
+                    <listitem>
+                        <para>Whether this value must be null</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>An optional comment for JavaDocs</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -810,7 +888,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-reference">
+        <section xml:id="command-index-field-reference">
             <title>field reference</title>
             <para>Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)</para>
             <programlisting><![CDATA[field reference --fieldName --type]]></programlisting>
@@ -877,7 +955,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-set">
+        <section xml:id="command-index-field-set">
             <title>field set</title>
             <para>Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)</para>
             <programlisting><![CDATA[field set --fieldName --element]]></programlisting>
@@ -962,7 +1040,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-string">
+        <section xml:id="command-index-field-string">
             <title>field string</title>
             <para>Adds a private string field to an existing Java source file</para>
             <programlisting><![CDATA[field string --fieldName]]></programlisting>
@@ -1048,10 +1126,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-finder-commands">
+    <section xml:id="command-index-finder-commands">
         <title>Finder Commands</title>
         <para>Finder Commands are contained in org.springframework.roo.addon.finder.FinderCommands.</para>
-        <section id="command-index-finder-add">
+        <section xml:id="command-index-finder-add">
             <title>finder add</title>
             <para>Install finders in the given target (must be an entity)</para>
             <programlisting><![CDATA[finder add --finderName]]></programlisting>
@@ -1070,7 +1148,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-finder-list">
+        <section xml:id="command-index-finder-list">
             <title>finder list</title>
             <para>List all finders for a given target (must be an entity</para>
             <programlisting><![CDATA[finder list --class]]></programlisting>
@@ -1096,10 +1174,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-hint-commands">
+    <section xml:id="command-index-hint-commands">
         <title>Hint Commands</title>
         <para>Hint Commands are contained in org.springframework.roo.classpath.operations.HintCommands.</para>
-        <section id="command-index-hint">
+        <section xml:id="command-index-hint">
             <title>hint</title>
             <para>Provides step-by-step hints and context-sensitive guidance</para>
             <programlisting><![CDATA[hint]]></programlisting>
@@ -1113,10 +1191,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-integration-test-commands">
+    <section xml:id="command-index-integration-test-commands">
         <title>Integration Test Commands</title>
         <para>Integration Test Commands are contained in org.springframework.roo.addon.test.IntegrationTestCommands.</para>
-        <section id="command-index-test-mock">
+        <section xml:id="command-index-test-mock">
             <title>test mock</title>
             <para>Creates a mock test for the specified entity</para>
             <programlisting><![CDATA[test mock]]></programlisting>
@@ -1136,46 +1214,46 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-j-line-shell">
+    <section xml:id="command-index-j-line-shell">
         <title>J Line Shell</title>
         <para>J Line Shell are contained in org.springframework.roo.shell.jline.JLineShell.</para>
-        <section id="command-index-asxfwd">
+        <section xml:id="command-index-asxfwd">
             <title>*/</title>
             <para>End of block comment</para>
             <programlisting><![CDATA[*/]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-fwdasx">
+        <section xml:id="command-index-fwdasx">
             <title>/*</title>
             <para>Start of block comment</para>
             <programlisting><![CDATA[/*]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-fwdfwd">
+        <section xml:id="command-index-fwdfwd">
             <title>//</title>
             <para>Inline comment markers</para>
             <programlisting><![CDATA[//]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-date">
+        <section xml:id="command-index-date">
             <title>date</title>
             <para>Displays the local date and time</para>
             <programlisting><![CDATA[date]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-exit">
+        <section xml:id="command-index-exit">
             <title>exit</title>
             <para>Exits the shell</para>
             <programlisting><![CDATA[exit]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-props">
+        <section xml:id="command-index-props">
             <title>props</title>
             <para>Shows the shell's properties</para>
             <programlisting><![CDATA[props]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-script">
+        <section xml:id="command-index-script">
             <title>script</title>
             <para>Parses the specified resource file and executes its commands</para>
             <programlisting><![CDATA[script --file]]></programlisting>
@@ -1194,7 +1272,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-version">
+        <section xml:id="command-index-version">
             <title>version</title>
             <para>Displays shell version</para>
             <programlisting><![CDATA[version]]></programlisting>
@@ -1208,10 +1286,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-jms-commands">
+    <section xml:id="command-index-jms-commands">
         <title>Jms Commands</title>
         <para>Jms Commands are contained in org.springframework.roo.addon.jms.JmsCommands.</para>
-        <section id="command-index-field-jms-template">
+        <section xml:id="command-index-field-jms-template">
             <title>field jms template</title>
             <para>insert a JmsTemplate field into an existing type</para>
             <programlisting><![CDATA[field jms template]]></programlisting>
@@ -1230,7 +1308,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-jms-listener-class">
+        <section xml:id="command-index-jms-listener-class">
             <title>jms listener class</title>
             <para>Create a new class which is a asynchronous JMS consumer</para>
             <programlisting><![CDATA[jms listener class --class]]></programlisting>
@@ -1255,7 +1333,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-jms-setup">
+        <section xml:id="command-index-jms-setup">
             <title>jms setup</title>
             <para>Install a JMS provider in your project</para>
             <programlisting><![CDATA[jms setup --provider]]></programlisting>
@@ -1281,16 +1359,16 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-jpa-commands">
+    <section xml:id="command-index-jpa-commands">
         <title>Jpa Commands</title>
         <para>Jpa Commands are contained in org.springframework.roo.addon.jpa.JpaCommands.</para>
-        <section id="command-index-database-properties-list">
+        <section xml:id="command-index-database-properties-list">
             <title>database properties list</title>
             <para>Shows database configuration details</para>
             <programlisting><![CDATA[database properties list]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-database-properties-remove">
+        <section xml:id="command-index-database-properties-remove">
             <title>database properties remove</title>
             <para>Removes a particular database property</para>
             <programlisting><![CDATA[database properties remove --key]]></programlisting>
@@ -1303,7 +1381,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-database-properties-set">
+        <section xml:id="command-index-database-properties-set">
             <title>database properties set</title>
             <para>Changes a particular database property</para>
             <programlisting><![CDATA[database properties set --key --value]]></programlisting>
@@ -1322,20 +1400,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-persistence-exception-translation">
-            <title>persistence exception translation</title>
-            <para>Installs support for JPA exception translation</para>
-            <programlisting><![CDATA[persistence exception translation]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>The package in which the JPA exception translation aspect will be installed</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section id="command-index-persistence-setup">
+        <section xml:id="command-index-persistence-setup">
             <title>persistence setup</title>
             <para>Install or updates a JPA persistence provider in your project</para>
             <programlisting><![CDATA[persistence setup --provider --database]]></programlisting>
@@ -1358,13 +1423,31 @@
                         <para>The JNDI datasource to use</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--databaseName</term>
+                    <listitem>
+                        <para>The database name to use</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--userName</term>
+                    <listitem>
+                        <para>The username to use</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--password</term>
+                    <listitem>
+                        <para>The password to use</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
     </section>
-    <section id="command-index-logging-commands">
+    <section xml:id="command-index-logging-commands">
         <title>Logging Commands</title>
         <para>Logging Commands are contained in org.springframework.roo.addon.logging.LoggingCommands.</para>
-        <section id="command-index-logging-setup">
+        <section xml:id="command-index-logging-setup">
             <title>logging setup</title>
             <para>Configure logging in your project</para>
             <programlisting><![CDATA[logging setup --level]]></programlisting>
@@ -1384,10 +1467,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-mail-commands">
+    <section xml:id="command-index-mail-commands">
         <title>Mail Commands</title>
         <para>Mail Commands are contained in org.springframework.roo.addon.email.MailCommands.</para>
-        <section id="command-index-email-sender-setup">
+        <section xml:id="command-index-email-sender-setup">
             <title>email sender setup</title>
             <para>Install a Spring JavaMailSender in your project</para>
             <programlisting><![CDATA[email sender setup --hostServer]]></programlisting>
@@ -1430,7 +1513,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-email-template-setup">
+        <section xml:id="command-index-email-template-setup">
             <title>email template setup</title>
             <para>Configures a template for a SimpleMailMessage</para>
             <programlisting><![CDATA[email template setup]]></programlisting>
@@ -1449,7 +1532,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-field-email-template">
+        <section xml:id="command-index-field-email-template">
             <title>field email template</title>
             <para>Inserts a MailTemplate field into an existing type</para>
             <programlisting><![CDATA[field email template]]></programlisting>
@@ -1469,10 +1552,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-maven-commands">
+    <section xml:id="command-index-maven-commands">
         <title>Maven Commands</title>
         <para>Maven Commands are contained in org.springframework.roo.addon.maven.MavenCommands.</para>
-        <section id="command-index-dependency-add">
+        <section xml:id="command-index-dependency-add">
             <title>dependency add</title>
             <para>Adds a new dependency to the Maven project object model (POM)</para>
             <programlisting><![CDATA[dependency add --groupId --artifactId --version]]></programlisting>
@@ -1497,7 +1580,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-dependency-remove">
+        <section xml:id="command-index-dependency-remove">
             <title>dependency remove</title>
             <para>Removes an existing dependency from the Maven project object model (POM)</para>
             <programlisting><![CDATA[dependency remove --groupId --artifactId --version]]></programlisting>
@@ -1522,13 +1605,19 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-perform-clean">
+        <section xml:id="command-index-perform-assembly">
+            <title>perform assembly</title>
+            <para>Executes the assembly goal via Maven</para>
+            <programlisting><![CDATA[perform assembly]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-perform-clean">
             <title>perform clean</title>
             <para>Executes a full clean (including Eclipse files) via Maven</para>
             <programlisting><![CDATA[perform clean]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-perform-command">
+        <section xml:id="command-index-perform-command">
             <title>perform command</title>
             <para>Executes a user-specified Maven command</para>
             <programlisting><![CDATA[perform command --mavenCommand]]></programlisting>
@@ -1541,25 +1630,25 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-perform-eclipse">
+        <section xml:id="command-index-perform-eclipse">
             <title>perform eclipse</title>
             <para>Sets up Eclipse configuration via Maven</para>
             <programlisting><![CDATA[perform eclipse]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-perform-package">
+        <section xml:id="command-index-perform-package">
             <title>perform package</title>
             <para>Packages the application using Maven, but does not execute any tests</para>
             <programlisting><![CDATA[perform package]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-perform-tests">
+        <section xml:id="command-index-perform-tests">
             <title>perform tests</title>
             <para>Executes the tests via Maven</para>
             <programlisting><![CDATA[perform tests]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-project">
+        <section xml:id="command-index-project">
             <title>project</title>
             <para>Creates a new project</para>
             <programlisting><![CDATA[project --topLevelPackage]]></programlisting>
@@ -1582,13 +1671,19 @@
                         <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--template</term>
+                    <listitem>
+                        <para>The type of project to create (defaults to STANDARD_PROJECT)</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
     </section>
-    <section id="command-index-metadata-commands">
+    <section xml:id="command-index-metadata-commands">
         <title>Metadata Commands</title>
         <para>Metadata Commands are contained in org.springframework.roo.classpath.MetadataCommands.</para>
-        <section id="command-index-metadata-for-id">
+        <section xml:id="command-index-metadata-for-id">
             <title>metadata for id</title>
             <para>Shows detailed information about the metadata item</para>
             <programlisting><![CDATA[metadata for id --metadataId]]></programlisting>
@@ -1601,7 +1696,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-metadata-for-type">
+        <section xml:id="command-index-metadata-for-type">
             <title>metadata for type</title>
             <para>Shows detailed metadata for the indicated type</para>
             <programlisting><![CDATA[metadata for type --type]]></programlisting>
@@ -1614,13 +1709,13 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-metadata-status">
+        <section xml:id="command-index-metadata-status">
             <title>metadata status</title>
             <para>Shows metadata statistics</para>
             <programlisting><![CDATA[metadata status]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section id="command-index-metadata-trace">
+        <section xml:id="command-index-metadata-trace">
             <title>metadata trace</title>
             <para>Traces metadata event delivery notifications (0=none, 1=some, 2=all)</para>
             <programlisting><![CDATA[metadata trace --level]]></programlisting>
@@ -1634,10 +1729,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-prop-file-commands">
+    <section xml:id="command-index-prop-file-commands">
         <title>Prop File Commands</title>
         <para>Prop File Commands are contained in org.springframework.roo.addon.propfiles.PropFileCommands.</para>
-        <section id="command-index-properties-list">
+        <section xml:id="command-index-properties-list">
             <title>properties list</title>
             <para>Shows the details of a particular properties file</para>
             <programlisting><![CDATA[properties list --name --path]]></programlisting>
@@ -1656,7 +1751,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-properties-remove">
+        <section xml:id="command-index-properties-remove">
             <title>properties remove</title>
             <para>Removes a particular properties file property</para>
             <programlisting><![CDATA[properties remove --name --path --key]]></programlisting>
@@ -1681,7 +1776,7 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-properties-set">
+        <section xml:id="command-index-properties-set">
             <title>properties set</title>
             <para>Changes a particular properties file property</para>
             <programlisting><![CDATA[properties set --name --path --key --value]]></programlisting>
@@ -1713,20 +1808,20 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-security-commands">
+    <section xml:id="command-index-security-commands">
         <title>Security Commands</title>
         <para>Security Commands are contained in org.springframework.roo.addon.security.SecurityCommands.</para>
-        <section id="command-index-security-setup">
+        <section xml:id="command-index-security-setup">
             <title>security setup</title>
             <para>Install Spring Security into your project</para>
             <programlisting><![CDATA[security setup]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
-    <section id="command-index-selenium-commands">
+    <section xml:id="command-index-selenium-commands">
         <title>Selenium Commands</title>
         <para>Selenium Commands are contained in org.springframework.roo.addon.web.selenium.SeleniumCommands.</para>
-        <section id="command-index-selenium-test">
+        <section xml:id="command-index-selenium-test">
             <title>selenium test</title>
             <para>Creates a new Selenium test for a particular controller</para>
             <programlisting><![CDATA[selenium test --controller]]></programlisting>
@@ -1752,10 +1847,10 @@
             </variablelist>
         </section>
     </section>
-    <section id="command-index-simple-parser">
+    <section xml:id="command-index-simple-parser">
         <title>Simple Parser</title>
         <para>Simple Parser are contained in org.springframework.roo.shell.SimpleParser.</para>
-        <section id="command-index-help">
+        <section xml:id="command-index-help">
             <title>help</title>
             <para>Shows system help</para>
             <programlisting><![CDATA[help]]></programlisting>
@@ -1768,17 +1863,17 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section id="command-index-reference-guide">
+        <section xml:id="command-index-reference-guide">
             <title>reference guide</title>
             <para>Writes the reference guide XML fragments (in DocBook format) into the current working directory</para>
             <programlisting><![CDATA[reference guide]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
-    <section id="command-index-web-flow-commands">
+    <section xml:id="command-index-web-flow-commands">
         <title>Web Flow Commands</title>
         <para>Web Flow Commands are contained in org.springframework.roo.addon.web.flow.WebFlowCommands.</para>
-        <section id="command-index-web-flow">
+        <section xml:id="command-index-web-flow">
             <title>web flow</title>
             <para>Install Spring Web Flow configuration artifacts into your project</para>
             <programlisting><![CDATA[web flow]]></programlisting>

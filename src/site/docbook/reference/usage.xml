@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="usage" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/2000/svg"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>Usage and Conventions</title>
+
+  <para>In this chapter we'll introduce how to use the Roo tool itself. We'll
+  cover typical conventions you'll experience when using Roo.</para>
+
+  <section xml:id="usage-usability">
+    <title>Usability Philosophy</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-shell">
+    <title>Shell Features</title>
+
+    <para>TBC; include script services.</para>
+  </section>
+
+  <section xml:id="usage-ide">
+    <title>IDE Usage</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-build-system">
+    <title>Build System Usage</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-file-system">
+    <title>File System Conventions</title>
+
+    <para>Cover version control recommendations, plus handling of changes if
+    Roo isn't running. Also the auto-scaled file monitoring in use etc. Also
+    backup command.</para>
+  </section>
+
+  <section xml:id="usage-addons">
+    <title>Add-On Installation and Removal</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-recommendations">
+    <title>Recommended Practices</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-diagnosis">
+    <title>Diagnosing Roo Problems</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="usage-known-issues">
+    <title>Known Issues</title>
+
+    <para>TBC</para>
+  </section>
+</chapter>

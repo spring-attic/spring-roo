@@ -1,31 +1,225 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
-<book xmlns:xi="http://www.w3.org/2001/XInclude">
-	<bookinfo>
-		<title>Spring Roo - Reference Documentation</title>
+<book version="5.0" xml:id="spring-roo-reference-guide"
+      xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+      xmlns:ns4="http://www.w3.org/2000/svg"
+      xmlns:ns3="http://www.w3.org/1999/xhtml"
+      xmlns:ns="http://docbook.org/ns/docbook">
+  <info>
+    <title>Spring Roo - Reference Documentation</title>
 
-		<releaseinfo>Spring Roo 1.0.0.RC2</releaseinfo>
+    <productname>Spring Roo</productname>
 
-		<authorgroup>
-			<author>
-				<firstname>Ben</firstname>
-				<surname>Alex</surname>
-			</author>
-		</authorgroup>
+    <releaseinfo>1.0.0.RC3</releaseinfo>
 
-		<legalnotice>
-			<para>Copies of this document may be made for your own use and for
-				distribution to others, provided that you do not charge any fee for such
-				copies and further provided that each copy contains this Copyright
-				Notice, whether distributed in print or electronically.</para>
-		</legalnotice>
-	</bookinfo>
+    <authorgroup>
+      <author>
+        <personname>Ben Alex</personname>
+      </author>
+    </authorgroup>
 
-	<xi:include href="spring-roo-intro.xml" />
+    <legalnotice>
+      <para>Copyright 2009 SpringSource, Inc. All Rights Reserved.</para>
 
-	<xi:include href="appendix-command-index.xml" />
+      <para>Copies of this document may be made for your own use and for
+      distribution to others, provided that you do not charge any fee for such
+      copies and further provided that each copy contains this Copyright
+      Notice, whether distributed in print or electronically.</para>
+    </legalnotice>
+  </info>
 
-	<xi:include href="glossary.xml" />
+  <toc></toc>
 
+  <xi:include href="preface.xml" />
+
+  <part xml:id="welcome">
+    <title>Welcome to Spring Roo</title>
+
+    <partintro>
+      <para>Welcome to Spring Roo! In this part of the reference guide we will
+      explore everything you need to know in order to use Roo effectively.
+      We've designed this part so that you can read each chapter consecutively
+      and stop at any time. However, the more you read, the more you'll learn
+      and the easier you'll find it to work with Roo.</para>
+
+      <para>Parts <link linkend="base">II</link>, <link
+      linkend="internals">III</link> and <link linkend="appendices">IV</link>
+      of this manual are more designed for reference usage and people who wish
+      to extend Roo itself.</para>
+    </partintro>
+
+    <xi:include href="intro.xml" />
+
+    <xi:include href="beginning.xml" />
+
+    <xi:include href="architecture.xml" />
+
+    <xi:include href="usage.xml" />
+
+    <xi:include href="existing.xml" />
+
+    <xi:include href="removing.xml" />
+  </part>
+
+  <part xml:id="base">
+    <title>Base Add-Ons</title>
+
+    <partintro>
+      <para>This part of the reference guide provides a detailed reference to
+      the major Roo base add-ons and how they work. This part goes into more
+      detail than the <link linkend="beginning">tutorial chapter</link> and
+      offers a "bigger picture" discussion than the <link
+      linkend="command-index">command reference</link> appendix.</para>
+    </partintro>
+
+    <chapter xml:id="base-overview">
+      <title>Base Add-On Overview</title>
+
+      <para>When you download the Spring Roo distribution ZIP, there are
+      actually two major logical components in use. The first of these is the
+      "<emphasis>Roo core</emphasis>", which provides an environment in which
+      to host add-ons and provide services to them. The other component is
+      what we call "<emphasis>base add-ons</emphasis>". A base add-on is
+      different from a third party add-on only in that it is included in the
+      Roo distribution by default and does not require specific installation.
+      In addition, you cannot remove a base add-on using normal Roo
+      commands.</para>
+
+      <para>Base add-ons always adopt the package name prefix
+      <code>org.springframework.roo.addon</code>, whereas Roo core package
+      names always start with <code>org.springframework.roo</code> (but
+      excluding those with "<code>addon</code>" as the next package name
+      segment). Every other add-on within Roo is considered a third-party
+      add-on. Naturally we try to be conservative with changes to Roo core
+      because these may impact existing add-ons. Roo core also provides very
+      few commands, and whatever commands it provides are generally internal
+      core features (like "<link linkend="command-index-poll-status">poll
+      status</link>" or "<link
+      linkend="command-index-metadata-for-id">metadata for id</link>") or
+      aggregate the features provided by several individual base add-ons (eg
+      "<link linkend="command-index-entity">entity</link>
+      --withTests").</para>
+
+      <para>Using Roo does not require you to be aware of whether a particular
+      component is part of Roo core, a base add-on or a third-party add-on.
+      It's just useful for us to formally define these commonly-used terms and
+      explain the impact on whether you need to install or uninstall a
+      component or not.</para>
+
+      <para>The individual base add-ons provided by Roo provide capabilities
+      in the following key functional areas:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Project management (like project creation, dependency
+          management, "perform" commands)</para>
+        </listitem>
+
+        <listitem>
+          <para>General type management (like creation of types, toString
+          method, JavaBean methods)</para>
+        </listitem>
+
+        <listitem>
+          <para>Persistence (like JPA setup, entities)</para>
+        </listitem>
+
+        <listitem>
+          <para>Field management (like JSR 303 and field creation with JPA
+          compliance)</para>
+        </listitem>
+
+        <listitem>
+          <para>Dynamic finders (creation of finders without needing to write
+          the JPA-QL for them)</para>
+        </listitem>
+
+        <listitem>
+          <para>JUnit testing (with integration and mock testing)</para>
+        </listitem>
+
+        <listitem>
+          <para>Spring MVC (including URL rewriting, JSP services, controller
+          management)</para>
+        </listitem>
+
+        <listitem>
+          <para>Spring Web Flow</para>
+        </listitem>
+
+        <listitem>
+          <para>Spring Security</para>
+        </listitem>
+
+        <listitem>
+          <para>Selenium testing</para>
+        </listitem>
+
+        <listitem>
+          <para>Java Message Service (JMS)</para>
+        </listitem>
+
+        <listitem>
+          <para>Simple Mail Transfer Service (SMTP)</para>
+        </listitem>
+
+        <listitem>
+          <para>Log4J configuration</para>
+        </listitem>
+      </itemizedlist>
+
+      <para>We will add dedicated chapters that discuss each of these
+      functional areas in subsequent releases of this documentation. In the
+      meantime, please refer to <link linkend="welcome">Part I</link> of this
+      guide, our <link linkend="intro-exploring-sample">samples</link>, the
+      <link linkend="command-index">command reference</link> and <link
+      linkend="resources">project resources</link>.</para>
+    </chapter>
+  </part>
+
+  <part xml:id="internals">
+    <title>Internals and Add-On Development</title>
+
+    <partintro>
+      <para>In this part of the guide we reveal how Roo works internally. With
+      this knowledge you'll be well-positioned to be able to check out the Roo
+      codebase, build a development release, and write add-ons to extend
+      Roo.</para>
+
+      <para>You should be familiar with <link linkend="welcome">Part I</link>
+      of this reference guide and ideally have used Roo for a period of time
+      to gain the most value from this part.</para>
+    </partintro>
+
+    <xi:include href="core.xml" />
+
+    <xi:include href="development.xml" />
+
+    <xi:include href="third-party.xml" />
+
+    <xi:include href="simple-addons.xml" />
+
+    <xi:include href="advanced-addons.xml" />
+  </part>
+
+  <part xml:id="appendices">
+    <title>Appendices</title>
+
+    <partintro>
+      <para>The fourth and final part of the reference guide provides
+      appendices and background information that does not neatly belong within
+      the other parts. The information is intended to be treated as a
+      reference and not read consecutively.</para>
+    </partintro>
+
+    <xi:include href="appendix-command-index.xml" />
+
+    <xi:include href="upgrade.xml" />
+
+    <xi:include href="background.xml" />
+
+    <xi:include href="resources.xml" />
+  </part>
 </book>

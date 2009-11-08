@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="architecture"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/2000/svg"
+         xmlns:ns3="http://www.w3.org/1999/xhtml"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>Application Architecture</title>
+
+  <para>In this chapter we'll introduce the architecture of Roo-created
+  projects. In later chapters we'll cover the architecture of Roo
+  itself.</para>
+
+  <para>This chapter focuses on web applications created by Roo, as opposed to
+  add-on projects.</para>
+
+  <section xml:id="architecture-overview">
+    <title>Architectural Overview</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="architecture-critical-technologies">
+    <title>Critical Technologies</title>
+
+    <para>Certain technologies are very important in all Roo projects.</para>
+
+    <section xml:id="architecture-critical-technologies-aspectj">
+      <title>AspectJ</title>
+
+      <para>TBC</para>
+    </section>
+
+    <section xml:id="architecture-critical-technologies-spring">
+      <title>Spring</title>
+
+      <para>TBC</para>
+    </section>
+  </section>
+
+  <section xml:id="architecture-dao">
+    <title>Goodbye DAOs</title>
+
+    <para>TBC</para>
+  </section>
+
+  <section xml:id="architecture-entities">
+    <title>Entities and Fields</title>
+
+    <para>We'll mention JavaBean field name conventions plus JSR 303
+    etc.</para>
+  </section>
+
+  <section xml:id="architecture-extending-features">
+    <title>Extending Features via Add-Ons</title>
+
+    <para>TBC</para>
+  </section>
+</chapter>
