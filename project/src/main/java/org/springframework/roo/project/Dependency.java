@@ -75,7 +75,7 @@ public class Dependency implements Comparable<Dependency> {
 	 */
 	public Dependency(Element dependency) {
 		this.type = DependencyType.JAR;
-        if (XmlUtils.findFirstElement("//type", dependency) != null || dependency.hasAttribute("type")) {
+        if (XmlUtils.findFirstElement("/type", dependency) != null || dependency.hasAttribute("type")) {
         	String t;
         	if (dependency.hasAttribute("type")) {
         		t = dependency.getAttribute("type");
@@ -87,6 +87,7 @@ public class Dependency implements Comparable<Dependency> {
 			} else if (t.equals("ZIP")) {
 			    this.type = DependencyType.ZIP;
 			} else {
+				System.out.println("WARN " + t + " is not recognized");
 			    this.type = DependencyType.OTHER;
 			}
         }
