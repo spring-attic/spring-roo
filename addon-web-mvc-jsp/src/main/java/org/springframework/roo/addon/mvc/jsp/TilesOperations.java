@@ -68,7 +68,7 @@ public class TilesOperations {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 			builder.setEntityResolver(new TilesDtdResolver());
 			try {
-				tilesView = builder.parse(viewFile);
+				tilesView = builder.parse(new File(viewFile));
 			} catch (SAXException se) {
 				throw new IllegalStateException("Unable to parse the tiles " + viewFile + " file", se);
 			} catch (IOException ioe) {
