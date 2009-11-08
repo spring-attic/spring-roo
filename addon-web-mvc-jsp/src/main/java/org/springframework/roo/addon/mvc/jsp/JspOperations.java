@@ -56,6 +56,7 @@ public class JspOperations {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/us.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/us.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/de.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/de.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/sv.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/sv.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/es.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/es.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/list.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/list.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/add.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/add.png")).getOutputStream());
 			} catch (Exception e) {
@@ -122,6 +123,9 @@ public class JspOperations {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_sv.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties")).getOutputStream());
 				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
 				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_es.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties")).getOutputStream());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
+				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
