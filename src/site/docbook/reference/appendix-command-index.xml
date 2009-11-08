@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo ENGINEERING BUILD [rev 398M].</para>
+    <para>This appendix was automatically built from Roo 1.0.0.RC3 [rev 399].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -95,129 +95,6 @@
             <para>Display file system polling information</para>
             <programlisting><![CDATA[poll status]]></programlisting>
             <para>This command does not accept any options.</para>
-        </section>
-    </section>
-    <section xml:id="command-index-bundlor-commands">
-        <title>Bundlor Commands</title>
-        <para>Bundlor Commands are contained in com.springsource.bundlor.roo.addon.BundlorCommands.</para>
-        <section xml:id="command-index-bundlor-add-explicit-import">
-            <title>bundlor add explicit import</title>
-            <para>Add an explicit import for a dependency Bundlor cannot detect</para>
-            <programlisting><![CDATA[bundlor add explicit import --package --fromVersion --toVersion]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>package to import</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--fromVersion</term>
-                    <listitem>
-                        <para>minimum version to accept</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--toVersion</term>
-                    <listitem>
-                        <para>version range ceiling, use INF for infinity</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--inclusiveUpperBound</term>
-                    <listitem>
-                        <para>should upper version be inclusive (default = exclusive)</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--optional</term>
-                    <listitem>
-                        <para>treat package import as optional (default = mandatory)</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-bundlor-configure-imports">
-            <title>bundlor configure imports</title>
-            <para>specify version range for package imports, and whether they are optional</para>
-            <programlisting><![CDATA[bundlor configure imports --packagePattern --fromVersion --toVersion]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--packagePattern</term>
-                    <listitem>
-                        <para>package name with optional .* postfix</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--fromVersion</term>
-                    <listitem>
-                        <para>minimum version to accept</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--toVersion</term>
-                    <listitem>
-                        <para>version range ceiling, use INF for infinity</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--inclusiveUpperBound</term>
-                    <listitem>
-                        <para>should upper version be inclusive (default = exclusive)</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--optional</term>
-                    <listitem>
-                        <para>treat package import as optional (default = mandatory)</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-bundlor-non-exported-packages">
-            <title>bundlor non-exported packages</title>
-            <para>specify packages that should not be exported by the bundle</para>
-            <programlisting><![CDATA[bundlor non-exported packages --packagePattern]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--packagePattern</term>
-                    <listitem>
-                        <para>package name with optional .* postfix</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-bundlor-setup">
-            <title>bundlor setup</title>
-            <para>automatically create and manage an OSGi manifest for this project using Bundlor</para>
-            <programlisting><![CDATA[bundlor setup]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--bundleName</term>
-                    <listitem>
-                        <para>Human readable name for the bundle</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-bundlor-version-package-exports">
-            <title>bundlor version package exports</title>
-            <para>specify version to export individual packages at (defaults to bundle version)</para>
-            <programlisting><![CDATA[bundlor version package exports --packagePattern --version]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--packagePattern</term>
-                    <listitem>
-                        <para>package name with optional .* postfix</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--version</term>
-                    <listitem>
-                        <para>version to export package at</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
         </section>
     </section>
     <section xml:id="command-index-classpath-commands">
