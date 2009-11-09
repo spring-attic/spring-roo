@@ -1,7 +1,9 @@
 package org.springframework.roo.addon.maven;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -15,6 +17,7 @@ import org.springframework.roo.project.ProjectMetadataProvider;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -29,6 +32,8 @@ import org.w3c.dom.Element;
  */
 @ScopeDevelopment
 public class MavenOperations extends ProjectOperations {
+	
+	private Logger logger = Logger.getLogger(MavenOperations.class.getName());
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
@@ -138,6 +143,11 @@ public class MavenOperations extends ProjectOperations {
 		fileManager.scan();
 		
 		applicationContextOperations.createMiddleTierApplicationContext();
-	}
 	
+		try {
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "log4j.properties")).getOutputStream());
+		} catch (IOException e1) {
+			logger.warning("Unable to install log4j logging configuration");
+		}
+	}
 }
