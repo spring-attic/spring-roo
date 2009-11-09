@@ -99,9 +99,11 @@ public class MenuOperations {
 			categoryWrapper = document.createElement("li");
 			categoryWrapper.setAttribute("id", menuCategoryId);
 			Element h2 = document.createElement("h2");
-			
 			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label")) {
-				setMessageProperty("menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_se.properties", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label", menuCategoryLabel.getReadableSymbolName());
 			}
 			Element categoryLabel = document.createElement("spring:message");
 			categoryLabel.setAttribute("code", "menu.category." + menuCategoryLabel.getSymbolName().toLowerCase() + ".label");
@@ -131,7 +133,11 @@ public class MenuOperations {
 			message.setAttribute("code", messageCode);
 			if (menuItemLabel.getSymbolName().length() > 0) {
 				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", "label." + menuItemLabel.getSymbolName().toLowerCase())) {
-					setMessageProperty("label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties","label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties","label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties","label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_se.properties","label." + menuItemLabel.getSymbolName().toLowerCase(), menuItemLabel.getReadableSymbolName());
+				
 				}
 				Element entityLabel = document.createElement("spring:message");
 				entityLabel.setAttribute("code", "label." + menuItemLabel.getSymbolName().toLowerCase());
@@ -261,12 +267,12 @@ public class MenuOperations {
 	 * @param key the property key to update (required)
 	 * @param value the property value to set into the property key (required)
 	 */
-	private void setMessageProperty(String key, String value) {
+	private void setI18nMessageProperties(String key, String value) {
 		Assert.hasText(key, "Key required");
 		Assert.hasText(value, "Value required");
 		
 		//get hold of all messages*.properties files and add the supplied key and value
-		String antPath = pathResolver.getRoot(Path.SRC_MAIN_WEBAPP) + "/WEB-INF/i18n/messages**.properties";
+		String antPath = pathResolver.getRoot(Path.SRC_MAIN_WEBAPP) + "/WEB-INF/i18n/messages*.properties";
 
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
 		MutableFile mutableFile = null;
@@ -277,7 +283,7 @@ public class MenuOperations {
 					mutableFile = fileManager.updateFile(file.getCanonicalPath());
 					props.load(mutableFile.getInputStream());
 				} else {
-					throw new IllegalStateException("Properties file not found (");
+					throw new IllegalStateException("Properties file not found");
 				}
 			} catch (IOException ioe) {
 				throw new IllegalStateException(ioe);
@@ -291,6 +297,43 @@ public class MenuOperations {
 			}
 		}
 	}
+	
+	 /**
+     * Changes the specified property, throwing an exception if the file does not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the specified path (required)
+     * @param key the property key to update (required)
+     * @param value the property value to set into the property key (required)
+     */
+    private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+            Assert.notNull(propertyFilePath, "Property file path required");
+            Assert.hasText(propertyFilename, "Property filename required");
+            Assert.hasText(key, "Key required");
+            Assert.hasText(value, "Value required");
+            
+            String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+            MutableFile mutableFile = null;
+            Properties props = new Properties();
+            
+            try {
+                    if (fileManager.exists(filePath)) {
+                            mutableFile = fileManager.updateFile(filePath);
+                            props.load(mutableFile.getInputStream());
+                    } else {
+                            throw new IllegalStateException("Properties file not found");
+                    }
+            } catch (IOException ioe) {
+                    throw new IllegalStateException(ioe);
+            }
+            props.setProperty(key, value);
+            
+            try {
+                    props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
+            } catch (IOException ioe) {
+                    throw new IllegalStateException(ioe);
+            }
+    }
 
 	/**
 	 * Retrieves the specified property, returning null if the property or file does not exist.
