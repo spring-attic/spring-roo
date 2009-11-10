@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.springframework.roo.annotations</artifactId>
 	<groupId>org.springframework.roo</groupId>
-	<version>1.0.0.RC3</version>
+	<version>1.0.0.RC4</version>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
 
