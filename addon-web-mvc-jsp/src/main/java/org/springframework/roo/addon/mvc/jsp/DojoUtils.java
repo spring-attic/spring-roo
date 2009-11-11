@@ -79,24 +79,24 @@ public class DojoUtils {
 		boolean isRequired = isTypeInAnnotationList(new JavaType("javax.validation.constraints.NotNull"), field.getAnnotations());
 		if(field.getFieldType().equals(new JavaType(Integer.class.getName()))) {			
 			if (min != Integer.MIN_VALUE || max != Integer.MAX_VALUE) {
-				regex = ", regExp: \"-?[0-9]{" + (min == Integer.MIN_VALUE ? "1," : min) + (max == Integer.MAX_VALUE ? "" : max) + "}\"";
+				regex = ", regExp: '-?[0-9]{" + (min == Integer.MIN_VALUE ? "1," : min) + (max == Integer.MAX_VALUE ? "" : max) + "}'";
 			} else {
-				regex = ", regExp: \"-?[0-9]*\"";
+				regex = ", regExp: '-?[0-9]*'";
 			}
 		} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().equals(new JavaType(Float.class.getName()))) {			
 			if (min != Integer.MIN_VALUE || max != Integer.MAX_VALUE) {
-				regex = ", regExp: \"-?[0-9]{" + (min == Integer.MIN_VALUE ? "1," : min) + (max == Integer.MAX_VALUE ? "" : max) + "}(\\.?[0-9]*)?\"";
+				regex = ", regExp: '-?[0-9]{" + (min == Integer.MIN_VALUE ? "1," : min) + (max == Integer.MAX_VALUE ? "" : max) + "}(\\.?[0-9]*)?'";
 			} else {
-				regex = ", regExp: \"-?[0-9]*\\.[0-9]*\"";
+				regex = ", regExp: '-?[0-9]*\\.[0-9]*'";
 			}
 		} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			regex = "";//, regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
 		}	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + field.getFieldName().getSymbolName()
-				+ "\", widgetType : \"dijit.form.ValidationTextBox\", widgetAttrs : {promptMessage: \"${field_validation}\", invalidMessage: \"" + invalid 
-				+ "\"" + regex + ", required : " + isRequired + "}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
+				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${field_validation}', invalidMessage: '" + invalid 
+				+ "'" + regex + ", required : " + isRequired + "}})); ");
 		return script;
 	}
 	
@@ -106,8 +106,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : \"_" + StringUtils.uncapitalize(fieldName.getSymbolName())
-				+ "\", widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName()) + "', widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
 		return script;
 	}
 	
@@ -153,7 +152,7 @@ public class DojoUtils {
 			script.setAttribute("type", "text/javascript");
 		}		
 		if (!script.getTextContent().contains(require)) {
-			script.setTextContent(script.getTextContent() + "dojo.require(\"" + require + "\");");
+			script.setTextContent(script.getTextContent() + "dojo.require('" + require + "');");
 		}		
 		if (!elementFound) {	
 			if (document.getDocumentElement().getFirstChild() == null) {
