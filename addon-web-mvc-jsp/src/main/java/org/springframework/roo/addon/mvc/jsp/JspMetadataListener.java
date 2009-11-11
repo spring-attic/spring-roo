@@ -168,20 +168,22 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			writeToDiskIfNecessary(showPath, helper.getShowDocument().getChildNodes());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 //		}
+			
+		String controllerId = controllerPath.replaceAll("/", "_");
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getChildNodes());
 			//add 'create new' menu item
 			menuOperations.addMenuItem(
-					"web_mvc_jsp_" + controllerPath + "_category", 
-					new JavaSymbolName(controllerPath), 
-					"web_mvc_jsp_create_" + controllerPath + "_menu_item", 
+					"web_mvc_jsp_" + controllerId + "_category", 
+					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
+					"web_mvc_jsp_create_" + controllerId + "_menu_item", 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
 					"/" + controllerPath + "/form");
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} else {
-			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerPath + "_category", "web_mvc_jsp_create_" + controllerPath + "_menu_item");
+			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerId + "_category", "web_mvc_jsp_create_" + controllerId + "_menu_item");
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "create");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
@@ -194,9 +196,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
-				"web_mvc_jsp_" + controllerPath + "_category", 
-				new JavaSymbolName(controllerPath), 
-				"web_mvc_jsp_list_" + controllerPath + "_menu_item", 
+				"web_mvc_jsp_" + controllerId + "_category", 
+				new JavaSymbolName(entityMetadata.getPlural()), 
+				"web_mvc_jsp_list_" + controllerId + "_menu_item", 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
