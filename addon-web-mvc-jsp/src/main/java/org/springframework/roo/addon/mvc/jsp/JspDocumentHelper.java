@@ -34,8 +34,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import sun.nio.ch.DevPollSelectorProvider;
-
 /**
  * Helper class which generates the contents of the various jsp documents
  *
