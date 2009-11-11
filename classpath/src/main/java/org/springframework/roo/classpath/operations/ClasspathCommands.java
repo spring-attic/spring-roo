@@ -134,7 +134,7 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="dod", help="Creates a new data on demand for the specified entity")
 	public void newDod(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The entity which will this data on demand class will create and modify as required") JavaType entity,
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The entity which this data on demand class will create and modify as required") JavaType entity,
 			@CliOption(key="class", mandatory=false, help="The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')") JavaType clazz,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		

@@ -151,7 +151,7 @@
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>The entity which will this data on demand class will create and modify as required</para>
+                        <para>The entity which this data on demand class will create and modify as required</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
