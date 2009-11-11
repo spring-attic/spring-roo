@@ -34,6 +34,8 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import sun.nio.ch.DevPollSelectorProvider;
+
 /**
  * Helper class which generates the contents of the various jsp documents
  *
@@ -727,11 +729,11 @@ public class JspDocumentHelper {
 							formElement.appendChild(document.createElement("br"));	
 							specialAnnotation = true;
 						}
-					} else if (isEnumType(field.getFieldType())) {
-						divElement.appendChild(JspUtils.getEnumSelectBox(document, fieldType, field.getFieldName()));		
-						divElement.appendChild(DojoUtils.getSelectDojo(document, field.getFieldName()));
-						divElement.appendChild(document.createElement("br"));
+					} else if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Enumerated") && isEnumType(field.getFieldType())) {
 						divElement.appendChild(JspUtils.getErrorsElement(document, field.getFieldName()));
+						divElement.appendChild(JspUtils.getEnumSelectBox(document, fieldType, field.getFieldName()));		
+						divElement.appendChild(document.createElement("br"));
+						divElement.appendChild(DojoUtils.getSelectDojo(document, field.getFieldName()));
 						formElement.appendChild(divElement);
 						formElement.appendChild(document.createElement("br"));	
 						specialAnnotation = true;
