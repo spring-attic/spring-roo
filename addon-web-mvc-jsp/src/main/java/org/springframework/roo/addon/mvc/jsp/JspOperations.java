@@ -53,7 +53,7 @@ public class JspOperations {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_next.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_next.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_previous.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_previous.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_last.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_last.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/us.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/us.png")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/gb.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/gb.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/de.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/de.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/sv.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/sv.png")).getOutputStream());
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/es.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/es.png")).getOutputStream());
