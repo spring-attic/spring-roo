@@ -35,9 +35,9 @@
 
     	<c:out value="&#160;|&#160;"/>
 
-    	<spring:url var="img_se" value="/static/images/se.png" />
-    	<spring:url var="url_se" value="">
-    		<spring:param name="lang" value="se" />
+    	<spring:url var="img_sv" value="/static/images/sv.png" />
+    	<spring:url var="url_sv" value="">
+    		<spring:param name="lang" value="sv" />
     		<c:if test="${not empty param.page}">
     			<spring:param name="page" value="${param.page}" />
     		</c:if>
@@ -45,8 +45,8 @@
     			<spring:param name="size" value="${param.size}" />
     		</c:if>
     	</spring:url>	
-    	<spring:message code="global.language.switch" arguments="Svenska" var="lang_se"/>			    	
-    	<a href="${url_se}" title="${lang_se}"><img src="${img_se}" alt="${lang_se}"/></a>
+    	<spring:message code="global.language.switch" arguments="Svenska" var="lang_sv"/>			    	
+    	<a href="${url_sv}" title="${lang_sv}"><img src="${img_sv}" alt="${lang_sv}"/></a>
 
 
     	<c:out value="&#160;|&#160;"/>
