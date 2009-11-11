@@ -210,7 +210,7 @@
       linkend="intro-first-steps">ten minute test</link>.</para>
 
       <para>You'll also find that Roo adopts a very conservative, incremental
-      approach to adding technologies your project. This means when you first
+      approach to adding technologies to your project. This means when you first
       start a new project Roo will only assume you want to build a simple JAR.
       As such it will have next to no dependencies. Only when you ask to add a
       persistence provider will JPA be installed, and only when you add a
