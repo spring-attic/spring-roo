@@ -197,7 +197,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
 				"web_mvc_jsp_" + controllerId + "_category", 
-				new JavaSymbolName(entityMetadata.getPlural()), 
+				new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 				"web_mvc_jsp_list_" + controllerId + "_menu_item", 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
@@ -210,8 +210,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getChildNodes());
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
-						"web_mvc_jsp_" + controllerPath + "_category", 
-						new JavaSymbolName(controllerPath), 
+						"web_mvc_jsp_" + controllerId + "_category", 
+						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
 						new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")),
 						"global.menu.find",
