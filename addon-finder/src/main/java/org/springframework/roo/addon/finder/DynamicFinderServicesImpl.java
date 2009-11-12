@@ -77,7 +77,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 		FieldToken lastFieldToken = null;
 		boolean isNewField = true;
-		boolean isFieldSet = false;
+		boolean isFieldApplied = false;
 		for (Token token : tokens) {
 			if (token instanceof ReservedToken) {
 				String reservedToken = token.getValue();
@@ -88,37 +88,37 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 					if(isNewField){
 						builder.append(tablename.toLowerCase()).append(".").append(fieldName);
 						isNewField = false;
-						isFieldSet = false;
+						isFieldApplied = false;
 					} 
 					if (reservedToken.equalsIgnoreCase("And")) {
-						if(!isFieldSet){
+						if(!isFieldApplied){
 							builder.append(" = :").append(fieldName).append(" ");
-							isFieldSet = true;
+							isFieldApplied = true;
 						}
 						builder.append("AND ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Or")) {
-						if(!isFieldSet){
+						if(!isFieldApplied){
 							builder.append(" = :").append(fieldName).append(" ");
-							isFieldSet = true;
+							isFieldApplied = true;
 						}					
 						builder.append("OR ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Between")) {
 						builder.append(" BETWEEN ").append(":min").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" AND ").append(":max").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" ");
 						setField = false;
-						isFieldSet = true;
+						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("Like")) {
 						builder.append(" LIKE ");					
 						setField = true;
 					} else if (reservedToken.equalsIgnoreCase("IsNotNull")) {
 						builder.append(" is not NULL ");
 						setField = false;
-						isFieldSet = true;
+						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("IsNull")) {
 						builder.append(" is NULL ");
 						setField = false;
-						isFieldSet = true;
+						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("Not")) {
 						builder.append(" NOT ");
 					} else if (reservedToken.equalsIgnoreCase("NotEquals")) {
@@ -136,7 +136,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 					} 
 					if(setField) {
 						builder.append(":").append(fieldName).append(" ");
-						isFieldSet = true;
+						isFieldApplied = true;
 					}		
 				}
 			} else {
@@ -148,9 +148,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(tablename.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
-			isFieldSet = false;
+			isFieldApplied = false;
 		}
-		if(!isFieldSet) {
+		if(!isFieldApplied) {
 			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
