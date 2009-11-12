@@ -118,26 +118,28 @@ public class WebFlowOperations {
 			XmlUtils.writeXml(mvcContextMutableFile.getOutputStream(), mvcAppCtx);	
 		}
 		
-		String flowDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName);
+		String flowDirectoryId = flowName.replaceAll("[^a-zA-Z/_]", "");
+		
+		String flowDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowDirectoryId);
 		
 		//install flow directory
 		if (!fileManager.exists(flowDirectory)) {			
 			fileManager.createDirectory(flowDirectory);
 		}
 		
-		String flowConfig = flowDirectory.concat("/" + flowName + "-flow.xml");
+		String flowConfig = flowDirectory.concat("/config-flow.xml");
 		if (!fileManager.exists(flowConfig)) {			
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/" + flowName + "-flow.xml")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "flow-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowDirectoryId + "/config-flow.xml")).getOutputStream());
 			} catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
 		
 		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-1.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/view-state-1.jspx")).getOutputStream());
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-2.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/view-state-2.jspx")).getOutputStream());		
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "end-state.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowName + "/end-state.jspx")).getOutputStream());	
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-1.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx")).getOutputStream());
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "view-state-2.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowDirectoryId + "/view-state-2.jspx")).getOutputStream());		
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "end-state.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + flowDirectoryId + "/end-state.jspx")).getOutputStream());	
 		} catch (IOException e) {
 			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
@@ -145,16 +147,16 @@ public class WebFlowOperations {
 		//add 'create new' menu item
 		menuOperations.addMenuItem(
 				"web_flow_category", 
-				new JavaSymbolName(flowName), 
-				"web_flow_" + flowName.toLowerCase().replaceAll("-", "_") + "_menu_item", 
-				new JavaSymbolName(flowName),
+				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")), 
+				"web_flow_" + flowDirectoryId.toLowerCase() + "_menu_item", 
+				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")),
 				"webflow.menu.enter",
-				"/" + flowName);
+				"/" + flowDirectoryId);
 		
-		TilesOperations tilesOperations = new TilesOperations(flowName, fileManager, pathResolver, "config/webmvc-config.xml");
-		tilesOperations.addViewDefinition("view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/view-state-1.jspx");
-		tilesOperations.addViewDefinition("view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/view-state-2.jspx");
-		tilesOperations.addViewDefinition("end-state", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowName + "/end-state.jspx");
+		TilesOperations tilesOperations = new TilesOperations(flowDirectoryId, fileManager, pathResolver, "config/webmvc-config.xml");
+		tilesOperations.addViewDefinition("view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx");
+		tilesOperations.addViewDefinition("view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-2.jspx");
+		tilesOperations.addViewDefinition("end-state", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/end-state.jspx");
 		tilesOperations.writeToDiskIfNecessary();
 
 		updateDependencies();
