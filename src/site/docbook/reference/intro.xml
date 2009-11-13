@@ -67,10 +67,10 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>Roo is not an IDE plugin</emphasis>. There is no "Roo
-        Eclipse plugin" or "Roo IntelliJ plugin". You simply don't need them.
-        Roo works perfectly fine in its own operating system command window.
-        It sits there and monitors your file system, intelligently and
+        <para><emphasis>Roo is not an IDE plugin</emphasis>. There is no
+        requirement for a "Roo Eclipse plugin" or "Roo IntelliJ plugin". Roo
+        works perfectly fine in its own operating system command window. It
+        sits there and monitors your file system, intelligently and
         incrementally responding to changes as appropriate. This means you're
         perfectly able to use vi or emacs if you'd like (Roo doesn't mind how
         your project files get changed).</para>
@@ -117,11 +117,11 @@
       minute test</link>.</para>
 
       <para>Anyone who has programmed Java for a few years and looked at the
-      alternatives on other platforms will be fully aware that enterprise
-      Java suffers from productivity problems. It takes days to start a new
-      project and incredibly long cycle times as you go about normal
-      development. Still, we remain with Java because it's a highly attractive
-      platform. It's the <link
+      alternatives on other platforms will be fully aware that enterprise Java
+      suffers from productivity problems. It takes days to start a new project
+      and incredibly long cycle times as you go about normal development.
+      Still, we remain with Java because it's a highly attractive platform.
+      It's the <link
       xlink:href="http://www.tiobe.com/content/paperinfo/tpci/index.html">most
       widely used programming language</link> on the planet, with <link
       xlink:href="http://www.oreillynet.com/onjava/blog/2007/01/1_in_every_10_java_developer_i.html">millions</link>
@@ -210,15 +210,15 @@
       linkend="intro-first-steps">ten minute test</link>.</para>
 
       <para>You'll also find that Roo adopts a very conservative, incremental
-      approach to adding technologies to your project. This means when you first
-      start a new project Roo will only assume you want to build a simple JAR.
-      As such it will have next to no dependencies. Only when you ask to add a
-      persistence provider will JPA be installed, and only when you add a
-      field using JavaBean Validation annotations will that library be
-      installed. The same holds true for Spring Security, Spring Web Flow and
-      the other technologies Roo supports. With Roo you really do smart small
-      and incrementally add technologies if and when you want to, which is
-      consistent with Roo's philosophy of there being <link
+      approach to adding technologies to your project. This means when you
+      first start a new project Roo will only assume you want to build a
+      simple JAR. As such it will have next to no dependencies. Only when you
+      ask to add a persistence provider will JPA be installed, and only when
+      you add a field using JavaBean Validation annotations will that library
+      be installed. The same holds true for Spring Security, Spring Web Flow
+      and the other technologies Roo supports. With Roo you really do smart
+      small and incrementally add technologies if and when you want to, which
+      is consistent with Roo's philosophy of there being <link
       linkend="intro-why-use-it-no-engineering-tradeoffs">no engineering
       trade-offs</link>.</para>
     </section>
