@@ -139,6 +139,11 @@ public class ParserUtils {
 			currentValue = new StringBuilder();
 		}
 		
+		// Strip out an empty default option, if it was returned (ROO-379)
+		if (result.containsKey("") && result.get("").trim().equals("")) {
+			result.remove("");
+		}
+
 		return result;
 	}
 	
