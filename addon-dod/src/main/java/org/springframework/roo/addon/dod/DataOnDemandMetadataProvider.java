@@ -68,6 +68,9 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		}
 		
 		MethodMetadata persistMethod = entityMetadata.getPersistMethod();
+
+		MethodMetadata findMethod = entityMetadata.getFindMethod();
+		MethodMetadata identifierAccessor = entityMetadata.getIdentifierAccessor();
 		
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
@@ -76,7 +79,7 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata, findEntriesMethod, persistMethod, metadataService, metadataDependencyRegistry);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata, identifierAccessor, findMethod, findEntriesMethod, persistMethod, metadataService, metadataDependencyRegistry);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

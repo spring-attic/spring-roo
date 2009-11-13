@@ -50,7 +50,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private DataOnDemandAnnotationValues annotationValues;
 	private BeanInfoMetadata beanInfoMetadata;
-	
+	private MethodMetadata identifierAccessorMethod;
+	private MethodMetadata findMethod;
+
 	/** The "findEntityEntries(Integer,Integer):List<Entity>" static method for the entity (required) */
 	private MethodMetadata findEntriesMethod;
 	
@@ -70,11 +72,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MetadataService metadataService;
 	private MetadataDependencyRegistry metadataDependencyRegistry;
 	
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
+		Assert.notNull(identifierAccessor, "Identifier accessor method required");
+		Assert.notNull(findMethod, "Find method required");
 		Assert.notNull(findEntriesMethod, "Find entries method required");
 		Assert.notNull(persistMethod, "Persist method required");
 		Assert.notNull(metadataService, "Metadata service required");
@@ -86,6 +90,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		this.annotationValues = annotationValues;
 		this.beanInfoMetadata = beanInfoMetadata;
+		this.identifierAccessorMethod = identifierAccessor;
+		this.findMethod = findMethod;
 		this.findEntriesMethod = findEntriesMethod;
 		this.persistMethod = persistMethod;
 		this.metadataService = metadataService;
@@ -330,7 +336,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine("return " + getDataField().getFieldName().getSymbolName() +".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
+		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
@@ -453,7 +460,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "new Short(index)";
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 					initializer = "1";
-				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null) {
+				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
 					requiredDataOnDemandCollaborators.add(field.getFieldType());
 					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 					
