@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.roo.model.JavaPackage;
@@ -114,8 +113,10 @@ public class MavenCommands implements CommandMarker {
 		    	}
 		    }
 	    } catch (IOException ioe) {
-	    	if (ioe.getMessage().contains("No such file or directory")) {
-	    		logger.log(Level.SEVERE, "Could not locate Maven executable; please ensure mvn command is in your path");
+	    	if (ioe.getMessage().contains("No such file or directory") || // for *nix/Mac
+	    		ioe.getMessage().contains("CreateProcess error=2"))       // for Windows
+	    	{
+	    		logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");
 	    		return;
 	    	}
 	    	throw ioe;
