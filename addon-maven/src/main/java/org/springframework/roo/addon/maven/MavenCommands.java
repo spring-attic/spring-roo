@@ -97,16 +97,21 @@ public class MavenCommands implements CommandMarker {
 		try {
 			String cmd = null;
 			if (File.separatorChar == '\\') {
-				// Windows platform requires the cmd /c prefix
-				cmd = "cmd /c mvn " + extra;
+				cmd = "mvn.bat " + extra;
 			} else {
 				cmd = "mvn " + extra;
 			}
-			Process p = Runtime.getRuntime().exec(cmd, new String[0], root);
+			Process p = Runtime.getRuntime().exec(cmd, null, root);
 		    input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		    String line;
 		    while ((line = input.readLine()) != null) {
-		    	logger.info(line);
+		    	if (line.startsWith("[ERROR]")) {
+		    		logger.severe(line);
+		    	} else if (line.startsWith("[WARNING]")) {
+		    		logger.warning(line);
+		    	} else {
+		    		logger.info(line);
+		    	}
 		    }
 	    } catch (IOException ioe) {
 	    	if (ioe.getMessage().contains("No such file or directory")) {
