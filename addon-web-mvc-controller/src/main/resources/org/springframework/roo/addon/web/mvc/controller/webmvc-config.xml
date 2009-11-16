@@ -38,6 +38,8 @@
         </property>
     </bean>
     
+    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" /> 
+    
     <!-- Configure default Bean Validation (JSR-303) support 
          This configuration will be replaced with the mvc:annotation-driven configuration once SPR-6352 is resolved -->
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
