@@ -30,7 +30,6 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -50,8 +49,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private static final String PROVIDES_TYPE_STRING = WebScaffoldMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType JAVAX_CONSTRAINT = new JavaType("javax.validation.ConstraintViolation");
-	private static final JavaType JAVAX_VALIDATION = new JavaType("javax.validation.Validation");
 
 	private WebScaffoldAnnotationValues annotationValues;
 	private BeanInfoMetadata beanInfoMetadata;
@@ -303,8 +300,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), entityName));
-		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
+		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.Valid"), attributes));
 		
 		List<AnnotationMetadata> noAnnotations = new ArrayList<AnnotationMetadata>();
 		
@@ -328,11 +324,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
-		bodyBuilder.appendFormalLine("for (" + JAVAX_CONSTRAINT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "> constraint : " + JAVAX_VALIDATION.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath().toString(), \"" + entityName + ".error.\" + constraint.getPropertyPath(), constraint.getMessage());");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
@@ -392,8 +383,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
 	}
-
-
 	
 	private MethodMetadata getUpdateMethod() {		
 		JavaSymbolName methodName = new JavaSymbolName("update");
@@ -403,8 +392,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), entityName));
-		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
+		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.Valid"), attributes));
 		
 		List<AnnotationMetadata> noAnnotations = new ArrayList<AnnotationMetadata>();
 		
@@ -427,11 +415,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
-		bodyBuilder.appendFormalLine("for (" + JAVAX_CONSTRAINT.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "> constraint : " + JAVAX_VALIDATION.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".buildDefaultValidatorFactory().getValidator().validate(" + entityName + ")) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("result.rejectValue(constraint.getPropertyPath().toString(), \"" + entityName + ".error.\" + constraint.getPropertyPath(), constraint.getMessage());");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
