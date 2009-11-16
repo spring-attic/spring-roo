@@ -3,7 +3,6 @@ package org.springframework.roo.addon.jpa;
 import java.util.SortedSet;
 
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -26,18 +25,15 @@ public class JpaCommands implements CommandMarker {
 	
 	private JpaOperations jpaOperations;
 	private PropFileOperations propFileOperations;
-	private MetadataService metadataService;
-	
-	public JpaCommands(StaticFieldConverter staticFieldConverter, JpaOperations jpaOperations, PropFileOperations propFileOperations, MetadataService metadataService) {
+
+	public JpaCommands(StaticFieldConverter staticFieldConverter, JpaOperations jpaOperations, PropFileOperations propFileOperations) {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(jpaOperations, "JPA operations required");
 		Assert.notNull(propFileOperations, "Property file operations required");
-		Assert.notNull(metadataService, "Metadata service required");
 		staticFieldConverter.add(JdbcDatabase.class);
 		staticFieldConverter.add(OrmProvider.class);
 		this.jpaOperations = jpaOperations;
 		this.propFileOperations = propFileOperations;
-		this.metadataService = metadataService;
 	}
 	
 	@CliAvailabilityIndicator("persistence setup")
@@ -54,9 +50,10 @@ public class JpaCommands implements CommandMarker {
 			@CliOption(key={"userName"}, mandatory=false, help="The username to use") String userName,
 			@CliOption(key={"password"}, mandatory=false, help="The password to use") String password
 			) {
+
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi);
 		
-		if (jndi != null && 0 != jndi.length()) {
+		if (jndi == null || 0 == jndi.length()) {
 			if (null != databaseName && 0 != databaseName.length()) {
 				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.url", jdbcDatabase.getConnectionString() + (databaseName.startsWith("/") ? databaseName : "/" + databaseName));
 			}
