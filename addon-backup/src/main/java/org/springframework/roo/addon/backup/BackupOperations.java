@@ -64,7 +64,7 @@ public class BackupOperations {
 		try {
 			File projectDirectory = new File(getPathResolver().getIdentifier(Path.ROOT, "."));
 			
-			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectMetadata.getProjectName() + "_" + df.format(new Date()) + ".zip")));
+			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectMetadata.getProjectName() + "_" + df.format(new Date()) + ".zip")));
 			ZipOutputStream zos = new ZipOutputStream(file.getOutputStream());
 			
 			zip(projectDirectory, projectDirectory, zos);
