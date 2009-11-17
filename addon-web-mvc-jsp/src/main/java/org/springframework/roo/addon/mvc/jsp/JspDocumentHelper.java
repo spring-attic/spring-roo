@@ -607,6 +607,8 @@ public class JspDocumentHelper {
 	
 	private void createFieldsForCreateAndUpdate(Document document, Element formElement) {
 		
+		formElement.appendChild(new XmlElementBuilder("form:errors", document).addAttribute("delimiter", "<p/>").addAttribute("cssClass", "errors").build());
+		
 		for (FieldMetadata field : fields) {
 			JavaType fieldType = field.getFieldType();
 			if(fieldType.isCommonCollectionType() && fieldType.equals(new JavaType(Set.class.getName()))) {
