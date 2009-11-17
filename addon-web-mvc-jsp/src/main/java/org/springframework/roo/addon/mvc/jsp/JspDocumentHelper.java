@@ -421,10 +421,12 @@ public class JspDocumentHelper {
 		formHiddenId.setAttribute("path", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
 		formHiddenId.setAttribute("id", "_" + entityMetadata.getIdentifierField().getFieldName().getSymbolName());
 		formElement.appendChild(formHiddenId);
-		Element formHiddenVersion = document.createElement("form:hidden");
-		formHiddenVersion.setAttribute("path", entityMetadata.getVersionField().getFieldName().getSymbolName());
-		formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName());
-		formElement.appendChild(formHiddenVersion);
+		if (null != entityMetadata.getVersionField()) {
+			Element formHiddenVersion = document.createElement("form:hidden");
+			formHiddenVersion.setAttribute("path", entityMetadata.getVersionField().getFieldName().getSymbolName());
+			formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName());
+			formElement.appendChild(formHiddenVersion);
+		}
 
 		divElement.appendChild(formElement);
 		div.appendChild(divElement);
