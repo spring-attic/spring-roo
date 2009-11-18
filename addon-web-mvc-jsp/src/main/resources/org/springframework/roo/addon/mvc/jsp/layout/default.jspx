@@ -5,8 +5,6 @@
 	xmlns:form="http://www.springframework.org/tags/form"
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:roo="urn:jsptagdir:/WEB-INF/tags" >  
- 	
- 	<jsp:output omit-xml-declaration="yes"/>  
 	
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
 		

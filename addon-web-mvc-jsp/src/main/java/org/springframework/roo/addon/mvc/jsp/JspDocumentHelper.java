@@ -88,14 +88,26 @@ public class JspDocumentHelper {
 		
 		document.createComment(warning);
 		
-		Element div = new XmlElementBuilder("div", document).addAttribute("xmlns:roo", "urn:jsptagdir:/WEB-INF/tags").addAttribute("xmlns:form", "http://www.springframework.org/tags/form").addAttribute("xmlns:spring", "http://www.springframework.org/tags").addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core").addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt").addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions").build();
-		document.appendChild(div);
+		//add document namespaces
+		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
+								.addAttribute("xmlns:roo", "urn:jsptagdir:/WEB-INF/tags")
+								.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
+								.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
+								.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+								.addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt")
+								.addAttribute("xmlns:fn", "http://java.sun.com/jsp/jstl/functions")
+								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
+							.build());
+		
+//		div.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 
 		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + entityMetadata.getPlural().toLowerCase()).addAttribute("var", "entity_label_plural").build())
-								.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", "${entity_label_plural}").addAttribute("var", "title_msg").build())
-								.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + entityMetadata.getPlural().toLowerCase()).addAttribute("var", "entity_label_plural").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", "${entity_label_plural}").addAttribute("var", "title_msg").build())
+									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
 								.build();
 		
 		Element ifElement = document.createElementNS("http://java.sun.com/jsp/jstl/core", "c:if");
@@ -251,23 +263,23 @@ public class JspDocumentHelper {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();		
 		
-		Element div = document.createElement("div");
-		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
-		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
-		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
-		div.setAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt");
+		//add document namespaces
+		Element div = new XmlElementBuilder("div", document)
+							.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
+							.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
+							.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+							.addAttribute("xmlns:fmt", "http://java.sun.com/jsp/jstl/fmt")
+							.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+							.addAttribute("version", "2.0")
+							.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
+						.build();
 		document.appendChild(div);
 		
-		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title_div");
-		divElement.setAttribute("style", "width: 100%");
-		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
-		Element message = document.createElement("spring:message");
-		message.setAttribute("code", "entity.show");
-		message.setAttribute("arguments", "${entity_label}");
-		message.setAttribute("var", "title_msg");
-		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
+									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
+								.build();
 		
 		Element ifElement = document.createElement("c:if");
 		ifElement.setAttribute("test", "${not empty " + entityName + "}");
@@ -316,22 +328,22 @@ public class JspDocumentHelper {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();		
 
-		Element div = document.createElement("div");
-		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
-		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
-		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
-		document.appendChild(div);		
+		//add document namespaces
+		Element div = new XmlElementBuilder("div", document)
+							.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
+							.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
+							.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+							.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+							.addAttribute("version", "2.0")
+							.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
+						.build();
+		document.appendChild(div);
 
-		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title_div");
-		divElement.setAttribute("style", "width: 100%");
-		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
-		Element message = document.createElement("spring:message");
-		message.setAttribute("code", "entity.create");
-		message.setAttribute("arguments", "${entity_label}");
-		message.setAttribute("var", "title_msg");
-		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.create").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
+									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
+								.build();
 		
 		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
@@ -371,22 +383,22 @@ public class JspDocumentHelper {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();		
 
-		Element div = document.createElement("div");
-		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
-		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
-		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		//add document namespaces
+		Element div = new XmlElementBuilder("div", document)
+							.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
+							.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
+							.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+							.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+							.addAttribute("version", "2.0")
+							.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
+						.build();
 		document.appendChild(div);
 		
-		Element divElement = document.createElement("div");
-		divElement.setAttribute("id", "_title_div");
-		divElement.setAttribute("style", "width: 100%");
-		divElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build());
-		Element message = document.createElement("spring:message");
-		message.setAttribute("code", "entity.update");
-		message.setAttribute("arguments", "${entity_label}");
-		message.setAttribute("var", "title_msg");
-		divElement.appendChild(message);
-		divElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.update").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
+									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
+								.build();
 		
 		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
@@ -437,24 +449,24 @@ public class JspDocumentHelper {
 	public Document getFinderDocument(String finderName) {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();		
-
-		Element div = document.createElement("div");
-		div.setAttribute("xmlns:form", "http://www.springframework.org/tags/form");
-		div.setAttribute("xmlns:spring", "http://www.springframework.org/tags");
-		div.setAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core");
+		
+		//add document namespaces
+		Element div = new XmlElementBuilder("div", document)
+							.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
+							.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
+							.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+							.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+							.addAttribute("version", "2.0")
+							.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
+						.build();
 		document.appendChild(div);
 		
-		Element titleDivElement = document.createElement("div");
-		titleDivElement.setAttribute("id", "_title_div");
-		titleDivElement.setAttribute("style", "width: 100%");
-		titleDivElement.appendChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + finderName.replace("find" + entityMetadata.getPlural() + "By", "").toLowerCase()).addAttribute("var", "entity_label").build());
-		Element message = document.createElement("spring:message");
-		message.setAttribute("code", "entity.find");
-		message.setAttribute("arguments", "${entity_label}");
-		message.setAttribute("var", "title_msg");
-		titleDivElement.appendChild(message);
-		titleDivElement.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
-			
+		Element titleDivElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + finderName.replace("find" + entityMetadata.getPlural() + "By", "").toLowerCase()).addAttribute("var", "entity_label").build())
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.find").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
+									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
+								.build();
+		
 		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
 		url.setAttribute("value", "/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), ""));

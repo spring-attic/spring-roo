@@ -155,11 +155,7 @@ public class DojoUtils {
 			script.setTextContent(script.getTextContent() + "dojo.require('" + require + "');");
 		}		
 		if (!elementFound) {	
-			if (document.getDocumentElement().getFirstChild() == null) {
-				document.getDocumentElement().appendChild(script);
-			} else {
-				document.getDocumentElement().getFirstChild().insertBefore(script, document.getDocumentElement().getFirstChild());
-			}			
+			document.getDocumentElement().appendChild(script);	
 		}
 	}
 
