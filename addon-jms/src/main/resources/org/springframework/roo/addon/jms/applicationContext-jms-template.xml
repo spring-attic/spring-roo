@@ -26,7 +26,7 @@
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="connectionFactory">
 			<!-- lets wrap in a pool to avoid creating a connection per send -->
-			<bean class="org.springframework.jms.connection.SingleConnectionFactory">
+			<bean class="org.springframework.jms.connection.CachingConnectionFactory">
 				<property name="targetConnectionFactory">
 					<ref local="jmsFactory" />
 				</property>
