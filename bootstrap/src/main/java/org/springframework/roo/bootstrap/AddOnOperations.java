@@ -136,7 +136,7 @@ public class AddOnOperations {
 						logger.fine("SAVED " + simpleName);
 					}
 				}
-				
+				zf.close();
 			} catch (IOException ioe) {
 				throw new IllegalStateException(ioe);
 			}
@@ -177,7 +177,7 @@ public class AddOnOperations {
 		String filename = path.substring(path.lastIndexOf('/') + 1);
 		
 		try {
-			File tmpFile = File.createTempFile(filename, "zip");
+			File tmpFile = File.createTempFile(filename, ".zip");
 			logger.fine("Downloading " + u);
 			
 			FileCopyUtils.copy(u.openStream(), new FileOutputStream(tmpFile));
@@ -194,7 +194,7 @@ public class AddOnOperations {
 					continue;
 				}
 			}
-			
+			zf.close();
 			Assert.isTrue(looksOk, "Downloaded file does not appear to be a Roo add-on");
 
 			// To be here it looks close enough to a Roo add-on
@@ -204,6 +204,10 @@ public class AddOnOperations {
 			}
 			FileCopyUtils.copy(tmpFile, target);
 			logger.fine("Written to " + target.getAbsolutePath());
+			if (!tmpFile.delete()) {
+				// it's just a temp file: try again on exit
+				tmpFile.deleteOnExit();
+			}
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
