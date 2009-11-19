@@ -103,7 +103,7 @@ public class JspDocumentHelper {
 		
 //		div.appendChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"));
 
-		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div")
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + entityMetadata.getPlural().toLowerCase()).addAttribute("var", "entity_label_plural").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.list.all").addAttribute("arguments", "${entity_label_plural}").addAttribute("var", "title_msg").build())
@@ -275,7 +275,7 @@ public class JspDocumentHelper {
 						.build();
 		document.appendChild(div);
 		
-		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div")
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
 									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
@@ -339,7 +339,7 @@ public class JspDocumentHelper {
 						.build();
 		document.appendChild(div);
 
-		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div")
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.create").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
 									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
@@ -394,7 +394,7 @@ public class JspDocumentHelper {
 						.build();
 		document.appendChild(div);
 		
-		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+		Element divElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div")
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).addAttribute("var", "entity_label").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.update").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
 									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))
@@ -461,7 +461,7 @@ public class JspDocumentHelper {
 						.build();
 		document.appendChild(div);
 		
-		Element titleDivElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div").addAttribute("style", "width: 100%")
+		Element titleDivElement = new XmlElementBuilder("div", document).addAttribute("id", "_title_div")
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "label." + finderName.replace("find" + entityMetadata.getPlural() + "By", "").toLowerCase()).addAttribute("var", "entity_label").build())
 									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.find").addAttribute("arguments", "${entity_label}").addAttribute("var", "title_msg").build())
 									.addChild(DojoUtils.getTitlePaneDojo(document, "${title_msg}"))

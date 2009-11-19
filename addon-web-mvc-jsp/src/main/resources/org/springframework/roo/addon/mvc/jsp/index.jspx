@@ -1,7 +1,7 @@
 <div xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>	
 	<script type="text/javascript">dojo.require("dijit.TitlePane")</script>
-    <div style="width: 100%" id="_title">
+    <div id="_title">
     	<spring:message var="title" code="welcome.titlepane" />
     	<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
 		<h3><spring:message code="welcome.h3" /></h3>
