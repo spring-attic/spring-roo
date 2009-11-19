@@ -20,7 +20,8 @@
 		<dependency>
 			<groupId>net.sourceforge.jline</groupId>
 			<artifactId>com.springsource.jline</artifactId>
-			<version>0.9.94</version>
+			<!-- S2-A is a private patched version: see ROO-350 for details -->
+			<version>0.9.94.S2-A</version>
 		</dependency>
 	</dependencies>
 </project>

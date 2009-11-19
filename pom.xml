@@ -10,40 +10,40 @@
     <modules>
         <module>annotations</module>
         <module>support</module>
-		<module>model</module>
+        <module>model</module>
         <module>shell</module>
         <module>shell-jline</module>
-		<module>metadata</module>
+        <module>metadata</module>
         <module>file-undo</module>
         <module>file-monitor</module>
         <module>file-monitor-polling</module>
         <module>project</module>
         <module>process-manager</module>
-		<module>classpath</module>
-		<module>classpath-javaparser</module>
-		<module>addon-maven</module>
-		<module>addon-plural</module>
-		<module>addon-propfiles</module>
-		<module>addon-beaninfo</module>
-		<module>addon-configurable</module>
-		<module>addon-email</module>
-		<module>addon-javabean</module>
-		<module>addon-jpa</module>
-		<module>addon-jms</module>
-		<module>addon-finder</module>
-		<module>addon-logging</module>
-		<module>addon-entity</module>
-		<module>addon-property-editor</module>
-		<module>addon-security</module>
-		<module>addon-tostring</module>
-		<module>addon-web-flow</module>
-		<module>addon-web-mvc-controller</module>
-		<module>addon-web-mvc-jsp</module>
-		<module>addon-web-menu</module>
-		<module>addon-web-selenium</module>
-		<module>addon-dod</module>
-		<module>addon-test</module>
-		<module>addon-backup</module>
+        <module>classpath</module>
+        <module>classpath-javaparser</module>
+        <module>addon-maven</module>
+        <module>addon-plural</module>
+        <module>addon-propfiles</module>
+        <module>addon-beaninfo</module>
+        <module>addon-configurable</module>
+        <module>addon-email</module>
+        <module>addon-javabean</module>
+        <module>addon-jpa</module>
+        <module>addon-jms</module>
+        <module>addon-finder</module>
+        <module>addon-logging</module>
+        <module>addon-entity</module>
+        <module>addon-property-editor</module>
+        <module>addon-security</module>
+        <module>addon-tostring</module>
+        <module>addon-web-flow</module>
+        <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-jsp</module>
+        <module>addon-web-menu</module>
+        <module>addon-web-selenium</module>
+        <module>addon-dod</module>
+        <module>addon-test</module>
+        <module>addon-backup</module>
 
         <module>bootstrap</module>
     </modules>
@@ -76,7 +76,7 @@
     <ciManagement>
         <system>bamboo</system>
         <url>https://build.springframework.org/browse/ROO</url>
-    </ciManagement>    
+    </ciManagement>
 
     <distributionManagement>
         <repository>
@@ -102,7 +102,7 @@
         </site>
     </distributionManagement>
 
-	<repositories>
+    <repositories>
         <repository>
             <id>com.springsource.repository.bundles.release</id>
             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
@@ -113,17 +113,22 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository> 
-		<repository>
-			<id>com.springsource.repository.bundles.milestone</id>
-			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
-			<url>http://repository.springsource.com/maven/bundles/milestone</url>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.snapshot</id>
-			<name>SpringSource Enterprise Bundle Repository - Nightly Snapshots</name>
-			<url> http://repository.springsource.com/maven/bundles/snapshot</url>
-		</repository>
-	</repositories>
+        <repository>
+            <id>com.springsource.private.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Private External Bundle Releases</name>
+            <url>http://private.repository.springsource.com/maven/bundles/external</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.milestone</id>
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
+            <url>http://repository.springsource.com/maven/bundles/milestone</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.snapshot</id>
+            <name>SpringSource Enterprise Bundle Repository - Nightly Snapshots</name>
+            <url> http://repository.springsource.com/maven/bundles/snapshot</url>
+        </repository>
+    </repositories>
 
     <developers>
         <developer>
@@ -133,7 +138,7 @@
             <organization>SpringSource</organization>
             <timezone>+10</timezone>
         </developer>
- 	<developer>
+        <developer>
             <name>Stefan Schmidt</name>
             <id>sschmidt</id>
             <email>stefan.schmidt at springsource.com</email>
@@ -143,21 +148,21 @@
     </developers>
 
     <dependencies>
-		<!-- JUnits with repo1 artifact/groupId required due to SureFire hard-coded dependency -->
+        <!-- JUnits with repo1 artifact/groupId required due to SureFire hard-coded dependency -->
         <!--
-		<dependency>
-			<groupId>org.junit</groupId>
-			<artifactId>com.springsource.org.junit</artifactId>
-			<version>4.5.0</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.junit</groupId>
+            <artifactId>com.springsource.org.junit</artifactId>
+            <version>4.5.0</version>
+            <scope>test</scope>
+        </dependency>
         -->
         <dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.7</version>
-			<scope>test</scope>
-		</dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -168,7 +173,7 @@
                 <version>2.0.0.RELEASE</version>
             </extension>
         </extensions>
-        <plugins>            
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-help-plugin</artifactId>
@@ -193,28 +198,28 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.0.2</version>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
             </plugin>
-      <plugin>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>buildnumber-maven-plugin</artifactId>
-      <version>1.0-beta-3</version>
-      <executions>
-        <execution>
-          <phase>validate</phase>        
-          <goals>
-            <goal>create</goal>
-          </goals>
-        </execution>
-      </executions>
-      <configuration>
-        <doCheck>false</doCheck>
-        <doUpdate>false</doUpdate>
-      </configuration>
-      </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.0-beta-3</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -255,130 +260,130 @@
                 </executions>
             </plugin>
             <!-- DocBook (with thanks to Spring Batch's config!) -->
-			<plugin>
-				<groupId>com.agilejava.docbkx</groupId>
-				<artifactId>docbkx-maven-plugin</artifactId>
-				<version>2.0.8</version>
-				<executions>
-					<execution>
-						<id>single-page</id>
-						<goals>
-							<goal>generate-html</goal>
-						</goals>
-						<configuration>
-							<htmlCustomization>${basedir}/src/docbkx/resources/xsl/html.xsl</htmlCustomization>
-							<postProcess>
-								<move todir="${basedir}/target/site/reference/html-single">
-									<fileset dir="${basedir}/target/docbkx/html">
-										<include name="index.html" />
-									</fileset>
-								</move>
-								<copy todir="${basedir}/target/site/reference/html-single">
-									<fileset dir="${basedir}/src/docbkx/resources">
-										<include name="**/*.css" />
-										<include name="**/*.png" />
-										<include name="**/*.gif" />
-										<include name="**/*.jpg" />
-									</fileset>
-								</copy>
-								<copy todir="${basedir}/target/site/reference/html-single">
-									<fileset dir="${basedir}/src/site/docbook/reference">
-										<include name="**/*.png" />
-										<include name="**/*.gif" />
-										<include name="**/*.jpg" />
-									</fileset>
-								</copy>
-							</postProcess>
-						</configuration>
-						<phase>pre-site</phase>
-					</execution>
-					<execution>
-						<id>single-pdf</id>
-						<goals>
-							<goal>generate-pdf</goal>
-						</goals>
-						<configuration>
-							<imgSrcPath>src/site/docbook/reference/</imgSrcPath>
-							<admonGraphicsPath>src/docbkx/resources/images/</admonGraphicsPath>
-							<postProcess>
-								<copy file="${basedir}/target/docbkx/pdf/index.pdf" tofile="${basedir}/target/site/reference/pdf/spring-roo-docs.pdf" failonerror="false" />
-							</postProcess>
-						</configuration>
-						<phase>pre-site</phase>
-					</execution>
-					<execution>
-						<id>multi-page</id>
-						<goals>
-							<goal>generate-html</goal>
-						</goals>
-						<configuration>
-							<chunkedOutput>true</chunkedOutput>
-							<htmlCustomization>${basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
-							<postProcess>
-								<move todir="${basedir}/target/site/reference">
-									<fileset dir="${basedir}/target/docbkx">
-										<include name="**/*.html" />
-									</fileset>
-								</move>
-								<copy todir="${basedir}/target/site/reference/html">
-									<fileset dir="${basedir}/src/docbkx/resources">
-										<include name="**/*.css" />
-										<include name="**/*.png" />
-										<include name="**/*.gif" />
-										<include name="**/*.jpg" />
-									</fileset>
-								</copy>
-								<copy todir="${basedir}/target/site/reference/html">
-									<fileset dir="${basedir}/src/site/docbook/reference">
-										<include name="**/*.png" />
-										<include name="**/*.gif" />
-										<include name="**/*.jpg" />
-									</fileset>
-								</copy>
-							</postProcess>
-						</configuration>
-						<phase>pre-site</phase>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.docbook</groupId>
-						<artifactId>docbook-xml</artifactId>
-						<version>4.4</version>
-						<scope>runtime</scope>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.xmlgraphics</groupId>
-						<artifactId>fop</artifactId>
-						<version>0.93</version>
-					</dependency>
-				</dependencies>
-				<configuration>
-					<includes>index.xml</includes>
-					<chunkedOutput>false</chunkedOutput>
-					<draftWatermarkImage />
-					<htmlStylesheet>css/html.css</htmlStylesheet>
-					<sourceDirectory>${basedir}/src/site/docbook/reference</sourceDirectory>
-					<foCustomization>${basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
-					<xincludeSupported>true</xincludeSupported>
-					<entities>
-						<entity>
-							<name>version</name>
-							<value>${project.version}</value>
-						</entity>
-					</entities>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>com.agilejava.docbkx</groupId>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <version>2.0.8</version>
+                <executions>
+                    <execution>
+                        <id>single-page</id>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <htmlCustomization>${basedir}/src/docbkx/resources/xsl/html.xsl</htmlCustomization>
+                            <postProcess>
+                                <move todir="${basedir}/target/site/reference/html-single">
+                                    <fileset dir="${basedir}/target/docbkx/html">
+                                        <include name="index.html" />
+                                    </fileset>
+                                </move>
+                                <copy todir="${basedir}/target/site/reference/html-single">
+                                    <fileset dir="${basedir}/src/docbkx/resources">
+                                        <include name="**/*.css" />
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${basedir}/target/site/reference/html-single">
+                                    <fileset dir="${basedir}/src/site/docbook/reference">
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                    <execution>
+                        <id>single-pdf</id>
+                        <goals>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <configuration>
+                            <imgSrcPath>src/site/docbook/reference/</imgSrcPath>
+                            <admonGraphicsPath>src/docbkx/resources/images/</admonGraphicsPath>
+                            <postProcess>
+                                <copy file="${basedir}/target/docbkx/pdf/index.pdf" tofile="${basedir}/target/site/reference/pdf/spring-roo-docs.pdf" failonerror="false" />
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                    <execution>
+                        <id>multi-page</id>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <chunkedOutput>true</chunkedOutput>
+                            <htmlCustomization>${basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
+                            <postProcess>
+                                <move todir="${basedir}/target/site/reference">
+                                    <fileset dir="${basedir}/target/docbkx">
+                                        <include name="**/*.html" />
+                                    </fileset>
+                                </move>
+                                <copy todir="${basedir}/target/site/reference/html">
+                                    <fileset dir="${basedir}/src/docbkx/resources">
+                                        <include name="**/*.css" />
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${basedir}/target/site/reference/html">
+                                    <fileset dir="${basedir}/src/site/docbook/reference">
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.docbook</groupId>
+                        <artifactId>docbook-xml</artifactId>
+                        <version>4.4</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.xmlgraphics</groupId>
+                        <artifactId>fop</artifactId>
+                        <version>0.93</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <includes>index.xml</includes>
+                    <chunkedOutput>false</chunkedOutput>
+                    <draftWatermarkImage />
+                    <htmlStylesheet>css/html.css</htmlStylesheet>
+                    <sourceDirectory>${basedir}/src/site/docbook/reference</sourceDirectory>
+                    <foCustomization>${basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+                    <xincludeSupported>true</xincludeSupported>
+                    <entities>
+                        <entity>
+                            <name>version</name>
+                            <value>${project.version}</value>
+                        </entity>
+                    </entities>
+                </configuration>
+            </plugin>
             <!-- Other -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.2-beta-3</version>
-				<configuration>
-					<descriptors>
-						<descriptor>bootstrap/src/main/assembly/assembly.xml</descriptor>
-					</descriptors>
-				</configuration>
+                <configuration>
+                    <descriptors>
+                        <descriptor>bootstrap/src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -431,9 +436,9 @@
     </build>
 
     <reporting>
-		<excludeDefaults>true</excludeDefaults>
+        <excludeDefaults>true</excludeDefaults>
         <plugins>
-              <plugin>
+            <plugin>
                 <groupId>com.googlecode.maven-overview-plugin</groupId>
                 <artifactId>maven-overview-plugin</artifactId>
                 <version>1.6</version>
@@ -442,22 +447,22 @@
                     <height>2000</height>
                     <width>2000</width>
                     <exclusions>
-					    <exclusion>
-						    <groupId>org.springframework.roo</groupId>
-						    <artifactId>org.springframework.roo.bootstrap</artifactId>
-					    </exclusion>
+                        <exclusion>
+                            <groupId>org.springframework.roo</groupId>
+                            <artifactId>org.springframework.roo.bootstrap</artifactId>
+                        </exclusion>
                     </exclusions>
                 </configuration>
-              </plugin>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.1</version>
                 <reportSets>
-                  <reportSet>
-                  </reportSet>
+                    <reportSet>
+                    </reportSet>
                 </reportSets>
-            </plugin>           
+            </plugin>
         </plugins>
     </reporting>
 
