@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -170,9 +171,12 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="table", mandatory=false, help="The JPA table name to use for this entity") String table,
 			@CliOption(key="identifierField", mandatory=false, help="The JPA identifier field name to use for this entity") String identifierField,
 			@CliOption(key="identifierColumn", mandatory=false, help="The JPA identifier field column to use for this entity") String identifierColumn,
+			@CliOption(key="identifierType", mandatory=false, optionContext="java-lang,project", unspecifiedDefaultValue="java.lang.Long", specifiedDefaultValue="java.lang.Long", help="The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType,
 			@CliOption(key="inheritanceType", mandatory=false, help="The JPA @Inheritance value") InheritanceType inheritanceType,
 			@CliOption(key="mappedSuperclass", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Apply @MappedSuperclass for this entity") boolean mappedSuperclass,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
@@ -202,6 +206,9 @@ public class ClasspathCommands implements CommandMarker {
 		if (identifierColumn != null) {
 			entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), identifierColumn));
 		}
+		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
+			entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
+		}
 		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
 
 		
@@ -227,7 +234,6 @@ public class ClasspathCommands implements CommandMarker {
 				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
 				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.DiscriminatorColumn"), new ArrayList<AnnotationAttributeValue<?>>()));
 			}
-			
 		}
 		
 		int modifier = Modifier.PUBLIC;
