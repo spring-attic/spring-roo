@@ -5,6 +5,7 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -63,9 +64,24 @@ public final class WebScaffoldMetadataProvider extends AbstractItdMetadataProvid
 		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		
+		// We also need to be informed if a referenced type is changed
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+					
+			//not interested in identifiers and version fields
+			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
+				continue;
+			}
+			JavaType type = accessor.getReturnType();
+
+			String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA);
+			//we are only interested if the type is part of our application and if no editor exists for it already
+			if (metadataService.get(physicalTypeIdentifier) != null) {
+				metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
+			}
+		}
+		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
 	}
 	

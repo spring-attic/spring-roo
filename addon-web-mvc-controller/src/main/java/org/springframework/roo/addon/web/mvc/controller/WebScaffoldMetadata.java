@@ -326,8 +326,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-//		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
-//		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
@@ -417,8 +415,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-//		bodyBuilder.appendFormalLine("modelMap.addAllAttributes(result.getAllErrors());");
-//		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
