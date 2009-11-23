@@ -16,10 +16,10 @@ while true; do
 
     ROO_CP=$ROO_CP:`echo $HOME/roo-dev/work/*.jar | sed 's/ /:/g'`
 
-    java -DdevelopmentMode=true $ROO_OPTS -Droo.home="$HOME/roo-dev" -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:/roo-bootstrap.xml" $@
+    java -DdevelopmentMode=true $ROO_OPTS -Droo.home="$HOME/roo-dev" -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" $@
     EXITED=$?
     # echo Exited with $EXITED
-    if [ $EXITED -ne 100 ]; then
+    if [ $EXITED -eq 0 ]; then
 		break
 	fi
 done

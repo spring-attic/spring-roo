@@ -41,7 +41,7 @@ public class AddOnCommands implements CommandMarker {
 	public ExitShellRequest uninstallCmd(
 			@CliOption(key={"","pattern"}, mandatory=true, help="The filename pattern to remove") String pattern) {
 		boolean restart = addOnOperations.uninstall(pattern);
-		return restart ? ExitShellRequest.EXIT_AND_RESTART : null;
+		return restart ? ExitShellRequest.EXIT_AND_RESTART_AFTER_ADDON_UNINSTALL : null;
 	}
 	
 	@CliCommand(value="addon list", help="Lists add-ons installed in the $ROO_HOME/add-ons directory")
