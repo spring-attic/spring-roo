@@ -24,6 +24,13 @@ public class JLineCompletorAdapter implements Completor {
 
 	@SuppressWarnings("unchecked")
 	public int complete(String buffer, int cursor, List candidates) {
-		return simpleParser.complete(buffer, cursor, candidates);
+		int result;
+		try {
+			JLineLogHandler.cancelRedrawProhibition();
+			result = simpleParser.complete(buffer, cursor, candidates);
+		} finally {
+			JLineLogHandler.prohibitRedraw();
+		}
+		return result;
 	}
 }

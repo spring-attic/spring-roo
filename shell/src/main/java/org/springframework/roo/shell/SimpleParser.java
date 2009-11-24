@@ -634,6 +634,31 @@ public final class SimpleParser {
 							}
 						}
 						
+						// ROO-389: give inline options given there's multiple choices available and we want to help the user
+						StringBuilder help = new StringBuilder();
+						help.append(System.getProperty("line.separator"));
+						help.append(option.mandatory() ? "required --" : "optional --");
+						if ("".equals(option.help())) {
+							help.append(lastOptionKey).append(": ").append("No help available");
+						} else {
+							help.append(lastOptionKey).append(": ").append(option.help());
+						}
+						if (option.specifiedDefaultValue().equals(option.unspecifiedDefaultValue())) {
+							if (option.specifiedDefaultValue().equals("__NULL__")) {
+								help.append("; no default value");
+							} else {
+								help.append("; default: '").append(option.specifiedDefaultValue()).append("'");
+							}
+						} else {
+							if (!"".equals(option.specifiedDefaultValue()) && !"__NULL__".equals(option.specifiedDefaultValue())) {
+								help.append("; default if option present: '" + option.specifiedDefaultValue()).append("'");
+							}
+							if (!"".equals(option.unspecifiedDefaultValue()) && !"__NULL__".equals(option.unspecifiedDefaultValue())) {
+								help.append("; default if option not present: '" + option.unspecifiedDefaultValue()).append("'");
+							}
+						}
+						logger.info(help.toString());
+
 						if (results.size() == 1) {
 							String suggestion = results.iterator().next().trim();
 							if (suggestion.equals(lastOptionValue)) {
@@ -643,6 +668,7 @@ public final class SimpleParser {
 						}
 						
 						if (results.size() > 0) {
+							
 							candidates.addAll(results);
 							// values presented from the last space onwards
 							if (translated.endsWith(" ")) {
