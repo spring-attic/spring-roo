@@ -12,38 +12,18 @@
 	<context:component-scan base-package="com.springsource.vote" use-default-filters="false">
 		<context:include-filter expression="org.springframework.stereotype.Controller" type="annotation"/>
 	</context:component-scan>
-
-	<!-- Maps request paths to @Controller classes; e.g. a path of /owner looks for a controller named OwnerController 
-		 This configuration will be replaced with the mvc:annotation-driven configuration once SPR-6352 is resolved -->
-	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
-		<property name="interceptors">
-			<list>
-				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang"/>
-				<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" p:paramName="theme"/>
-			</list>
-		</property>
-		<property name="defaultHandler">
-			<!-- If no @Controller match, map path to a view to render; e.g. the "/index" path would map to the view named "index" -->	
-			<bean class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
-		</property>
-	</bean>	
-
-	<!-- Register Bean Validation (JSR-303) support for Spring MVC controllers 
-		 This configuration will be replaced with the mvc:annotation-driven configuration once SPR-6352 is resolved -->
-	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-        <property name="webBindingInitializer">
-            <bean class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
-				<property name="validator" ref="validator" />
-            </bean>
-        </property>
-    </bean>
-    
-    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" /> 
-    
-    <!-- Configure default Bean Validation (JSR-303) support 
-         This configuration will be replaced with the mvc:annotation-driven configuration once SPR-6352 is resolved -->
-    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
-
+	
+	<!-- Turns on support for mapping requests to Spring MVC @Controller methods
+	     Also registers default Formatters and Validators for use across all @Controllers -->
+	<mvc:annotation-driven>
+		<mvc:interceptors>
+			<bean name="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+				<property name="paramName" value="lang" />
+			</bean>
+			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+		</mvc:interceptors>
+	</mvc:annotation-driven>		
+	
 	<!-- Resolves logical view names returned by Controllers to Tiles; a view
 		 name to resolve is treated as the name of a tiles definition -->
 	<bean class="org.springframework.js.ajax.AjaxUrlBasedViewResolver" id="tilesViewResolver">
@@ -65,13 +45,13 @@
 	<bean class="org.springframework.context.support.ReloadableResourceBundleMessageSource" id="messageSource" p:basename="WEB-INF/i18n/messages" p:fallbackToSystemLocale="false"/>
 	
 	<!-- store preferred language configuration in a cookie -->
-	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver"/>	
+	<bean class="org.springframework.web.servlet.i18n.CookieLocaleResolver" id="localeResolver" />	
 	
 	<!-- resolves localized <theme_name>.properties files in the classpath to allow for theme support -->
-	<bean class="org.springframework.ui.context.support.ResourceBundleThemeSource" id="themeSource" />
+	<bean class="org.springframework.ui.context.support.ResourceBundleThemeSource" id="themeSource"/>
 	
 	<!-- store preferred theme configuration in a cookie -->
-	<bean class="org.springframework.web.servlet.theme.CookieThemeResolver" id="themeResolver" p:defaultThemeName="left" />
+	<bean class="org.springframework.web.servlet.theme.CookieThemeResolver" id="themeResolver" p:defaultThemeName="left"/>
 
 	<!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
 	     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet container: 
@@ -86,6 +66,18 @@
 			</props>
 		</property>
 	</bean>
+	
+	<!-- Required to enable invocation of org.springframework.web.servlet.Controllers -->
+	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+	
+	<!-- Required for bean name-based request mapping -->
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" p:order="1"/>
+	
+	<!-- Required for each static view controller -->
+	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/index" p:viewName="index" />
+	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/uncaughtException" p:viewName="uncaughtException" />
+	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/resourceNotFound" p:viewName="resourceNotFound" />
+	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/dataAccessFailure" p:viewName="dataAccessFailure" />
 
 	<!-- allows for integration of file upload functionality -->
 	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
