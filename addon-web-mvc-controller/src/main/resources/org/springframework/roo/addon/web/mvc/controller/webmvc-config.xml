@@ -17,13 +17,13 @@
 	     Also registers default Formatters and Validators for use across all @Controllers -->
 	<mvc:annotation-driven>
 		<mvc:interceptors>
+			<bean name="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
 			<bean name="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
 				<property name="paramName" value="lang" />
 			</bean>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
 		</mvc:interceptors>
 	</mvc:annotation-driven>		
-	
+
 	<!-- Resolves logical view names returned by Controllers to Tiles; a view
 		 name to resolve is treated as the name of a tiles definition -->
 	<bean class="org.springframework.js.ajax.AjaxUrlBasedViewResolver" id="tilesViewResolver">
@@ -71,7 +71,14 @@
 	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
 	
 	<!-- Required for bean name-based request mapping -->
-	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" p:order="1"/>
+	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" p:order="1">
+		<property name="interceptors">
+			<list>
+				<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
+			</list>
+		</property>
+	</bean>
 	
 	<!-- Required for each static view controller -->
 	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/index" p:viewName="index" />
