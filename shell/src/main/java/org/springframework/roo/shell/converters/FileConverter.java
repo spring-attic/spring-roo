@@ -42,7 +42,8 @@ public class FileConverter implements Converter {
 		Assert.isTrue(directory.isDirectory());
 
 		for (File file : directory.listFiles()) {
-			if (existingData == null || existingData.length() == 0 || file.getName().startsWith(existingData)) {
+			if (existingData == null || existingData.length() == 0 || 
+				file.getName().toLowerCase().startsWith(existingData.toLowerCase())) {
 
 				String completion = "";
 				if (directoryData.length() > 0)
