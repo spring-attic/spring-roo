@@ -3,10 +3,14 @@ package org.springframework.roo.shell.jline;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
@@ -48,6 +52,8 @@ public class JLineShell extends AbstractShell implements Shell {
     private ConsoleReader reader;
     private SimpleParser parser;
     private boolean developmentMode = false;
+    private FileWriter fileLog;
+	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
 	public JLineShell(ExecutionStrategy executionStrategy) {
 		super(executionStrategy);
@@ -87,7 +93,9 @@ public class JLineShell extends AbstractShell implements Shell {
 		}
                 
 		// reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
-
+		
+		openFileLogIfPossible();
+		
         logger.info(version(null));
         logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
         
@@ -155,6 +163,37 @@ public class JLineShell extends AbstractShell implements Shell {
 		return this.developmentMode;
 	}
 	
+	private void openFileLogIfPossible() {
+		try {
+			fileLog = new FileWriter("log.roo", true);
+			// first write, so let's record the date and time of the first user command
+			fileLog.write("// Spring Roo " + versionInfo() + " log opened at " + df.format(new Date()) + "\n");
+			fileLog.flush();
+		} catch (IOException ignoreIt) {}
+	}
+	
+	@Override
+	protected void logCommandToOutput(String processedLine) {
+		if (fileLog == null) {
+			openFileLogIfPossible();
+			if (fileLog == null) {
+				// still failing, so give up
+				return;
+			}
+		}
+		try {
+			fileLog.write(processedLine + "\n"); // unix line endings only from Roo
+			fileLog.flush(); // so tail -f will show it's working
+			if (getExitShellRequest() != null) {
+				// shutting down, so close our file (we can always reopen it later if needed)
+				fileLog.write("// Spring Roo " + versionInfo() + " log closed at " + df.format(new Date()) + "\n");
+				fileLog.flush();
+				fileLog.close();
+				fileLog = null;
+			}
+		} catch (IOException ignoreIt) {}
+	}
+
 	/**
 	 * Obtains the "roo.home" from the system property, throwing an exception if missing.
 	 *

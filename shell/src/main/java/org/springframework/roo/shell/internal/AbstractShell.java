@@ -140,11 +140,54 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			// We rely on execution strategy to log it
 	    	//Throwable root = ExceptionUtils.extractRootCause(ex);
 			//logger.log(Level.FINE, root.getMessage());
+	    	try {
+	    		logCommandIfRequired(line, false);
+	    	} catch (Exception ignoreIt) {}
 			return false;
 		} finally {
 			setShellStatus(ShellStatus.EXECUTION_COMPLETE);
 		}
+		logCommandIfRequired(line, true);
 		return true;
+	}
+	
+	/**
+	 * Allows a subclass to log the execution of a well-formed command. This is invoked after a command
+	 * has completed, and indicates whether the command returned normally or returned an exception. Note
+	 * that attempted commands that are not well-formed (eg they are missing a mandatory argument) will
+	 * never be presented to this method, as the command execution is never actually attempted in those
+	 * cases. This method is only invoked if an attempt is made to execute a particular command.
+	 * 
+	 * <p>
+	 * Implementations should consider specially handling the "script" commands, and also
+	 * indicating whether a command was successful or not. Implementations that wish to behave
+	 * consistently with other {@link AbstractShell} subclasses are encouraged to simply override
+	 * {@link #logCommandToOutput(String)} instead, and only override this method if you actually
+	 * need to fine-tune the output logic.
+	 *  
+	 * @param line the parsed line (any comments have been removed; never null)
+	 * @param successful if the command was successful or not
+	 */
+	protected void logCommandIfRequired(String line, boolean successful) {
+		if (line.startsWith("script")) {
+			logCommandToOutput((successful ? "// " : "// [failed] ") + line);
+		} else {
+			logCommandToOutput((successful ? "" : "// [failed] ") + line);
+		}
+	}
+	
+	/**
+	 * Allows a subclass to actually write the resulting logged command to some form of output. This
+	 * frees subclasses from needing to implement the logic within {@link #logCommandIfRequired(String, boolean)}.
+	 *
+	 * <p>
+	 * Implementations should invoke {@link #getExitShellRequest()} to monitor any attempts to exit the shell and
+	 * release resources such as output log files.
+	 * 
+	 * @param processedLine the line that should be appended to some type of output (excluding the \n character)
+	 */
+	protected void logCommandToOutput(String processedLine) {
+		// logger.severe(processedLine);
 	}
 
 	public ExitShellRequest getExitShellRequest() {
