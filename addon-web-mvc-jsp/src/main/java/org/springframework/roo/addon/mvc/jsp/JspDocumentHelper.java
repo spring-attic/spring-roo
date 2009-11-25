@@ -288,12 +288,12 @@ public class JspDocumentHelper {
 			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 				
 			Element label = document.createElement("label");
-			label.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
+			label.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
 			label.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divSubmitElement.appendChild(label);
 			
 			Element divContent = document.createElement("div");
-			divContent.setAttribute("id", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
+			divContent.setAttribute("id", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
 			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
@@ -431,12 +431,12 @@ public class JspDocumentHelper {
 		
 		Element formHiddenId = document.createElement("form:hidden");
 		formHiddenId.setAttribute("path", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
-		formHiddenId.setAttribute("id", "_" + entityMetadata.getIdentifierField().getFieldName().getSymbolName());
+		formHiddenId.setAttribute("id", "_" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "_id");
 		formElement.appendChild(formHiddenId);
 		if (null != entityMetadata.getVersionField()) {
 			Element formHiddenVersion = document.createElement("form:hidden");
 			formHiddenVersion.setAttribute("path", entityMetadata.getVersionField().getFieldName().getSymbolName());
-			formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName());
+			formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName() + "_id");
 			formElement.appendChild(formHiddenVersion);
 		}
 
@@ -490,7 +490,7 @@ public class JspDocumentHelper {
 			divElement.setAttribute("id", "roo_" + entityName + "_" + paramName.getSymbolName().toLowerCase());
 
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + paramName.getSymbolName().toLowerCase());
+			labelElement.setAttribute("for", "_" + paramName.getSymbolName().toLowerCase() + "_id");
 			labelElement.setTextContent(paramName.getReadableSymbolName()  + ":");
 			
 			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
@@ -504,7 +504,7 @@ public class JspDocumentHelper {
 					Element select = document.createElement("select");
 					select.setAttribute("style", "width:250px");
 					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
-					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase());
+					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
 					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
@@ -550,7 +550,7 @@ public class JspDocumentHelper {
 				divElement.appendChild(labelElement);
 				Element formCheckTrue = document.createElement("input");
 				formCheckTrue.setAttribute("type", "radio");
-				formCheckTrue.setAttribute("id", "_" + paramName.getSymbolName());
+				formCheckTrue.setAttribute("id", "_" + paramName.getSymbolName() + "_id");
 				formCheckTrue.setAttribute("name", paramName.getSymbolName().toLowerCase());
 				formCheckTrue.setAttribute("value", "true");
 				formCheckTrue.setAttribute("checked", "checked");
@@ -567,7 +567,7 @@ public class JspDocumentHelper {
 				divElement.appendChild(labelElement);
 				Element formInput = document.createElement("input");
 				formInput.setAttribute("name", paramName.getSymbolName().toLowerCase());
-				formInput.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase());
+				formInput.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
 				formInput.setAttribute("size", "0");
 				formInput.setAttribute("style", "width:250px");
 				divElement.appendChild(formInput);
@@ -634,7 +634,7 @@ public class JspDocumentHelper {
 			divElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
 						
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
+			labelElement.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
 			labelElement.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divElement.appendChild(labelElement);
 			

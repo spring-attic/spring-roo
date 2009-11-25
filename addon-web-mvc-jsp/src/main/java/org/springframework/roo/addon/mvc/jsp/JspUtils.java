@@ -21,7 +21,7 @@ public class JspUtils {
 	public static Element getInputBox(Document document, JavaSymbolName field, Integer maxValue) {
 		Element formInput = document.createElement("form:input");
 		formInput.setAttribute("path", StringUtils.uncapitalize(field.getSymbolName()));
-		formInput.setAttribute("id", "_" + field.getSymbolName());
+		formInput.setAttribute("id", "_" + field.getSymbolName() + "_id");
 		formInput.setAttribute("size", "0");
 		formInput.setAttribute("cssStyle", "width:250px");
 		formInput.setAttribute("maxlength", maxValue.toString());
@@ -32,7 +32,7 @@ public class JspUtils {
 		Element formSelect = document.createElement("form:select");
 		formSelect.setAttribute("path", StringUtils.uncapitalize(fieldName.getSymbolName()));
 		formSelect.setAttribute("cssStyle", "width:250px");						
-		formSelect.setAttribute("id", "_" + fieldName);
+		formSelect.setAttribute("id", "_" + fieldName + "_id");
 		Element formOptions = document.createElement("form:options");
 		formOptions.setAttribute("items", "${" + pluralName.toLowerCase() + "}");
 		formOptions.setAttribute("itemValue", identifierField.getFieldName().getSymbolName());	
@@ -44,7 +44,7 @@ public class JspUtils {
 		Element formSelect = document.createElement("form:select");
 		formSelect.setAttribute("path", StringUtils.uncapitalize(fieldName.getSymbolName()));
 		formSelect.setAttribute("cssStyle", "width:250px");						
-		formSelect.setAttribute("id", "_" + fieldName.getSymbolName());
+		formSelect.setAttribute("id", "_" + fieldName.getSymbolName() + "_id");
 		formSelect.setAttribute("items", "${" + javaType.getSimpleTypeName().toLowerCase() + "_enum}");		
 		return formSelect;
 	}
@@ -52,7 +52,7 @@ public class JspUtils {
 	public static Element getTextArea(Document document, JavaSymbolName fieldName, Integer maxValue) {
 		Element textArea = document.createElement("form:textarea");
 		textArea.setAttribute("path", StringUtils.uncapitalize(fieldName.getSymbolName()));
-		textArea.setAttribute("id", "_" + fieldName.getSymbolName());
+		textArea.setAttribute("id", "_" + fieldName.getSymbolName() + "_id");
 		textArea.setAttribute("cssStyle", "width:250px");
 		return textArea;
 	}
@@ -60,14 +60,14 @@ public class JspUtils {
 	public static Element getCheckBox(Document document, JavaSymbolName fieldName) {
 		Element formCheck = document.createElement("form:checkbox");
 		formCheck.setAttribute("path", StringUtils.uncapitalize(fieldName.getSymbolName()));
-		formCheck.setAttribute("id", "_" + fieldName.getSymbolName());
+		formCheck.setAttribute("id", "_" + fieldName.getSymbolName() + "_id");
 		return formCheck;
 	}
 	
 	public static Element getErrorsElement(Document document, JavaSymbolName field) {
 		Element errors = document.createElement("form:errors");
 		errors.setAttribute("path", StringUtils.uncapitalize(field.getSymbolName()));
-		errors.setAttribute("id", "_" + field.getSymbolName() + "_error");
+		errors.setAttribute("id", "_" + field.getSymbolName() + "_error_id");
 		errors.setAttribute("cssClass", "errors");
 		return errors;
 	}

@@ -42,7 +42,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
-				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() 
+				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() 
 				+ "', required : true}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
 		return script;
 	} 
@@ -54,7 +54,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName())
-				+ "', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() + "', required : "
+				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() + "', required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
 		return script;
 	}
@@ -65,7 +65,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getSymbolName().toLowerCase()
-				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${validation_required}', required : true}})); ");
+				+ "_id', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${validation_required}', required : true}})); ");
 		return script;
 	}
 
@@ -95,7 +95,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
-				+ "', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${field_validation}', invalidMessage: '" + invalid 
+				+ "_id', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${field_validation}', invalidMessage: '" + invalid 
 				+ "'" + regex + ", required : " + isRequired + "}})); ");
 		return script;
 	}
@@ -106,7 +106,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName()) + "', widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName()) + "_id', widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
 		return script;
 	}
 	
@@ -117,7 +117,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
-				+ "', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); ");
+				+ "_id', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); ");
 		return script;
 	}
 	
@@ -128,7 +128,7 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
-				+ "', widgetType: 'dijit.form.MultiSelect', widgetAttrs: {}})); ");
+				+ "_id', widgetType: 'dijit.form.MultiSelect', widgetAttrs: {}})); ");
 		return script;
 	}
 	
