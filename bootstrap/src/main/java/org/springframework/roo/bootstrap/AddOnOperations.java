@@ -153,7 +153,7 @@ public class AddOnOperations {
 		
 		// an exit code of 100 means we want the Roo startup script to reload Roo
 		if (changesPending) {
-			logger.log(Level.SEVERE, "Restarting Spring Roo");
+			logger.log(Level.SEVERE, "Spring Roo restart required");
 			return true;
 		}
 		

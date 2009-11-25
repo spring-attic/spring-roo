@@ -32,15 +32,19 @@ public class AddOnCommands implements CommandMarker {
 	
 	@CliCommand(value="addon install", help="Installs a new add-on to the $ROO_HOME/add-ons directory")
 	public ExitShellRequest installCmd(
-			@CliOption(key={"","url"}, mandatory=true, help="The URL to obtain the add-on ZIP file from") String url) {
+			@CliOption(key={"","url"}, mandatory=true, help="The URL to obtain the add-on ZIP file from") String url,
+			@CliOption(key={"automaticRestart"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Causes an automatic shell restart to occur if changes are made") boolean automaticRestart) {
 		boolean restart = addOnOperations.install(url);
+		if (!automaticRestart) return null;
 		return restart ? ExitShellRequest.EXIT_AND_RESTART : null;
 	}
 
 	@CliCommand(value="addon uninstall", help="Removes an existing add-on from the $ROO_HOME/add-ons directory")
 	public ExitShellRequest uninstallCmd(
-			@CliOption(key={"","pattern"}, mandatory=true, help="The filename pattern to remove") String pattern) {
+			@CliOption(key={"","pattern"}, mandatory=true, help="The filename pattern to remove") String pattern,
+			@CliOption(key={"automaticRestart"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Causes an automatic shell restart to occur if changes are made") boolean automaticRestart) {
 		boolean restart = addOnOperations.uninstall(pattern);
+		if (!automaticRestart) return null;
 		return restart ? ExitShellRequest.EXIT_AND_RESTART_AFTER_ADDON_UNINSTALL : null;
 	}
 	
