@@ -11,9 +11,7 @@ import java.util.logging.Logger;
 
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -186,41 +184,5 @@ public class ControllerOperations {
 		classpathOperations.generateClassFile(details);
 		
 		webMvcOperations.installMvcArtefacts();
-	}
-
-	public void createPropertyEditors(Set<JavaType> types) {
-		for(JavaType type : types) {
-			//do nothing if we are dealing with an enum
-			if(isEnumType(type)) {
-				continue;
-			}
-			JavaType newType = new JavaType(type.getFullyQualifiedTypeName() + "Editor");
-			String ressourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(newType, Path.SRC_MAIN_JAVA);		
-			
-			//create annotation @RooEditor(providePropertyEditorFor = MyObject.class)
-			List<AnnotationAttributeValue<?>> editorAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			editorAttributes.add(new ClassAttributeValue(new JavaSymbolName("providePropertyEditorFor"), type));
-			AnnotationMetadata editorAnnotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.property.editor.RooEditor"), editorAttributes);
-		
-			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(newType, pathResolver.getPath(ressourceIdentifier));
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(editorAnnotation);
-			ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, newType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, annotations);
-
-			classpathOperations.generateClassFile(details);
-		}
-	}
-	
-	private boolean isEnumType(JavaType type) {
-		PhysicalTypeMetadata physicalTypeMetadata  = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata != null) {
-			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
-			if (details != null) {
-				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 }

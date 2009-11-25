@@ -79,14 +79,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		this.controllerPath = annotationValues.getPath();
 		this.metadataService = metadataService;
-		
-		//now figure out if we need to create any custom property editors
-		
-		SortedSet<JavaType> editorsToBeCreated = getEditorToBeCreated();		
-		if (editorsToBeCreated.size() > 0) { 			
-			controllerOperations.createPropertyEditors(editorsToBeCreated);
-		}
-		
+				
 		specialDomainTypes = getSpecialDomainTypes();
 		
 		if (annotationValues.create) {
@@ -585,42 +578,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return null;
 	}
 	
-	private SortedSet<JavaType> getEditorToBeCreated() {
-		SortedSet<JavaType> editorTypes = new TreeSet<JavaType>();
-		
-		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-			
-			//not interested in identifiers and version fields
-			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
-				continue;
-			}
-			
-			//not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if(fieldMetadata == null || !hasMutator(fieldMetadata)) {
-				continue;
-			}
-			JavaType type = accessor.getReturnType();
-			
-			if(type.isCommonCollectionType()) {
-				for (JavaType genericType : type.getParameters()) {
-					if(isTypeElegibleForEditorCreation(genericType)) {					
-						editorTypes.add(genericType);	
-					} else if (genericType.equals(new JavaType(Date.class.getName()))) {
-						typeExposesDateField = true;
-					}
-				}		
-			} else {
-				if(isTypeElegibleForEditorCreation(type)) {
-					editorTypes.add(type);
-				} else if (type.equals(new JavaType(Date.class.getName()))) {
-					typeExposesDateField = true;
-				}
-			}
-		}
-		return editorTypes;
-	}
-	
 	private SortedSet<JavaType> getSpecialDomainTypes() {
 		SortedSet<JavaType> editorTypes = new TreeSet<JavaType>();
 		
@@ -675,15 +632,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
 			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
-		return false;
-	}
-	
-	private boolean isTypeElegibleForEditorCreation(JavaType javaType) {
-		String editorPhysicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(new JavaType(javaType.getFullyQualifiedTypeName() + "Editor"), Path.SRC_MAIN_JAVA);
-		//we are only interested if the type is part of our application and if no editor exists for it already
-		if (isSpecialType(javaType) && metadataService.get(editorPhysicalTypeIdentifier) == null) {
-		  return true;
-		}		
 		return false;
 	}
 	
