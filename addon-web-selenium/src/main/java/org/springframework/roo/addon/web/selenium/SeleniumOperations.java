@@ -60,6 +60,10 @@ public class SeleniumOperations {
 		this.menuOperations = menuOperations;
 	}
 	
+	public boolean isProjectAvailable() {
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+	}
+	
 	/**
 	 * Creates a new Selenium testcase
 	 * 

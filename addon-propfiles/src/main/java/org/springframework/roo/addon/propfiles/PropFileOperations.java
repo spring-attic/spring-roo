@@ -7,10 +7,12 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
@@ -25,12 +27,19 @@ public class PropFileOperations {
 	
 	private FileManager fileManager;
 	private PathResolver pathResolver;
+	private MetadataService metadataService;
 	
-	public PropFileOperations(FileManager fileManager, PathResolver pathResolver) {
+	public PropFileOperations(MetadataService metadataService, FileManager fileManager, PathResolver pathResolver) {
+		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
+		this.metadataService = metadataService;
+	}
+	
+	public boolean isPropertiesCommandAvailable() {
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 	
 	/**

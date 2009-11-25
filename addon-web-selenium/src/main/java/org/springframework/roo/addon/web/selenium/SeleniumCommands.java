@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.selenium;
 
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -22,6 +23,11 @@ public class SeleniumCommands implements CommandMarker {
 	public SeleniumCommands(SeleniumOperations seleniumOperations) {
 		Assert.notNull(seleniumOperations, "Selenium operations required");
 		this.seleniumOperations = seleniumOperations;
+	}
+	
+	@CliAvailabilityIndicator({"selenium test"})
+	public boolean isJdkFieldManagementAvailable() {
+		return seleniumOperations.isProjectAvailable();
 	}
 	
 	@CliCommand(value="selenium test", help="Creates a new Selenium test for a particular controller")

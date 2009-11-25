@@ -3,6 +3,7 @@ package org.springframework.roo.addon.propfiles;
 import java.util.SortedSet;
 
 import org.springframework.roo.project.Path;
+import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -26,6 +27,11 @@ public class PropFileCommands implements CommandMarker {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(loggingOperations, "Logging operations required");
 		this.propFileOperations = loggingOperations;
+	}
+	
+	@CliAvailabilityIndicator({"properties list", "properties set", "properties remove"})
+	public boolean isInstallWebFlowAvailable() {
+		return propFileOperations.isPropertiesCommandAvailable();
 	}
 	
 	@CliCommand(value="properties list", help="Shows the details of a particular properties file")

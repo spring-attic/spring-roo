@@ -60,7 +60,7 @@ public class FieldCommands implements CommandMarker {
 		this.legalNumericPrimitives.add(Double.class.getName());
 	}
 	
-	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean"})
+	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean", "field enum"})
 	public boolean isJdkFieldManagementAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}

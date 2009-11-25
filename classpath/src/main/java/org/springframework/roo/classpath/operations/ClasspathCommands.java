@@ -44,7 +44,7 @@ public class ClasspathCommands implements CommandMarker {
 		converter.add(InheritanceType.class);
 	}
 	
-	@CliAvailabilityIndicator({"class", "dod", "test integration"})
+	@CliAvailabilityIndicator({"class", "dod", "test integration", "interface", "enum type", "enum constant"})
 	public boolean isProjectAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}

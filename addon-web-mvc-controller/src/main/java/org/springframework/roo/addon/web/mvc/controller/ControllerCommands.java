@@ -39,7 +39,7 @@ public class ControllerCommands implements CommandMarker {
 		this.metadataService = metadataService;
 	}
 	
-	@CliAvailabilityIndicator({"controller automatic", "controller manual", "controller all"})
+	@CliAvailabilityIndicator({"controller scaffold", "controller all"})
 	public boolean isNewControllerAvailable() {
 		return controllerOperations.isNewControllerAvailable();
 	}
