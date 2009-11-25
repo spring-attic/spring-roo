@@ -2,7 +2,7 @@
 	<jsp:output omit-xml-declaration="yes"/>
 	<script type="text/javascript">dojo.require("dijit.TitlePane");</script>
 	<spring:message var="title" code="webflow.state1.title" />
-	<div id="_title" style="width: 100%">
+	<div id="_title">
 		<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
 		<h1>${title}</h1>	
 		<p><spring:message code="webflow.state1.message" /></p>		
