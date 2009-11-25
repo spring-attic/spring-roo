@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -66,7 +67,9 @@ public class JavaTypeConverter implements Converter {
 		String topLevelPath = null;
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata != null) {
-			topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+			JavaPackage topLevelPackage = projectMetadata.getTopLevelPackage();
+			topLevelPath = topLevelPackage.getFullyQualifiedPackageName();
+			lastUsed.setTopLevelPackage(topLevelPackage);
 		}
 
 		String newValue = value;

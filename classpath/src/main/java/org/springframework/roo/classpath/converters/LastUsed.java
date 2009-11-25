@@ -18,6 +18,7 @@ public class LastUsed {
 	private JavaPackage javaPackage;
 	private JavaType javaType;
 	private Shell shell;
+	private JavaPackage topLevelPackage;
 	
 	public LastUsed(Shell shell) {
 		Assert.notNull(shell, "Shell required");
@@ -34,7 +35,7 @@ public class LastUsed {
 		}
 		this.javaType = null;
 		this.javaPackage = javaPackage;
-		this.shell.setPromptPath(javaPackage.getFullyQualifiedPackageName());
+		this.shell.setPromptPath(shorten(javaPackage.getFullyQualifiedPackageName()));
 	}
 	
 	/**
@@ -47,7 +48,22 @@ public class LastUsed {
 		}
 		this.javaType = javaType;
 		this.javaPackage = javaType.getPackage();
-		this.shell.setPromptPath(javaType.getFullyQualifiedTypeName());
+		this.shell.setPromptPath(shorten(javaType.getFullyQualifiedTypeName()));
+	}
+	
+	private String shorten(String fullyQualifiedName) {
+		if (topLevelPackage == null) {
+			return fullyQualifiedName;
+		}
+		return fullyQualifiedName.replace(topLevelPackage.getFullyQualifiedPackageName(), "~");
+	}
+
+	public JavaPackage getTopLevelPackage() {
+		return topLevelPackage;
+	}
+
+	public void setTopLevelPackage(JavaPackage topLevelPackage) {
+		this.topLevelPackage = topLevelPackage;
 	}
 
 	/**
