@@ -1,7 +1,10 @@
 package org.springframework.roo.support.util;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +59,7 @@ public abstract class XmlUtils {
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		
 		try {
-			transformer.transform(new DOMSource(document), new StreamResult(new OutputStreamWriter(outputEntry, "ISO-8859-1"/* "UTF-8" */)));
+			transformer.transform(new DOMSource(document), createUnixStreamResultForEntry(outputEntry));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -71,11 +74,50 @@ public abstract class XmlUtils {
 
 		try {
 			for (int i = 0; i < nodes.getLength(); i++) {
-				transformer.transform(new DOMSource(nodes.item(i)), new StreamResult(new OutputStreamWriter(outputEntry, "ISO-8859-1")));
+				transformer.transform(new DOMSource(nodes.item(i)), createUnixStreamResultForEntry(outputEntry));
 			}
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+	
+	/**
+	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
+	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
+	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.  
+	 * @param outputEntry
+	 * @return StreamResult 
+	 * @throws UnsupportedEncodingException 
+	 */
+	private static StreamResult createUnixStreamResultForEntry(OutputStream outputEntry) throws UnsupportedEncodingException {
+		final Writer writer;
+		if (System.getProperty("line.separator").equals("\r\n")) {
+			writer = new OutputStreamWriter(outputEntry, "ISO-8859-1") {
+				public void write(char[] cbuf, int off, int len) throws IOException {
+					for (int i = off; i < off + len; i++) {
+						if (cbuf[i] != '\r' || i == cbuf.length - 1 || cbuf[i + 1] != '\n') {
+							super.write(cbuf[i]);
+						}
+					}
+				}
+				public void write(int c) throws IOException {
+					if (c != '\r') super.write(c);
+				}
+				public void write(String str, int off, int len) throws IOException {
+					String orig = str.substring(off, off + len);
+					String filtered = orig.replace("\r\n", "\n");
+					int lengthDiff = orig.length() - filtered.length();
+					if (filtered.endsWith("\r")) {
+						super.write(filtered.substring(0, filtered.length() - 1), 0, len - lengthDiff - 1);
+					} else {
+						super.write(filtered, 0, len - lengthDiff);
+					}
+				}
+			};
+		} else {
+			writer = new OutputStreamWriter(outputEntry, "ISO-8859-1");
+		}
+		return new StreamResult(writer);
 	}
 
 	/**
