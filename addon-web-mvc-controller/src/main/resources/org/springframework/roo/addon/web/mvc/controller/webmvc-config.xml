@@ -85,7 +85,8 @@
 	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/uncaughtException" p:viewName="uncaughtException" />
 	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/resourceNotFound" p:viewName="resourceNotFound" />
 	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/dataAccessFailure" p:viewName="dataAccessFailure" />
-
+	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/login" p:viewName="login" />
+	
 	<!-- allows for integration of file upload functionality -->
 	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
 </beans>
