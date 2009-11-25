@@ -108,7 +108,7 @@ public class TilesOperations {
 		Element putAttribute = root.getOwnerDocument().createElement("put-attribute");
 		putAttribute.setAttribute("name", "body");
 		putAttribute.setAttribute("value", viewLocation);
-		
+	
 		definition.appendChild(putAttribute);
 		root.appendChild(definition);
 	}

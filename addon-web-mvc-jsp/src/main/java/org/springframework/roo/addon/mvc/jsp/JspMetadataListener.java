@@ -12,10 +12,12 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
+import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -55,12 +57,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	private JspOperations jspOperations;
 	private PathResolver pathResolver;
 	
-	public JspMetadataListener(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations) {
+	public JspMetadataListener(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations, ClasspathOperations classpathOperations, WebMvcOperations mvcOperations) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(menuOperations, "Menu Operations required");
 		Assert.notNull(pathResolver, "Path resolver required");
+		Assert.notNull(classpathOperations, "Classpath operations required");
+		Assert.notNull(mvcOperations, "Web MVC operations required");
 		this.metadataService = metadataService;
 		this.metadataDependencyRegistry = metadataDependencyRegistry;
 		this.fileManager = fileManager;
@@ -72,7 +76,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// Ensure we're notified of all metadata related to web scaffold metadata, in particular their initial creation
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 	
-		jspOperations = new JspOperations(fileManager, metadataService);
+		jspOperations = new JspOperations(fileManager, metadataService, classpathOperations, mvcOperations, pathResolver, menuOperations);
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {

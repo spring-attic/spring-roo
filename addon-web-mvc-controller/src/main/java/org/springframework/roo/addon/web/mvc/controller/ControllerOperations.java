@@ -18,15 +18,11 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
@@ -34,7 +30,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -187,93 +182,6 @@ public class ControllerOperations {
 		annotations.add(requestMapping);
 		annotations.add(controllerAnnotation);
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, annotations);
-		
-		classpathOperations.generateClassFile(details);
-		
-		webMvcOperations.installMvcArtefacts();
-	}
-	
-	/**
-	 * Creates a new Spring MVC controller.
-	 * 
-	 * <p>
-	 * Request mappings assigned by this method will always commence with "/" and end with "/**".
-	 * You may present this prefix and/or this suffix if you wish, although it will automatically be added
-	 * should it not be provided.
-	 * 
-	 * @param controller the controller class to create (required)
-	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
-	 */
-	public void createManualController(JavaType controller, String preferredMapping) {
-		Assert.notNull(controller, "Controller Java Type required");
-		
-		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);		
-		
-		//create annotation @RequestMapping("/myobject/**")
-		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		if (preferredMapping == null || preferredMapping.length() == 0) {
-			String typeName = controller.getSimpleTypeName();
-			int dropFrom = typeName.lastIndexOf("Controller");
-			if (dropFrom > -1) {
-				typeName = typeName.substring(0, dropFrom);
-			}
-			preferredMapping = "/" + typeName.toLowerCase() + "/**";
-		}
-		if (!preferredMapping.startsWith("/")) {
-			preferredMapping = "/" + preferredMapping;
-		}
-		if (!preferredMapping.endsWith("/**")) {
-			preferredMapping = preferredMapping + "/**";
-		}
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), preferredMapping));
-		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
-		
-		//create annotation @Controller
-		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		AnnotationMetadata controllerAnnotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		annotations.add(requestMapping);
-		annotations.add(controllerAnnotation);
-		
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-
-		List<AnnotationMetadata> getMethodAnnotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		getMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
-		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
-		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
-		getParamNames.add(new JavaSymbolName("modelMap"));
-		getParamNames.add(new JavaSymbolName("request"));
-		getParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata getMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, getMethodAnnotations, null, null);
-		methods.add(getMethod);
-
-		List<AnnotationMetadata> postMethodAnnotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> postMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
-		postMethodAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "{id}"));
-		postMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), postMethodAttributes));
-		List<AnnotatedJavaType> postParamTypes = new ArrayList<AnnotatedJavaType>();
-		List<AnnotationMetadata> idParamAnnotations = new ArrayList<AnnotationMetadata>();
-		idParamAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.PathVariable"), new ArrayList<AnnotationAttributeValue<?>>()));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotations));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
-		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
-		List<JavaSymbolName> postParamNames = new ArrayList<JavaSymbolName>();
-		postParamNames.add(new JavaSymbolName("id"));
-		postParamNames.add(new JavaSymbolName("modelMap"));
-		postParamNames.add(new JavaSymbolName("request"));
-		postParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata postMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, postMethodAnnotations, null, null);
-		methods.add(postMethod);
-
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 		
 		classpathOperations.generateClassFile(details);
 		

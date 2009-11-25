@@ -13,18 +13,5 @@
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles" rev="2.1.3" />
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.jsp" rev="2.1.3" />
 		<dependency org="org.apache.tiles" name="com.springsource.org.apache.tiles.core" rev="2.1.3" />
-
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>com.springsource.org.hibernate.validator</artifactId>
-			<version>4.0.0.GA</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" />
 	</springWebMvc>
 </dependencies>

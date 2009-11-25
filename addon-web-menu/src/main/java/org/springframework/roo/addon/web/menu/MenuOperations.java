@@ -102,10 +102,10 @@ public class MenuOperations {
 			String messageResourceId = "menu.category." + menuCategoryId.toLowerCase() + ".label";
 			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId)) {
 				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
+//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
+//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
+//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
+//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
 
 			}
 			Element categoryLabel = document.createElement("spring:message");
@@ -138,10 +138,10 @@ public class MenuOperations {
 			if (menuItemLabel.getSymbolName().length() > 0) {
 				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId)) {
 					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
 				}
 				Element entityLabel = document.createElement("spring:message");
 				entityLabel.setAttribute("code", menuItemResourceId);
