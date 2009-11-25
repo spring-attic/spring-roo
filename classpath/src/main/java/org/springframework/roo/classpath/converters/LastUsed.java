@@ -2,6 +2,7 @@ package org.springframework.roo.classpath.converters;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
@@ -16,7 +17,13 @@ import org.springframework.roo.support.util.Assert;
 public class LastUsed {
 	private JavaPackage javaPackage;
 	private JavaType javaType;
+	private Shell shell;
 	
+	public LastUsed(Shell shell) {
+		Assert.notNull(shell, "Shell required");
+		this.shell = shell;
+	}
+
 	/**
 	 * Sets the package, and clears the type field. Ignores attempts to set to java.*.
 	 */
@@ -27,6 +34,7 @@ public class LastUsed {
 		}
 		this.javaType = null;
 		this.javaPackage = javaPackage;
+		this.shell.setPromptPath(javaPackage.getFullyQualifiedPackageName());
 	}
 	
 	/**
@@ -39,6 +47,7 @@ public class LastUsed {
 		}
 		this.javaType = javaType;
 		this.javaPackage = javaType.getPackage();
+		this.shell.setPromptPath(javaType.getFullyQualifiedTypeName());
 	}
 
 	/**

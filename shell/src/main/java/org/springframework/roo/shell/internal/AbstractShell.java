@@ -190,6 +190,21 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		// logger.severe(processedLine);
 	}
 
+	/**
+	 * Base implementation of the {@link Shell#setPromptPath(String)} method, designed for simple shell
+	 * implementations. Advanced implementations (eg those that support ANSI codes etc) will likely want
+	 * to override this method and set the {@link #shellPrompt} variable directly.
+	 * 
+	 * @param path to set (can be null or empty; must NOT be formatted in any special way eg ANSI codes)
+	 */
+	public void setPromptPath(String path) {
+		if ("".equals(path) || path == null) {
+			shellPrompt = "roo> ";
+		} else {
+			shellPrompt = path + " roo> ";
+		}
+	}
+
 	public ExitShellRequest getExitShellRequest() {
 		return exitShellRequest;
 	}

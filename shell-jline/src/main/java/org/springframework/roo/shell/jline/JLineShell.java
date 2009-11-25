@@ -72,11 +72,8 @@ public class JLineShell extends AbstractShell implements Shell {
 			throw new IllegalStateException("Cannot start console class", ioe);
 		}
 		
-        if (reader.getTerminal().isANSISupported()) {
-        	ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
-        	shellPrompt = ansi.yellow("roo> ").toString();
-        }
-        
+		setPromptPath(null);
+		
         JLineLogHandler handler = new JLineLogHandler(reader, this);
         JLineLogHandler.prohibitRedraw(); // affects this thread only
         int detected = HandlerUtils.registerTargetHandler(Logger.getLogger(""), handler);
@@ -86,7 +83,6 @@ public class JLineShell extends AbstractShell implements Shell {
         reader.addCompletor(new JLineCompletorAdapter(parser));
 		parser.addTarget(this);
 		
-        reader.setDefaultPrompt(JLineShell.shellPrompt);
 		reader.setBellEnabled(true);
 		if (Boolean.getBoolean("jline.nobell")) {
         	reader.setBellEnabled(false);
@@ -102,6 +98,26 @@ public class JLineShell extends AbstractShell implements Shell {
         setShellStatus(ShellStatus.STARTED);
 	}
 	
+	@Override
+	public void setPromptPath(String path) {
+        if (reader.getTerminal().isANSISupported()) {
+        	ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
+            if ("".equals(path) || path == null) {
+            	shellPrompt = ansi.yellow("roo> ").toString();
+    		} else {
+    			shellPrompt = ansi.cyan(path).yellow(" roo> ").toString();
+    		}
+        } else {
+        	// the superclass will do for this non-ANSI terminal
+        	super.setPromptPath(path);
+        }
+        
+		// the shellPrompt is now correct; let's ensure it now gets used
+        reader.setDefaultPrompt(JLineShell.shellPrompt);
+	}
+
+
+
 	private ConsoleReader createAnsiWindowsReader() throws Exception {
 		// get decorated OutputStream that parses ANSI-codes
 		@SuppressWarnings("unchecked")

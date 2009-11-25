@@ -55,6 +55,15 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	boolean isDevelopmentMode();
 	
 	/**
+	 * Changes the "path" displayed in the shell prompt. An implementation will ensure this path is
+	 * included on the screen, taking care to merge it with the product name and handle any special
+	 * formatting requirements (such as ANSI, if supported by the implementation).
+	 * 
+	 * @param path to set (can be null or empty; must NOT be formatted in any special way eg ANSI codes)
+	 */
+	void setPromptPath(String path);
+	
+	/**
 	 * Returns the home directory of the current running shell instance 
      *	
 	 * @return the home directory of the current shell instance
