@@ -95,7 +95,7 @@ public abstract class XmlUtils {
 			writer = new OutputStreamWriter(outputEntry, "ISO-8859-1") {
 				public void write(char[] cbuf, int off, int len) throws IOException {
 					for (int i = off; i < off + len; i++) {
-						if (cbuf[i] != '\r' || i == cbuf.length - 1 || cbuf[i + 1] != '\n') {
+						if (cbuf[i] != '\r' || (i < cbuf.length - 1 && cbuf[i + 1] != '\n')) {
 							super.write(cbuf[i]);
 						}
 					}
