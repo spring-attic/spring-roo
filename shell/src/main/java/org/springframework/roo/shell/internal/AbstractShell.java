@@ -229,7 +229,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		inBlockComment = false;
 	}
 
-	@CliCommand(value={"props"}, help="Shows the shell's properties")
+	@CliCommand(value={"system properties"}, help="Shows the shell's properties")
 	public String props() {
 		Properties properties = System.getProperties();
 		SortedSet<String> data = new TreeSet<String>();
