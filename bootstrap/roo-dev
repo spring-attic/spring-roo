@@ -19,7 +19,7 @@ while true; do
     java -DdevelopmentMode=true $ROO_OPTS -Droo.home="$HOME/roo-dev" -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" $@
     EXITED=$?
     # echo Exited with $EXITED
-    if [ $EXITED -eq 0 ]; then
+    if [ $EXITED -ne 100 -a $EXITED -ne 200 ]; then
 		break
 	fi
 done

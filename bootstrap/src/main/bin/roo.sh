@@ -20,7 +20,9 @@ ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 
 while true; do
 	java -Djava.ext.dirs="$ROO_HOME/dist:$ROO_HOME/lib:$ROO_HOME/work:$JAVA_HOME/jre/lib/ext" $ROO_OPTS -Droo.home="$ROO_HOME" org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" $@
-	if [ $? -eq 0 ]; then
+    EXITED=$?
+    # echo Exited with $EXITED
+    if [ $EXITED -ne 100 -a $EXITED -ne 200 ]; then
 		break
 	fi
 done
