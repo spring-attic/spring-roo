@@ -307,7 +307,7 @@ public class SeleniumOperations {
 		td1.setTextContent("type");
 		
 		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent("_" + field.getFieldName().getSymbolName());		
+		td2.setTextContent("_" + field.getFieldName().getSymbolName() + "_id");		
 		
 		Node td3 = tr.appendChild(document.createElement("td"));	
 		td3.setTextContent(convertToInitializer(field));		
