@@ -503,7 +503,9 @@ public final class SimpleParser {
 			
 			for (CliOption include : unspecified) {
 				for (String value : include.key()) {
-					results.add(translated + value + " ");
+					if (!"".equals(value)) {
+						results.add(translated + value + " ");
+					}
 				}
 				if (!showAllRemaining) {
 					break;
@@ -521,8 +523,35 @@ public final class SimpleParser {
 			// OR we have specified a full option key/value pair
 			
 			// Let's list some other options the user might want to try (naturally skip the "" option, as that's the default)
+			int index = -1;
 			for (CliOption include : unspecified) {
+				index++;
 				for (String value : include.key()) {
+					
+					// Manually determine if this non-mandatory but unspecifiedDefaultValue=* requiring option is able to be bound
+					
+					if (!include.mandatory() && "*".equals(include.unspecifiedDefaultValue()) && !"".equals(value)) {
+						try {
+							for (Converter candidate : converters) {
+								Class<?> paramType = methodTarget.method.getParameterTypes()[index];
+								if (candidate.supports(paramType, include.optionContext())) {
+									// try to invoke this usable converter
+									candidate.convertFromText("*", paramType, include.optionContext());
+									// if we got this far, the converter is happy with "*" so we need not bother the user with entering the data in themselves
+									break;
+								}
+							}
+						} catch (RuntimeException notYetReady) {
+							if (translated.endsWith(" ")) {
+								results.add(translated + "--" + value + " ");
+							} else {
+								results.add(translated + " --" + value + " ");
+							}
+							continue;
+						}
+					}
+					
+					// Handle normal mandatory options
 					if (!"".equals(value) && include.mandatory()) {
 						if (translated.endsWith(" ")) {
 							results.add(translated + "--" + value + " ");
