@@ -77,6 +77,7 @@ public class MenuOperations {
 		Assert.hasText(menuItemId, "Menu item label identifier required");
 		Assert.notNull(menuItemLabel, "Menu item object required");
 		Assert.hasText(link, "Link required");
+		Assert.hasText(messageCode, "Message code required");
 		
 		menuItemId = menuItemId.replaceAll("/", "_");
 		
@@ -102,11 +103,6 @@ public class MenuOperations {
 			String messageResourceId = "menu.category." + menuCategoryId.toLowerCase() + ".label";
 			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId)) {
 				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-//				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-
 			}
 			Element categoryLabel = document.createElement("spring:message");
 			categoryLabel.setAttribute("code", messageResourceId);
@@ -122,6 +118,7 @@ public class MenuOperations {
 		//check for existence of menu item by looking for the indentifier provided
 		Element menuItem = XmlUtils.findFirstElement("//li[@id='" + menuItemId + "']", categoryWrapper);
 		
+		String menuItemResourceId = "label." + menuItemLabel.getSymbolName().toLowerCase();
 		//if not exists, create one
 		if(menuItem == null) {		
 			menuItem = document.createElement("li");
@@ -134,14 +131,9 @@ public class MenuOperations {
 			createLink.setAttribute("href", "${" + menuItemId + "_url}");				
 			Element message = document.createElement("spring:message");
 			message.setAttribute("code", messageCode);
-			String menuItemResourceId = "label." + menuItemLabel.getSymbolName().toLowerCase();
 			if (menuItemLabel.getSymbolName().length() > 0) {
 				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId)) {
 					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-//					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
 				}
 				Element entityLabel = document.createElement("spring:message");
 				entityLabel.setAttribute("code", menuItemResourceId);
@@ -152,6 +144,16 @@ public class MenuOperations {
 			createLink.appendChild(message);
 			menuItem.appendChild(createLink);
 			categoryRoot.appendChild(menuItem);
+		//check if the plural of the entity has changed (this impacts i18n)
+		} else {
+			//get access to the first spring:message element and check its code
+			Element message = XmlUtils.findFirstElementByName("spring:message", menuItem);
+			if (null != message) {
+				if (!message.getAttribute("code").equals(menuItemResourceId)) {
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+					message.setAttribute("code", menuItemResourceId);
+				}
+			}
 		}
 		
 		writeToDiskIfNecessary(document.getChildNodes());
