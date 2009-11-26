@@ -523,9 +523,7 @@ public final class SimpleParser {
 			// OR we have specified a full option key/value pair
 			
 			// Let's list some other options the user might want to try (naturally skip the "" option, as that's the default)
-			int index = -1;
 			for (CliOption include : unspecified) {
-				index++;
 				for (String value : include.key()) {
 					
 					// Manually determine if this non-mandatory but unspecifiedDefaultValue=* requiring option is able to be bound
@@ -533,8 +531,23 @@ public final class SimpleParser {
 					if (!include.mandatory() && "*".equals(include.unspecifiedDefaultValue()) && !"".equals(value)) {
 						try {
 							for (Converter candidate : converters) {
-								Class<?> paramType = methodTarget.method.getParameterTypes()[index];
-								if (candidate.supports(paramType, include.optionContext())) {
+								
+								// Find the target parameter
+								Class<?> paramType = null;
+								int index = -1;
+								for (Annotation[] a : methodTarget.method.getParameterAnnotations()) {
+									index++;
+									for (Annotation an : a) {
+										if (an instanceof CliOption) {
+											if (an.equals(include)) {
+												// found the parameter, so store it
+												paramType = methodTarget.method.getParameterTypes()[index];
+												break;
+											}
+										}
+									}
+								}
+								if (paramType != null && candidate.supports(paramType, include.optionContext())) {
 									// try to invoke this usable converter
 									candidate.convertFromText("*", paramType, include.optionContext());
 									// if we got this far, the converter is happy with "*" so we need not bother the user with entering the data in themselves
@@ -542,6 +555,7 @@ public final class SimpleParser {
 								}
 							}
 						} catch (RuntimeException notYetReady) {
+							System.out.println("FAILED with " + notYetReady);
 							if (translated.endsWith(" ")) {
 								results.add(translated + "--" + value + " ");
 							} else {
