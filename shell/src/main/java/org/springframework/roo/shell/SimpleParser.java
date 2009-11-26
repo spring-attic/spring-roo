@@ -555,7 +555,6 @@ public final class SimpleParser {
 								}
 							}
 						} catch (RuntimeException notYetReady) {
-							System.out.println("FAILED with " + notYetReady);
 							if (translated.endsWith(" ")) {
 								results.add(translated + "--" + value + " ");
 							} else {
@@ -742,7 +741,6 @@ public final class SimpleParser {
 		});
 		for (File e : existing) {
 			e.delete();
-			System.out.println("Deleted " + e);
 		}
 		
 		// Compute the sections we'll be outputting, and get them into a nice order
@@ -893,7 +891,6 @@ public final class SimpleParser {
 		try {
 			File output = new File(f, "appendix-command-index.xml");
 			FileCopyUtils.copy(byteArrayOutputStream.toByteArray(), output);
-			System.out.println("Written to " + output.getCanonicalPath());
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
