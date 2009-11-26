@@ -15,14 +15,19 @@
 	
 	<!-- Turns on support for mapping requests to Spring MVC @Controller methods
 	     Also registers default Formatters and Validators for use across all @Controllers -->
-	<mvc:annotation-driven>
-		<mvc:interceptors>
-			<bean name="themeChangeInterceptor" class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
-			<bean name="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
-				<property name="paramName" value="lang" />
-			</bean>
-		</mvc:interceptors>
-	</mvc:annotation-driven>		
+	<mvc:annotation-driven />
+	
+	<!-- register "global" HandlerInterceptor beans to apply to all registered HandlerMappings -->
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
+	</mvc:interceptors>	
+	
+	<!-- selects a static view for rendering without the need for an explicit controller -->
+	<mvc:view-controller path="/index" />
+	<mvc:view-controller path="/uncaughtException" />
+	<mvc:view-controller path="/resourceNotFound" />
+	<mvc:view-controller path="/dataAccessFailure" />
 
 	<!-- Resolves logical view names returned by Controllers to Tiles; a view
 		 name to resolve is treated as the name of a tiles definition -->
@@ -66,26 +71,6 @@
 			</props>
 		</property>
 	</bean>
-	
-	<!-- Required to enable invocation of org.springframework.web.servlet.Controllers -->
-	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
-	
-	<!-- Required for bean name-based request mapping -->
-	<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" p:order="1">
-		<property name="interceptors">
-			<list>
-				<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
-				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" p:paramName="lang" />
-			</list>
-		</property>
-	</bean>
-	
-	<!-- Required for each static view controller -->
-	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/index" p:viewName="index" />
-	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/uncaughtException" p:viewName="uncaughtException" />
-	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/resourceNotFound" p:viewName="resourceNotFound" />
-	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/dataAccessFailure" p:viewName="dataAccessFailure" />
-	<bean class="org.springframework.web.servlet.mvc.ParameterizableViewController" name="/login" p:viewName="login" />
 	
 	<!-- allows for integration of file upload functionality -->
 	<bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver"/>
