@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -31,6 +33,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.classloader.ClasspathSearcher;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
@@ -50,15 +53,18 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 	private NotifiableFileMonitorService notifiableFileMonitorService = null;
 	private FilenameResolver filenameResolver = new DefaultFilenameResolver();
 	private boolean pathsRegistered = false;
+	private ClasspathSearcher classpathSearcher;
 	
-	public DefaultFileManager(MetadataService metadataService, UndoManager undoManager, MetadataDependencyRegistry metadataDependencyRegistry, FileMonitorService fileMonitorService) {
+	public DefaultFileManager(MetadataService metadataService, UndoManager undoManager, MetadataDependencyRegistry metadataDependencyRegistry, FileMonitorService fileMonitorService, ClasspathSearcher classpathSearcher) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(undoManager, "Undo manager required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata depedency registry required");
 		Assert.notNull(fileMonitorService, "File monitor service required");
+		Assert.notNull(classpathSearcher, "Classpath searcher required");
 		this.metadataService = metadataService;
 		this.undoManager = undoManager;
 		this.fileMonitorService = fileMonitorService;
+		this.classpathSearcher = classpathSearcher;
 		if (fileMonitorService instanceof NotifiableFileMonitorService) {
 			this.notifiableFileMonitorService = (NotifiableFileMonitorService) fileMonitorService;
 		}
@@ -186,6 +192,10 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
 	
+	public List<URL> findMatchingClasspathResources(String antPath) {
+		return classpathSearcher.findMatchingClasspathResources(antPath);
+	}
+
 	public int scan() {
 		if (fileMonitorService instanceof NotifiableFileMonitorService) {
 			return ((NotifiableFileMonitorService)fileMonitorService).scanNotified();

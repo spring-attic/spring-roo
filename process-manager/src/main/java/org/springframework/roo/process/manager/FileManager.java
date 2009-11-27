@@ -8,6 +8,7 @@ import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.classloader.ClasspathSearcher;
 
 /**
  * Represents the primary means for add-ons to modify the underlying disk storage.
@@ -26,7 +27,7 @@ import org.springframework.roo.project.ProjectMetadata;
  * @since 1.0
  *
  */
-public interface FileManager {
+public interface FileManager extends ClasspathSearcher {
 	
 	/**
 	 * Indicates whether the file identified by the passed canonical path exists.
