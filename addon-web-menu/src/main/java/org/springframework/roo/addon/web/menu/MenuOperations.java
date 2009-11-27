@@ -10,9 +10,7 @@ import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.SortedSet;
 
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -265,43 +263,6 @@ public class MenuOperations {
 		
 		// A file existed, but it contained the same content, so we return false
 		return false;
-	}
-	
-	/**
-	 * Changes the specified property, throwing an exception if the file does not exist.
-	 * 
-	 * @param key the property key to update (required)
-	 * @param value the property value to set into the property key (required)
-	 */
-	private void setI18nMessageProperties(String key, String value) {
-		Assert.hasText(key, "Key required");
-		Assert.hasText(value, "Value required");
-		
-		//get hold of all messages*.properties files and add the supplied key and value
-		String antPath = pathResolver.getRoot(Path.SRC_MAIN_WEBAPP) + "/WEB-INF/i18n/messages*.properties";
-
-		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
-		MutableFile mutableFile = null;
-		Properties props = new Properties();
-		for (FileDetails file : entries) {
-			try {
-				if (fileManager.exists(file.getCanonicalPath())) {
-					mutableFile = fileManager.updateFile(file.getCanonicalPath());
-					props.load(mutableFile.getInputStream());
-				} else {
-					throw new IllegalStateException("Properties file not found");
-				}
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
-			props.setProperty(key, value);
-			
-			try {
-				props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
-		}
 	}
 	
 	 /**
