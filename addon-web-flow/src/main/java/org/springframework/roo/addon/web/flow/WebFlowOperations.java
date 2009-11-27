@@ -65,11 +65,11 @@ public class WebFlowOperations {
 	}
 	
 	public boolean isInstallWebFlowAvailable() {		
-		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"));
+		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
 	}
 	
 	public boolean isManageWebFlowAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"));
+		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
 	}
 	
 	/**
@@ -86,15 +86,15 @@ public class WebFlowOperations {
 		}
 		
 		try {
-			if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml"))) {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "webflow-config.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webflow-config.xml")).getOutputStream());
+			if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"))) {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "webflow-config.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml")).getOutputStream());
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} 	
 		
 		//adjust MVC config to accommodate Spring Web Flow
-		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/config/webmvc-config.xml");
+		String mvcContextPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
 		MutableFile mvcContextMutableFile = null;
 		
 		Document mvcAppCtx;

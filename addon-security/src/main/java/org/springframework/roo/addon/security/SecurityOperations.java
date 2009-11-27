@@ -141,7 +141,7 @@ public class SecurityOperations {
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 		
 		//include static view controller handler to webmvc-config.xml
-		String webMvc = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/config/webmvc-config.xml");
+		String webMvc = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		
 		MutableFile mutableConfigXml = null;
 		Document webConfigDoc;

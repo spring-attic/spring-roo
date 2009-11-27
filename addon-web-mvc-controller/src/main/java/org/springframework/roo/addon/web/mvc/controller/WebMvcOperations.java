@@ -77,7 +77,7 @@ public class WebMvcOperations {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 		// Verify the servlet application context already exists
-		String servletCtxFilename = "WEB-INF/config/webmvc-config.xml";
+		String servletCtxFilename = "WEB-INF/spring/webmvc-config.xml";
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, servletCtxFilename)), "'" + servletCtxFilename + "' does not exist");
 		
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"))) {
@@ -169,7 +169,7 @@ public class WebMvcOperations {
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/config/webmvc-config.xml"))) {
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"))) {
 			//this file already exists, nothing to do
 			return;
 		}
@@ -185,7 +185,7 @@ public class WebMvcOperations {
 		Element rootElement = (Element) pom.getFirstChild();
 		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 		
-		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/config/webmvc-config.xml"));
+		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"));
 		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 
 		fileManager.scan();
