@@ -33,7 +33,7 @@ public class SeleniumCommands implements CommandMarker {
 	@CliCommand(value="selenium test", help="Creates a new Selenium test for a particular controller")
 	public void generateTest(
 			@CliOption(key="controller", mandatory=true) JavaType controller, 
-			@CliOption(key="name", mandatory=false) String name,
+			@CliOption(key="class", mandatory=false) String name,
 			@CliOption(key="serverUrl", mandatory=false, unspecifiedDefaultValue="http://localhost:8080/", specifiedDefaultValue="http://localhost:8080/") String url){
 		seleniumOperations.generateTest(controller, name, url);
 	}

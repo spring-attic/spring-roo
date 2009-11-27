@@ -2,12 +2,12 @@ project --topLevelPackage com.springsource.vote
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_PERSISTENT
 
-entity --name ~.domain.Choice --testAutomatically
+entity --class ~.domain.Choice --testAutomatically
 field string namingChoice --notNull --sizeMin 1 --sizeMax 30
 field string description --sizeMax 80
 controller scaffold ~.web.ChoiceController
 
-entity --name Vote --testAutomatically
+entity --class Vote --testAutomatically
 field reference choice --type Choice
 field string ip --notNull --sizeMin 7 --sizeMax 15 
 field date registered --type java.util.Date --notNull --past

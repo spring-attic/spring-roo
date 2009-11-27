@@ -32,7 +32,7 @@ public class JspCommands implements CommandMarker {
 	
 	@CliCommand(value="controller class", help="Create a new manual Controller (ie where you write the methods)")
 	public void newController(
-			@CliOption(key={"name",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
+			@CliOption(key={"class",""}, mandatory=true, help="The path and name of the controller object to be created") JavaType controller,
 			@CliOption(key="preferredMapping", mandatory=false, help="Indicates a specific request mapping path for this controller (eg /foo/)") String preferredMapping) {
 		jspOperations.createManualController(controller, preferredMapping);
 	}

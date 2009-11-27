@@ -56,7 +56,7 @@ public class ClasspathCommands implements CommandMarker {
 	
 	@CliCommand(value="class", help="Creates a new Java class source file in any project path")
 	public void createClass(
-			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
 			@CliOption(key="rooAnnotations", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should have common Roo annotations") boolean rooAnnotations,
 			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
@@ -88,7 +88,7 @@ public class ClasspathCommands implements CommandMarker {
 	
 	@CliCommand(value="interface", help="Creates a new Java interface source file in any project path")
 	public void createInterface(
-			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
 			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
@@ -104,7 +104,7 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="enum type", help="Creates a new Java enum source file in any project path")
 	public void createEnum(
-			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
 			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
@@ -164,7 +164,7 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="entity", help="Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
-			@CliOption(key="name", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true, help="Name of the entity to create") JavaType name, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
 			@CliOption(key="abstract", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Whether the generated class should be marked as abstract") boolean createAbstract,
 			@CliOption(key="testAutomatically", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Create automatic integration tests for this entity") boolean testAutomatically,

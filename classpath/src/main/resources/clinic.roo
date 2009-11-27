@@ -2,13 +2,13 @@ project --topLevelPackage com.springsource.petclinic
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
-entity --name ~.reference.PetType --testAutomatically
-entity --name ~.reference.Specialty --testAutomatically
-entity --name ~.domain.Pet --testAutomatically
-entity --name ~.domain.Visit --testAutomatically
-entity --name ~.domain.AbstractPerson --abstract
-entity --name ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
-entity --name ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
+entity --class ~.reference.PetType --testAutomatically
+entity --class ~.reference.Specialty --testAutomatically
+entity --class ~.domain.Pet --testAutomatically
+entity --class ~.domain.Visit --testAutomatically
+entity --class ~.domain.AbstractPerson --abstract
+entity --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
+entity --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
 
 field string --class ~.reference.PetType --fieldName type --notNull --sizeMax 30
 field string --class ~.reference.Specialty --fieldName name --notNull --sizeMax 30
@@ -44,12 +44,12 @@ finder add --class ~.domain.Visit --finderName findVisitsByDescriptionAndVisitDa
 finder add --class ~.domain.Visit --finderName findVisitsByVisitDateBetween 
 finder add --class ~.domain.Visit --finderName findVisitsByDescriptionLike
 
-controller scaffold --name ~.web.PetTypeController --entity ~.reference.PetType
-controller scaffold --name ~.web.SpecialtyController --entity ~.reference.Specialty
-controller scaffold --name ~.web.OwnerController --entity ~.domain.Owner
-controller scaffold --name ~.web.PetController --entity ~.domain.Pet 
-controller scaffold --name ~.web.VetController --entity ~.domain.Vet
-controller scaffold --name ~.web.VisitController --entity ~.domain.Visit
+controller scaffold --class ~.web.PetTypeController --entity ~.reference.PetType
+controller scaffold --class ~.web.SpecialtyController --entity ~.reference.Specialty
+controller scaffold --class ~.web.OwnerController --entity ~.domain.Owner
+controller scaffold --class ~.web.PetController --entity ~.domain.Pet 
+controller scaffold --class ~.web.VetController --entity ~.domain.Vet
+controller scaffold --class ~.web.VisitController --entity ~.domain.Visit
 
 selenium test --controller ~.web.PetTypeController
 selenium test --controller ~.web.SpecialtyController
