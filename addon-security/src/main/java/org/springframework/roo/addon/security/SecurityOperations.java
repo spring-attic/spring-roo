@@ -16,6 +16,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -92,7 +93,6 @@ public class SecurityOperations {
 			}
 		}
 		
-		//TODO this should be reviewed after the add-on API restructure
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml"))) {
 			TilesOperations tilesOperations = new TilesOperations("/", fileManager, pathResolver, "config/webmvc-config.xml");
 			tilesOperations.addViewDefinition("login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
@@ -139,5 +139,28 @@ public class SecurityOperations {
 		fm.getParentNode().insertBefore(filterMapping, fm.getPreviousSibling());
 		
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
+		
+		//include static view controller handler to webmvc-config.xml
+		String webMvc = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/config/webmvc-config.xml");
+		
+		MutableFile mutableConfigXml = null;
+		Document webConfigDoc;
+		try {
+			if (fileManager.exists(webMvc)) {
+				mutableConfigXml = fileManager.updateFile(webMvc);
+				webConfigDoc = XmlUtils.getDocumentBuilder().parse(mutableConfigXml.getInputStream());
+			} else {
+				throw new IllegalStateException("Could not acquire " + webMvc);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} 
+		
+		Element viewController = XmlUtils.findFirstElementByName("mvc:view-controller", webConfigDoc.getDocumentElement());
+		Assert.notNull(viewController, "Could not find mvc:view-controller in " + webMvc);
+		
+		viewController.getParentNode().insertBefore(new XmlElementBuilder("mvc:view-controller", webConfigDoc).addAttribute("path", "/login").build(), viewController);
+		System.out.println(viewController);
+		XmlUtils.writeXml(mutableConfigXml.getOutputStream(), webConfigDoc);
 	}
 }
