@@ -160,7 +160,6 @@ public class SecurityOperations {
 		Assert.notNull(viewController, "Could not find mvc:view-controller in " + webMvc);
 		
 		viewController.getParentNode().insertBefore(new XmlElementBuilder("mvc:view-controller", webConfigDoc).addAttribute("path", "/login").build(), viewController);
-		System.out.println(viewController);
 		XmlUtils.writeXml(mutableConfigXml.getOutputStream(), webConfigDoc);
 	}
 }
