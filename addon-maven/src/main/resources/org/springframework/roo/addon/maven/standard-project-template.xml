@@ -24,19 +24,12 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</repository>
-
-		<!--  required for some plugins that depend on snapshots :( -->
+		<!--  required for some plugins that depend on snapshots -->
 		<repository>
 			<id>com.springsource.repository.bundles.snapshot</id>
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Snapshots</name>
 			<url>http://repository.springsource.com/maven/bundles/snapshot</url>
 		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.external.snapshots</id>
-			<name>SpringSource Enterprise Bundle Repository - Third Party External Bundle Snapshots</name>
-			<url>http://private.repository.springsource.com.s3.amazonaws.com/maven/bundles/external</url>
-		</repository>
-
 	</repositories>
 	
 	<pluginRepositories>
@@ -126,7 +119,7 @@
 			<version>${spring.version}</version>
 		</dependency>
 	</dependencies>
-
+	
 	<build>
 		<plugins>
 			<plugin>
@@ -151,10 +144,7 @@
 				<artifactId>aspectj-maven-plugin</artifactId>
 				<version>1.0</version>
 				<dependencies>
-					<!--
-						NB: You must use Maven 2.0.9 or above or these are ignored (see
-						MNG-2972)
-					-->
+					<!-- NB: You must use Maven 2.0.9 or above or these are ignored (see MNG-2972) -->
 					<dependency>
 						<groupId>org.aspectj</groupId>
 						<artifactId>com.springsource.org.aspectj.runtime</artifactId>
@@ -187,21 +177,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-help-plugin</artifactId>
-				<version>2.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.4.3</version>
 				<configuration>
@@ -211,35 +186,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.0.4</version>
-				<configuration>
-					<attach>true</attach>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- Other -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -254,18 +200,8 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>2.4</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.0-beta-7</version>
 			</plugin>
 			<!-- IDE -->
 			<plugin>
@@ -303,12 +239,6 @@
 					<dependenciesAsLibraries>true</dependenciesAsLibraries>
 				</configuration>
 			</plugin>
-			<!-- Site -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>2.0-beta-7</version>
-			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>tomcat-maven-plugin</artifactId>
@@ -321,10 +251,9 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	
 	<properties>
 		<spring.version>3.0.0.BUILD-SNAPSHOT</spring.version>
 		<aspectj.version>1.6.6.RELEASE</aspectj.version>
 	</properties>
-
 </project>
