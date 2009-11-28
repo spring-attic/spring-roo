@@ -2,6 +2,7 @@ package org.springframework.roo.addon.mvc.jsp;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -80,99 +80,33 @@ public class JspOperations {
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.notNull(projectMetadata, "Unable to obtain path resolver");	
-
-		String imagesDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images");
-		if (!fileManager.exists(imagesDirectory)) {
-			fileManager.createDirectory(imagesDirectory);
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/banner-graphic.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/banner-graphic.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/springsource-logo.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/springsource-logo.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_first.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_first.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_next.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_next.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_previous.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_previous.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/resultset_last.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/resultset_last.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/gb.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/gb.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/de.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/de.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/sv.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/sv.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/es.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/es.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/it.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/it.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/list.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/list.png")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "images/add.png"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "images/add.png")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}
-		}
-
-		String cssDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles");
-		if (!fileManager.exists(cssDirectory)) {
-			fileManager.createDirectory(cssDirectory);
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo-menu-left.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo-menu-left.css")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/roo-menu-right.css"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "styles/roo-menu-right.css")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/left.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes/left.properties")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "styles/right.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes/right.properties")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for view layer.", e);
-			}
-		}
 		
-		String layoutsDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts");
-		if (!fileManager.exists(layoutsDirectory)) {
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/layouts.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/layouts.xml")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/default.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}
-		}		
+		//install styles
+		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"));
+		
+		//install styles
+		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/styles"));
+		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes"));
 
-		String jspDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views");
-		if (!fileManager.exists(jspDirectory)) {
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "dataAccessFailure.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/dataAccessFailure.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "resourceNotFound.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/resourceNotFound.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "uncaughtException.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/uncaughtException.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/index.jspx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "layout/views.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}
-		}
+		//install layout
+		copyDirectoryContents("layout/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
+		copyDirectoryContents("layout/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
+		copyDirectoryContents("layout/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
+
+		//install common view files
+		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
+
+		//install tags
+		copyDirectoryContents("tags/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/"));
 		
-		String tagsDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/tags");
-		if (!fileManager.exists(tagsDirectory)) {
-			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/pagination.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/pagination.tagx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/language.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/language.tagx")).getOutputStream());
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "tags/theme.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/theme.tagx")).getOutputStream());
-			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-			}
-		}
-		
-		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n");
+		//install message resources
+		copyDirectoryContents("i18n/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/"));
+
+		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties")).getOutputStream());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_de.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties")).getOutputStream());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_de.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_sv.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties")).getOutputStream());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_sv.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_es.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties")).getOutputStream());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_es.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "i18n/messages_it.properties"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties")).getOutputStream());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties"), "welcome.titlepane", "[roo_replace_app_name]", projectMetadata.getProjectName());
-				changeProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages_it.properties"), "welcome.h3", "[roo_replace_app_name]", projectMetadata.getProjectName());
-
+				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
+				setProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"), "application.name", projectMetadata.getProjectName().substring(0,1).toUpperCase() +  projectMetadata.getProjectName().substring(1));
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
@@ -288,7 +222,7 @@ public class JspOperations {
 			new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 		}
 		
-		setProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties"), "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName());
+		setProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"), "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName());
 		
 		menuOperations.addMenuItem("web_mvc_jsp_manual_controller_category", 
 				new JavaSymbolName("Controller"), 
@@ -314,18 +248,33 @@ public class JspOperations {
 		}	
 	}
 	
-	private void changeProperties(String fileIdentifier, String propKey, String replace, String with) {
-		MutableFile mutableFile = fileManager.updateFile(fileIdentifier);
-		Properties props = new Properties();
-		try {
-			props.load(mutableFile.getInputStream());
-			String welcome = (String) props.get(propKey);
-			if(null != welcome && welcome.length() > 0) {
-				props.setProperty(propKey, welcome.replace(replace, with));
-				props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
+	/**
+	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
+	 * 
+	 * @param sourceAntPath directory
+	 * @param target directory
+	 */
+	private void copyDirectoryContents(String sourceAntPath, String targetDirectory) {
+		Assert.hasText(sourceAntPath, "Source path required");
+		Assert.hasText(targetDirectory, "Target directory required");
+		
+		if (!targetDirectory.endsWith("/")) {
+			targetDirectory += "/";
+		}
+		
+		if (!fileManager.exists(targetDirectory)) {
+			fileManager.createDirectory(targetDirectory);
+		}
+		
+		for (URL url: fileManager.findMatchingClasspathResources(TemplateUtils.getTemplatePath(getClass(), sourceAntPath))) {
+			String fileName =  url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+			if (!fileManager.exists(targetDirectory + fileName)) {
+				try {
+					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());
+				} catch (IOException e) {
+					new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+				}
 			}
-		} catch (IOException e) {
-			new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
-		}	
+		}
 	}
 }

@@ -6,10 +6,15 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
@@ -99,8 +104,8 @@ public class MenuOperations {
 			categoryWrapper.setAttribute("id", menuCategoryId);
 			Element h2 = document.createElement("h2");
 			String messageResourceId = "menu.category." + menuCategoryId.toLowerCase() + ".label";
-			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId)) {
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
+			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageResourceId)) {
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
 			}
 			Element categoryLabel = document.createElement("spring:message");
 			categoryLabel.setAttribute("code", messageResourceId);
@@ -130,8 +135,8 @@ public class MenuOperations {
 			Element message = document.createElement("spring:message");
 			message.setAttribute("code", messageCode);
 			if (menuItemLabel.getSymbolName().length() > 0) {
-				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId)) {
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId)) {
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
 				}
 				Element entityLabel = document.createElement("spring:message");
 				entityLabel.setAttribute("code", menuItemResourceId);
@@ -148,7 +153,7 @@ public class MenuOperations {
 			Element message = XmlUtils.findFirstElementByName("spring:message", menuItem);
 			if (null != message) {
 				if (!message.getAttribute("code").equals(menuItemResourceId)) {
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/messages.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
 					message.setAttribute("code", menuItemResourceId);
 				}
 			}
@@ -274,32 +279,47 @@ public class MenuOperations {
      * @param value the property value to set into the property key (required)
      */
     private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-            Assert.notNull(propertyFilePath, "Property file path required");
-            Assert.hasText(propertyFilename, "Property filename required");
-            Assert.hasText(key, "Key required");
-            Assert.hasText(value, "Value required");
-            
-            String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-            MutableFile mutableFile = null;
-            Properties props = new Properties();
-            
-            try {
-                    if (fileManager.exists(filePath)) {
-                            mutableFile = fileManager.updateFile(filePath);
-                            props.load(mutableFile.getInputStream());
-                    } else {
-                            throw new IllegalStateException("Properties file not found");
-                    }
-            } catch (IOException ioe) {
-                    throw new IllegalStateException(ioe);
+	    Assert.notNull(propertyFilePath, "Property file path required");
+	    Assert.hasText(propertyFilename, "Property filename required");
+	    Assert.hasText(key, "Key required");
+	    Assert.hasText(value, "Value required");
+	    
+	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+	    MutableFile mutableFile = null;
+	    
+	    Properties props = new Properties() {
+	    						//override the keys() method to order the keys alphabetically
+						        @Override 
+						        @SuppressWarnings("unchecked")
+						        public synchronized Enumeration keys() {
+						        	final Object[] keys = keySet().toArray();
+						        	Arrays.sort(keys);
+						        	return new Enumeration() {
+							        	int i = 0;
+							        	public boolean hasMoreElements() { return i < keys.length; }
+							        		public Object nextElement() { return keys[i++]; }
+							        	};
+						        	}
+
+						    	};
+	    
+	    try {
+            if (fileManager.exists(filePath)) {
+            	mutableFile = fileManager.updateFile(filePath);
+            	props.load(mutableFile.getInputStream());
+            } else {
+            	throw new IllegalStateException("Properties file not found");
             }
-            props.setProperty(key, value);
-            
-            try {
-                    props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
-            } catch (IOException ioe) {
-                    throw new IllegalStateException(ioe);
-            }
+	    } catch (IOException ioe) {
+	    	throw new IllegalStateException(ioe);
+	    }
+	    props.setProperty(key, value);
+	    
+	    try {
+	    	props.store(mutableFile.getOutputStream() , "Updated at test " + new Date());
+	    } catch (IOException ioe) {
+	    	throw new IllegalStateException(ioe);
+	    }
     }
 
 	/**
