@@ -22,7 +22,8 @@
 		<script src="${spring_url}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
 		<script src="${spring_dojo_url}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
 		<script language="JavaScript" type="text/javascript">dojo.require("dojo.parser");</script>
-		<title><spring:message code="welcome.h3" /></title>
+		<spring:message code="application.name" var="app_name"/>
+		<title><spring:message code="welcome.h3" arguments="${app_name}" /></title>
 	</head>
    	<body class="tundra spring">		
 	    <tiles:insertAttribute name="menu" ignore="true" />   
