@@ -489,30 +489,10 @@ Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
 $ cd ..
 $ rmdir roo-test</programlisting>
 
-    <para>If you see the logo appear, you've installed Roo
-    successfully.</para>
+    <para>If you see the logo appear, you've installed Roo successfully.</para>
 
-    <para><emphasis>Windows users</emphasis> who wish to receive an enhanced
-    Roo shell experience are encouraged to type the following command after
-    installing Roo (as per <link
-    xlink:href="http://jira.springframework.org/browse/ROO-350">ROO-350</link>):</para>
-
-    <programlisting>roo&gt; addon install
-       --url http://www.xs4all.nl/~kuip/com.springsource.roo.jansi.roo.addon-1.0.0.zip</programlisting>
-
-    <para>The above command will install colour ANSI services for Windows
-    users. You do not need to do this if you're running Linux or Apple, as
-    these work out-of-the-box (although typing the command will not cause any
-    problems on Linux or Apple machines). In due course we will likely make
-    this final ANSI-related step for Windows users unnecessary, but for now it
-    is experimental and requires the add-on installation directive shown
-    above. You can remove it by typing <code>addon uninstall *ansi*</code>
-    within Roo and press ENTER.</para>
-
-    <para>Users of any ANSI-enabled shell (all Linux users, all Apple users,
-    plus Windows users who have installed the above add-on) can enjoy brighter
-    colours within the Roo shell by setting the <code>ROO_OPTS</code>
-    environment variable before loading Roo. For example:</para>
+    <para>Users can enjoy brighter colours within the Roo shell by setting the 
+    <code>ROO_OPTS</code> environment variable before loading Roo. For example:</para>
 
     <programlisting>$ export ROO_OPTS="-Droo.bright=true"                   // Linux or Apple
 $ set ROO_OPTS="-Droo.bright=true"                      // Windows users</programlisting>
@@ -596,7 +576,7 @@ Once JPA is installed, type 'hint' and ENTER for the next suggestion.</programli
 
     <programlisting>roo&gt; persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 roo&gt; hint
-roo&gt; entity --name ~.Timer --testAutomatically
+roo&gt; entity --class ~.Timer --testAutomatically
 roo&gt; hint
 roo&gt; field string message --notNull
 roo&gt; hint controllers
@@ -648,12 +628,13 @@ $ mvn tomcat:run</programlisting>
     <programlisting>$ mkdir sample
 $ cd sample
 $ roo
-roo&gt; script filename.roo
+roo&gt; script --file filename.roo
 roo&gt; quit
 $ mvn tomcat:run</programlisting>
 
     <para>The <code>filename.roo</code> shown in the statements above should
-    be substituted with one of the filenames from this list:</para>
+    be substituted with one of the filenames from this list (note that you
+    get filename completion using TAB):</para>
 
     <itemizedlist>
       <listitem>
