@@ -221,6 +221,12 @@ public class JspDocumentHelper {
 			deleteMessage.setAttribute("var", "delete_label");
 			deleteFormElement.appendChild(deleteMessage);
 			deleteFormElement.appendChild(new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${delete_label}").addAttribute("src", "${delete_image_url}").addAttribute("value", "${delete_label}").addAttribute("alt", "${delete_label}").build());
+			deleteFormElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty param.page}")
+						.addChild(new XmlElementBuilder("input", document).addAttribute("type", "hidden").addAttribute("value", "${param.page}").addAttribute("name", "page").build())
+					.build());
+			deleteFormElement.appendChild(new XmlElementBuilder("c:if", document).addAttribute("test", "${not empty param.size}")
+						.addChild(new XmlElementBuilder("input", document).addAttribute("type", "hidden").addAttribute("value", "${param.size}").addAttribute("name", "size").build())
+					.build());
 			deleteElement.appendChild(deleteFormElement);
 			trElement2.appendChild(deleteElement);
 		}
