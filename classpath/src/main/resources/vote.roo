@@ -13,7 +13,7 @@ field string ip --notNull --sizeMin 7 --sizeMax 15
 field date registered --type java.util.Date --notNull --past
 controller scaffold ~.web.VoteController
 
-controller class ~.web.PublicVoteController
+controller class ~.web.PublicVoteController --preferredMapping /public
 
 logging setup --level DEBUG --package WEB
 
