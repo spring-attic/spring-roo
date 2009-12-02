@@ -510,8 +510,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (javaType.isCommonCollectionType() && isSpecialType(javaType.getParameters().get(0))) {
 				javaType = javaType.getParameters().get(0);
 				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-			}
-			else if (isSpecialType(javaType)) {
+			} else if(isEnumType(javaType)){
+				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + javaType.getSimpleTypeName().toLowerCase() + "_enum\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+			} else if (isSpecialType(javaType)) {
 				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			}
 			if (typeEntityMetadata != null) {
