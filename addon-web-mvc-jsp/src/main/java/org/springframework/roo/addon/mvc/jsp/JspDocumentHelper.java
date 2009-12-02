@@ -34,8 +34,6 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.xml.internal.ws.wsdl.writer.document.ParamType;
-
 /**
  * Helper class which generates the contents of the various jsp documents
  *
