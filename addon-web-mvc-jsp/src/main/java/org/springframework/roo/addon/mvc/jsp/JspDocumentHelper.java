@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.beans.Introspector;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,29 +144,30 @@ public class JspDocumentHelper {
 		Element trElement2 = document.createElement("tr");
 		forEachElement.appendChild(trElement2);
 
+		String idFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
+		
 		Element idTdElement = document.createElement("td");
-		idTdElement.setTextContent("${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		idTdElement.setTextContent("${" + entityName + "." + idFieldName + "}");
 		trElement2.appendChild(idTdElement);
 		fieldCounter = 0;
 		for (FieldMetadata field : fields) {
+			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element tdElement = document.createElement("td");
 			if (field.getFieldType().isCommonCollectionType()) {
-				tdElement.setTextContent("${fn:length(" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + ")}");
+				tdElement.setTextContent("${fn:length(" + entityName + "." + fieldName + ")}");
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
-				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
-				tdElement.appendChild(fmt);
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("type", "DATE").addAttribute("pattern", dateFormatLocalized.toPattern()).build());
+			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("type", "DATE").addAttribute("pattern", dateFormatLocalized.toPattern()).build());
 			} else {
-				tdElement.setTextContent("${fn:substring(" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + ", 0, 10)}");
+				tdElement.setTextContent("${fn:substring(" + entityName + "." + fieldName + ", 0, 10)}");
 			}
 			if(++fieldCounter < 7) {
 				trElement2.appendChild(tdElement);
 			}
 		}		
 		
-		Element showUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}").build();
+		Element showUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_form_url").addAttribute("value", "/" + controllerPath + "/${" + entityName + "." + idFieldName + "}").build();
 		Element showImageUrl = new XmlElementBuilder("spring:url", document).addAttribute("var", "show_image_url").addAttribute("value", "/static/images/show.png").build();
 		Element showMessage = new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.show").addAttribute("arguments", "${entity_label}").addAttribute("var", "show_label").build();
 		Element showSubmitElement = new XmlElementBuilder("input", document).addAttribute("type", "image").addAttribute("class", "image").addAttribute("title", "${show_label}").addAttribute("src", "${show_image_url}").addAttribute("value", "${show_label}").addAttribute("alt", "${show_label}").build();
@@ -177,7 +179,7 @@ public class JspDocumentHelper {
 			Element updateFormElement = document.createElement("form:form");
 			Element updateUrl = document.createElement("spring:url");
 			updateUrl.setAttribute("var", "update_form_url");
-			updateUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form");
+			updateUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + idFieldName + "}/form");
 			updateElement.appendChild(updateUrl);
 			updateFormElement.setAttribute("action", "${update_form_url}");
 			updateFormElement.setAttribute("method", "GET");
@@ -207,7 +209,7 @@ public class JspDocumentHelper {
 			Element deleteFormElement = document.createElement("form:form");
 			Element deleteUrl = document.createElement("spring:url");
 			deleteUrl.setAttribute("var", "delete_form_url");
-			deleteUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+			deleteUrl.setAttribute("value", "/" + controllerPath + "/${" + entityName + "." + idFieldName + "}");
 			deleteElement.appendChild(deleteUrl);
 			deleteFormElement.setAttribute("action", "${delete_form_url}");
 			deleteFormElement.setAttribute("method", "DELETE");
@@ -290,26 +292,33 @@ public class JspDocumentHelper {
 		Element ifElement = document.createElement("c:if");
 		ifElement.setAttribute("test", "${not empty " + entityName + "}");
 		for (FieldMetadata field : fields) {
+			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element divSubmitElement = document.createElement("div");
-			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
+			divSubmitElement.setAttribute("id", "roo_" + entityName + "_" + fieldName);
 				
 			Element label = document.createElement("label");
-			label.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
+			label.setAttribute("for", "_" + fieldName + "_id");
 			label.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divSubmitElement.appendChild(label);
 			
 			Element divContent = document.createElement("div");
-			divContent.setAttribute("id", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
+			divContent.setAttribute("id", "_" + fieldName + "_id");
 			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
+				fmt.setAttribute("value", "${" + entityName + "." + fieldName + "}");
 				fmt.setAttribute("type", "DATE");
 				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
 				divContent.appendChild(fmt);
-			} else {
-				divContent.setTextContent("${" + entityName + "." + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "}");
+			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+				Element fmt = document.createElement("fmt:formatDate");
+				fmt.setAttribute("value", "${" + entityName + "." + fieldName + ".time}");
+				fmt.setAttribute("type", "DATE");
+				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
+				divContent.appendChild(fmt);
+			}else {
+				divContent.setTextContent("${" + entityName + "." + fieldName + "}");
 			}
 			divSubmitElement.appendChild(divContent);
 			ifElement.appendChild(divSubmitElement);
@@ -388,6 +397,9 @@ public class JspDocumentHelper {
 	public Document getUpdateDocument() {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();		
+		
+		String idFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
+		String versionFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getVersionField().getFieldName().getSymbolName()));
 
 		//add document namespaces
 		Element div = new XmlElementBuilder("div", document)
@@ -408,7 +420,7 @@ public class JspDocumentHelper {
 		
 		Element url = document.createElement("spring:url");
 		url.setAttribute("var", "form_url");
-		url.setAttribute("value", "/" + controllerPath + "/${" + entityName	+ "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}");
+		url.setAttribute("value", "/" + controllerPath + "/${" + entityName	+ "." + idFieldName + "}");
 		divElement.appendChild(url);
 		
 		Element formElement = document.createElement("form:form");
@@ -436,13 +448,13 @@ public class JspDocumentHelper {
 		formElement.appendChild(divSubmitElement);
 		
 		Element formHiddenId = document.createElement("form:hidden");
-		formHiddenId.setAttribute("path", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
-		formHiddenId.setAttribute("id", "_" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "_id");
+		formHiddenId.setAttribute("path", idFieldName);
+		formHiddenId.setAttribute("id", "_" + idFieldName + "_id");
 		formElement.appendChild(formHiddenId);
 		if (null != entityMetadata.getVersionField()) {
 			Element formHiddenVersion = document.createElement("form:hidden");
-			formHiddenVersion.setAttribute("path", entityMetadata.getVersionField().getFieldName().getSymbolName());
-			formHiddenVersion.setAttribute("id", "_" + entityMetadata.getVersionField().getFieldName().getSymbolName() + "_id");
+			formHiddenVersion.setAttribute("path", versionFieldName);
+			formHiddenVersion.setAttribute("id", "_" + versionFieldName + "_id");
 			formElement.appendChild(formHiddenVersion);
 		}
 
@@ -638,10 +650,10 @@ public class JspDocumentHelper {
 			}
 			
 			Element divElement = document.createElement("div");
-			divElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()));
+			divElement.setAttribute("id", "roo_" + entityName + "_" + StringUtils.uncapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())));
 						
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "_id");
+			labelElement.setAttribute("for", "_" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "_id");
 			labelElement.setTextContent(field.getFieldName().getReadableSymbolName() + ":");
 			divElement.appendChild(labelElement);
 			
@@ -678,7 +690,7 @@ public class JspDocumentHelper {
 						}
 	
 						if(typeEntityMetadata == null) {
-							throw new IllegalStateException("Could not determine the plural name for the '" + StringUtils.uncapitalize(field.getFieldName().getSymbolName()) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+							throw new IllegalStateException("Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 						}
 						
 						String plural = typeEntityMetadata.getPlural().toLowerCase();
@@ -795,7 +807,6 @@ public class JspDocumentHelper {
 					divElement.appendChild(DojoUtils.getValidationDojo(document, field));
 					
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
-							// should be tested with instanceof
 									fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 								divElement.appendChild(DojoUtils.getDateDojo(document, field, dateFormatLocalized));
 					}

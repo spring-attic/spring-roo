@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import java.beans.Introspector;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(field.getFieldName().getSymbolName())
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()))
 				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() + "', required : "
 				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
 		return script;
@@ -89,9 +90,10 @@ public class DojoUtils {
 			} else {
 				regex = ", regExp: '-?[0-9]*\\.[0-9]*'";
 			}
-		} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
-			regex = "";//, regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
-		}	
+		} 
+//		else if (Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()).contains("email"))) {
+//			regex = "";//, regExp: \"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\"";
+//		}	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getFieldName().getSymbolName()
@@ -106,7 +108,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.SimpleTextarea");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName()) + "_id', widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(fieldName.getSymbolName())) + "_id', widgetType: 'dijit.form.SimpleTextarea', widgetAttrs: {}})); ");
 		return script;
 	}
 	
@@ -116,7 +118,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.FilteringSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(fieldName.getSymbolName()))
 				+ "_id', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); ");
 		return script;
 	}
@@ -127,7 +129,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.MultiSelect");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");		
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + StringUtils.uncapitalize(fieldName.getSymbolName())
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(fieldName.getSymbolName()))
 				+ "_id', widgetType: 'dijit.form.MultiSelect', widgetAttrs: {}})); ");
 		return script;
 	}
