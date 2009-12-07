@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.converters;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -172,13 +171,6 @@ public class JavaTypeConverter implements Converter {
 			types.add(Date.class.getName());
 			types.add(Calendar.class.getName());
 		}
-		
-		if (optionContext.contains("java-all") || optionContext.contains("java-date")) {
-			// misc
-			types.add(java.sql.Date.class.getName());
-			types.add(Timestamp.class.getName());
-		}
-		
 		
 		for (String type : types) {
 			if (type.startsWith(existingData) || existingData.startsWith(type)) {
