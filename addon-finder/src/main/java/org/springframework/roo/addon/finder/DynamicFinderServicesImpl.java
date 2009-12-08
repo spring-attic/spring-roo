@@ -92,17 +92,15 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 					} 
 					if (reservedToken.equalsIgnoreCase("And")) {
 						if(!isFieldApplied){
-							builder.append(" = :").append(fieldName).append(" ");
+							builder.append(" = :").append(fieldName).append(" AND ");
 							isFieldApplied = true;
 						}
-						builder.append("AND ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Or")) {
 						if(!isFieldApplied){
-							builder.append(" = :").append(fieldName).append(" ");
+							builder.append(" = :").append(fieldName).append(" OR ");
 							isFieldApplied = true;
 						}					
-						builder.append("OR ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Between")) {
 						builder.append(" BETWEEN ").append(":min").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" AND ").append(":max").append(lastFieldToken.getField().getFieldName().getSymbolNameCapitalisedFirstLetter()).append(" ");

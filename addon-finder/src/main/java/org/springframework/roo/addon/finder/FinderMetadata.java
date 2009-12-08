@@ -135,25 +135,39 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		Assert.notNull(entityManagerMethod, "Entity manager method incorrectly returned null");
 		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
+		List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
 		if (containsCollectionType) {
-			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + (jpaQuery.endsWith("AND") ? "" : (jpaQuery.endsWith("WHERE") ? "" : " AND")) + "\");");
+			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + "\");");
+			boolean jpaQueryComplete = false;
 			for (int i = 0; i < paramTypes.size(); i++) {
+				if (!jpaQueryComplete && !jpaQuery.endsWith("WHERE")) {
+					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(paramNames.get(i).getSymbolName().toLowerCase()) + paramNames.get(i).getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+					jpaQueryComplete = true;
+				}
 				if (paramTypes.get(i).isCommonCollectionType()) {
-					bodyBuilder.appendFormalLine("for (int i = 0; i < " + paramNames.get(i) + ".size(); i++) {");
-					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
-					bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + paramNames.get(i) + "_item\").append(i).append(\" MEMBER OF " + tableName + "." + paramNames.get(i) + "\");");
-					bodyBuilder.indentRemove();
-					bodyBuilder.appendFormalLine("}");
+					collectionTypeNames.add(paramNames.get(i));
 				} 
 			}
+			int position = 0;
+			for (JavaSymbolName name: collectionTypeNames) {
+				bodyBuilder.appendFormalLine("for (int i = 0; i < " + name + ".size(); i++) {");
+				bodyBuilder.indent();
+				bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
+				bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + name + "_item\").append(i).append(\" MEMBER OF " + tableName + "." + name + "\");");
+				bodyBuilder.indentRemove();
+				bodyBuilder.appendFormalLine("}");
+				if (collectionTypeNames.size() > ++position) {
+					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(name.getSymbolName().toLowerCase()) + name.getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+				}
+			}		
 			bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
-			bodyBuilder.appendFormalLine("int i = 0;");
+			
 			for (int i = 0; i < paramTypes.size(); i++) {
 				if (paramTypes.get(i).isCommonCollectionType()) {
+					bodyBuilder.appendFormalLine("int " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + "Index = 0;");
 					bodyBuilder.appendFormalLine("for (" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName() + " " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + paramNames.get(i) + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + i++, " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + "Index++, " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				} else {
