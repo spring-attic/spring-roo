@@ -9,19 +9,6 @@
 	<artifactId>org.springframework.roo.shell.jline</artifactId>
 	<packaging>jar</packaging>
 	<name>Spring Roo - Shell (JLine Implementation)</name>
-	<repositories>
-		<!-- Repositories for Jansi and its JNA dependency, used on Windows: -->
-		<repository>
-				<id>jansi.release.m2</id>
-				<name>jansi Release Repository</name>
-				<url>http://jansi.fusesource.org/repo/release</url>
-		</repository>
-		<repository>
-				<id>maven2-repository.dev.java.net</id>
-				<name>Java.net Repository for Maven</name>
-				<url>http://download.java.net/maven/2/</url>
-		</repository>
-	</repositories>
 	<dependencies>
         <!-- ROO modules -->
 		<dependency>
@@ -38,13 +25,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.fusesource.jansi</groupId>
-			<artifactId>jansi</artifactId>
-			<version>1.1</version>
+			<artifactId>com.springsource.org.fusesource.jansi</artifactId>
+			<version>1.1.0</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
+			<artifactId>com.springsource.com.sun.jna</artifactId>
 			<version>3.2.3</version>
 			<scope>runtime</scope>
 		</dependency>
