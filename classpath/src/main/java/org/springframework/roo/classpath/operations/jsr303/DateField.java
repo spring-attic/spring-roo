@@ -7,6 +7,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.DateTime;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -29,6 +31,10 @@ public class DateField extends FieldDetails {
 	
 	/** Whether the JSR 303 @Future annotation will be added */
 	private boolean future = false;
+
+	private DateTime dateFormat = null;
+	
+	private DateTime timeFormat = null;
 
 	public DateField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
@@ -56,6 +62,10 @@ public class DateField extends FieldDetails {
 			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(value))));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs));
 		}
+		//always add a DateTimeFormat annotation
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("style"), (null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "S") + (null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-")));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));
 	}
 
 	public boolean isPast() {
@@ -81,5 +91,20 @@ public class DateField extends FieldDetails {
 	public void setPersistenceType(DateFieldPersistenceType persistenceType) {
 		this.persistenceType = persistenceType;
 	}
-	
+
+	public DateTime getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(DateTime dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+
+	public DateTime getTimeFormat() {
+		return timeFormat;
+	}
+
+	public void setTimeFormat(DateTime timeFormat) {
+		this.timeFormat = timeFormat;
+	}
 }

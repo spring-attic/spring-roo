@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
 import java.beans.Introspector;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -36,27 +35,27 @@ public class DojoUtils {
 		return script;
 	}
 	
-	public static Element getRequiredDateDojo(Document document, JavaSymbolName fieldName, SimpleDateFormat simpleDateFormat) {
+	public static Element getRequiredDateDojo(Document document, JavaSymbolName beanName, JavaSymbolName fieldName) {
 		Assert.notNull(document, "Document required");
 		Assert.notNull(fieldName, "Field name required");
 		addDojoDepenency(document, "dijit.form.DateTextBox");		
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
-				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() 
-				+ "', required : true}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
+				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${validation_required}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName()
+				+ "_format}', required : true}, datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName() + "_format}'}})); ");
 		return script;
 	} 
 	
-	public static Element getDateDojo(Document document, FieldMetadata field, SimpleDateFormat simpleDateFormat) {
+	public static Element getDateDojo(Document document, JavaSymbolName beanName, FieldMetadata field) {
 		Assert.notNull(document, "Document required");
 		Assert.notNull(field, "Field required");
 		addDojoDepenency(document, "dijit.form.DateTextBox");	
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()))
-				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {constraints: {datePattern : '" + simpleDateFormat.toPattern() + "', required : "
-				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '" + simpleDateFormat.toPattern() + "'}})); ");
+				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${field_validation}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_format}', required : "
+				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_format}'}})); ");
 		return script;
 	}
 	

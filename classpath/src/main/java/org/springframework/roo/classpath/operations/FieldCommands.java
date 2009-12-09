@@ -51,6 +51,7 @@ public class FieldCommands implements CommandMarker {
 		staticFieldConverter.add(Cardinality.class);
 		staticFieldConverter.add(Fetch.class);
 		staticFieldConverter.add(EnumType.class);
+		staticFieldConverter.add(DateTime.class);
 		this.classpathOperations = classpathOperations;
 		this.legalNumericPrimitives.add(Short.class.getName());
 		this.legalNumericPrimitives.add(Byte.class.getName());
@@ -186,7 +187,10 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="column", mandatory=false, help="The JPA column name") String column,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
-			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+			@CliOption(key="dateFormat", mandatory=false, unspecifiedDefaultValue="SHORT", specifiedDefaultValue="SHORT", help="Indicates the style of the date format") DateTime dateFormat,
+			@CliOption(key="timeFormat", mandatory=false, unspecifiedDefaultValue="NONE", specifiedDefaultValue="NONE", help="Indicates the style of the time format") DateTime timeFormat) {
+
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
@@ -197,6 +201,8 @@ public class FieldCommands implements CommandMarker {
 		if (persistenceType == null) fieldDetails.setPersistenceType(DateFieldPersistenceType.JPA_TIMESTAMP);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
+		if (timeFormat != null) fieldDetails.setTimeFormat(timeFormat);
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 

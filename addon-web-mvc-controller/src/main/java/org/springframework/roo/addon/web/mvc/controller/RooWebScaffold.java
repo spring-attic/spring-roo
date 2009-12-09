@@ -112,12 +112,4 @@ public @interface RooWebScaffold {
 	 * @return indicates if the finders methods should be provided (defaults to "true"; optional)
 	 */
 	boolean exposeFinders() default true;
-	
-	
-	/**
-	 * Allows the configuration of a custom date format used by this controller.
-	 * 
-	 * @return returns the date format. If not set this will default to ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).toPattern(); 
-	 */
-	String dateFormat() default "";
 }

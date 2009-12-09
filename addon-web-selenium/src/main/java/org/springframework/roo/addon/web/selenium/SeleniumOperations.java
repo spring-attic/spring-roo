@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.web.selenium;
 
 import java.io.InputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
@@ -15,6 +17,9 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.operations.DateTime;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -45,7 +50,6 @@ public class SeleniumOperations {
 	private MetadataService metadataService;
 	private BeanInfoMetadata beanInfoMetadata;
 	private MenuOperations menuOperations;
-	private SimpleDateFormat simpleDateFormat;
 	
 	private Logger logger = Logger.getLogger(SeleniumOperations.class.getName());
 	
@@ -78,8 +82,6 @@ public class SeleniumOperations {
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName()  + "' does not appear to be an automatic, scaffolded controller");
 		this.beanInfoMetadata = (BeanInfoMetadata) metadataService.get(webScaffoldMetadata.getIdentifierForBeanInfoMetadata());
-		
-		this.simpleDateFormat = webScaffoldMetadata.getAnnotationValues().getDateFormat();
 		
 		//we abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
 		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
@@ -340,19 +342,35 @@ public class SeleniumOperations {
 		} else if (field.getFieldType().equals(new JavaType(Date.class.getName())) ||
 				field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 			Calendar cal = Calendar.getInstance();
+			AnnotationMetadata dateTimeFormat = null;
+			String style = null;
+			if (null != (dateTimeFormat = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat")))) {
+				AnnotationAttributeValue<?> value = dateTimeFormat.getAttribute(new JavaSymbolName("style"));
+				if (value != null) {
+					style = value.getValue().toString();
+				}
+			}
 			if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past"))) {
 				cal.add(Calendar.YEAR, -1);
 				cal.add(Calendar.MONTH, -1);
 				cal.add(Calendar.DAY_OF_MONTH, -1);
-				initializer = simpleDateFormat.format(cal.getTime());
 			} else if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
 				cal.add(Calendar.YEAR, +1);
 				cal.add(Calendar.MONTH, +1);
 				cal.add(Calendar.DAY_OF_MONTH, +1);
-				initializer = simpleDateFormat.format(cal.getTime());
+			} 
+			if (style != null) {
+				if (style.startsWith("-")) {
+					initializer = ((SimpleDateFormat) DateFormat.getTimeInstance(DateTime.parseDateFormat(style.charAt(1)), Locale.getDefault())).format(cal.getTime());
+				} else if (style.endsWith("-")) {
+					initializer = ((SimpleDateFormat) DateFormat.getDateInstance(DateTime.parseDateFormat(style.charAt(0)), Locale.getDefault())).format(cal.getTime());
+				} else {
+					initializer = ((SimpleDateFormat) DateFormat.getDateTimeInstance(DateTime.parseDateFormat(style.charAt(0)), DateTime.parseDateFormat(style.charAt(1)), Locale.getDefault())).format(cal.getTime());
+				}
 			} else {
-				initializer = simpleDateFormat.format(cal.getTime());
+				initializer = ((SimpleDateFormat) DateFormat.getDateInstance(DateFormat.SHORT, Locale.getDefault())).format(cal.getTime());
 			}
+			
 		} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {		
 			initializer = new Boolean(true).toString();
 		} else if (field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {

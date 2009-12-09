@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.mvc.jsp;
 
 import java.beans.Introspector;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +47,6 @@ public class JspDocumentHelper {
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
 	private FinderMetadata finderMetadata;
-	private SimpleDateFormat dateFormatLocalized;
 	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 	private final String entityName;
 	private final String controllerPath;
@@ -70,8 +68,7 @@ public class JspDocumentHelper {
 		this.metadataService = metadataService;
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
-		
-		dateFormatLocalized = webScaffoldAnnotationValues.getDateFormat();
+
 		entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		
 		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
@@ -156,9 +153,9 @@ public class JspDocumentHelper {
 			if (field.getFieldType().isCommonCollectionType()) {
 				tdElement.setTextContent("${fn:length(" + entityName + "." + fieldName + ")}");
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("type", "DATE").addAttribute("pattern", dateFormatLocalized.toPattern()).build());
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("type", "DATE").addAttribute("pattern", dateFormatLocalized.toPattern()).build());
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
 			} else {
 				tdElement.setTextContent("${fn:substring(" + entityName + "." + fieldName + ", 0, 10)}");
 			}
@@ -306,17 +303,9 @@ public class JspDocumentHelper {
 			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + fieldName + "}");
-				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
-				divContent.appendChild(fmt);
+				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				Element fmt = document.createElement("fmt:formatDate");
-				fmt.setAttribute("value", "${" + entityName + "." + fieldName + ".time}");
-				fmt.setAttribute("type", "DATE");
-				fmt.setAttribute("pattern", dateFormatLocalized.toPattern());
-				divContent.appendChild(fmt);
+				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
 			}else {
 				divContent.setTextContent("${" + entityName + "." + fieldName + "}");
 			}
@@ -600,12 +589,11 @@ public class JspDocumentHelper {
 				dojoMessage.setAttribute("argumentSeparator", ",");
 				dojoMessage.setAttribute("var", "validation_required");
 				divElement.appendChild(dojoMessage);				
-				divElement.appendChild(DojoUtils.getSimpleValidationDojo(document, paramName));
+//				divElement.appendChild(DojoUtils.getSimpleValidationDojo(document, paramName));
 				
 				if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
-						// should be tested with instanceof
 						type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-							divElement.appendChild(DojoUtils.getRequiredDateDojo(document, paramName, dateFormatLocalized));
+					divElement.appendChild(DojoUtils.getRequiredDateDojo(document, new JavaSymbolName(entityName), paramName));
 				}
 			}
 			
@@ -683,7 +671,6 @@ public class JspDocumentHelper {
 								formElement.appendChild(document.createElement("br"));
 								return;
 							}
-							
 							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType().getParameters().get(0), Path.SRC_MAIN_JAVA));
 						} else {
 							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
@@ -808,7 +795,7 @@ public class JspDocumentHelper {
 					
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 									fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-								divElement.appendChild(DojoUtils.getDateDojo(document, field, dateFormatLocalized));
+						divElement.appendChild(DojoUtils.getDateDojo(document, new JavaSymbolName(entityName), field));
 					}
 
 					formElement.appendChild(divElement);
