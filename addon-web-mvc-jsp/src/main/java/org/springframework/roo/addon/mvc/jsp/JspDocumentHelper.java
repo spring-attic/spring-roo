@@ -19,6 +19,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -589,11 +590,24 @@ public class JspDocumentHelper {
 				dojoMessage.setAttribute("argumentSeparator", ",");
 				dojoMessage.setAttribute("var", "validation_required");
 				divElement.appendChild(dojoMessage);				
-//				divElement.appendChild(DojoUtils.getSimpleValidationDojo(document, paramName));
 				
+				// only include the Spring JS / Dojo date picker for styles supported by Dojo (SMALL & MEDIUM)
 				if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 						type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-					divElement.appendChild(DojoUtils.getRequiredDateDojo(document, new JavaSymbolName(entityName), paramName));
+					FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(paramName);
+					if (null == field) {
+						//could be minFieldName or maxFieldName
+						field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(StringUtils.uncapitalize(paramName.getSymbolName().substring(3))));
+					}
+					if (null != field) {
+						AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+						if (annotation != null) {
+							AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("style"));
+							if (null != value && !value.getValue().toString().contains("L") && !value.getValue().toString().contains("F")) {
+								divElement.appendChild(DojoUtils.getRequiredDateDojo(document, new JavaSymbolName(entityName), paramName));
+							}
+						}
+					}
 				}
 			}
 			
@@ -793,9 +807,16 @@ public class JspDocumentHelper {
 					divElement.appendChild(validMessage);
 					divElement.appendChild(DojoUtils.getValidationDojo(document, field));
 					
+					// only include the Spring JS / Dojo date picker for styles supported by Dojo (SMALL & MEDIUM)
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) ||
 									fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-						divElement.appendChild(DojoUtils.getDateDojo(document, new JavaSymbolName(entityName), field));
+						AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+						if (annotation != null) {
+							AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("style"));
+							if (null != value && !value.getValue().toString().contains("L") && !value.getValue().toString().contains("F")) {
+								divElement.appendChild(DojoUtils.getDateDojo(document, new JavaSymbolName(entityName), field));
+							}
+						}
 					}
 
 					formElement.appendChild(divElement);
