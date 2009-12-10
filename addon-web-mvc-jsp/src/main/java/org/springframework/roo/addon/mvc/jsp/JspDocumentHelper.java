@@ -153,9 +153,9 @@ public class JspDocumentHelper {
 			if (field.getFieldType().isCommonCollectionType()) {
 				tdElement.setTextContent("${fn:length(" + entityName + "." + fieldName + ")}");
 			} else if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
+				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			} else {
 				tdElement.setTextContent("${fn:substring(" + entityName + "." + fieldName + ", 0, 10)}");
 			}
@@ -303,9 +303,9 @@ public class JspDocumentHelper {
 			divContent.setAttribute("class", "box");
 			
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
-				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
+				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_format}").build());
+				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			}else {
 				divContent.setTextContent("${" + entityName + "." + fieldName + "}");
 			}

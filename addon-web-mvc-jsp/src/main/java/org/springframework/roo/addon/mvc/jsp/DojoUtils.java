@@ -43,7 +43,7 @@ public class DojoUtils {
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
 				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${validation_required}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName()
-				+ "_format}', required : true}, datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName() + "_format}'}})); ");
+				+ "_date_format}', required : true}, datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName() + "_date_format}'}})); ");
 		return script;
 	} 
 	
@@ -54,8 +54,8 @@ public class DojoUtils {
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
 		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()))
-				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${field_validation}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_format}', required : "
-				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_format}'}})); ");
+				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${field_validation}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_date_format}', required : "
+				+ (isTypeInAnnotationList(new JavaType("javax.validation.NotNull"), field.getAnnotations()) ? "true" : "false") + "}, datePattern : '${" + beanName.getSymbolName() + "_" + field.getFieldName().getSymbolName() + "_date_format}'}})); ");
 		return script;
 	}
 	

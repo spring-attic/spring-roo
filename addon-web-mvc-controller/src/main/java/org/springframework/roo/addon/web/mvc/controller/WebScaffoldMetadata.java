@@ -34,7 +34,6 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
-import org.springframework.roo.classpath.operations.DateTime;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
@@ -708,7 +707,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Iterator<Map.Entry<JavaSymbolName,String>> it = dateTypes.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<JavaSymbolName,String> entry = it.next();
-			addDateTimeFormatAttribute(bodyBuilder, entry.getValue(), entry.getKey());
+			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + entry.getKey().getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + entry.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
 		}
 	}
 	
@@ -727,27 +726,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					if (annotation != null) {
 						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
 						if (styleValue != null) {
-							addDateTimeFormatAttribute(bodyBuilder, styleValue.getValue().toString(), paramNames.get(i));
+							bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
 						}
 					}
 				}
 			}
-		}
-	}
-	
-	private void addDateTimeFormatAttribute(InvocableMemberBodyBuilder bodyBuilder, String style, JavaSymbolName fieldName) {
-		if (style.length() != 2) throw new IllegalStateException("Unable to preocess style attribute of @DateTimeFormat annotation on '" + fieldName.getSymbolName() + "' field.");
-		if (style.equals("--")) {
-			// do nothing
-		} else if (style.startsWith("-")) {
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getTimeInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(1)).getKey() + ", org.springframework.context.i18n.LocaleContextHolder.getLocale())).toPattern());");
-//			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_server_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getTimeInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(1)).getKey() + ", java.util.Locale.getDefault())).toPattern());");
-		} else if (style.endsWith("-")) {
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getDateInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(0)).getKey() + ", org.springframework.context.i18n.LocaleContextHolder.getLocale())).toPattern());");
-//			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_server_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getDateInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(0)).getKey() + ", java.util.Locale.getDefault())).toPattern());");
-		} else {
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getDateTimeInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(0)).getKey() + ",java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(1)).getKey() + ", org.springframework.context.i18n.LocaleContextHolder.getLocale())).toPattern());");
-//			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_server_format\", ((java.text.SimpleDateFormat) java.text.DateFormat.getDateTimeInstance(java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(0)).getKey() + ",java.text.DateFormat." + DateTime.parseDateTimeFormat(style.charAt(1)).getKey() + ", java.util.Locale.getDefault())).toPattern());");
 		}
 	}
 

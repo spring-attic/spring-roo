@@ -20,7 +20,20 @@
 		<link rel="stylesheet" type="text/css" media="screen" href="${roo_css_url}"><!-- //required for FF3 and Opera --></link>
 		<link rel="stylesheet" type="text/css" href="${tundra_url}"><!-- //required for FF3 and Opera --></link>	
 		<link rel="SHORTCUT ICON" href="${favicon}" />
-		<script type="text/javascript">var djConfig={locale:'${cookie['locale'].value}'};</script>	
+		<script type="text/javascript"><![CDATA[
+			function readCookie(name) {
+				var nameEQ = name + '=';
+				var ca = document.cookie.split(';');
+				for(var i=0;i < ca.length;i++) {
+					var c = ca[i];
+					while (c.charAt(0)==' ') c = c.substring(1,c.length);
+					if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+				}
+				return null;
+			}
+			var djConfig={locale:readCookie('locale')}; 
+		]]>
+		</script>
 		<script src="${dojo_url}" type="text/javascript" ><!-- //required for FF3 and Opera --></script>
 		<script src="${spring_url}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
 		<script src="${spring_dojo_url}" type="text/javascript"><!-- //required for FF3 and Opera --></script>
