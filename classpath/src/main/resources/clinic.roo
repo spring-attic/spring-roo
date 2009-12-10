@@ -2,57 +2,58 @@ project --topLevelPackage com.springsource.petclinic
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
-entity --class ~.reference.PetType --testAutomatically
-entity --class ~.reference.Specialty --testAutomatically
+enum type --class ~.reference.PetType
+enum constant --name Dog
+enum constant --name Cat
+enum constant --name Bird
+
+enum type --class ~.reference.Specialty
+enum constant --name Cardiology
+enum constant --name Dentistry
+enum constant --name Nutrition
+
 entity --class ~.domain.Pet --testAutomatically
 entity --class ~.domain.Visit --testAutomatically
 entity --class ~.domain.AbstractPerson --abstract
 entity --class ~.domain.Vet --extends ~.domain.AbstractPerson --testAutomatically
 entity --class ~.domain.Owner --extends ~.domain.AbstractPerson --testAutomatically
 
-field string --class ~.reference.PetType --fieldName type --notNull --sizeMax 30
-field string --class ~.reference.Specialty --fieldName name --notNull --sizeMax 30
-field string --class ~.domain.AbstractPerson --fieldName firstName --sizeMin 3 --sizeMax 30
-field string --class ~.domain.AbstractPerson --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
-field string --class ~.domain.AbstractPerson --fieldName address --notNull --sizeMax 50 --sizeMin 1
-field string --class ~.domain.AbstractPerson --fieldName city --notNull --sizeMax 30
-field number --class ~.domain.AbstractPerson --fieldName telephone --type java.lang.Integer --notNull
+field string --fieldName firstName --sizeMin 3 --sizeMax 30 --class ~.domain.AbstractPerson
+field string --fieldName lastName --notNull --sizeMin 3 --sizeMax 30
+field string --fieldName address --notNull --sizeMax 50 --sizeMin 1
+field string --fieldName city --notNull --sizeMax 30
+field string --fieldName telephone --notNull
+field string --fieldName homePage --sizeMax 30
+field string --fieldName email --sizeMax 30 --sizeMin 6
+field date --fieldName birthDay --type java.util.Date --notNull
 
-field string --class ~.domain.AbstractPerson --fieldName homePage --sizeMax 30
-field string --class ~.domain.AbstractPerson --fieldName email --sizeMax 30 --sizeMin 6
+field string --fieldName description --sizeMax 255 --class ~.domain.Visit
+field date --fieldName visitDate --type java.util.Date --notNull --past
+field reference --fieldName pet --type ~.domain.Pet --notNull
+field reference --fieldName vet --type ~.domain.Vet
 
-field string --class ~.domain.Visit --fieldName description --sizeMax 255
-field boolean --class ~.domain.Pet --fieldName sendReminders --notNull --primitive
-field string --class ~.domain.Pet --fieldName name --notNull --sizeMin 1
-field number --class ~.domain.Pet --fieldName weight --type java.lang.Float --notNull --min 0
-field date --class ~.domain.Vet --fieldName employedSince --type java.util.Date --notNull --past
-field date --class ~.domain.Visit --fieldName visitDate --type java.util.Date --notNull --past
+field boolean --fieldName sendReminders --notNull --primitive --class ~.domain.Pet
+field string --fieldName name --notNull --sizeMin 1
+field number --fieldName weight --type java.lang.Float --notNull --min 0
+field reference --fieldName owner --type ~.domain.Owner
+field enum --fieldName type --type ~.reference.PetType --notNull
 
-field reference --class ~.domain.Visit --fieldName pet --type ~.domain.Pet --notNull
-field reference --class ~.domain.Visit --fieldName vet --type ~.domain.Vet
-field reference --class ~.domain.Pet --fieldName owner --type ~.domain.Owner
-field reference --class ~.domain.Pet --fieldName type --type ~.reference.PetType
+field date --fieldName employedSince --type java.util.Calendar --notNull --past --class ~.domain.Vet
+field enum --fieldName specialty --type ~.reference.Specialty --notNull false
+
 field set --class ~.domain.Owner --fieldName pets --element ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
-field set --class ~.domain.Vet --fieldName specialties --element ~.reference.Specialty --cardinality MANY_TO_MANY --notNull false
-field date --class ~.domain.AbstractPerson --fieldName birthDay --type java.util.Date --notNull
 
-finder add --class ~.domain.Pet --finderName findPetsByNameAndWeight
-finder add --class ~.domain.Pet --finderName findPetsByOwner
-finder add --class ~.domain.Pet --finderName findPetsBySendRemindersAndWeightLessThan
-finder add --class ~.domain.Pet --finderName findPetsByTypeAndNameLike
-finder add --class ~.domain.Visit --finderName findVisitsByDescriptionAndVisitDate  
-finder add --class ~.domain.Visit --finderName findVisitsByVisitDateBetween 
-finder add --class ~.domain.Visit --finderName findVisitsByDescriptionLike
+finder add --finderName findPetsByNameAndWeight --class ~.domain.Pet
+finder add --finderName findPetsByOwner
+finder add --finderName findPetsBySendRemindersAndWeightLessThan
+finder add --finderName findPetsByTypeAndNameLike
 
-controller scaffold --class ~.web.PetTypeController --entity ~.reference.PetType
-controller scaffold --class ~.web.SpecialtyController --entity ~.reference.Specialty
-controller scaffold --class ~.web.OwnerController --entity ~.domain.Owner
-controller scaffold --class ~.web.PetController --entity ~.domain.Pet 
-controller scaffold --class ~.web.VetController --entity ~.domain.Vet
-controller scaffold --class ~.web.VisitController --entity ~.domain.Visit
+finder add --finderName findVisitsByDescriptionAndVisitDate --class ~.domain.Visit
+finder add --finderName findVisitsByVisitDateBetween
+finder add --finderName findVisitsByDescriptionLike
 
-selenium test --controller ~.web.PetTypeController
-selenium test --controller ~.web.SpecialtyController
+controller all --package ~.web
+
 selenium test --controller ~.web.OwnerController
 selenium test --controller ~.web.PetController
 selenium test --controller ~.web.VetController
