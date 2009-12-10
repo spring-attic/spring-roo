@@ -403,7 +403,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			for (JavaType current : cit.getImplementsTypes()) {
 				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
 	        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
-	        	extendsList.add(resolvedName);
+	        	implementsList.add(resolvedName);
 			}
 	    	if (implementsList.size() > 0) {
 	    		classOrInterfaceDeclaration.setImplements(implementsList);
