@@ -117,8 +117,7 @@ public class ControllerOperations {
 						JavaType entity = javaType;
 						Set<String> disallowedOperations = new HashSet<String>();
 						String path = entity.getSimpleTypeName().toLowerCase();
-						String dateFormat = null;
-						createAutomaticController(controller, entity, disallowedOperations, path, dateFormat);
+						createAutomaticController(controller, entity, disallowedOperations, path);
 						break;
 					}
 				}
@@ -144,7 +143,7 @@ public class ControllerOperations {
 	 * @param entity the entity this controller should edit (required)
 	 * @param set of disallowed operations (required, but can be empty)
 	 */
-	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path, String dateFormat) {		
+	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path) {		
 		Assert.notNull(controller, "Controller Java Type required");
 		Assert.notNull(entity, "Entity Java Type required");
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
@@ -157,9 +156,6 @@ public class ControllerOperations {
 		rooWebScaffoldAttributes.add(new StringAttributeValue(new JavaSymbolName("path"), path));
 		rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyMaintainView"), true));
 		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
-		if (null != dateFormat && dateFormat.length() > 0) {
-			rooWebScaffoldAttributes.add(new StringAttributeValue(new JavaSymbolName("dateFormat"), dateFormat));
-		}
 		for(String operation: disallowedOperations) {
 			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));
 		}
