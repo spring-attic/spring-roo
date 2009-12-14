@@ -165,6 +165,7 @@
 					</execution>
 				</executions>
 				<configuration>
+					<outxml>true</outxml>
 					<aspectLibraries>
 						<aspectLibrary>
 							<groupId>org.springframework</groupId>
