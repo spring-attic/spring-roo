@@ -110,15 +110,15 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						builder.append(" LIKE ");					
 						setField = true;
 					} else if (reservedToken.equalsIgnoreCase("IsNotNull")) {
-						builder.append(" is not NULL ");
+						builder.append(" IS NOT NULL ");
 						setField = false;
 						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("IsNull")) {
-						builder.append(" is NULL ");
+						builder.append(" IS NULL ");
 						setField = false;
 						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("Not")) {
-						builder.append(" NOT ");
+						builder.append(" IS NOT ");
 					} else if (reservedToken.equalsIgnoreCase("NotEquals")) {
 						builder.append(" != ");
 					} else if (reservedToken.equalsIgnoreCase("LessThan")) {
