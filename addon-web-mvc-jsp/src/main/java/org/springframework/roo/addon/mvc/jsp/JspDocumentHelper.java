@@ -578,7 +578,6 @@ public class JspDocumentHelper {
 				Element formInput = document.createElement("input");
 				formInput.setAttribute("name", paramName.getSymbolName().toLowerCase());
 				formInput.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
-				formInput.setAttribute("size", "0");
 				divElement.appendChild(formInput);
 				Element required = document.createElement("spring:message");
 				required.setAttribute("code", "field.required");
@@ -608,6 +607,8 @@ public class JspDocumentHelper {
 							}
 						}
 					}
+				} else {
+					divElement.appendChild(DojoUtils.getSimpleValidationDojo(document, paramName));
 				}
 			}
 			
