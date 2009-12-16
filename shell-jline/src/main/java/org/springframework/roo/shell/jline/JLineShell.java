@@ -116,8 +116,6 @@ public class JLineShell extends AbstractShell implements Shell {
         reader.setDefaultPrompt(JLineShell.shellPrompt);
 	}
 
-
-
 	private ConsoleReader createAnsiWindowsReader() throws Exception {
 		// get decorated OutputStream that parses ANSI-codes
 		@SuppressWarnings("unchecked")
@@ -126,8 +124,7 @@ public class JLineShell extends AbstractShell implements Shell {
 			public boolean isANSISupported() { return true; }
 		};
 		ansiTerminal.initializeTerminal();
-		// make sure to reset the original shell's colors on shutdown by closing the stream;
-		// this requires a patched jansi WindowsAnsiOutputStream to work, but never hurts.
+		// make sure to reset the original shell's colors on shutdown by closing the stream
 		addShellStatusListener(new ShellStatusListener() {
 			public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
 				if (newStatus == ShellStatus.SHUTTING_DOWN) {
@@ -136,12 +133,13 @@ public class JLineShell extends AbstractShell implements Shell {
 			}
 		});
 		return new ConsoleReader(
-				new FileInputStream(FileDescriptor.in),
-        		new PrintWriter(
-        				new OutputStreamWriter(ansiOut,
-        						System.getProperty("jline.WindowsTerminal.output.encoding", System.getProperty("file.encoding")))),
-        		null,
-				ansiTerminal
+			new FileInputStream(FileDescriptor.in),
+        	new PrintWriter(
+        		new OutputStreamWriter(ansiOut,
+        			// default to Cp850 encoding for Windows console output (ROO-439)
+        			System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))),
+    		null,
+			ansiTerminal
 		);
 	}
 	
