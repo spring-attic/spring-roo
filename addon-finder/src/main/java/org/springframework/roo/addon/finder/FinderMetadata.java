@@ -140,7 +140,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + "\");");
 			boolean jpaQueryComplete = false;
 			for (int i = 0; i < paramTypes.size(); i++) {
-				if (!jpaQueryComplete && !jpaQuery.endsWith("WHERE")) {
+				if (!jpaQueryComplete && !jpaQuery.trim().endsWith("WHERE") && !jpaQuery.trim().endsWith("AND") && !jpaQuery.trim().endsWith("OR")) {
 					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(paramNames.get(i).getSymbolName().toLowerCase()) + paramNames.get(i).getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
 					jpaQueryComplete = true;
 				}
@@ -164,10 +164,10 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			
 			for (int i = 0; i < paramTypes.size(); i++) {
 				if (paramTypes.get(i).isCommonCollectionType()) {
-					bodyBuilder.appendFormalLine("int " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + "Index = 0;");
-					bodyBuilder.appendFormalLine("for (" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName() + " " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + paramNames.get(i) + ") {");
+					bodyBuilder.appendFormalLine("int " + paramNames.get(i) + "Index = 0;");
+					bodyBuilder.appendFormalLine("for (" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName() + " _" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + paramNames.get(i) + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + "Index++, " + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + " + paramNames.get(i) + "Index++, _" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				} else {

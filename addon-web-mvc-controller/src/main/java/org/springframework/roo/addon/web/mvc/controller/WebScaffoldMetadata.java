@@ -513,7 +513,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 			needModelMap = true;
 		}	
-		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Date.class.getName()))) {
+		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
 			setupFinderDateTimeFormatAttributes(methodMetadata.getParameterNames(), types, bodyBuilder);
 			needModelMap = true;
 		}
@@ -591,7 +591,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);	
 		
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
-		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Date.class.getName()))) {
+		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Calendar.class.getName()))) {
 			setupFinderDateTimeFormatAttributes(paramNames, paramTypes, bodyBuilder);
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
