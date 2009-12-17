@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.0.0.RC3 [rev 399].</para>
+    <para>This appendix was automatically built from Roo 1.0.0.RC4 [rev 523].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -23,6 +23,12 @@
                         <para>The URL to obtain the add-on ZIP file from</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--automaticRestart</term>
+                    <listitem>
+                        <para>Causes an automatic shell restart to occur if changes are made</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-addon-list">
@@ -40,6 +46,12 @@
                     <term>--pattern</term>
                     <listitem>
                         <para>The filename pattern to remove</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--automaticRestart</term>
+                    <listitem>
+                        <para>Causes an automatic shell restart to occur if changes are made</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -103,10 +115,10 @@
         <section xml:id="command-index-class">
             <title>class</title>
             <para>Creates a new Java class source file in any project path</para>
-            <programlisting><![CDATA[class --name]]></programlisting>
+            <programlisting><![CDATA[class --class]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
                         <para>No help available</para>
                     </listitem>
@@ -171,12 +183,12 @@
         <section xml:id="command-index-entity">
             <title>entity</title>
             <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
-            <programlisting><![CDATA[entity --name]]></programlisting>
+            <programlisting><![CDATA[entity --class]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Name of the entity to create</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -213,6 +225,12 @@
                     <term>--identifierColumn</term>
                     <listitem>
                         <para>The JPA identifier field column to use for this entity</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--identifierType</term>
+                    <listitem>
+                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long)</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -263,10 +281,10 @@
         <section xml:id="command-index-enum-type">
             <title>enum type</title>
             <para>Creates a new Java enum source file in any project path</para>
-            <programlisting><![CDATA[enum type --name]]></programlisting>
+            <programlisting><![CDATA[enum type --class]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
                         <para>No help available</para>
                     </listitem>
@@ -288,10 +306,10 @@
         <section xml:id="command-index-interface">
             <title>interface</title>
             <para>Creates a new Java interface source file in any project path</para>
-            <programlisting><![CDATA[interface --name]]></programlisting>
+            <programlisting><![CDATA[interface --class]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
                         <para>No help available</para>
                     </listitem>
@@ -346,32 +364,13 @@
                 </varlistentry>
             </variablelist>
         </section>
-        <section xml:id="command-index-controller-class">
-            <title>controller class</title>
-            <para>Create a new manual Controller (ie where you write the methods)</para>
-            <programlisting><![CDATA[controller class --name]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--name</term>
-                    <listitem>
-                        <para>The path and name of the controller object to be created</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--preferredMapping</term>
-                    <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/)</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
         <section xml:id="command-index-controller-scaffold">
             <title>controller scaffold</title>
             <para>Create a new scaffold Controller (ie where we maintain CRUD automatically)</para>
-            <programlisting><![CDATA[controller scaffold --name]]></programlisting>
+            <programlisting><![CDATA[controller scaffold --class]]></programlisting>
             <variablelist>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
                         <para>The path and name of the controller object to be created</para>
                     </listitem>
@@ -392,12 +391,6 @@
                     <term>--disallowedOperations</term>
                     <listitem>
                         <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--dateFormat</term>
-                    <listitem>
-                        <para>The date format defaults to the current locale, use this parameter to customize the date format</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -554,6 +547,18 @@
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--dateFormat</term>
+                    <listitem>
+                        <para>Indicates the style of the date format</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--timeFormat</term>
+                    <listitem>
+                        <para>Indicates the style of the time format</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1124,12 +1129,6 @@
             <programlisting><![CDATA[exit]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section xml:id="command-index-props">
-            <title>props</title>
-            <para>Shows the shell's properties</para>
-            <programlisting><![CDATA[props]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
         <section xml:id="command-index-script">
             <title>script</title>
             <para>Parses the specified resource file and executes its commands</para>
@@ -1148,6 +1147,12 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+        <section xml:id="command-index-system-properties">
+            <title>system properties</title>
+            <para>Shows the shell's properties</para>
+            <programlisting><![CDATA[system properties]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
         <section xml:id="command-index-version">
             <title>version</title>
@@ -1316,6 +1321,29 @@
                     <term>--password</term>
                     <listitem>
                         <para>The password to use</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-jsp-commands">
+        <title>Jsp Commands</title>
+        <para>Jsp Commands are contained in org.springframework.roo.addon.mvc.jsp.JspCommands.</para>
+        <section xml:id="command-index-controller-class">
+            <title>controller class</title>
+            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <programlisting><![CDATA[controller class --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--preferredMapping</term>
+                    <listitem>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/)</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1710,7 +1738,7 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>--name</term>
+                    <term>--class</term>
                     <listitem>
                         <para>No help available</para>
                     </listitem>
