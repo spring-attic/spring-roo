@@ -22,7 +22,7 @@
       <listitem>
         <para><emphasis>Release stability</emphasis>: This software has not
         yet reached its final release. While we have already addressed around
-        300 bugs and enhancement requests, until we reach final release there
+        400 bugs and enhancement requests, until we reach final release there
         might be small unknown glitches or missing functionality. In
         particular the documentation is a work-in-progress and some command
         names or command options used in the shell might be varied, replaced
@@ -121,6 +121,29 @@
         &gt; Clean in Eclipse/STS, or by "<literal>mvn clean
         compile</literal>" from the command line, or "<literal>perform
         clean</literal>" from within Roo itself.</para>
+      </listitem>
+      
+      <listitem>
+        <para><emphasis>Selenium Add-on</emphasis>: The maven selenium plugin 
+        does not work on Mac OSX 10.6. This is a known issue to the developers
+        of this maven plugin and the progress on this issue can be tracked at
+         <link xlink:href="http://jira.openqa.org/browse/SRC-743">
+        http://jira.openqa.org/browse/SRC-743</link></para>
+        <para><emphasis>Date handling in Roo generated Selenium tests</emphasis>:
+        Selenium tests are generated at development time by using the 
+        '<literal>selenium</literal>' command. At the time of test generation 
+        the Selenium add-on will make a best effort to determine the format 
+        used in date input fields in Roo scaffolded views (Spring MVC apps). 
+        However, the date format expected in localized browsers can be different 
+        than the date format that the JVM reports when the tests are generated. 
+        For example if the JVM reports a date format of 'dd/MM/yy' for the locale 
+        en_AU but the browser sends a locale header of 'en-us' the selenium test 
+        will fail since the 'en-us' locale for SHORT date formats is in fact 
+        'MM/dd/yy'.</para>
+        <para>Therefore, when generating Selenium tests for web pages which are 
+        using date fields an <emphasis>exact match between browser locale and 
+        JVM locale are required</emphasis>.
+        </para>
       </listitem>
     </itemizedlist>
   </section>
