@@ -704,7 +704,7 @@ public class JspDocumentHelper {
 						divElement.removeChild(labelElement);
 						ifElement.appendChild(labelElement);
 						
-						ifElement.appendChild(JspUtils.getSelectBox(document, field.getFieldName(), plural, entityMetadata.getIdentifierField()));		
+						ifElement.appendChild(JspUtils.getSelectBox(document, field.getFieldName(), plural, typeEntityMetadata.getIdentifierField()));		
 
 						specialAnnotation = true;
 						formElement.appendChild(divElement);
