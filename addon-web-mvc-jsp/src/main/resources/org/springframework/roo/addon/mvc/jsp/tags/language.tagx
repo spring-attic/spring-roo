@@ -73,7 +73,21 @@
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Italiano" var="lang_it"/>
     	<a href="${url_it}" title="${lang_it}"><img src="${img_it}" alt="${lang_it}"/></a>
-
+		<c:out value=" "/>
+		
+		<spring:url var="img_nl" value="/static/images/nl.png" />
+    	<spring:url var="url_nl" value="">
+    		<spring:param name="lang" value="nl" />
+			<c:if test="${not empty param.page}">
+   				<spring:param name="page" value="${param.page}" />
+    		</c:if>
+    		<c:if test="${not empty param.size}">
+    			<spring:param name="size" value="${param.size}" />
+    		</c:if>	    		
+    	</spring:url>	
+    	<spring:message code="global.language.switch" arguments="Nederlandse" var="lang_nl"/>
+    	<a href="${url_nl}" title="${lang_nl}"><img src="${img_nl}" alt="${lang_nl}"/></a>
+    	
     </span>
     
  </jsp:root>
