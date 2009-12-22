@@ -19,7 +19,7 @@ public class JdbcDatabase implements Comparable<JdbcDatabase> {
 	public static final JdbcDatabase H2_IN_MEMORY = new JdbcDatabase("H2", "org.h2.Driver", "jdbc:h2:mem:TO_BE_CHANGED_BY_ADDON;DB_CLOSE_DELAY=-1");
 	public static final JdbcDatabase HYPERSONIC_IN_MEMORY = new JdbcDatabase("HYPERSONIC", "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:TO_BE_CHANGED_BY_ADDON");
 	public static final JdbcDatabase HYPERSONIC_PERSISTENT = new JdbcDatabase("HYPERSONIC", "org.hsqldb.jdbcDriver", "jdbc:hsqldb:${user.home}/TO_BE_CHANGED_BY_ADDON");
-	public static final JdbcDatabase POSTGRESQL = new JdbcDatabase("POSTGRESQL", "org.postgresql.Driver", "jdbc:postgresql://localhost:5432");
+	public static final JdbcDatabase POSTGRES = new JdbcDatabase("POSTGRES", "org.postgresql.Driver", "jdbc:postgresql://localhost:5432");
 	public static final JdbcDatabase MYSQL = new JdbcDatabase("MYSQL", "com.mysql.jdbc.Driver", "jdbc:mysql://localhost:3306");
 	public static final JdbcDatabase ORACLE = new JdbcDatabase("ORACLE", "oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost:1521");
 	public static final JdbcDatabase SYBASE = new JdbcDatabase("SYBASE", "com.sybase.jdbc2.jdbc.SybDriver", "jdbc:sybase:Tds:localhost:4100");
