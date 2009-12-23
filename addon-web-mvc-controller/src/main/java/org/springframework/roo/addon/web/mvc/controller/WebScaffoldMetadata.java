@@ -82,7 +82,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.annotationValues = annotationValues;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
-		this.entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		this.entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		this.controllerPath = annotationValues.getPath();
 		this.metadataService = metadataService;
 				
@@ -318,6 +318,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
@@ -413,6 +414,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName+ " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
@@ -707,7 +709,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Iterator<Map.Entry<JavaSymbolName,String>> it = dateTypes.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<JavaSymbolName,String> entry = it.next();
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + entry.getKey().getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + entry.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + entry.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
 		}
 	}
 	
@@ -726,7 +728,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					if (annotation != null) {
 						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
 						if (styleValue != null) {
-							bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + fieldName.getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+							bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
 						}
 					}
 				}

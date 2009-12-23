@@ -70,7 +70,7 @@ public class JspDocumentHelper {
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 
-		entityName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
 		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
 		
@@ -562,6 +562,7 @@ public class JspDocumentHelper {
 
 					Element select = document.createElement("select");
 					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
+					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
 					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
