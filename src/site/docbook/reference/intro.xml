@@ -489,10 +489,12 @@ Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
 $ cd ..
 $ rmdir roo-test</programlisting>
 
-    <para>If you see the logo appear, you've installed Roo successfully.</para>
+    <para>If you see the logo appear, you've installed Roo
+    successfully.</para>
 
-    <para>Users can enjoy brighter colours within the Roo shell by setting the 
-    <code>ROO_OPTS</code> environment variable before loading Roo. For example:</para>
+    <para>Users can enjoy brighter colours within the Roo shell by setting the
+    <code>ROO_OPTS</code> environment variable before loading Roo. For
+    example:</para>
 
     <programlisting>$ export ROO_OPTS="-Droo.bright=true"                   // Linux or Apple
 $ set ROO_OPTS="-Droo.bright=true"                      // Windows users</programlisting>
@@ -578,7 +580,7 @@ Once JPA is installed, type 'hint' and ENTER for the next suggestion.</programli
 roo&gt; hint
 roo&gt; entity --class ~.Timer --testAutomatically
 roo&gt; hint
-roo&gt; field string message --notNull
+roo&gt; field string --fieldName message --notNull
 roo&gt; hint controllers
 roo&gt; controller all --package ~.web
 roo&gt; selenium test --controller ~.web.TimerController
@@ -633,8 +635,8 @@ roo&gt; quit
 $ mvn tomcat:run</programlisting>
 
     <para>The <code>filename.roo</code> shown in the statements above should
-    be substituted with one of the filenames from this list (note that you
-    get filename completion using TAB):</para>
+    be substituted with one of the filenames from this list (note that you get
+    filename completion using TAB):</para>
 
     <itemizedlist>
       <listitem>

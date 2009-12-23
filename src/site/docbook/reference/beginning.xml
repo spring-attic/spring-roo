@@ -87,6 +87,15 @@
 
     <para>We'll assume you're using STS. Write a test and try out code
     assist.</para>
+
+    <para>If you're using IntelliJ, we recommend you review IntelliJ issue
+    report <link
+    xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
+    and consider voting on it. This issue report represents an IntelliJ
+    community request for full Aspect ITD support in IntelliJ. As shown in the
+    issue report, the AspectJ, AJDT and Roo project leads (all of whom who
+    work for the SpringSource division of VMware) have offered to assist
+    IntelliJ in securing ITD support.</para>
   </section>
 
   <section xml:id="beginning-step-5">
