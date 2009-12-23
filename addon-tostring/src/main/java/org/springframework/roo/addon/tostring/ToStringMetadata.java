@@ -2,6 +2,7 @@ package org.springframework.roo.addon.tostring;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,8 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
 				} else if (accessor.getReturnType().isArray()) {
 					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
+				} else if (beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(fieldName)).getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+					accessorText = accessorName + "().getTime()";
 				}
 				map.put(fieldName, accessorText);
 				order.add(fieldName);
