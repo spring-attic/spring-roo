@@ -62,6 +62,8 @@ div .box {
   	position:relative;
   	left:0px;
   	text-align:left;
+  	overflow:hidden;
+	display:block;
 }
 
 #menu {
@@ -116,7 +118,6 @@ div .box {
 	background:#fff;
 	border:none;
 	margin-top:15px;
-	margin-right: 235px;
 	border-top:1px solid #999999;
 }
 
