@@ -12,15 +12,20 @@ body {
 	background-position: top center;
 	background-repeat: no-repeat;
 	text-align: center;
+}
+
+#wrapper {
 	min-width: 800px;
 	max-width: 800px;
 	margin-top: 90px;
 	margin-left: auto;
 	margin-right: auto;
-}
-
-.formContainer {
-	height:400px;
+	
+	/* fix max-width incompatibility in IE6 */
+	width:expression(document.body.clientWidth > 800? "800px": "auto" );
+	
+	overflow:hidden;
+	display:block;
 }
 
 label {
