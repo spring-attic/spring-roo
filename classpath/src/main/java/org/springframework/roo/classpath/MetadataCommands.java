@@ -34,8 +34,8 @@ public class MetadataCommands implements CommandMarker {
 		this.itdMetadataScanner = itdMetadataScanner;
 	}
 
-	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications (0=none, 1=some, 2=all)")
-	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true) int level) {
+	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
+	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
 		metadataDependencyRegistry.setTrace(level);
 	}
 	
@@ -50,7 +50,7 @@ public class MetadataCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="metadata for id", help="Shows detailed information about the metadata item")
-	public String metadataForId(@CliOption(key={"", "metadataId"}, mandatory=true) String metadataId) {
+	public String metadataForId(@CliOption(key={"", "metadataId"}, mandatory=true, help="The metadata ID (should start with MID:)") String metadataId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Identifier : ").append(metadataId).append(System.getProperty("line.separator"));
 		
@@ -96,7 +96,7 @@ public class MetadataCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="metadata for type", help="Shows detailed metadata for the indicated type")
-	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true) JavaType javaType) {
+	public String metadataForType(@CliOption(key={"", "type"}, mandatory=true, help="The Java type name to display metadata for") JavaType javaType) {
 		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 		if (id == null) {
 			return "Cannot locate source for " + javaType.getFullyQualifiedTypeName();

@@ -33,7 +33,7 @@ public class BootstrapCommands implements CommandMarker {
 	
 	@CliCommand(value="development mode", help="Switches the system into development mode (greater diagnostic information)")
 	public String developmentMode(
-			@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true") boolean enabled) {
+			@CliOption(key={"","enabled"}, mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="true", help="Activates development mode") boolean enabled) {
 		processManager.setDevelopmentMode(enabled);
 		shell.setDevelopmentMode(enabled);
 		return "Development mode set to " + enabled;
@@ -61,7 +61,7 @@ public class BootstrapCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="poll speed", help="Changes the file system polling speed")
-	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true) long minimumDelayBetweenPoll) {
+	public String pollingSpeed(@CliOption(key={"","ms"}, mandatory=true, help="The number of milliseconds between each poll") long minimumDelayBetweenPoll) {
 		processManager.setMinimumDelayBetweenPoll(minimumDelayBetweenPoll);
 		return pollingInfo();
 	}

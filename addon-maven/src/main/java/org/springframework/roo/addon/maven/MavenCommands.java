@@ -49,12 +49,16 @@ public class MavenCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="dependency add", help="Adds a new dependency to the Maven project object model (POM)")
-	public void addDependency(@CliOption(key="groupId", mandatory=true) JavaPackage groupId, @CliOption(key="artifactId", mandatory=true) JavaSymbolName artifactId, @CliOption(key="version", mandatory=true) String version) {
+	public void addDependency(@CliOption(key="groupId", mandatory=true, help="The group ID of the dependency") JavaPackage groupId, 
+			@CliOption(key="artifactId", mandatory=true, help="The artifact ID of the dependency") JavaSymbolName artifactId,
+			@CliOption(key="version", mandatory=true, help="The version of the dependency") String version) {
 		mavenOperations.addDependency(groupId, artifactId, version);
 	}
 	
 	@CliCommand(value="dependency remove", help="Removes an existing dependency from the Maven project object model (POM)")
-	public void removeDependency(@CliOption(key="groupId", mandatory=true) JavaPackage groupId, @CliOption(key="artifactId", mandatory=true) JavaSymbolName artifactId, @CliOption(key="version", mandatory=true) String version) {
+	public void removeDependency(@CliOption(key="groupId", mandatory=true, help="The group ID of the dependency") JavaPackage groupId, 
+			@CliOption(key="artifactId", mandatory=true, help="The artifact ID of the dependency") JavaSymbolName artifactId, 
+			@CliOption(key="version", mandatory=true, help="The version of the dependency") String version) {
 		mavenOperations.removeDependency(groupId, artifactId, version);
 	}
 	
@@ -89,7 +93,7 @@ public class MavenCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value={"perform command"}, help="Executes a user-specified Maven command")
-	public void mvn(@CliOption(key="mavenCommand", mandatory=true) String extra) throws IOException {
+	public void mvn(@CliOption(key="mavenCommand", mandatory=true, help="User-specified Maven command (eg test:test)") String extra) throws IOException {
 		File root = new File(mavenOperations.getProjectRoot());
 		Assert.isTrue(root.isDirectory() && root.exists(), "Project root does not currently exist as a directory ('" + root.getCanonicalPath() + "')");
 		BufferedReader input = null;

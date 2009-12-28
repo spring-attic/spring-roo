@@ -36,7 +36,7 @@ public class IntegrationTestCommands implements CommandMarker {
 	
 	@CliCommand(value="test mock", help="Creates a mock test for the specified entity")
 	public void newMockTest(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the entity this mock test is targeting") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {

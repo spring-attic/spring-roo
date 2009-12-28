@@ -48,7 +48,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     
 	@CliCommand(value={"script"}, help="Parses the specified resource file and executes its commands")
 	public void script(@CliOption(key={"","file"}, help="The file to locate and execute", mandatory=true) File resource,
-						@CliOption(key="lineNumbers", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false") boolean lineNumbers) {
+						@CliOption(key="lineNumbers", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Display line numbers when executing the script") boolean lineNumbers) {
 		Assert.notNull(resource, "Resource to parser is required");
 		
 		long started = new Date().getTime();
@@ -255,7 +255,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	}
 
 	@CliCommand(value={"version"}, help="Displays shell version")
-	public String version(@CliOption(key="") String extra) {
+	public String version(@CliOption(key="", help="Special version flags") String extra) {
     	StringBuilder sb = new StringBuilder();
 		
     	if ("jaime".equals(extra)) {

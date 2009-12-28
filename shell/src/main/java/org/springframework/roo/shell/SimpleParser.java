@@ -897,7 +897,7 @@ public final class SimpleParser {
 	}
 	
 	@CliCommand(value="help", help="Shows system help")
-	public void obtainHelp(@CliOption(key={"","command"}, optionContext="availableCommands") String buffer) {
+	public void obtainHelp(@CliOption(key={"","command"}, optionContext="availableCommands", help="Command name to provide help for") String buffer) {
 		if (buffer == null) {
 			buffer = "";
 		}

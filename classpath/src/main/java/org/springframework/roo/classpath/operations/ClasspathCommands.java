@@ -56,9 +56,9 @@ public class ClasspathCommands implements CommandMarker {
 	
 	@CliCommand(value="class", help="Creates a new Java class source file in any project path")
 	public void createClass(
-			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true, help="The name of the class to create") JavaType name, 
 			@CliOption(key="rooAnnotations", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should have common Roo annotations") boolean rooAnnotations,
-			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
+			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA", help="Source directory to create the class in") Path path, 
 			@CliOption(key="extends", mandatory=false, unspecifiedDefaultValue="java.lang.Object", help="The superclass (defaults to java.lang.Object)") JavaType superclass,
 			@CliOption(key="abstract", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should be marked as abstract") boolean createAbstract,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -88,8 +88,8 @@ public class ClasspathCommands implements CommandMarker {
 	
 	@CliCommand(value="interface", help="Creates a new Java interface source file in any project path")
 	public void createInterface(
-			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
-			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true, help="The name of the interface to create") JavaType name, 
+			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA", help="Source directory to create the interface in") Path path, 
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
@@ -104,8 +104,8 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="enum type", help="Creates a new Java enum source file in any project path")
 	public void createEnum(
-			@CliOption(key="class", optionContext="update,project", mandatory=true) JavaType name, 
-			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA") Path path, 
+			@CliOption(key="class", optionContext="update,project", mandatory=true, help="The name of the enum to create") JavaType name, 
+			@CliOption(key="path", mandatory=false, unspecifiedDefaultValue="SRC_MAIN_JAVA", specifiedDefaultValue="SRC_MAIN_JAVA", help="Source directory to create the enum in") Path path, 
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
@@ -152,7 +152,7 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value="test integration", help="Creates a new integration test for the specified entity")
 	public void newIntegrationTest(
-			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project") JavaType entity,
+			@CliOption(key="entity", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The name of the entity to create an integration test for") JavaType entity,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
