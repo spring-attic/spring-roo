@@ -173,8 +173,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = found.get(0);
-			Assert.isTrue(!Modifier.isPrivate(field.getModifier()), "Field '" + field.getFieldName().getSymbolName() + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' cannot be private (use protected instead)");
-			return found.get(0);
+			return field;
 		}
 		
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
@@ -313,8 +312,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @javax.persistence.Version in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = found.get(0);
-			Assert.isTrue(!Modifier.isPrivate(field.getModifier()), "Field '" + field.getFieldName().getSymbolName() + "' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' cannot be private (use protected instead)");
-			return found.get(0);
+			return field;
 		}
 		
 		// Quit at this stage if the user doesn't want a version field
