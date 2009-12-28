@@ -94,7 +94,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     	setShellStatus(ShellStatus.PARSING);
 
 		try {
-			// We support simple block comments; ie a single pair per line. Anything else is unnecessarily complicated.
+			// We support simple block comments; ie a single pair per line
 			if (!inBlockComment && line.contains("/*")) {
 				blockCommentBegin();
 				String lhs = line.substring(0, line.lastIndexOf("/*"));
@@ -111,6 +111,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				}
 				blockCommentFinish();
 				line = line.substring(line.lastIndexOf("*/")+2);
+			}
+			// We also support inline comments
+			if (!inBlockComment && line.contains("//")) {
+				line = line.substring(0, line.indexOf("//"));
 			}
 			if ("".equals(line.trim())) {
 		    	setShellStatus(ShellStatus.EXECUTION_COMPLETE);
@@ -214,7 +218,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return ExitShellRequest.NORMAL_EXIT;
 	}
 
-	@CliCommand(value={"//", ";"}, help="Inline comment markers")
+	@CliCommand(value={"//", ";"}, help="Inline comment markers (start of line only)")
 	public void inlineComment() {}
 
 	@CliCommand(value={"/*"}, help="Start of block comment")
