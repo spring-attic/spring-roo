@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.0.0.RC4 [rev 523].</para>
+    <para>This appendix was automatically built from Roo ENGINEERING BUILD [rev 537:538M].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -20,13 +20,13 @@
                 <varlistentry>
                     <term>--url</term>
                     <listitem>
-                        <para>The URL to obtain the add-on ZIP file from</para>
+                        <para>The URL to obtain the add-on ZIP file from; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--automaticRestart</term>
                     <listitem>
-                        <para>Causes an automatic shell restart to occur if changes are made</para>
+                        <para>Causes an automatic shell restart to occur if changes are made; default: 'true'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -45,13 +45,13 @@
                 <varlistentry>
                     <term>--pattern</term>
                     <listitem>
-                        <para>The filename pattern to remove</para>
+                        <para>The filename pattern to remove; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--automaticRestart</term>
                     <listitem>
-                        <para>Causes an automatic shell restart to occur if changes are made</para>
+                        <para>Causes an automatic shell restart to occur if changes are made; default: 'true'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -78,7 +78,7 @@
                 <varlistentry>
                     <term>--enabled</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Activates development mode; default: 'true'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -97,7 +97,7 @@
                 <varlistentry>
                     <term>--ms</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The number of milliseconds between each poll; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -120,37 +120,37 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The name of the class to create; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--rooAnnotations</term>
                     <listitem>
-                        <para>Whether the generated class should have common Roo annotations</para>
+                        <para>Whether the generated class should have common Roo annotations; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source directory to create the class in; default: 'SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--extends</term>
                     <listitem>
-                        <para>The superclass (defaults to java.lang.Object)</para>
+                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--abstract</term>
                     <listitem>
-                        <para>Whether the generated class should be marked as abstract</para>
+                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -163,19 +163,19 @@
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>The entity which this data on demand class will create and modify as required</para>
+                        <para>The entity which this data on demand class will create and modify as required; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')</para>
+                        <para>The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand'); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -188,67 +188,67 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>Name of the entity to create</para>
+                        <para>Name of the entity to create; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--extends</term>
                     <listitem>
-                        <para>The superclass (defaults to java.lang.Object)</para>
+                        <para>The superclass (defaults to java.lang.Object); default if option not present: 'java.lang.Object'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--abstract</term>
                     <listitem>
-                        <para>Whether the generated class should be marked as abstract</para>
+                        <para>Whether the generated class should be marked as abstract; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--testAutomatically</term>
                     <listitem>
-                        <para>Create automatic integration tests for this entity</para>
+                        <para>Create automatic integration tests for this entity; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--table</term>
                     <listitem>
-                        <para>The JPA table name to use for this entity</para>
+                        <para>The JPA table name to use for this entity; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierField</term>
                     <listitem>
-                        <para>The JPA identifier field name to use for this entity</para>
+                        <para>The JPA identifier field name to use for this entity; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierColumn</term>
                     <listitem>
-                        <para>The JPA identifier field column to use for this entity</para>
+                        <para>The JPA identifier field column to use for this entity; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--identifierType</term>
                     <listitem>
-                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long)</para>
+                        <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--inheritanceType</term>
                     <listitem>
-                        <para>The JPA @Inheritance value</para>
+                        <para>The JPA @Inheritance value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--mappedSuperclass</term>
                     <listitem>
-                        <para>Apply @MappedSuperclass for this entity</para>
+                        <para>Apply @MappedSuperclass for this entity; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -261,19 +261,19 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the enum class to receive this field</para>
+                        <para>The name of the enum class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>The name of the constant</para>
+                        <para>The name of the constant; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -286,19 +286,19 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The name of the enum to create; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source directory to create the enum in; default: 'SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -311,19 +311,19 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The name of the interface to create; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source directory to create the interface in; default: 'SRC_MAIN_JAVA'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -336,13 +336,13 @@
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The name of the entity to create an integration test for; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -359,7 +359,7 @@
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package in which new controllers will be placed</para>
+                        <para>The package in which new controllers will be placed; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -372,25 +372,25 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created</para>
+                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>The name of the entity object which the controller exposes to the web tier</para>
+                        <para>The name of the entity object which the controller exposes to the web tier; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object)</para>
+                        <para>The base path under which the controller listens for RESTful requests (defaults to the simple name of the form backing object); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--disallowedOperations</term>
                     <listitem>
-                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller</para>
+                        <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -407,67 +407,67 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--assertFalse</term>
                     <listitem>
-                        <para>Whether this value must assert false</para>
+                        <para>Whether this value must assert false; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--assertTrue</term>
                     <listitem>
-                        <para>Whether this value must assert true</para>
+                        <para>Whether this value must assert true; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name</para>
+                        <para>The JPA column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--primitive</term>
                     <listitem>
-                        <para>Indicates to use a primitive type</para>
+                        <para>Indicates to use a primitive type; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -480,85 +480,85 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity</para>
+                        <para>The Java type of the entity; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--persistenceType</term>
                     <listitem>
-                        <para>The type of persistent storage to be used</para>
+                        <para>The type of persistent storage to be used; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--future</term>
                     <listitem>
-                        <para>Whether this value must be in the future</para>
+                        <para>Whether this value must be in the future; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--past</term>
                     <listitem>
-                        <para>Whether this value must be in the past</para>
+                        <para>Whether this value must be in the past; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name</para>
+                        <para>The JPA column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--dateFormat</term>
                     <listitem>
-                        <para>Indicates the style of the date format</para>
+                        <para>Indicates the style of the date format; default: 'SHORT'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--timeFormat</term>
                     <listitem>
-                        <para>Indicates the style of the time format</para>
+                        <para>Indicates the style of the time format; default: 'NONE'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -571,55 +571,55 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The enum type of this field</para>
+                        <para>The enum type of this field; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--enumType</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level</para>
+                        <para>The fetch semantics at a JPA level; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -632,85 +632,85 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity</para>
+                        <para>The Java type of the entity; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMin</term>
                     <listitem>
-                        <para>The BigDecimal string-based representation of the minimum value</para>
+                        <para>The BigDecimal string-based representation of the minimum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMax</term>
                     <listitem>
-                        <para>The BigDecimal string based representation of the maximum value</para>
+                        <para>The BigDecimal string based representation of the maximum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--min</term>
                     <listitem>
-                        <para>The minimum value</para>
+                        <para>The minimum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--max</term>
                     <listitem>
-                        <para>The maximum value</para>
+                        <para>The maximum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name</para>
+                        <para>The JPA column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--primitive</term>
                     <listitem>
-                        <para>Indicates to use a primitive type if possible</para>
+                        <para>Indicates to use a primitive type if possible; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -723,49 +723,49 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field</para>
+                        <para>The name of the field; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of this field</para>
+                        <para>The Java type of this field; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -778,61 +778,61 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>The Java type of the entity to reference</para>
+                        <para>The Java type of the entity to reference; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--joinColumnName</term>
                     <listitem>
-                        <para>The JPA Join Column name</para>
+                        <para>The JPA Join Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--fetch</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level</para>
+                        <para>The fetch semantics at a JPA level; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -845,79 +845,79 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--element</term>
                     <listitem>
-                        <para>The entity which will be contained within the Set</para>
+                        <para>The entity which will be contained within the Set; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--mappedBy</term>
                     <listitem>
-                        <para>The field name on the referenced type which owns the relationship</para>
+                        <para>The field name on the referenced type which owns the relationship; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMin</term>
                     <listitem>
-                        <para>The minimum string length</para>
+                        <para>The minimum string length; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMax</term>
                     <listitem>
-                        <para>The maximum string length</para>
+                        <para>The maximum string length; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--cardinality</term>
                     <listitem>
-                        <para>The relationship cardinarily at a JPA level</para>
+                        <para>The relationship cardinarily at a JPA level; default: 'MANY_TO_MANY'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--fetch</term>
                     <listitem>
-                        <para>The fetch semantics at a JPA level</para>
+                        <para>The fetch semantics at a JPA level; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -930,79 +930,79 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--notNull</term>
                     <listitem>
-                        <para>Whether this value cannot be null</para>
+                        <para>Whether this value cannot be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--nullRequired</term>
                     <listitem>
-                        <para>Whether this value must be null</para>
+                        <para>Whether this value must be null; default if option present: 'true'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMin</term>
                     <listitem>
-                        <para>The BigDecimal string-based representation of the minimum value</para>
+                        <para>The BigDecimal string-based representation of the minimum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--decimalMax</term>
                     <listitem>
-                        <para>The BigDecimal string based representation of the maximum value</para>
+                        <para>The BigDecimal string based representation of the maximum value; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMin</term>
                     <listitem>
-                        <para>The minimum string length</para>
+                        <para>The minimum string length; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--sizeMax</term>
                     <listitem>
-                        <para>The maximum string length</para>
+                        <para>The maximum string length; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--regexp</term>
                     <listitem>
-                        <para>The required regular expression pattern</para>
+                        <para>The required regular expression pattern; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name</para>
+                        <para>The JPA column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--comment</term>
                     <listitem>
-                        <para>An optional comment for JavaDocs</para>
+                        <para>An optional comment for JavaDocs; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--transient</term>
                     <listitem>
-                        <para>Indicates to mark the field as transient</para>
+                        <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1019,13 +1019,13 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The controller or entity for which the finders are generated</para>
+                        <para>The controller or entity for which the finders are generated; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--finderName</term>
                     <listitem>
-                        <para>The finder string as generated with 'list finders for'</para>
+                        <para>The finder string as generated with 'list finders for'; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1038,19 +1038,19 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The controller or entity for which the finders are generated</para>
+                        <para>The controller or entity for which the finders are generated; default if option not present: '*' (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--depth</term>
                     <listitem>
-                        <para>The depth of attribute combinations to be generated for the finders</para>
+                        <para>The depth of attribute combinations to be generated for the finders; default: '1'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--filter</term>
                     <listitem>
-                        <para>A comma separated list of strings that must be present in a filter to be included</para>
+                        <para>A comma separated list of strings that must be present in a filter to be included; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1067,7 +1067,7 @@
                 <varlistentry>
                     <term>--topic</term>
                     <listitem>
-                        <para>The topic for which advice should be provided</para>
+                        <para>The topic for which advice should be provided; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1084,13 +1084,13 @@
                 <varlistentry>
                     <term>--entity</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The name of the entity this mock test is targeting; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
-                        <para>Indicates whether reserved words are ignored by Roo</para>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1113,7 +1113,7 @@
         </section>
         <section xml:id="command-index-fwdfwd">
             <title>//</title>
-            <para>Inline comment markers</para>
+            <para>Inline comment markers (start of line only)</para>
             <programlisting><![CDATA[//]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
@@ -1137,13 +1137,13 @@
                 <varlistentry>
                     <term>--file</term>
                     <listitem>
-                        <para>The file to locate and execute</para>
+                        <para>The file to locate and execute; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--lineNumbers</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Display line numbers when executing the script; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1162,7 +1162,7 @@
                 <varlistentry>
                     <term>--[default]</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Special version flags; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1179,13 +1179,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; default: 'jmsTemplate'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1198,19 +1198,19 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to create</para>
+                        <para>The name of the class to create; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--destinationName</term>
                     <listitem>
-                        <para>The name of the destination</para>
+                        <para>The name of the destination; default: 'myDestination'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--destinationType</term>
                     <listitem>
-                        <para>The type of the destination</para>
+                        <para>The type of the destination; default: 'QUEUE'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1223,19 +1223,19 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The persistence provider to support</para>
+                        <para>The persistence provider to support; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--destinationName</term>
                     <listitem>
-                        <para>The name of the destination</para>
+                        <para>The name of the destination; default: 'myDestination'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--destinationType</term>
                     <listitem>
-                        <para>The type of the destination</para>
+                        <para>The type of the destination; default: 'QUEUE'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1258,7 +1258,7 @@
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be removed</para>
+                        <para>The property key that should be removed; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1271,13 +1271,13 @@
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be changed</para>
+                        <para>The property key that should be changed; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>The new vale for this property key</para>
+                        <para>The new vale for this property key; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1290,37 +1290,37 @@
                 <varlistentry>
                     <term>--provider</term>
                     <listitem>
-                        <para>The persistence provider to support</para>
+                        <para>The persistence provider to support; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--database</term>
                     <listitem>
-                        <para>The database to support</para>
+                        <para>The database to support; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--jndiDataSource</term>
                     <listitem>
-                        <para>The JNDI datasource to use</para>
+                        <para>The JNDI datasource to use; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--databaseName</term>
                     <listitem>
-                        <para>The database name to use</para>
+                        <para>The database name to use; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--userName</term>
                     <listitem>
-                        <para>The username to use</para>
+                        <para>The username to use; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>The password to use</para>
+                        <para>The password to use; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1337,13 +1337,13 @@
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created</para>
+                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--preferredMapping</term>
                     <listitem>
-                        <para>Indicates a specific request mapping path for this controller (eg /foo/)</para>
+                        <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1360,13 +1360,13 @@
                 <varlistentry>
                     <term>--level</term>
                     <listitem>
-                        <para>The log level to configure</para>
+                        <para>The log level to configure; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
-                        <para>The package to append the logging level to (all by default)</para>
+                        <para>The package to append the logging level to (all by default); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1383,37 +1383,37 @@
                 <varlistentry>
                     <term>--hostServer</term>
                     <listitem>
-                        <para>The host server</para>
+                        <para>The host server; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--protocol</term>
                     <listitem>
-                        <para>The protocol used by mail server</para>
+                        <para>The protocol used by mail server; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--port</term>
                     <listitem>
-                        <para>The port used by mail server</para>
+                        <para>The port used by mail server; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--encoding</term>
                     <listitem>
-                        <para>The encoding used for mail</para>
+                        <para>The encoding used for mail; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--username</term>
                     <listitem>
-                        <para>The mail account username</para>
+                        <para>The mail account username; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--password</term>
                     <listitem>
-                        <para>The mail account password</para>
+                        <para>The mail account password; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1426,13 +1426,13 @@
                 <varlistentry>
                     <term>--from</term>
                     <listitem>
-                        <para>The 'from' email (optional)</para>
+                        <para>The 'from' email (optional); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--subject</term>
                     <listitem>
-                        <para>The message subject (obtional)</para>
+                        <para>The message subject (obtional); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1445,13 +1445,13 @@
                 <varlistentry>
                     <term>--fieldName</term>
                     <listitem>
-                        <para>The name of the field to add</para>
+                        <para>The name of the field to add; default: 'mailTemplate'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The name of the class to receive this field</para>
+                        <para>The name of the class to receive this field; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1468,19 +1468,19 @@
                 <varlistentry>
                     <term>--groupId</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The group ID of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The artifact ID of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--version</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The version of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1493,19 +1493,19 @@
                 <varlistentry>
                     <term>--groupId</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The group ID of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--artifactId</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The artifact ID of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--version</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The version of the dependency; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1530,7 +1530,7 @@
                 <varlistentry>
                     <term>--mavenCommand</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>User-specified Maven command (eg test:test); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1561,25 +1561,25 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The uppermost package name</para>
+                        <para>The uppermost package name; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--projectName</term>
                     <listitem>
-                        <para>The name of the project (last segment of package name used as default)</para>
+                        <para>The name of the project (last segment of package name used as default); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--java</term>
                     <listitem>
-                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)</para>
+                        <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--template</term>
                     <listitem>
-                        <para>The type of project to create (defaults to STANDARD_PROJECT)</para>
+                        <para>The type of project to create (defaults to STANDARD_PROJECT); default: 'STANDARD_PROJECT'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1596,7 +1596,7 @@
                 <varlistentry>
                     <term>--metadataId</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The metadata ID (should start with MID:); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1609,7 +1609,7 @@
                 <varlistentry>
                     <term>--type</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The Java type name to display metadata for; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1622,13 +1622,13 @@
         </section>
         <section xml:id="command-index-metadata-trace">
             <title>metadata trace</title>
-            <para>Traces metadata event delivery notifications (0=none, 1=some, 2=all)</para>
+            <para>Traces metadata event delivery notifications</para>
             <programlisting><![CDATA[metadata trace --level]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--level</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>The verbosity of notifications (0=none, 1=some, 2=all); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1645,13 +1645,13 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source path to property file; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1664,19 +1664,19 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source path to property file; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be removed</para>
+                        <para>The property key that should be removed; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1689,25 +1689,25 @@
                 <varlistentry>
                     <term>--name</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Property file name (including .properties suffix); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--path</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Source path to property file; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--key</term>
                     <listitem>
-                        <para>The property key that should be changed</para>
+                        <para>The property key that should be changed; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--value</term>
                     <listitem>
-                        <para>The new vale for this property key</para>
+                        <para>The new vale for this property key; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1734,19 +1734,19 @@
                 <varlistentry>
                     <term>--controller</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Controller to create a Selenium test for; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>--class</term>
+                    <term>--name</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Name of the test; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--serverUrl</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>URL of the server where the web application is available, including protocol, port and hostname; default: 'http://localhost:8080/'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1763,7 +1763,7 @@
                 <varlistentry>
                     <term>--command</term>
                     <listitem>
-                        <para>No help available</para>
+                        <para>Command name to provide help for; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1786,7 +1786,7 @@
                 <varlistentry>
                     <term>--flowName</term>
                     <listitem>
-                        <para>The name for your web flow</para>
+                        <para>The name for your web flow; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>

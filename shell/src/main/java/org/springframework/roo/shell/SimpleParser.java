@@ -808,11 +808,33 @@ public final class SimpleParser {
 										key = "[default]";
 									}
 								}
-								String help = "".equals(option.help()) ? "No help available" : option.help();
+								
+								StringBuilder help = new StringBuilder();
+								if ("".equals(option.help())) {
+									help.append("No help available");
+								} else {
+									help.append(option.help());
+								}
+								if (option.specifiedDefaultValue().equals(option.unspecifiedDefaultValue())) {
+									if (option.specifiedDefaultValue().equals("__NULL__")) {
+										help.append("; no default value");
+									} else {
+										help.append("; default: '").append(option.specifiedDefaultValue()).append("'");
+									}
+								} else {
+									if (!"".equals(option.specifiedDefaultValue()) && !"__NULL__".equals(option.specifiedDefaultValue())) {
+										help.append("; default if option present: '" + option.specifiedDefaultValue()).append("'");
+									}
+									if (!"".equals(option.unspecifiedDefaultValue()) && !"__NULL__".equals(option.unspecifiedDefaultValue())) {
+										help.append("; default if option not present: '" + option.unspecifiedDefaultValue()).append("'");
+									}
+								}
+								help.append(option.mandatory() ? " (mandatory) " : "");
+								
 								// Store details for later
 								key = "--" + key;
 								optionKeys.add(key);
-								optionDetails.put(key, help);
+								optionDetails.put(key, help.toString());
 								
 								// Include it in the mandatory syntax
 								if (option.mandatory()) {
