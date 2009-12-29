@@ -108,7 +108,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
 				} else if (accessor.getReturnType().isArray()) {
 					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
-				} else if (beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(fieldName)).getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+				} else if (new JavaType(Calendar.class.getName()).equals(accessor.getReturnType())) {
 					accessorText = accessorName + "().getTime()";
 				}
 				map.put(fieldName, accessorText);
