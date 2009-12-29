@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chapter version="5.0" xml:id="usage" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:ns5="http://www.w3.org/1998/Math/MathML"
          xmlns:ns4="http://www.w3.org/2000/svg"
          xmlns:ns3="http://www.w3.org/1999/xhtml"
@@ -39,7 +40,10 @@
 
     <para>Cover version control recommendations, plus handling of changes if
     Roo isn't running. Also the auto-scaled file monitoring in use etc. Also
-    backup command.</para>
+    backup command. The only files that Roo automatically maintains are
+    AspectJ ITDs matching the <code>*_Roo_*.aj</code> wildcard and those JSPs
+    associated with MVC controllers that have the annotation
+    <code>@RooWebScaffold(automaticallyMaintainView=true)</code>. </para>
   </section>
 
   <section xml:id="usage-addons">

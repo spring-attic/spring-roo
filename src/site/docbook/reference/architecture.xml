@@ -2,6 +2,7 @@
 <chapter version="5.0" xml:id="architecture"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:ns5="http://www.w3.org/1998/Math/MathML"
          xmlns:ns4="http://www.w3.org/2000/svg"
          xmlns:ns3="http://www.w3.org/1999/xhtml"
@@ -18,38 +19,359 @@
   <section xml:id="architecture-overview">
     <title>Architectural Overview</title>
 
-    <para>TBC</para>
+    <para>Spring Roo focuses on the development of enterprise applications
+    written in Java. In the current version of Roo these applications
+    typically will have a relational database backend, Java Persistence API
+    (JPA) persistence approach, Spring Framework dependency injection and
+    transactional management, JUnit tests, a Maven build configuration and
+    usually a Spring MVC-based front-end that uses JSP for its views. As such
+    a Roo-based application is like most modern Java-based enterprise
+    applications.</para>
+
+    <para>While most people will be focusing on developing these Spring
+    MVC-based web applications, it's important to recognize that Roo does not
+    impose any restrictions on the sort of Java applications that can be built
+    with it. Even with Roo 1.0.0 it's easy to build any type of self-contained
+    application. Some examples of the types of requirements you can easily
+    address with the current version of Roo include (but are not limited
+    to):</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Listening for messages on a JMS queue and sending replies over
+        JMS or SMTP (Roo can easily <link
+        linkend="command-index-jms-setup">setup JMS</link> message producers,
+        consumers and <link
+        linkend="command-index-email-sender-setup">SMTP</link>)</para>
+      </listitem>
+
+      <listitem>
+        <para>Writing a services layer (perhaps annotated with Spring's
+        @Service <link
+        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/beans.html#beans-stereotype-annotations">stereotype
+        annotation</link>) and exposing it using a remoting protocol to a rich
+        client (Spring's <link
+        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/remoting.html">remoting
+        services</link> will help here)</para>
+      </listitem>
+
+      <listitem>
+        <para>Executing a series of predefined actions against the database,
+        perhaps in conjunction with Spring's new @Scheduled or @Async <link
+        xlink:href="http://static.springsource.org/spring/docs/3.0.0.RELEASE/spring-framework-reference/html/scheduling.html#scheduling-annotation-support">timer
+        annotations</link></para>
+      </listitem>
+
+      <listitem>
+        <para>Experimentation with the latest <link
+        linkend="architecture-critical-technologies-spring">Spring</link> and
+        <link
+        linkend="architecture-critical-technologies-aspectj">AspectJ</link>
+        features with minimal time investment</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>One of the major differences between Roo and traditional,
+    hand-written applications is we don't add layers of abstraction
+    unnecessarily. Most traditional Java enterprise applications will have a
+    DAO layer, services layer, domain layer and controller layer. In a typical
+    Roo application you'll only use an <link
+    linkend="architecture-entities">entity layer</link> (which is similar to a
+    domain layer) and a <link linkend="architecture-web">web layer</link>. As
+    indicated by the list above, a <link
+    linkend="architecture-services">services layer</link> might be added if
+    your application requires it, although a <link
+    linkend="architecture-dao">DAO layer</link> is extremely rarely added.
+    We'll look at some of these layering conventions (and the rationale for
+    them) as we go through the rest of this chapter.</para>
+
+    <para>In the next major release of Roo we intend to expand our <link
+    xlink:href="http://en.wikipedia.org/wiki/Cloud_computing">cloud</link>
+    support and choice of rich internet application (RIA) frameworks. While
+    today you can build a Roo based application that deploys to clouds like
+    <link xlink:href="http://cloudfoundry.com/">Cloud Foundry</link>, <link
+    xlink:href="http://aws.amazon.com/">Amazon Web Services</link> and <link
+    xlink:href="https://jira.springsource.org/browse/ROO-146">Google App
+    Engine</link>, in the future we'll have a broader number of add-ons to
+    make this easier and facilitate development with non-relational databases.
+    In terms of RIA support, we're planning to add extra services to help you
+    build <link xlink:href="http://code.google.com/webtoolkit/">Google Web
+    Toolkit</link> (GWT) frontends, in part due to the high level of synergy
+    between GWT and Roo (both heavily focusing on engineering performance and
+    a first-class Java-centric development approach). There have also been
+    requests made to support <link
+    xlink:href="http://ant.apache.org/ivy/">Apache Ivy</link> as an
+    alternative to <link xlink:href="http://maven.apache.org/">Apache
+    Maven</link>, which you can track as feature request <link
+    xlink:href="https://jira.springsource.org/browse/ROO-91">ROO-91</link>.</para>
   </section>
 
   <section xml:id="architecture-critical-technologies">
     <title>Critical Technologies</title>
 
-    <para>Certain technologies are very important in all Roo projects.</para>
+    <para>Two technologies are very important in all Roo projects, those being
+    AspectJ and Spring. We'll have a look at how Roo-based applications use
+    these technologies in this section.</para>
 
     <section xml:id="architecture-critical-technologies-aspectj">
       <title>AspectJ</title>
 
-      <para>TBC</para>
+      <para>AspectJ is a powerful and mature aspect oriented programming (AOP)
+      framework that underpins many large-scale systems. Spring Framework has
+      offered extensive support for AspectJ since 2004, with Spring 2.0
+      adopting AspectJ's pointcut definition language even for expressing
+      Spring AOP pointcuts. Many of the official Spring projects offer support
+      for AspectJ or are themselves heavily dependent on it, with several
+      examples including Spring Security (formerly Acegi Security System for
+      Spring), Spring Insight, SpringSource tc Server, SpringSource dm Server,
+      Spring Enterprise and Spring Roo.</para>
+
+      <para>While AspectJ is most commonly known for its aspect oriented
+      programming (AOP) features such as applying advice at defined pointcuts,
+      Roo projects use AspectJ's powerful inter-type declaration (ITD)
+      features. This is where the real magic of Roo comes from, as it allows
+      us to code generate members (artifacts like methods, fields etc) in a
+      different compilation unit (ie source file) from the normal .java code
+      you'd write as a developer. Because the generated code is in a separate
+      file, we can maintain that file's lifecycle and contents completely
+      independently of whatever you are doing to the .java files. Your .java
+      files do not need to do anything unnatural like reference the generated
+      ITD file and the whole process is completely transparent.</para>
+
+      <para>Let's have a look at how ITDs work. In a new directory, type the
+      following commands and note the console output:</para>
+
+      <programlisting>roo&gt; project --topLevelPackage com.aspectj.rocks
+roo&gt; persistence setup --database HYPERSONIC_IN_MEMORY --provider OPENJPA
+roo&gt; entity --class Hello
+Created SRC_MAIN_JAVA/com/aspectj/rocks
+Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
+Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_Entity.aj
+Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj
+Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_Configurable.aj
+roo&gt; field string --fieldName comment
+Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
+Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_JavaBean.aj
+Managed SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_ToString.aj</programlisting>
+
+      <para>Notice how there is a standard <code>Hello.java</code> file, as
+      well as a series of <code>Hello_Roo_*.aj</code> files. Any file ending
+      in <code>*_Roo_*.aj</code> is an AspectJ ITD and will be managed by Roo.
+      You should not edit these files directly, as Roo will automatically
+      maintain them (this includes even deleting files that aren't required,
+      as we'll see shortly).</para>
+
+      <para>The <code>Hello.java</code> is just a normal Java file. It looks
+      like this:</para>
+
+      <programlisting>package com.aspectj.rocks;
+
+import javax.persistence.Entity;
+import org.springframework.roo.addon.javabean.RooJavaBean;
+import org.springframework.roo.addon.tostring.RooToString;
+import org.springframework.roo.addon.entity.RooEntity;
+
+@Entity
+@RooJavaBean
+@RooToString
+@RooEntity
+public class Hello {
+
+    private String comment;
+}</programlisting>
+
+      <para>As shown, there's very little in the <code>.java</code> file.
+      There are some annotations, plus of course the field we added. Note that
+      Roo annotations are always source-level retention, meaning they're not
+      compiled into your <code>.class</code> file. Also, as per our usability
+      goals you'll note that Roo annotations also always start with
+      <code>@Roo*</code> to help you find them with code assist.</para>
+
+      <para>By this stage you're probably wondering what the ITD files look
+      like. Let's have a look at one of them,
+      <code>Hello_Roo_ToString.aj</code>:</para>
+
+      <programlisting>package com.aspectj.rocks;
+
+import java.lang.String;
+
+privileged aspect Hello_Roo_ToString {
+    
+    public String Hello.toString() {    
+        StringBuilder sb = new StringBuilder();        
+        sb.append("Id: ").append(getId()).append(", ");        
+        sb.append("Version: ").append(getVersion()).append(", ");        
+        sb.append("Comment: ").append(getComment());        
+        return sb.toString();        
+    }    
+    
+}</programlisting>
+
+      <para>Notice how the ITD is very similar to Java code. The main
+      differences are that it is declared with "<code>privileged
+      aspect</code>", plus each member identifies the target type (in this
+      case it is "<code>Hello.toString</code>", which means add the
+      "<code>toString</code>" method to the "<code>Hello</code>" type). The
+      compiler will automatically recognize these ITD files and cause the
+      correct members to be compiled into <code>Hello.class</code>. We can see
+      that quite easily by using Java's <code>javap</code> command. All we
+      need to do is run the compiler and view the resulting class. From the
+      same directory as you created the project in, enter the following
+      commands and observe the final output:</para>
+
+      <programlisting>$ mvn compile
+$ javap -classpath target/classes/.:target/test-classes/. com.aspectj.rocks.Hello
+Compiled from "Hello.java"
+public class com.aspectj.rocks.Hello extends java.lang.Object implements org.springframework.beans.factory.aspectj.ConfigurableObject{
+    public transient javax.persistence.EntityManager ajc$interField$com_aspectj_rocks$entityManager;
+    public java.lang.Long ajc$interField$com_aspectj_rocks_Hello_Roo_Entity$id;
+    public java.lang.Integer ajc$interField$com_aspectj_rocks_Hello_Roo_Entity$version;
+    public com.aspectj.rocks.Hello();
+    public static java.lang.String ajc$privFieldGet$com_aspectj_rocks_Hello_Roo_JavaBean$com_aspectj_rocks_Hello$comment(com.aspectj.rocks.Hello);
+    public static void ajc$privFieldSet$com_aspectj_rocks_Hello_Roo_JavaBean$com_aspectj_rocks_Hello$comment(com.aspectj.rocks.Hello, java.lang.String);
+    static {};
+    public static long countHelloes();
+    public static final javax.persistence.EntityManager entityManager();
+    public static java.util.List findAllHelloes();
+    public static com.aspectj.rocks.Hello findHello(java.lang.Long);
+    public static java.util.List findHelloEntries(int, int);
+    public void flush();
+    public java.lang.String getComment();
+    public java.lang.Long getId();
+    public java.lang.Integer getVersion();
+    public void merge();
+    public void persist();
+    public void remove();
+    public void setComment(java.lang.String);
+    public void setId(java.lang.Long);
+    public void setVersion(java.lang.Integer);
+    public java.lang.String toString();
+}</programlisting>
+
+      <para>While the <code>javap</code> output might look a little daunting
+      at first, it represents all the members that Roo has added (via AspectJ
+      ITDs) to the original <code>Hello.java</code> file. Notice there isn't
+      just the <code>toString</code> method we saw in the earlier ITD, but
+      we've also made the <code>Hello</code> class implement Spring's
+      <code>ConfigurableObject</code> interface, provided access to a JPA
+      <code>EntityManager</code>, included a range of convenient persistence
+      methods plus even getters and setters. All of these useful features are
+      automatically maintained in a round-trip compatible manner via the
+      ITDs.</para>
+
+      <para>A careful reader might be wondering about the long field names
+      seen for introduced fields. You can see that these field names start
+      with "<code>ajc$</code>" in the output above. The reason for this is to
+      avoid name collisions with fields you might have in the
+      <code>.java</code> file. The good news is that you won't ever need to
+      deal with this unless you're trying to do something clever with
+      reflection. It's just something to be aware of for introduced fields in
+      particular. Note that the names of methods and constructors are never
+      modified.</para>
+
+      <para>Naturally as a normal Roo user you won't need to worry about the
+      internals of ITD source code and the resulting <code>.class</code>
+      files. Roo automatically manages all ITDs for you and you never need
+      deal with them directly. It's just nice to know how it all works under
+      the hood (Roo doesn't believe in magic!). The benefit of this ITD
+      approach is how easily and gracefully Roo can handle code generation for
+      you.</para>
+
+      <para>To see this in action, go and edit the <code>Hello.java</code> in
+      your favourite text editor with Roo running. Do something simple like
+      add a new field. You'll notice the <code>Hello_Roo_ToString.aj</code>
+      and <code>Hello_Roo_JavaBean.aj</code> files are instantly and
+      automatically updated by Roo to include your new field. Now go and write
+      your own <code>toString</code> method in the <code>.java</code> file.
+      Notice Roo deletes the <code>Hello_Roo_ToString.aj</code> file, as it
+      detects your <code>toString </code>method should take priority over a
+      generated <code>toString</code> method. But let's say you want a
+      generated <code>toString</code> as well, so change the
+      <code>Hello.java</code>'s <code>@RooToString</code> annotation to read
+      <code>@RooToString(toStringMethod="generatedToString")</code>. Now
+      you'll notice the <code>Hello_Roo_ToString.aj</code> file is immediately
+      re-created, but this time it introduces a <code>generatedToString</code>
+      method instead of the original <code>toString</code>. If you comment out
+      both fields in <code>Hello.java</code> you'll also see that Roo deletes
+      both ITDs. You can also see the same effect by quitting the Roo shell,
+      making any changes you like, then restarting the Roo shell. Upon restart
+      Roo will automatically perform a scan and discover if it needs to make
+      any changes.</para>
+
+      <para>Despite the admittedly impressive nature of ITDs, AspectJ is also
+      pretty good at aspect oriented programming features like pointcuts and
+      advice! To this end Roo applications also use AspectJ for all other AOP
+      requirements. It is AspectJ that provides the AOP so that classes are
+      dependency injected with singletons when instantiated and transactional
+      services are called as part of method invocations. All Roo applications
+      are preconfigured to use the Spring Aspects project, which ships as part
+      of Spring Framework and represents a comprehensive "aspect library" for
+      AspectJ.</para>
     </section>
 
     <section xml:id="architecture-critical-technologies-spring">
       <title>Spring</title>
 
-      <para>TBC</para>
+      <para>Spring Roo applications all use Spring. By "Spring" we not only
+      mean Spring Framework, but also the other Spring projects like Spring
+      Security and Spring Web Flow. Of course, only Spring Framework is
+      installed into a user project by default and there are fine-grained
+      commands provided to install each additional Spring project beyond
+      Spring Framework.</para>
+
+      <para>All Roo applications use Spring Aspects, which was mentioned in
+      the <link linkend="architecture-critical-technologies-aspectj">AspectJ
+      section</link> and ensures Spring Framework's <code>@Configurable</code>
+      dependency injection and transactional advice is applied. Furthermore,
+      Roo applications use Spring's annotation-driven component scanning by
+      default and also rely on Spring Framework for instantiation and
+      dependency injection of features such as JPA providers and access to
+      database connection pools. Many of the optional features that can be
+      used in Roo applications (like JMS and SMTP messaging) are also built
+      upon the corresponding Spring Framework dependency injection support and
+      portable service abstractions.</para>
+
+      <para>Those Roo applications that include a web controller will also
+      receive Spring Framework 3's MVC features such as its conversion API,
+      web content negotation view resolution and REST support. It is possible
+      (and indeed encouraged) to write your own web Spring MVC controllers in
+      Roo applications, and you are also free to use alternate page rendering
+      technologies if you wish (ie not just JSP).</para>
+
+      <para>Generally speaking Roo will not modify any Spring-related
+      configuration or setting file (eg properties) unless specifically
+      requested via a shell command. Roo also ensures that anytime it creates,
+      modifies or deletes a file it explicitly tells you about this via a
+      shell message. What this means is you can safely edit your Spring
+      application context files at any time and without telling Roo. This is
+      very useful if the default configuration offered by Roo is unsuitable
+      for your particular application's needs.</para>
     </section>
+  </section>
+
+  <section xml:id="architecture-entities">
+    <title>Entity Layer</title>
+
+    <para>We'll mention JavaBean field name conventions plus JSR 303
+    etc.</para>
+  </section>
+
+  <section xml:id="architecture-web">
+    <title>Web Layer</title>
+
+    <para></para>
+  </section>
+
+  <section xml:id="architecture-services">
+    <title>Optional Services Layer</title>
+
+    <para></para>
   </section>
 
   <section xml:id="architecture-dao">
     <title>Goodbye DAOs</title>
 
     <para>TBC</para>
-  </section>
-
-  <section xml:id="architecture-entities">
-    <title>Entities and Fields</title>
-
-    <para>We'll mention JavaBean field name conventions plus JSR 303
-    etc.</para>
   </section>
 
   <section xml:id="architecture-extending-features">
