@@ -56,13 +56,13 @@
       </listitem>
 
       <listitem>
-        <para>customizing the look and feel of the Web UI for our business
-        domain</para>
+        <para>controlling and securing access to different views in the
+        application</para>
       </listitem>
 
       <listitem>
-        <para>controlling and securing access to different views in the
-        application</para>
+        <para>customizing the look and feel of the Web UI for our business
+        domain</para>
       </listitem>
 
       <listitem>
@@ -155,9 +155,8 @@
 pizza&gt;</programlisting></para>
 
     <para>Next, we start Spring Roo and type <emphasis role="bold">'<link
-    linkend="???"><link linkend="???"><link
-    linkend="command-index-hint-commands">hint</link></link></link>'</emphasis>
-    to obtain contexts sensitive guidance from the Roo shell:<programlisting>pizza&gt; <emphasis
+    linkend="command-index-hint-commands">hint</link>'</emphasis> to obtain
+    contexts sensitive guidance from the Roo shell:<programlisting>pizza&gt; <emphasis
           role="bold">roo</emphasis>
     ____  ____  ____  
    / __ \/ __ \/ __ \ 
@@ -222,7 +221,7 @@ com.springsource.roo.pizzashop roo&gt;
     seperate folders for your main project resources and tests. Roo also
     installs a default application context and a log4j configuration for you.
     Finally, The project pom file contains all required dependencies and
-    configurations to get started with our Pizza shop project. </para>
+    configurations to get started with our Pizza shop project.</para>
 
     <para>Once the project structure is created by Roo you can go ahead and
     install a persistence configuration for your application. Roo leverages
@@ -266,7 +265,7 @@ com.springsource.roo.pizzashop roo&gt;
     linkend="command-index-persistence-setup">persistence
     setup</link></emphasis>' command can be used later on to swap the database
     (or even ORM) for a different production database such as MySQL, Postgres,
-    MS SQL Server, Oracle, Sybase, or H2. </para>
+    MS SQL Server, Oracle, Sybase, or H2.</para>
   </section>
 
   <section xml:id="beginning-step-2">
@@ -422,41 +421,496 @@ field set --fieldName pizzas --element ~.domain.Pizza
   <section xml:id="beginning-step-3">
     <title>Step 3: Integration Tests</title>
 
-    <para>TBC</para>
+    <para>Once you are done with creating the first iteration of your domain
+    model you naturally want to see if it works. Lucky we have instructed Roo
+    to create integration tests for our domain objects all along. Hint: if you
+    have not created any integration tests while developing your domain model
+    you can still easily create them using the '<link
+    linkend="command-index-test-integration"><emphasis role="bold">test
+    integration</emphasis></link>' command. Once your tests are in place it is
+    time to run them using the '<emphasis role="bold"><link
+    linkend="command-index-perform-tests">perform tests</link></emphasis>'
+    command:</para>
+
+    <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform tests</emphasis>
+...
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.springsource.roo.pizzashop.domain.PizzaOrderIntegrationTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.413 sec
+Running com.springsource.roo.pizzashop.domain.ToppingIntegrationTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 sec
+Running com.springsource.roo.pizzashop.domain.PizzaIntegrationTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.14 sec
+Running com.springsource.roo.pizzashop.domain.BaseIntegrationTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.097 sec
+
+Results :
+
+Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 17 seconds
+[INFO] Finished at: Tue Dec 29 15:58:04 EST 2009
+[INFO] Final Memory: 25M/79M
+[INFO] ------------------------------------------------------------------------
+</programlisting></para>
+
+    <para>As you can see Roo has issued a Maven command (equivalent to running
+    'mvn test' outside the Roo shell) in order to execute the integration
+    tests. All tests have passed, Roo has generated 9 integration tests per
+    domain object resulting in a total of 36 integration tests for all 4
+    domain objects.</para>
   </section>
 
   <section xml:id="beginning-step-4">
     <title>Step 4: Using Your IDE</title>
 
-    <para>We'll assume you're using STS. Write a test and try out code
-    assist.</para>
-
-    <para>If you're using IntelliJ, we recommend you review IntelliJ issue
-    report <link
+    <para>Of course Roo projects can be used in your favorite IDE. For the
+    remainder of this tutorial we'll assume you're using the <link
+    xlink:href="http://www.springsource.com/products/sts">SpringSource Tool
+    Suite</link> (STS) which is offered free of charge. If you're using
+    IntelliJ, we recommend you review IntelliJ issue report <link
     xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
     and consider voting on it. This issue report represents an IntelliJ
     community request for full Aspect ITD support in IntelliJ. As shown in the
     issue report, the AspectJ, AJDT and Roo project leads (all of whom who
     work for the SpringSource division of VMware) have offered to assist
     IntelliJ in securing ITD support.</para>
+
+    <para>By default Roo projects do not contain any IDE-specific workspace
+    artifacts so in order to be able to import our Pizza shop application into
+    STS we need to create the relevant project artifacts. The Roo shell helps
+    us creating these artifacts by means of the 'perform eclipse'
+    command:</para>
+
+    <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform eclipse</emphasis>
+...
+[INFO] Preparing eclipse:eclipse
+[INFO] [aspectj:compile {execution: default}]
+[INFO] [eclipse:eclipse {execution: default-cli}]
+[INFO] Adding support for WTP version 2.0.
+[INFO] Using Eclipse Workspace: null
+[INFO] Adding default classpath container: org.eclipse.jdt.launching.JRE_CONTAINER
+[INFO] Wrote settings to /Users/sschmidt/pizza/.settings/org.eclipse.jdt.core.prefs
+[INFO] Wrote Eclipse project for "pizzashop" to /Users/sschmidt/Development/workspaces/pizza.
+...
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 3 seconds
+[INFO] Finished at: Tue Dec 29 16:11:38 EST 2009
+[INFO] Final Memory: 24M/79M
+[INFO] ------------------------------------------------------------------------
+</programlisting>Note, when issuing this command for the first time you can
+    expect delays while Maven downloads the dependencies and it's sources into
+    your local repository. Once this command has completed you are ready to
+    import your project into STS by clicking 'File &gt; Import &gt; General
+    &gt; Existing Projects into Workspace'. Once your project is imported into
+    STS you can take a look at the Java sources. For example you can run the
+    included JUnit tests by right clicking the pizzashop project and then
+    selecting 'Run As &gt; JUnit Test'.</para>
+
+    <para>As detailed in the <link linkend="architecture">Application
+    Architecture</link> chapter of this documentation Roo projects leverage
+    AspectJ Intertype declarations extensively. This does, however, not affect
+    your ability to use code completion features offered by STS. To see code
+    completion working in action you can open an existing integration test and
+    use the 'testMarkerMethod' method to test it. For example you can open the
+    BaseIntegrationTest.java source file and try it out:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/codecompletion.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+
+    <para>Note, most of the methods visible in the STS code assist are
+    actually not in the Java sources but rather part of the AspectJ ITD and
+    are therefore introduced into the Java bytecode at compile time.</para>
   </section>
 
   <section xml:id="beginning-step-5">
     <title>Step 5: Creating A Web Tier</title>
 
-    <para>Performed within the IDE.</para>
+    <para>As a next step we want to scaffold a Web tier for the Pizza shop
+    application. This is accomplished via the '<emphasis role="bold"><link
+    linkend="command-index-controller-commands">controller</link></emphasis>'
+    command. The most convenient way to generate controllers and all relevant
+    Web artifacts is to use the '<emphasis role="bold"><link
+    linkend="command-index-controller-all">controller all</link></emphasis>'
+    command:</para>
+
+    <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">controller all --package ~.web
+</emphasis></programlisting>This command will scan the Pizza shop project for
+    any domain entities and scaffold a Spring MVC controller for each entity
+    deteced. The '--package' attribute is needed to specify in which package
+    the controllers should be installed. This command can be issued from your
+    normal Roo shell or from the Roo shell which ships with STS. In order to
+    use the integrated Roo shell within STS you need to right click on the
+    pizzashop application and select 'Spring Tools &gt; Open Roo
+    Shell'.</para>
+
+    <para>Note, that with the first use of the '<emphasis role="bold"><link
+    linkend="command-index-controller-commands">controller</link></emphasis>'
+    command the nature of the project changes from a normal Java project
+    nature to a Web project nature in STS. The first use of the 'controller'
+    command will also add additional dependencies such as Spring MVC, Tiles,
+    URL rewrite, etc to your project. In order to update the project classpath
+    within STS with these new dependencies you can issue 'perform eclipse'
+    again, followed by a project refresh in STS.</para>
+
+    <para>All newly added Web artifacts which are needed for the view
+    scaffolding can be found under the src/main/webapp folder. This folder
+    includes graphics, cascading style sheets, Java Server pages, Tiles
+    configurations and more. The purpose of these folders is summarized in
+    Step 7. The Roo generated Spring MVC controllers follow the REST pattern
+    as much as possible by leveraging new features introduced with the release
+    of Spring Framework v3. The following URI - Resource mappings are applied
+    in Roo generated controllers:</para>
+
+    <para><table frame="box" rules="all">
+        <caption></caption>
+
+        <thead>
+          <tr align="center">
+            <th>Resource</th>
+
+            <th>GET</th>
+
+            <th>PUT</th>
+
+            <th>POST</th>
+
+            <th>DELETE</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Collection URI such as
+            http://domain.com/pizzashop/topping/</td>
+
+            <td>List the members of the collection. For example list all the
+            toppings available in the application.</td>
+
+            <td>Not used.</td>
+
+            <td>Create a new topping in the collection where the ID is
+            assigned automatically by the collection.</td>
+
+            <td>Not used.</td>
+          </tr>
+
+          <tr>
+            <td>Member URI such as http://domain.com/pizzashop/topping/5</td>
+
+            <td>Retrieve the addressed topping with id=5.</td>
+
+            <td>Update the addressed topping with id=5.</td>
+
+            <td>Not used.</td>
+
+            <td>Delete the addressed topping with id=5.</td>
+          </tr>
+
+          <tr>
+            <td>Member URI such as
+            http://domain.com/pizzashop/topping/form</td>
+
+            <td>Create Form - returns an initialized, but empty topping for
+            form binding.</td>
+
+            <td>Not used.</td>
+
+            <td>Not used.</td>
+
+            <td>Not used.</td>
+          </tr>
+
+          <tr>
+            <td>Member URI such as
+            http://domain.com/pizzashop/topping/5/form</td>
+
+            <td>Update Form returns the topping resource which is
+            pre-populated for form binding.</td>
+
+            <td>Not used.</td>
+
+            <td>Not used.</td>
+
+            <td>Not used.</td>
+          </tr>
+        </tbody>
+      </table></para>
   </section>
 
   <section xml:id="beginning-step-6">
     <title>Step 6: Loading the Web Server</title>
 
-    <para>TBC</para>
+    <para>To deploy your application in a Web container during the project
+    developemt you have several options available:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para>Deploy from your shell / command line (without the need to
+          assemble a war archive):</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>run 'mvn tomcat:run' in the root of your project (not
+              inside the Roo shell) to deploy to a Tomcat container</para>
+            </listitem>
+
+            <listitem>
+              <para>run 'mvn jetty:run' in the root of your project (not
+              inside the Roo shell) to deploy to a <link
+              xlink:href="http://www.eclipse.org/jetty/">Jetty</link>
+              container</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Deploy to a integrated Web container configured in STS:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Drag your project to the desired Web container inside the
+              STS server view</para>
+            </listitem>
+
+            <listitem>
+              <para>Right-click your project and select 'Run As &gt; Run on
+              Server' to deploy to the desired Web container</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>After selecting your preferred deployment method you
+    should see the Web container starting and the application should be
+    available under the following URL <link
+    xlink:href="http://localhost:8080/pizzashop">http://localhost:8080/pizzashop</link></para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/standardui.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+  </section>
+
+  <section>
+    <title>Step 7: Securing the Application</title>
+
+    <para>As discussed with the Pizza shop owner we need to control access to
+    certain views in the Web frontend. Securing access to different views in
+    the application is achieved by installing the Spring Security addon via
+    the '<link linkend="command-index-security-commands"><emphasis
+    role="bold">security setup</emphasis></link>' command:</para>
+
+    <para><programlisting>~.web roo&gt; <emphasis role="bold">security setup</emphasis>
+Managed ROOT/pom.xml
+Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext-security.xml
+Created SRC_MAIN_WEBAPP/WEB-INF/views/login.jspx
+Managed SRC_MAIN_WEBAPP/WEB-INF/views/views.xml
+Managed SRC_MAIN_WEBAPP/WEB-INF/web.xml
+Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
+</programlisting>Note, the Roo shell will hide the '<link
+    linkend="command-index-security-commands"><emphasis role="bold">security
+    setup</emphasis></link>' command until you have created a Web layer. As
+    shown above, the 'security setup' command manages the project pom.xml
+    file. This means additional dependencies have been added to the project.
+    To add these dependencies to the STS workspace you should run the 'perform
+    eclipse' command again followed by a project refresh in STS.</para>
+
+    <para>In order to secure the views for the Topping, Base and Pizza
+    resource in the Pizza shop application you need to open the
+    applicationContext-security.xml file in the
+    src/main/resources/META-INF/spring folder:</para>
+
+    <para><programlisting>&lt;!-- HTTP security configurations --&gt;
+&lt;http auto-config="true" use-expressions="true"&gt;
+   &lt;form-login login-processing-url="/static/j_spring_security_check" login-page="/login" authentication-failure-url="/login?login_error=t"/&gt;
+   &lt;logout logout-url="/static/j_spring_security_logout"/&gt;
+   &lt;!-- Configure these elements to secure URIs in your application --&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">pizza</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">topping</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">base</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/resources/**" access="permitAll" /&gt;
+   &lt;intercept-url pattern="/static/**" access="permitAll" /&gt;
+   &lt;intercept-url pattern="/**" access="permitAll" /&gt;
+&lt;/http&gt;</programlisting>As a next step you can use the Spring Security
+    JSP tag library to restrict access to the relevant menu items in the
+    menu.jspx file:</para>
+
+    <para><programlisting>&lt;div <emphasis role="bold">xmlns:sec="http://www.springframework.org/security/tags"</emphasis> ...&gt;
+	  &lt;jsp:output omit-xml-declaration="yes"/&gt;
+	  &lt;ul id="roo_menu"&gt;
+	  <emphasis role="bold">&lt;sec:authorize ifAllGranted="ROLE_ADMIN"&gt;</emphasis>
+      &lt;li id="web_mvc_jsp_topping_category"&gt;
+         ...
+      &lt;/li&gt;
+   &lt;/sec:authorize&gt;
+   &lt;li id="web_mvc_jsp_pizzaorder_category"&gt;
+         ...
+    &lt;/li&gt;
+&lt;/div&gt;</programlisting>This leaves the pizza order view visible to the
+    public. Obviously the delete and the update use case for the pizza order
+    view are not desirable. The easiest way to take care of this is to adjust
+    the @RooWebScaffold annotation in the PizzaOrderController.java
+    source:</para>
+
+    <para><programlisting>@RooWebScaffold(path = "pizzaorder", 
+                automaticallyMaintainView = true, 
+                formBackingObject = PizzaOrder.class, 
+                <emphasis role="bold">delete=false</emphasis>, 
+                <emphasis role="bold">update=false</emphasis>)</programlisting>This
+    will trigger the Roo shell to remove the delete and the update method from
+    the PizzaOrderController and also adjust the relevant view artifacts.
+    </para>
+
+    <para>With these steps completed you can restart the application and the
+    'admin' user can navigate to <link
+    xlink:href="http://localhost:8080/pizzashop/login">http://localhost:8080/pizzashop/login</link>
+    to authenticate.</para>
+  </section>
+
+  <section>
+    <title>Step 7: Customizing the Look &amp; Feel of the Web UI</title>
+
+    <para>Roo generated Web UIs can be customized in various ways. To find
+    your way around the installed Web-tier artifacts take a look at the
+    following table:</para>
+
+    <para><table frame="box" rules="all">
+        <caption></caption>
+
+        <thead>
+          <tr align="center">
+            <th>Directory</th>
+
+            <th>Purpose</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>/styles</td>
+
+            <td>style sheets (CSS)</td>
+          </tr>
+
+          <tr>
+            <td>/images</td>
+
+            <td>graphics</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/classes/*.properties</td>
+
+            <td>theme configurations</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/spring/*.xml</td>
+
+            <td>Web-related Spring application contexts</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/i18n/*.properties</td>
+
+            <td>internationalization message files</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/layouts/layout.jspx</td>
+
+            <td>Tiles definition for master layout</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/tags/*.tagx</td>
+
+            <td>Tag libraries (pagination, language, etc)</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/views/**/*</td>
+
+            <td>Tiles and other view artifacts</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/web.xml</td>
+
+            <td>Web application context</td>
+          </tr>
+
+          <tr>
+            <td>/WEB-INF/urlrewrite.xml</td>
+
+            <td>URL rewrite filter configuration</td>
+          </tr>
+        </tbody>
+      </table>The easiest way to customize the look &amp; feel of the Roo Web
+    UI is to change CSS and image resources to suit your needs. The following
+    look &amp; feel was created for the specific purpose of the Pizza shop
+    application:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/altui.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+
+    <para>To achieve a higher level of customization you can change the
+    default Tiles template and adjust the JSP pages. However, any JSP views
+    which were scaffolded for a Controller are maintained by Roo. This way Roo
+    can add and remove fields from the relevant view artifacts in case the
+    underlying domain entity changes (ie fields get added or removed). If you
+    wish to maintain these JSP artifacts yourself you need to disable the
+    handling of the artifacts by Roo by configuring
+    @RooWebScaffold(automaticallyMaintainView=false) in the relevant
+    controller.</para>
   </section>
 
   <section xml:id="beginning-step-7">
     <title>Step 7: Selenium Tests</title>
 
-    <para>TBC</para>
+    <para>Roo offers a core addon which can generate <link
+    xlink:href="http://seleniumhq.org/">Selenium</link> test scripts for you.
+    You can create the Selenium scripts by using the '<emphasis
+    role="bold"><link linkend="command-index-selenium-commands">selenium
+    test</link></emphasis>' command. Tests are generated for each controller
+    and are integrated in a test suite:</para>
+
+    <para><programlisting>~.web roo&gt; <emphasis role="bold">selenium test --controller ~.web.ToppingController</emphasis>
+~.web roo&gt; selenium test --controller ~.web.BaseController
+~.web roo&gt; selenium test --controller ~.web.PizzaController
+~.web roo&gt; selenium test --controller ~.web.PizzaOrderController</programlisting>The
+    generated tests are located in the src/main/webapp/selenium folder and can
+    be run via the following maven command (executed from command line:</para>
+
+    <para><programlisting>pizza&gt; <emphasis role="bold">mvn selenium:selenese</emphasis></programlisting></para>
+
+    <para>Running the maven selenium addon will start a new instance of the
+    FireFox browser and run tests against the Pizza Shop Web UI by using Roo
+    generated seed data.</para>
+
+    <para>Please note that the maven selenium plugin configured in the project
+    pom.xml assumes that the <link
+    xlink:href="http://www.mozilla.com/en-US/firefox/firefox.html">FireFox</link>
+    Web browser is already installed in your environment. Running the maven
+    selenium plugin also assumes that your application is already started as
+    discussed in step 6. Finally, there are limitations with regards to
+    locales used by the application. Please refer to the <link
+    linkend="selenium-addon-known-issues">known issues section</link> for
+    details.</para>
   </section>
 
   <section xml:id="beginning-step-8">

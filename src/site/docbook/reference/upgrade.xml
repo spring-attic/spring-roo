@@ -123,7 +123,7 @@
         clean</literal>" from within Roo itself.</para>
       </listitem>
       
-      <listitem>
+      <listitem xml:id="selenium-addon-known-issues">
         <para><emphasis>Selenium Add-on</emphasis>: The maven selenium plugin 
         does not work on Mac OSX 10.6. This is a known issue to the developers
         of this maven plugin and the progress on this issue can be tracked at
