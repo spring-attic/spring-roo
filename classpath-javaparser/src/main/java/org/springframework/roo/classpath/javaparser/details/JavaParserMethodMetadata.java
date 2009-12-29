@@ -74,7 +74,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		
 		// Compute the return type
 		Type rt = methodDeclaration.getType();
-		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), rt, fullTypeParameters);
+		this.returnType = JavaParserUtils.getJavaType(compilationUnitServices, rt, fullTypeParameters);
 		
 		// Compute the method name
 		this.methodName = new JavaSymbolName(methodDeclaration.getName());
@@ -86,7 +86,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		if (methodDeclaration.getParameters() != null) {
 			for (Parameter p : methodDeclaration.getParameters()) {
 				Type pt = p.getType();
-				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pt, fullTypeParameters);
+				JavaType parameterType = JavaParserUtils.getJavaType(compilationUnitServices, pt, fullTypeParameters);
 				
 				List<AnnotationExpr> annotationsList = p.getAnnotations();
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();

@@ -73,7 +73,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		NameExpr nameToFind = JavaParserUtils.getNameExpr(annotationExpr);
 		
 		// Compute the actual annotation type, having regard to the compilation unit package and imports
-		annotationType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), nameToFind, null);
+		annotationType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
 		
 		// Generate some member-value pairs for subsequent parsing
 		List<MemberValuePair> annotationPairs = new ArrayList<MemberValuePair>();
@@ -193,7 +193,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			} else {
 				throw new UnsupportedOperationException("A FieldAccessExpr for '" + field.getScope() + "' should return a NameExpr or FieldAccessExpr (was " + field.getScope().getClass().getName() + ")");
 			}
-			JavaType fieldType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), nameToFind, null);
+			JavaType fieldType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
 			
 			EnumDetails enumDetails = new EnumDetails(fieldType, new JavaSymbolName(fieldName));
 			return new EnumAttributeValue(annotationName, enumDetails);
@@ -202,7 +202,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		if (expression instanceof ClassExpr) {
 			ClassExpr clazz = (ClassExpr) expression;
 			Type nameToFind = clazz.getType();
-			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), nameToFind, null);
+			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices, nameToFind, null);
 			return new ClassAttributeValue(annotationName, javaType);
 		}
 		
@@ -262,7 +262,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			}
 			
 			// Convert the candidate annotation type's into a JavaType
-			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), existingName, null);
+			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices, existingName, null);
 			if (annotation.getAnnotationType().equals(javaType)) {
 				foundExisting = true;
 				break;
@@ -374,7 +374,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 				existingName = ((SingleMemberAnnotationExpr) candidate).getName();
 			}
 			
-			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), existingName, null);
+			JavaType javaType = JavaParserUtils.getJavaType(compilationUnitServices, existingName, null);
 			if (annotation.equals(javaType)) {
 				toRemove = candidate;
 				break;

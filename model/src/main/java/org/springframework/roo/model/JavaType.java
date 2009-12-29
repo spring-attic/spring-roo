@@ -253,8 +253,43 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (isDefaultPackage()) {
 			return new JavaPackage("");
 		}
+		
+		JavaType enclosingType = getEnclosingType();
+		if (enclosingType != null) {
+			return enclosingType.getPackage();
+		}
+
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		return new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
+	}
+	
+	/**
+	 * @return the enclosing type, if any (will return null if there is no enclosing type)
+	 */
+	public JavaType getEnclosingType() {
+		int offset = fullyQualifiedTypeName.lastIndexOf(".");
+		if (offset == -1) {
+			// there is no dot in the name, so there's no way there's an enclosing type
+			return null;
+		}
+		String possibleName = fullyQualifiedTypeName.substring(0, offset);
+		int offset2 = possibleName.lastIndexOf(".");
+		
+		// start by handling if the type name is Foo.Bar (ie an enclosed type within the default package)
+		String enclosedWithinPackage = null;
+		String enclosedWithinTypeName = possibleName;
+
+		// handle the probability the type name is within a package like com.alpha.Foo.Bar
+		if (offset2 > -1) {
+			enclosedWithinPackage = possibleName.substring(0, offset2);
+			enclosedWithinTypeName = possibleName.substring(offset2+1);
+		}
+		if (enclosedWithinTypeName.charAt(0) == enclosedWithinTypeName.toUpperCase().charAt(0)) {
+			// first letter is uppercase, so treat it as a type name
+			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
+			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
+		}
+		return null;
 	}
 	
 	public boolean isDefaultPackage() {

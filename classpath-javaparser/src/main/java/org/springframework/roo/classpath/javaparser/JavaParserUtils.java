@@ -4,6 +4,7 @@ import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
 import japa.parser.ast.body.ModifierSet;
+import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.ClassExpr;
 import japa.parser.ast.expr.Expression;
@@ -214,15 +215,13 @@ public class JavaParserUtils  {
 	 * Resolves the effective {@link JavaType} a {@link Type} represents. A {@link Type} includes low-level
 	 * types such as void, arrays and primitives.
 	 * 
-	 * @param compilationUnitPackage to use for package resolution (required)
-	 * @param imports to use for package resolution (required)
+	 * @param compilationUnitServices to use for package resolution (required)
 	 * @param type to locate (required)
 	 * @param typeParameters names to consider type parameters (can be null if there are none)
 	 * @return the {@link JavaType}, with proper indication of primitive and array status (never null)
 	 */
-	public static JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, Type type, Set<JavaSymbolName> typeParameters) {
-		Assert.notNull(imports, "Imports cannot be null");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+	public static JavaType getJavaType(CompilationUnitServices compilationUnitServices, Type type, Set<JavaSymbolName> typeParameters) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(type, "The reference type must be provided");
 		
 		if (type instanceof VoidType) {
@@ -275,12 +274,12 @@ public class JavaParserUtils  {
 			if (wt.getSuper() != null) {
 				ReferenceType rt = (ReferenceType) wt.getSuper();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
-				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
+				JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_SUPER, effectiveType.getParameters());
 			} else if (wt.getExtends() != null) {
 				ReferenceType rt = (ReferenceType) wt.getExtends();
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) rt.getType();
-				JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
+				JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 				return new JavaType(effectiveType.getFullyQualifiedTypeName(), rt.getArrayCount(), effectiveType.getDataType(), JavaType.WILDCARD_EXTENDS, effectiveType.getParameters());
 			} else {
 				return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
@@ -296,7 +295,7 @@ public class JavaParserUtils  {
 			throw new IllegalStateException("The presented type '" + internalType.getClass() + "' with value '" + internalType + "' is unsupported by JavaParserUtils");
 		}
 
-		JavaType effectiveType = getJavaTypeNow(compilationUnitPackage, imports, cit, typeParameters);
+		JavaType effectiveType = getJavaTypeNow(compilationUnitServices, cit, typeParameters);
 		if (array > 0) {
 			return new JavaType(effectiveType.getFullyQualifiedTypeName(), array, effectiveType.getDataType(), effectiveType.getArgName(), effectiveType.getParameters());
 		}
@@ -320,19 +319,30 @@ public class JavaParserUtils  {
 	 * fully qualified name is treated as part of java.lang. Otherwise the compilation unit package plus unqualified name
 	 * expression represents the fully qualified name expression.
 	 * 
-	 * @param compilationUnitPackage the package that the compilation unit belongs to (required)
-	 * @param imports the compilation unit's imports (required)
+	 * @param compilationUnitServices for package management (required)
 	 * @param nameToFind to locate (required)
 	 * @param typeParameters names to consider type parameters (can be null if there are none)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, NameExpr nameToFind, Set<JavaSymbolName> typeParameters) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+	public static final JavaType getJavaType(CompilationUnitServices compilationUnitServices, NameExpr nameToFind, Set<JavaSymbolName> typeParameters) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(nameToFind, "Name to find is required");
+
+		JavaPackage compilationUnitPackage = compilationUnitServices.getCompilationUnitPackage();
 		
 		if (nameToFind instanceof QualifiedNameExpr) {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameToFind;
+			
+			// handle qualified name expressions that are related to inner types (eg Foo.Bar)
+			NameExpr qneQualifier = qne.getQualifier();
+			NameExpr enclosedBy = getNameExpr(compilationUnitServices.getEnclosingTypeName().getSimpleTypeName());
+			if (isEqual(qneQualifier, enclosedBy)) {
+				// this qualified name expression is simply an inner type reference
+				String name = compilationUnitServices.getEnclosingTypeName().getFullyQualifiedTypeName() + "." + nameToFind.getName();
+				return new JavaType(name);
+			}
+			
+			// treat it as a fully-qualified name expression that includes the package
 			return new JavaType(qne.toString());
 		}
 		
@@ -341,7 +351,17 @@ public class JavaParserUtils  {
 			return new JavaType(nameToFind.getName(), 0, DataType.VARIABLE, null, null);
 		}
 		
-		ImportDeclaration importDeclaration = getImportDeclarationFor(imports, nameToFind);
+		// We are searching for a non-qualified name expression (nameToFind), so check if the compilation unit itself declares that type
+		for (TypeDeclaration internalType : compilationUnitServices.getInnerTypes()) {
+			NameExpr nameExpr = getNameExpr(internalType.getName());
+			if (isEqual(nameExpr, nameToFind)) {
+				// found, so now we need to convert the internalType to a proper JavaType
+				String name = compilationUnitServices.getEnclosingTypeName().getFullyQualifiedTypeName() + "." + nameToFind.getName();
+				return new JavaType(name);
+			}
+		}
+		
+		ImportDeclaration importDeclaration = getImportDeclarationFor(compilationUnitServices, nameToFind);
 		if (importDeclaration  == null) {
 			if (ImportRegistrationResolverImpl.isPartOfJavaLang(nameToFind.getName())) {
 				return new JavaType("java.lang." + nameToFind.getName());
@@ -426,15 +446,17 @@ public class JavaParserUtils  {
 	 * Resolves the effective {@link JavaType} a {@link ClassOrInterfaceType} represents, including any
 	 * type arguments.
 	 * 
-	 * @param compilationUnitPackage the package that the compilation unit belongs to (required)
-	 * @param imports the compilation unit's imports (required)
+	 * @param compilationUnitServices for package management (required)
 	 * @param cit the class or interface type to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaTypeNow(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, ClassOrInterfaceType cit, Set<JavaSymbolName> typeParameters) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+	public static final JavaType getJavaTypeNow(CompilationUnitServices compilationUnitServices, ClassOrInterfaceType cit, Set<JavaSymbolName> typeParameters) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(cit, "ClassOrInterfaceType required");
+
+		JavaPackage compilationUnitPackage = compilationUnitServices.getCompilationUnitPackage();
+		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+
 		String typeName = cit.getName();
 		ClassOrInterfaceType scope = cit.getScope();
 		while (scope != null) {
@@ -443,13 +465,13 @@ public class JavaParserUtils  {
 		}
 		NameExpr nameExpr = getNameExpr(typeName);
 		
-		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr, typeParameters);
+		JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr, typeParameters);
 		
 		// Handle any type arguments
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		if (cit.getTypeArgs() != null) {
 			for (Type ta : cit.getTypeArgs()) {
-				typeParams.add(getJavaType(compilationUnitPackage, imports, ta, typeParameters));
+				typeParams.add(getJavaType(compilationUnitServices, ta, typeParameters));
 			}
 		}
 		
@@ -460,19 +482,17 @@ public class JavaParserUtils  {
 	 * Resolves the effective {@link JavaType} a {@link ClassOrInterfaceDeclaration} represents, including any
 	 * type parameters.
 	 * 
-	 * @param compilationUnitPackage the package that the compilation unit belongs to (required)
-	 * @param imports the compilation unit's imports (required)
+	 * @param compilationUnitServices for package management (required)
 	 * @param cid the class or interface declaration to resolve (required)
 	 * @return the effective Java type (never null)
 	 */
-	public static final JavaType getJavaType(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, ClassOrInterfaceDeclaration cid) {
-		Assert.notNull(imports, "Compilation unit imports required");
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+	public static final JavaType getJavaType(CompilationUnitServices compilationUnitServices, ClassOrInterfaceDeclaration cid) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(cid, "ClassOrInterfaceType required");
 		
 		// Convert the ClassOrInterfaceDeclaration name into a JavaType
 		NameExpr nameExpr = getNameExpr(cid.getName());
-		JavaType effectiveType = getJavaType(compilationUnitPackage, imports, nameExpr, null);
+		JavaType effectiveType = getJavaType(compilationUnitServices, nameExpr, null);
 		
 		// Populate JavaType with type parameters
 		List<JavaType> typeParams = new ArrayList<JavaType>();
@@ -487,7 +507,7 @@ public class JavaParserUtils  {
 					javaType = new JavaType("java.lang.Object", 0, DataType.TYPE, currentTypeParam, null);
 				} else {
 					ClassOrInterfaceType cit = candidate.getTypeBound().get(0);
-					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, cit, locatedTypeParams);
+					javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, cit, locatedTypeParams);
 					javaType = new JavaType(javaType.getFullyQualifiedTypeName(), javaType.getArray(), javaType.getDataType(), currentTypeParam, javaType.getParameters());
 				}
 				typeParams.add(javaType);
@@ -506,12 +526,16 @@ public class JavaParserUtils  {
 	 * This therefore reflects the normal Java semantics for using simple type names that have been imported.
 	 * 
 	 * @param imports the compilation unit's imports (required)
+	 * @param typesInCompilationUnit the types in the compilation unit (required)
 	 * @param nameExpr the expression to locate an import for (which would generally be a {@link NameExpr} and thus not have a package identifier; required)
 	 * @return the relevant import, or null if there is no import for the expression
 	 */
-	private static final ImportDeclaration getImportDeclarationFor(List<ImportDeclaration> imports, NameExpr nameExpr) {
-		Assert.notNull(imports, "Compilation unit imports required");
+	private static final ImportDeclaration getImportDeclarationFor(CompilationUnitServices compilationUnitServices, NameExpr nameExpr) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(nameExpr, "Name expression required");
+		
+		List<ImportDeclaration> imports = compilationUnitServices.getImports();
+
 		for (ImportDeclaration candidate : imports) {
 			NameExpr candidateNameExpr = candidate.getName();
 			Assert.isInstanceOf(QualifiedNameExpr.class, candidateNameExpr, "Expected import '" + candidate + "' to use a fully-qualified type name");

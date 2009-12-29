@@ -54,7 +54,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		this.declaredByMetadataId = declaredByMetadataId;
 		
 		Type type = fieldDeclaration.getType();
-		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), type, typeParameters);
+		this.fieldType = JavaParserUtils.getJavaType(compilationUnitServices, type, typeParameters);
 		
 		// Convert into an array if this variable ID uses array notation
 		if (var.getId().getArrayCount() > 0) {
@@ -69,7 +69,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			if (e instanceof ObjectCreationExpr) {
 				ObjectCreationExpr initializer = (ObjectCreationExpr) e;
 				ClassOrInterfaceType initializerType = initializer.getType();
-				this.fieldInitializer = JavaParserUtils.getJavaTypeNow(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), initializerType, typeParameters);
+				this.fieldInitializer = JavaParserUtils.getJavaTypeNow(compilationUnitServices, initializerType, typeParameters);
 			} else {
 				// TODO: Support other initializers (eg japa.parser.ast.expr.IntegerLiteralExpr)
 			}

@@ -90,6 +90,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private List<ImportDeclaration> imports;
 	private JavaPackage compilationUnitPackage;
 	private Set<JavaSymbolName> typeParameterNames;
+	private List<TypeDeclaration> innerTypes = new ArrayList<TypeDeclaration>();
 	
 	static final String UNSUPPORTED_MESSAGE_PREFIX = "Only enum, class and interface files are supported";
 	
@@ -124,11 +125,29 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		
 		Assert.notEmpty(compilationUnit.getTypes(), "No types in compilation unit, so unable to continue parsing");
 		
+		CompilationUnitServices compilationUnitServices = new CompilationUnitServices() {
+			public List<ImportDeclaration> getImports() {
+				return imports;
+			}
+			public JavaPackage getCompilationUnitPackage() {
+				return compilationUnitPackage;
+			}
+			public List<TypeDeclaration> getInnerTypes() {
+				return innerTypes;
+			}
+			public JavaType getEnclosingTypeName() {
+				return name;
+			}
+			public void flush() {
+				// We will do this at the very end
+			}
+		};
+
 		if (typeDeclaration instanceof ClassOrInterfaceDeclaration) {
 			this.clazz = (ClassOrInterfaceDeclaration) typeDeclaration;
 
 			// Determine the type name, adding type parameters if possible
-			JavaType newName = JavaParserUtils.getJavaType(compilationUnitPackage, imports, this.clazz);
+			JavaType newName = JavaParserUtils.getJavaType(compilationUnitServices, this.clazz);
 			
 			// Revert back to the original type name (thus avoiding unnecessary inferences about java.lang types; see ROO-244)
 			this.name = new JavaType(this.name.getFullyQualifiedTypeName(), newName.getArray(), newName.getDataType(), newName.getArgName(), newName.getParameters());
@@ -166,7 +185,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			List<ClassOrInterfaceType> extendsList = this.clazz.getExtends();
 			if (extendsList != null) {
 				for (ClassOrInterfaceType candidate : extendsList) {
-					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, candidate, typeParameterNames);
+					JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
 					extendsTypes.add(javaType);
 				}
 			}
@@ -197,7 +216,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		List<ClassOrInterfaceType> implementsList = this.clazz == null ? this.enumClazz.getImplements() : this.clazz.getImplements();
 		if (implementsList != null) {
 			for (ClassOrInterfaceType candidate : implementsList) {
-				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitPackage, imports, candidate, typeParameterNames);
+				JavaType javaType = JavaParserUtils.getJavaTypeNow(compilationUnitServices, candidate, typeParameterNames);
 				implementsTypes.add(javaType);
 			}
 		}
@@ -211,25 +230,34 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		}
 
         List<BodyDeclaration> members = this.clazz == null ? this.enumClazz.getMembers() : this.clazz.getMembers();
+		
         if (members != null) {
-                for (BodyDeclaration member : members) {
-                        if (member instanceof FieldDeclaration) {
+    		// Now we've finished declaring the type, we should introspect for any inner types that can thus be referred to in other body members
+    		// We defer this until now because it's illegal to refer to an inner type in the signature of the enclosing type
+    		for (BodyDeclaration bodyDeclaration : members) {
+    			if (bodyDeclaration instanceof TypeDeclaration) {
+    				// found a type
+    				innerTypes.add((TypeDeclaration) bodyDeclaration);
+    			}
+    		}
+
+    		for (BodyDeclaration member : members) {
+                  if (member instanceof FieldDeclaration) {
                                 FieldDeclaration castMember = (FieldDeclaration) member;
                                 for (VariableDeclarator var : castMember.getVariables()) {
                                         declaredFields.add(new JavaParserFieldMetadata(declaredByMetadataId, castMember, var, this, typeParameterNames));
                                 }
-                        }
-                        if (member instanceof MethodDeclaration) {
-                                MethodDeclaration castMember = (MethodDeclaration) member;
-                                declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
-                        }
-                        if (member instanceof ConstructorDeclaration) {
-                                ConstructorDeclaration castMember = (ConstructorDeclaration) member;
-                                declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
-                        }
-                }
+                  }
+                  if (member instanceof MethodDeclaration) {
+                	  MethodDeclaration castMember = (MethodDeclaration) member;
+                      declaredMethods.add(new JavaParserMethodMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
+                  }
+                  if (member instanceof ConstructorDeclaration) {
+                      ConstructorDeclaration castMember = (ConstructorDeclaration) member;
+                      declaredConstructors.add(new JavaParserConstructorMetadata(declaredByMetadataId, castMember, this, typeParameterNames));
+                  }
+            }
         }
-
 	}
 	
 	
@@ -415,7 +443,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		typeDeclaration.setMembers(new ArrayList<BodyDeclaration>());
 		
 		// Add the class of interface declaration to the compilation unit
-		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
+		final List<TypeDeclaration> types = new ArrayList<TypeDeclaration>();
 		types.add(typeDeclaration);
 		compilationUnit.setTypes(types);
 		
@@ -426,6 +454,12 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			}
 			public JavaPackage getCompilationUnitPackage() {
 				return cit.getName().getPackage();
+			}
+			public List<TypeDeclaration> getInnerTypes() {
+				return new ArrayList<TypeDeclaration>();
+			}
+			public JavaType getEnclosingTypeName() {
+				return cit.getName();
 			}
 			public void flush() {
 				// We will do this at the very end
@@ -504,4 +538,13 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	public List<ImportDeclaration> getImports() {
 		return imports;
 	}
+
+	public List<TypeDeclaration> getInnerTypes() {
+		return innerTypes;
+	}
+
+	public JavaType getEnclosingTypeName() {
+		return name;
+	}
+
 }
