@@ -16,7 +16,63 @@
   <section xml:id="beginning-what-you-will-learn">
     <title>What You'll Learn</title>
 
-    <para>TBC</para>
+    <para>In this tutorial you will learn to create a complete Web application
+    from scratch using Roo. The application we are going to develop will
+    demonstrate many of the core features offered by Roo. In particular you
+    will learn how to use the Roo shell for:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>project creation</para>
+      </listitem>
+
+      <listitem>
+        <para>creation and development of domain objects (JPA entities)</para>
+      </listitem>
+
+      <listitem>
+        <para>adding fields of different types to the domain objects</para>
+      </listitem>
+
+      <listitem>
+        <para>creating relationships between domain objects</para>
+      </listitem>
+
+      <listitem>
+        <para>automatic creation of integration tests</para>
+      </listitem>
+
+      <listitem>
+        <para>creating workspace artifacts to import the project into your
+        IDE</para>
+      </listitem>
+
+      <listitem>
+        <para>automatic scaffolding of a Web tier</para>
+      </listitem>
+
+      <listitem>
+        <para>running the application in a Web container</para>
+      </listitem>
+
+      <listitem>
+        <para>customizing the look and feel of the Web UI for our business
+        domain</para>
+      </listitem>
+
+      <listitem>
+        <para>controlling and securing access to different views in the
+        application</para>
+      </listitem>
+
+      <listitem>
+        <para>creating and running Selenium tests</para>
+      </listitem>
+
+      <listitem>
+        <para>deployment and backup of your application</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="beginning-wedding-tutorial">
@@ -59,21 +115,308 @@
   </section>
 
   <section xml:id="beginning-tutorial-application-use-cases">
-    <title>Tutorial Application Use Cases</title>
+    <title>Tutorial Application Details</title>
 
-    <para>TBC</para>
+    <para>To demonstrate the development of an application using Spring Roo we
+    will create a Web site for a Pizza shop. The requirements for the Pizza
+    shop application include the ability to create new Pizza types by the
+    staff of the Pizza shop. A pizza is composed of a base and one or more
+    toppings. Furthermore, the shop owner would like to allow online orders of
+    Pizzas by his customers for delivery.</para>
+
+    <para>After this short discussion with the Pizza shop owner, we have
+    created a simple class diagram for the initial domain model:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/pizza.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+
+    <para>While this class diagram represents a simpified model of the problem
+    domain for the pizza shop problem domain, it is a good starting point for
+    the project at hand in order to deliver a first prototype of the
+    application to the Pizza shop owner. Later tutorials will expand this
+    domain model to demonstrate more advanced features of Spring Roo.</para>
   </section>
 
   <section xml:id="beginning-step-1">
     <title>Step 1: Starting a Typical Project</title>
 
-    <para>TBC</para>
+    <para>Now that we have spoken with our client (the Pizza shop owner) to
+    gather the first ideas and requirements for the project we can get started
+    with the development of the project. After <link
+    linkend="intro-installation">installing</link> a JDK, <link
+    linkend="intro">Spring Roo</link> and Maven, we prepare a clean workspace
+    for our project we first create a new directory:</para>
+
+    <para><programlisting>&gt; mkdir pizza
+&gt; cd pizza
+pizza&gt;</programlisting></para>
+
+    <para>Next, we start Spring Roo and type <emphasis role="bold">'<link
+    linkend="???"><link linkend="???"><link
+    linkend="command-index-hint-commands">hint</link></link></link>'</emphasis>
+    to obtain contexts sensitive guidance from the Roo shell:<programlisting>pizza&gt; <emphasis
+          role="bold">roo</emphasis>
+    ____  ____  ____  
+   / __ \/ __ \/ __ \ 
+  / /_/ / / / / / / / 
+ / _, _/ /_/ / /_/ /  
+/_/ |_|\____/\____/    1.0.0.RELEASE [rev XXX]
+
+
+Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
+roo&gt;
+roo&gt; <emphasis role="bold">hint</emphasis>
+Welcome to Roo! We hope you enjoy your stay!
+
+Before you can use many features of Roo, you need to start a new project.
+
+To do this, type 'project' (without the quotes) and then hit TAB.
+
+Enter a --topLevelPackage like 'com.mycompany.projectname' (no quotes).
+When you've finished completing your --topLevelPackage, press ENTER.
+Your new project will then be created in the current working directory.
+
+Note that Roo frequently allows the use of TAB, so press TAB regularly.
+Once your project is created, type 'hint' and ENTER for the next suggestion.
+You're also welcome to visit http://forum.springframework.org for Roo help.
+roo&gt; 
+</programlisting>There are quite a few usability features within the Roo
+    shell. After typing <emphasis role="bold">'<link
+    linkend="command-index-hint-commands">hint</link>'</emphasis> you have
+    noticed that this commands guides you in a step-by-step style towards the
+    completion of your first project. Or if you type <emphasis
+    role="bold">'<link linkend="command-index-help">help</link></emphasis>'
+    you will see all of the commands available to you in the particular
+    context you are in. In our case we have not created a new project yet so
+    the help command only reveals higher level commands which are available to
+    you at this stage. To create an actual project we can use the '<emphasis
+    role="bold"><link
+    linkend="command-index-project">project</link></emphasis>' command:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.springsource.roo.pizzashop</emphasis>
+Created /Users/sschmidt/Development/workspaces/test9/pom.xml
+Created SRC_MAIN_JAVA
+Created SRC_MAIN_RESOURCES
+Created SRC_TEST_JAVA
+Created SRC_TEST_RESOURCES
+Created SRC_MAIN_WEBAPP
+Created SRC_MAIN_RESOURCES/META-INF/spring
+Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
+Created SRC_MAIN_RESOURCES/META-INF/spring/log4j.properties
+com.springsource.roo.pizzashop roo&gt; 
+</programlisting>This command will create a the following folder structure in
+    your file system:</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/projectfolders.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+
+    <para>For those familiar with <link
+    xlink:href="http://maven.apache.org/">Maven</link> you will notice that
+    this folder structure follows standard Maven conventions by creating
+    seperate folders for your main project resources and tests. Roo also
+    installs a default application context and a log4j configuration for you.
+    Finally, The project pom file contains all required dependencies and
+    configurations to get started with our Pizza shop project. </para>
+
+    <para>Once the project structure is created by Roo you can go ahead and
+    install a persistence configuration for your application. Roo leverages
+    the Java Persistence API (JPA) which provides a convenient abstraction to
+    achieve object-relational mapping. JPA takes care of mappings between your
+    persistent domain objects (entities) and their underlying database tables.
+    To install or change the persistence configuration in your project you can
+    use the '<emphasis role="bold"><link
+    linkend="command-index-persistence-setup">persistence
+    setup</link></emphasis>' command (note: utry using the <emphasis
+    role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
+    your commands, options and even obtain contextual help):</para>
+
+    <para><programlisting>com.springsource.roo.pizzashop roo&gt; <emphasis
+          role="bold">hint</emphasis>
+Roo requires the installation of a JPA provider and associated database.
+
+Type 'persistence setup' and then hit TAB three times.
+We suggest you type 'H' then TAB to complete "HIBERNATE".
+After the --provider, press TAB twice for database choices.
+For testing purposes, type (or TAB) HYPERSONIC_IN_MEMORY.
+If you press TAB again, you'll see there are no more options.
+As such, you're ready to press ENTER to execute the command.
+
+Once JPA is installed, type 'hint' and ENTER for the next suggestion.
+com.springsource.roo.pizzashop roo&gt;
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
+Created SRC_MAIN_RESOURCES/META-INF/persistence.xml
+Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
+Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
+Managed ROOT/pom.xml
+com.springsource.roo.pizzashop roo&gt; 
+</programlisting>So in this case we have installed Hibernate as
+    object-relational mapping (ORM)-provider. Hibernate is one of three ORM
+    providers which Roo currently offers. EclipseLink and OpenJPA represent
+    the alternative choices. In a similar fashion we have chosen the
+    Hypersonic in-memory database database as our target database. This
+    database is frequently used during Roo application development as it
+    releaves the developer from the burden of installing and configuring a
+    production scale database. Of course the '<emphasis role="bold"><link
+    linkend="command-index-persistence-setup">persistence
+    setup</link></emphasis>' command can be used later on to swap the database
+    (or even ORM) for a different production database such as MySQL, Postgres,
+    MS SQL Server, Oracle, Sybase, or H2. </para>
   </section>
 
   <section xml:id="beginning-step-2">
     <title>Step 2: Creating Entities and Fields</title>
 
-    <para>TBC</para>
+    <para>Now it is time to create our domain objects and fields which we have
+    identified in our class diagram. First, we can use the '<emphasis
+    role="bold"><link linkend="command-index-entity">entity</link></emphasis>'
+    command to create the actual domain object. The entity command has a
+    number of <link linkend="command-index-entity">optional attributes</link>
+    and one required attribute which is '--class'. In addition to the required
+    '--class' attribute we use the '--testAutomatically' attribute which
+    conveniently creates integration tests for a domain object. So let's start
+    with the Topping domain object:</para>
+
+    <para><programlisting>com.springsource.roo.pizzashop roo&gt; <emphasis
+          role="bold">hint</emphasis>
+You can create entities either via Roo or your IDE.
+Using the Roo shell is fast and easy, especially thanks to the TAB completion.
+
+Start by typing 'ent' and then hitting TAB twice.
+Enter the --name in the form '~.domain.MyEntityClassName'
+In Roo, '~' means the --topLevelPackage you specified via 'create project'.
+
+Afer specify a --name argument, press SPACE then TAB. Note nothing appears.
+Because nothing appears, it means you've entered all mandatory arguments.
+However, optional arguments do exist for this command (and most others in Roo).
+To see the optional arguments, type '--' and then hit TAB. Mostly you won't
+need any optional arguments, but let's select the --testAutomatically option
+and hit ENTER. You can always use this approach to view optional arguments.
+
+After creating an entity, use 'hint' for the next suggestion.
+com.springsource.roo.pizzashop roo&gt;
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">entity --class ~.domain.Topping --testAutomatically  </emphasis>                  
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand.java
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest.java
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Entity.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_Configurable.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_Configurable.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_IntegrationTest.aj
+Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_Configurable.aj
+</programlisting>You will notice that besides the ctreation of Java, and
+    AspectJ sources, the '<emphasis role="bold"><link
+    linkend="command-index-entity">entity</link></emphasis>' command in the
+    Roo shell takes care of creating the approriate folder structure in your
+    project for the top level package you defined earlier. You will notice
+    that we used the '<emphasis role="bold">~</emphasis>' character as a
+    placeholder for the project's top level package. While this serves a
+    convenience to abbreviate long commands, you can also tab-complete the
+    full top level package in the Roo shell.</para>
+
+    <para>As a next step we need to add the 'name' field to our Topping domain
+    class. This can be achieved by using the '<emphasis role="bold"><link
+    linkend="command-index-field-commands">field</link></emphasis>' command as
+    follows:</para>
+
+    <para><programlisting>~.domain.Topping roo&gt; <emphasis role="bold">hint</emphasis>
+You can add fields to your entities using either Roo or your IDE.
+
+To add a new field, type 'field' and then hit TAB. Be sure to select
+your entity and provide a legal Java field name. Use TAB to find an entity
+name, and '~' to refer to the top level package. Also remember to use TAB
+to access each mandatory argument for the command.
+
+Afer completing the mandatory arguments, press SPACE, type '--' and then TAB.
+The optional arguments shown reflect official JSR 303 Validation constraints.
+Feel free to use an optional argument, or delete '--' and hit ENTER.
+
+If creating multiple fields, use the UP arrow to access command history.
+
+After adding your fields, type 'hint' for the next suggestion.
+To learn about setting up many-to-one fields, type 'hint relationships'.
+~.domain.Topping roo&gt;
+~.domain.Topping roo&gt; <emphasis role="bold">field string --fieldName name --notNull --sizeMin 2</emphasis>
+Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
+Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JavaBean.aj
+Managed SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
+Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
+</programlisting>As explained in the documentation by typing the 'hint'
+    command you can easily add constraints to your fields by using optional
+    attributes such as '--notNull' and '--sizeMin 2'. These attributes result
+    in standards-compliant <link
+    xlink:href="http://jcp.org/en/jsr/detail?id=303">JSR-303</link>
+    annotations which Roo will add to your field definition in your Java
+    sources. You will also notice that the Roo shell is aware of the current
+    context within which you are using the 'field' command. It knows that you
+    have just created a Topping entity and therefore assumes that the field
+    command should be applied to the Topping Java source. Roo's current
+    context is visible in the Shell (enclosed by a red rectangle for
+    illustration):</para>
+
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/shellcontext.png"></imagedata>
+      </imageobject>
+    </mediaobject>
+
+    <para>If you wish to add the field to a different target type you can
+    specify the '--class' attribute as part of the 'field' command which then
+    allows you to tab complete to any type in your project.</para>
+
+    <para>As a next step you can create the Base and the Pizza domain object
+    in a similar fashion by issuing the following commands (shell output
+    omitted):</para>
+
+    <para><programlisting>entity --class ~.domain.Base --testAutomatically 
+field string --fieldName name --notNull --sizeMin 2
+entity --class ~.domain.Pizza --testAutomatically 
+field string --fieldName name --notNull --sizeMin 2
+field number --fieldName price --type java.lang.Float </programlisting>After
+    adding the name and the price field to the Pizza domain class we need to
+    deal with its releationships to Base and Topping. Let's start with the m:n
+    (one Pizza can have many Toppings and one Topping can be applied to many
+    Pizzas) relationship between Pizza and Toppings. To create such
+    many-to-many relationships Roo offers the '<emphasis role="bold"><link
+    linkend="command-index-field-set">field set</link></emphasis>'
+    command:</para>
+
+    <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field set --fieldName toppings --element ~.domain.Topping</emphasis></programlisting>As
+    you can see it is easy to define this relationship even without knowing
+    about the exact JPA annotations needed to create this mapping in our Pizza
+    domain entity. In a similar way you can define the 1:1 relationship
+    between the Pizza and Base domain entities by using the '<emphasis
+    role="bold"><link linkend="command-index-field-reference">field
+    reference</link></emphasis>' command:</para>
+
+    <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field reference --fieldName base --type ~.domain.Base</emphasis></programlisting>In
+    a similar fashion we can then continue to create the PizzaOrder domain
+    object and add its fields by leveraging the '<emphasis role="bold"><link
+    linkend="command-index-field-date"><link
+    linkend="command-index-field-date">field date</link></link></emphasis>'
+    and '<emphasis role="bold"><link
+    linkend="command-index-field-number">field number</link></emphasis>'
+    commands:</para>
+
+    <para><programlisting>entity --class ~.domain.PizzaOrder --testAutomatically 
+field string --fieldName name --notNull --sizeMin 2
+field string --fieldName address --sizeMax 30
+field number --fieldName total --type java.lang.Float 
+field date --fieldName deliveryDate --type java.util.Date
+field set --fieldName pizzas --element ~.domain.Pizza
+</programlisting></para>
+
+    <para>This concludes this step since the initial version of the domain
+    model is now complete.</para>
   </section>
 
   <section xml:id="beginning-step-3">
