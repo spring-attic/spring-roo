@@ -394,7 +394,7 @@ public class SeleniumOperations {
 		td1.setTextContent("open");
 		
 		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent(linkTarget);
+		td2.setTextContent(linkTarget+"?lang=" + Locale.getDefault());
 		
 		Node td3 = tr.appendChild(document.createElement("td"));
 		td3.setTextContent(" ");
