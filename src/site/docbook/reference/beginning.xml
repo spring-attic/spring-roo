@@ -146,8 +146,10 @@
     <title>Step 1: Starting a Typical Project</title>
 
     <para>Now that we have spoken with our client (the Pizza Shop owner) to
-    gather the first ideas and requirements for the project we can get started
-    with the development of the project. After <link
+    gather the first idea</para>
+
+    <para>s and requirements for the project we can get started with the
+    development of the project. After <link
     linkend="intro-installation">installing</link> a JDK, <link
     linkend="intro">Spring Roo</link> and Maven, we prepare a clean workspace
     for our project we first create a new directory:</para>
@@ -488,14 +490,9 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     <para>Of course Roo projects can be used in your favorite IDE. For the
     remainder of this tutorial we'll assume you're using the <link
     xlink:href="http://www.springsource.com/products/sts">SpringSource Tool
-    Suite</link> (STS) which is offered free of charge. If you're using
-    IntelliJ, we recommend you review IntelliJ issue report <link
-    xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
-    and consider voting on it. This issue report represents an IntelliJ
-    community request for full Aspect ITD support in IntelliJ. As shown in the
-    issue report, the AspectJ, AJDT and Roo project leads (all of whom who
-    work for the SpringSource division of VMware) have offered to assist
-    IntelliJ in securing ITD support.</para>
+    Suite</link> (STS) which is offered free of charge. Please refer to the
+    <link linkend="usage-ide">IDE usage</link> section of this reference guide
+    for a more detailed discussion of IDE interoperability.</para>
 
     <para>By default Roo projects do not contain any IDE-specific workspace
     artifacts so in order to be able to import our Pizza Shop application into
