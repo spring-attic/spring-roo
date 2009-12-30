@@ -1,10 +1,11 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
 for %%? in ("%~dp0..") do set ROO_HOME=%%~f?
 rem echo Resolved ROO_HOME: "%ROO_HOME%"
 
-if exist "%JAVA_HOME%\jre" (set ROO_JRE=%JAVA_HOME%\jre) else (set ROO_JRE=%JAVA_HOME%)
+rem parentheses might occur in path, so delayed variable expansion is needed, hence the ! chars
+if exist "!JAVA_HOME!\jre" (set ROO_JRE=!JAVA_HOME!\jre) else (set ROO_JRE=!JAVA_HOME!)
 
 :launch
 java -Djline.nobell=true -Djava.ext.dirs="%ROO_HOME%\dist;%ROO_HOME%\lib;%ROO_HOME%\work;%ROO_JRE%\lib\ext" %ROO_OPTS% -Droo.home="%ROO_HOME%" org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" %*
