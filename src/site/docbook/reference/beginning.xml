@@ -127,11 +127,13 @@
     <para>After this short discussion with the Pizza shop owner, we have
     created a simple class diagram for the initial domain model:</para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/pizza.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/pizza.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
     <para>While this class diagram represents a simpified model of the problem
     domain for the pizza shop problem domain, it is a good starting point for
@@ -209,11 +211,13 @@ com.springsource.roo.pizzashop roo&gt;
 </programlisting>This command will create a the following folder structure in
     your file system:</para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/projectfolders.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/projectfolders.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
     <para>For those familiar with <link
     xlink:href="http://maven.apache.org/">Maven</link> you will notice that
@@ -362,11 +366,13 @@ Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString
     context is visible in the Shell (enclosed by a red rectangle for
     illustration):</para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/shellcontext.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/shellcontext.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
     <para>If you wish to add the field to a different target type you can
     specify the '--class' attribute as part of the 'field' command which then
@@ -523,11 +529,13 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     use the 'testMarkerMethod' method to test it. For example you can open the
     BaseIntegrationTest.java source file and try it out:</para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/codecompletion.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/codecompletion.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
     <para>Note, most of the methods visible in the STS code assist are
     actually not in the Java sources but rather part of the AspectJ ITD and
@@ -567,86 +575,20 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     <para>All newly added Web artifacts which are needed for the view
     scaffolding can be found under the src/main/webapp folder. This folder
     includes graphics, cascading style sheets, Java Server pages, Tiles
-    configurations and more. The purpose of these folders is summarized in
-    Step 7. The Roo generated Spring MVC controllers follow the REST pattern
-    as much as possible by leveraging new features introduced with the release
-    of Spring Framework v3. The following URI - Resource mappings are applied
-    in Roo generated controllers:</para>
+    configurations and more. The purpose of these folders is summarized in the
+    <link linkend="customizing-ui">UI customization section</link>. The Roo
+    generated Spring MVC controllers follow the REST pattern as much as
+    possible by leveraging new features introduced with the release of Spring
+    Framework v3. The following URI - Resource mappings are applied in Roo
+    generated controllers:</para>
 
-    <para><table frame="box" rules="all">
-        <caption></caption>
+    <para></para>
 
-        <thead>
-          <tr align="center">
-            <th>Resource</th>
-
-            <th>GET</th>
-
-            <th>PUT</th>
-
-            <th>POST</th>
-
-            <th>DELETE</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>Collection URI such as
-            http://domain.com/pizzashop/topping/</td>
-
-            <td>List the members of the collection. For example list all the
-            toppings available in the application.</td>
-
-            <td>Not used.</td>
-
-            <td>Create a new topping in the collection where the ID is
-            assigned automatically by the collection.</td>
-
-            <td>Not used.</td>
-          </tr>
-
-          <tr>
-            <td>Member URI such as http://domain.com/pizzashop/topping/5</td>
-
-            <td>Retrieve the addressed topping with id=5.</td>
-
-            <td>Update the addressed topping with id=5.</td>
-
-            <td>Not used.</td>
-
-            <td>Delete the addressed topping with id=5.</td>
-          </tr>
-
-          <tr>
-            <td>Member URI such as
-            http://domain.com/pizzashop/topping/form</td>
-
-            <td>Create Form - returns an initialized, but empty topping for
-            form binding.</td>
-
-            <td>Not used.</td>
-
-            <td>Not used.</td>
-
-            <td>Not used.</td>
-          </tr>
-
-          <tr>
-            <td>Member URI such as
-            http://domain.com/pizzashop/topping/5/form</td>
-
-            <td>Update Form returns the topping resource which is
-            pre-populated for form binding.</td>
-
-            <td>Not used.</td>
-
-            <td>Not used.</td>
-
-            <td>Not used.</td>
-          </tr>
-        </tbody>
-      </table></para>
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/restmappings.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
   </section>
 
   <section xml:id="beginning-step-6">
@@ -695,15 +637,17 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     available under the following URL <link
     xlink:href="http://localhost:8080/pizzashop">http://localhost:8080/pizzashop</link></para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/standardui.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/standardui.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
   </section>
 
   <section>
-    <title>Step 7: Securing the Application</title>
+    <title>Securing the Application</title>
 
     <para>As discussed with the Pizza shop owner we need to control access to
     certain views in the Web frontend. Securing access to different views in
@@ -779,94 +723,33 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
   </section>
 
   <section>
-    <title>Step 7: Customizing the Look &amp; Feel of the Web UI</title>
+    <title xml:id="customizing-ui">Customizing the Look &amp; Feel of the Web
+    UI</title>
 
     <para>Roo generated Web UIs can be customized in various ways. To find
     your way around the installed Web-tier artifacts take a look at the
     following table:</para>
 
-    <para><table frame="box" rules="all">
-        <caption></caption>
+    <para></para>
 
-        <thead>
-          <tr align="center">
-            <th>Directory</th>
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/webfolders.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
-            <th>Purpose</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr>
-            <td>/styles</td>
-
-            <td>style sheets (CSS)</td>
-          </tr>
-
-          <tr>
-            <td>/images</td>
-
-            <td>graphics</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/classes/*.properties</td>
-
-            <td>theme configurations</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/spring/*.xml</td>
-
-            <td>Web-related Spring application contexts</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/i18n/*.properties</td>
-
-            <td>internationalization message files</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/layouts/layout.jspx</td>
-
-            <td>Tiles definition for master layout</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/tags/*.tagx</td>
-
-            <td>Tag libraries (pagination, language, etc)</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/views/**/*</td>
-
-            <td>Tiles and other view artifacts</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/web.xml</td>
-
-            <td>Web application context</td>
-          </tr>
-
-          <tr>
-            <td>/WEB-INF/urlrewrite.xml</td>
-
-            <td>URL rewrite filter configuration</td>
-          </tr>
-        </tbody>
-      </table>The easiest way to customize the look &amp; feel of the Roo Web
-    UI is to change CSS and image resources to suit your needs. The following
+    <para>The easiest way to customize the look &amp; feel of the Roo Web UI
+    is to change CSS and image resources to suit your needs. The following
     look &amp; feel was created for the specific purpose of the Pizza shop
     application:</para>
 
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/altui.png"></imagedata>
-      </imageobject>
-    </mediaobject>
+    <para></para>
+
+    <para><mediaobject>
+        <imageobject>
+          <imagedata fileref="images/altui.png"></imagedata>
+        </imageobject>
+      </mediaobject></para>
 
     <para>To achieve a higher level of customization you can change the
     default Tiles template and adjust the JSP pages. However, any JSP views
@@ -880,7 +763,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
   </section>
 
   <section xml:id="beginning-step-7">
-    <title>Step 7: Selenium Tests</title>
+    <title>Selenium Tests</title>
 
     <para>Roo offers a core addon which can generate <link
     xlink:href="http://seleniumhq.org/">Selenium</link> test scripts for you.
@@ -914,14 +797,67 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
   </section>
 
   <section xml:id="beginning-step-8">
-    <title>Step 8: Backups and Deployment</title>
+    <title>Backups and Deployment</title>
 
-    <para>Make a ZIP and make a WAR; refer to version control section.</para>
+    <para>One other very useful command is the '<emphasis role="bold"><link
+    linkend="command-index-backup-commands">backup</link></emphasis>' command.
+    Issuing this command will create you a backup of the current workspace
+    with all sources, log files and the script log file (excluding the target
+    directory):</para>
+
+    <para><programlisting>~.web roo&gt; <emphasis role="bold">backup</emphasis>
+Created ROOT/pizzashop_2009-12-30_11:23:37.zip
+Backup completed in 516 ms
+~.web roo&gt; 
+</programlisting>Finally, you may wish to deploy your application to a
+    production Web container. For this you can easily create a war archive by
+    taking advantage of the '<link
+    linkend="command-index-perform-package"><emphasis role="bold">perform
+    package</emphasis></link>' command:</para>
+
+    <para><programlisting>~.web roo&gt; <emphasis role="bold">perform package</emphasis>
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Building pizzashop
+[INFO]    task-segment: [package]
+[INFO] ------------------------------------------------------------------------
+...
+[INFO] [war:war {execution: default-war}]
+[INFO] Exploding webapp...
+[INFO] Assembling webapp pizzashop in /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT
+[INFO] Copy webapp webResources to /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT
+[INFO] Generating war /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
+[INFO] Building war: /Users/sschmidt/pizza/target/pizzashop-0.1.0-SNAPSHOT.war
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESSFUL
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 17 seconds
+[INFO] Finished at: Wed Dec 30 11:36:40 EST 2009
+[INFO] Final Memory: 26M/79M
+[INFO] ------------------------------------------------------------------------
+~.web roo&gt; 
+</programlisting> This command produces your war file which can then be easily
+    copied into your production Web container.</para>
   </section>
 
   <section xml:id="beginning-where-to-next">
     <title>Where To Next</title>
 
-    <para>TBC</para>
+    <para>TBD:</para>
+
+    <para>- dynamic finders</para>
+
+    <para>- <link linkend="command-index-web-flow-commands">web flow</link>
+    addon</para>
+
+    <para>- push-in refactoring</para>
+
+    <para>- <link linkend="command-index-logging-commands">logging</link>
+    addon</para>
+
+    <para>- <link linkend="command-index-jms-commands">jms</link> addon</para>
+
+    <para>- <link linkend="command-index-email-sender-setup">email</link>
+    addon</para>
   </section>
 </chapter>
