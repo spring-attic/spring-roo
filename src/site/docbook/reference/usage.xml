@@ -255,7 +255,7 @@
     editor. The syntax of the script is identical to what you'd type at the
     Roo shell. Both the Roo shell and your scripts can contain inline comments
     using the <code>;</code> and <code>//</code> markers, as well as block
-    comments using the <code>/* */</code> syntax. </para>
+    comments using the <code>/* */</code> syntax.</para>
 
     <para>A really nice script-related feature of the Roo shell is that it
     will automatically build a script containing the commands you entered.
@@ -352,41 +352,132 @@ quit
   <section xml:id="usage-build-system">
     <title>Build System Usage</title>
 
-    <para></para>
+    <para>For Spring Roo 1.0.0 we support the use of Apache Maven. This is a
+    common build system used in many enteprise applications. As per the <link
+    linkend="intro-installation">installation instructions</link>, you must
+    ensure you are using Maven 2.0.9 or above.</para>
+
+    <para>Roo will create a new <code>pom.xml</code> file whenever you use the
+    <link linkend="command-index-project">project</link> command. The POM will
+    contain the following Roo-specific considerations:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>A reference to the Roo annotations JAR. This JAR exists at
+        development time only and has a scope that prevents it from being
+        included in resultant WAR files.</para>
+      </listitem>
+
+      <listitem>
+        <para>A correct configuration of the Maven AspectJ plugin. This
+        includes a reference to the Spring Aspects library, which is important
+        to Roo-based applications. Spring Aspects is included within Spring
+        Framework.</para>
+      </listitem>
+    </itemizedlist>
+
+    <para>There are no other Roo changes to the POM. In particular, there is
+    no requirement for the POM to include Roo as part of any code generation
+    step. Roo is never used in this "bulk generation style".</para>
+
+    <para>If you are interested in ensuring a build includes the latest Roo
+    code generation output, you can cause Maven or equivalent build system to
+    execute <code>roo quit</code>. The presentation of the quit command line
+    option will cause the Roo shell to load, perform its startup-time scan
+    (which identifies and completes any required changes to generated files)
+    and then exit.</para>
+
+    <para>Those seeking Ant/Ivy instead of Maven support are encouraged to
+    vote for issue <link
+    xlink:href="https://jira.springsource.org/browse/ROO-91">ROO-91</link>.
+    The internals of Roo do not rely on Maven at all, so this new feature is
+    not a significant undertaking. Nonetheless we have deferred it until we
+    see sufficient community interest to justify maintaining two build system
+    environment.</para>
   </section>
 
   <section xml:id="usage-file-system">
     <title>File System Conventions</title>
 
-    <para>Cover version control recommendations, plus handling of changes if
-    Roo isn't running. Also the auto-scaled file monitoring in use etc. Also
-    backup command. The only files that Roo automatically maintains are
-    AspectJ ITDs matching the <code>*_Roo_*.aj</code> wildcard and those JSPs
-    associated with MVC controllers that have the annotation
+    <para>We have already covered some of Roo's file system conventions in the
+    <link linkend="usage-usability">Usability Philosophy</link> section.In
+    summary Roo will automatically monitor the file system for changes and
+    code generate only those files which match the <code>*_Roo_*.aj</code>
+    wildcard. It will also code generatethose JSPs associated with scaffolded
+    MVC controllers that have the annotation
     <code>@RooWebScaffold(automaticallyMaintainView=true)</code>.</para>
+
+    <para>Roo applications follow the standard Maven-based directory layout.
+    We have also placed Spring application context-related files (both
+    <code>.xml</code> and <code>.properties</code>) in the recommended
+    classpath sub-directory for Spring applications,
+    <code>META-INF/spring</code>.</para>
   </section>
 
   <section xml:id="usage-addons">
     <title>Add-On Installation and Removal</title>
 
-    <para>TBC</para>
+    <para>Roo supports the installation and removal of third-party add-ons.
+    Roo add-ons adopt a simple convention where all add-ons are incorporated
+    into the Roo shell's startup classpath.</para>
+
+    <para>In essence add-ons are shipped as <code>.zip</code> files which are
+    placed into the <code>$ROO_HOME/add-ons</code> directory. The Roo <link
+    linkend="command-index-addon-cleanup">addon cleanup</link> command will
+    then expand the <code>.jar</code> files inside the <code>.zip</code> file
+    and place them into the <code>$ROO_HOME/work</code> directory. It will
+    naturally remove unnecessary <code>.jar</code> files from
+    <code>$ROO_HOME/work</code> as well (eg if an add-on was uninstalled). The
+    Roo startup scripts (<code>roo.bat</code> and <code>roo.sh</code>) will
+    automatically include the files in <code>$ROO_HOME/work</code>.</para>
+
+    <para>The relevant <link linkend="command-index-add-on-commands">add-on
+    commands</link> can be found in the command index.</para>
   </section>
 
   <section xml:id="usage-recommendations">
     <title>Recommended Practices</title>
 
-    <para>TBC</para>
-  </section>
+    <para>Following some simple recommendations will ensure you have the best
+    possible experience with Roo:</para>
 
-  <section xml:id="usage-diagnosis">
-    <title>Diagnosing Roo Problems</title>
+    <itemizedlist>
+      <listitem>
+        <para>Don't edit any files that Roo code generates (see the <link
+        linkend="usage-usability">Usability Philosophy</link> for
+        details).</para>
+      </listitem>
 
-    <para>TBC</para>
-  </section>
+      <listitem>
+        <para>Before installing any new technology, check if Roo offers a
+        setup command and use it if present (this will ensure the seutp
+        reflects our recommendations and the expectations of other
+        add-ons).</para>
+      </listitem>
 
-  <section xml:id="usage-known-issues">
-    <title>Known Issues</title>
+      <listitem>
+        <para>Ensure you leave the Roo shell running when creating, updating
+        or deleting files in your project.</para>
+      </listitem>
 
-    <para>TBC</para>
+      <listitem>
+        <para>Remember you'll still need to write Java code (and JSPs for
+        custom controllers). Have the right expectations before you start
+        using Roo. It just helps you - it doesn't replace the requirement to
+        program.</para>
+      </listitem>
+
+      <listitem>
+        <para>Check the <link linkend="upgrade-known-issues">Known
+        Issues</link> section before upgrading or if you experience any
+        problems.</para>
+      </listitem>
+
+      <listitem>
+        <para>Refer to the <link linkend="resources">Roo Resources</link>
+        section for details of how to get assistance with Roo. We're happy to
+        hear from you.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 </chapter>

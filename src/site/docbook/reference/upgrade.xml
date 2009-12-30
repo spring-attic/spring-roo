@@ -118,7 +118,7 @@
         does not work on Mac OSX 10.6. This is a known issue to the developers
         of this maven plugin and the progress on this issue can be tracked at
         <link xlink:href="http://jira.openqa.org/browse/SRC-743">
-        http://jira.openqa.org/browse/SRC-743</link></para>
+        http://jira.openqa.org/browse/SRC-743</link>.</para>
       </listitem>
     </itemizedlist>
   </section>
@@ -362,80 +362,5 @@
         as CTRL + R commands and STS' embedded Roo shell.</para>
       </listitem>
     </itemizedlist>
-  </section>
-
-  <section xml:id="upgrade-1.0.0.RC4">
-    <title>1.0.0.RC4</title>
-
-    <para>When upgrading from Spring Roo 1.0.0.RC3 to Spring Roo 1.0.0.RC4 you
-    should be aware that a large number of changes have been applied to the UI
-    scaffolding functionalities which impact an update to the Web
-    layer:</para>
-
-    <itemizedlist>
-      <listitem>
-        <para>(IMPORTANT) Run the 'backup' command using the PREVIOUS version
-        of Roo (ie Roo RC3)</para>
-      </listitem>
-
-      <listitem>
-        <para>Edit your project's <code>pom.xml</code> and verify the Spring
-        Roo annotations JAR matches the new Roo release (RC4) you are
-        using.</para>
-      </listitem>
-
-      <listitem>
-        <para>Edit your project's <code>pom.xml</code> and verify that major
-        libraries match the new versions that are now used by Roo. The
-        simplest approach to doing this is to create a new directory and use
-        "<code>roo script clinic.roo</code>" and then <code>diff</code> your
-        existing <code>pom.xml</code> against the newly-created Petclinic
-        <code>pom.xml</code>. The main changes in Roo 1.0.0.RC4 are upgrades
-        to Spring Framework (version 3.0.0.GA), Spring Security and Spring Web
-        Flow.</para>
-      </listitem>
-
-      <listitem>
-        <para>The easiest way to update the Web artifacts is to delete the old
-        ones completely: <code>rm -rf src/main/webapp/*</code></para>
-      </listitem>
-
-      <listitem>
-        <para>Roo RC4 takes advantage of the new type conversion API
-        introduced in Spring Framework 3.0.0.RC3 (see <link
-        xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/ch05.html">
-        chapter 5</link> of the Spring reference documentation) which is aimed
-        to replace property editors. To remove existing property editors from
-        your current project you can issue the following command: <code>rm -rf
-        src/main/java/com/foo/domain/*Editor.java</code> (depending on your
-        package naming convention)</para>
-      </listitem>
-
-      <listitem>
-        <para>Another (optional) step is to replace the web controllers. This
-        step is only required if you have used the dateFormat
-        <code>@RooWebScaffold(dateFormat="..")</code> attribute in the
-        @RooWebScaffold annotation: <code>rm -rf
-        src/main/java/com/foo/web/*</code> (depending on your package naming
-        convention)</para>
-
-        <para>Alternatively, you can simply remove this attribute from the
-        @RooWebScaffold annotation. Note, date formats can now be defined via
-        the <code>field date</code> command (see <link
-        xlink:href="https://jira.springsource.org/browse/ROO-453">ROO-453</link>
-        for further information).</para>
-      </listitem>
-
-      <listitem>
-        <para>Run the controller command again to regenerate all necessary web
-        artifacts: <code>controller all --package ~.web</code> or you can use
-        the <code>controller scaffold ...</code> command. This will recreate
-        all web artifacts.</para>
-      </listitem>
-    </itemizedlist>
-
-    <para>If you experience any difficulty with upgrading your projects to Roo
-    1.0.0.RC4, please use the <link linkend="resources-forums">community
-    support forum</link> for assistance.</para>
   </section>
 </appendix>
