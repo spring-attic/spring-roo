@@ -63,13 +63,13 @@
 	<!-- This bean resolves specific types of exceptions to corresponding logical - view names for error views. 
 	     The default behaviour of DispatcherServlet - is to propagate all exceptions to the servlet container: 
 	     this will happen - here with all other types of exceptions. -->
-	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver" p:defaultErrorView="uncaughtException">
 		<property name="exceptionMappings">
 			<props>
 				<prop key=".DataAccessException">dataAccessFailure</prop>
 				<prop key=".NoSuchRequestHandlingMethodException">resourceNotFound</prop>
 				<prop key=".TypeMismatchException">resourceNotFound</prop>
-				<prop key=".lang.Exception">uncaughtException</prop>
+				<prop key=".MissingServletRequestParameterException">resourceNotFound</prop>
 			</props>
 		</property>
 	</bean>
