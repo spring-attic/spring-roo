@@ -118,13 +118,13 @@
     <title>Tutorial Application Details</title>
 
     <para>To demonstrate the development of an application using Spring Roo we
-    will create a Web site for a Pizza shop. The requirements for the Pizza
-    shop application include the ability to create new Pizza types by the
-    staff of the Pizza shop. A pizza is composed of a base and one or more
-    toppings. Furthermore, the shop owner would like to allow online orders of
-    Pizzas by his customers for delivery.</para>
+    will create a Web site for a Pizza Shop. The requirements for the Roo
+    Pizza Shop application include the ability to create new Pizza types by
+    the staff of the Roo Pizza Shop. A pizza is composed of a base and one or
+    more toppings. Furthermore, the shop owner would like to allow online
+    orders of Pizzas by his customers for delivery.</para>
 
-    <para>After this short discussion with the Pizza shop owner, we have
+    <para>After this short discussion with the Pizza Shop owner, we have
     created a simple class diagram for the initial domain model:</para>
 
     <para></para>
@@ -135,17 +135,17 @@
         </imageobject>
       </mediaobject></para>
 
-    <para>While this class diagram represents a simpified model of the problem
-    domain for the pizza shop problem domain, it is a good starting point for
-    the project at hand in order to deliver a first prototype of the
-    application to the Pizza shop owner. Later tutorials will expand this
+    <para>While this class diagram represents a simplified model of the
+    problem domain for the pizza shop problem domain, it is a good starting
+    point for the project at hand in order to deliver a first prototype of the
+    application to the Pizza Shop owner. Later tutorials will expand this
     domain model to demonstrate more advanced features of Spring Roo.</para>
   </section>
 
   <section xml:id="beginning-step-1">
     <title>Step 1: Starting a Typical Project</title>
 
-    <para>Now that we have spoken with our client (the Pizza shop owner) to
+    <para>Now that we have spoken with our client (the Pizza Shop owner) to
     gather the first ideas and requirements for the project we can get started
     with the development of the project. After <link
     linkend="intro-installation">installing</link> a JDK, <link
@@ -185,17 +185,17 @@ Once your project is created, type 'hint' and ENTER for the next suggestion.
 You're also welcome to visit http://forum.springframework.org for Roo help.
 roo&gt; 
 </programlisting>There are quite a few usability features within the Roo
-    shell. After typing <emphasis role="bold">'<link
-    linkend="command-index-hint-commands">hint</link>'</emphasis> you have
+    shell. After typing<emphasis role="bold"> <link
+    linkend="command-index-hint-commands">hint</link> </emphasis>you may have
     noticed that this commands guides you in a step-by-step style towards the
-    completion of your first project. Or if you type <emphasis
-    role="bold">'<link linkend="command-index-help">help</link></emphasis>'
-    you will see all of the commands available to you in the particular
-    context you are in. In our case we have not created a new project yet so
-    the help command only reveals higher level commands which are available to
-    you at this stage. To create an actual project we can use the '<emphasis
+    completion of your first project. Or if you type<emphasis role="bold">
+    <link linkend="command-index-help">help</link></emphasis> you will see a
+    list of all commands available to you in the particular context you are
+    in. In our case we have not created a new project yet so the help command
+    only reveals higher level commands which are available to you at this
+    stage. To create an actual project we can use the <emphasis
     role="bold"><link
-    linkend="command-index-project">project</link></emphasis>' command:</para>
+    linkend="command-index-project">project</link></emphasis> command:</para>
 
     <para><programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.springsource.roo.pizzashop</emphasis>
 Created /Users/sschmidt/Development/workspaces/test9/pom.xml
@@ -222,10 +222,10 @@ com.springsource.roo.pizzashop roo&gt;
     <para>For those familiar with <link
     xlink:href="http://maven.apache.org/">Maven</link> you will notice that
     this folder structure follows standard Maven conventions by creating
-    seperate folders for your main project resources and tests. Roo also
+    separate folders for your main project resources and tests. Roo also
     installs a default application context and a log4j configuration for you.
     Finally, The project pom file contains all required dependencies and
-    configurations to get started with our Pizza shop project.</para>
+    configurations to get started with our Pizza Shop project.</para>
 
     <para>Once the project structure is created by Roo you can go ahead and
     install a persistence configuration for your application. Roo leverages
@@ -233,9 +233,9 @@ com.springsource.roo.pizzashop roo&gt;
     achieve object-relational mapping. JPA takes care of mappings between your
     persistent domain objects (entities) and their underlying database tables.
     To install or change the persistence configuration in your project you can
-    use the '<emphasis role="bold"><link
+    use the <emphasis role="bold"><link
     linkend="command-index-persistence-setup">persistence
-    setup</link></emphasis>' command (note: utry using the <emphasis
+    setup</link></emphasis> command (note: utry using the <emphasis
     role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
     your commands, options and even obtain contextual help):</para>
 
@@ -252,7 +252,8 @@ As such, you're ready to press ENTER to execute the command.
 
 Once JPA is installed, type 'hint' and ENTER for the next suggestion.
 com.springsource.roo.pizzashop roo&gt;
-com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis> 
+com.springsource.roo.pizzashop roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE ↩
+                                        --database HYPERSONIC_IN_MEMORY</emphasis> 
 Created SRC_MAIN_RESOURCES/META-INF/persistence.xml
 Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
 Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
@@ -264,10 +265,10 @@ com.springsource.roo.pizzashop roo&gt;
     the alternative choices. In a similar fashion we have chosen the
     Hypersonic in-memory database database as our target database. This
     database is frequently used during Roo application development as it
-    releaves the developer from the burden of installing and configuring a
-    production scale database. Of course the '<emphasis role="bold"><link
+    relieves the developer from the burden of installing and configuring a
+    production scale database. Of course the <emphasis role="bold"><link
     linkend="command-index-persistence-setup">persistence
-    setup</link></emphasis>' command can be used later on to swap the database
+    setup</link></emphasis> command can be used later on to swap the database
     (or even ORM) for a different production database such as MySQL, Postgres,
     MS SQL Server, Oracle, Sybase, or H2.</para>
   </section>
@@ -276,14 +277,15 @@ com.springsource.roo.pizzashop roo&gt;
     <title>Step 2: Creating Entities and Fields</title>
 
     <para>Now it is time to create our domain objects and fields which we have
-    identified in our class diagram. First, we can use the '<emphasis
-    role="bold"><link linkend="command-index-entity">entity</link></emphasis>'
+    identified in our class diagram. First, we can use the <emphasis
+    role="bold"><link linkend="command-index-entity">entity</link></emphasis>
     command to create the actual domain object. The entity command has a
     number of <link linkend="command-index-entity">optional attributes</link>
-    and one required attribute which is '--class'. In addition to the required
-    '--class' attribute we use the '--testAutomatically' attribute which
-    conveniently creates integration tests for a domain object. So let's start
-    with the Topping domain object:</para>
+    and one required attribute which is <code>--class</code>. In addition to
+    the required <code>--class</code> attribute we use the
+    <code>--testAutomatically</code> attribute which conveniently creates
+    integration tests for a domain object. So let's start with the
+    <code>Topping</code> domain object:</para>
 
     <para><programlisting>com.springsource.roo.pizzashop roo&gt; <emphasis
           role="bold">hint</emphasis>
@@ -294,7 +296,7 @@ Start by typing 'ent' and then hitting TAB twice.
 Enter the --name in the form '~.domain.MyEntityClassName'
 In Roo, '~' means the --topLevelPackage you specified via 'create project'.
 
-Afer specify a --name argument, press SPACE then TAB. Note nothing appears.
+After specify a --name argument, press SPACE then TAB. Note nothing appears.
 Because nothing appears, it means you've entered all mandatory arguments.
 However, optional arguments do exist for this command (and most others in Roo).
 To see the optional arguments, type '--' and then hit TAB. Mostly you won't
@@ -316,19 +318,20 @@ Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTe
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingIntegrationTest_Roo_IntegrationTest.aj
 Created SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_Configurable.aj
-</programlisting>You will notice that besides the ctreation of Java, and
-    AspectJ sources, the '<emphasis role="bold"><link
-    linkend="command-index-entity">entity</link></emphasis>' command in the
-    Roo shell takes care of creating the approriate folder structure in your
+</programlisting>You will notice that besides the creation of Java and AspectJ
+    sources, the <emphasis role="bold"><link
+    linkend="command-index-entity">entity</link></emphasis> command in the Roo
+    shell takes care of creating the appropriate folder structure in your
     project for the top level package you defined earlier. You will notice
     that we used the '<emphasis role="bold">~</emphasis>' character as a
     placeholder for the project's top level package. While this serves a
     convenience to abbreviate long commands, you can also tab-complete the
     full top level package in the Roo shell.</para>
 
-    <para>As a next step we need to add the 'name' field to our Topping domain
-    class. This can be achieved by using the '<emphasis role="bold"><link
-    linkend="command-index-field-commands">field</link></emphasis>' command as
+    <para>As a next step we need to add the 'name' field to our
+    <code>Topping</code> domain class. This can be achieved by using the
+    <emphasis role="bold"><link
+    linkend="command-index-field-commands">field</link></emphasis> command as
     follows:</para>
 
     <para><programlisting>~.domain.Topping roo&gt; <emphasis role="bold">hint</emphasis>
@@ -353,17 +356,20 @@ Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping.java
 Created SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_JavaBean.aj
 Managed SRC_TEST_JAVA/com/springsource/roo/pizzashop/domain/ToppingDataOnDemand_Roo_DataOnDemand.aj
 Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString.aj
-</programlisting>As explained in the documentation by typing the 'hint'
-    command you can easily add constraints to your fields by using optional
-    attributes such as '--notNull' and '--sizeMin 2'. These attributes result
-    in standards-compliant <link
+</programlisting>As explained in the documentation by typing the <emphasis
+    role="bold"><link
+    linkend="command-index-hint-commands">hint</link></emphasis> command you
+    can easily add constraints to your fields by using optional attributes
+    such as <code>--notNull</code> and <code>--sizeMin 2</code>. These
+    attributes result in standards-compliant <link
     xlink:href="http://jcp.org/en/jsr/detail?id=303">JSR-303</link>
     annotations which Roo will add to your field definition in your Java
     sources. You will also notice that the Roo shell is aware of the current
-    context within which you are using the 'field' command. It knows that you
-    have just created a Topping entity and therefore assumes that the field
-    command should be applied to the Topping Java source. Roo's current
-    context is visible in the Shell (enclosed by a red rectangle for
+    context within which you are using the <emphasis role="bold"><link
+    linkend="command-index-field-commands">field</link></emphasis> command. It
+    knows that you have just created a Topping entity and therefore assumes
+    that the field command should be applied to the Topping Java source. Roo's
+    current context is visible in the Shell (enclosed by a red rectangle for
     illustration):</para>
 
     <para></para>
@@ -375,42 +381,46 @@ Managed SRC_MAIN_JAVA/com/springsource/roo/pizzashop/domain/Topping_Roo_ToString
       </mediaobject></para>
 
     <para>If you wish to add the field to a different target type you can
-    specify the '--class' attribute as part of the 'field' command which then
-    allows you to tab complete to any type in your project.</para>
+    specify the <code>--class</code> attribute as part of the <emphasis
+    role="bold"><link
+    linkend="command-index-field-commands">field</link></emphasis> command
+    which then allows you to tab complete to any type in your project.</para>
 
-    <para>As a next step you can create the Base and the Pizza domain object
-    in a similar fashion by issuing the following commands (shell output
-    omitted):</para>
+    <para>As a next step you can create the <code>Base</code> and the
+    <code>Pizza</code> domain object in a similar fashion by issuing the
+    following commands (shell output omitted):</para>
 
     <para><programlisting>entity --class ~.domain.Base --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
 entity --class ~.domain.Pizza --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
 field number --fieldName price --type java.lang.Float </programlisting>After
-    adding the name and the price field to the Pizza domain class we need to
-    deal with its releationships to Base and Topping. Let's start with the m:n
-    (one Pizza can have many Toppings and one Topping can be applied to many
-    Pizzas) relationship between Pizza and Toppings. To create such
-    many-to-many relationships Roo offers the '<emphasis role="bold"><link
-    linkend="command-index-field-set">field set</link></emphasis>'
+    adding the name and the price field to the <code>Pizza</code> domain class
+    we need to deal with its relationships to <code>Base</code> and
+    <code>Topping</code>. Let's start with the m:n (one <code>Pizza</code> can
+    have many <code>Toppings</code> and one <code>Topping</code> can be
+    applied to many <code>Pizzas</code>) relationship between
+    <code>Pizza</code> and <code>Toppings</code>. To create such many-to-many
+    relationships Roo offers the <emphasis role="bold"><link
+    linkend="command-index-field-set">field set</link></emphasis>
     command:</para>
 
     <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field set --fieldName toppings --element ~.domain.Topping</emphasis></programlisting>As
     you can see it is easy to define this relationship even without knowing
-    about the exact JPA annotations needed to create this mapping in our Pizza
-    domain entity. In a similar way you can define the 1:1 relationship
-    between the Pizza and Base domain entities by using the '<emphasis
-    role="bold"><link linkend="command-index-field-reference">field
-    reference</link></emphasis>' command:</para>
+    about the exact JPA annotations needed to create this mapping in our
+    <code>Pizza</code> domain entity. In a similar way you can define the 1:1
+    relationship between the <code>Pizza</code> and <code>Base</code> domain
+    entities by using the <emphasis role="bold"><link
+    linkend="command-index-field-reference">field reference</link></emphasis>
+    command:</para>
 
     <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field reference --fieldName base --type ~.domain.Base</emphasis></programlisting>In
-    a similar fashion we can then continue to create the PizzaOrder domain
-    object and add its fields by leveraging the '<emphasis role="bold"><link
-    linkend="command-index-field-date"><link
-    linkend="command-index-field-date">field date</link></link></emphasis>'
-    and '<emphasis role="bold"><link
-    linkend="command-index-field-number">field number</link></emphasis>'
-    commands:</para>
+    a similar fashion we can then continue to create the
+    <code>PizzaOrder</code> domain object and add its fields by leveraging the
+    <emphasis role="bold"><link linkend="command-index-field-date"><link
+    linkend="command-index-field-date">field date</link></link></emphasis> and
+    <emphasis role="bold"><link linkend="command-index-field-number">field
+    number</link></emphasis> commands:</para>
 
     <para><programlisting>entity --class ~.domain.PizzaOrder --testAutomatically 
 field string --fieldName name --notNull --sizeMin 2
@@ -431,11 +441,11 @@ field set --fieldName pizzas --element ~.domain.Pizza
     model you naturally want to see if it works. Lucky we have instructed Roo
     to create integration tests for our domain objects all along. Hint: if you
     have not created any integration tests while developing your domain model
-    you can still easily create them using the '<link
+    you can still easily create them using the <link
     linkend="command-index-test-integration"><emphasis role="bold">test
-    integration</emphasis></link>' command. Once your tests are in place it is
-    time to run them using the '<emphasis role="bold"><link
-    linkend="command-index-perform-tests">perform tests</link></emphasis>'
+    integration</emphasis></link> command. Once your tests are in place it is
+    time to run them using the <emphasis role="bold"><link
+    linkend="command-index-perform-tests">perform tests</link></emphasis>
     command:</para>
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform tests</emphasis>
@@ -466,10 +476,10 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 </programlisting></para>
 
     <para>As you can see Roo has issued a Maven command (equivalent to running
-    'mvn test' outside the Roo shell) in order to execute the integration
-    tests. All tests have passed, Roo has generated 9 integration tests per
-    domain object resulting in a total of 36 integration tests for all 4
-    domain objects.</para>
+    '<code>mvn test</code>' outside the Roo shell) in order to execute the
+    integration tests. All tests have passed, Roo has generated 9 integration
+    tests per domain object resulting in a total of 36 integration tests for
+    all 4 domain objects.</para>
   </section>
 
   <section xml:id="beginning-step-4">
@@ -488,10 +498,11 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     IntelliJ in securing ITD support.</para>
 
     <para>By default Roo projects do not contain any IDE-specific workspace
-    artifacts so in order to be able to import our Pizza shop application into
+    artifacts so in order to be able to import our Pizza Shop application into
     STS we need to create the relevant project artifacts. The Roo shell helps
-    us creating these artifacts by means of the 'perform eclipse'
-    command:</para>
+    us creating these artifacts by means of the <link
+    linkend="command-index-perform-eclipse"><emphasis role="bold">perform
+    eclipse</emphasis></link> command:</para>
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform eclipse</emphasis>
 ...
@@ -502,7 +513,7 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Using Eclipse Workspace: null
 [INFO] Adding default classpath container: org.eclipse.jdt.launching.JRE_CONTAINER
 [INFO] Wrote settings to /Users/sschmidt/pizza/.settings/org.eclipse.jdt.core.prefs
-[INFO] Wrote Eclipse project for "pizzashop" to /Users/sschmidt/Development/workspaces/pizza.
+[INFO] Wrote Eclipse project for "pizzashop" to /Users/sschmidt/pizza.
 ...
 
 [INFO] ------------------------------------------------------------------------
@@ -526,8 +537,9 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     AspectJ Intertype declarations extensively. This does, however, not affect
     your ability to use code completion features offered by STS. To see code
     completion working in action you can open an existing integration test and
-    use the 'testMarkerMethod' method to test it. For example you can open the
-    BaseIntegrationTest.java source file and try it out:</para>
+    use the <code>testMarkerMethod()</code> method to test it. For example you
+    can open the <code>BaseIntegrationTest.java</code> source file and try it
+    out:</para>
 
     <para></para>
 
@@ -545,39 +557,41 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
   <section xml:id="beginning-step-5">
     <title>Step 5: Creating A Web Tier</title>
 
-    <para>As a next step we want to scaffold a Web tier for the Pizza shop
-    application. This is accomplished via the '<emphasis role="bold"><link
-    linkend="command-index-controller-commands">controller</link></emphasis>'
+    <para>As a next step we want to scaffold a Web tier for the Pizza Shop
+    application. This is accomplished via the <emphasis role="bold"><link
+    linkend="command-index-controller-commands">controller</link></emphasis>
     command. The most convenient way to generate controllers and all relevant
-    Web artifacts is to use the '<emphasis role="bold"><link
-    linkend="command-index-controller-all">controller all</link></emphasis>'
+    Web artifacts is to use the <emphasis role="bold"><link
+    linkend="command-index-controller-all">controller all</link></emphasis>
     command:</para>
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">controller all --package ~.web
-</emphasis></programlisting>This command will scan the Pizza shop project for
+</emphasis></programlisting>This command will scan the Pizza Shop project for
     any domain entities and scaffold a Spring MVC controller for each entity
-    deteced. The '--package' attribute is needed to specify in which package
-    the controllers should be installed. This command can be issued from your
-    normal Roo shell or from the Roo shell which ships with STS. In order to
-    use the integrated Roo shell within STS you need to right click on the
-    pizzashop application and select 'Spring Tools &gt; Open Roo
+    detected. The <code>--package</code> attribute is needed to specify in
+    which package the controllers should be installed. This command can be
+    issued from your normal Roo shell or from the Roo shell, which ships with
+    STS. In order to use the integrated Roo shell within STS you need to right
+    click on the pizzashop application and select 'Spring Tools &gt; Open Roo
     Shell'.</para>
 
-    <para>Note, that with the first use of the '<emphasis role="bold"><link
-    linkend="command-index-controller-commands">controller</link></emphasis>'
+    <para>Note, that with the first use of the <emphasis role="bold"><link
+    linkend="command-index-controller-commands">controller</link></emphasis>
     command the nature of the project changes from a normal Java project
-    nature to a Web project nature in STS. The first use of the 'controller'
+    nature to a Web project nature in STS. The first use of the <emphasis
+    role="bold"><link
+    linkend="command-index-controller-commands">controller</link></emphasis>
     command will also add additional dependencies such as Spring MVC, Tiles,
     URL rewrite, etc to your project. In order to update the project classpath
     within STS with these new dependencies you can issue 'perform eclipse'
     again, followed by a project refresh in STS.</para>
 
     <para>All newly added Web artifacts which are needed for the view
-    scaffolding can be found under the src/main/webapp folder. This folder
-    includes graphics, cascading style sheets, Java Server pages, Tiles
-    configurations and more. The purpose of these folders is summarized in the
-    <link linkend="customizing-ui">UI customization section</link>. The Roo
-    generated Spring MVC controllers follow the REST pattern as much as
+    scaffolding can be found under the <code>src/main/webapp</code> folder.
+    This folder includes graphics, cascading style sheets, Java Server pages,
+    Tiles configurations and more. The purpose of these folders is summarized
+    in the <link linkend="customizing-ui">UI customization section</link>. The
+    Roo generated Spring MVC controllers follow the REST pattern as much as
     possible by leveraging new features introduced with the release of Spring
     Framework v3. The following URI - Resource mappings are applied in Roo
     generated controllers:</para>
@@ -595,7 +609,7 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     <title>Step 6: Loading the Web Server</title>
 
     <para>To deploy your application in a Web container during the project
-    developemt you have several options available:</para>
+    development you have several options available:</para>
 
     <para><itemizedlist>
         <listitem>
@@ -605,7 +619,9 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
           <itemizedlist>
             <listitem>
               <para>run 'mvn tomcat:run' in the root of your project (not
-              inside the Roo shell) to deploy to a Tomcat container</para>
+              inside the Roo shell) to deploy to a <link
+              xlink:href="http://tomcat.apache.org/">Tomcat</link>
+              container</para>
             </listitem>
 
             <listitem>
@@ -649,11 +665,11 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
   <section>
     <title>Securing the Application</title>
 
-    <para>As discussed with the Pizza shop owner we need to control access to
+    <para>As discussed with the Pizza Shop owner we need to control access to
     certain views in the Web frontend. Securing access to different views in
     the application is achieved by installing the Spring Security addon via
-    the '<link linkend="command-index-security-commands"><emphasis
-    role="bold">security setup</emphasis></link>' command:</para>
+    the <link linkend="command-index-security-commands"><emphasis
+    role="bold">security setup</emphasis></link> command:</para>
 
     <para><programlisting>~.web roo&gt; <emphasis role="bold">security setup</emphasis>
 Managed ROOT/pom.xml
@@ -662,22 +678,27 @@ Created SRC_MAIN_WEBAPP/WEB-INF/views/login.jspx
 Managed SRC_MAIN_WEBAPP/WEB-INF/views/views.xml
 Managed SRC_MAIN_WEBAPP/WEB-INF/web.xml
 Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
-</programlisting>Note, the Roo shell will hide the '<link
+</programlisting>Note, the Roo shell will hide the <link
     linkend="command-index-security-commands"><emphasis role="bold">security
-    setup</emphasis></link>' command until you have created a Web layer. As
-    shown above, the 'security setup' command manages the project pom.xml
-    file. This means additional dependencies have been added to the project.
-    To add these dependencies to the STS workspace you should run the 'perform
-    eclipse' command again followed by a project refresh in STS.</para>
+    setup</emphasis></link> command until you have created a Web layer. As
+    shown above, the <link linkend="command-index-security-commands"><emphasis
+    role="bold">security setup</emphasis></link> command manages the project
+    <code>pom.xml</code> file. This means additional dependencies have been
+    added to the project. To add these dependencies to the STS workspace you
+    should run the <link linkend="command-index-perform-eclipse"><emphasis
+    role="bold">perform eclipse</emphasis></link> command again followed by a
+    project refresh in STS.</para>
 
-    <para>In order to secure the views for the Topping, Base and Pizza
-    resource in the Pizza shop application you need to open the
-    applicationContext-security.xml file in the
-    src/main/resources/META-INF/spring folder:</para>
+    <para>In order to secure the views for the <code>Topping</code>,
+    <code>Base</code> and <code>Pizza</code> resource in the Pizza Shop
+    application you need to open the
+    <code>applicationContext-security.xml</code> file in the
+    <code>src/main/resources/META-INF/spring</code> folder:</para>
 
     <para><programlisting>&lt;!-- HTTP security configurations --&gt;
 &lt;http auto-config="true" use-expressions="true"&gt;
-   &lt;form-login login-processing-url="/static/j_spring_security_check" login-page="/login" authentication-failure-url="/login?login_error=t"/&gt;
+   &lt;form-login login-processing-url="/static/j_spring_security_check" login-page="/login" ↩
+                                          authentication-failure-url="/login?login_error=t"/&gt;
    &lt;logout logout-url="/static/j_spring_security_logout"/&gt;
    &lt;!-- Configure these elements to secure URIs in your application --&gt;
    &lt;intercept-url pattern="/<emphasis role="bold">pizza</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
@@ -688,7 +709,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
    &lt;intercept-url pattern="/**" access="permitAll" /&gt;
 &lt;/http&gt;</programlisting>As a next step you can use the Spring Security
     JSP tag library to restrict access to the relevant menu items in the
-    menu.jspx file:</para>
+    <code>menu.jspx</code> file:</para>
 
     <para><programlisting>&lt;div <emphasis role="bold">xmlns:sec="http://www.springframework.org/security/tags"</emphasis> ...&gt;
 	  &lt;jsp:output omit-xml-declaration="yes"/&gt;
@@ -704,8 +725,8 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
 &lt;/div&gt;</programlisting>This leaves the pizza order view visible to the
     public. Obviously the delete and the update use case for the pizza order
     view are not desirable. The easiest way to take care of this is to adjust
-    the @RooWebScaffold annotation in the PizzaOrderController.java
-    source:</para>
+    the <code>@RooWebScaffold</code> annotation in the
+    <code>PizzaOrderController.java</code> source:</para>
 
     <para><programlisting>@RooWebScaffold(path = "pizzaorder", 
                 automaticallyMaintainView = true, 
@@ -713,8 +734,8 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
                 <emphasis role="bold">delete=false</emphasis>, 
                 <emphasis role="bold">update=false</emphasis>)</programlisting>This
     will trigger the Roo shell to remove the delete and the update method from
-    the PizzaOrderController and also adjust the relevant view artifacts.
-    </para>
+    the <code>PizzaOrderController</code> and also adjust the relevant view
+    artifacts. </para>
 
     <para>With these steps completed you can restart the application and the
     'admin' user can navigate to <link
@@ -740,7 +761,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
 
     <para>The easiest way to customize the look &amp; feel of the Roo Web UI
     is to change CSS and image resources to suit your needs. The following
-    look &amp; feel was created for the specific purpose of the Pizza shop
+    look &amp; feel was created for the specific purpose of the Pizza Shop
     application:</para>
 
     <para></para>
@@ -758,8 +779,8 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     underlying domain entity changes (ie fields get added or removed). If you
     wish to maintain these JSP artifacts yourself you need to disable the
     handling of the artifacts by Roo by configuring
-    @RooWebScaffold(automaticallyMaintainView=false) in the relevant
-    controller.</para>
+    <code>@RooWebScaffold(automaticallyMaintainView=false)</code> in the
+    relevant controller.</para>
   </section>
 
   <section xml:id="beginning-step-7">
@@ -767,17 +788,18 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
 
     <para>Roo offers a core addon which can generate <link
     xlink:href="http://seleniumhq.org/">Selenium</link> test scripts for you.
-    You can create the Selenium scripts by using the '<emphasis
+    You can create the Selenium scripts by using the <emphasis
     role="bold"><link linkend="command-index-selenium-commands">selenium
-    test</link></emphasis>' command. Tests are generated for each controller
+    test</link></emphasis> command. Tests are generated for each controller
     and are integrated in a test suite:</para>
 
     <para><programlisting>~.web roo&gt; <emphasis role="bold">selenium test --controller ~.web.ToppingController</emphasis>
 ~.web roo&gt; selenium test --controller ~.web.BaseController
 ~.web roo&gt; selenium test --controller ~.web.PizzaController
 ~.web roo&gt; selenium test --controller ~.web.PizzaOrderController</programlisting>The
-    generated tests are located in the src/main/webapp/selenium folder and can
-    be run via the following maven command (executed from command line:</para>
+    generated tests are located in the <code>src/main/webapp/selenium</code>
+    folder and can be run via the following maven command (executed from
+    command line, not the Roo shell):</para>
 
     <para><programlisting>pizza&gt; <emphasis role="bold">mvn selenium:selenese</emphasis></programlisting></para>
 
@@ -786,7 +808,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     generated seed data.</para>
 
     <para>Please note that the maven selenium plugin configured in the project
-    pom.xml assumes that the <link
+    <code>pom.xml</code> assumes that the <link
     xlink:href="http://www.mozilla.com/en-US/firefox/firefox.html">FireFox</link>
     Web browser is already installed in your environment. Running the maven
     selenium plugin also assumes that your application is already started as
@@ -799,8 +821,8 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
   <section xml:id="beginning-step-8">
     <title>Backups and Deployment</title>
 
-    <para>One other very useful command is the '<emphasis role="bold"><link
-    linkend="command-index-backup-commands">backup</link></emphasis>' command.
+    <para>One other very useful command is the <emphasis role="bold"><link
+    linkend="command-index-backup-commands">backup</link></emphasis> command.
     Issuing this command will create you a backup of the current workspace
     with all sources, log files and the script log file (excluding the target
     directory):</para>
@@ -811,9 +833,9 @@ Backup completed in 516 ms
 ~.web roo&gt; 
 </programlisting>Finally, you may wish to deploy your application to a
     production Web container. For this you can easily create a war archive by
-    taking advantage of the '<link
+    taking advantage of the <link
     linkend="command-index-perform-package"><emphasis role="bold">perform
-    package</emphasis></link>' command:</para>
+    package</emphasis></link> command:</para>
 
     <para><programlisting>~.web roo&gt; <emphasis role="bold">perform package</emphasis>
 [INFO] Scanning for projects...
@@ -843,14 +865,18 @@ Backup completed in 516 ms
   <section xml:id="beginning-where-to-next">
     <title>Where To Next</title>
 
-    <para>TBD:</para>
+    <para>Congratuations! You've now completed the Roo Pizza Shop tutorial.
+    You're now in a good position to try Roo for your own projects. While
+    reading the next few chapters of this reference guide will help you
+    understand more about how to use Roo, we suggest the following specific
+    sections if you'd like to know more about commonly-used Roo
+    add-ons:</para>
 
-    <para>- dynamic finders</para>
+    <para>- <link linkend="command-index-finder-commands">dynamic
+    finders</link></para>
 
     <para>- <link linkend="command-index-web-flow-commands">web flow</link>
     addon</para>
-
-    <para>- push-in refactoring</para>
 
     <para>- <link linkend="command-index-logging-commands">logging</link>
     addon</para>
