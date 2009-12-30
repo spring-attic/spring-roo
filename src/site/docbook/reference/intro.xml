@@ -193,9 +193,8 @@
       them or at least will have no difficulty finding hundreds of thousands
       of other people who have (and the resultant books, blogs, samples etc
       that exist for each). Also, because most of these technologies are
-      implemented using <link
-      linkend="architecture-extending-features">add-ons</link>, if you'd like
-      Roo to use a different technology on your project it's quite easy to do
+      implemented using <link linkend="base">add-ons</link>, if you'd like Roo
+      to use a different technology on your project it's quite easy to do
       so.</para>
 
       <para>By using standard Java technologies, Roo avoids reinventing the
@@ -475,9 +474,9 @@
     <para>Next verify Roo has been installed correctly. This can be done using
     the following commands:</para>
 
-    <programlisting>$ mkdir roo-test
-$ cd roo-test
-$ roo quit
+    <programlisting>$ <emphasis role="bold">mkdir roo-test</emphasis>
+$ <emphasis role="bold">cd roo-test</emphasis>
+$ <emphasis role="bold">roo quit</emphasis>
     ____  ____  ____  
    / __ \/ __ \/ __ \ 
   / /_/ / / / / / / / 
@@ -486,8 +485,8 @@ $ roo quit
 
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
-$ cd ..
-$ rmdir roo-test</programlisting>
+$ <emphasis role="bold">cd ..</emphasis>
+$ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
 
     <para>If you see the logo appear, you've installed Roo
     successfully.</para>
@@ -496,8 +495,8 @@ $ rmdir roo-test</programlisting>
     <code>ROO_OPTS</code> environment variable before loading Roo. For
     example:</para>
 
-    <programlisting>$ export ROO_OPTS="-Droo.bright=true"                   // Linux or Apple
-$ set ROO_OPTS="-Droo.bright=true"                      // Windows users</programlisting>
+    <programlisting>$ <emphasis role="bold">export ROO_OPTS="-Droo.bright=true"</emphasis>                   // Linux or Apple
+$ <emphasis role="bold">set ROO_OPTS="-Droo.bright=true"</emphasis>                      // Windows users</programlisting>
 
     <para>You can also use the <code>ROO_OPTS</code> variable to set any other
     internal options you'd like Roo to start with. Please note that brighter
@@ -520,9 +519,9 @@ $ set ROO_OPTS="-Droo.bright=true"                      // Windows users</progra
 
     <para>Please start by typing the following commands:</para>
 
-    <programlisting>$ mkdir ten-minutes
-$ cd ten-minutes
-$ roo
+    <programlisting>$ <emphasis role="bold">mkdir ten-minutes</emphasis>
+$ <emphasis role="bold">cd ten-minutes</emphasis>
+$ <emphasis role="bold">roo</emphasis>
     ____  ____  ____  
    / __ \/ __ \/ __ \ 
   / /_/ / / / / / / / 
@@ -531,7 +530,7 @@ $ roo
 
 
 Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
-roo&gt; hint
+roo&gt; <emphasis role="bold">hint</emphasis>
 Welcome to Roo! We hope you enjoy your stay!
 
 Before you can use many features of Roo, you need to start a new project.
@@ -549,7 +548,7 @@ You're also welcome to visit http://forum.springframework.org for Roo help.</pro
     <para>Notice the output from the "hint" command guides you through what to
     do next. Let's do that:</para>
 
-    <programlisting>roo&gt; project --topLevelPackage com.tenminutes
+    <programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.tenminutes</emphasis>
 Created /home/balex/ten-minutes/pom.xml
 Created SRC_MAIN_JAVA
 Created SRC_MAIN_RESOURCES
@@ -558,7 +557,7 @@ Created SRC_TEST_RESOURCES
 Created SRC_MAIN_WEBAPP
 Created SRC_MAIN_RESOURCES/META-INF/spring
 Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
-roo&gt; hint
+roo&gt; <emphasis role="bold">hint</emphasis>
 Roo requires the installation of a JPA provider and associated database.
 
 Type 'persistence setup' and then hit TAB three times.
@@ -576,19 +575,19 @@ Once JPA is installed, type 'hint' and ENTER for the next suggestion.</programli
     the TAB key when using the shell, as it will save you from having to type
     most of these commands:</para>
 
-    <programlisting>roo&gt; persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
-roo&gt; hint
-roo&gt; entity --class ~.Timer --testAutomatically
-roo&gt; hint
-roo&gt; field string --fieldName message --notNull
-roo&gt; hint controllers
-roo&gt; controller all --package ~.web
-roo&gt; selenium test --controller ~.web.TimerController
-roo&gt; perform tests
-roo&gt; perform package
-roo&gt; perform eclipse
-roo&gt; quit
-$ mvn tomcat:run</programlisting>
+    <programlisting>roo&gt; <emphasis role="bold">persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY</emphasis>
+roo&gt; <emphasis role="bold">hint</emphasis>
+roo&gt; <emphasis role="bold">entity --class ~.Timer --testAutomatically</emphasis>
+roo&gt; <emphasis role="bold">hint</emphasis>
+roo&gt; <emphasis role="bold">field string --fieldName message --notNull</emphasis>
+roo&gt; <emphasis role="bold">hint controllers</emphasis>
+roo&gt; <emphasis role="bold">controller all --package ~.web</emphasis>
+roo&gt; <emphasis role="bold">selenium test --controller ~.web.TimerController</emphasis>
+roo&gt; <emphasis role="bold">perform tests</emphasis>
+roo&gt; <emphasis role="bold">perform package</emphasis>
+roo&gt; <emphasis role="bold">perform eclipse</emphasis>
+roo&gt; <emphasis role="bold">quit</emphasis>
+$ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
 
     <para>The "perform" commands could have been easily undertaken from the
     command prompt using "mvn" instead. We just did them from within Roo to
@@ -627,12 +626,12 @@ $ mvn tomcat:run</programlisting>
     found in your $ROO_HOME/samples directory. You can run any sample script
     by using the follow command format:</para>
 
-    <programlisting>$ mkdir sample
-$ cd sample
-$ roo
-roo&gt; script --file filename.roo
-roo&gt; quit
-$ mvn tomcat:run</programlisting>
+    <programlisting>$ <emphasis role="bold">mkdir sample</emphasis>
+$ <emphasis role="bold">cd sample</emphasis>
+$ <emphasis role="bold">roo</emphasis>
+roo&gt; <emphasis role="bold">script --file filename.roo</emphasis>
+roo&gt; <emphasis role="bold">quit</emphasis>
+$ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
 
     <para>The <code>filename.roo</code> shown in the statements above should
     be substituted with one of the filenames from this list (note that you get

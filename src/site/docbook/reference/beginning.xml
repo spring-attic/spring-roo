@@ -735,7 +735,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
                 <emphasis role="bold">update=false</emphasis>)</programlisting>This
     will trigger the Roo shell to remove the delete and the update method from
     the <code>PizzaOrderController</code> and also adjust the relevant view
-    artifacts. </para>
+    artifacts.</para>
 
     <para>With these steps completed you can restart the application and the
     'admin' user can navigate to <link
@@ -872,18 +872,31 @@ Backup completed in 516 ms
     sections if you'd like to know more about commonly-used Roo
     add-ons:</para>
 
-    <para>- <link linkend="command-index-finder-commands">dynamic
-    finders</link></para>
+    <itemizedlist>
+      <listitem>
+        <para><link linkend="command-index-finder-commands">Dynamic
+        Finders</link></para>
+      </listitem>
 
-    <para>- <link linkend="command-index-web-flow-commands">web flow</link>
-    addon</para>
+      <listitem>
+        <para><link linkend="command-index-web-flow-commands">Spring Web
+        Flow</link> addon</para>
+      </listitem>
 
-    <para>- <link linkend="command-index-logging-commands">logging</link>
-    addon</para>
+      <listitem>
+        <para><link linkend="command-index-logging-commands">Logging</link>
+        addon</para>
+      </listitem>
 
-    <para>- <link linkend="command-index-jms-commands">jms</link> addon</para>
+      <listitem>
+        <para><link linkend="command-index-jms-commands">JMS</link>
+        addon</para>
+      </listitem>
 
-    <para>- <link linkend="command-index-email-sender-setup">email</link>
-    addon</para>
+      <listitem>
+        <para><link linkend="command-index-email-sender-setup">Email</link>
+        (SMTP) addon</para>
+      </listitem>
+    </itemizedlist>
   </section>
 </chapter>
