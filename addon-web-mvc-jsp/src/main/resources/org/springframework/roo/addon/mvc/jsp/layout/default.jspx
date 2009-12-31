@@ -9,7 +9,8 @@
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
 		
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />		
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=8" />		
 		<spring:theme code="styleSheet" var="roo_css"/>	
 		<spring:url value="/${roo_css}" var="roo_css_url"/>
 		<spring:url value="/resources/dojo/dojo.js" var="dojo_url"/>
@@ -46,7 +47,7 @@
 		    <tiles:insertAttribute name="menu" ignore="true" />   
 	    	<div id="main">
 	    		<tiles:insertAttribute name="body" />
-	    		<div class="footer">				
+	    		<div id="footer">				
 				  	<spring:url var="home" value="/" />
 				    <span><a href="${home}"><spring:message code="button.home"/></a></span>				    
 				    <c:if test="${pageContext.request.userPrincipal != null}">	
