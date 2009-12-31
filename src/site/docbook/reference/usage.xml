@@ -324,6 +324,12 @@ quit
     way Eclipse will detect changes made to the file systme by the
     externally-running Roo shell.</para>
 
+    <para>When using AJDT you may be prompted whether to enable weaving of the
+    JDT. You should select to enable weaving so as to ensure the Java Editor
+    in Eclipse (or STS) gives the best AspectJ-based experience. You can also
+    verify this setting is active by loading Eclipse (or STS) and selecting
+    Window &gt; Preferences &gt; JDT Weaving.</para>
+
     <para>If you're using IntelliJ, we recommend you review IntelliJ issue
     report <link
     xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
