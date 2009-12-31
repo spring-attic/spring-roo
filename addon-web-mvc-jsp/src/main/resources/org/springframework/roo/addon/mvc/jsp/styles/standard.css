@@ -15,6 +15,7 @@ body {
 }
 
 #wrapper {
+	width:800px;
 	min-width: 800px;
 	max-width: 800px;
 	margin-right: auto;
@@ -87,13 +88,7 @@ body {
 	margin-top:15px;
 	border-top:1px solid #999999;
 	clear:both;
-}
-
-#footer td {
-	color: #666666;
-	background: #dcdcdc;	
-	text-align: right;
-	
+		
 	min-width: 800px;
 	max-width: 800px;
 	margin-right: auto;
