@@ -243,7 +243,7 @@ release, ensure you perform an "svn update" first and then run
 
 the following command is used from the root SVN location:
 
-  mvn clean install site assembly:assembly
+  mvn clean install site assembly:assembly deploy site:deploy
 
 This will create a ZIP in the "target" directory.
 
@@ -251,6 +251,7 @@ The org.springframework.roo.annotations JAR should be uploaded to
 repository.springsource.com/maven/bundles/release/org/springframework/
 roo/org.springframework.roo/org.sfw.roo.annotations/<version>. Ensure
 SHA1/MD5 files, plus the POM and JAR is uploaded. Set public read ACL.
+Use the mvn-hash.sh if required to create the SHA1/MD5 files.
 
 The target/spring-roo-<version>.zip should be uploaded to
 /dist.springframework.org/milestone/ROO/. Also upload an SHA1 file.
@@ -260,6 +261,11 @@ x-amz-meta-bundle.version:1.0.0.M1
 x-amz-meta-release.type:milestone
 x-amz-meta-package.file.name:spring-roo-1.0.0.M1.zip
 x-amz-meta-project.name:Spring Roo
+
+If performing a GA release (ie *.RELEASE) upload the ZIP to
+/dist.springframework.org/release/ROO/ and change the S3 props to:
+
+x-amz-meta-release.type:release
 
 In addition, a SVN branch should be created using the copy command:
 

@@ -27,14 +27,10 @@
         </snapshotRepository>
 
         <site>
-            <id>local</id>
-            <name>Local Site Directory</name>
-            <!--
-            This variable is set by the build release script. You can also set it on the command line if
-            you are running maven directly. e.g. mvn site -DsiteDirectory=file:///home/joe/mysite
-            -->
-            <url>${siteDirectory}</url>
+            <id>static.springframework.org</id>
+            <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo/org.springframework.roo.annotations</url>
         </site>
+
     </distributionManagement>
 
 	<build>
