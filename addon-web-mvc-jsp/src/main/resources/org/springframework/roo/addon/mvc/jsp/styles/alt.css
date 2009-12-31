@@ -87,14 +87,6 @@ body {
 	border:none;
 	margin-top:15px;
 	border-top:1px solid #999999;
-	clear:both;
-		
-	min-width: 800px;
-	max-width: 800px;
-	margin-right: auto;
-	margin-left: auto;
-	/* fix max-width incompatibility in IE6 */
-	width:expression(document.body.clientWidth > 800? "800px": "auto" );
 }
 
 #footer .new {
