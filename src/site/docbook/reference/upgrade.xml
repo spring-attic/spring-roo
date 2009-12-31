@@ -227,9 +227,9 @@
     further instructions concerning upgrading to a particular version of
     Roo.</para>
 
-    <para>If you experience any difficulty with upgrading your projects to Roo
-    1.0.0.RC3, please use the <link linkend="resources-forums">community
-    support forum</link> for assistance.</para>
+    <para>If you experience any difficulty with upgrading your projects,
+    please use the <link linkend="resources-forums">community support
+    forum</link> for assistance.</para>
   </section>
 
   <section xml:id="upgrade-1.0.0.RELEASE">
@@ -249,10 +249,11 @@
 
       <listitem>
         <para>Due to CSS issues discovered in the Roo RC4 release (<link
-        xlink:href="http://jira.springframework.org/browse/ROO-480">ROO-480</link>)
-        the standard.css, alt.css and the layout.jspx files needed adjustment.
-        To update these three files, please replace them with the same files
-        generated in a dummy project using Roo 1.0.0.RELEASE.</para>
+        xlink:href="http://jira.springframework.org/browse/ROO-480">ROO-480</link>),
+        the <code>standard.css</code>, <code>alt.css</code> and the
+        <code>layout.jspx</code> files required adjustment. To update these
+        three files, please replace them with the same files generated in a
+        dummy project using Roo 1.0.0.RELEASE.</para>
       </listitem>
     </itemizedlist>
   </section>
