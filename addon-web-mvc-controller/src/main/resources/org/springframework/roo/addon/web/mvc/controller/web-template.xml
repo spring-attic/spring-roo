@@ -6,6 +6,11 @@
 	<description>TO_BE_CHANGED_BY_LISTENER</description>
 
 	<context-param>
+		<param-name>defaultHtmlEscape</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	
+	<context-param>
 		<param-name>webAppRootKey</param-name>
 		<param-value>TO_BE_CHANGED_BY_LISTENER</param-value>
 	</context-param>

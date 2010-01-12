@@ -158,7 +158,7 @@ public class JspDocumentHelper {
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				tdElement.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			} else {
-				tdElement.setTextContent("${fn:substring(" + entityName + "." + fieldName + ", 0, 10)}");
+				tdElement.appendChild(new XmlElementBuilder("c:out", document).addAttribute("value", "${fn:substring(" + entityName + "." + fieldName + ", 0, 10)}").build());
 			}
 			if(++fieldCounter < 7) {
 				trElement2.appendChild(tdElement);
@@ -308,7 +308,7 @@ public class JspDocumentHelper {
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				divContent.appendChild(new XmlElementBuilder("fmt:formatDate", document).addAttribute("value", "${" + entityName + "." + fieldName + ".time}").addAttribute("pattern", "${" + entityName + "_" + fieldName + "_date_format}").build());
 			}else {
-				divContent.setTextContent("${" + entityName + "." + fieldName + "}");
+				divContent.appendChild(new XmlElementBuilder("c:out", document).addAttribute("value", "${" + entityName + "." + fieldName + "}").build());
 			}
 			divSubmitElement.appendChild(divContent);
 			ifElement.appendChild(divSubmitElement);
