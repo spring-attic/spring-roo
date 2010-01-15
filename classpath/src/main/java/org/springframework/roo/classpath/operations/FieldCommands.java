@@ -6,9 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
@@ -20,6 +24,7 @@ import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -44,15 +49,18 @@ import org.springframework.roo.support.util.Assert;
 public class FieldCommands implements CommandMarker {
 	private ClasspathOperations classpathOperations;
 	private final Set<String> legalNumericPrimitives = new HashSet<String>();
+	private MetadataService metadataService;
 
-	public FieldCommands(StaticFieldConverter staticFieldConverter, ClasspathOperations classpathOperations) {
+	public FieldCommands(StaticFieldConverter staticFieldConverter, ClasspathOperations classpathOperations, MetadataService metadataService) {
 		Assert.notNull(staticFieldConverter, "Static field converter required");
 		Assert.notNull(classpathOperations, "Classpath operations required");
+		Assert.notNull(metadataService, "Metadata service required");
 		staticFieldConverter.add(Cardinality.class);
 		staticFieldConverter.add(Fetch.class);
 		staticFieldConverter.add(EnumType.class);
 		staticFieldConverter.add(DateTime.class);
 		this.classpathOperations = classpathOperations;
+		this.metadataService = metadataService;
 		this.legalNumericPrimitives.add(Short.class.getName());
 		this.legalNumericPrimitives.add(Byte.class.getName());
 		this.legalNumericPrimitives.add(Integer.class.getName());
@@ -243,6 +251,14 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		
+		//check if the target type is a JPA @Entity
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
+			throw new IllegalStateException("The field reference command is only applicable to JPA @Entity target types.");
+		}
 		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
@@ -267,6 +283,14 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		//check if the target type is a JPA @Entity
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA));
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
+			throw new IllegalStateException("The field set command is only applicable to JPA @Entity elements.");
+		}	
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(element);
@@ -300,5 +324,4 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
-
 }
