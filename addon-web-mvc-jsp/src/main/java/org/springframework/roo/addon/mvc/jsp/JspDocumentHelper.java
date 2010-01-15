@@ -389,8 +389,7 @@ public class JspDocumentHelper {
 		Document document = builder.newDocument();		
 		
 		String idFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
-		String versionFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getVersionField().getFieldName().getSymbolName()));
-
+		
 		//add document namespaces
 		Element div = new XmlElementBuilder("div", document)
 							.addAttribute("xmlns:form", "http://www.springframework.org/tags/form")
@@ -442,6 +441,7 @@ public class JspDocumentHelper {
 		formHiddenId.setAttribute("id", "_" + idFieldName + "_id");
 		formElement.appendChild(formHiddenId);
 		if (null != entityMetadata.getVersionField()) {
+			String versionFieldName = Introspector.decapitalize(StringUtils.capitalize(entityMetadata.getVersionField().getFieldName().getSymbolName()));
 			Element formHiddenVersion = document.createElement("form:hidden");
 			formHiddenVersion.setAttribute("path", versionFieldName);
 			formHiddenVersion.setAttribute("id", "_" + versionFieldName + "_id");
