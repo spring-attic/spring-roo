@@ -777,7 +777,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) throw new IllegalArgumentException(\"An identifier is required to retrieve an instance of " + governorTypeDetails.getName().getSimpleTypeName() +"\");");
-		} else {
+		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (id == null) throw new IllegalArgumentException(\"An identifier is required to retrieve an instance of " + governorTypeDetails.getName().getSimpleTypeName() +"\");");
 		}
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
