@@ -490,19 +490,29 @@ $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
 
     <para>If you see the logo appear, you've installed Roo
     successfully.</para>
+  </section>
 
-    <para>Users can enjoy brighter colours within the Roo shell by setting the
-    <code>ROO_OPTS</code> environment variable before loading Roo. For
-    example:</para>
+  <section xml:id="intro-roo-opts">
+    <title>Optional ROO_OPTS Configuration</title>
 
-    <programlisting>$ <emphasis role="bold">export ROO_OPTS="-Droo.bright=true"</emphasis>                   // Linux or Apple
-$ <emphasis role="bold">set ROO_OPTS="-Droo.bright=true"</emphasis>                      // Windows users</programlisting>
+    <para>The standalone Roo shell supports fine-tuning display-related
+    configuration via the ROO_OPTS environment variable. An environment
+    variable is used so that these configuration settings can be applied
+    before the shell is instantiated and the first messages displayed. The
+    ROO_OPTS settings do not apply within SpringSource Tool Suite's embedded
+    Roo shell.</para>
 
-    <para>You can also use the <code>ROO_OPTS</code> variable to set any other
-    internal options you'd like Roo to start with. Please note that brighter
-    colours are only provided by the command-line version of Roo. The colours
-    do not change in SpringSource Tool Suite's embedded Roo shell,
-    irrespective of whether you've set this variable or not.</para>
+    <para>At present the only configuration settings available is roo.bright.
+    This causes forground messages in the shell to be displayed with brighter
+    colors. This is potentially useful if your background color is light (eg
+    white). You can set the variable using the following commands:</para>
+
+    <para><programlisting>$ <emphasis role="bold">export ROO_OPTS="-Droo.bright=true"</emphasis>                   // Linux or Apple
+$ <emphasis role="bold">set ROO_OPTS="-Droo.bright=true"</emphasis>                      // Windows users</programlisting>There
+    is an enhancement request within our issue tracker for customisable shell
+    color schemes. If you're interested in seeing this supported by Roo, you
+    may wish to consider voting for <link
+    xlink:href="http://jira.springframework.org/browse/ROO-549">ROO-549</link>.</para>
   </section>
 
   <section xml:id="intro-first-steps">
