@@ -60,6 +60,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private Set<String> notifyChanged = new HashSet<String>();
 	private Set<String> notifyCreated = new HashSet<String>();
 	private Set<String> notifyDeleted = new HashSet<String>();
+	private Set<MonitoringRequest> notifiedFailingRequests = new CopyOnWriteArraySet<MonitoringRequest>();
 	
 	// Mutex
 	private Boolean lock = new Boolean(true);
@@ -232,8 +233,15 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 				
 				if (!request.getFile().exists()) {
-					logger.warning("Cannot monitor non-existent path '" + request.getFile() + "'");
+					if (!notifiedFailingRequests.contains(request)) {
+						logger.warning("Cannot monitor non-existent path '" + request.getFile() + "'");
+						notifiedFailingRequests.add(request);
+					}
 					continue;
+				}
+				
+				if (notifiedFailingRequests.contains(request)) {
+					notifiedFailingRequests.remove(request);
 				}
 				
 				// Build contents of the monitored location
