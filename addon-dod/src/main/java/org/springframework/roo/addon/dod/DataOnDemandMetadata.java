@@ -443,23 +443,23 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
 					initializer = "new Integer(index)";
 				} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
-					initializer = "1";
+					initializer = "new Integer(index)"; // auto-boxed
 				} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT)) {
-					initializer = "new Double(index)";
+					initializer = "new Integer(index).doubleValue()"; // auto-boxed
 				} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
-					initializer = "1.0";
+					initializer = "new Integer(index).doubleValue()";
 				} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT)) {
-					initializer = "new Float(index)";
+					initializer = "new Integer(index).floatValue()"; // auto-boxed
 				} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
-					initializer = "1.0";
+					initializer = "new Integer(index).floatValue()";
 				} else if (field.getFieldType().equals(JavaType.LONG_OBJECT)) {
-					initializer = "new Long(index)";
+					initializer = "new Integer(index).longValue()"; // auto-boxed
 				} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
-					initializer = "1";
+					initializer = "new Integer(index).longValue()";
 				} else if (field.getFieldType().equals(JavaType.SHORT_OBJECT)) {
-					initializer = "new Short(index)";
+					initializer = "new Integer(index).shortValue()"; // auto-boxed
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
-					initializer = "1";
+					initializer = "new Integer(index).shortValue()";
 				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
 					requiredDataOnDemandCollaborators.add(field.getFieldType());
 					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
