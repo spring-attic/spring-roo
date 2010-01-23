@@ -84,9 +84,16 @@ public final class SimpleParser {
 		Assert.notNull(buffer, "Buffer required");
 		
 		// Locate the applicable targets which match this buffer
-		Set<MethodTarget> matchingTargets = locateTargets(buffer, true);
+		Set<MethodTarget> matchingTargets = locateTargets(buffer, true, true);
 		if (matchingTargets.size() == 0) {
-			logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+			// Before we just give up, let's see if we can offer a more informative message to the user
+			// by seeing the command is simply unavailable at this point in time
+			matchingTargets = locateTargets(buffer, true, false);
+			if (matchingTargets.size() == 0) {
+				logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+			} else {
+				logger.warning("Command '" + buffer + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
+			}
 			return null;
 		}
 		if (matchingTargets.size() > 1) {
@@ -228,7 +235,7 @@ public final class SimpleParser {
 		return new ParseResult(methodTarget.method, methodTarget.target, arguments.toArray());
 	}
 	
-	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching) {
+	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching, boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
 		Set<MethodTarget> result = new HashSet<MethodTarget>();
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
@@ -240,24 +247,25 @@ public final class SimpleParser {
 				if (cmd != null) {
 					// We have a @CliCommand.
 
-					// Decide if this @CliCommand is available at this moment
-					Boolean available = null;
-					for (String value : cmd.value()) {
-						MethodTarget mt = this.availabilityIndicators.get(value);
-						if (mt != null) {
-							Assert.isNull(available, "More than one availability indicator is defined for '" + m.toGenericString() + "'");
-							try {
-								available = (Boolean) mt.method.invoke(mt.target, new Object[] {});
-								// We should "break" here, but we loop over all to ensure no conflicting availability indicators are defined
-							} catch (Exception e) {
-								available = false;
+					if (checkAvailabilityIndicators) {
+						// Decide if this @CliCommand is available at this moment
+						Boolean available = null;
+						for (String value : cmd.value()) {
+							MethodTarget mt = this.availabilityIndicators.get(value);
+							if (mt != null) {
+								Assert.isNull(available, "More than one availability indicator is defined for '" + m.toGenericString() + "'");
+								try {
+									available = (Boolean) mt.method.invoke(mt.target, new Object[] {});
+									// We should "break" here, but we loop over all to ensure no conflicting availability indicators are defined
+								} catch (Exception e) {
+									available = false;
+								}
 							}
 						}
-					}
-					
-					// Skip this @CliCommand if it's not available
-					if (available != null && !available) {
-						continue;
+						// Skip this @CliCommand if it's not available
+						if (available != null && !available) {
+							continue;
+						}
 					}
 					
 					for (String value : cmd.value()) {
@@ -366,7 +374,7 @@ public final class SimpleParser {
 		String translated = buffer.substring(0, cursor);
 		
 		// Start by locating a method that matches
-		Set<MethodTarget> targets = locateTargets(translated, false);
+		Set<MethodTarget> targets = locateTargets(translated, false, true);
 		SortedSet<String> results = new TreeSet<String>();
 
 //		logger.info("RESULTS: '" + translated + "' " + StringUtils.collectionToCommaDelimitedString(targets));
@@ -928,7 +936,7 @@ public final class SimpleParser {
 		StringBuilder sb = new StringBuilder();
 
 		// Figure out if there's a single command we can offer help for
-		Set<MethodTarget> matchingTargets = locateTargets(buffer, false);
+		Set<MethodTarget> matchingTargets = locateTargets(buffer, false, false);
 		if (matchingTargets.size() == 1) {
 			// Single command help
 			MethodTarget methodTarget = matchingTargets.iterator().next(); 
