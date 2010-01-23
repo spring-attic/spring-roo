@@ -20,6 +20,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -36,7 +37,7 @@ public class BackupOperations {
 	private MetadataService metadataService;
 	private FileManager fileManager;
 	
-	private Logger logger = Logger.getLogger(BackupOperations.class.getName());
+	private static Logger logger = HandlerUtils.getLogger(BackupOperations.class);
 
 	public BackupOperations(MetadataService metadataService, FileManager fileManager) {
 		Assert.notNull(metadataService, "Metadata service required");

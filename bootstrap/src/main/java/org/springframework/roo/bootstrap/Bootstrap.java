@@ -95,7 +95,8 @@ public class Bootstrap {
 		Logger sfwLogger = Logger.getLogger("org.springframework");
 		sfwLogger.setLevel(Level.WARNING);
 
-		// Set a suitable priority level on ROO log messages
+		// Set a suitable priority level on Roo log messages
+		// (see ROO-539 and HandlerUtils.getLogger(Class))
 		Logger rooLogger = Logger.getLogger("org.springframework.roo");
 		rooLogger.setLevel(Level.FINE);
 	}

@@ -2,6 +2,7 @@ package org.springframework.roo.file.monitor.event;
 
 import java.util.logging.Logger;
 
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class LoggingFileEventListener implements FileEventListener {
 
-	private static final Logger logger = Logger.getLogger(LoggingFileEventListener.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(LoggingFileEventListener.class);
 	
 	public LoggingFileEventListener(FileEventPublisher fileEventPublisher) {
 		Assert.notNull(fileEventPublisher, "File event publisher required");

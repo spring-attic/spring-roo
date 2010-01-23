@@ -3,7 +3,6 @@ package org.springframework.roo.addon.web.flow;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.springframework.roo.addon.mvc.jsp.JspOperations;
 import org.springframework.roo.addon.mvc.jsp.TilesOperations;
@@ -36,8 +35,6 @@ import org.w3c.dom.Element;
  */
 @ScopeDevelopment
 public class WebFlowOperations {
-	
-	Logger logger = Logger.getLogger(WebFlowOperations.class.getName());
 	
 	private FileManager fileManager;
 	private PathResolver pathResolver;

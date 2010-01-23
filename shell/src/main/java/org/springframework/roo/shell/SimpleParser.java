@@ -24,6 +24,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 
 import org.springframework.roo.shell.internal.AbstractShell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -35,7 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public final class SimpleParser {
-	private static final Logger logger = Logger.getLogger(SimpleParser.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
 
 	private Set<Object> targets = new HashSet<Object>();
 	private Set<Converter> converters = new HashSet<Converter>();

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -47,8 +46,6 @@ import org.w3c.dom.Element;
  */
 @ScopeDevelopment
 public class MailOperations {
-	
-	Logger logger = Logger.getLogger(MailOperations.class.getName());
 	
 	private FileManager fileManager;
 	private PathResolver pathResolver;

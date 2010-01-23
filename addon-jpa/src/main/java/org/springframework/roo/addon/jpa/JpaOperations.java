@@ -16,6 +16,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -31,7 +32,7 @@ import org.w3c.dom.Element;
 @ScopeDevelopment
 public class JpaOperations {
 	
-	Logger logger = Logger.getLogger(JpaOperations.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(JpaOperations.class);
 		
 	private FileManager fileManager;
 	private PathResolver pathResolver;

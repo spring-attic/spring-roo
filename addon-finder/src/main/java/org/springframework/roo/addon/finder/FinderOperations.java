@@ -27,6 +27,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -39,7 +40,7 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopment
 public class FinderOperations {
 	
-	private static final Logger logger = Logger.getLogger(FinderOperations.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(FinderOperations.class);
 	
 	private FileManager fileManager;
 	private PathResolver pathResolver;

@@ -29,6 +29,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -51,7 +52,7 @@ public class SeleniumOperations {
 	private BeanInfoMetadata beanInfoMetadata;
 	private MenuOperations menuOperations;
 	
-	private Logger logger = Logger.getLogger(SeleniumOperations.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperations.class);
 	
 	public SeleniumOperations(MetadataService metadataService, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations) {
 		Assert.notNull(metadataService, "Metadata service required");

@@ -24,6 +24,7 @@ import org.springframework.roo.shell.ParseResult;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -34,7 +35,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
 
-	protected final Logger logger = Logger.getLogger(getClass().getName());
+	protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment = false;
     protected ExitShellRequest exitShellRequest = null;
     protected ExecutionStrategy executionStrategy;

@@ -14,13 +14,14 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 @ScopeDevelopmentShell
 public class MavenCommands implements CommandMarker {
 	
 	private MavenOperations mavenOperations;
-	protected final Logger logger = Logger.getLogger(getClass().getName());
+	protected final Logger logger = HandlerUtils.getLogger(getClass());
 
 	public MavenCommands(StaticFieldConverter staticFieldConverter, MavenOperations mavenOperations) {
 		Assert.notNull(staticFieldConverter, "Static field converter required");

@@ -18,12 +18,13 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.ProcessManager;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 public class JavaParserClassMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
-	private static final Logger logger = Logger.getLogger(JavaParserClassMetadata.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(JavaParserClassMetadata.class);
 
 	private String fileIdentifier;
 	private PhysicalTypeDetails physicalTypeDetails;

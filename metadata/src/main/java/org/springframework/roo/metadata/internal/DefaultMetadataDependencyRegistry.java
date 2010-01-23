@@ -16,6 +16,7 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopment
 public final class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
 
-	private static final Logger logger = Logger.getLogger(DefaultMetadataDependencyRegistry.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(DefaultMetadataDependencyRegistry.class);
 	private int trace = 0;
 	private int level = 0;
 	private int notificationNumber = 0;

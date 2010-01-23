@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.file.undo.UndoableOperation;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
@@ -18,7 +19,7 @@ import org.springframework.roo.support.util.FileCopyUtils;
  *
  */
 public class DeleteFile implements UndoableOperation {
-	private static final Logger logger = Logger.getLogger(DeleteFile.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(DeleteFile.class);
 
 	private FilenameResolver filenameResolver;
 	private File actual;

@@ -36,6 +36,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -47,7 +48,7 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopment
 public class ControllerOperations {
 	
-	Logger logger = Logger.getLogger(ControllerOperations.class.getName());
+	private static Logger logger = HandlerUtils.getLogger(ControllerOperations.class);
 		
 	private PathResolver pathResolver;
 	private MetadataService metadataService;

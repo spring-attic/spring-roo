@@ -23,6 +23,7 @@ import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -52,7 +53,7 @@ import org.springframework.roo.support.util.Assert;
 @ScopeDevelopment
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
-	private static final Logger logger = Logger.getLogger(PollingFileMonitorService.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	
 	protected Set<FileEventListener> fileEventListeners = new CopyOnWriteArraySet<FileEventListener>();
 	private Set<MonitoringRequest> requests = new CopyOnWriteArraySet<MonitoringRequest>();

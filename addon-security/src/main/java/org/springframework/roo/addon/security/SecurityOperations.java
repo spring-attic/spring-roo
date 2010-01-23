@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.security;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import org.springframework.roo.addon.mvc.jsp.TilesOperations;
 import org.springframework.roo.metadata.MetadataService;
@@ -30,8 +29,6 @@ import org.w3c.dom.Element;
 @ScopeDevelopment
 public class SecurityOperations {
 	
-	Logger logger = Logger.getLogger(SecurityOperations.class.getName());
-		
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private MetadataService metadataService;

@@ -16,12 +16,13 @@ import java.util.zip.ZipFile;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
 @ScopeDevelopment
 public class AddOnOperations {
-	private Logger logger = Logger.getLogger(AddOnOperations.class.getName());
+	private static Logger logger = HandlerUtils.getLogger(AddOnOperations.class);
 	
 	private final Shell shell;
 	

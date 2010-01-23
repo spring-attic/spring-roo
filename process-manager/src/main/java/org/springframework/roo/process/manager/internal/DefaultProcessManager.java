@@ -12,6 +12,7 @@ import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.process.manager.event.AbstractProcessManagerStatusPublisher;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
 
@@ -25,7 +26,7 @@ import org.springframework.roo.support.util.ExceptionUtils;
 @ScopeDevelopment
 public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager, Runnable {
 
-	private static final Logger logger = Logger.getLogger(DefaultProcessManager.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(DefaultProcessManager.class);
 	
 	private boolean developmentMode = false;
 	private UndoManager undoManager;

@@ -36,6 +36,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -54,7 +55,7 @@ import org.w3c.dom.Element;
 @ScopeDevelopment
 public class JmsOperations {
 	
-	Logger logger = Logger.getLogger(JmsOperations.class.getName());
+	private static final Logger logger = HandlerUtils.getLogger(JmsOperations.class);
 	
 	private FileManager fileManager;
 	private PathResolver pathResolver;

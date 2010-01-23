@@ -13,6 +13,7 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -26,7 +27,7 @@ import org.springframework.roo.support.util.StringUtils;
 @ScopeDevelopmentShell
 public class ControllerCommands implements CommandMarker {
 	
-	private static Logger logger = Logger.getLogger(ControllerCommands.class.getName());
+	private static Logger logger = HandlerUtils.getLogger(ControllerCommands.class);
 	
 	private ControllerOperations controllerOperations;
 	private MetadataService metadataService;
