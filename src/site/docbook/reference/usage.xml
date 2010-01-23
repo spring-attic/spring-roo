@@ -330,6 +330,22 @@ quit
     verify this setting is active by loading Eclipse (or STS) and selecting
     Window &gt; Preferences &gt; JDT Weaving.</para>
 
+    <para>If you're using m2eclipse, you won't need to use the <link
+    linkend="command-index-perform-eclipse">perform eclipse</link> command to
+    setup your environment. A simple import of the project using Eclipse's
+    File &gt; Import &gt; General &gt; Maven Projects menu option is
+    sufficient.</para>
+
+    <para>Irrespective of how you iport your project into Eclipse (ie via the
+    <link linkend="command-index-perform-eclipse">perform eclipse</link>
+    command or via m2eclipse) you should be aware that the project will not be
+    a Web Tools Project (WTP) until such time as you install your first web
+    controller. This is usually undertaken via the controller all or
+    controller scaffold command. If you have already imported your project
+    into Eclipse, simply complete the relevant controller command and then
+    re-import. The project will then be a WTP and offer the ability to deploy
+    to an IDE-embedded web container.</para>
+
     <para>If you're using IntelliJ, we recommend you review IntelliJ issue
     report <link
     xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
