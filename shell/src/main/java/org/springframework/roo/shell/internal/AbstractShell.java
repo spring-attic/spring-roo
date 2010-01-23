@@ -113,8 +113,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				blockCommentFinish();
 				line = line.substring(line.lastIndexOf("*/")+2);
 			}
-			// We also support inline comments
-			if (!inBlockComment && line.contains("//")) {
+			// We also support inline comments (but only at start of line, otherwise valid 
+			// command options like http://www.helloworld.com will fail as per ROO-517)
+			if (!inBlockComment && line.trim().startsWith("//")) {
 				line = line.substring(0, line.indexOf("//"));
 			}
 			if ("".equals(line.trim())) {
