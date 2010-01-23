@@ -73,7 +73,7 @@ public class MavenCommands implements CommandMarker {
 		mvn("-Dmaven.test.skip=true package");
 	}
 
-	@CliCommand(value={"perform eclipse"}, help="Sets up Eclipse configuration via Maven")
+	@CliCommand(value={"perform eclipse"}, help="Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)")
 	public void runEclipse() throws IOException {
 		mvn("eclipse:clean eclipse:eclipse");
 	}
