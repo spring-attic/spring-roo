@@ -118,6 +118,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			if (!inBlockComment && line.trim().startsWith("//")) {
 				line = line.substring(0, line.indexOf("//"));
 			}
+			// convert any TAB characters to whitespace (ROO-527)
+			line = line.replace('\t', ' ');
 			if ("".equals(line.trim())) {
 		    	setShellStatus(ShellStatus.EXECUTION_COMPLETE);
 				return true;
