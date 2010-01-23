@@ -34,6 +34,16 @@
       </listitem>
 
       <listitem>
+        <para><emphasis>Hibernate Validator bug on Java 5 JVMs</emphasis>: If
+        you are running Java 5, please be aware of a bug in Hibernate
+        Validator that will present an exception
+        ("java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException"). This
+        is detailed in <link
+        xlink:href="https://jira.springsource.org/browse/ROO-224">ROO-224</link>
+        and does not impact Java 6 users.</para>
+      </listitem>
+
+      <listitem>
         <para><emphasis>Human language support</emphasis>: Pluralisation
         within Roo delegates to the <link
         xlink:href="https://inflector.dev.java.net/">Inflector</link> library.
@@ -122,11 +132,12 @@
       </listitem>
 
       <listitem>
-        <para>The Web UI has been tested successfully with FireFox, Opera,
-        Safari, Chrome, IE8 and IE6. Due to a CSS issue with IE6 the layout
-        will appear 'stretched' if JavaScript is disabled. We therefore do not
-        recommend to run IE6 without JavaScript when displaying the default
-        scaffolded Roo Web interface.</para>
+        <para><emphasis>CSS considerations</emphasis>: The Web UI has been
+        tested successfully with FireFox, Opera, Safari, Chrome, IE8 and IE6.
+        Due to a CSS issue with IE6 the layout will appear 'stretched' if
+        JavaScript is disabled. We therefore do not recommend to run IE6
+        without JavaScript when displaying the default scaffolded Roo Web
+        interface.</para>
       </listitem>
     </itemizedlist>
   </section>

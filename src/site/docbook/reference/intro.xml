@@ -599,9 +599,18 @@ roo&gt; <emphasis role="bold">perform eclipse</emphasis>
 roo&gt; <emphasis role="bold">quit</emphasis>
 $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
 
-    <para>The "perform" commands could have been easily undertaken from the
-    command prompt using "mvn" instead. We just did them from within Roo to
-    benefit from TAB completion.</para>
+    <para>The "<link linkend="command-index-maven-commands">perform</link>"
+    commands could have been easily undertaken from the command prompt using
+    "mvn" instead. We just did them from within Roo to benefit from TAB
+    completion. You could have also skipped the "<link
+    linkend="command-index-perform-eclipse">perform eclipse</link>" command if
+    you are using the m2eclipse plugin in your STS/Eclipse installation (STS
+    automatically includes m2eclipse).</para>
+
+    <para>Please note that if you are using Java 5, you may receive an
+    exception ("java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException")
+    due to a bug in Hibernate Validator. This is discussed in the <link
+    linkend="upgrade-known-issues">known issues</link> section.</para>
 
     <para>Now that you've loaded Tomcat, let's run the Selenium tests. You can
     do this by loading a new command window, changing into the ten-minutes
