@@ -63,6 +63,9 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
 	private List<JavaType> metadataTriggers = new ArrayList<JavaType>();
 	
+	/** We don't care about trigger annotations; we always produce metadata */
+	private boolean ignoreTriggerAnnotations = false;
+
 	public AbstractItdMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager) {
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
@@ -162,6 +165,14 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 		this.roles.remove(role);
 	}
 	
+	protected boolean isIgnoreTriggerAnnotations() {
+		return ignoreTriggerAnnotations;
+	}
+
+	protected void setIgnoreTriggerAnnotations(boolean ignoreTriggerAnnotations) {
+		this.ignoreTriggerAnnotations = ignoreTriggerAnnotations;
+	}
+
 	public final MetadataItem get(String metadataIdentificationString) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected request for '" + metadataIdentificationString + "' to this provider (which uses '" + getProvidesType() + "'");
 		
@@ -190,7 +201,7 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 		ClassOrInterfaceTypeDetails cid = null;
 		if (governorPhysicalTypeMetadata.getPhysicalTypeDetails() != null && governorPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-			
+		
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
 				if (MemberFindingUtils.getDeclaredTypeAnnotation(cid, trigger) != null) {
@@ -198,6 +209,11 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 					break;
 				}
 			}
+		}
+	
+		// Fallback to ignoring trigger annotations
+		if (ignoreTriggerAnnotations) {
+			produceMetadata = true;
 		}
 		
 		// Cancel production if the governor type details are required, but aren't available

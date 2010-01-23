@@ -23,7 +23,8 @@ public final class PluralMetadataProvider extends AbstractItdMetadataProvider {
 
 	public PluralMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager) {
 		super(metadataService, metadataDependencyRegistry, fileManager);
-		addMetadataTrigger(new JavaType(RooPlural.class.getName()));
+		setIgnoreTriggerAnnotations(true);
+		setDependsOnGovernorBeingAClass(false);
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
