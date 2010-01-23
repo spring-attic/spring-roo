@@ -289,7 +289,7 @@ quit
     don't strictly need one. With Roo you can build an application at the
     command line, although to be honest you'll get more productivity via an
     IDE if it's anything beyond a trivial application. If you would prefer to
-    use the command line, you can start a freash application using the Roo
+    use the command line, you can start a fresh application using the Roo
     shell, edit your <code>.java</code> and other files using any text editor,
     and use the <link linkend="command-index-maven-commands">perform</link>
     commands to compile, test and package your application ready for

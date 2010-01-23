@@ -499,7 +499,8 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     STS we need to create the relevant project artifacts. The Roo shell helps
     us creating these artifacts by means of the <link
     linkend="command-index-perform-eclipse"><emphasis role="bold">perform
-    eclipse</emphasis></link> command:</para>
+    eclipse</emphasis></link> command, which is appropriate if you do not have
+    the m2eclipse plugin installed:</para>
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform eclipse</emphasis>
 ...
@@ -528,6 +529,12 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     STS you can take a look at the Java sources. For example you can run the
     included JUnit tests by right clicking the pizzashop project and then
     selecting 'Run As &gt; JUnit Test'.</para>
+
+    <para>If you have m2eclipse installed, you can skip the <link
+    linkend="command-index-perform-eclipse"><emphasis role="bold">perform
+    eclipse</emphasis></link> command entirely. You simply need to select in
+    STS/Eclipse the 'File &gt; Import &gt; General &gt; Maven Projects' menu
+    option. If you're using STS you already have m2eclipse installed.</para>
 
     <para>As detailed in the <link linkend="architecture">Application
     Architecture</link> chapter of this documentation Roo projects leverage
