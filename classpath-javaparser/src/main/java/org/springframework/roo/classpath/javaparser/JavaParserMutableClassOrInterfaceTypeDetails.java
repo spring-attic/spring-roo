@@ -417,7 +417,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	    	List<ClassOrInterfaceType> extendsList = new ArrayList<ClassOrInterfaceType>();
 			for (JavaType current : cit.getExtendsTypes()) {
 				if (!"java.lang.Object".equals(current.getFullyQualifiedTypeName())) {
-					NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
+					NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), current);
 		        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
 		        	extendsList.add(resolvedName);
 				}
@@ -429,7 +429,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	        // Implements handling
 	    	List<ClassOrInterfaceType> implementsList = new ArrayList<ClassOrInterfaceType>();
 			for (JavaType current : cit.getImplementsTypes()) {
-				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName().getPackage(), compilationUnit.getImports(), current);
+				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(cit.getName(), compilationUnit.getImports(), current);
 	        	ClassOrInterfaceType resolvedName = JavaParserUtils.getClassOrInterfaceType(nameExpr);
 	        	implementsList.add(resolvedName);
 			}

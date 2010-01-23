@@ -271,7 +271,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		Assert.isTrue(!foundExisting, "Found an existing annotation for type '" + annotation.getAnnotationType() + "'");
 		
 		// Import the annotation type, if needed
-		NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), annotation.getAnnotationType());
+		NameExpr nameToUse = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), annotation.getAnnotationType());
 
 		// Create member-value pairs in accordance with Java Parser requirements
 		List<MemberValuePair> memberValuePairs = new ArrayList<MemberValuePair>();
@@ -288,7 +288,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		if (memberValuePairs.size() == 0) {
     		annotationExpression = new MarkerAnnotationExpr(nameToUse);
     	}  else if (memberValuePairs.size() == 1 && (memberValuePairs.get(0).getName() == null || "value".equals(memberValuePairs.get(0).getName()))) {
-			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
+			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
     		annotationExpression = new SingleMemberAnnotationExpr(nameToUse, toUse);
     	} else {
 	    	// We have a number of pairs being presented
@@ -308,7 +308,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	    		annotations.remove(mae);
 	    		
 	    		if (memberValuePairs != null && memberValuePairs.size() == 1 && (memberValuePairs.get(0).getName() == null || "value".equals(memberValuePairs.get(0).getName()))) {
-	    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
+	    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 		    		annotationExpression = new SingleMemberAnnotationExpr(nameToUse, toUse);
 		    		annotations.add(annotationExpression);
 		    	} else {
@@ -322,7 +322,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	    		SingleMemberAnnotationExpr smae = (SingleMemberAnnotationExpr) annotationExpression;
 	    		if (memberValuePairs.size() == 1 && memberValuePairs.get(0).getName() == null || memberValuePairs.get(0).getName().equals("value") || memberValuePairs.get(0).getName().equals("")) {
 	    			// they specified only a single member-value pair, and it is the default anyway, so we need not do anything except update the value
-	    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
+	    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 	    			smae.setMemberValue(toUse);
 	    			if (permitFlush) {
 	    				compilationUnitServices.flush();
@@ -340,7 +340,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	    	List<MemberValuePair> annotationPairs = ((NormalAnnotationExpr)annotationExpression).getPairs();
 	    	annotationPairs.clear();
 	    	for (MemberValuePair pair : memberValuePairs) {
-    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), pair.getValue());    						
+    			Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), pair.getValue());    						
     			pair.setValue(toUse);
     			annotationPairs.add(pair);
 	    	}

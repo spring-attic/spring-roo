@@ -109,7 +109,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		Assert.notNull(field, "Field required");
 		
 		// Import the field type into the compilation unit
-		NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), field.getFieldType());
+		NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
 		ClassOrInterfaceType fieldType = JavaParserUtils.getClassOrInterfaceType(importedType);
 		
 		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), fieldType, field.getFieldName().getSymbolName());
@@ -119,7 +119,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			List<Type> fieldTypeArgs = new ArrayList<Type>();
 			fieldType.setTypeArgs(fieldTypeArgs);
 			for (JavaType parameter : field.getFieldType().getParameters()) {
-				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
 				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 			}
 		}
@@ -137,14 +137,14 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			Assert.isTrue(vars.size() == 1, "Expected ASTHelper to have provided a single VariableDeclarator");
 			VariableDeclarator vd = vars.iterator().next();
 			
-			NameExpr importedInitialzierType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), initializer);
+			NameExpr importedInitialzierType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), initializer);
 			ClassOrInterfaceType initializerType = JavaParserUtils.getClassOrInterfaceType(importedInitialzierType);
 			
 			// Add parameterized types for the initializer
 			List<Type> initTypeArgs = new ArrayList<Type>();
 			initializerType.setTypeArgs(initTypeArgs);
 			for (JavaType parameter : initializer.getParameters()) {
-				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
 				initTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 			}
 

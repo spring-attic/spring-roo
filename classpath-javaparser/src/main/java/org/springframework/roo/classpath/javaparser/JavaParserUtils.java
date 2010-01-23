@@ -574,13 +574,14 @@ public class JavaParserUtils  {
 	 * to separately parse every unqualified type usage within the compilation unit so as to
 	 * refrain from importing subsequently conflicting types.
 	 * 
-	 * @param compilationUnitPackage the compilation unit's package (required)
+	 * @param targetType the compilation unit target type (required)
 	 * @param imports the compilation unit's imports (required)
 	 * @param typeToImport the type to be imported (required)
 	 * @return the name expression to be used when referring to that type (never null)
 	 */
-	public static final NameExpr importTypeIfRequired(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, JavaType typeToImport) {
-		Assert.notNull(compilationUnitPackage, "Compilation unit package is required");
+	public static final NameExpr importTypeIfRequired(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
+		Assert.notNull(targetType, "Target type is required");
+		JavaPackage compilationUnitPackage = targetType.getPackage();
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(typeToImport, "Java type to import is required");
 		
@@ -628,6 +629,12 @@ public class JavaParserUtils  {
 			// useSimpleTypeName = true;
 		}
 		
+		if (addImport = true && targetType.getSimpleTypeName().equals(typeToImport.getSimpleTypeName())) {
+			// So we would have imported it, but then it would conflict with the simple name of the type
+			addImport = false;
+			useSimpleTypeName = false;
+		}
+		
 		if (addImport) {
 			imports.add(newImport);
 			useSimpleTypeName = true;
@@ -651,13 +658,13 @@ public class JavaParserUtils  {
 	 * {@link Expression} passed to this method will be returned unless the type was already imported, just imported, or represented
 	 * a java.lang type.
 	 * 
-	 * @param compilationUnitPackage the package name (required)
+	 * @param targetType the compilation unit target type (required)
 	 * @param imports the existing imports (required)
 	 * @param value that expression, which need not necessarily be resolvable to a type (required)
 	 * @return the expression to now use, as appropriately resolved (never returns null)
 	 */
-	public static final Expression importExpressionIfRequired(JavaPackage compilationUnitPackage, List<ImportDeclaration> imports, Expression value) {
-		Assert.notNull(compilationUnitPackage, "Compilation unit package required");
+	public static final Expression importExpressionIfRequired(JavaType targetType, List<ImportDeclaration> imports, Expression value) {
+		Assert.notNull(targetType, "Target type required");
 		Assert.notNull(imports, "Imports required");
 		Assert.notNull(value, "Expression value required");
 		
@@ -669,7 +676,7 @@ public class JavaParserUtils  {
 				String simpleName = ((QualifiedNameExpr) scope).getName();
 				String fullyQualifiedName = packageName + "." + simpleName;
 				JavaType javaType = new JavaType(fullyQualifiedName);
-				NameExpr nameToUse = importTypeIfRequired(compilationUnitPackage, imports, javaType);
+				NameExpr nameToUse = importTypeIfRequired(targetType, imports, javaType);
 				if (!(nameToUse instanceof QualifiedNameExpr)) {
 					return new FieldAccessExpr(nameToUse, field);
 				}
@@ -678,14 +685,14 @@ public class JavaParserUtils  {
 			Type type = ((ClassExpr)value).getType();
 			if (type instanceof ClassOrInterfaceType) {
 				JavaType javaType = new JavaType(((ClassOrInterfaceType)type).getName());
-				NameExpr nameToUse = importTypeIfRequired(compilationUnitPackage, imports, javaType);
+				NameExpr nameToUse = importTypeIfRequired(targetType, imports, javaType);
 				if (!(nameToUse instanceof QualifiedNameExpr)) {
 					return new ClassExpr(new ClassOrInterfaceType(javaType.getSimpleTypeName()));
 				}
 			} else if (type instanceof ReferenceType && ((ReferenceType)type).getType() instanceof ClassOrInterfaceType) {
 				ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
 				JavaType javaType = new JavaType(cit.getName());
-				NameExpr nameToUse = importTypeIfRequired(compilationUnitPackage, imports, javaType);
+				NameExpr nameToUse = importTypeIfRequired(targetType, imports, javaType);
 				if (!(nameToUse instanceof QualifiedNameExpr)) {
 					return new ClassExpr(new ClassOrInterfaceType(javaType.getSimpleTypeName()));
 				}

@@ -27,7 +27,6 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
-import org.springframework.roo.classpath.javaparser.JavaParserClassMetadata;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -175,7 +174,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		if (method.getReturnType().isPrimitive()) {
 			returnType = JavaParserUtils.getType(method.getReturnType());
 		} else {
-			NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), method.getReturnType());
+			NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), method.getReturnType());
 			ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
 			
 			// Add any type arguments presented for the return type
@@ -183,7 +182,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 				List<Type> typeArgs = new ArrayList<Type>();
 				cit.setTypeArgs(typeArgs);
 				for (JavaType parameter : method.getReturnType().getParameters()) {
-					NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+					NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
 					typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 				}
 			}
@@ -226,7 +225,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 			if (methodParameter.getJavaType().isPrimitive()) {
 				parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
 			} else {
-				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), methodParameter.getJavaType());
+				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), methodParameter.getJavaType());
 				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
 				
 				// Add any type arguments presented for the return type
@@ -234,7 +233,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 					List<Type> typeArgs = new ArrayList<Type>();
 					cit.setTypeArgs(typeArgs);
 					for (JavaType parameter : methodParameter.getJavaType().getParameters()) {
-						NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), parameter);
+						NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
 						typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 					}
 					
@@ -246,7 +245,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 			if (method.getThrowsTypes().size() > 0) {
 				List<NameExpr> throwsTypes = new ArrayList<NameExpr>();
 				for (JavaType javaType: method.getThrowsTypes()) {
-					NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getCompilationUnitPackage(), compilationUnitServices.getImports(), javaType);
+					NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), javaType);
 					throwsTypes.add(importedType);
 				}
 				d.setThrows(throwsTypes);
