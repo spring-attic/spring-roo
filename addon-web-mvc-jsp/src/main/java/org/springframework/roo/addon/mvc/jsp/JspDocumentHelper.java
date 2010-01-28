@@ -715,7 +715,8 @@ public class JspDocumentHelper {
 								|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToOne")) {
 							ifElement.appendChild(DojoUtils.getSelectDojo(document, field.getFieldName()));
 						} else {
-							ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, field.getFieldName()));
+							//MultiSelectDojo interferes with Spring MVC form:select tag so we'll disable this for now (see ROO-543)
+							//ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, field.getFieldName()));
 						}
 					} else if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.validation.constraints.Size")) {
 						AnnotationAttributeValue<?> max = annotation.getAttribute(new JavaSymbolName("max"));
