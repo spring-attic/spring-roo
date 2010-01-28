@@ -461,21 +461,27 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 					initializer = "new Integer(index).shortValue()";
 				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
-					requiredDataOnDemandCollaborators.add(field.getFieldType());
-					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 					
-					// Look up the metadata we are relying on
-					String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
-					metadataDependencyRegistry.registerDependency(otherProvider, getId());
-					DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
-					if (otherMd == null || !otherMd.isValid()) {
-						// There is no metadata around, so we'll just make some basic assumptions
-						initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+					if (field.getFieldType().equals(this.getAnnotationValues().getEntity())) {
+						// avoid circular references (ROO-562)
+						initializer = "obj";
 					} else {
-						// We can use the correct name
-						initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
+						requiredDataOnDemandCollaborators.add(field.getFieldType());
+						String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
+						
+						// Look up the metadata we are relying on
+						String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+
+						metadataDependencyRegistry.registerDependency(otherProvider, getId());
+						DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
+						if (otherMd == null || !otherMd.isValid()) {
+							// There is no metadata around, so we'll just make some basic assumptions
+							initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+						} else {
+							// We can use the correct name
+							initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
+						}
 					}
-					
 				}
 				
 				mandatoryMutators.add(mutatorMethod);
