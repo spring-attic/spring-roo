@@ -7,11 +7,12 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates a class should be annotated with Spring's
- * @org.springframework.beans.factory.annotation.Configurable annotation.
+ * {@link org.springframework.beans.factory.annotation.Configurable} annotation.
  *  
  * <p>
  * Obviously you should just use @Configurable in normal Java code if you would like
- * @Configurable functionality (ie there is no use case for using {@link RooConfigurable} given it
+ * {@link org.springframework.beans.factory.annotation.Configurable} functionality 
+ * (ie there is no use case for using {@link RooConfigurable} given it
  * is more complex with the involvement of ITDs etc). This annotation exists solely for 
  * consistency with other ITD providers.
  * 

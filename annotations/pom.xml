@@ -142,6 +142,26 @@
 	
     <reporting>
         <plugins>
+                        <plugin>
+                                <artifactId>maven-javadoc-plugin</artifactId>
+                                <reportSets>
+                                        <reportSet>
+                                                <id>html</id>
+                                                <reports>
+                                                        <report>javadoc</report>
+                                                </reports>
+                                        </reportSet>
+                                </reportSets>
+                                <configuration>
+                                        <aggregate>true</aggregate>
+                                        <breakiterator>true</breakiterator>
+                                        <links>
+                                                <link>http://java.sun.com/javase/6/docs/api/</link>
+                                                <link>http://junit.sourceforge.net/javadoc/</link>
+                                                <link>http://static.springsource.org/spring/docs/3.0.0.RELEASE/api/</link>
+                                        </links>
+                                </configuration>
+                        </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
