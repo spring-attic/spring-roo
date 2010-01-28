@@ -242,9 +242,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			for (ReservedToken keyWord : ReservedTokenHolder.getBooleanTokens()) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
-		} else {
-			tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
-		}
+		} 
+		tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
+		
 		return tempFinders;
 	}
 
