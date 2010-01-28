@@ -451,14 +451,45 @@
                 </configuration>
             </plugin>
             <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <id>html</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <breakiterator>true</breakiterator>
+                    <links>
+                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                        <link>http://junit.sourceforge.net/javadoc/</link>
+                        <link>http://static.springsource.org/spring/docs/3.0.0.RELEASE/api/</link>
+                        <link>http://jline.sourceforge.net/javadoc/</link>
+                        <link>http://jansi.fusesource.org/maven/1.1/apidocs/</link>
+                    </links>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jdepend-maven-plugin</artifactId>
+                <version>2.0-beta-2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.1</version>
                 <reportSets>
-                    <reportSet>
-                    </reportSet>
+                  <reportSet>
+                  </reportSet>
                 </reportSets>
-            </plugin>
+            </plugin>           
         </plugins>
     </reporting>
 

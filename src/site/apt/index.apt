@@ -2,13 +2,12 @@
  Spring Roo
  ------
 
-Introduction
-  
-  {{{http://www.springsource.org/roo}Spring Roo}} provides interactive, lightweight, user customizable tooling that enables rapid delivery of high performance enterprise Java applications.  
+ 
+  Welcome to the {{{http://www.springsource.org/roo}Spring Roo}} build system web site. 
 
-  Spring Roo is part of {{{http://www.springsource.org/projects}Spring}}.
+  This is not the official home of Spring Roo, but rather provides access to common build system outputs like reports and reference guide documentation.
 
-Learn More
+  Please visit the {{{http://www.springsource.org/roo}official home page}} if you'd like an introduction to Roo and
+  access to all of the main resources.
 
-  Visit the Spring Roo {{{http://www.springsource.org/roo}home page}} or {{{http://forum.springsource.org/showthread.php?t=71985}resources index}} to learn more.
 

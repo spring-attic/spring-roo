@@ -30,17 +30,64 @@
 		</links>
 
 		<menu name="Documentation" inherit="none">
-			<item name="Home" href="index.html" />
-			<item name="Reference Guide" href="reference/index.html" />
-			<item name="FAQ" href="faq.html" />
+			<item name="Home" href="http://static.springsource.org/spring-roo/index.html" />
+			<item name="Reference Guide" href="http://static.springsource.org/spring-roo/reference/index.html" />
+			<item name="@Roo Annotations" href="http://static.springsource.org/spring-roo/org.springframework.roo.annotations/apidocs" />
+			<item name="FAQ" href="http://static.springsource.org/spring-roo/faq.html" />
+		</menu>
+
+		<menu name="Core Modules" inherit="none">
+			<item name="Support" href="http://static.springsource.org/spring-roo/org.springframework.roo.support" />
+			<item name="Model" href="http://static.springsource.org/spring-roo/org.springframework.roo.model" />
+			<item name="Shell" href="http://static.springsource.org/spring-roo/org.springframework.roo.shell" />
+			<item name="Shell (JLine)" href="http://static.springsource.org/spring-roo/org.springframework.roo.shell.jline" />
+			<item name="Metadata" href="http://static.springsource.org/spring-roo/org.springframework.roo.metadata" />
+			<item name="File Undo" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.undo" />
+			<item name="File Monitor" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.monitor" />
+			<item name="File Monitor (Polling)" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.monitor.polling" />
+			<item name="Project" href="http://static.springsource.org/spring-roo/org.springframework.roo.project" />
+			<item name="Classpath" href="http://static.springsource.org/spring-roo/org.springframework.roo.classpath" />
+			<item name="Classpath (JavaParser)" href="http://static.springsource.org/spring-roo/org.springframework.roo.classpath.javaparser" />
+		</menu>
+
+		<menu name="Base Add-Ons" inherit="none">
+			<item name="Annotations" href="http://static.springsource.org/spring-roo/org.springframework.roo.annotations" />
+			<item name="Maven" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.maven" />
+			<item name="Pluralisation" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.plural" />
+			<item name="Property Files" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.propfiles" />
+			<item name="JavaBean Information" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.beaninfo" />
+			<item name="Configurable" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.configurable" />
+			<item name="Email" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.email" />
+			<item name="JavaBean Method Manager" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.javabean" />
+			<item name="JPA" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.jpa" />
+			<item name="JMS" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.jms" />
+			<item name="Entity" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.entity" />
+			<item name="Finder" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.finder" />
+			<item name="Logging" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.logging" />
+			<item name="Property Editor" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.property.editor" />
+			<item name="Web MVC Controller" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.web.controller" />
+			<item name="Web Menu" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.web.menu" />
+			<item name="Web MVC JSP View" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.web.mvc.jsp" />
+			<item name="Spring Security" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.security" />
+			<item name="ToString" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.tostring" />
+			<item name="Web Flow" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.web.flow" />
+			<item name="Web Selenium Tests" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.web.selenium" />
+			<item name="Test Data On Demand" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.dod" />
+			<item name="Automated Integration Testing" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.test" />
+			<item name="Backup" href="http://static.springsource.org/spring-roo/org.springframework.roo.addon.backup" />
 		</menu>
 
 		<menu name="Support" inherit="none">
 			<item name="Forums"
 				href="http://forum.springsource.org/forumdisplay.php?f=67" />
 			<item name="JIRA" href="http://jira.springframework.org/browse/ROO" />
-			<item name="Twitter" href="http://search.twitter.com/search?q=%23roo" />
 		</menu>
+
+		<menu name="Twitter" inherit="none">
+			<item name="#roo Hash Key" href="http://search.twitter.com/search?q=%23roo" />
+			<item name="Ben Alex" href="http://twitter.com/benalexau" />
+			<item name="Stefan Schmidt" href="http://twitter.com/schmidtstefan" />
+        </menu>
 
 		<menu ref="reports"/>
 
