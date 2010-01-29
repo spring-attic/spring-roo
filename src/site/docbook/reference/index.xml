@@ -12,12 +12,13 @@
 
     <productname>Spring Roo</productname>
 
-    <releaseinfo>1.0.1.RELEASE</releaseinfo>
+    <releaseinfo>1.0.2.RELEASE</releaseinfo>
 
     <authorgroup>
       <author>
         <personname>Ben Alex</personname>
       </author>
+
       <author>
         <personname>Stefan Schmidt</personname>
       </author>

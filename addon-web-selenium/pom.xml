@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.roo</groupId>
 		<artifactId>org.springframework.roo.parent</artifactId>
-		<version>1.0.1.RELEASE</version>
+		<version>1.0.2.RELEASE</version>
 	</parent>
 	<artifactId>org.springframework.roo.addon.web.selenium</artifactId>
 	<packaging>jar</packaging>
