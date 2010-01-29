@@ -48,6 +48,7 @@
 			<item name="Project" href="http://static.springsource.org/spring-roo/org.springframework.roo.project" />
 			<item name="Classpath" href="http://static.springsource.org/spring-roo/org.springframework.roo.classpath" />
 			<item name="Classpath (JavaParser)" href="http://static.springsource.org/spring-roo/org.springframework.roo.classpath.javaparser" />
+			<item name="Bootstrap" href="http://static.springsource.org/spring-roo/org.springframework.roo.bootstrap" />
 		</menu>
 
 		<menu name="Base Add-Ons" inherit="none">
