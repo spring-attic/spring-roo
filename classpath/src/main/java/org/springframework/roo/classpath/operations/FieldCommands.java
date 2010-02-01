@@ -254,6 +254,9 @@ public class FieldCommands implements CommandMarker {
 		
 		//check if the target type is a JPA @Entity
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			throw new IllegalStateException("The specified target '--type' does not exist or can not be found. Please create this type first.");
+		}
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
@@ -286,6 +289,9 @@ public class FieldCommands implements CommandMarker {
 		
 		//check if the target type is a JPA @Entity
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			throw new IllegalStateException("The specified target '--element' does not exist or can not be found. Please create this type first.");
+		}
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
