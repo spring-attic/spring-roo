@@ -22,8 +22,8 @@
 %
 
 @hidden $Id$
-@title DTD for the Tiles Definition File, Version 2.0
-@doctype tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN" "http://tiles.apache.org/dtds/tiles-config_2_0.dtd"
+@title DTD for the Tiles Definition File, Version 2.1
+@doctype tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN" "http://tiles.apache.org/dtds/tiles-config_2_1.dtd"
 @root tiles-definitions
 -->
 
@@ -39,7 +39,7 @@
 
 <!-- A "ContentType" is the content type of an attribute passed to a template.
 -->
-<!ENTITY % ContentType "(string|template|definition|object)">
+<!ENTITY % ContentType "CDATA">
 
 <!-- A "ClassName" is the fully qualified name of a Java class that is
      instantiated to provide the functionality of the enclosing element.
@@ -108,9 +108,11 @@
 -->
 <!ATTLIST definition       extends          %DefinitionName; #IMPLIED>
 <!--
-@attr name           The unique identifier for this definition.
+@attr name           The unique identifier for this definition. Required when
+                     it is a root definition, while it is implied in nested
+                     definitions. 
 -->
-<!ATTLIST definition       name             %DefinitionName; #REQUIRED>
+<!ATTLIST definition       name             %DefinitionName; #IMPLIED>
 <!--
 @attr role           Security role name that is allowed access to this definition
                      object. The definition is inserted only if the role name is
@@ -123,13 +125,25 @@
                      containing appropriate attributes will be available.
 -->
 <!ATTLIST definition       template         %RequestPath;    #IMPLIED>
-
+<!--
+@attr templateExpression The expression that will evaluate to a template for this definition.
+					     This attribute will be ignored if template is specified.
+					 
+-->
+<!ATTLIST definition       templateExpression       CDATA    #IMPLIED>
+<!--
+@attr templateType   The type of the template attribute. Can be: string,
+					 template or definition.
+                     By default, the type is "template". If a type is
+                     associated, the desidered renderer will be invoked.
+-->
+<!ATTLIST definition       templateType             %ContentType;   #IMPLIED>
 
 <!-- The "put-attribute" element describes an attribute of a definition. It allows to
      specify the tiles attribute name and its value. The tiles value can be
      specified as an xml attribute, or in the body of the <put-attribute> tag.
 -->
-<!ELEMENT put-attribute (#PCDATA)>
+<!ELEMENT put-attribute ( (definition*) )>
 <!ATTLIST put-attribute     id               ID              #IMPLIED>
 <!--
 @attr name           The unique identifier for this put-attribute.
@@ -148,11 +162,22 @@
 -->
 <!ATTLIST put-attribute     value            CDATA           #IMPLIED>
 <!--
+@attr expression     The expression associated to this tiles attribute. This
+					 attribute will be ignored if value is specified.
+					 
+-->
+<!ATTLIST put-attribute     expression       CDATA           #IMPLIED>
+<!--
 @attr role           Security role name that is allowed access to this attribute
                      object. The attribute is inserted only if the role name is
                      allowed.
 -->
 <!ATTLIST put-attribute     role             CDATA            #IMPLIED>
+<!--
+@attr cascade        If true, the attribute will be cascaded to all inner
+                     definitions. By default, cascade is false.
+-->
+<!ATTLIST put-attribute     cascade          %Boolean;    #IMPLIED>
 
 
 <!-- The "put-list-attribute" element describes a list attribute of a definition. It allows to
@@ -172,6 +197,17 @@
                      allowed.
 -->
 <!ATTLIST put-list-attribute role             CDATA            #IMPLIED>
+<!--
+@attr inherit        If true, the attribute will put the elements of the attribute
+                     with the same name of the parent definition before the ones
+                     specified here. By default, it is 'false'.
+-->
+<!ATTLIST put-list-attribute inherit          %Boolean;        #IMPLIED>
+<!--
+@attr cascade        If true, the attribute will be cascaded to all inner
+                     definitions. By default, cascade is false.
+-->
+<!ATTLIST put-list-attribute cascade          %Boolean;        #IMPLIED>
 
 <!-- ========== Subordinate Elements ====================================== -->
 
@@ -179,7 +215,7 @@
 <!-- The "add-attribute" element describes an element of a list. It is similar to the
      <put> element.
 -->
-<!ELEMENT add-attribute (#PCDATA)>
+<!ELEMENT add-attribute ( (definition*) )>
 <!ATTLIST add-attribute              id               ID              #IMPLIED>
 <!--
 @attr type           The type of the value. Can be: string, template or definition.
@@ -193,6 +229,12 @@
                      be specified with this tag attribute, or in the body of the tag.
 -->
 <!ATTLIST add-attribute              value            CDATA           #IMPLIED>
+<!--
+@attr expression     The expression associated to this tiles attribute. This
+					 attribute will be ignored if value is specified.
+					 
+-->
+<!ATTLIST add-attribute              expression       CDATA           #IMPLIED>
 <!--
 @attr role           Security role name that is allowed access to this attribute
                      object. The attribute will be added to the parent list

@@ -139,8 +139,8 @@ public class TilesOperations {
 		// Build a string representation of the JSP
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		Transformer transformer = XmlUtils.createIndentingTransformer();
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://tiles.apache.org/dtds/tiles-config_2_0.dtd");
-		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.0//EN");
+		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "http://tiles.apache.org/dtds/tiles-config_2_1.dtd");
+		transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "-//Apache Software Foundation//DTD Tiles Configuration 2.1//EN");
 		XmlUtils.writeXml(transformer, byteArrayOutputStream, root.getOwnerDocument());
 		String jspContent = byteArrayOutputStream.toString();
 		String tilesDefinition = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + simpleBeanName + "/views.xml"); 
@@ -180,8 +180,8 @@ public class TilesOperations {
 	
 	private class TilesDtdResolver implements EntityResolver {		
 		public InputSource resolveEntity (String publicId, String systemId) {
-			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_0.dtd")) {				
-				return new InputSource(TemplateUtils.getTemplate(TilesOperations.class, "layout/tiles-config_2_0.dtd"));
+			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
+				return new InputSource(TemplateUtils.getTemplate(TilesOperations.class, "layout/tiles-config_2_1.dtd"));
 			} else {
 				// use the default behaviour
 				return null;
