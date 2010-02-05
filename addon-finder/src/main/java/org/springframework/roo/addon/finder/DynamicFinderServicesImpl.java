@@ -86,7 +86,11 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 				if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 					if(isNewField){
-						builder.append(tablename.toLowerCase()).append(".").append(fieldName);
+						if (reservedToken.equalsIgnoreCase("Like")) {
+							builder.append("LOWER(").append(tablename.toLowerCase()).append(".").append(fieldName).append(")");
+						} else {
+							builder.append(tablename.toLowerCase()).append(".").append(fieldName);
+						}
 						isNewField = false;
 						isFieldApplied = false;
 					} 
@@ -135,7 +139,11 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						builder.append(" = ");
 					} 
 					if(setField) {
-						builder.append(":").append(fieldName).append(" ");
+						if (builder.toString().endsWith("LIKE ")) {
+							builder.append("LOWER(:").append(fieldName).append(") ");
+						} else {
+							builder.append(":").append(fieldName).append(" ");
+						}
 						isFieldApplied = true;
 					}		
 				}
