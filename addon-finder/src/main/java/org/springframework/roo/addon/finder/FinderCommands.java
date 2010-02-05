@@ -70,7 +70,7 @@ public class FinderCommands implements CommandMarker {
 	@CliCommand(value="finder add", help="Install finders in the given target (must be an entity)")
 	public void installFinders(
 			@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
-			@CliOption(key={"finderName",""}, mandatory=true, help="The finder string as generated with 'list finders for'") JavaSymbolName finderName){
+			@CliOption(key={"finderName",""}, mandatory=true, help="The finder string as generated with the 'finder list' command") JavaSymbolName finderName){
 		finderOperations.installFinder(typeName, finderName);		
 	}	
 }
