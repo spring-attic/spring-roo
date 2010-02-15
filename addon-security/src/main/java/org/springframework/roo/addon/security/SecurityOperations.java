@@ -132,8 +132,8 @@ public class SecurityOperations {
 		Element ctx = XmlUtils.findRequiredElement("/web-app/context-param[last()]", root);
 		ctx.getParentNode().insertBefore(filter, ctx.getNextSibling());
 
-		Element fm = XmlUtils.findRequiredElement("/web-app/filter-mapping", root);
-		fm.getParentNode().insertBefore(filterMapping, fm.getPreviousSibling());
+		Element fm = XmlUtils.findRequiredElement("/web-app/filter-mapping[filter-name='Spring OpenEntityManagerInViewFilter']", root);
+		fm.getParentNode().insertBefore(filterMapping, fm.getNextSibling());
 		
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 		
