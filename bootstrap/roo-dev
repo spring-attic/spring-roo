@@ -2,9 +2,14 @@
  
 if [ -z "$ROO_CLASSPATH_FILE" ]; then
     echo "WARNING: ROO_CLASSPATH_FILE environment variable is not set"
-    quit
+    exit
 fi
  
+if [ ! -f $ROO_CLASSPATH_FILE ]; then
+    echo "WARNING: $ROO_CLASSPATH_FILE file not found"
+    exit
+fi
+
 while true; do
  
     read ROO_CP <$ROO_CLASSPATH_FILE
