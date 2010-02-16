@@ -493,12 +493,13 @@ public class JspDocumentHelper {
 			
 			JavaType type = types.get(i);
 			JavaSymbolName paramName = paramNames.get(i);
+			String paramId = StringUtils.uncapitalize(StringUtils.capitalize(paramName.getSymbolName()));
 			
 			Element divElement = document.createElement("div");
-			divElement.setAttribute("id", "roo_" + entityName + "_" + paramName.getSymbolName().toLowerCase());
+			divElement.setAttribute("id", "roo_" + entityName + "_" + paramId);
 
 			Element labelElement = document.createElement("label");
-			labelElement.setAttribute("for", "_" + paramName.getSymbolName().toLowerCase() + "_id");
+			labelElement.setAttribute("for", "_" + paramId + "_id");
 			labelElement.setTextContent(paramName.getReadableSymbolName()  + ":");
 			
 			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
@@ -510,24 +511,24 @@ public class JspDocumentHelper {
 					ifElement.appendChild(labelElement);
 
 					Element select = document.createElement("select");
-					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
-					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
+					select.setAttribute("name", paramId);
+					select.setAttribute("id", "_" + paramId + "_id");
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
-					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
+					forEach.setAttribute("var", paramId + "_item");
 					select.appendChild(forEach);
 					Element option = document.createElement("option");
-					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
-					option.setTextContent("${" + paramName.getSymbolName().toLowerCase()  + "_item}");
+					option.setAttribute("value", "${" + paramId + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + paramId  + "_item}");
 					forEach.appendChild(option);
 					ifElement.appendChild(select);
-					ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, new JavaSymbolName(paramName.getSymbolName())));
+					ifElement.appendChild(DojoUtils.getMultiSelectDojo(document, new JavaSymbolName(paramId)));
 				}
 			} else if (isEnumType(type)) {
 				divElement.appendChild(labelElement);
-				divElement.appendChild(new XmlElementBuilder("select", document).addAttribute("name", paramName.getSymbolName().toLowerCase()).addAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id")
-						.addChild(new XmlElementBuilder("c:forEach", document).addAttribute("items", "${" + type.getSimpleTypeName().toLowerCase() + "_enum}").addAttribute("var", paramName.getSymbolName().toLowerCase() + "_item")
-								.addChild(new XmlElementBuilder("option", document).addAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "_item}").setText("${" + paramName.getSymbolName().toLowerCase() + "_item}").build())
+				divElement.appendChild(new XmlElementBuilder("select", document).addAttribute("name", paramId).addAttribute("id", "_" + paramId + "_id")
+						.addChild(new XmlElementBuilder("c:forEach", document).addAttribute("items", "${" + type.getSimpleTypeName().toLowerCase() + "_enum}").addAttribute("var", paramId + "_item")
+								.addChild(new XmlElementBuilder("option", document).addAttribute("value", "${" + paramId + "_item}").setText("${" + paramId + "_item}").build())
 								.build())
 						.build());		
 				divElement.appendChild(DojoUtils.getSelectDojo(document, paramName));
@@ -539,8 +540,8 @@ public class JspDocumentHelper {
 				divElement.appendChild(labelElement);
 				Element formCheckTrue = document.createElement("input");
 				formCheckTrue.setAttribute("type", "radio");
-				formCheckTrue.setAttribute("id", "_" + paramName.getSymbolName() + "_id");
-				formCheckTrue.setAttribute("name", paramName.getSymbolName().toLowerCase());
+				formCheckTrue.setAttribute("id", "_" + paramId + "_id");
+				formCheckTrue.setAttribute("name", paramId);
 				formCheckTrue.setAttribute("value", "true");
 				formCheckTrue.setAttribute("checked", "checked");
 				formCheckTrue.setTextContent("(true)");
@@ -561,24 +562,24 @@ public class JspDocumentHelper {
 					ifElement.appendChild(labelElement);
 
 					Element select = document.createElement("select");
-					select.setAttribute("name", paramName.getSymbolName().toLowerCase());
-					select.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
+					select.setAttribute("name", paramId);
+					select.setAttribute("id", "_" + paramId + "_id");
 					Element forEach = document.createElement("c:forEach");
 					forEach.setAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}");
-					forEach.setAttribute("var", paramName.getSymbolName().toLowerCase() + "_item");
+					forEach.setAttribute("var", paramId + "_item");
 					select.appendChild(forEach);
 					Element option = document.createElement("option");
-					option.setAttribute("value", "${" + paramName.getSymbolName().toLowerCase() + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
-					option.setTextContent("${" + paramName.getSymbolName().toLowerCase()  + "_item}");
+					option.setAttribute("value", "${" + paramId + "_item." + entityMetadata.getIdentifierField().getFieldName() + "}");
+					option.setTextContent("${" + paramId  + "_item}");
 					forEach.appendChild(option);					
 					ifElement.appendChild(select);
-					ifElement.appendChild(DojoUtils.getSelectDojo(document, new JavaSymbolName(paramName.getSymbolName())));
+					ifElement.appendChild(DojoUtils.getSelectDojo(document, new JavaSymbolName(paramId)));
 				}
 			} else {	
 				divElement.appendChild(labelElement);
 				Element formInput = document.createElement("input");
-				formInput.setAttribute("name", paramName.getSymbolName().toLowerCase());
-				formInput.setAttribute("id", "_" + paramName.getSymbolName().toLowerCase() + "_id");
+				formInput.setAttribute("name", paramId);
+				formInput.setAttribute("id", "_" + paramId + "_id");
 				divElement.appendChild(formInput);
 				Element required = document.createElement("spring:message");
 				required.setAttribute("code", "field.required");
