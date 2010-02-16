@@ -88,32 +88,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
-			
-			if ("".equals(identifierField)) {
-				identifierField = "id";
-			}
-			if ("".equals(persistMethod)) {
-				persistMethod = "persist";
-			}
-			if ("".equals(flushMethod)) {
-				flushMethod = "flush";
-			}
-			if ("".equals(mergeMethod)) {
-				mergeMethod = "merge";
-			}
-			if ("".equals(removeMethod)) {
-				removeMethod = "remove";
-			}
-			if ("".equals(countMethod)) {
-				countMethod = "count";
-			}
-			// findAllMethod is allowed to be an empty string
-			if ("".equals(findMethod)) {
-				findMethod = "find";
-			}
-			if ("".equals(findEntriesMethod)) {
-				findEntriesMethod = "find";
-			}
 		}
 
 		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.
@@ -176,6 +150,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return field;
 		}
 		
+		if ("".equals(identifierField)) {
+			// force a default
+			identifierField = "id";
+		}
+		
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
 		JavaSymbolName idField = null;
@@ -211,7 +190,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// User has specified an alternate column name
 			columnName = this.identifierColumn;
 		}
-		
+
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
@@ -544,24 +523,34 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
-	 * @return the merge method (never returns null)
+	 * @return the merge method (may return null)
 	 */
 	public MethodMetadata getPersistMethod() {
 		if (parent != null) {
-			return parent.getPersistMethod();
+			MethodMetadata found = parent.getPersistMethod();
+			if (found != null) {
+				return found;
+			}
 		}
-		
+		if ("".equals(persistMethod)) {
+			return null;
+		}
 		return getDelegateMethod(new JavaSymbolName(persistMethod), "persist");
 	}
 	
 	/**
-	 * @return the merge method (never returns null)
+	 * @return the merge method (may return null)
 	 */
 	public MethodMetadata getRemoveMethod() {
 		if (parent != null) {
-			return parent.getRemoveMethod();
+			MethodMetadata found = parent.getRemoveMethod();
+			if (found != null) {
+				return found;
+			}
 		}
-		
+		if ("".equals(removeMethod)) {
+			return null;
+		}
 		return getDelegateMethod(new JavaSymbolName(removeMethod), "remove");
 	}
 	
@@ -570,9 +559,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public MethodMetadata getFlushMethod() {
 		if (parent != null) {
-			return parent.getFlushMethod();
+			MethodMetadata found = parent.getFlushMethod();
+			if (found != null) {
+				return found;
+			}
 		}
-		
+		if ("".equals(flushMethod)) {
+			return null;
+		}
 		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush");
 	}
 	
@@ -581,9 +575,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public MethodMetadata getMergeMethod() {
 		if (parent != null) {
-			return parent.getMergeMethod();
+			MethodMetadata found = parent.getMergeMethod();
+			if (found != null) {
+				return found;
+			}
 		}
-		
+		if ("".equals(mergeMethod)) {
+			return null;
+		}
 		return getDelegateMethod(new JavaSymbolName(mergeMethod), "merge");
 	}
 	
@@ -758,6 +757,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find (by ID) method (may return null)
 	 */
 	public MethodMetadata getFindMethod() {
+		if ("".equals(findMethod)) {
+			return null;
+		}
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findMethod + governorTypeDetails.getName().getSimpleTypeName());
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -790,6 +792,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * @return the find entries method (may return null)
 	 */
 	public MethodMetadata getFindEntriesMethod() {
+		if ("".equals(findEntriesMethod)) {
+			return null;
+		}
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName(findEntriesMethod + governorTypeDetails.getName().getSimpleTypeName() + "Entries");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -822,7 +827,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public List<String> getDynamicFinders() {
 		List<String> result = new ArrayList<String>();
-		if (finders == null) {
+		if (finders == null || finders.length == 0) {
 			return result;
 		}
 		for (String finder : finders) {

@@ -108,7 +108,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getDeleteMethod());
 		} 
 
-		if (annotationValues.exposeFinders) {			
+		if (annotationValues.exposeFinders) { // no need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)			
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				builder.addMethod(getFinderFormMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
 				builder.addMethod(getFinderMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
@@ -133,6 +133,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getDeleteMethod() {
+		if (entityMetadata.getFindMethod() == null || entityMetadata.getRemoveMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
 		JavaSymbolName methodName = new JavaSymbolName("delete");		
 		
 		MethodMetadata method = methodExists(methodName);
@@ -186,6 +190,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getListMethod() {
+		if (entityMetadata.getFindEntriesMethod() == null || entityMetadata.getCountMethod() == null || entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
+		
 		JavaSymbolName methodName = new JavaSymbolName("list");		
 		
 		MethodMetadata method = methodExists(methodName);
@@ -245,6 +254,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getShowMethod() {
+		if (entityMetadata.getFindMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
+
 		JavaSymbolName methodName = new JavaSymbolName("show");		
 		
 		MethodMetadata method = methodExists(methodName);
@@ -285,6 +299,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getCreateMethod() {		
+		if (entityMetadata.getPersistMethod() == null || entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
 		JavaSymbolName methodName = new JavaSymbolName("create");
 		
 		MethodMetadata method = methodExists(methodName);
@@ -342,6 +360,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getCreateFormMethod() {
+		if (entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
+
 		JavaSymbolName methodName = new JavaSymbolName("createForm");
 		
 		MethodMetadata method = methodExists(methodName);
@@ -382,6 +405,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getUpdateMethod() {		
+		if (entityMetadata.getMergeMethod() == null || entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
 		JavaSymbolName methodName = new JavaSymbolName("update");
 		
 		MethodMetadata method = methodExists(methodName);
@@ -438,6 +465,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getUpdateFormMethod() {
+		if (entityMetadata.getFindMethod() == null || entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
 		JavaSymbolName methodName = new JavaSymbolName("updateForm");
 		
 		MethodMetadata updateFormMethod = methodExists(methodName);
@@ -488,6 +519,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getFinderFormMethod(MethodMetadata methodMetadata) {
+		if (entityMetadata.getFindAllMethod() == null) {
+			// mandatory input is missing (ROO-589)
+			return null;
+		}
 		Assert.notNull(methodMetadata, "Method metadata required for finder");
 		JavaSymbolName finderFormMethodName = new JavaSymbolName(methodMetadata.getMethodName().getSymbolName() + "Form");
 		MethodMetadata finderFormMethod = methodExists(finderFormMethodName);
