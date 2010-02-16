@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details.annotations.populator;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public abstract class AutoPopulationUtils {
 		}
 		
 		for (Field field : fields) {
-			// Lookup whether this attibute name was provided
+			// Lookup whether this attribute name was provided
 			JavaSymbolName attributeName = attributeNameForEachField.get(field);
 			if (attributeName == null) {
 				throw new IllegalStateException("Expected cached attribute name lookup");
@@ -119,7 +120,12 @@ public abstract class AutoPopulationUtils {
 						field.set(target, value.getValue());
 					} else if (value instanceof StringAttributeValue && fieldType.equals(String.class)) {
 						field.set(target, value.getValue());
-					} else if (value instanceof ArrayAttributeValue && fieldType.isArray()) {
+					} else if (value instanceof StringAttributeValue && fieldType.getComponentType() != null && fieldType.getComponentType().equals(String.class)) {
+						// ROO-618
+						Object newValue = Array.newInstance(String.class, 1);
+						Array.set(newValue, 0, value.getValue());
+						field.set(target, newValue);
+					} else if (value instanceof ArrayAttributeValue<?> && fieldType.isArray()) {
 						// The field is a string array, the attribute is an array, so let's hope it's a string array
 						ArrayAttributeValue<?> castValue = (ArrayAttributeValue<?>) value;
 						List<String> result = new ArrayList<String>();
