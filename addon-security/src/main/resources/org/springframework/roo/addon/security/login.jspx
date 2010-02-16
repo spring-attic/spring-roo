@@ -1,13 +1,15 @@
 <div xmlns:spring="http://www.springframework.org/tags" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>
     <div id="_title" style="width: 100%">
-	     <spring:message code="security.login.title" var="title"/>
-	     <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
+	    <spring:message code="security.login.title" var="title"/>
+	    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
 	    <c:if test="${not empty param.login_error}">
-	      <font color="red">
-			<spring:message code="security.login.unsuccessful"/>
-			<c:out value="${SPRING_SECURITY_LAST_EXCEPTION.message}"/>.
-	      </font>
+	      <div class="errors">
+	      	<p>
+	      		<spring:message code="security.login.unsuccessful"/>
+				<c:out value="${SPRING_SECURITY_LAST_EXCEPTION.message}"/>.
+	      	</p>
+	      </div>
 	    </c:if>
 	     <c:if test="${empty param.login_error}">
 	    	<p>
