@@ -136,6 +136,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		
 		builder.addMethod(getNewTransientEntityMethod());
+		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
 		builder.addMethod(getInitMethod());
@@ -342,6 +343,35 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	/**
+	 * @return the "getSpecificEntity(int):Entity" method (never returns null)
+	 */
+	public MethodMetadata getSpecificPersistentEntityMethod() {
+		// Method definition to find or build
+		JavaSymbolName methodName = new JavaSymbolName("getSpecific" + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(JavaType.INT_PRIMITIVE);
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("index"));
+		JavaType returnType = beanInfoMetadata.getJavaBean();
+		
+		// Locate user-defined method
+		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
+		if (userMethod != null) {
+			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
+			return userMethod;
+		}
+
+		// Create method
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("init();");
+		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
+		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size()-1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(index);");
+		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	/**
 	 * @return the "init():void" method (never returns null)
 	 */
 	public MethodMetadata getInitMethod() {
@@ -472,14 +502,25 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						// Look up the metadata we are relying on
 						String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 
+						// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
+						boolean oneToOne = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null;
+						
 						metadataDependencyRegistry.registerDependency(otherProvider, getId());
 						DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
 						if (otherMd == null || !otherMd.isValid()) {
 							// There is no metadata around, so we'll just make some basic assumptions
-							initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+							if (oneToOne) {
+								initializer = collaboratingFieldName + ".getSpecific" + field.getFieldType().getSimpleTypeName() + "(index)";
+							} else {
+								initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+							}
 						} else {
 							// We can use the correct name
-							initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
+							if (oneToOne) {
+								initializer = collaboratingFieldName + "." + otherMd.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
+							} else {
+								initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
+							}
 						}
 					}
 				}
