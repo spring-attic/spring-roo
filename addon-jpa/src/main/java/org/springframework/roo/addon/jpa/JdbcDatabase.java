@@ -24,6 +24,7 @@ public class JdbcDatabase implements Comparable<JdbcDatabase> {
 	public static final JdbcDatabase ORACLE = new JdbcDatabase("ORACLE", "oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost:1521");
 	public static final JdbcDatabase SYBASE = new JdbcDatabase("SYBASE", "com.sybase.jdbc2.jdbc.SybDriver", "jdbc:sybase:Tds:localhost:4100");
 	public static final JdbcDatabase MSSQL = new JdbcDatabase("MSSQL", "com.microsoft.sqlserver.jdbc.SQLServerDriver ", "jdbc:microsoft:sqlserver://localhost:1433");
+	public static final JdbcDatabase DB2 = new JdbcDatabase("DB2", "com.ibm.db2.jcc.DB2Driver ", "jdbc:db2://localhost:50000");
 
 	public JdbcDatabase(String key, String driverClassName, String connectionString) {
 		Assert.hasText(key, "Key required");

@@ -19,6 +19,12 @@
 		<database id="SYBASE">
 			<dependency org="net.sourceforge.jtds" name="com.springsource.net.sourceforge.jtds" rev="1.2.2" />
 		</database>
+		<database id="DB2">
+			<dependency org="com.ibm" name="db2jcc" rev="3.50.152" />
+		</database>
+		<database id="ORACLE">
+			<dependency org="com.oracle" name="ojdbc14" rev="10.2.0.2" />
+		</database>
 	</databases>
 	<ormProviders>
 		<provider id="HIBERNATE">
