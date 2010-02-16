@@ -629,7 +629,7 @@ public class JavaParserUtils  {
 			// useSimpleTypeName = true;
 		}
 		
-		if (addImport = true && targetType.getSimpleTypeName().equals(typeToImport.getSimpleTypeName())) {
+		if (addImport == true && targetType.getSimpleTypeName().equals(typeToImport.getSimpleTypeName())) {
 			// So we would have imported it, but then it would conflict with the simple name of the type
 			addImport = false;
 			useSimpleTypeName = false;
