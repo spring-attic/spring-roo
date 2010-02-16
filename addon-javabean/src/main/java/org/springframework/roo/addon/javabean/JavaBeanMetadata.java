@@ -94,8 +94,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			return result;
 		}
 		
-		// Decide whether we need to produce the accessor method
-		if (this.gettersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
+		// Decide whether we need to produce the accessor method (see ROO-619 for reason we allow a getter for a final field)
+		if (this.gettersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
 			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
@@ -131,7 +131,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(field.getFieldName());
 		
-		// Decide whether we need to produce the mutator method
+		// Decide whether we need to produce the mutator method (disallowed for final fields as per ROO-36)
 		if (this.settersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
