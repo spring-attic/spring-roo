@@ -110,7 +110,7 @@ public class ItdSourceFileComposer {
 			this.append("privileged ");
 		}
 		this.append("aspect " + aspect.getSimpleTypeName() + " {");
-		this.newLine();
+		this.newLine(false);
 		this.indent();
 		this.newLine();
 
@@ -137,7 +137,7 @@ public class ItdSourceFileComposer {
 			this.append(": ");
 			outputAnnotation(typeAnnotation);
 			this.append(";");
-			this.newLine();
+			this.newLine(false);
 			this.newLine();
 		}
 	}
@@ -161,7 +161,7 @@ public class ItdSourceFileComposer {
 				this.append(extendsType.getSimpleTypeName());
 			}
 			this.append(";");
-			this.newLine();
+			this.newLine(false);
 			this.newLine();
 		}
 	}
@@ -186,7 +186,7 @@ public class ItdSourceFileComposer {
 				this.append(extendsType.getNameIncludingTypeParameters(false, resolver));
 			}
 			this.append(";");
-			this.newLine();
+			this.newLine(false);
 			this.newLine();
 		}
 	}
@@ -204,7 +204,7 @@ public class ItdSourceFileComposer {
 			for (AnnotationMetadata annotation : constructor.getAnnotations()) {
 				this.appendIndent();
 				outputAnnotation(annotation);
-				this.newLine();
+				this.newLine(false);
 			}
 			
 			// Append "<modifier> <TargetOfIntroduction>.new" portion
@@ -236,14 +236,14 @@ public class ItdSourceFileComposer {
 				}
 			}
 			this.append(") {");
-			this.newLine();
+			this.newLine(false);
 			this.indent();
 
 			// Add body
 			this.append(constructor.getBody());
 			this.indentRemove();
 			this.appendFormalLine("}");
-			this.newLine();
+			this.newLine(false);
 		}
 	}
 	
@@ -260,7 +260,7 @@ public class ItdSourceFileComposer {
 			for (AnnotationMetadata annotation : method.getAnnotations()) {
 				this.appendIndent();
 				outputAnnotation(annotation);
-				this.newLine();
+				this.newLine(false);
 			}
 			
 			// Append "<modifier> <returntype> <methodName>" portion
@@ -312,7 +312,7 @@ public class ItdSourceFileComposer {
 				this.append(") {");
 			}
 			
-			this.newLine();
+			this.newLine(false);
 			this.indent();
 
 			// Add body
@@ -335,7 +335,7 @@ public class ItdSourceFileComposer {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				this.appendIndent();
 				outputAnnotation(annotation);
-				this.newLine();
+				this.newLine(false);
 			}
 			
 			// Append "<modifier> <fieldtype> <fieldName>" portion
@@ -359,7 +359,7 @@ public class ItdSourceFileComposer {
 			
 			// Complete the field declaration
 			this.append(";");
-			this.newLine();
+			this.newLine(false);
 			this.newLine();
 		}
 	}
@@ -384,13 +384,20 @@ public class ItdSourceFileComposer {
 	 * Prints a blank line, ensuring any indent is included before doing so.
 	 */
 	private ItdSourceFileComposer newLine() {
-		appendIndent();
+		return newLine(true);
+	}
+	
+	/**
+	 * Prints a blank line, ensuring any indent is included before doing so.
+	 */
+	private ItdSourceFileComposer newLine(boolean indent) {
+		if (indent) appendIndent();
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		pw.append(getNewLine());
 		//pw.append(System.getProperty("line.separator"));
 		return this;
 	}
-	
+
 	private String getNewLine() {
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		return ("\n");
@@ -416,7 +423,7 @@ public class ItdSourceFileComposer {
 			pw.append(message);
 			content = true;
 		}
-		return newLine();
+		return newLine(false);
 	}
 
 	/**

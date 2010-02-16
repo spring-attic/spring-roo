@@ -51,11 +51,18 @@ public class InvocableMemberBodyBuilder {
 	/**
 	 * Prints a blank line, ensuring any indent is included before doing so.
 	 */
-	public InvocableMemberBodyBuilder newLine() {
-		appendIndent();
+	public InvocableMemberBodyBuilder newLine(boolean indentBefore) {
+		if (indentBefore) {
+			appendIndent();
+		}
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		stringBuilder.append("\n");
 		//pw.append(System.getProperty("line.separator"));
+		return this;
+	}
+	
+	public InvocableMemberBodyBuilder newLine() {
+		newLine(true);
 		return this;
 	}
 	
@@ -77,7 +84,7 @@ public class InvocableMemberBodyBuilder {
 		if (message != null && !"".equals(message)) {
 			stringBuilder.append(message);
 		}
-		return newLine();
+		return newLine(false);
 	}
 
 	/**
