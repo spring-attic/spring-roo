@@ -48,10 +48,12 @@
 		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
 	</filter>
 
+	<!-- See ROO-579: this filter will cause login page redisplay with Spring Security, so is disabled by default
 	<filter-mapping>
 		<filter-name>etagFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
+	-->
 
 	<filter-mapping>
 		<filter-name>CharacterEncodingFilter</filter-name>
