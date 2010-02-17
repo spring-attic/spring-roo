@@ -119,6 +119,14 @@ public interface FileManager extends ClasspathSearcher {
 	MutableFile updateFile(String fileIdentifier);
 	
 	/**
+	 * Obtains an already-existing file for reading. The path should be in canonical file name format.
+	 * 
+	 * @param fileIdentifier to read that already exists (required)
+	 * @return a representation of the file (or null if the file does not exist)
+	 */
+	FileDetails readFile(String fileIdentifier);
+	
+	/**
 	 * Delegates to {@link FileMonitorService#scanAll()} or {@link NotifiableFileMonitorService#scanNotified()} if available.
      *
 	 * @return the number of changes detected (can be 0 or above)

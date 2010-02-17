@@ -98,6 +98,15 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		return fileDetails;
 	}
 
+	public FileDetails readFile(String fileIdentifier) {
+		Assert.notNull(fileIdentifier, "File identifier required");
+		File f = new File(fileIdentifier);
+		if (!f.exists()) {
+			return null;
+		}
+		return new FileDetails(f, f.lastModified());
+	}
+
 	public MutableFile createFile(String fileIdentifier) {
 		Assert.notNull(fileIdentifier, "File identifier required");
 		File actual = new File(fileIdentifier);
