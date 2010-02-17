@@ -37,7 +37,7 @@ public class MavenCommands implements CommandMarker {
 	
 	@CliCommand(value="project", help="Creates a new project")
 	public void createProject(
-			@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name") JavaPackage topLevelPackage,
+			@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage,
 			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName,
 			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
 			@CliOption(key="template", mandatory=false, specifiedDefaultValue="STANDARD_PROJECT", unspecifiedDefaultValue="STANDARD_PROJECT", help="The type of project to create (defaults to STANDARD_PROJECT)") Template template) {

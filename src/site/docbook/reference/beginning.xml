@@ -210,8 +210,17 @@ Created SRC_MAIN_RESOURCES/META-INF/spring
 Created SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
 Created SRC_MAIN_RESOURCES/META-INF/spring/log4j.properties
 com.springsource.roo.pizzashop roo&gt; 
-</programlisting>This command will create a the following folder structure in
-    your file system:</para>
+</programlisting>When you used the <link
+    linkend="command-index-project">project</link> command, Roo created you a
+    Maven <code>pom.xml</code> file as well as a Maven-style directory
+    structure. The top level package you nominated in this command was then
+    used as the <code>&lt;groupId&gt;</code> within the <code>pom.xml</code>.
+    When typing later Roo commands, you can use the "<code>~</code>" shortcut
+    key to refer to this top-level-package (it is read in by the Roo shell
+    from the <code>pom.xml</code> each time you load Roo).</para>
+
+    <para>The following folder structure now exists in your file
+    system:</para>
 
     <para></para>
 
