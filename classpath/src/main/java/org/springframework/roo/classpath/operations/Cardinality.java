@@ -16,6 +16,7 @@ public class Cardinality implements Comparable<Cardinality> {
 
 	public static final Cardinality ONE_TO_MANY = new Cardinality("ONE_TO_MANY");
 	public static final Cardinality MANY_TO_MANY = new Cardinality("MANY_TO_MANY");
+	public static final Cardinality MANY_TO_ONE = new Cardinality("MANY_TO_ONE");
 
 	public Cardinality(String key) {
 		Assert.hasText(key, "Key required");

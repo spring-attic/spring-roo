@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.Fetch;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -35,11 +36,13 @@ public class ReferenceField extends FieldDetails {
 	
 	private JavaType fieldType;
 	private String joinColumnName;
-	private Fetch fetch =null;
+	private Fetch fetch = null;
+	private Cardinality cardinality = null;
 
-	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {		
+	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, Cardinality cardinality) {		
 		super(physicalTypeIdentifier, fieldType, fieldName);
 		this.fieldType = fieldType;
+		this.cardinality = cardinality;
 	}
 
 	public String getJoinColumnName() {
@@ -71,7 +74,13 @@ public class ReferenceField extends FieldDetails {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
 		}
 		
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+		if (cardinality.equals(Cardinality.ONE_TO_MANY)) {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+		} else if (cardinality.equals(Cardinality.MANY_TO_MANY)) {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+		} else {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+		}
 		
 		List<AnnotationAttributeValue<?>> jcAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 		if (joinColumnName != null) {

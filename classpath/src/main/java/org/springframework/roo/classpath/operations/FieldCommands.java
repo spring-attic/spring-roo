@@ -246,6 +246,7 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key="notNull", mandatory=false, specifiedDefaultValue="true", help="Whether this value cannot be null") Boolean notNull,
 			@CliOption(key="nullRequired", mandatory=false, specifiedDefaultValue="true", help="Whether this value must be null") Boolean nullRequired,
 			@CliOption(key="joinColumnName", mandatory=false, help="The JPA Join Column name") String joinColumnName,
+			@CliOption(key="cardinality", mandatory=false, unspecifiedDefaultValue="MANY_TO_ONE", specifiedDefaultValue="MANY_TO_ONE", help="The relationship cardinarily at a JPA level") Cardinality cardinality,
 			@CliOption(key="fetch", mandatory=false, help="The fetch semantics at a JPA level") Fetch fetch,
 			@CliOption(key="comment", mandatory=false, help="An optional comment for JavaDocs") String comment,
 			@CliOption(key="transient", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates to mark the field as transient") boolean transientModifier,
@@ -262,7 +263,7 @@ public class FieldCommands implements CommandMarker {
 		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
 			throw new IllegalStateException("The field reference command is only applicable to JPA @Entity target types.");
 		}
-		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName);
+		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);

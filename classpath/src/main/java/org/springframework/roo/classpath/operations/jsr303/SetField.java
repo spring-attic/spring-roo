@@ -56,22 +56,24 @@ public class SetField extends CollectionField {
 
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
-		List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-		attrs.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
 		if (fetch != null) {
 			JavaSymbolName value = new JavaSymbolName("EAGER");
 			if (fetch.equals(Fetch.LAZY)) {
 				value = new JavaSymbolName("LAZY");
 			}
-			attrs.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
 		}
 		if (mappedBy != null) {
-			attrs.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
 		}
 		if (cardinality.equals(Cardinality.ONE_TO_MANY)) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attrs));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+		} else if (cardinality.equals(Cardinality.MANY_TO_MANY)) {
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
 		} else {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attrs));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
 		}
 	}
 
