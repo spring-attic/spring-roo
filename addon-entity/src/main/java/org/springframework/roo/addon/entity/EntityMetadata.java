@@ -778,9 +778,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
-			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) throw new IllegalArgumentException(\"An identifier is required to retrieve an instance of " + governorTypeDetails.getName().getSimpleTypeName() +"\");");
+			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
-			bodyBuilder.appendFormalLine("if (id == null) throw new IllegalArgumentException(\"An identifier is required to retrieve an instance of " + governorTypeDetails.getName().getSimpleTypeName() +"\");");
+			bodyBuilder.appendFormalLine("if (id == null) return null;");
 		}
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
 		int modifier = Modifier.PUBLIC;
