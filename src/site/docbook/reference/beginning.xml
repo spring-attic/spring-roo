@@ -265,14 +265,25 @@ com.springsource.roo.pizzashop roo&gt;
     object-relational mapping (ORM)-provider. Hibernate is one of three ORM
     providers which Roo currently offers. EclipseLink and OpenJPA represent
     the alternative choices. In a similar fashion we have chosen the
-    Hypersonic in-memory database database as our target database. This
-    database is frequently used during Roo application development as it
-    relieves the developer from the burden of installing and configuring a
-    production scale database. Of course the <emphasis role="bold"><link
+    Hypersonic in-memory database database as our target database. Hypersonic
+    is a convenient database for Roo application development because it
+    relieves the developer from having to install and configure a production
+    scale database.</para>
+
+    <para>When you are ready to test or install your application in a
+    production setting, the <emphasis role="bold"><link
     linkend="command-index-persistence-setup">persistence
-    setup</link></emphasis> command can be used later on to swap the database
-    (or even ORM) for a different production database such as MySQL, Postgres,
-    MS SQL Server, Oracle, Sybase, or H2.</para>
+    setup</link></emphasis> command can be repeated. This allows you to
+    nominate a different database, or even ORM. Roo offers TAB completion for
+    production databases including Postgres, MySQL, Microsoft SQL Server,
+    Oracle, DB2, Sybase, H2, Hypersonic and more. Another important step is to
+    edit the <code>SRC_MAIN_RESOURCES/META-INF/persistence.xml</code> file and
+    modify your JPA provider's DDL (schema management) configuration setting
+    so it preserves the database between restarts of your application. To help
+    you with this, Roo automatically lists the valid settings for your JPA
+    provider as a comment in that file. Note that by default your JPA provider
+    will drop all database tables each time it reloads. As such you'll
+    certainly want to change this setting.</para>
   </section>
 
   <section xml:id="beginning-step-2">
