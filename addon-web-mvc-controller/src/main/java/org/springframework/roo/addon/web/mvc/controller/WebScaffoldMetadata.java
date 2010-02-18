@@ -551,7 +551,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			needModelMap = true;
 		}	
 		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
-			setupFinderDateTimeFormatAttributes(methodMetadata.getParameterNames(), types, bodyBuilder);
+			setupFinderDateTimeFormatAttributes(methodMetadata.getParameterNames(), types, bodyBuilder, true);
 			needModelMap = true;
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + methodMetadata.getMethodName().getSymbolName() + "\";");
@@ -585,7 +585,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		for (int i = 0; i < paramTypes.size(); i++) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), paramNames.get(i).getSymbolName()));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), StringUtils.uncapitalize(paramNames.get(i).getSymbolName())));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes));					
 			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
 				JavaSymbolName fieldName = null;
@@ -629,7 +629,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
 		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Calendar.class.getName()))) {
-			setupFinderDateTimeFormatAttributes(paramNames, paramTypes, bodyBuilder);
+			setupFinderDateTimeFormatAttributes(paramNames, paramTypes, bodyBuilder, false);
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
@@ -748,7 +748,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 	}
 	
-	private void setupFinderDateTimeFormatAttributes(List<JavaSymbolName> paramNames, List<JavaType> paramTypes, InvocableMemberBodyBuilder bodyBuilder) {
+	private void setupFinderDateTimeFormatAttributes(List<JavaSymbolName> paramNames, List<JavaType> paramTypes, InvocableMemberBodyBuilder bodyBuilder, boolean formMethod) {
 		for (int i = 0; i < paramTypes.size(); i++) {
 			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
 				JavaSymbolName fieldName = null;
@@ -763,7 +763,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					if (annotation != null) {
 						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
 						if (styleValue != null) {
-							bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+							if (formMethod) {
+								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + StringUtils.uncapitalize(paramNames.get(i).getSymbolName()) + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+							} else {
+								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+							}
 						}
 					}
 				}
