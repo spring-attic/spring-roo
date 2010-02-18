@@ -585,7 +585,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		for (int i = 0; i < paramTypes.size(); i++) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), paramNames.get(i).getSymbolName().toLowerCase()));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), paramNames.get(i).getSymbolName()));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes));					
 			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
 				JavaSymbolName fieldName = null;

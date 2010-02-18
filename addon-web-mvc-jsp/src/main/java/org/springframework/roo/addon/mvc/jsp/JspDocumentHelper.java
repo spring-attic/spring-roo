@@ -605,7 +605,7 @@ public class JspDocumentHelper {
 						if (annotation != null) {
 							AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("style"));
 							if (null != value && !value.getValue().toString().contains("L") && !value.getValue().toString().contains("F")) {
-								divElement.appendChild(DojoUtils.getRequiredDateDojo(document, new JavaSymbolName(entityName), paramName));
+								divElement.appendChild(DojoUtils.getRequiredDateDojo(document, new JavaSymbolName(entityName), new JavaSymbolName(paramId)));
 							}
 						}
 					}

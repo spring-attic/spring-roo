@@ -41,7 +41,7 @@ public class DojoUtils {
 		addDojoDepenency(document, "dijit.form.DateTextBox");		
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName().toLowerCase()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + fieldName.getSymbolName()
 				+ "_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${validation_required}', constraints: {datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName()
 				+ "_date_format}', required : true}, datePattern : '${" + beanName.getSymbolName() + "_" + fieldName.getSymbolName() + "_date_format}'}})); ");
 		return script;
@@ -64,7 +64,7 @@ public class DojoUtils {
 		Assert.notNull(field, "Field name required");
 		Element script = document.createElement("script");
 		script.setAttribute("type", "text/javascript");
-		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getSymbolName().toLowerCase()
+		script.setTextContent("Spring.addDecoration(new Spring.ElementDecoration({elementId : '_" + field.getSymbolName()
 				+ "_id', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${validation_required}', required : true}})); ");
 		return script;
 	}
