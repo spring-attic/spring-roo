@@ -243,6 +243,44 @@
     forum</link> for assistance.</para>
   </section>
 
+  <section xml:id="upgrade-1.0.1.RELEASE">
+    <title>Upgrading to 1.0.2.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.0.1.RELEASE to Spring Roo 1.0.2.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+
+      <listitem>
+        <para>If you are using Spring Security in your Roo application, it is
+        recommended you review issue <link
+        xlink:href="http://jira.springframework.org/browse/ROO-579">ROO-579</link>
+        and consider disabling the <code>ShallowEtagHeaderFilter</code> filter
+        in your <code>web.xml</code>.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="upgrade-1.0.1.RELEASE">
+    <title>Upgrading to 1.0.1.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.0.0.RELEASE to Spring Roo 1.0.1.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
   <section xml:id="upgrade-1.0.0.RELEASE">
     <title>Upgrading to 1.0.0.RELEASE</title>
 
