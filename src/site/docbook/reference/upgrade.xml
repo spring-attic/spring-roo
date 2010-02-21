@@ -243,7 +243,7 @@
     forum</link> for assistance.</para>
   </section>
 
-  <section xml:id="upgrade-1.0.1.RELEASE">
+  <section xml:id="upgrade-1.0.2.RELEASE">
     <title>Upgrading to 1.0.2.RELEASE</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
