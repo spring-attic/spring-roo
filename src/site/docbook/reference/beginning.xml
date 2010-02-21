@@ -419,7 +419,7 @@ field string --fieldName name --notNull --sizeMin 2
 field number --fieldName price --type java.lang.Float </programlisting>After
     adding the name and the price field to the <code>Pizza</code> domain class
     we need to deal with its relationships to <code>Base</code> and
-    <code>Topping</code>. Let's start with the m:n (one <code>Pizza</code> can
+    <code>Topping</code>. Let's start with the m:m (one <code>Pizza</code> can
     have many <code>Toppings</code> and one <code>Topping</code> can be
     applied to many <code>Pizzas</code>) relationship between
     <code>Pizza</code> and <code>Toppings</code>. To create such many-to-many
