@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.2.RELEASE</version>
+    <version>1.0.3.RELEASE</version>
     <name>Spring Roo</name>
 
     <modules>
@@ -497,7 +497,7 @@
         <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
         <spring.version>3.0.0.RELEASE</spring.version>
         <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
-        <roo.version>1.0.2.RELEASE</roo.version>
+        <roo.version>1.0.3.RELEASE</roo.version>
     </properties>
 
 </project>

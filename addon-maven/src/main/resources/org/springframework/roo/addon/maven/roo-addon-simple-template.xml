@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.bootstrap</artifactId>
-			<version>1.0.2.RELEASE</version>
+			<version>1.0.3.RELEASE</version>
 			<scope>provided</scope>
 		</dependency>
         <!-- Other modules (if any) -->

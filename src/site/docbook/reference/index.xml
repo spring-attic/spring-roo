@@ -12,7 +12,7 @@
 
     <productname>Spring Roo</productname>
 
-    <releaseinfo>1.0.2.RELEASE</releaseinfo>
+    <releaseinfo>1.0.3.RELEASE</releaseinfo>
 
     <authorgroup>
       <author>
@@ -25,7 +25,8 @@
     </authorgroup>
 
     <legalnotice>
-      <para>Copyright 2009, 2010 SpringSource, Inc. All Rights Reserved.</para>
+      <para>Copyright 2009, 2010 SpringSource, Inc. All Rights
+      Reserved.</para>
 
       <para>Copies of this document may be made for your own use and for
       distribution to others, provided that you do not charge any fee for such
