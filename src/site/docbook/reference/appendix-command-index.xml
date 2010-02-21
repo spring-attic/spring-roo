@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.0.1.RELEASE [rev 599].</para>
+    <para>This appendix was automatically built from Roo 1.0.2.RELEASE [rev 636].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -812,6 +812,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--cardinality</term>
+                    <listitem>
+                        <para>The relationship cardinarily at a JPA level; default: 'MANY_TO_ONE'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--fetch</term>
                     <listitem>
                         <para>The fetch semantics at a JPA level; no default value</para>
@@ -1025,7 +1031,7 @@
                 <varlistentry>
                     <term>--finderName</term>
                     <listitem>
-                        <para>The finder string as generated with 'list finders for'; no default value (mandatory) </para>
+                        <para>The finder string as generated with the 'finder list' command; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1561,7 +1567,7 @@
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
-                        <para>The uppermost package name; no default value (mandatory) </para>
+                        <para>The uppermost package name (this becomes the &lt;groupId&gt; in Maven and also the '~' value when using Roo's shell); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
