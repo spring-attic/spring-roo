@@ -308,7 +308,7 @@ quit
     Tools</link> (AJDT) and also offers an inbuilt Roo shell. The inbuilt Roo
     shell means you do not need to run the normal Roo shell if you are using
     STS. You'll also have other neat Roo-IDE integation features, like the
-    ability to press CTRL+G (or Apple+G if you're on an Apple) and a popup
+    ability to press CTRL+R (or Apple+R if you're on an Apple) and a popup
     will allow you to type a Roo command from anywhere within the IDE. Another
     nice feature is the shell message hotlinking, which means all shell
     messages emitted by Roo are actually links that you can click to open the
