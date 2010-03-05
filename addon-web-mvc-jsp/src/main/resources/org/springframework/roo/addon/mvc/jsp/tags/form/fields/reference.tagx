@@ -22,7 +22,7 @@
 	</c:choose>
 		
     <div id="${field}_id">
-        <label for="_${field}_id">${label}:</label>
+        <label for="_${field}_id"><c:out value="${label}"/>:</label>
         <spring:url value="/${typePath}/form" var="create_url"/>
         <a href="${create_url}">
             <spring:url value="/static/images/add.png" var="create_img_url"/>

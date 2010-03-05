@@ -435,7 +435,7 @@ public class JspViewManager {
 					if(max != null) {
 						int maxValue = (Integer)max.getValue();
 						if (fieldElement == null && maxValue > 30) {	
-							fieldElement = new XmlElementBuilder("field:textarea", document).addAttribute("max", max.getValue().toString()).build();
+							fieldElement = new XmlElementBuilder("field:textarea", document).build();
 						} 
 					}
 				} 
@@ -468,25 +468,27 @@ public class JspViewManager {
 				|| field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
 			fieldElement.setAttribute("validationMessageCode", "field.invalid.number");
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")))) {
 			AnnotationAttributeValue<?> min = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if(min != null) {
 				fieldElement.setAttribute("min", min.getValue().toString());
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")))
+				&& !"field:textarea".equals(fieldElement.getTagName())) {
 			AnnotationAttributeValue<?> maxA = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if(maxA != null) {
 				fieldElement.setAttribute("max", maxA.getValue().toString());
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMin")))
+				&& !"field:textarea".equals(fieldElement.getTagName())) {
 			AnnotationAttributeValue<?> decimalMin = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if(decimalMin != null) {
 				fieldElement.setAttribute("decimalMin", decimalMin.getValue().toString());
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.DecimalMax")))) {
 			AnnotationAttributeValue<?> decimalMax = annotationMetadata.getAttribute(new JavaSymbolName("value"));
 			if(decimalMax != null) {
 				fieldElement.setAttribute("decimalMax", decimalMax.getValue().toString());
@@ -498,7 +500,7 @@ public class JspViewManager {
 				fieldElement.setAttribute("validationRegex", regexp.getValue().toString());
 			}
 		}
-		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")))) {
+		if ("field:input".equals(fieldElement.getTagName()) && null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")))) {
 			AnnotationAttributeValue<?> max = annotationMetadata.getAttribute(new JavaSymbolName("max"));
 			if(max != null) {
 				fieldElement.setAttribute("max", max.getValue().toString());

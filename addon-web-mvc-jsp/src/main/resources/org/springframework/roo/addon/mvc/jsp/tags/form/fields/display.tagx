@@ -19,7 +19,7 @@
 	</c:if>
 	
 	<div id="${object.class.simpleName}_${field}_id">
-	    <label for="_${field}_id">${label}:</label>
+	    <label for="_${field}_id"><c:out value="${label}"/>:</label>
 	    <div class="box" id="_${field}_id">
 	    	<c:choose>
 	    		<c:when test="${date}">

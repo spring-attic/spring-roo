@@ -31,7 +31,7 @@
     <div id="${field}_id">
 		<c:choose>
 			<c:when test="${not empty items}">
-	            <label for="_${field}_id">${label}:</label>
+	            <label for="_${field}_id"><c:out value="${label}"/>:</label>
 	            <c:choose>
 	            	<c:when test="${empty itemValue}">
 	            		<c:choose>

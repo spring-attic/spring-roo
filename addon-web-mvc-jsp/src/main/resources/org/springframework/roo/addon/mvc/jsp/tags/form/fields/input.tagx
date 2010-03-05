@@ -29,7 +29,7 @@
 	</c:if>
 
 	<div id="${field}_id">
-	    <label for="_${field}_id">${label}:</label>
+	    <label for="_${field}_id"><c:out value="${label}"/>:</label>
 	    <c:choose>
 	    	<c:when test="${disableFormBinding}">
 	    		<input id="_${field}_id" name="${field}" />
