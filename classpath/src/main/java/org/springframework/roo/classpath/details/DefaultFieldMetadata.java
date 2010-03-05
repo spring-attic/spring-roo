@@ -20,13 +20,13 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultFieldMetadata implements FieldMetadata {
 
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-	private JavaType fieldInitializer;
+	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;
 	private String declaredByMetadataId;
 	private int modifier;
 	
-	public DefaultFieldMetadata(String declaredByMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, JavaType fieldInitializer, List<AnnotationMetadata> annotations) {
+	public DefaultFieldMetadata(String declaredByMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer, List<AnnotationMetadata> annotations) {
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldName, "Field name required");
 		Assert.notNull(fieldType, "Field type required");
@@ -53,7 +53,7 @@ public class DefaultFieldMetadata implements FieldMetadata {
 		return annotations;
 	}
 	
-	public JavaType getFieldInitializer() {
+	public String getFieldInitializer() {
 		return fieldInitializer;
 	}
 	

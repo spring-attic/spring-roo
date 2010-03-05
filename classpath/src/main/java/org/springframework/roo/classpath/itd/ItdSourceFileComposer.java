@@ -352,9 +352,8 @@ public class ItdSourceFileComposer {
 
 			// Append initializer, if present
 			if (field.getFieldInitializer() != null) {
-				this.append(" = new ");
-				this.append(field.getFieldInitializer().getNameIncludingTypeParameters(false, resolver));
-				this.append("()");
+				this.append(" = ");
+				this.append(field.getFieldInitializer());
 			}
 			
 			// Complete the field declaration

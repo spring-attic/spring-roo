@@ -84,7 +84,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return userField;
 		}
 		
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, fieldType, null);
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, "new " + fieldType + "()", null);
 	}
 	
 	private MethodMetadata getGetAsTextMethod() {

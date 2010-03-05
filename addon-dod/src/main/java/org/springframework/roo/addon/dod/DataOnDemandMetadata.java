@@ -208,7 +208,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 			
 			// Candidate not found, so let's create one
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.Random"), new JavaType("java.security.SecureRandom"), null);
+			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.Random"), "new java.security.SecureRandom()", null);
 			return field;
 		}
 	}

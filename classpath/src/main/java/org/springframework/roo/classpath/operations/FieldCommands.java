@@ -109,10 +109,10 @@ public class FieldCommands implements CommandMarker {
 		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		fieldDetails.decorateAnnotationsList(annotations);
-		JavaType initializer = null;
+		String initializer = null;
 		if (fieldDetails instanceof CollectionField) {
 			CollectionField collectionField = (CollectionField) fieldDetails;
-			initializer = collectionField.getInitializer();
+			initializer = "new " + collectionField.getInitializer() + "()";
 		}
 		int mod = Modifier.PRIVATE;
 		if (transientModifier) mod += Modifier.TRANSIENT;

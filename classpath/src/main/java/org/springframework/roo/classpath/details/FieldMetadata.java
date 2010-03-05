@@ -31,11 +31,8 @@ public interface FieldMetadata extends IdentifiableMember {
 	List<AnnotationMetadata> getAnnotations();
 	
 	/**
-	 * A field initializer is a class that provides an accessible no-argument constructor. This definition might
-	 * be expanded in a future release of ROO (eg to support primitives and non-default constructors).
-	 * 
 	 * @return the field initializer, if known (may be null if there is no initializer)
 	 */
-	JavaType getFieldInitializer();
+	String getFieldInitializer();
 	
 }

@@ -1,8 +1,13 @@
 package org.springframework.roo.classpath.javaparser.details;
 
 import japa.parser.ASTHelper;
+import japa.parser.JavaParser;
+import japa.parser.ParseException;
+import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.FieldDeclaration;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.TypeDeclaration;
 import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.Expression;
@@ -11,6 +16,7 @@ import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +41,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JavaParserFieldMetadata implements FieldMetadata {
 	private JavaType fieldType;
-	private JavaType fieldInitializer;
+	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private String declaredByMetadataId;
@@ -66,13 +72,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		// Lookup initializer, if one was requested and easily determinable
 		Expression e = var.getInit();
 		if (e != null) {
-			if (e instanceof ObjectCreationExpr) {
-				ObjectCreationExpr initializer = (ObjectCreationExpr) e;
-				ClassOrInterfaceType initializerType = initializer.getType();
-				this.fieldInitializer = JavaParserUtils.getJavaTypeNow(compilationUnitServices, initializerType, typeParameters);
-			} else {
-				// TODO: Support other initializers (eg japa.parser.ast.expr.IntegerLiteralExpr)
-			}
+			this.fieldInitializer = e.toString();
 		}
 		
 		List<AnnotationExpr> annotations = fieldDeclaration.getAnnotations();
@@ -124,31 +124,49 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			}
 		}
 		
-		// Deal with initializers, if one has been requested
-		JavaType initializer = field.getFieldInitializer();
-		if (initializer != null) {
-			if (initializer.isArray() || initializer.isPrimitive()) {
-				// TODO: Support arrays and primitives as initializers
-				throw new UnsupportedOperationException("Array or primitive initializers are currently unsupported");
-			}
-			
-			List<VariableDeclarator> vars = newField.getVariables();
-			Assert.notEmpty(vars, "Expected ASTHelper to have provided a single VariableDeclarator");
-			Assert.isTrue(vars.size() == 1, "Expected ASTHelper to have provided a single VariableDeclarator");
-			VariableDeclarator vd = vars.iterator().next();
-			
-			NameExpr importedInitialzierType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), initializer);
-			ClassOrInterfaceType initializerType = JavaParserUtils.getClassOrInterfaceType(importedInitialzierType);
-			
-			// Add parameterized types for the initializer
-			List<Type> initTypeArgs = new ArrayList<Type>();
-			initializerType.setTypeArgs(initTypeArgs);
-			for (JavaType parameter : initializer.getParameters()) {
-				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-				initTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
-			}
+		List<VariableDeclarator> vars = newField.getVariables();
+		Assert.notEmpty(vars, "Expected ASTHelper to have provided a single VariableDeclarator");
+		Assert.isTrue(vars.size() == 1, "Expected ASTHelper to have provided a single VariableDeclarator");
+		VariableDeclarator vd = vars.iterator().next();
 
-			vd.setInit(new ObjectCreationExpr(null, initializerType, null));
+		if (field.getFieldInitializer() != null && field.getFieldInitializer().length() > 0) {
+			// There is an initializer.
+			// We need to make a fake field that we can have JavaParser parse.
+			// Easiest way to do that is to build a simple source class containing the required field and re-parse it.
+			StringBuilder sb = new StringBuilder();
+			sb.append("class TemporaryClass {\n");
+			sb.append("  private " + field.getFieldType()  + " " + field.getFieldName() + " = " + field.getFieldInitializer() + ";\n");
+			sb.append("}\n");
+			ByteArrayInputStream bais = new ByteArrayInputStream(sb.toString().getBytes());
+			CompilationUnit ci;
+			try {
+				ci = JavaParser.parse(bais);
+			} catch (ParseException pe) {
+				throw new IllegalStateException("Illegal state: JavaParser did not parse correctly", pe);
+			}
+			List<TypeDeclaration> types = ci.getTypes();
+			if (types == null || types.size() != 1) {
+				throw new IllegalArgumentException("Field member invalid");
+			}
+			TypeDeclaration td = types.get(0);
+			List<BodyDeclaration> bodyDeclarations = td.getMembers();
+			if (bodyDeclarations == null || bodyDeclarations.size() != 1) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return body declarations correctly");
+			}
+			BodyDeclaration bd = bodyDeclarations.get(0);
+			if (!(bd instanceof FieldDeclaration)) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return a field declaration correctly");
+			}
+			FieldDeclaration fd = (FieldDeclaration) bd;
+			if (fd.getVariables() == null || fd.getVariables().size() != 1) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return a field declaration correctly");
+			}
+			
+			Expression init = fd.getVariables().get(0).getInit();
+
+			// TODO: resolve imports (?)
+
+			vd.setInit(init);
 		}
 		
 		// Add annotations
@@ -211,7 +229,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		compilationUnitServices.flush();
 	}
 
-	public JavaType getFieldInitializer() {
+	public String getFieldInitializer() {
 		return this.fieldInitializer;
 	}
 
