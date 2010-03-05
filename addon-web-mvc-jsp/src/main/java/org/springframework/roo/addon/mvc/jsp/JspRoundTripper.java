@@ -7,6 +7,12 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Provides convenience methods which can be used for round tripping xml documents.
+ * 
+ * @author Stefan Schmidt
+ * @since 1.1
+ */
 public class JspRoundTripper {
 	
 	/**
@@ -52,17 +58,31 @@ public class JspRoundTripper {
 		for (int i = 0; i < proposedChildren.getLength(); i++) {
 			Element proposedElement = (Element) proposedChildren.item(i);
 			String proposedId = proposedElement.getAttribute("id");
-			//only proposed elements with an id will be considered
-			if (! (proposedId.length() == 0)) {
+			if (! (proposedId.length() == 0)) { //only proposed elements with an id will be considered
 				Element originalElement = XmlUtils.findFirstElement("//*[@id='" + proposedId + "']", original);				
-				if (null == originalElement) {
-					//TODO add element
-				} else {					
-					if (!equalElements(originalElement, proposedElement)) {
+				if (null == originalElement) { //insert proposed element given the original document has no element with a matching id
+					Element placeHolder = XmlUtils.findFirstElementByName("util:placeholder", original);
+					if (placeHolder != null) { //insert right before place holder if we can find it
+						placeHolder.getParentNode().insertBefore(original.getOwnerDocument().importNode(proposedElement, false), placeHolder);
+					} else { //find the best place to insert the element
+						if (proposed.getAttribute("id").length() != 0) { //try to find the id of the proposed element's parent id in the original document 
+							Element originalParent = XmlUtils.findFirstElement("//*[@id='" + proposed.getAttribute("id") + "']", original);
+							if (originalParent != null) { //found parent with the same id, so we can just add it as new child
+								originalParent.appendChild(original.getOwnerDocument().importNode(proposedElement, false));
+							} else { //no parent found so we add it as a child of the root element (last resort)
+								original.appendChild(original.getOwnerDocument().importNode(proposedElement, false));
+							}
+						} else { //no parent found so we add it as a child of the root element (last resort)
+							original.appendChild(original.getOwnerDocument().importNode(proposedElement, false));
+						}
+					}
+					originalDocumentChanged = true;
+				} else { //we found a element in the original document with a matching id		
+					if (!equalElements(originalElement, proposedElement)) { //check if the elements are equal
 						String originalElementHashCode = originalElement.getAttribute("z");
-						if (originalElementHashCode.length() > 0) {
-							if (originalElementHashCode.equals(XmlUtils.calculateUniqueKeyFor(originalElement))) {
-								originalElement.getParentNode().replaceChild(original.getOwnerDocument().importNode(proposedElement, false), originalElement);
+						if (originalElementHashCode.length() > 0) { //only act if a hash code exists
+							if (originalElementHashCode.equals(XmlUtils.calculateUniqueKeyFor(originalElement))) { //only act if hashcodes match (no user changes in the element)
+								originalElement.getParentNode().replaceChild(original.getOwnerDocument().importNode(proposedElement, false), originalElement); //replace the original with the proposed element
 								originalDocumentChanged = true;
 							} 
 						}
@@ -84,7 +104,7 @@ public class JspRoundTripper {
 		NamedNodeMap attributes = a.getAttributes();
 		for (int i = 0; i < attributes.getLength(); i++) {
 			Node node = attributes.item(i);
-			if (!node.getNodeName().equals("z")) {
+			if (!node.getNodeName().equals("z") && !node.getNodeName().startsWith("_")) {
 				if (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue())) {
 					return false;
 				}
