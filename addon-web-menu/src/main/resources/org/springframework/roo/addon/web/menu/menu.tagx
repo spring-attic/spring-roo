@@ -2,6 +2,7 @@
 	<jsp:output omit-xml-declaration="yes"/>
 	
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<ul id="${id}">
 		<jsp:doBody />

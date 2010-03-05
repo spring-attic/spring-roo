@@ -1,5 +1,4 @@
 <div id="menu" xmlns:menu="urn:jsptagdir:/WEB-INF/tags/menu" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>
-	
-	<menu:menu id="_application_menu" />
+
 </div>

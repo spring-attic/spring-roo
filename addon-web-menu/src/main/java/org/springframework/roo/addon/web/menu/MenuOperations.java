@@ -3,18 +3,13 @@ package org.springframework.roo.addon.web.menu;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
@@ -29,7 +24,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * Generates the jsp menu and allows for management of menu items.
@@ -88,20 +82,23 @@ public class MenuOperations {
 		}
 		
 		//make the root element of the menu the one with the menu identifier allowing for different decorations of menu
-		Element rootElement = XmlUtils.findFirstElement("//*[@id='_application_menu']", (Element) document.getFirstChild());
+		Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']", (Element) document.getFirstChild());
 		if (rootElement == null) {
-			document.appendChild(new XmlElementBuilder("menu:menu", document).addAttribute("id", "_application_menu").build());
+			Element rootMenu = new XmlElementBuilder("menu:menu", document).addAttribute("id", "_menu").build();
+			rootMenu.setAttribute("z", XmlUtils.calculateUniqueKeyFor(rootMenu));
+			rootElement = (Element) document.getDocumentElement().appendChild(rootMenu);
 		}
 		
 		//check for existence of menu category by looking for the indentifier provided
-		Element category = XmlUtils.findFirstElement("//*[@id='_application_menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element category = XmlUtils.findFirstElement("//*[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		//if not exists, create new one
 		if(category == null) {
 			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document)
-															.addAttribute("id", "_application_menu_category_" + menuCategoryName.getSymbolName().toLowerCase())
+															.addAttribute("id", "c:" + menuCategoryName.getSymbolName().toLowerCase())
 															.addAttribute("name", menuCategoryName.getSymbolName())
 														.build());
+			category.setAttribute("z", XmlUtils.calculateUniqueKeyFor(category));
 			String messageCode = "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label";
 			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
 				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuCategoryName.getReadableSymbolName());
@@ -112,12 +109,14 @@ public class MenuOperations {
 		Element menuItem = XmlUtils.findFirstElement("//*[@id='_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
-			category.appendChild(new XmlElementBuilder("menu:item", document)
-									.addAttribute("id", "_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
-									.addAttribute("name", menuItemName.getSymbolName())
-									.addAttribute("messageCode", globalMessageCode)
-									.addAttribute("url", link)
-								.build());
+			menuItem = new XmlElementBuilder("menu:item", document)
+							.addAttribute("id", "_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
+							.addAttribute("name", menuItemName.getSymbolName())
+							.addAttribute("messageCode", globalMessageCode)
+							.addAttribute("url", link)
+						.build();
+			menuItem.setAttribute("z", XmlUtils.calculateUniqueKeyFor(menuItem));
+			category.appendChild(menuItem);	
 			String messageCode = "menu.item." + menuItemName.getSymbolName().toLowerCase() + ".label";
 			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
 				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuItemName.getReadableSymbolName());
@@ -127,58 +126,58 @@ public class MenuOperations {
 		writeToDiskIfNecessary(document);
 	}
 	
-	public void cleanUpMenuItems(String menuCategoryId, String menuItemIdPrefix, List<String> allowedMenuIds) {
-		Assert.hasText(menuCategoryId, "Menu category identifier required");
-		Assert.hasText(menuItemIdPrefix, "Menu item id prefix required (ie 'finder_')");
-		Assert.notNull(allowedMenuIds, "List of allowed menu items required");
-		
-		Document document;
-		try {
-			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
-		}
-		
-		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
-		List<Element> elements = XmlUtils.findElements("//li[@id='" + menuCategoryId + "']//li[starts-with(@id,'" + menuItemIdPrefix + "')]", document.getDocumentElement());
-		if(elements.size()==0) {
-			return;
-		}
-		
-		for(Element element: elements) {
-			if(!allowedMenuIds.contains(element.getAttribute("id"))) {
-				element.getParentNode().removeChild(element);
-			}
-		}
-		
-		writeToDiskIfNecessary(document);
-	}
-	
-	public void cleanUpMenuItem(String menuCategoryId, String menuItemId) {
-		Assert.hasText(menuCategoryId, "Menu category identifier required");
-		Assert.hasText(menuItemId, "Menu item id required");
-		
-		Document document;
-		try {
-			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
-		}
-		
-		//find menu item under this category if exists 
-		Element element = XmlUtils.findFirstElement("//li[@id='" + menuCategoryId + "']//li[@id='" + menuItemId + "']", document.getDocumentElement());
-		if(element==null) {
-			return;
-		}
-		element.getParentNode().removeChild(element);
-		
-		writeToDiskIfNecessary(document);
-	}
-	
+//	public void cleanUpMenuItems(String menuCategoryId, String menuItemIdPrefix, List<String> allowedMenuIds) {
+//		Assert.hasText(menuCategoryId, "Menu category identifier required");
+//		Assert.hasText(menuItemIdPrefix, "Menu item id prefix required (ie 'finder_')");
+//		Assert.notNull(allowedMenuIds, "List of allowed menu items required");
+//		
+//		Document document;
+//		try {
+//			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+//		} catch (Exception e) {
+//			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
+//		}
+//		
+//		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
+//		List<Element> elements = XmlUtils.findElements("//li[@id='" + menuCategoryId + "']//li[starts-with(@id,'" + menuItemIdPrefix + "')]", document.getDocumentElement());
+//		if(elements.size()==0) {
+//			return;
+//		}
+//		
+//		for(Element element: elements) {
+//			if(!allowedMenuIds.contains(element.getAttribute("id"))) {
+//				element.getParentNode().removeChild(element);
+//			}
+//		}
+//		
+//		writeToDiskIfNecessary(Path.SRC_MAIN_WEBAPP + "/WEB-INF/views/menu.jspx", document);
+//	}
+//	
+//	public void cleanUpMenuItem(String menuCategoryId, String menuItemId) {
+//		Assert.hasText(menuCategoryId, "Menu category identifier required");
+//		Assert.hasText(menuItemId, "Menu item id required");
+//		
+//		Document document;
+//		try {
+//			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+//		} catch (Exception e) {
+//			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+//		}
+//		
+//		//find menu item under this category if exists 
+//		Element element = XmlUtils.findFirstElement("//li[@id='" + menuCategoryId + "']//li[@id='" + menuItemId + "']", document.getDocumentElement());
+//		if(element==null) {
+//			return;
+//		}
+//		element.getParentNode().removeChild(element);
+//		
+//		writeToDiskIfNecessary(Path.SRC_MAIN_WEBAPP + "/WEB-INF/views/menu.jspx", document);
+//	}
+//	
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFile).getOutputStream());
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}			
@@ -219,33 +218,34 @@ public class MenuOperations {
 	}
 	
 	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(Document toWrite) {
-		// Build a string representation of the JSP
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		XmlUtils.writeXml(byteArrayOutputStream, toWrite);
-		String jspContent = byteArrayOutputStream.toString();
+	private boolean writeToDiskIfNecessary(Document proposed) {
+		Document original = null;
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;
-		if (fileManager.exists(menuFile)) {
-			// First verify if the file has even changed
-			File f = new File(menuFile);
-			String existing = null;
+		if (fileManager.exists(menuFile)) {	
 			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {}
-			
-			if (!jspContent.equals(existing)) {
+				original = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+			} catch (Exception e) {
+				new IllegalStateException("Could not parse file: " + menuFile);
+			} 
+			Assert.notNull(original, "Unable to parse " + menuFile);
+			if (XmlUtils.compareDocuments(original, proposed)) {
 				mutableFile = fileManager.updateFile(menuFile);
 			}
-			
 		} else {
+			original = proposed;
 			mutableFile = fileManager.createFile(menuFile);
-			Assert.notNull(mutableFile, "Could not create menu file '" + menuFile + "'");
+			Assert.notNull(mutableFile, "Could not create JSP file '" + menuFile + "'");
 		}
 		
 		try {
 			if (mutableFile != null) {
+				// Build a string representation of the JSP
+				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
+				String jspContent = byteArrayOutputStream.toString();
+
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file
@@ -342,3 +342,4 @@ public class MenuOperations {
 		return props.getProperty(key);
 	}
 }
+

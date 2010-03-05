@@ -22,7 +22,6 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -178,7 +177,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 //		}
 			
-		String controllerId = controllerPath.replaceAll("/", "_");
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
@@ -189,8 +187,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					"global.menu.new",
 					"/" + controllerPath + "/form");
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
-		} else {
-			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerId + "_category", "web_mvc_jsp_create_" + controllerId + "_menu_item");
+		} 
+		else {
+//			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerId + "_category", "web_mvc_jsp_create_" + controllerId + "_menu_item");
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "create");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
@@ -250,7 +249,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		
 		//clean up links to finders which are removed by now
-		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + controllerPath + "_category", "finder_", allowedMenuItems);
+//		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + controllerPath + "_category", "finder_", allowedMenuItems);
 		
 		//finally write the tiles definition if necessary
 		tilesOperations.writeToDiskIfNecessary();
@@ -266,14 +265,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;
 		if (fileManager.exists(jspFilename)) {	
-			JspRoundTripper round = new JspRoundTripper();
 			try {
 				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
 			} catch (Exception e) {
 				new IllegalStateException("Could not parse file: " + jspFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + jspFilename);
-			if (round.compareDocuments(original, proposed)) {
+			if (XmlUtils.compareDocuments(original, proposed)) {
 				mutableFile = fileManager.updateFile(jspFilename);
 			}
 		} else {
