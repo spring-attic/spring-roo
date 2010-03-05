@@ -194,7 +194,8 @@ public class SeleniumOperations {
 				new JavaSymbolName("SeleniumTests"), 
 				new JavaSymbolName("Test"),
 				"selenium.menu.test.suite",
-				"/static/" + relativeTestFilePath);		
+				"/static/" + relativeTestFilePath,
+				"si:");		
 	}
 	
 	private void installMavenPlugin(){

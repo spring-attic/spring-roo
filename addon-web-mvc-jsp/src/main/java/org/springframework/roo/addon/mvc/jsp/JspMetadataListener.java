@@ -39,6 +39,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 
@@ -185,11 +186,12 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
-					"/" + controllerPath + "/form");
+					"/" + controllerPath + "/form",
+					MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} 
 		else {
-//			menuOperations.cleanUpMenuItem("web_mvc_jsp_" + controllerId + "_category", "web_mvc_jsp_create_" + controllerId + "_menu_item");
+			menuOperations.cleanUpMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "create");
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
@@ -198,25 +200,20 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			tilesOperations.addViewDefinition(controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
-		}
-		
+		}		
 		//setup labels for i18n support
 		String resourceId = "label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase();
-		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId)) {
-			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
-		}
+		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
+		
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "' type");
 		String pluralResourceId = resourceId + ".plural";
-		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId)) {
-			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(pluralMetadata.getPlural()).getReadableSymbolName());
-		}
+		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(pluralMetadata.getPlural()).getReadableSymbolName());
+		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
 			JavaSymbolName fieldName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
 			String fieldResourceId = resourceId + "." + fieldName.getSymbolName().toLowerCase();
-			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId)) {
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, fieldName.getReadableSymbolName());
-			}
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, fieldName.getReadableSymbolName());
 		}
 
 		//Add 'list all' menu item
@@ -224,7 +221,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
-				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
+				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}",
+				MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
@@ -237,19 +235,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 						finderLabel, 
 						"global.menu.find",
-						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
-				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
-				
-				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase())) {
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase(), finderLabel.getReadableSymbolName());
-				}
+						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form",
+						MenuOperations.FINDER_MENU_ITEM_PREFIX);
+				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase(), finderLabel.getReadableSymbolName());
 				
 				tilesOperations.addViewDefinition(controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}
 		}
 		
 		//clean up links to finders which are removed by now
-//		menuOperations.cleanUpMenuItems("web_mvc_jsp_" + controllerPath + "_category", "finder_", allowedMenuItems);
+		menuOperations.cleanUpFinderMenuItems(new JavaSymbolName(controllerPath), allowedMenuItems);
 		
 		//finally write the tiles definition if necessary
 		tilesOperations.writeToDiskIfNecessary();
@@ -271,7 +267,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				new IllegalStateException("Could not parse file: " + jspFilename);
 			} 
 			Assert.notNull(original, "Unable to parse " + jspFilename);
-			if (XmlUtils.compareDocuments(original, proposed)) {
+			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
 				mutableFile = fileManager.updateFile(jspFilename);
 			}
 		} else {
@@ -382,73 +378,43 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	    Assert.hasText(propertyFilename, "Property filename required");
 	    Assert.hasText(key, "Key required");
 	    Assert.hasText(value, "Value required");
-	    
-	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-	    MutableFile mutableFile = null;
-	    
-	    Properties props = new Properties() {
-	    						//override the keys() method to order the keys alphabetically
-						        @Override 
-						        @SuppressWarnings("unchecked")
-						        public synchronized Enumeration keys() {
-						        	final Object[] keys = keySet().toArray();
-						        	Arrays.sort(keys);
-						        	return new Enumeration() {
-							        	int i = 0;
-							        	public boolean hasMoreElements() { return i < keys.length; }
-							        		public Object nextElement() { return keys[i++]; }
-							        	};
-						        	}
 
-						    	};
-	    
+	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+
+	    Properties readProps = new Properties();
 	    try {
             if (fileManager.exists(filePath)) {
-            	mutableFile = fileManager.updateFile(filePath);
-            	props.load(mutableFile.getInputStream());
+            	
+            	readProps.load(fileManager.getInputStream(filePath));
             } else {
             	throw new IllegalStateException("Properties file not found");
             }
 	    } catch (IOException ioe) {
 	    	throw new IllegalStateException(ioe);
 	    }
-	    props.setProperty(key, value);
-	    
-	    try {
-	    	props.store(mutableFile.getOutputStream() , "Updated at test " + new Date());
-	    } catch (IOException ioe) {
-	    	throw new IllegalStateException(ioe);
+	    if (null == readProps.getProperty(key)) {
+	    	MutableFile mutableFile = fileManager.updateFile(filePath);
+		    Properties props = new Properties() {
+				//override the keys() method to order the keys alphabetically
+		        @Override 
+		        @SuppressWarnings("unchecked")
+		        public synchronized Enumeration keys() {
+		        	final Object[] keys = keySet().toArray();
+		        	Arrays.sort(keys);
+		        	return new Enumeration() {
+			        	int i = 0;
+			        	public boolean hasMoreElements() { return i < keys.length; }
+			        		public Object nextElement() { return keys[i++]; }
+			        	};
+		        	}
+		    	};
+		    try {
+		    	props.load(mutableFile.getInputStream());	
+				props.setProperty(key, value);   
+		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
+		    } catch (IOException ioe) {
+		    	throw new IllegalStateException(ioe);
+		    }
 	    }
     }
-
-	/**
-	 * Retrieves the specified property, returning null if the property or file does not exist.
-	 * 
-	 * @param propertyFilePath the location of the property file (required)
-	 * @param propertyFilename the name of the property file within the specified path (required)
-	 * @param key the property key to retrieve (required)
-	 * @return the property value (may return null if the property file or requested property does not exist)
-	 */
-	private String getProperty(Path propertyFilePath, String propertyFilename, String key) {
-		Assert.notNull(propertyFilePath, "Property file path required");
-		Assert.hasText(propertyFilename, "Property filename required");
-		Assert.hasText(key, "Key required");
-		
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-		MutableFile mutableFile = null;
-		Properties props = new Properties();
-		
-		try {
-			if (fileManager.exists(filePath)) {
-				mutableFile = fileManager.updateFile(filePath);
-				props.load(mutableFile.getInputStream());
-			} else {
-				return null;
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-		
-		return props.getProperty(key);
-	}
 }

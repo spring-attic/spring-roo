@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Properties;
 
 import org.springframework.roo.model.JavaSymbolName;
@@ -21,6 +22,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
+import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,6 +41,9 @@ public class MenuOperations {
 	private PathResolver pathResolver;
 	
 	private String menuFile;
+	
+	public static final String DEFAULT_MENU_ITEM_PREFIX = "i:";
+	public static final String FINDER_MENU_ITEM_PREFIX = "fi:";
 	
 	public MenuOperations(FileManager fileManager, PathResolver pathResolver){
 		Assert.notNull(fileManager, "File manager required");
@@ -68,11 +73,16 @@ public class MenuOperations {
 	 * @param menuItemId the menu item identifier (required)
 	 * @param menuItemLabel the menu item label (required)
 	 * @param link the menu item link (required)
+	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link) {
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link, String idPrefix) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
 		Assert.notNull(menuItemName, "Menu item name required");
 		Assert.hasText(link, "Link required");
+		
+		if (idPrefix == null || idPrefix.length() == 0) {
+			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
+		}
 		
 		Document document;
 		try {			
@@ -85,7 +95,7 @@ public class MenuOperations {
 		Element rootElement = XmlUtils.findFirstElement("//*[@id='_menu']", (Element) document.getFirstChild());
 		if (rootElement == null) {
 			Element rootMenu = new XmlElementBuilder("menu:menu", document).addAttribute("id", "_menu").build();
-			rootMenu.setAttribute("z", XmlUtils.calculateUniqueKeyFor(rootMenu));
+			rootMenu.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(rootMenu));
 			rootElement = (Element) document.getDocumentElement().appendChild(rootMenu);
 		}
 		
@@ -98,82 +108,85 @@ public class MenuOperations {
 															.addAttribute("id", "c:" + menuCategoryName.getSymbolName().toLowerCase())
 															.addAttribute("name", menuCategoryName.getSymbolName())
 														.build());
-			category.setAttribute("z", XmlUtils.calculateUniqueKeyFor(category));
-			String messageCode = "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label";
-			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuCategoryName.getReadableSymbolName());
-			}
+			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label", menuCategoryName.getReadableSymbolName());
 		} 
 		
 		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
 			menuItem = new XmlElementBuilder("menu:item", document)
-							.addAttribute("id", "_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
+							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
 							.addAttribute("name", menuItemName.getSymbolName())
 							.addAttribute("messageCode", globalMessageCode)
 							.addAttribute("url", link)
 						.build();
-			menuItem.setAttribute("z", XmlUtils.calculateUniqueKeyFor(menuItem));
+			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
-			String messageCode = "menu.item." + menuItemName.getSymbolName().toLowerCase() + ".label";
-			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuItemName.getReadableSymbolName());
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName());
+		}
+		writeToDiskIfNecessary(document);
+	}
+	
+	public void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds) {
+		Assert.notNull(menuCategoryName, "Menu category identifier required");
+		Assert.notNull(allowedFinderMenuIds, "List of allowed menu items required");
+		
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
+		}
+		
+		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
+		List<Element> elements = XmlUtils.findElements("//category[@id='c:" +  menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
+		if(elements.size() == 0) {
+			return;
+		}
+		for (Element element: elements) {
+			if (!allowedFinderMenuIds.contains(element.getAttribute("id")) && ("?".equals(element.getAttribute("z")) || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(element.getAttribute("z")))) {
+				element.getParentNode().removeChild(element);
 			}
+		}
+		writeToDiskIfNecessary(document);
+	}
+	
+	/**
+	 * Attempts to locate a menu item and remove it. 
+	 * 
+	 * @param menuCategoryId the identifier for the menu category (required)
+	 * @param menuItemId the menu item identifier (required)
+	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
+	 */
+	public void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix) {
+		Assert.notNull(menuCategoryName, "Menu category identifier required");
+		Assert.notNull(menuItemName, "Menu item id required");
+		
+		if (idPrefix == null || idPrefix.length() == 0) {
+			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
+		}
+		
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
+		}
+		
+		//find menu item under this category if exists 
+		Element element = XmlUtils.findFirstElement("//category[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
+		if(element==null) {
+			return;
+		}
+		if ("?".equals(element.getAttribute("z")) || XmlRoundTripUtils.calculateUniqueKeyFor(element).equals(element.getAttribute("z"))) {
+			element.getParentNode().removeChild(element);
 		}
 		
 		writeToDiskIfNecessary(document);
 	}
 	
-//	public void cleanUpMenuItems(String menuCategoryId, String menuItemIdPrefix, List<String> allowedMenuIds) {
-//		Assert.hasText(menuCategoryId, "Menu category identifier required");
-//		Assert.hasText(menuItemIdPrefix, "Menu item id prefix required (ie 'finder_')");
-//		Assert.notNull(allowedMenuIds, "List of allowed menu items required");
-//		
-//		Document document;
-//		try {
-//			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
-//		} catch (Exception e) {
-//			throw new IllegalArgumentException("Unable to parse menu.jspx", e);
-//		}
-//		
-//		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
-//		List<Element> elements = XmlUtils.findElements("//li[@id='" + menuCategoryId + "']//li[starts-with(@id,'" + menuItemIdPrefix + "')]", document.getDocumentElement());
-//		if(elements.size()==0) {
-//			return;
-//		}
-//		
-//		for(Element element: elements) {
-//			if(!allowedMenuIds.contains(element.getAttribute("id"))) {
-//				element.getParentNode().removeChild(element);
-//			}
-//		}
-//		
-//		writeToDiskIfNecessary(Path.SRC_MAIN_WEBAPP + "/WEB-INF/views/menu.jspx", document);
-//	}
-//	
-//	public void cleanUpMenuItem(String menuCategoryId, String menuItemId) {
-//		Assert.hasText(menuCategoryId, "Menu category identifier required");
-//		Assert.hasText(menuItemId, "Menu item id required");
-//		
-//		Document document;
-//		try {
-//			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
-//		} catch (Exception e) {
-//			throw new IllegalArgumentException("Unable to parse menu.jsp", e);
-//		}
-//		
-//		//find menu item under this category if exists 
-//		Element element = XmlUtils.findFirstElement("//li[@id='" + menuCategoryId + "']//li[@id='" + menuItemId + "']", document.getDocumentElement());
-//		if(element==null) {
-//			return;
-//		}
-//		element.getParentNode().removeChild(element);
-//		
-//		writeToDiskIfNecessary(Path.SRC_MAIN_WEBAPP + "/WEB-INF/views/menu.jspx", document);
-//	}
-//	
 	private InputStream getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
@@ -230,7 +243,7 @@ public class MenuOperations {
 				new IllegalStateException("Could not parse file: " + menuFile);
 			} 
 			Assert.notNull(original, "Unable to parse " + menuFile);
-			if (XmlUtils.compareDocuments(original, proposed)) {
+			if (XmlRoundTripUtils.compareDocuments(original, proposed)) {
 				mutableFile = fileManager.updateFile(menuFile);
 			}
 		} else {
@@ -272,74 +285,44 @@ public class MenuOperations {
 	    Assert.hasText(propertyFilename, "Property filename required");
 	    Assert.hasText(key, "Key required");
 	    Assert.hasText(value, "Value required");
-	    
-	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-	    MutableFile mutableFile = null;
-	    
-	    Properties props = new Properties() {
-	    						//override the keys() method to order the keys alphabetically
-						        @Override 
-						        @SuppressWarnings("unchecked")
-						        public synchronized Enumeration keys() {
-						        	final Object[] keys = keySet().toArray();
-						        	Arrays.sort(keys);
-						        	return new Enumeration() {
-							        	int i = 0;
-							        	public boolean hasMoreElements() { return i < keys.length; }
-							        		public Object nextElement() { return keys[i++]; }
-							        	};
-						        	}
 
-						    	};
-	    
+	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+
+	    Properties readProps = new Properties();
 	    try {
             if (fileManager.exists(filePath)) {
-            	mutableFile = fileManager.updateFile(filePath);
-            	props.load(mutableFile.getInputStream());
+            	
+            	readProps.load(fileManager.getInputStream(filePath));
             } else {
             	throw new IllegalStateException("Properties file not found");
             }
 	    } catch (IOException ioe) {
 	    	throw new IllegalStateException(ioe);
 	    }
-	    props.setProperty(key, value);
-	    
-	    try {
-	    	props.store(mutableFile.getOutputStream() , "Updated at test " + new Date());
-	    } catch (IOException ioe) {
-	    	throw new IllegalStateException(ioe);
+	    if (null == readProps.getProperty(key)) {
+	    	MutableFile mutableFile = fileManager.updateFile(filePath);
+		    Properties props = new Properties() {
+				//override the keys() method to order the keys alphabetically
+		        @Override 
+		        @SuppressWarnings("unchecked")
+		        public synchronized Enumeration keys() {
+		        	final Object[] keys = keySet().toArray();
+		        	Arrays.sort(keys);
+		        	return new Enumeration() {
+			        	int i = 0;
+			        	public boolean hasMoreElements() { return i < keys.length; }
+			        		public Object nextElement() { return keys[i++]; }
+			        	};
+		        	}
+		    	};
+		    try {
+		    	props.load(mutableFile.getInputStream());	
+				props.setProperty(key, value);   
+		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
+		    } catch (IOException ioe) {
+		    	throw new IllegalStateException(ioe);
+		    }
 	    }
     }
-
-	/**
-	 * Retrieves the specified property, returning null if the property or file does not exist.
-	 * 
-	 * @param propertyFilePath the location of the property file (required)
-	 * @param propertyFilename the name of the property file within the specified path (required)
-	 * @param key the property key to retrieve (required)
-	 * @return the property value (may return null if the property file or requested property does not exist)
-	 */
-	private String getProperty(Path propertyFilePath, String propertyFilename, String key) {
-		Assert.notNull(propertyFilePath, "Property file path required");
-		Assert.hasText(propertyFilename, "Property filename required");
-		Assert.hasText(key, "Key required");
-		
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-		MutableFile mutableFile = null;
-		Properties props = new Properties();
-		
-		try {
-			if (fileManager.exists(filePath)) {
-				mutableFile = fileManager.updateFile(filePath);
-				props.load(mutableFile.getInputStream());
-			} else {
-				return null;
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-		
-		return props.getProperty(key);
-	}
 }
 

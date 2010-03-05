@@ -146,7 +146,8 @@ public class WebFlowOperations {
 				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")), 
 				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")),
 				"webflow.menu.enter",
-				"/" + flowDirectoryId);
+				"/" + flowDirectoryId,
+				null);
 		
 		TilesOperations tilesOperations = new TilesOperations(flowDirectoryId, fileManager, pathResolver, "config/webmvc-config.xml");
 		tilesOperations.addViewDefinition("view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx");

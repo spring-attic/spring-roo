@@ -32,6 +32,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
+import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -121,7 +122,6 @@ public class JspViewManager {
 								.addAttribute("columns", fieldNames.toString())
 								.addAttribute("columnHeadings", readableFieldNames.toString())
 							.build();
-		fieldTable.setAttribute("z", XmlUtils.calculateUniqueKeyFor(fieldTable));
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
 			fieldTable.setAttribute("update", "false");
@@ -132,6 +132,7 @@ public class JspViewManager {
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
 			fieldTable.setAttribute("customPath", controllerPath);
 		}
+		fieldTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldTable));
 		
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
@@ -140,7 +141,7 @@ public class JspViewManager {
 								.addChild(fieldTable)
 							.build();
 		
-		pageList.setAttribute("z", XmlUtils.calculateUniqueKeyFor(pageList));
+		pageList.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageList));
 
 		div.appendChild(pageList);
 		
@@ -164,7 +165,7 @@ public class JspViewManager {
 								.addAttribute("id", "ps:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("object", "${" + entityName + "}")
 							.build();
-		pageShow.setAttribute("z", XmlUtils.calculateUniqueKeyFor(pageShow));
+		pageShow.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageShow));
 
 		//add field:display elements for each field
 		for (FieldMetadata field : fields) {
@@ -181,7 +182,7 @@ public class JspViewManager {
 				fieldDisplay.setAttribute("calendar", "true");
 				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}");
 			}
-			fieldDisplay.setAttribute("z", XmlUtils.calculateUniqueKeyFor(fieldDisplay));
+			fieldDisplay.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldDisplay));
 
 			pageShow.appendChild(fieldDisplay);
 		}
@@ -209,14 +210,15 @@ public class JspViewManager {
 						.addAttribute("object", "${" + entityName + "}")
 						.addAttribute("path", controllerPath)
 					.build();
-		formCreate.setAttribute("z", XmlUtils.calculateUniqueKeyFor(formCreate));
-
+		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
 			formCreate.setAttribute("path", controllerPath);
 		}
 		
 		createFieldsForCreateAndUpdate(document, formCreate, "create");
 		
+		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
+
 		div.appendChild(formCreate);
 
 		return document;
@@ -240,8 +242,6 @@ public class JspViewManager {
 						.addAttribute("id", "fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 						.addAttribute("object", "${" + entityName + "}")
 					.build();	
-		formUpdate.setAttribute("z", XmlUtils.calculateUniqueKeyFor(formUpdate));
-
 		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
 			formUpdate.setAttribute("path", controllerPath);
@@ -256,6 +256,8 @@ public class JspViewManager {
 		}
 		
 		createFieldsForCreateAndUpdate(document, formUpdate, "update");
+		
+		formUpdate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formUpdate));
 		
 		div.appendChild(formUpdate);
 		
@@ -280,7 +282,7 @@ public class JspViewManager {
 								.addAttribute("objectName", entityName)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
-		formFind.setAttribute("z", XmlUtils.calculateUniqueKeyFor(formFind));
+		formFind.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formFind));
 		
 		div.appendChild(formFind);
 		
@@ -344,7 +346,7 @@ public class JspViewManager {
 			fieldElement.setAttribute("field", paramName.getSymbolName());
 			fieldElement.setAttribute("objectName", entityName);
 			fieldElement.setAttribute("id", "f:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + paramName);
-			fieldElement.setAttribute("z", XmlUtils.calculateUniqueKeyFor(fieldElement));
+			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 
 			formFind.appendChild(fieldElement);
 		}			
@@ -446,7 +448,7 @@ public class JspViewManager {
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("field", fieldName);
 			fieldElement.setAttribute("id", "c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
-			fieldElement.setAttribute("z", XmlUtils.calculateUniqueKeyFor(fieldElement));
+			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 			
 			root.appendChild(fieldElement);
 		}
