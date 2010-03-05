@@ -141,7 +141,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 	
-		JspDocumentHelper helper = new JspDocumentHelper(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
+		JspViewManager helper = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
 		
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 		
