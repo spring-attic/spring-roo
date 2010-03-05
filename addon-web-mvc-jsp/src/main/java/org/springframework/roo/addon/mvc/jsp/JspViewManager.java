@@ -116,15 +116,12 @@ public class JspViewManager {
 		}
 		
 		Element fieldTable = new XmlElementBuilder("field:table", document)
-								.addAttribute("id", "field:table_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "_field:table")
+								.addAttribute("id", "field:table_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("data", "${" + entityNamePlural + "}")
 								.addAttribute("columns", fieldNames.toString())
 								.addAttribute("columnHeadings", readableFieldNames.toString())
 							.build();
 		fieldTable.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldTable)));
-
-		
-		System.out.println(fieldTable);
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
 			fieldTable.setAttribute("update", "false");
@@ -280,7 +277,7 @@ public class JspViewManager {
 							.build());
 		
 		Element formFind = new XmlElementBuilder("form:find", document)
-								.addAttribute("id", beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "_form:find")
+								.addAttribute("id", "find_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("objectName", entityName)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
@@ -347,7 +344,7 @@ public class JspViewManager {
 			fieldElement.setAttribute("disableFormBinding", "true");
 			fieldElement.setAttribute("field", paramName.getSymbolName());
 			fieldElement.setAttribute("objectName", entityName);
-			fieldElement.setAttribute("id", beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
+			fieldElement.setAttribute("id", "find_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + paramName);
 			fieldElement.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldElement)));
 
 			formFind.appendChild(fieldElement);
@@ -449,7 +446,7 @@ public class JspViewManager {
 
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("field", fieldName);
-			fieldElement.setAttribute("id", fieldElement.getTagName() + "_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
+			fieldElement.setAttribute("id", createOrUpdate + "_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
 			fieldElement.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldElement)));
 
 			root.appendChild(fieldElement);
@@ -543,6 +540,4 @@ public class JspViewManager {
 		}		
 		return false;
 	}
-	
-	
 }

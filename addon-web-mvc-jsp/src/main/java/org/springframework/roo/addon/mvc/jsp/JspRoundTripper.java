@@ -1,10 +1,10 @@
 package org.springframework.roo.addon.mvc.jsp;
 
 import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class JspRoundTripper {
@@ -19,14 +19,11 @@ public class JspRoundTripper {
 	 * @param proposed document as determined by the JspViewManager
 	 * @return the new document if changes are necessary, null if no changes are necessary
 	 */
-	public Document analyseDocument(Document original, Document proposed) {
+	public boolean compareDocuments(Document original, Document proposed) {
 		boolean originalDocumentAdjusted = false;
-		originalDocumentAdjusted = checkNamespaces(original, proposed);
+//		originalDocumentAdjusted = checkNamespaces(original, proposed);
 		originalDocumentAdjusted = compareElements(original.getDocumentElement(), proposed.getDocumentElement(), false);
-		if (originalDocumentAdjusted) {
-			return original;
-		}
-		return null;
+		return originalDocumentAdjusted;
 	}
 	
 	/**
@@ -42,8 +39,7 @@ public class JspRoundTripper {
 	    boolean originalDocumentChanged = false;
 		NamedNodeMap nsNodes = proposed.getDocumentElement().getAttributes();
 		for (int i = 0; i < nsNodes.getLength(); i++) {
-			Attr el = XmlUtils.findFirstAttribute("//@" + nsNodes.item(i).getNodeName(), original.getDocumentElement());
-			if (el == null) {
+			if (null == XmlUtils.findFirstAttribute("//@" + nsNodes.item(i).getNodeName(), original.getDocumentElement())) {
 				original.getDocumentElement().setAttribute(nsNodes.item(i).getNodeName(), nsNodes.item(i).getNodeValue());
 				originalDocumentChanged = true;
 			}
@@ -51,36 +47,46 @@ public class JspRoundTripper {
 		return originalDocumentChanged;
 	}
 	
-	
 	private boolean compareElements(Element original, Element proposed, boolean originalDocumentChanged) {
 		NodeList proposedChildren = proposed.getChildNodes();
 		for (int i = 0; i < proposedChildren.getLength(); i++) {
 			Element proposedElement = (Element) proposedChildren.item(i);
-			String proposedHashCode = proposedElement.getAttribute("z");
-			if (proposedHashCode.length() != 0) {
-				String[] proposedHashCodes = proposedHashCode.split("-");
-				if (proposedHashCodes.length == 2) {
-					Element originalElement = XmlUtils.findFirstElement("//*[starts-with(@z,'" + proposedHashCodes[0] + "')]", original);
-					if (null != originalElement) {
-						String originalHashCode = originalElement.getAttribute("z");
-						if (originalHashCode.length() != 0) {
-							String[] originalHashCodes = proposedHashCode.split("-");
-							if (originalHashCodes.length == 2) {
-								if (originalHashCodes[1].equals(proposedHashCodes[1])) {
-									//the original element has not been changed so Roo can make adjustments if necessary
-									if (!proposedElement.getTagName().equals(originalElement.getTagName())) {
-										//Roo proposes to change the tag name, we need to rename the element
-										original.getOwnerDocument().renameNode(originalElement, "", proposedElement.getTagName());
-										originalElement.setAttribute("z", proposedHashCode);
-										originalDocumentChanged = true;
-									}
-								}
-							}
+			String proposedId = proposedElement.getAttribute("id");
+			//only proposed elements with an id will be considered
+			if (! (proposedId.length() == 0)) {
+				Element originalElement = XmlUtils.findFirstElement("//*[@id='" + proposedId + "']", original);				
+				if (null == originalElement) {
+					//TODO add element
+				} else {					
+					if (!equalElements(originalElement, proposedElement)) {
+						String originalElementHashCode = originalElement.getAttribute("z");
+						if (originalElementHashCode.length() > 0) {
+							if (originalElementHashCode.equals(XmlUtils.base64(XmlUtils.sha1Element(originalElement)))) {
+								originalElement.getParentNode().replaceChild(original.getOwnerDocument().importNode(proposedElement, false), originalElement);
+								originalDocumentChanged = true;
+							} 
 						}
 					}
 				}
 			}
+			originalDocumentChanged = compareElements(original, proposedElement, originalDocumentChanged);
 		}
 		return originalDocumentChanged;
+	}
+	
+	private boolean equalElements(Element a, Element b) {
+		if (!a.getTagName().equals(b.getTagName())) { 
+			return false;
+		}
+		NamedNodeMap attributes = a.getAttributes();
+		for (int i = 0; i < attributes.getLength(); i++) {
+			Node node = attributes.item(i);
+			if (!node.getNodeName().equals("z")) {
+				if (b.getAttribute(node.getNodeName()).length() == 0 || !b.getAttribute(node.getNodeName()).equals(node.getNodeValue())) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 }

@@ -2,7 +2,6 @@ package org.springframework.roo.addon.mvc.jsp;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -23,6 +22,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -260,45 +260,35 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	
 	/** return indicates if disk was changed (ie updated or created) */
 	private boolean writeToDiskIfNecessary(String jspFilename, Document proposed) {
-		// Build a string representation of the JSP
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, proposed);
-		String jspContent = byteArrayOutputStream.toString();
+		
+		Document original = null;
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;
-		if (fileManager.exists(jspFilename)) {
-			// First verify if the file has even changed
-			File f = new File(jspFilename);
-			String existing = null;
+		if (fileManager.exists(jspFilename)) {	
+			JspRoundTripper round = new JspRoundTripper();
 			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {}
-			
-//			if (!jspContent.equals(existing)) {
-			
-			mutableFile = fileManager.updateFile(jspFilename);
-			
-				JspRoundTripper round = new JspRoundTripper();
-				Document original = null;
-				try {
-					original = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-				} catch (Exception e) {
-					new IllegalStateException("Could not parse file: " + jspFilename);
-				} 
-				Assert.notNull(original, "Unable to parse " + jspFilename);
-				if (null == round.analyseDocument(original, proposed)) {
-					mutableFile = null;
-				}
-//			}
-			
+				original = XmlUtils.getDocumentBuilder().parse(fileManager.getInputStream(jspFilename));
+			} catch (Exception e) {
+				new IllegalStateException("Could not parse file: " + jspFilename);
+			} 
+			Assert.notNull(original, "Unable to parse " + jspFilename);
+			if (round.compareDocuments(original, proposed)) {
+				mutableFile = fileManager.updateFile(jspFilename);
+			}
 		} else {
+			original = proposed;
 			mutableFile = fileManager.createFile(jspFilename);
 			Assert.notNull(mutableFile, "Could not create JSP file '" + jspFilename + "'");
 		}
 		
 		try {
 			if (mutableFile != null) {
+				// Build a string representation of the JSP
+				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
+				String jspContent = byteArrayOutputStream.toString();
+
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file

@@ -26,10 +26,10 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
@@ -58,10 +58,10 @@ public abstract class XmlUtils {
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
 	}
-
-	public static final void writeMalformedXml(OutputStream outputEntry, NodeList nodes) {
-		writeMalformedXml(createIndentingTransformer(), outputEntry, nodes);
-	}
+//
+//	public static final void writeMalformedXml(OutputStream outputEntry, NodeList nodes) {
+//		writeMalformedXml(createIndentingTransformer(), outputEntry, nodes);
+//	}
 
 	public static final void writeXml(Transformer transformer, OutputStream outputEntry, Document document) {
 		Assert.notNull(transformer, "Transformer required");
@@ -77,21 +77,21 @@ public abstract class XmlUtils {
 		}
 	}
 
-	public static final void writeMalformedXml(Transformer transformer, OutputStream outputEntry, NodeList nodes) {
-		Assert.notNull(transformer, "Transformer required");
-		Assert.notNull(outputEntry, "Output entry required");
-		Assert.notNull(nodes, "NodeList required");
-
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
-		try {
-			for (int i = 0; i < nodes.getLength(); i++) {
-				transformer.transform(new DOMSource(nodes.item(i)), createUnixStreamResultForEntry(outputEntry));
-			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
-		}
-	}
+//	public static final void writeMalformedXml(Transformer transformer, OutputStream outputEntry, NodeList nodes) {
+//		Assert.notNull(transformer, "Transformer required");
+//		Assert.notNull(outputEntry, "Output entry required");
+//		Assert.notNull(nodes, "NodeList required");
+//
+//		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+//
+//		try {
+//			for (int i = 0; i < nodes.getLength(); i++) {
+//				transformer.transform(new DOMSource(nodes.item(i)), createUnixStreamResultForEntry(outputEntry));
+//			}
+//		} catch (Exception ex) {
+//			throw new IllegalStateException(ex);
+//		}
+//	}
 	
 	/**
 	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
@@ -237,22 +237,22 @@ public abstract class XmlUtils {
 	
 	/**
 	 * Checks for a given element whether it can find an attribute which matches the 
-	 * XPath expression supplied. Returns {@link Attr} if exists.
+	 * XPath expression supplied. Returns {@link Node} if exists.
 	 * 
 	 * @param xPathExpression the xPathExpression (required)
 	 * @param element (required)
 	 * 
-	 * @return the Element if discovered (null if not found)
+	 * @return the Node if discovered (null if not found)
 	 */
-	public static Attr findFirstAttribute(String xPathExpression, Element element) {
-		Attr attr = null;
+	public static Node findFirstAttribute(String xPathExpression, Element element) {
+		Node attr = null;
 		try {
 			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
 			if (expr == null) {
 				expr = xpath.compile(xPathExpression);
 				compiledExpressionCache.put(xPathExpression, expr);
 			}
-			attr = (Attr) expr.evaluate(element, XPathConstants.NODE);
+			attr = (Node) expr.evaluate(element, XPathConstants.NODE);
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
 		}

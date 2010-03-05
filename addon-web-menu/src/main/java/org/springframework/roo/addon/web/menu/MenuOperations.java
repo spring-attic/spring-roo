@@ -124,7 +124,7 @@ public class MenuOperations {
 			}
 		}
 		
-		writeToDiskIfNecessary(document.getChildNodes());
+		writeToDiskIfNecessary(document);
 	}
 	
 	public void cleanUpMenuItems(String menuCategoryId, String menuItemIdPrefix, List<String> allowedMenuIds) {
@@ -151,7 +151,7 @@ public class MenuOperations {
 			}
 		}
 		
-		writeToDiskIfNecessary(document.getChildNodes());
+		writeToDiskIfNecessary(document);
 	}
 	
 	public void cleanUpMenuItem(String menuCategoryId, String menuItemId) {
@@ -172,7 +172,7 @@ public class MenuOperations {
 		}
 		element.getParentNode().removeChild(element);
 		
-		writeToDiskIfNecessary(document.getChildNodes());
+		writeToDiskIfNecessary(document);
 	}
 	
 	private InputStream getMenuFile() {			
@@ -219,10 +219,10 @@ public class MenuOperations {
 	}
 	
 	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(NodeList toWrite) {
+	private boolean writeToDiskIfNecessary(Document toWrite) {
 		// Build a string representation of the JSP
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		XmlUtils.writeMalformedXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, toWrite);
+		XmlUtils.writeXml(byteArrayOutputStream, toWrite);
 		String jspContent = byteArrayOutputStream.toString();
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
