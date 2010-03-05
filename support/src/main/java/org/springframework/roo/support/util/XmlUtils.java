@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +26,10 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
 
 /**
@@ -42,6 +46,14 @@ public abstract class XmlUtils {
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
 	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	private static MessageDigest digest;
+	static {
+		try {
+		  digest = MessageDigest.getInstance("sha-1");
+		} catch (NoSuchAlgorithmException e) {
+			new IllegalStateException("Could not create hash key for identifier");
+		}
+	}
 	
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
@@ -141,7 +153,6 @@ public abstract class XmlUtils {
 
 		Element rootElement = null;
 		try {
-
 			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
 			if (expr == null) {
 				expr = xpath.compile(xPathExpression);
@@ -223,6 +234,30 @@ public abstract class XmlUtils {
 		}
 		return elements;
 	}
+	
+	/**
+	 * Checks for a given element whether it can find an attribute which matches the 
+	 * XPath expression supplied. Returns {@link Attr} if exists.
+	 * 
+	 * @param xPathExpression the xPathExpression (required)
+	 * @param element (required)
+	 * 
+	 * @return the Element if discovered (null if not found)
+	 */
+	public static Attr findFirstAttribute(String xPathExpression, Element element) {
+		Attr attr = null;
+		try {
+			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+			if (expr == null) {
+				expr = xpath.compile(xPathExpression);
+				compiledExpressionCache.put(xPathExpression, expr);
+			}
+			attr = (Attr) expr.evaluate(element, XPathConstants.NODE);
+		} catch (XPathExpressionException e) {
+			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
+		}
+		return attr;
+	}
 
 	/**
 	 * @return a transformer that indents entries by 4 characters (never null)
@@ -249,5 +284,55 @@ public abstract class XmlUtils {
 		} catch (ParserConfigurationException ex) {
 			throw new IllegalStateException(ex);
 		}
+	}
+	
+	/**
+	 * Convenience method which will call data.getBytes() and create a sha-1 hash for the
+	 * provided data.
+	 * 
+	 * @param data to hash
+	 * @return byte[] hash of the input data
+	 */
+	public static byte[] sha1(String data) {
+		return sha1(data.getBytes());
+	}
+	
+	/**
+	 * Create a base 64 encoded hash key for a given XML element. The key is based on the 
+	 * element name, the attribute names and their values. Child elements are ignored. 
+	 * Attributes named 'z' are not concluded since they contain the hash key itself.
+	 * 
+	 * @param element The element to create the base 64 encoded hash key for
+	 * @return the hash key
+	 */
+	public static byte[] sha1Element(Element element) {
+		StringBuilder sb = new StringBuilder(); 
+		sb.append(element.getTagName());
+		NamedNodeMap attributes = element.getAttributes();
+		for (int i = 0; i < attributes.getLength(); i++) {
+			if (!"z".equals(attributes.item(i).getNodeName())) {
+				sb.append(attributes.item(i).getNodeName()).append(attributes.item(i).getNodeValue());
+			}
+		}
+		return sha1(sb.toString().getBytes());
+	}
+	
+	/**
+	 * Creates a sha-1 hash value for the given data byte array.
+	 * 
+	 * @param data to hash
+	 * @return byte[] hash of the input data
+	 */
+	public static byte[] sha1(byte[] data) {
+		Assert.notNull(digest, "Could not create hash key for identifier");
+		return digest.digest(data);
+	}
+	
+	public static String base64(String data) {
+		return base64(data.getBytes());
+	}
+	
+	public static String base64(byte[] data) {
+		return Base64.encodeBytes(data);
 	}
 }

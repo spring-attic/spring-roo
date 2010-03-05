@@ -6,7 +6,8 @@
 	<jsp:directive.attribute name="finderName" type="java.lang.String" required="true" description="The finder name"/>
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied"/>
 	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
-
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
+	
 	<c:choose>
 		<c:when test="${not empty customPath}">
 			<c:set var="objectPath" value="${customPath}" />

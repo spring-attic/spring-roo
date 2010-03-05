@@ -10,6 +10,7 @@
 	<jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" description="Include 'update' link into table (default true)"/>
 	<jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" description="Include 'delete' link into table (default true)"/>
 	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 
 	<c:if test="${empty columnHeadings}">
 		<c:set var="columnHeadings" value="${columns}" />
@@ -46,7 +47,7 @@
 		<thead>
 			<tr>
 				<c:forTokens items="${columnHeadings}" delims="," var="columnHeading">
-		          <th><c:out value="${columnHeading}"/></th>
+		          <th><c:out value="${columnHeading}" /></th>
 		        </c:forTokens>
 		        <th></th>
 		        <th></th>
@@ -61,7 +62,7 @@
 	                </td>
                </c:forTokens>
                <td>
-                   <spring:url value="/${typePath}/${item[typeIdFieldName]}" var="show_form_url"/>
+                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="show_form_url"/>
                    <spring:url value="/static/images/show.png" var="show_image_url"/>
                    <form:form action="${show_form_url}" method="GET">
                        <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
@@ -70,7 +71,7 @@
                </td>
                <td>
                	   <c:if test="${update}">
-	                   <spring:url value="/${typePath}/${item[typeIdFieldName]}/form" var="update_form_url"/>
+	                   <spring:url value="${typePath}/${item[typeIdFieldName]}/form" var="update_form_url"/>
 	                   <spring:url value="/static/images/update.png" var="update_image_url"/>
 	                   <form:form action="${update_form_url}" method="GET">
 	                       <spring:message arguments="${typeName}" code="entity.update" var="update_label"/>
@@ -80,7 +81,7 @@
                </td>
                <td>
                	   <c:if test="${delete}">
-	                   <spring:url value="/${typePath}/${item[typeIdFieldName]}" var="delete_form_url"/>
+	                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="delete_form_url"/>
 	                   <spring:url value="/static/images/delete.png" var="delete_image_url"/>
 	                   <form:form action="${delete_form_url}" method="DELETE">
 	                       <spring:message arguments="${typeName}" code="entity.delete" var="delete_label"/>

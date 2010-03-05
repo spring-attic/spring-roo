@@ -4,9 +4,10 @@
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="object" type="java.lang.Object" required="true" description="The form backing object"/>
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied"/>
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${not empty object and empty label}">
-		<spring:message code="label.${fn:toLowerCase(object.class.simpleName)}" var="label"/>
+		<spring:message code="label.${fn:toLowerCase(object.class.name)}" var="label"/>
 	</c:if>
 	
 	<script type="text/javascript">dojo.require('dijit.TitlePane');</script>

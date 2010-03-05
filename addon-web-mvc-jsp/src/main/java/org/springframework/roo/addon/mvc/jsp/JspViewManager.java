@@ -78,24 +78,26 @@ public class JspViewManager {
 		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
 		
 		if (webScaffoldAnnotationValues.getPath().startsWith("/")) {
-			controllerPath = webScaffoldAnnotationValues.getPath().substring(1);
-		} else {
 			controllerPath = webScaffoldAnnotationValues.getPath();
+		} else {
+			controllerPath = "/" + webScaffoldAnnotationValues.getPath();
 		}	
 	}
 	
-	public Document getListDocument() {		
+	public Document getListDocument() {
+		
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
-			
+		
 		//add document namespaces
-		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
+		Element div = new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
-							.build());
+							.build();
+		document.appendChild(div);
 		
 		//create field:table element
 		StringBuilder fieldNames = new StringBuilder(6);
@@ -114,32 +116,34 @@ public class JspViewManager {
 		}
 		
 		Element fieldTable = new XmlElementBuilder("field:table", document)
-								.addAttribute("id", "_" + entityName + "_list_table")
+								.addAttribute("id", "field:table_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "_field:table")
 								.addAttribute("data", "${" + entityNamePlural + "}")
 								.addAttribute("columns", fieldNames.toString())
 								.addAttribute("columnHeadings", readableFieldNames.toString())
 							.build();
+		fieldTable.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldTable)));
+
+		
+		System.out.println(fieldTable);
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
 			fieldTable.setAttribute("update", "false");
 		}
-		
 		if (!webScaffoldAnnotationValues.isDelete()) {
 			fieldTable.setAttribute("delete", "false");
 		}
-		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
 			fieldTable.setAttribute("customPath", controllerPath);
 		}
 		
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
-								.addAttribute("id", "_" + entityName + "_list_page")
+								.addAttribute("id", "list_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("items", "${" + entityNamePlural + "}")
-								.addAttribute("objectName", entityName)
-								.addAttribute("objectPlural", entityNamePlural)
 								.addChild(fieldTable)
 							.build();
+		
+		pageList.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(pageList)));
 
 		div.appendChild(pageList);
 		
@@ -160,15 +164,17 @@ public class JspViewManager {
 							.build());
 		
 		Element pageShow = new XmlElementBuilder("page:show", document)
-								.addAttribute("id", "_" + entityName + "_show_page")
+								.addAttribute("id", "show_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("object", "${" + entityName + "}")
 							.build();
+		pageShow.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(pageShow)));
+
 		
 		//add field:display elements for each field
 		for (FieldMetadata field : fields) {
 			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element fieldDisplay = new XmlElementBuilder("field:display", document)
-								.addAttribute("id", "_" + entityName + "_show_" + fieldName)
+								.addAttribute("id", "field:display_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
 								.addAttribute("object", "${" + entityName + "}")
 								.addAttribute("field", fieldName)
 							.build();
@@ -179,6 +185,8 @@ public class JspViewManager {
 				fieldDisplay.setAttribute("calendar", "true");
 				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}");
 			}
+			fieldDisplay.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldDisplay)));
+
 			pageShow.appendChild(fieldDisplay);
 		}
 		div.appendChild(pageShow);
@@ -201,12 +209,14 @@ public class JspViewManager {
 
 		//add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
-						.addAttribute("id", "_" + entityName + "_create_page")
+						.addAttribute("id", "create_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 						.addAttribute("object", "${" + entityName + "}")
+						.addAttribute("path", controllerPath)
 					.build();
-		
+		formCreate.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(formCreate)));
+
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
-			formCreate.setAttribute("customPath", controllerPath);
+			formCreate.setAttribute("path", controllerPath);
 		}
 		
 		createFieldsForCreateAndUpdate(document, formCreate, "create");
@@ -231,21 +241,21 @@ public class JspViewManager {
 
 		//add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
-						.addAttribute("id", "_" + entityName + "_create_page")
+						.addAttribute("id", "update_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 						.addAttribute("object", "${" + entityName + "}")
-					.build();
+					.build();	
+		formUpdate.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(formUpdate)));
+
 		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
-			formUpdate.setAttribute("customPath", controllerPath);
+			formUpdate.setAttribute("path", controllerPath);
 		}
-		
 		if (!"id".equals(entityMetadata.getIdentifierField().getFieldName().getSymbolName())) {
 			formUpdate.setAttribute("idField", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
 		}
-		
 		if (null == entityMetadata.getVersionField()) {
 			formUpdate.setAttribute("versionField", "none");
-		} else if ("version".equals(entityMetadata.getVersionField().getFieldName().getSymbolName())) {
+		} else if (!"version".equals(entityMetadata.getVersionField().getFieldName().getSymbolName())) {
 			formUpdate.setAttribute("versionField", entityMetadata.getVersionField().getFieldName().getSymbolName());
 		}
 		
@@ -270,10 +280,12 @@ public class JspViewManager {
 							.build());
 		
 		Element formFind = new XmlElementBuilder("form:find", document)
-								.addAttribute("id", "_" + entityName + "_find_form")
+								.addAttribute("id", beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "_form:find")
 								.addAttribute("objectName", entityName)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
+		formFind.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(formFind)));
+
 		
 		div.appendChild(formFind);
 		
@@ -285,7 +297,6 @@ public class JspViewManager {
 		for (int i = 0; i < types.size(); i++) {
 			JavaType type = types.get(i);
 			JavaSymbolName paramName = paramNames.get(i);
-			String fieldId = "_" + paramName + "_find_form";
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(paramName);
 			if (field == null) {
 				//it may be that the field has an min or max prepended
@@ -334,9 +345,11 @@ public class JspViewManager {
 			}
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("disableFormBinding", "true");
-			fieldElement.setAttribute("id", fieldId);
 			fieldElement.setAttribute("field", paramName.getSymbolName());
 			fieldElement.setAttribute("objectName", entityName);
+			fieldElement.setAttribute("id", beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
+			fieldElement.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldElement)));
+
 			formFind.appendChild(fieldElement);
 		}			
 		return document;
@@ -344,7 +357,6 @@ public class JspViewManager {
 	
 	private void createFieldsForCreateAndUpdate(Document document, Element root, String createOrUpdate) {		
 		for (FieldMetadata field : fields) {
-			String fieldId = "_" + entityName + "_" + createOrUpdate + "_" + field.getFieldName().getSymbolName();
 			String fieldName = field.getFieldName().getSymbolName();
 			JavaType fieldType = field.getFieldType();
 			List<AnnotationMetadata> annotations = field.getAnnotations();
@@ -436,9 +448,10 @@ public class JspViewManager {
 			}
 
 			addCommonAttributes(field, fieldElement); 
-			fieldElement.setAttribute("id", fieldId);
 			fieldElement.setAttribute("field", fieldName);
-			fieldElement.setAttribute("objectName", entityName);
+			fieldElement.setAttribute("id", fieldElement.getTagName() + "_" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
+			fieldElement.setAttribute("z", XmlUtils.base64(XmlUtils.sha1Element(fieldElement)));
+
 			root.appendChild(fieldElement);
 		}
 	}
@@ -530,4 +543,6 @@ public class JspViewManager {
 		}		
 		return false;
 	}
+	
+	
 }

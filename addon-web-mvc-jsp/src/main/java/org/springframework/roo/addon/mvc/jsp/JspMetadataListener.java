@@ -41,7 +41,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Document;
 
 /**
  * Listens for {@link WebScaffoldMetadata} and produces JSPs when requested by that metadata.
@@ -168,20 +168,20 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 //		if (webScaffoldMetadata.getAnnotationValues().isList()) {
 			// By now we have a directory to put the JSPs inside
 			String listPath1 = destinationDirectory + "/list.jspx";
-			writeToDiskIfNecessary(listPath1, viewManager.getListDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
 			
 //		} 
 //		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
 			String showPath = destinationDirectory + "/show.jspx";
-			writeToDiskIfNecessary(showPath, viewManager.getShowDocument().getChildNodes());
+			writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 //		}
 			
 		String controllerId = controllerPath.replaceAll("/", "_");
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
-			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			//add 'create new' menu item
 			menuOperations.addMenuItem( 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
@@ -195,20 +195,20 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
-			writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
 		}
 		
 		//setup labels for i18n support
-		String resourceId = "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		String resourceId = "label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase();
 		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId)) {
 			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
 		}
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 		Assert.notNull(pluralMetadata, "Could not determine plural for '" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "' type");
-		String pluralResourceId = "label." + pluralMetadata.getPlural().toLowerCase();
+		String pluralResourceId = resourceId + ".plural";
 		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId)) {
 			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(pluralMetadata.getPlural()).getReadableSymbolName());
 		}
@@ -231,7 +231,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName).getChildNodes());
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
@@ -259,10 +259,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	}
 	
 	/** return indicates if disk was changed (ie updated or created) */
-	private boolean writeToDiskIfNecessary(String jspFilename, NodeList toWrite) {
+	private boolean writeToDiskIfNecessary(String jspFilename, Document proposed) {
 		// Build a string representation of the JSP
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		XmlUtils.writeMalformedXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, toWrite);
+		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, proposed);
 		String jspContent = byteArrayOutputStream.toString();
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
@@ -275,9 +275,22 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				existing = FileCopyUtils.copyToString(new FileReader(f));
 			} catch (IOException ignoreAndJustOverwriteIt) {}
 			
-			if (!jspContent.equals(existing)) {
-				mutableFile = fileManager.updateFile(jspFilename);
-			}
+//			if (!jspContent.equals(existing)) {
+			
+			mutableFile = fileManager.updateFile(jspFilename);
+			
+				JspRoundTripper round = new JspRoundTripper();
+				Document original = null;
+				try {
+					original = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+				} catch (Exception e) {
+					new IllegalStateException("Could not parse file: " + jspFilename);
+				} 
+				Assert.notNull(original, "Unable to parse " + jspFilename);
+				if (null == round.analyseDocument(original, proposed)) {
+					mutableFile = null;
+				}
+//			}
 			
 		} else {
 			mutableFile = fileManager.createFile(jspFilename);
@@ -297,7 +310,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		// A file existed, but it contained the same content, so we return false
 		return false;
-
 	}
 	
 	private List<FieldMetadata> getElegibleFields() {

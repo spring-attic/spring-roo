@@ -2,7 +2,6 @@
 	<jsp:output omit-xml-declaration="yes"/>
 
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
-	<jsp:directive.attribute name="objectName" type="java.lang.String" required="true" description="The simple name of the form backing object"/>
 	<jsp:directive.attribute name="field" type="java.lang.String" required="true" description="The field exposed from the form backing object"/>
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this field, will default to a message bundle if not supplied"/>
 	<jsp:directive.attribute name="items" type="java.util.Collection" required="true" description="The name of the collection displayed in the select box"/>
@@ -11,13 +10,14 @@
 	<jsp:directive.attribute name="disabled" type="java.lang.Boolean" required="false" description="Specify if this field should be enabled"/>
 	<jsp:directive.attribute name="multiple" type="java.lang.Boolean" required="false" description="Specify if the select box should allow multiple selections"/>
 	<jsp:directive.attribute name="disableFormBinding" type="java.lang.Boolean" required="false" description="Set to true to disable Spring form binding"/>
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${empty disabled}">
 		<c:set value="false" var="disabled"/>
 	</c:if>
 	
 	<c:if test="${empty label}">
-		<spring:message code="label.${fn:toLowerCase(objectName)}.${fn:toLowerCase(field)}" var="label"/>
+		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
 	</c:if>
 	
 	<c:if test="${empty required}">

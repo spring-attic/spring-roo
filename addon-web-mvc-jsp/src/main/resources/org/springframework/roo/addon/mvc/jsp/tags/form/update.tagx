@@ -3,23 +3,14 @@
 	
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="object" type="java.lang.Object" required="true" description="The form backing object"/>
+	<jsp:directive.attribute name="path" type="java.lang.String" required="true" description="Specify the relative URL path (with leading /)" />
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied"/>
 	<jsp:directive.attribute name="idField" type="java.lang.String" required="false" description="Specify the field name of the id field (default 'id')"/>
 	<jsp:directive.attribute name="versionField" type="java.lang.String" required="false" description="Specify the field name of the version field (default 'version'). If specified 'none' the version field will not be inlcuded (versionField='none')."/>
-	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
-	
-	<c:set var="objectName" value="${fn:toLowerCase(object.class.simpleName)}" />
-	<c:choose>
-		<c:when test="${not empty customPath}">
-			<c:set var="objectPath" value="${customPath}" />
-		</c:when>
-		<c:otherwise>
-			<c:set var="objectPath" value="${objectName}" />
-		</c:otherwise>
-	</c:choose>
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${empty label}">
-		<spring:message code="label.${fn:toLowerCase(objectName)}" var="label"/>
+		<spring:message code="label.${fn:toLowerCase(object.class.name)}" var="label"/>
 	</c:if>
 	
 	<c:if test="${empty idField}">
@@ -34,11 +25,11 @@
     <div id="_title_div">
         <spring:message arguments="${label}" code="entity.update" var="title_msg"/>
         <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_div', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
-        <spring:url value="/${objectPath}" var="form_url"/>
-        <form:form action="${form_url}" method="PUT" modelAttribute="${objectName}">
+        <spring:url value="${path}" var="form_url"/>
+        <form:form action="${form_url}" method="PUT" modelAttribute="${fn:toLowerCase(object.class.simpleName)}">
             <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
            	<jsp:doBody />
-           	<div class="submit" id="${objectName}_submit">
+           	<div class="submit" id="${fn:toLowerCase(object.class.simpleName)}_submit">
                 <spring:message code="button.save" var="save_button"/>
                 <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
                 <input id="proceed" type="submit" value="${save_button}"/>
