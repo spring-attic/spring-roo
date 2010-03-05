@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -339,11 +340,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+					Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 				}				
 			}
 		}
@@ -388,11 +391,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+					Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 				}				
 			}
 		}
@@ -444,11 +449,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if(isEnumType(type)){
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+					Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 				}				
 			}
 		}
@@ -502,11 +509,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		if(specialDomainTypes.size() > 0) {
 			for (JavaType type: specialDomainTypes) {
-				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 				} else if (isEnumType(type)) {
-					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + type.getSimpleTypeName().toLowerCase() + "_enum\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+					PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+					Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
+					bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 				}
 			}
 		}
@@ -539,11 +548,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			EntityMetadata typeEntityMetadata = null;
 			if (javaType.isCommonCollectionType() && isSpecialType(javaType.getParameters().get(0))) {
 				javaType = javaType.getParameters().get(0);
-				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			} else if(isEnumType(javaType)){
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + javaType.getSimpleTypeName().toLowerCase() + "_enum\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+				Assert.notNull(pluralMetadata, "Could not determine plural for '" + javaType.getFullyQualifiedTypeName() + "' type");
+				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 			} else if (isSpecialType(javaType)) {
-				typeEntityMetadata = (EntityMetadata) metadataService.get(entityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			}
 			if (typeEntityMetadata != null) {
 				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");

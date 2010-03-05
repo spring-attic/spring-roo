@@ -346,3 +346,10 @@ fieldset th {
 	font-size:11px;
 	color:#888888;
 }
+
+.dijitTextarea{
+        min-height:5.5em !important;
+        max-height:22em !important;
+        overflow-y: auto !important;
+        max-width: 173px;
+}

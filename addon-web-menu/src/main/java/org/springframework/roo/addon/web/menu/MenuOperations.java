@@ -135,9 +135,6 @@ public class MenuOperations {
 			Element message = document.createElement("spring:message");
 			message.setAttribute("code", messageCode);
 			if (menuItemLabel.getSymbolName().length() > 0) {
-				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId)) {
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
-				}
 				Element entityLabel = document.createElement("spring:message");
 				entityLabel.setAttribute("code", menuItemResourceId);
 				entityLabel.setAttribute("var", "label_" + menuItemLabel.getSymbolName().toLowerCase());
@@ -153,7 +150,6 @@ public class MenuOperations {
 			Element message = XmlUtils.findFirstElementByName("spring:message", menuItem);
 			if (null != message) {
 				if (!message.getAttribute("code").equals(menuItemResourceId)) {
-					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", menuItemResourceId, menuItemLabel.getReadableSymbolName());
 					message.setAttribute("code", menuItemResourceId);
 				}
 			}

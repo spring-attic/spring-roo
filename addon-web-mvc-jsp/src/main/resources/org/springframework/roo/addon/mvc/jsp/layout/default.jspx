@@ -4,7 +4,7 @@
 	xmlns:tiles="http://tiles.apache.org/tags-tiles"
 	xmlns:form="http://www.springframework.org/tags/form"
 	xmlns:spring="http://www.springframework.org/tags"
-	xmlns:roo="urn:jsptagdir:/WEB-INF/tags" >  
+	xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" >  
 	
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
 		
@@ -58,8 +58,8 @@
 					    </span>					    
 					</c:if>			    
 				    
-				    <roo:language />
-				    <roo:theme />
+				    <util:language />
+				    <util:theme />
 				    				    
 				    <spring:url var="logo" value="/static/images/springsource-logo.png" />
 				    <spring:message code="global.sponsored" var="sponsored"/>

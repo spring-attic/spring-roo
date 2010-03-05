@@ -6,11 +6,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
@@ -197,6 +202,25 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
 		}
+		
+		//setup labels for i18n support
+		String resourceId = "label." + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId)) {
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
+		}
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine plural for '" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "' type");
+		String pluralResourceId = "label." + pluralMetadata.getPlural().toLowerCase();
+		if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId)) {
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(pluralMetadata.getPlural()).getReadableSymbolName());
+		}
+		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
+			JavaSymbolName fieldName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			String fieldResourceId = resourceId + "." + fieldName.getSymbolName().toLowerCase();
+			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId)) {
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, fieldName.getReadableSymbolName());
+			}
+		}
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
@@ -212,15 +236,21 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
 				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getChildNodes());
+				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
 						"web_mvc_jsp_" + controllerId + "_category", 
 						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 						"finder_" + finderName.toLowerCase() + "_menu_item", 
-						new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", "")),
+						finderLabel,
 						"global.menu.find",
 						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");
+				
+				if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase())) {
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase(), finderLabel.getReadableSymbolName());
+				}
+				
 				tilesOperations.addViewDefinition(controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}
 		}
@@ -343,5 +373,88 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		} 
+	}
+	
+	 /**
+     * Changes the specified property, throwing an exception if the file does not exist.
+     * 
+     * @param propertyFilePath the location of the property file (required)
+     * @param propertyFilename the name of the property file within the specified path (required)
+     * @param key the property key to update (required)
+     * @param value the property value to set into the property key (required)
+     */
+    private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+	    Assert.notNull(propertyFilePath, "Property file path required");
+	    Assert.hasText(propertyFilename, "Property filename required");
+	    Assert.hasText(key, "Key required");
+	    Assert.hasText(value, "Value required");
+	    
+	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+	    MutableFile mutableFile = null;
+	    
+	    Properties props = new Properties() {
+	    						//override the keys() method to order the keys alphabetically
+						        @Override 
+						        @SuppressWarnings("unchecked")
+						        public synchronized Enumeration keys() {
+						        	final Object[] keys = keySet().toArray();
+						        	Arrays.sort(keys);
+						        	return new Enumeration() {
+							        	int i = 0;
+							        	public boolean hasMoreElements() { return i < keys.length; }
+							        		public Object nextElement() { return keys[i++]; }
+							        	};
+						        	}
+
+						    	};
+	    
+	    try {
+            if (fileManager.exists(filePath)) {
+            	mutableFile = fileManager.updateFile(filePath);
+            	props.load(mutableFile.getInputStream());
+            } else {
+            	throw new IllegalStateException("Properties file not found");
+            }
+	    } catch (IOException ioe) {
+	    	throw new IllegalStateException(ioe);
+	    }
+	    props.setProperty(key, value);
+	    
+	    try {
+	    	props.store(mutableFile.getOutputStream() , "Updated at test " + new Date());
+	    } catch (IOException ioe) {
+	    	throw new IllegalStateException(ioe);
+	    }
+    }
+
+	/**
+	 * Retrieves the specified property, returning null if the property or file does not exist.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to retrieve (required)
+	 * @return the property value (may return null if the property file or requested property does not exist)
+	 */
+	private String getProperty(Path propertyFilePath, String propertyFilename, String key) {
+		Assert.notNull(propertyFilePath, "Property file path required");
+		Assert.hasText(propertyFilename, "Property filename required");
+		Assert.hasText(key, "Key required");
+		
+		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		MutableFile mutableFile = null;
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(filePath)) {
+				mutableFile = fileManager.updateFile(filePath);
+				props.load(mutableFile.getInputStream());
+			} else {
+				return null;
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+		
+		return props.getProperty(key);
 	}
 }

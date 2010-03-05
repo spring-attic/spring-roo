@@ -115,7 +115,6 @@ public class JspViewManager {
 		
 		Element fieldTable = new XmlElementBuilder("field:table", document)
 								.addAttribute("id", "_" + entityName + "_list_table")
-								.addAttribute("type", "${" + entityName + "}")
 								.addAttribute("data", "${" + entityNamePlural + "}")
 								.addAttribute("columns", fieldNames.toString())
 								.addAttribute("columnHeadings", readableFieldNames.toString())
@@ -133,7 +132,7 @@ public class JspViewManager {
 		Element pageList = new XmlElementBuilder("page:list", document)
 								.addAttribute("id", "_" + entityName + "_list_page")
 								.addAttribute("items", "${" + entityNamePlural + "}")
-								.addAttribute("object", entityName)
+								.addAttribute("objectName", entityName)
 								.addAttribute("objectPlural", entityNamePlural)
 								.addChild(fieldTable)
 							.build();
@@ -178,7 +177,6 @@ public class JspViewManager {
 			}
 			pageShow.appendChild(fieldDisplay);
 		}
-		
 		div.appendChild(pageShow);
 		
 		return document;
@@ -200,7 +198,7 @@ public class JspViewManager {
 		//add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
 						.addAttribute("id", "_" + entityName + "_create_page")
-						.addAttribute("object", entityName)
+						.addAttribute("object", "${" + entityName + "}")
 					.build();
 		
 		createFieldsForCreateAndUpdate(document, formCreate, "create");
@@ -226,7 +224,7 @@ public class JspViewManager {
 		//add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
 						.addAttribute("id", "_" + entityName + "_create_page")
-						.addAttribute("object", entityName)
+						.addAttribute("object", "${" + entityName + "}")
 					.build();
 		
 		if (!"id".equals(entityMetadata.getIdentifierField().getFieldName().getSymbolName())) {
@@ -261,7 +259,7 @@ public class JspViewManager {
 		
 		Element formFind = new XmlElementBuilder("form:find", document)
 								.addAttribute("id", "_" + entityName + "_find_form")
-								.addAttribute("object", entityName)
+								.addAttribute("objectName", entityName)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
 		
@@ -299,9 +297,7 @@ public class JspViewManager {
 				}
 			} else if (isEnumType(type) && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
 				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				if (pluralMetadata == null) {
-					throw new IllegalStateException("Could not determine the plural for the " + field.getFieldType().getFullyQualifiedTypeName() + " type");
-				}
+				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
 				fieldElement = new XmlElementBuilder("field:select", document)
 									.addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}")
 								.build();
@@ -328,6 +324,7 @@ public class JspViewManager {
 			fieldElement.setAttribute("disableFormBinding", "true");
 			fieldElement.setAttribute("id", fieldId);
 			fieldElement.setAttribute("field", paramName.getSymbolName());
+			fieldElement.setAttribute("objectName", entityName);
 			formFind.appendChild(fieldElement);
 		}			
 		return document;
@@ -355,9 +352,7 @@ public class JspViewManager {
 			//handle enum fields	 
 			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
 				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				if (pluralMetadata == null) {
-					throw new IllegalStateException("Could not determine the plural for the " + field.getFieldType().getFullyQualifiedTypeName() + " type");
-				}
+				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
 				fieldElement = new XmlElementBuilder("field:select", document)
 									.addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}")
 								.build();
@@ -386,11 +381,7 @@ public class JspViewManager {
 						} else {
 							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
 						}
-	
-						if(typeEntityMetadata == null) {
-							throw new IllegalStateException("Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
-						}
-												
+						Assert.notNull(typeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
 						fieldElement = new XmlElementBuilder("field:select", document)
 												.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
 												.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
@@ -432,15 +423,17 @@ public class JspViewManager {
 						} 
 					}
 				} 
-				//use a default input field if no other criteria apply
-				if (fieldElement == null) {
-					fieldElement = document.createElement("field:input");
-				}
-				addCommonAttributes(field, fieldElement); 
-				fieldElement.setAttribute("id", fieldId);
-				fieldElement.setAttribute("field", fieldName);
-				root.appendChild(fieldElement);
 			}
+			//use a default input field if no other criteria apply
+			if (fieldElement == null) {
+				fieldElement = document.createElement("field:input");
+			}
+
+			addCommonAttributes(field, fieldElement); 
+			fieldElement.setAttribute("id", fieldId);
+			fieldElement.setAttribute("field", fieldName);
+			fieldElement.setAttribute("objectName", entityName);
+			root.appendChild(fieldElement);
 		}
 	}
 
@@ -496,6 +489,16 @@ public class JspViewManager {
 			AnnotationAttributeValue<?> min = annotationMetadata.getAttribute(new JavaSymbolName("min"));
 			if(min != null) {
 				fieldElement.setAttribute("min", min.getValue().toString());
+			}
+		}
+		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")))) {
+			String tagName = fieldElement.getTagName();
+			if ("field:textarea".equals(tagName) || 
+					"field:input".equals(tagName) || 
+					"field:datetime".equals(tagName) ||
+					"field:textarea".equals(tagName) ||
+					"field:select".equals(tagName)) {
+				fieldElement.setAttribute("required", "true");
 			}
 		}
 	}
