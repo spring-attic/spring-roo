@@ -128,6 +128,10 @@ public class JspViewManager {
 			fieldTable.setAttribute("delete", "false");
 		}
 		
+		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
+			fieldTable.setAttribute("customPath", controllerPath);
+		}
+		
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
 								.addAttribute("id", "_" + entityName + "_list_page")
@@ -201,6 +205,10 @@ public class JspViewManager {
 						.addAttribute("object", "${" + entityName + "}")
 					.build();
 		
+		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
+			formCreate.setAttribute("customPath", controllerPath);
+		}
+		
 		createFieldsForCreateAndUpdate(document, formCreate, "create");
 		
 		div.appendChild(formCreate);
@@ -226,6 +234,10 @@ public class JspViewManager {
 						.addAttribute("id", "_" + entityName + "_create_page")
 						.addAttribute("object", "${" + entityName + "}")
 					.build();
+		
+		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
+			formUpdate.setAttribute("customPath", controllerPath);
+		}
 		
 		if (!"id".equals(entityMetadata.getIdentifierField().getFieldName().getSymbolName())) {
 			formUpdate.setAttribute("idField", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
@@ -338,7 +350,7 @@ public class JspViewManager {
 			List<AnnotationMetadata> annotations = field.getAnnotations();
 			AnnotationMetadata annotationMetadata;
 			
-			if (fieldType.isCommonCollectionType() && fieldType.equals(new JavaType(Set.class.getName()))) {
+			if (fieldType.getFullyQualifiedTypeName().equals(Set.class.getName())) {
 				if (fieldType.getParameters().size() != 1) {
 					throw new IllegalArgumentException("A set is defined without specification of its type (via generics) - unable to create view for it");
 				}
@@ -353,14 +365,12 @@ public class JspViewManager {
 			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
 				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
 				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				fieldElement = new XmlElementBuilder("field:select", document)
-									.addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}")
-								.build();
+				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}").build();
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
-						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we skip this field
-						document.createElement("div"); //TODO review OneToMany handling
+						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
+						fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("targetName", fieldType.getSimpleTypeName()).build();
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")
@@ -393,9 +403,7 @@ public class JspViewManager {
 					} 
 					// only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-							fieldElement = new XmlElementBuilder("field:datetime", document)
-												.addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}")
-											.build();
+							fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}").build();
 						
 						if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
 							fieldElement.setAttribute("future", "true");
@@ -417,9 +425,7 @@ public class JspViewManager {
 					if(max != null) {
 						int maxValue = (Integer)max.getValue();
 						if (fieldElement == null && maxValue > 30) {	
-							fieldElement = new XmlElementBuilder("field:textarea", document)
-												.addAttribute("max", max.getValue().toString())
-											.build();
+							fieldElement = new XmlElementBuilder("field:textarea", document).addAttribute("max", max.getValue().toString()).build();
 						} 
 					}
 				} 

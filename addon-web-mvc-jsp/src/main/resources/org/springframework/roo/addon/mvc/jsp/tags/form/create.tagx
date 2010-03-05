@@ -4,8 +4,18 @@
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="object" type="java.lang.Object" required="true" description="The form backing object"/>
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied"/>
-
+	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
+	
 	<c:set var="objectName" value="${fn:toLowerCase(object.class.simpleName)}" />
+	<c:choose>
+		<c:when test="${not empty customPath}">
+			<c:set var="objectPath" value="${customPath}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="objectPath" value="${objectName}" />
+		</c:otherwise>
+	</c:choose>
+	
 	<c:if test="${empty label}">
 		<spring:message code="label.${objectName}" var="label"/>
 	</c:if>
@@ -14,7 +24,7 @@
     <div id="_title_div">
         <spring:message arguments="${label}" code="entity.create" var="title_msg"/>
         <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_div', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
-        <spring:url value="/${objectName}" var="form_url"/>
+        <spring:url value="/${objectPath}" var="form_url"/>
         <form:form action="${form_url}" method="POST" modelAttribute="${objectName}">
             <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
            	<jsp:doBody />

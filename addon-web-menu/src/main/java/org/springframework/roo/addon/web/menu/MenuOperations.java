@@ -109,11 +109,11 @@ public class MenuOperations {
 		} 
 		
 		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='_application_menu_item_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
 			category.appendChild(new XmlElementBuilder("menu:item", document)
-									.addAttribute("id", "_application_menu_item_" + menuItemName.getSymbolName().toLowerCase())
+									.addAttribute("id", "_application_menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
 									.addAttribute("name", menuItemName.getSymbolName())
 									.addAttribute("messageCode", globalMessageCode)
 									.addAttribute("url", link)

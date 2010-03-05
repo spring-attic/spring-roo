@@ -9,6 +9,7 @@
 	<jsp:directive.attribute name="typeIdFieldName" type="java.lang.String" required="false" description="The identifier field name for the type (defaults to 'id')"/>
 	<jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" description="Include 'update' link into table (default true)"/>
 	<jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" description="Include 'delete' link into table (default true)"/>
+	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
 
 	<c:if test="${empty columnHeadings}">
 		<c:set var="columnHeadings" value="${columns}" />
@@ -26,6 +27,21 @@
 		<c:set var="delete" value="true" />
 	</c:if>
 	
+	<c:if test="${not empty data[0]}">
+		<c:set var="typeName" value="${data[0].class.simpleName}" />
+	</c:if>
+
+	<c:choose>
+		<c:when test="${not empty customPath}">
+			<c:set var="typePath" value="${customPath}" />
+		</c:when>
+		<c:otherwise>
+			<c:if test="${not empty typeName}">
+				<c:set var="typePath" value="${fn:toLowerCase(typeName)}" />
+			</c:if>
+		</c:otherwise>
+	</c:choose>
+	
 	<table>
 		<thead>
 			<tr>
@@ -38,10 +54,6 @@
 			</tr>
 		</thead>
         <c:forEach items="${data}" var="item">
-        	<c:if test="${empty type}">
-        		<c:set var="type" value="${item}" />
-        		<c:set var="typeName" value="${fn:toLowerCase(type.class.simpleName)}" />
-        	</c:if>
            <tr>
            	   <c:forTokens items="${columns}" delims="," var="column">
 	                <td>
@@ -49,29 +61,29 @@
 	                </td>
                </c:forTokens>
                <td>
-                   <c:url value="/${typeName}/${type[typeIdFieldName]}" var="show_form_url"/>
+                   <spring:url value="/${typePath}/${item[typeIdFieldName]}" var="show_form_url"/>
                    <spring:url value="/static/images/show.png" var="show_image_url"/>
                    <form:form action="${show_form_url}" method="GET">
-                       <spring:message arguments="${entity_label}" code="entity.show" var="show_label"/>
+                       <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
                        <input alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" type="image" value="${show_label}"/>
                    </form:form>
                </td>
                <td>
                	   <c:if test="${update}">
-	                   <spring:url value="/${typeName}/${type[typeIdFieldName]}/form" var="update_form_url"/>
+	                   <spring:url value="/${typePath}/${item[typeIdFieldName]}/form" var="update_form_url"/>
 	                   <spring:url value="/static/images/update.png" var="update_image_url"/>
 	                   <form:form action="${update_form_url}" method="GET">
-	                       <spring:message arguments="${entity_label}" code="entity.update" var="update_label"/>
+	                       <spring:message arguments="${typeName}" code="entity.update" var="update_label"/>
 	                       <input alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" type="image" value="${update_label}"/>
 	                   </form:form>
                    </c:if>
                </td>
                <td>
                	   <c:if test="${delete}">
-	                   <spring:url value="/${typeName}/${type[typeIdFieldName]}" var="delete_form_url"/>
+	                   <spring:url value="/${typePath}/${item[typeIdFieldName]}" var="delete_form_url"/>
 	                   <spring:url value="/static/images/delete.png" var="delete_image_url"/>
 	                   <form:form action="${delete_form_url}" method="DELETE">
-	                       <spring:message arguments="${entity_label}" code="entity.delete" var="delete_label"/>
+	                       <spring:message arguments="${typeName}" code="entity.delete" var="delete_label"/>
 	                       <input alt="${delete_label}" class="image" src="${delete_image_url}" title="${delete_label}" type="image" value="${delete_label}"/>
 	                       <c:if test="${not empty param.page}">
 	                           <input name="page" type="hidden" value="${param.page}"/>
@@ -87,13 +99,14 @@
        <tr class="footer">
            <td colspan="10">
                <span class="new">
-                   <spring:url value="/${typeName}/form" var="create_url"/>
+                   <spring:url value="/${typePath}/form" var="create_url"/>
                    <a href="${create_url}">
                        <spring:url value="/static/images/add.png" var="create_img_url"/>
-                       <spring:message arguments="${entity_label}" code="global.menu.new" var="add_message"/>
+                       <spring:message arguments="${typeName}" code="global.menu.new" var="add_message"/>
                        <img alt="${add_message}" src="${create_img_url}" title="${add_message}"/>
                    </a>
-               </span>
+               </span> 
+               <c:out value=" "/>
                <c:if test="${not empty maxPages}">
                    <util:pagination maxPages="${maxPages}" page="${param.page}" size="${param.size}"/>
                </c:if>

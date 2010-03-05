@@ -146,7 +146,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 	
-		JspViewManager helper = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
+		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
 		
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 		
@@ -168,20 +168,20 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 //		if (webScaffoldMetadata.getAnnotationValues().isList()) {
 			// By now we have a directory to put the JSPs inside
 			String listPath1 = destinationDirectory + "/list.jspx";
-			writeToDiskIfNecessary(listPath1, helper.getListDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath1, viewManager.getListDocument().getChildNodes());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
 			
 //		} 
 //		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
 			String showPath = destinationDirectory + "/show.jspx";
-			writeToDiskIfNecessary(showPath, helper.getShowDocument().getChildNodes());
+			writeToDiskIfNecessary(showPath, viewManager.getShowDocument().getChildNodes());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 //		}
 			
 		String controllerId = controllerPath.replaceAll("/", "_");
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
-			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument().getChildNodes());
 			//add 'create new' menu item
 			menuOperations.addMenuItem( 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
@@ -195,7 +195,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
-			writeToDiskIfNecessary(listPath, helper.getUpdateDocument().getChildNodes());
+			writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument().getChildNodes());
 			tilesOperations.addViewDefinition(controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
 		} else {
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
@@ -231,7 +231,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
-				writeToDiskIfNecessary(listPath, helper.getFinderDocument(finderName).getChildNodes());
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName).getChildNodes());
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
