@@ -11,7 +11,7 @@
 		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
 	</c:if>
 	<c:if test="${empty labelPlural}">
-		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,'_'))}.plural" var="labelPlural"/>
+		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}.plural" var="labelPlural"/>
 	</c:if>
 	
 	<script type="text/javascript">dojo.require('dijit.TitlePane');</script>
