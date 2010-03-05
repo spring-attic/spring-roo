@@ -61,7 +61,7 @@ public class JspRoundTripper {
 					if (!equalElements(originalElement, proposedElement)) {
 						String originalElementHashCode = originalElement.getAttribute("z");
 						if (originalElementHashCode.length() > 0) {
-							if (originalElementHashCode.equals(XmlUtils.base64(XmlUtils.sha1Element(originalElement)))) {
+							if (originalElementHashCode.equals(XmlUtils.calculateUniqueKeyFor(originalElement))) {
 								originalElement.getParentNode().replaceChild(original.getOwnerDocument().importNode(proposedElement, false), originalElement);
 								originalDocumentChanged = true;
 							} 
@@ -76,6 +76,9 @@ public class JspRoundTripper {
 	
 	private boolean equalElements(Element a, Element b) {
 		if (!a.getTagName().equals(b.getTagName())) { 
+			return false;
+		}
+		if (a.getAttributes().getLength() != b.getAttributes().getLength()) {
 			return false;
 		}
 		NamedNodeMap attributes = a.getAttributes();

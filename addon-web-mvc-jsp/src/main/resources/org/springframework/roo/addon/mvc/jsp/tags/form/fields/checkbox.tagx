@@ -14,7 +14,7 @@
 	</c:if>
 	
 	<c:if test="${empty label}">
-		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
+		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
 	</c:if>
 		
     <div id="${field}_id">

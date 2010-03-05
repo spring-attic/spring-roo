@@ -8,9 +8,14 @@ import java.io.Writer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -287,34 +292,28 @@ public abstract class XmlUtils {
 	}
 	
 	/**
-	 * Convenience method which will call data.getBytes() and create a sha-1 hash for the
-	 * provided data.
-	 * 
-	 * @param data to hash
-	 * @return byte[] hash of the input data
-	 */
-	public static byte[] sha1(String data) {
-		return sha1(data.getBytes());
-	}
-	
-	/**
-	 * Create a base 64 encoded hash key for a given XML element. The key is based on the 
+	 * Create a base 64 encoded SHA1 hash key for a given XML element. The key is based on the 
 	 * element name, the attribute names and their values. Child elements are ignored. 
 	 * Attributes named 'z' are not concluded since they contain the hash key itself.
 	 * 
 	 * @param element The element to create the base 64 encoded hash key for
-	 * @return the hash key
+	 * @return the unique key
 	 */
-	public static byte[] sha1Element(Element element) {
+	public static String calculateUniqueKeyFor(Element element) {
 		StringBuilder sb = new StringBuilder(); 
 		sb.append(element.getTagName());
 		NamedNodeMap attributes = element.getAttributes();
+		SortedMap<String, String> attrKVStore = Collections.synchronizedSortedMap(new TreeMap<String, String>());
 		for (int i = 0; i < attributes.getLength(); i++) {
-			if (!"z".equals(attributes.item(i).getNodeName())) {
-				sb.append(attributes.item(i).getNodeName()).append(attributes.item(i).getNodeValue());
+			Node attr = attributes.item(i);
+			if (!"z".equals(attr.getNodeName()) && !attr.getNodeName().startsWith("_")) {
+				attrKVStore.put(attr.getNodeName(), attr.getNodeValue());
 			}
 		}
-		return sha1(sb.toString().getBytes());
+		for (Entry<String, String> entry: attrKVStore.entrySet()) {
+			sb.append(entry.getKey()).append(entry.getValue());
+		}
+		return base64(sha1(sb.toString().getBytes()));
 	}
 	
 	/**
@@ -323,16 +322,12 @@ public abstract class XmlUtils {
 	 * @param data to hash
 	 * @return byte[] hash of the input data
 	 */
-	public static byte[] sha1(byte[] data) {
+	private static byte[] sha1(byte[] data) {
 		Assert.notNull(digest, "Could not create hash key for identifier");
 		return digest.digest(data);
 	}
 	
-	public static String base64(String data) {
-		return base64(data.getBytes());
-	}
-	
-	public static String base64(byte[] data) {
+	private static String base64(byte[] data) {
 		return Base64.encodeBytes(data);
 	}
 }

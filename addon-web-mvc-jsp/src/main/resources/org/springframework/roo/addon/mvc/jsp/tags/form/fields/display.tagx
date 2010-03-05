@@ -11,7 +11,7 @@
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${not empty object and empty label}">
-		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
+		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
 	</c:if>
 	
 	<c:if test="${empty dateTimePattern}">
