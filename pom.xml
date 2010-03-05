@@ -44,6 +44,7 @@
         <module>addon-dod</module>
         <module>addon-test</module>
         <module>addon-backup</module>
+        <module>addon-serializable</module>
 
         <module>bootstrap</module>
     </modules>
@@ -216,7 +217,6 @@
                     <doUpdate>false</doUpdate>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>

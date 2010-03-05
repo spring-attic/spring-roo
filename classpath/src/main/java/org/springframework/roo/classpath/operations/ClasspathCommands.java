@@ -76,6 +76,7 @@ public class ClasspathCommands implements CommandMarker {
 		if (rooAnnotations) {
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), new ArrayList<AnnotationAttributeValue<?>>()));			
 		}
 		
 		int modifier = Modifier.PUBLIC;
@@ -174,6 +175,7 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key="identifierType", mandatory=false, optionContext="java-lang,project", unspecifiedDefaultValue="java.lang.Long", specifiedDefaultValue="java.lang.Long", help="The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType,
 			@CliOption(key="inheritanceType", mandatory=false, help="The JPA @Inheritance value") InheritanceType inheritanceType,
 			@CliOption(key="mappedSuperclass", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Apply @MappedSuperclass for this entity") boolean mappedSuperclass,
+			@CliOption(key="serializable", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Whether the generated class should implement java.io.Serializable") boolean serializable,
 			@CliOption(key="permitReservedWords", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
@@ -211,7 +213,6 @@ public class ClasspathCommands implements CommandMarker {
 		}
 		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
 
-		
 		if (table != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), table));
@@ -223,6 +224,10 @@ public class ClasspathCommands implements CommandMarker {
 
 		if (mappedSuperclass) {
 			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.MappedSuperclass"), new ArrayList<AnnotationAttributeValue<?>>()));
+		}
+		
+		if (serializable) {
+			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), entityAttrs));			
 		}
 		
 		if (inheritanceType != null) {
@@ -246,8 +251,5 @@ public class ClasspathCommands implements CommandMarker {
 		if (testAutomatically) {
 			classpathOperations.newIntegrationTest(name);
 		}
-		
-		
 	}
-
 }
