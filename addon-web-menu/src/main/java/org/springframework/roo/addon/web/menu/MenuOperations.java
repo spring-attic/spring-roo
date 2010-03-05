@@ -25,6 +25,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -74,15 +75,10 @@ public class MenuOperations {
 	 * @param menuItemLabel the menu item label (required)
 	 * @param link the menu item link (required)
 	 */
-	public void addMenuItem(String menuCategoryId, JavaSymbolName menuCategoryLabel, String menuItemId, JavaSymbolName menuItemLabel, String messageCode, String link) {
-		Assert.hasText(menuCategoryId, "Menu category label identifier required");
-		Assert.notNull(menuCategoryLabel, "Menu category label required");
-		Assert.hasText(menuItemId, "Menu item label identifier required");
-		Assert.notNull(menuItemLabel, "Menu item object required");
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link) {
+		Assert.notNull(menuCategoryName, "Menu category name required");
+		Assert.notNull(menuItemName, "Menu item name required");
 		Assert.hasText(link, "Link required");
-		Assert.hasText(messageCode, "Message code required");
-		
-		menuItemId = menuItemId.replaceAll("/", "_");
 		
 		Document document;
 		try {			
@@ -92,66 +88,39 @@ public class MenuOperations {
 		}
 		
 		//make the root element of the menu the one with the menu identifier allowing for different decorations of menu
-		Element rootElement = XmlUtils.findRequiredElement("//ul[@id='roo_menu']", (Element) document.getFirstChild());
-		
-		//check for existence of menu category by looking for the indentifier provided
-		Element categoryWrapper = XmlUtils.findFirstElement("//li[@id='" + menuCategoryId + "']", rootElement);
-		Element categoryRoot = null;
-			
-		//if not exists, create new one
-		if(categoryWrapper == null) {
-			categoryWrapper = document.createElement("li");
-			categoryWrapper.setAttribute("id", menuCategoryId);
-			Element h2 = document.createElement("h2");
-			String messageResourceId = "menu.category." + menuCategoryId.toLowerCase() + ".label";
-			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageResourceId)) {
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageResourceId, menuCategoryLabel.getReadableSymbolName());
-			}
-			Element categoryLabel = document.createElement("spring:message");
-			categoryLabel.setAttribute("code", messageResourceId);
-			h2.appendChild(categoryLabel);
-			categoryWrapper.appendChild(h2);
-			categoryRoot = document.createElement("ul");
-			categoryWrapper.appendChild(categoryRoot);
-			rootElement.appendChild(categoryWrapper);
-		} else {
-			categoryRoot = XmlUtils.findRequiredElement("ul", categoryWrapper);
+		Element rootElement = XmlUtils.findFirstElement("//*[@id='_application_menu']", (Element) document.getFirstChild());
+		if (rootElement == null) {
+			document.appendChild(new XmlElementBuilder("menu:menu", document).addAttribute("id", "_application_menu").build());
 		}
 		
-		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//li[@id='" + menuItemId + "']", categoryWrapper);
+		//check for existence of menu category by looking for the indentifier provided
+		Element category = XmlUtils.findFirstElement("//*[@id='_application_menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
 		
-		String menuItemResourceId = "label." + menuItemLabel.getSymbolName().toLowerCase();
-		//if not exists, create one
-		if(menuItem == null) {		
-			menuItem = document.createElement("li");
-			menuItem.setAttribute("id", menuItemId);
-			Element url = document.createElement("spring:url");
-			url.setAttribute("var", menuItemId + "_url");
-			url.setAttribute("value", link);
-			menuItem.appendChild(url);
-			Element createLink = document.createElement("a");				
-			createLink.setAttribute("href", "${" + menuItemId + "_url}");				
-			Element message = document.createElement("spring:message");
-			message.setAttribute("code", messageCode);
-			if (menuItemLabel.getSymbolName().length() > 0) {
-				Element entityLabel = document.createElement("spring:message");
-				entityLabel.setAttribute("code", menuItemResourceId);
-				entityLabel.setAttribute("var", "label_" + menuItemLabel.getSymbolName().toLowerCase());
-				createLink.appendChild(entityLabel);
-				message.setAttribute("arguments", "${" + "label_" + menuItemLabel.getSymbolName().toLowerCase() + "}");
+		//if not exists, create new one
+		if(category == null) {
+			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document)
+															.addAttribute("id", "_application_menu_category_" + menuCategoryName.getSymbolName().toLowerCase())
+															.addAttribute("name", menuCategoryName.getSymbolName())
+														.build());
+			String messageCode = "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label";
+			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuCategoryName.getReadableSymbolName());
 			}
-			createLink.appendChild(message);
-			menuItem.appendChild(createLink);
-			categoryRoot.appendChild(menuItem);
-		//check if the plural of the entity has changed (this impacts i18n)
-		} else {
-			//get access to the first spring:message element and check its code
-			Element message = XmlUtils.findFirstElementByName("spring:message", menuItem);
-			if (null != message) {
-				if (!message.getAttribute("code").equals(menuItemResourceId)) {
-					message.setAttribute("code", menuItemResourceId);
-				}
+		} 
+		
+		//check for existence of menu item by looking for the indentifier provided
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='_application_menu_item_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
+		
+		if (menuItem == null) {
+			category.appendChild(new XmlElementBuilder("menu:item", document)
+									.addAttribute("id", "_application_menu_item_" + menuItemName.getSymbolName().toLowerCase())
+									.addAttribute("name", menuItemName.getSymbolName())
+									.addAttribute("messageCode", globalMessageCode)
+									.addAttribute("url", link)
+								.build());
+			String messageCode = "menu.item." + menuItemName.getSymbolName().toLowerCase() + ".label";
+			if (null == getProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode)) {
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", messageCode, menuItemName.getReadableSymbolName());
 			}
 		}
 		
@@ -211,7 +180,31 @@ public class MenuOperations {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx")).getOutputStream());
 			} catch (Exception e) {
-				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+			}			
+		}
+		
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx"))) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/menu.tagx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+			}			
+		}
+		
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx"))) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "item.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/item.tagx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
+			}			
+		}
+		
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx"))) {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "category.tagx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu/category.tagx")).getOutputStream());
+			} catch (Exception e) {
+				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}			
 		}
 		

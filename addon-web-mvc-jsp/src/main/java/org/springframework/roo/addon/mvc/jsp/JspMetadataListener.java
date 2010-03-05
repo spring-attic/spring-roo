@@ -183,10 +183,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, helper.getCreateDocument().getChildNodes());
 			//add 'create new' menu item
-			menuOperations.addMenuItem(
-					"web_mvc_jsp_" + controllerId + "_category", 
+			menuOperations.addMenuItem( 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
-					"web_mvc_jsp_create_" + controllerId + "_menu_item", 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
 					"/" + controllerPath + "/form");
@@ -224,9 +222,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
-				"web_mvc_jsp_" + controllerId + "_category", 
 				new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
-				"web_mvc_jsp_list_" + controllerId + "_menu_item", 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}");
@@ -239,10 +235,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
-						"web_mvc_jsp_" + controllerId + "_category", 
 						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
-						"finder_" + finderName.toLowerCase() + "_menu_item", 
-						finderLabel,
+						finderLabel, 
 						"global.menu.find",
 						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form");
 				allowedMenuItems.add("finder_" + finderName.toLowerCase() + "_menu_item");

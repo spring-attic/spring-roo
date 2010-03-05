@@ -227,11 +227,10 @@ public class JspOperations {
 		
 		setProperties(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"), "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName());
 		
-		menuOperations.addMenuItem("web_mvc_jsp_manual_controller_category", 
+		menuOperations.addMenuItem( 
 				new JavaSymbolName("Controller"), 
-				"web_mvc_jsp_list_" + folderName + "_menu_item", 
 				new JavaSymbolName(controller.getSimpleTypeName()), 
-				"label." + folderName, 
+				"global.menu.new", 
 				"/" + folderName + "/index");
 		
 		TilesOperations tilesOperations = new TilesOperations(folderName, fileManager, pathResolver, "config/webmvc-config.xml");

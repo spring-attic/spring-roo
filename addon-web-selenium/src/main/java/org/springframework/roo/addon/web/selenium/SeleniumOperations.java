@@ -191,9 +191,7 @@ public class SeleniumOperations {
 		XmlUtils.writeXml(seleniumMutableFile.getOutputStream(), suite);
 		
 		menuOperations.addMenuItem(
-				"selenium_category", 
 				new JavaSymbolName("SeleniumTests"), 
-				"selenium_test_suite_menu_item", 
 				new JavaSymbolName("Test"),
 				"selenium.menu.test.suite",
 				"/static/" + relativeTestFilePath);		

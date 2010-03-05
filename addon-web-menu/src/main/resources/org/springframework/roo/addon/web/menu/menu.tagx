@@ -3,7 +3,7 @@
 	
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	
-	<ul id="_application_menu">
+	<ul id="${id}">
 		<jsp:doBody />
 	</ul>
 </jsp:root>

@@ -143,9 +143,7 @@ public class WebFlowOperations {
 
 		//add 'create new' menu item
 		menuOperations.addMenuItem(
-				"web_flow_category", 
 				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")), 
-				"web_flow_" + flowDirectoryId.toLowerCase() + "_menu_item", 
 				new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")),
 				"webflow.menu.enter",
 				"/" + flowDirectoryId);
