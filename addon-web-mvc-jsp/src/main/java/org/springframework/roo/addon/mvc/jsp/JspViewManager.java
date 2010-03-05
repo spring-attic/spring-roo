@@ -359,8 +359,8 @@ public class JspViewManager {
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
-						//OneToMany relationships are not managed from the one side, therefore we skip this field
-						return;
+						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we skip this field
+						document.createElement("div"); //TODO review OneToMany handling
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")
