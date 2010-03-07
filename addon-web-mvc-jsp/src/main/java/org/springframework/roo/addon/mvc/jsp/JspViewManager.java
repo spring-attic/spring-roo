@@ -279,7 +279,7 @@ public class JspViewManager {
 		
 		Element formFind = new XmlElementBuilder("form:find", document)
 								.addAttribute("id", "ff:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-								.addAttribute("objectName", entityName)
+								.addAttribute("path", controllerPath)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
 		formFind.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formFind));
@@ -344,7 +344,6 @@ public class JspViewManager {
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("disableFormBinding", "true");
 			fieldElement.setAttribute("field", paramName.getSymbolName());
-			fieldElement.setAttribute("objectName", entityName);
 			fieldElement.setAttribute("id", "f:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + paramName);
 			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 
