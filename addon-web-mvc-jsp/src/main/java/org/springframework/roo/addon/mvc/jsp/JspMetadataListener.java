@@ -238,8 +238,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form",
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + finderLabel.getSymbolName().toLowerCase(), finderLabel.getReadableSymbolName());
-				
+				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
+					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId + "." + paramName.getSymbolName().toLowerCase(), paramName.getReadableSymbolName());
+				}
 				tilesOperations.addViewDefinition(controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}
 		}
