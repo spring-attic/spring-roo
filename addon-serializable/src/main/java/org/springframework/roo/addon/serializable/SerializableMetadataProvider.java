@@ -58,8 +58,7 @@ public final class SerializableMetadataProvider extends AbstractItdMetadataProvi
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = SerializableMetadata.getJavaType(metadataIdentificationString);
 		Path path = SerializableMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
