@@ -301,13 +301,17 @@ public class JspViewManager {
 			}
 			Assert.notNull(field, "could not find field '" + paramName + "' in '" + type.getFullyQualifiedTypeName() + "'");
 			Element fieldElement = null;
-
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+			Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
+			
 			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type.getParameters().get(0), Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
+					
 					fieldElement = new XmlElementBuilder("field:select", document)
 										.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
+										.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
 									.build();
 					
 					FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(paramName);
@@ -316,10 +320,9 @@ public class JspViewManager {
 					}
 				}
 			} else if (isEnumType(type) && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				fieldElement = new XmlElementBuilder("field:select", document)
+					fieldElement = new XmlElementBuilder("field:select", document)
 									.addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}")
+									.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
 								.build();
 				
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {	
@@ -330,6 +333,7 @@ public class JspViewManager {
 					fieldElement = new XmlElementBuilder("field:select", document)
 										.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
+										.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
 									.build();
 				}
 			} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Date.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
