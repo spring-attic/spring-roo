@@ -9,21 +9,18 @@
 		<param-name>defaultHtmlEscape</param-name>
 		<param-value>true</param-value>
 	</context-param>
-	
-	<context-param>
-		<param-name>webAppRootKey</param-name>
-		<param-value>TO_BE_CHANGED_BY_LISTENER</param-value>
-	</context-param>
 
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath*:META-INF/spring/applicationContext*.xml</param-value>
 	</context-param>
 
+	<!-- See ROO-579: this filter will cause login page redisplay with Spring Security, so is disabled by default
 	<filter>
 		<filter-name>etagFilter</filter-name>
 		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
 	</filter>
+	-->
 
 	<filter>
 		<filter-name>CharacterEncodingFilter</filter-name>

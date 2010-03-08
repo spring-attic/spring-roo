@@ -97,8 +97,6 @@ public class WebMvcOperations {
 		XmlUtils.findRequiredElement("/web-app/display-name", rootElement).setTextContent(projectMetadata.getProjectName());
 		XmlUtils.findRequiredElement("/web-app/description", rootElement).setTextContent("Roo generated " + projectMetadata.getProjectName() + " application");
 		
-		XmlUtils.findRequiredElement("/web-app/context-param[param-value='TO_BE_CHANGED_BY_LISTENER']/param-value", rootElement).setTextContent(projectMetadata.getProjectName() + ".root");
-		
 		List<Element> servletNames = XmlUtils.findElements("/web-app/*[servlet-name='TO_BE_CHANGED_BY_LISTENER']", rootElement);
 		for(Element element: servletNames){
 			XmlUtils.findRequiredElement("servlet-name", element).setTextContent(projectMetadata.getProjectName());

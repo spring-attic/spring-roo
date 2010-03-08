@@ -146,7 +146,7 @@ public class MavenOperations extends ProjectOperations {
 		applicationContextOperations.createMiddleTierApplicationContext();
 	
 		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "log4j.properties")).getOutputStream());
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());
 		} catch (IOException e1) {
 			logger.warning("Unable to install log4j logging configuration");
 		}

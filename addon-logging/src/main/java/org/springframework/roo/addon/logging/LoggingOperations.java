@@ -15,9 +15,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * Provides logging configuration operations.
@@ -50,11 +47,11 @@ public class LoggingOperations {
 		Assert.notNull(loggerPackage, "LoggerPackage required");
 		
 		setupProperties(logLevel, loggerPackage);
-		setupWebXml();
+//		setupWebXml();
 	}
 	
 	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
-		String filePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "log4j.properties");
+		String filePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
 		
@@ -92,47 +89,5 @@ public class LoggingOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-	}
-
-	private void setupWebXml() {
-		String filePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
-		MutableFile webXmlMutableFile = null;
-		
-		Document document;
-		if (fileManager.exists(filePath)) {
-			webXmlMutableFile = fileManager.updateFile(filePath);
-			try {
-				document = XmlUtils.getDocumentBuilder().parse(webXmlMutableFile.getInputStream());
-			} catch (Exception ex) {
-				throw new IllegalStateException(ex);
-			}
-			
-			Element rootElement = (Element) document.getFirstChild();
-			
-			if(XmlUtils.findFirstElement("/web-app/listener[listener-class='org.springframework.web.util.Log4jConfigListener']", rootElement) == null) {
-				Element log4jContextParam = document.createElement("context-param");
-				Element log4jContextParamName = document.createElement("param-name");
-				log4jContextParamName.setTextContent("log4jConfigLocation");
-				Element log4jContextParamValue = document.createElement("param-value");
-				log4jContextParamValue.setTextContent("classpath:META-INF/spring/log4j.properties");
-				log4jContextParam.appendChild(log4jContextParamName);
-				log4jContextParam.appendChild(log4jContextParamValue);
-				
-				Element log4jListener = document.createElement("listener");
-				Element log4jListenerClass = document.createElement("listener-class");
-				log4jListenerClass.setTextContent("org.springframework.web.util.Log4jConfigListener");
-				log4jListener.appendChild(log4jListenerClass);
-				
-				Element ctx = XmlUtils.findRequiredElement("/web-app/context-param", rootElement);
-				Assert.notNull(ctx, "Could not find the context param element in web.xml");
-				ctx.getParentNode().insertBefore(log4jContextParam, ctx);
-				
-				Element listener = XmlUtils.findRequiredElement("/web-app/listener", rootElement);
-				Assert.notNull(listener, "Could not find the listener element in web.xml");
-				listener.getParentNode().insertBefore(log4jListener, listener);
-	
-				XmlUtils.writeXml(webXmlMutableFile.getOutputStream(), document);
-			}
-		}					
 	}
 }
