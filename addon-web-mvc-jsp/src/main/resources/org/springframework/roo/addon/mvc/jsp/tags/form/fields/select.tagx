@@ -1,10 +1,11 @@
-<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" xmlns:form="http://www.springframework.org/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:field="urn:jsptagdir:/WEB-INF/tags/form/fields" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" xmlns:form="http://www.springframework.org/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>
 
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="field" type="java.lang.String" required="true" description="The field exposed from the form backing object"/>
-	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this field, will default to a message bundle if not supplied"/>
+	<jsp:directive.attribute name="path" type="java.lang.String" required="true" description="The relative path to the referenced resource"/>
 	<jsp:directive.attribute name="items" type="java.util.Collection" required="true" description="The name of the collection displayed in the select box"/>
+	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this field, will default to a message bundle if not supplied"/>
 	<jsp:directive.attribute name="itemValue" type="java.lang.String" required="false" description="The identifier used as value in the select box (defaults to 'id' for non enum types)"/>
 	<jsp:directive.attribute name="required" type="java.lang.Boolean" required="false" description="Indicates if this field is required (default false)"/>
 	<jsp:directive.attribute name="disabled" type="java.lang.Boolean" required="false" description="Specify if this field should be enabled"/>
@@ -72,8 +73,7 @@
 	            </c:choose>
 	       </c:when>
 	        <c:otherwise>
-	        	<label for="_${field}_id">${label}:</label>
-	        	<div>0</div>
+	        	<field:reference field="${field}" id="${id}" path="${path}" required="${required}"/>
 	        </c:otherwise>
         </c:choose>
     </div>

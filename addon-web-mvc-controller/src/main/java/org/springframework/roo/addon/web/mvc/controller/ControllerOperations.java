@@ -115,12 +115,11 @@ public class ControllerOperations {
 						JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
 						JavaType entity = javaType;
 						Set<String> disallowedOperations = new HashSet<String>();
-						String path = entity.getSimpleTypeName().toLowerCase();
+						String path = em.getPlural().toLowerCase();
 						createAutomaticController(controller, entity, disallowedOperations, path);
 						break;
 					}
-				}
-				
+				}		
 			}
 		}
 		return;

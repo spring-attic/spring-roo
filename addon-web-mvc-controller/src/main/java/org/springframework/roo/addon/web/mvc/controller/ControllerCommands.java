@@ -4,9 +4,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
@@ -79,7 +81,9 @@ public class ControllerCommands implements CommandMarker {
 		}
 		
 		if (path == null || path.length() == 0) {
-			path = entity.getSimpleTypeName().toLowerCase();
+			PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(entity.getEnclosingType(), Path.SRC_MAIN_JAVA));
+			Assert.notNull(pluralMetadata, "Could not determine plural for '" + entity.getSimpleTypeName() + "'");
+			path = pluralMetadata.getPlural().toLowerCase();
 		} else if (path.startsWith("/")) {
 			path = path.substring(1);
 		}

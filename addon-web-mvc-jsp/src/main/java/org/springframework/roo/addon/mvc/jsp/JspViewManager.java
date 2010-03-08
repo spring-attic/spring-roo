@@ -371,39 +371,35 @@ public class JspViewManager {
 			if (fieldType.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(boolean.class.getName())) {
 				 fieldElement = document.createElement("field:checkbox");
 			//handle enum fields	 
-			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}").build();
+			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(fieldType)) {
+				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
+				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + fieldType.getFullyQualifiedTypeName() + "' type");
+				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}").addAttribute("path", pluralMetadata.getPlural()).build();
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
 						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
-						fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("targetName", fieldType.getSimpleTypeName()).build();
+						//the link URL is determined as a best effort attempt following Roo REST conventions, this link might be wrong if custom paths are used
+						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
+						EntityMetadata typeEntityMetadata = getFieldType(field);
+						Assert.notNull(typeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
+
+						fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("path", "/" + typeEntityMetadata.getPlural().toLowerCase()).build();
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToOne")) {
 
-						EntityMetadata typeEntityMetadata = null;
-						
-						if (field.getFieldType().isCommonCollectionType()) {
-							//currently there is no scaffolding available for Maps (see ROO-194)
-							if(field.getFieldType().equals(new JavaType(Map.class.getName()))) {
-								return;
-							}
-							List<JavaType> parameters = field.getFieldType().getParameters();
-							if (parameters.size() == 0) {
-								throw new IllegalStateException("Could not determine the parameter type for the " + fieldName + " field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
-							}
-							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(parameters.get(0), Path.SRC_MAIN_JAVA));
-						} else {
-							typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-						}
+						EntityMetadata typeEntityMetadata = getFieldType(field);
 						Assert.notNull(typeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
+					
+						EntityMetadata referenceTypeEntityMetadata = getFieldType(field);
+						Assert.notNull(referenceTypeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
+
 						fieldElement = new XmlElementBuilder("field:select", document)
 												.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
 												.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
+												.addAttribute("path", "/" + referenceTypeEntityMetadata.getPlural().toLowerCase())
 											.build();
 										
 						if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
@@ -451,6 +447,24 @@ public class JspViewManager {
 			
 			root.appendChild(fieldElement);
 		}
+	}
+
+	private EntityMetadata getFieldType(FieldMetadata field) {
+		EntityMetadata typeEntityMetadata;
+		if (field.getFieldType().isCommonCollectionType()) {
+			//currently there is no scaffolding available for Maps (see ROO-194)
+			if(field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+				return null;
+			}
+			List<JavaType> parameters = field.getFieldType().getParameters();
+			if (parameters.size() == 0) {
+				throw new IllegalStateException("Could not determine the parameter type for the " + field.getFieldName().getSymbolName() + " field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
+			}
+			typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(parameters.get(0), Path.SRC_MAIN_JAVA));
+		} else {
+			typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+		}
+		return typeEntityMetadata;
 	}
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
@@ -511,7 +525,7 @@ public class JspViewManager {
 		}
 		if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")))) {
 			String tagName = fieldElement.getTagName();
-			if (tagName.endsWith("textarea") || tagName.endsWith("input") || tagName.endsWith("datetime") || tagName.endsWith("textarea") ||	tagName.endsWith("select")) {
+			if (tagName.endsWith("textarea") || tagName.endsWith("input") || tagName.endsWith("datetime") || tagName.endsWith("textarea") ||	tagName.endsWith("select") || tagName.endsWith("reference")) {
 				fieldElement.setAttribute("required", "true");
 			}
 		}
