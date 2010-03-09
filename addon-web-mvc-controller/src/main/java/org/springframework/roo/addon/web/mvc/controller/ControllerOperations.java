@@ -149,10 +149,9 @@ public class ControllerOperations {
 		
 		String ressourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);		
 		
-		//create annotation @RooWebScaffold(automaticallyMaintainView = true, formBackingObject = MyObject.class)
+		//create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
 		List<AnnotationAttributeValue<?>> rooWebScaffoldAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		rooWebScaffoldAttributes.add(new StringAttributeValue(new JavaSymbolName("path"), path));
-		rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyMaintainView"), true));
 		rooWebScaffoldAttributes.add(new ClassAttributeValue(new JavaSymbolName("formBackingObject"), entity));
 		for(String operation: disallowedOperations) {
 			rooWebScaffoldAttributes.add(new BooleanAttributeValue(new JavaSymbolName(operation), false));

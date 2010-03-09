@@ -117,23 +117,12 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 
 		this.beanInfoMetadata = beanInfoMetadata;
-		// We need to be informed if our dependent metadata changes
-		// Shouldn't need this, as notifications should trickle down through WebScaffoldMetadataKey
-//		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
-//		metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
 		
 		jspOperations.installCommonViewArtefacts();
 		
 		JspMetadata md = new JspMetadata(metadataIdentificationString, beanInfoMetadata, webScaffoldMetadata);
-		
-		if (!md.getAnnotationValues().isAutomaticallyMaintainView()) {
-			// we're not maintaining the view, so we have nothing to do
-			return md;
-		}
 
-//		if (webScaffoldMetadata.getAnnotationValues().isShow()) { 
-			installImage("images/show.png");
-//		}
+		installImage("images/show.png");
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) { 
 			installImage("images/update.png");
 		}
