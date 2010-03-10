@@ -21,7 +21,6 @@ import org.springframework.roo.addon.entity.RooEntity;
  * <ul>
  * <li>The Spring MVC {@link org.springframework.stereotype.Controller} annotation will be declared on the controller type if not exists</li>
  * <li>Setting this annotation will also generate JSP view pages corresponding to the functionalities included</li>
- * <li>Existing JSP pages will be overwritten unless automaticallyMaintainView is disabled</li>
  * <li>The {@link RooWebScaffold#formBackingObject()} property defines the {@link RooEntity} which is exposed through this
  * controller</li>
  * </ul>
@@ -42,15 +41,6 @@ import org.springframework.roo.addon.entity.RooEntity;
 @Target(ElementType.TYPE)
 public @interface RooWebScaffold {
 	
-	/**
-	 * Defines the handling of JSP pages which are using this controller. If this flag is set to true 
-	 * ROO will maintain the view artefacts. Existing JSP pages will be overwritten unless 
-	 * automaticallyMaintainView is disabled
-	 * 
-	 * @return indicator if ROO should maintain view artifacts
-	 */
-	boolean automaticallyMaintainView() default true;
-	
 	
 	/**
 	 * All view-related artifacts for a specific controller are stored in a sub-directory under 
@@ -67,22 +57,6 @@ public @interface RooWebScaffold {
 	 * here class will be exposed in a RESTful way.
 	 */
 	Class<?> formBackingObject();
-	
-//	/**
-//	 * Creates a list() method which exposes all entities this controller is responsible for. If enabled this 
-//	 * list() method will return a {@link List} of entities.
-//	 * 
-//	 * @return indicates if the list() method should be provided (defaults to "true"; optional)
-//	 */
-//	boolean list() default true;
-//	
-//	/**
-//	 * Creates a show() method which exposes the entity with a given id of the type this controller is responsible for. 
-//	 * If enabled this show() method will return a single entity or null if an entity with this id cannot be found.
-//	 * 
-//	 * @return indicates if the show() method should be provided (defaults to "true"; optional)
-//	 */
-//	boolean show() default true;
 	
 	/**
 	 * Creates a delete() method which deletes an entity for a given id. 
@@ -112,4 +86,12 @@ public @interface RooWebScaffold {
 	 * @return indicates if the finders methods should be provided (defaults to "true"; optional)
 	 */
 	boolean exposeFinders() default true;
+	
+	/**
+	 * Registers an @InitBinder method to provide converters for String presentation of objects. Useful
+	 * for adjusting the label of select boxes in the UI
+	 * 
+	 * @return indicates if the registerConverters method is provided (defaults to 'true'; optional)
+	 */
+	boolean registerConverters() default true;
 }
