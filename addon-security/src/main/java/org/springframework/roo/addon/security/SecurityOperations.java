@@ -34,10 +34,10 @@ public class SecurityOperations {
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
 	
-	private static final Dependency DEPENDENCY_CORE = new Dependency("org.springframework.security", "org.springframework.security.core", "3.0.0.RELEASE");
-	private static final Dependency DEPENDENCY_CONFIG = new Dependency("org.springframework.security", "org.springframework.security.config", "3.0.0.RELEASE");
-	private static final Dependency DEPENDENCY_WEB = new Dependency("org.springframework.security", "org.springframework.security.web", "3.0.0.RELEASE");
-	private static final Dependency DEPENDENCY_TAGLIBS = new Dependency("org.springframework.security", "org.springframework.security.taglibs", "3.0.0.RELEASE");
+	private static final Dependency DEPENDENCY_CORE = new Dependency("org.springframework.security", "org.springframework.security.core", "3.0.2.RELEASE");
+	private static final Dependency DEPENDENCY_CONFIG = new Dependency("org.springframework.security", "org.springframework.security.config", "3.0.2.RELEASE");
+	private static final Dependency DEPENDENCY_WEB = new Dependency("org.springframework.security", "org.springframework.security.web", "3.0.2.RELEASE");
+	private static final Dependency DEPENDENCY_TAGLIBS = new Dependency("org.springframework.security", "org.springframework.security.taglibs", "3.0.2.RELEASE");
 	
 	public SecurityOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
