@@ -160,7 +160,7 @@ public class ControllerOperations {
 		
 		//create annotation @RequestMapping("/myobject/**")
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path + "/**"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + path));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 		
 		//create annotation @Controller

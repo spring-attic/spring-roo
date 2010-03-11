@@ -178,7 +178,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("size"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath + "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("DELETE"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
@@ -232,7 +232,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("modelMap"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
@@ -286,7 +285,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("modelMap"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath + "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
@@ -334,7 +333,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("modelMap"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
@@ -389,7 +387,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("modelMap"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath + "/form"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/form"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
@@ -506,7 +504,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("modelMap"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/" + controllerPath + "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form"));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}/form"));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
 
