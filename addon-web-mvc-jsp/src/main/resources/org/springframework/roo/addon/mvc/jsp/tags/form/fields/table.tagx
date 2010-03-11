@@ -63,19 +63,21 @@
                <td>
                    <spring:url value="${typePath}/${item[typeIdFieldName]}" var="show_form_url"/>
                    <spring:url value="/static/images/show.png" var="show_image_url"/>
-                   <form:form action="${show_form_url}" method="GET">
-                       <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
+                   <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
+                   <a href="${show_form_url}" alt="${show_label}" title="${show_label}">
                        <input alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" type="image" value="${show_label}"/>
-                   </form:form>
+                   </a>
                </td>
                <td>
                	   <c:if test="${update}">
-	                   <spring:url value="${typePath}/${item[typeIdFieldName]}/form" var="update_form_url"/>
+	                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="update_form_url">
+	                   		<spring:param name="form" />
+	                   </spring:url>
 	                   <spring:url value="/static/images/update.png" var="update_image_url"/>
-	                   <form:form action="${update_form_url}" method="GET">
-	                       <spring:message arguments="${typeName}" code="entity.update" var="update_label"/>
-	                       <input alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" type="image" value="${update_label}"/>
-	                   </form:form>
+					   <spring:message arguments="${typeName}" code="entity.update" var="update_label"/>
+	                   <a href="${update_form_url}" alt="${update_label}" title="${update_label}">
+                       		<input alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" type="image" value="${update_label}"/>
+                   	   </a>    
                    </c:if>
                </td>
                <td>

@@ -86,7 +86,6 @@ public class JspViewManager {
 	}
 	
 	public Document getListDocument() {
-		
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 		

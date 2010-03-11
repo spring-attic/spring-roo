@@ -154,18 +154,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		TilesOperations tilesOperations = new TilesOperations(controllerPath, fileManager, pathResolver, "config/webmvc-config.xml");
 		
-//		if (webScaffoldMetadata.getAnnotationValues().isList()) {
-			// By now we have a directory to put the JSPs inside
-			String listPath1 = destinationDirectory + "/list.jspx";
-			writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
-			tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
-			
-//		} 
-//		if (webScaffoldMetadata.getAnnotationValues().isShow()) {
-			String showPath = destinationDirectory + "/show.jspx";
-			writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
-			tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
-//		}
+		// By now we have a directory to put the JSPs inside
+		String listPath1 = destinationDirectory + "/list.jspx";
+		writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
+		tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
+
+		String showPath = destinationDirectory + "/show.jspx";
+		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
+		tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
@@ -175,7 +171,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
-					"/" + controllerPath + "/form",
+					"/" + controllerPath + "?form",
 					MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} 
