@@ -220,7 +220,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
 						finderLabel, 
 						"global.menu.find",
-						"/" + controllerPath + "/find/" + finderName.replace("find" + entityMetadata.getPlural(), "") + "/form",
+						"/" + controllerPath + "?find=" + finderName.replace("find" + entityMetadata.getPlural(), "") + "&form",
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
