@@ -38,6 +38,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlRoundTripUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -163,12 +164,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
+		JavaSymbolName categoryName = getControllerPathSymbolName(controllerPath);
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			//add 'create new' menu item
 			menuOperations.addMenuItem( 
-					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
+					categoryName, 
 					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
 					"global.menu.new",
 					"/" + controllerPath + "?form",
@@ -203,7 +205,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
-				new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
+				categoryName, 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}",
@@ -217,12 +219,12 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
-						new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), 
+						categoryName, 
 						finderLabel, 
 						"global.menu.find",
 						"/" + controllerPath + "?find=" + finderName.replace("find" + entityMetadata.getPlural(), "") + "&form",
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
-				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
+				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
 					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId + "." + paramName.getSymbolName().toLowerCase(), paramName.getReadableSymbolName());
 				}
@@ -231,7 +233,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 		
 		//clean up links to finders which are removed by now
-		menuOperations.cleanUpFinderMenuItems(new JavaSymbolName(controllerPath), allowedMenuItems);
+		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);
 		
 		//finally write the tiles definition if necessary
 		tilesOperations.writeToDiskIfNecessary();
@@ -402,5 +404,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		    	throw new IllegalStateException(ioe);
 		    }
 	    }
+    }
+    
+    private JavaSymbolName getControllerPathSymbolName(String controllerPath) {
+		String cleanControllerPath[] = controllerPath.split("/");
+		StringBuilder cleanControllerName = new StringBuilder();
+		for (String piece: cleanControllerPath) {
+			cleanControllerName.append(StringUtils.capitalize(piece));
+		}
+		return new JavaSymbolName(cleanControllerName.toString());
     }
 }
