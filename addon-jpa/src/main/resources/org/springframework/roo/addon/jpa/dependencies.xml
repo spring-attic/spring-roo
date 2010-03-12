@@ -5,7 +5,7 @@
 			<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" />
 		</database>
 		<database id="POSTGRES">
-			<dependency org="org.postgresql" name="com.springsource.org.postgresql.jdbc4" rev="8.3.604" />
+			<dependency org="org.postgresql" name="com.springsource.org.postgresql.jdbc3" rev="8.3.603" />
 		</database>
 		<database id="MYSQL">
 			<dependency org="com.mysql.jdbc" name="com.springsource.com.mysql.jdbc" rev="5.1.6" />
