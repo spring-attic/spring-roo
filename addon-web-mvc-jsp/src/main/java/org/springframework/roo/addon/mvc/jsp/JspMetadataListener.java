@@ -208,7 +208,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				categoryName, 
 				new JavaSymbolName(entityMetadata.getPlural()),
 				"global.menu.list",
-				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&amp;size=${empty param.size ? 10 : param.size}",
+				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}",
 				MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
