@@ -18,7 +18,7 @@
 		<c:set value="MM/dd/yyyy" var="dateTimePattern"/>
 	</c:if>
 	
-	<div id="${object.class.simpleName}_${field}_id">
+	<div id="${fn:toLowerCase(fn:substringAfter(id,':'))}_${field}_id">
 	    <label for="_${field}_id"><c:out value="${label}"/>:</label>
 	    <div class="box" id="_${field}_id">
 	    	<c:choose>
@@ -29,7 +29,7 @@
 	    			<fmt:formatDate value="${object[field].time}" pattern="${dateTimePattern}"/>
 	    		</c:when>
 	    		<c:otherwise>
-	    			<c:out value="${object[field]}"/>
+		    		<spring:eval expression="object[field]" />
 	    		</c:otherwise>
 	    	</c:choose>
 	    </div>
