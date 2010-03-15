@@ -162,7 +162,7 @@ public class JspViewManager {
 		
 		Element pageShow = new XmlElementBuilder("page:show", document)
 								.addAttribute("id", "ps:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-								.addAttribute("object", "${" + entityName + "}")
+								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
 							.build();
 		pageShow.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageShow));
 
@@ -171,7 +171,7 @@ public class JspViewManager {
 			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element fieldDisplay = new XmlElementBuilder("field:display", document)
 								.addAttribute("id", "s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
-								.addAttribute("object", "${" + entityName + "}")
+								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
 								.addAttribute("field", fieldName)
 							.build();
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
@@ -206,7 +206,7 @@ public class JspViewManager {
 		//add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
 						.addAttribute("id", "fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-						.addAttribute("object", "${" + entityName + "}")
+						.addAttribute("modelAttribute", entityName.toLowerCase())
 						.addAttribute("path", controllerPath)
 					.build();
 		
@@ -239,7 +239,7 @@ public class JspViewManager {
 		//add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
 						.addAttribute("id", "fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-						.addAttribute("object", "${" + entityName + "}")
+						.addAttribute("modelAttribute", entityName.toLowerCase())
 					.build();	
 		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {

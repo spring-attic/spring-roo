@@ -301,7 +301,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
@@ -345,7 +345,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName + " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + entityName + ");");
 		if (specialDomainTypes.size() > 0) {
 			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
 		}
@@ -388,7 +388,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
 		if (specialDomainTypes.size() > 0) {
 			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
 		}
@@ -438,7 +438,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName + " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + entityName + ");");
 		if (specialDomainTypes.size() > 0) {
 			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
 		}
@@ -491,7 +491,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!entityMetadata.getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + " == null) throw new IllegalArgumentException(\"An Identifier is required\");");
 		}
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		if (specialDomainTypes.size() > 0) {
 			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
 		}
