@@ -301,6 +301,11 @@ public class JspViewManager {
 				//it may be that the field has an min or max prepended
 				field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(Introspector.decapitalize(paramName.getSymbolName().substring(3))));
 			}
+			//ignoring java.util.Map field types (see ROO-194)
+			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
+				continue;
+			}
 			Assert.notNull(field, "could not find field '" + paramName + "' in '" + type.getFullyQualifiedTypeName() + "'");
 			Element fieldElement = null;
 			
