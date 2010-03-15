@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -44,6 +45,8 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class JspViewManager {
+	
+	private Logger log = Logger.getLogger(JspViewManager.class.getName());
 	
 	private List<FieldMetadata> fields; 
 	private BeanInfoMetadata beanInfoMetadata; 
@@ -369,6 +372,11 @@ public class JspViewManager {
 			List<AnnotationMetadata> annotations = field.getAnnotations();
 			AnnotationMetadata annotationMetadata;
 			
+			//ignoring java.util.Map field types (see ROO-194)
+			if (fieldType.equals(new JavaType(Map.class.getName()))) {
+//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
+				continue;
+			}
 			if (fieldType.getFullyQualifiedTypeName().equals(Set.class.getName())) {
 				if (fieldType.getParameters().size() != 1) {
 					throw new IllegalArgumentException("A set is defined without specification of its type (via generics) - unable to create view for it");
