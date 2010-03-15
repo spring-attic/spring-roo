@@ -185,7 +185,7 @@ public class JpaOperations {
 			
 		} else {
 			props.put("database.username", "");
-			logger.fine("please enter your database details in src/main/resources/database.properties");
+			logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
 		}
 		
 		props.put("database.password", "");
