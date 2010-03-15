@@ -30,6 +30,12 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Snapshots</name>
 			<url>http://repository.springsource.com/maven/bundles/snapshot</url>
 		</repository>
+		<repository>
+		  <id>spring-maven-snapshot</id>
+		  <snapshots><enabled>true</enabled></snapshots>
+		  <name>Springframework Maven SNAPSHOT Repository</name>
+		  <url>http://maven.springframework.org/snapshot</url>
+		</repository> 
 	</repositories>
 	
 	<pluginRepositories>
@@ -254,7 +260,7 @@
 	</build>
 	
 	<properties>
-		<spring.version>3.0.0.RELEASE</spring.version>
+		<spring.version>3.0.2.BUILD-SNAPSHOT</spring.version>
 		<aspectj.version>1.6.6.RELEASE</aspectj.version>
 	</properties>
 </project>

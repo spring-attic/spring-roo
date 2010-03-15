@@ -125,6 +125,12 @@
             <name>SpringSource Enterprise Bundle Repository - Nightly Snapshots</name>
             <url> http://repository.springsource.com/maven/bundles/snapshot</url>
         </repository>
+	<repository>
+  		<id>spring-maven-snapshot</id>
+  		<snapshots><enabled>true</enabled></snapshots>
+  		<name>Springframework Maven SNAPSHOT Repository</name>
+  		<url>http://maven.springframework.org/snapshot</url>
+	</repository> 
     </repositories>
 
     <developers>
@@ -495,7 +501,7 @@
 
     <properties>
         <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
-        <spring.version>3.0.0.RELEASE</spring.version>
+        <spring.version>3.0.2.BUILD-SNAPSHOT</spring.version>
         <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
         <roo.version>1.1.0.M1</roo.version>
     </properties>
