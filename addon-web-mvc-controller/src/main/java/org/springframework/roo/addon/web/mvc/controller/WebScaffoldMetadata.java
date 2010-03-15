@@ -23,6 +23,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -686,8 +687,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					
 					StringBuilder sb = new StringBuilder();
 					sb.append("return ").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
+					if (isEnumType(elegibleMethods.get(0).getReturnType())) {
+						sb.append(".name()");
+					}
 					for (int i = 1; i < elegibleMethods.size(); i++) {
 						sb.append(" + \" \" + ").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
+						if (isEnumType(elegibleMethods.get(i).getReturnType())) {
+							sb.append(".name()");
+						}
 					}
 					sb.append(";");
 					
