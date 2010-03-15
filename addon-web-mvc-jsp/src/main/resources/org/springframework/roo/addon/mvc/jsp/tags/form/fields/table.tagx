@@ -101,7 +101,9 @@
        <tr class="footer">
            <td colspan="10">
                <span class="new">
-                   <spring:url value="/${typePath}/form" var="create_url"/>
+                   <spring:url value="/${typePath}" var="create_url">
+                   		<spring:param name="form" />
+                   </spring:url>
                    <a href="${create_url}">
                        <spring:url value="/static/images/add.png" var="create_img_url"/>
                        <spring:message arguments="${typeName}" code="global.menu.new" var="add_message"/>
