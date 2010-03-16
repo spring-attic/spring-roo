@@ -109,13 +109,20 @@ public class Dependency implements Comparable<Dependency> {
 	        }
 	        
 	        //parsing for exclusions
-	        NodeList exclusionList = dependency.getElementsByTagName("exclusions");
+	        List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
 	        
-	        if(exclusionList.getLength() > 0) {
-	        	for (int i = 0; i < exclusionList.getLength(); i++) {
-	        		Element exclusionElement = (Element) exclusionList.item(i);
-	        		String exclusionId = exclusionElement.getElementsByTagName("groupId").item(0).getTextContent();
-	        		String exclusionArtifactId = exclusionElement.getElementsByTagName("artifactId").item(0).getTextContent();
+	        if(exclusionList.size() > 0) {
+	        	for (Element exclusion : exclusionList) {
+	        		Element exclusionE= XmlUtils.findFirstElement("groupId", exclusion);
+	        		String exclusionId = "";
+	        		if (exclusionE !=null) {
+	        			exclusionId = exclusionE.getTextContent();
+	        		}
+	        		Element exclusionArtifactE = XmlUtils.findFirstElement("artifactId", exclusion);
+	        		String exclusionArtifactId = "";
+	        		if (exclusionArtifactE !=null) {
+	        			exclusionArtifactId = exclusionArtifactE.getTextContent();
+	        		}
 	        		if(!(exclusionArtifactId.length() < 1) && !(exclusionId.length() < 1)) {
 		        		this.exclusions.add(new Dependency(exclusionId, exclusionArtifactId, "ignored"));
 	        		}
