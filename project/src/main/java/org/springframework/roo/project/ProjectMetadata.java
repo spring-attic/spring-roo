@@ -27,6 +27,7 @@ import org.springframework.roo.support.util.Assert;
  * {@link PathResolver} implementation that understands the target project layout.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -38,20 +39,23 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private String projectName;
 	private Set<Dependency> dependencies;
 	private Set<Dependency> buildPluginDependencies;
+	private Set<Repository> repositories;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Dependency> buildPluginDependencies, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Dependency> buildPluginDependencies, Set<Repository> repositories, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
 		Assert.notNull(dependencies, "Dependencies required");
 		Assert.notNull(buildPluginDependencies, "Build plugin dependencies required");
+		Assert.notNull(repositories, "Repositories required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
 		this.dependencies = dependencies;
 		this.buildPluginDependencies = buildPluginDependencies;
 		this.pathResolver = pathResolver;
+		this.repositories = repositories;
 	}
 
 	public static final String getProjectIdentifier() {
@@ -79,6 +83,18 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isBuildPluginDependencyRegistered(Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to check is required");
 		return buildPluginDependencies.contains(dependency);
+	}
+	
+	/**
+	 * Convenience method for determining whether a particular repository
+	 * is registered.
+	 * 
+	 * @param reopository to check (required)
+	 * @return whether the repository is currently registered or not
+	 */
+	public boolean isRepositoryRegistered(Repository repository) {
+		Assert.notNull(repository, "Repository to check is required");
+		return repositories.contains(repository);
 	}
 
 	public JavaPackage getTopLevelPackage() {

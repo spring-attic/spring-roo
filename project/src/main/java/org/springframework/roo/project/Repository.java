@@ -1,0 +1,119 @@
+package org.springframework.roo.project;
+
+import org.springframework.roo.support.style.ToStringCreator;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Element;
+
+/**
+ * Simplified immutable representation of a dependency.
+ * 
+ * <p>
+ * Structured after the model used by Maven and Ivy.
+ *
+ * @author Stefan Schmidt
+ * @since 1.1
+ *
+ */
+public class Repository implements Comparable<Repository> {
+	private String id;
+	private String name;
+	private String url;
+	private boolean enableSnapshots = false;
+	
+	/**
+	 * Convenience constructor creating a repository instance
+	 * 
+	 * @param id the repository id (required)
+	 * @param name the repository name (required)
+	 * @param url the repository url (required)
+	 */
+	public Repository(String id, String name, String url) {
+		Assert.hasText(id, "Group ID required");
+		Assert.hasText(name, "Artifact ID required");
+		Assert.notNull(url, "URL required");
+		this.id = id;
+		this.name = name;
+		this.url = url;
+	}
+	
+	/**
+	 * Convenience constructor for creating a repository instance
+	 * 
+	 * @param id the repository id (required)
+	 * @param name the repository name (required)
+	 * @param url the repository url (required)
+	 * @param snapshots allowed? (required)
+	 */
+	public Repository(String id, String name, String url, boolean enableSnapshots) {
+		Assert.hasText(id, "Group ID required");
+		Assert.hasText(name, "Artifact ID required");
+		Assert.hasText(url, "URL required");
+		this.id = id;
+		this.name = name;
+		this.url = url;
+		this.enableSnapshots = enableSnapshots;
+	}
+	
+	/**
+	 * Convenience constructor for creating a repository instance from a 
+	 * XML Element
+	 * 
+	 * @param element containing the repository definition (required)
+	 */
+	public Repository(Element element) {
+		Assert.notNull(element, "Element required");
+		this.id = XmlUtils.findRequiredElement("id", element).getTextContent();
+		this.name = XmlUtils.findRequiredElement("name", element).getTextContent();
+		this.url = XmlUtils.findRequiredElement("url", element).getTextContent();
+		if (null != XmlUtils.findFirstElement("snapshots", element)) {
+			this.enableSnapshots = new Boolean(XmlUtils.findRequiredElement("snapshots/enabled", element).getTextContent());
+		}
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+	
+	public boolean isEnableSnapshots() {
+		return enableSnapshots;
+	}
+	
+	public int hashCode() {
+		return 11 * this.id.hashCode() * this.name.hashCode() * this.url.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		return obj != null && obj instanceof Repository && this.compareTo((Repository)obj) == 0;
+	}
+
+	public int compareTo(Repository o) {
+		if (o == null) {
+			throw new NullPointerException();
+		}
+		int result = this.id.compareTo(o.id);
+		if (result == 0) {
+			result = this.name.compareTo(o.name);
+		}
+		if (result == 0) {
+			result = this.url.compareTo(o.url);
+		}
+		return result;
+	}
+
+	public String toString() {
+		ToStringCreator tsc = new ToStringCreator(this);
+		tsc.append("id", id);
+		tsc.append("name", name);
+		tsc.append("url", url);
+		return tsc.toString();
+	}
+}

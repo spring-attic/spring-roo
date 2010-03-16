@@ -13,6 +13,7 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @author Adrian Colyer
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -20,6 +21,7 @@ public abstract class ProjectOperations {
 	private MetadataService metadataService;
 	private ProjectMetadataProvider projectMetadataProvider;
 	private Set<DependencyListener> listeners = new HashSet<DependencyListener>();
+	private Set<RepositoryListener> repoListeners = new HashSet<RepositoryListener>();
 	
 	public ProjectOperations(MetadataService metadataService, ProjectMetadataProvider projectMetadataProvider) {
 		Assert.notNull(metadataService, "Metadata service required");
@@ -34,48 +36,6 @@ public abstract class ProjectOperations {
 
 	public final boolean isPerformCommandAllowed() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
-	}
-	
-	/**
-	 * Allows addition of a JAR dependency to the POM. 
-	 * 
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
-	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 * 
-	 * @param groupId to add (required)
-	 * @param artifactId to add (required)
-	 * @param versionId to add (requireD)
-	 */
-	public final void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(groupId, "Group ID required");
-		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR);
-		projectMetadataProvider.addDependency(dependency);
-		sendDependencyAdditionNotifications(dependency);
-	}
-	
-	/**
-	 * Allows remove of an existing JAR dependency from the POM. 
-	 * 
-	 * <p>
-	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
-	 * 
-	 * @param groupId to remove (required)
-	 * @param artifactId to remove (required)
-	 * @param versionId to remove (requireD)
-	 */
-	public final void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(groupId, "Group ID required");
-		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR);
-		projectMetadataProvider.removeDependency(dependency);
-		sendDependencyRemovalNotifications(dependency);
 	}
 	
 	/**
@@ -132,14 +92,122 @@ public abstract class ProjectOperations {
 			listener.dependencyRemoved(d);
 		}
 	}
-
+	
+	/**
+	 * Register a listener to track changes in repositories
+	 */
+	public void addRepositoryListener(RepositoryListener listener) {
+		this.repoListeners.add(listener);
+	}
+	
+	/**
+	 * Remove a repository listener from change tracking
+	 */
+	public void removeRepositoryListener(RepositoryListener listener) {
+		this.repoListeners.remove(listener);
+	}
+	
+	private void sendRepositoryAdditionNotifications(Repository r) {
+		for (RepositoryListener listener : repoListeners) {
+			listener.repositoryAdded(r);
+		}
+	}
+	
+	private void sendRepositoryRemovalNotifications(Repository r) {
+		for (RepositoryListener listener : repoListeners) {
+			listener.repositoryRemoved(r);
+		}
+	}
 	
 	public void updateProjectType(ProjectType projectType) {
 		Assert.notNull(projectType, "ProjectType required");
 		
 		projectMetadataProvider.updateProjectType(projectType);
 	}
-
+	
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param groupId to add (required)
+	 * @param artifactId to add (required)
+	 * @param versionId to add (requireD)
+	 */
+	public final void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(groupId, "Group ID required");
+		Assert.notNull(artifactId, "Artifact ID required");
+		Assert.hasText(version, "Version required");
+		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR);
+		projectMetadataProvider.addDependency(dependency);
+		sendDependencyAdditionNotifications(dependency);
+	}
+	
+	/**
+	 * Allows remove of an existing JAR dependency from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param groupId to remove (required)
+	 * @param artifactId to remove (required)
+	 * @param versionId to remove (requireD)
+	 */
+	public final void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(groupId, "Group ID required");
+		Assert.notNull(artifactId, "Artifact ID required");
+		Assert.hasText(version, "Version required");
+		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR);
+		projectMetadataProvider.removeDependency(dependency);
+		sendDependencyRemovalNotifications(dependency);
+	}
+	
+	/**
+	 * Allows addition of a repository to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param id to add (required)
+	 * @param name to add (required)
+	 * @param url to add (requireD)
+	 */
+	public final void addRepository(String id, String name, String url) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
+		Assert.hasText(id, "ID required");
+		Assert.hasText(name, "Name required");
+		Assert.hasText(url, "URL required");
+		Repository repository = new Repository(id, name, url);
+		projectMetadataProvider.addRepository(repository);
+		sendRepositoryAdditionNotifications(repository);
+	}
+	
+	/**
+	 * Allows remove of an existing repository from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param id to add (required)
+	 * @param name to add (required)
+	 * @param url to add (requireD)
+	 */
+	public final void removeRepository(String id, String name, String url) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.hasText(id, "ID required");
+		Assert.hasText(name, "Name required");
+		Assert.hasText(url, "URL required");
+		Repository repository = new Repository(id, name, url);
+		projectMetadataProvider.removeRepository(repository);
+		sendRepositoryRemovalNotifications(repository);
+	}
 	
 	/**
 	 * Allows addition of a build plugin to the POM. 
