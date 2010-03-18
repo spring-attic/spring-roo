@@ -15,6 +15,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
@@ -25,20 +26,19 @@ import org.w3c.dom.Element;
 
 /**
  * Provides JPA configuration operations.
- *
+ * 
  * @author Stefan Schmidt
+ * @author Alan Stewart
  * @since 1.0
  */
 @ScopeDevelopment
 public class JpaOperations {
-	
 	private static final Logger logger = HandlerUtils.getLogger(JpaOperations.class);
-		
 	private FileManager fileManager;
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
-	
+
 	public JpaOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
 		Assert.notNull(pathResolver, "Path resolver required");
@@ -49,20 +49,17 @@ public class JpaOperations {
 		this.metadataService = metadataService;
 		this.projectOperations = projectOperations;
 	}
-	
+
 	public boolean isJpaInstallationPossible() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && 
-			!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && !fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-	
+
 	public boolean isJpaInstalled() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && 
-			fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-	
+
 	/**
-	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml,  
-	 * database.properties and the project pom.xml)
+	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml, database.properties and the project pom.xml)
 	 * 
 	 * @param ormProvider the ORM provider selected (Hibernate, OpenJpa, EclipseLink)
 	 * @param database the database (HSQL, H2, MySql, etc)
@@ -70,17 +67,23 @@ public class JpaOperations {
 	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
-				
-		updatePersistenceXml(ormProvider, database);	
-		if(jndi == null || jndi.length() == 0) updateDatabaseProperties(database);
+
+		updatePersistenceXml(ormProvider, database);
+		if (jndi == null || jndi.length() == 0) {
+			updateDatabaseProperties(database);
+		}
 		updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
+
+		if (ormProvider == OrmProvider.OPENJPA) {
+			installMavenPlugin(); // Install openjpa-maven-plugin for enhancement
+		}
 	}
-	
-	private void updateApplicationContext(JdbcDatabase database, String jndi) {		
+
+	private void updateApplicationContext(JdbcDatabase database, String jndi) {
 		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
-		
+
 		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
@@ -91,19 +94,19 @@ public class JpaOperations {
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
-		
+		}
+
 		Element root = appCtx.getDocumentElement();
 
-		//checking for existence of configurations, if found abort
+		// Checking for existence of configurations, if found abort
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id='dataSource']", root);
 		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id='dataSource']", root);
-						
+
 		if ((jndi == null || jndi.length() == 0) && dataSource == null) {
 			dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
-			dataSource.setAttribute("id", "dataSource");			
+			dataSource.setAttribute("id", "dataSource");
 			dataSource.appendChild(createPropertyElement("driverClassName", "${database.driverClassName}", appCtx));
 			dataSource.appendChild(createPropertyElement("url", "${database.url}", appCtx));
 			dataSource.appendChild(createPropertyElement("username", "${database.username}", appCtx));
@@ -112,53 +115,52 @@ public class JpaOperations {
 			if (dataSourceJndi != null) {
 				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
 			}
-		} else if (jndi != null && jndi.length() > 0){			
+		} else if (jndi != null && jndi.length() > 0) {
 			if (dataSourceJndi == null) {
 				dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
 				dataSourceJndi.setAttribute("id", "dataSource");
 				root.appendChild(dataSourceJndi);
-			}			
-			dataSourceJndi.setAttribute("jndi-name", jndi);			
+			}
+			dataSourceJndi.setAttribute("jndi-name", jndi);
 			if (dataSource != null) {
 				dataSource.getParentNode().removeChild(dataSource);
-			} 
+			}
 		}
-	
+
 		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id='transactionManager']", root);
-		if (transactionManager == null) {	
+		if (transactionManager == null) {
 			transactionManager = appCtx.createElement("bean");
 			transactionManager.setAttribute("id", "transactionManager");
 			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
 			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
 			root.appendChild(transactionManager);
 		}
-		
+
 		Element aspectJTxManager = XmlUtils.findFirstElement("/beans/annotation-driven", root);
 		if (aspectJTxManager == null) {
 			aspectJTxManager = appCtx.createElement("tx:annotation-driven");
 			aspectJTxManager.setAttribute("mode", "aspectj");
 			aspectJTxManager.setAttribute("transaction-manager", "transactionManager");
 			root.appendChild(aspectJTxManager);
-		}		
-		
+		}
+
 		Element entityManagerFactory = XmlUtils.findFirstElement("/beans/bean[@id='entityManagerFactory']", root);
 		if (entityManagerFactory == null) {
 			entityManagerFactory = appCtx.createElement("bean");
 			entityManagerFactory.setAttribute("id", "entityManagerFactory");
 			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-			entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));			
-			root.appendChild(entityManagerFactory);		
+			entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
+			root.appendChild(entityManagerFactory);
 		}
-		
+
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
 
 	private void updateDatabaseProperties(JdbcDatabase database) {
 		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 		MutableFile databaseMutableFile = null;
-		
 		Properties props = new Properties();
-		
+
 		try {
 			if (fileManager.exists(databasePath)) {
 				databaseMutableFile = fileManager.updateFile(databasePath);
@@ -172,33 +174,31 @@ public class JpaOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-		
+
 		props.put("database.driverClassName", database.getDriverClassName());
-		
+
 		String connectionString = database.getConnectionString();
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 		props.put("database.url", connectionString);
-		
-		if(database.equals(JdbcDatabase.HYPERSONIC_IN_MEMORY) || database.equals(JdbcDatabase.HYPERSONIC_PERSISTENT) || database.equals(JdbcDatabase.H2_IN_MEMORY)) {
+
+		if (database.equals(JdbcDatabase.HYPERSONIC_IN_MEMORY) || database.equals(JdbcDatabase.HYPERSONIC_PERSISTENT) || database.equals(JdbcDatabase.H2_IN_MEMORY)) {
 			props.put("database.username", "sa");
-			
 		} else {
 			props.put("database.username", "");
 			logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
 		}
-		
+
 		props.put("database.password", "");
-		
+
 		try {
 			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
 	}
-	
-	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {		
 
+	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "dependencies.xml");
 		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
 		Document dependencyDoc;
@@ -209,34 +209,39 @@ public class JpaOperations {
 		}
 
 		Element dependencies = (Element) dependencyDoc.getFirstChild();
-		
-		List<Element> databaseDepenencies = XmlUtils.findElements("/dependencies/databases/database[@id='" + database.getKey() + "']/dependency", dependencies) ;
-		for(Element dependency : databaseDepenencies) {			
+
+		List<Element> databaseDepenencies = XmlUtils.findElements("/dependencies/databases/database[@id='" + database.getKey() + "']/dependency", dependencies);
+		for (Element dependency : databaseDepenencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
-		
-		List<Element> ormDepenencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/dependency", dependencies) ;
-		for(Element dependency : ormDepenencies) {
+
+		List<Element> ormDepenencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/dependency", dependencies);
+		for (Element dependency : ormDepenencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
-		}		
-		
-		//hard coded to JPA & Hibernate Validator for now
+		}
+
+		// Hard coded to JPA & Hibernate Validator for now
 		List<Element> jpaDependencies = XmlUtils.findElements("/dependencies/persistence/provider[@id='JPA']/dependency", dependencies);
-		for(Element dependency : jpaDependencies) {
+		for (Element dependency : jpaDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
-		}	
+		}
 
 		List<Element> springDependencies = XmlUtils.findElements("/dependencies/spring/dependency", dependencies);
-		for(Element dependency : springDependencies) {
+		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
-		}		
-	}	
-	
-	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
+		}
 
+		List<Element> repositories = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/repository", dependencies);
+		for (Element repository : repositories) {
+			Repository repo = new Repository(repository);
+			projectOperations.addRepository(repo.getId(), repo.getName(), repo.getUrl());
+		}
+	}
+
+	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
-		
+
 		Document persistence;
 		try {
 			if (fileManager.exists(persistencePath)) {
@@ -250,63 +255,252 @@ public class JpaOperations {
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
-		
+		}
+
 		Properties dialects = new Properties();
 		try {
 			InputStream dialectsInputStream = TemplateUtils.getTemplate(getClass(), "jpa-dialects.properties");
 			Assert.notNull(dialectsInputStream, "Could not acquire jpa-dialects.properties");
-			dialects.load(dialectsInputStream);			
+			dialects.load(dialectsInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
+		}
 
 		Element rootElement = persistence.getDocumentElement();
-		
 		Element persistenceUnit = XmlUtils.findFirstElement("/persistence/persistence-unit", rootElement);
-		
-		while (persistenceUnit.getFirstChild()!=null) {
+
+		while (persistenceUnit.getFirstChild() != null) {
 			persistenceUnit.removeChild(persistenceUnit.getFirstChild());
 		}
-		
-		//add provider element
+
+		// Add provider element
 		Element provider = persistence.createElement("provider");
-		provider.setTextContent(ormProvider.getAdapter());		
+		provider.setTextContent(ormProvider.getAdapter());
 		persistenceUnit.appendChild(provider);
-		
-		//add properties
+
+		// Add properties
 		Element properties = persistence.createElement("properties");
-		if (ormProvider.equals(OrmProvider.HIBERNATE)) {		
+		if (ormProvider.equals(OrmProvider.HIBERNATE)) {
 			properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.getKey() + "." + database.getKey()), persistence));
 			properties.appendChild(persistence.createComment("value='create' to build a new database on each run; value='update' to modify an existing database; value='create-drop' means the same as 'create' but also drops tables when Hibernate closes; value='validate' makes no changes to the database")); // ROO-627
 			properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", "create", persistence));
 			properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
-		} else if (ormProvider.equals(OrmProvider.OPENJPA)) {		
+		} else if (ormProvider.equals(OrmProvider.OPENJPA)) {
 			properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.getKey() + "." + database.getKey()), persistence));
 			properties.appendChild(persistence.createComment("value='buildSchema' to runtime forward map the DDL SQL; value='validate' makes no changes to the database")); // ROO-627
-			properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));			
-		} else if (ormProvider.equals(OrmProvider.ECLIPSELINK)) {		
+			properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
+		} else if (ormProvider.equals(OrmProvider.ECLIPSELINK)) {
 			properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.getKey() + "." + database.getKey()), persistence));
 			properties.appendChild(persistence.createComment("value='drop-and-create-tables' to build a new database on each run; value='create-tables' creates new tables if needed; value='none' makes no changes to the database")); // ROO-627
 			properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
-            properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));		
+			properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
+			properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 		}
 		persistenceUnit.appendChild(properties);
-		
+
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
 	}
-	
+
 	private Element createPropertyElement(String name, String value, Document doc) {
 		Element property = doc.createElement("property");
 		property.setAttribute("name", name);
 		property.setAttribute("value", value);
 		return property;
 	}
-	
+
 	private Element createRefElement(String name, String value, Document doc) {
 		Element property = doc.createElement("property");
 		property.setAttribute("name", name);
 		property.setAttribute("ref", value);
 		return property;
 	}
+
+	private void installMavenPlugin() {
+		String pomFilePath = "pom.xml";
+		String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
+		MutableFile pomMutableFile = null;
+
+		Document pom;
+		try {
+			if (fileManager.exists(pomPath)) {
+				pomMutableFile = fileManager.updateFile(pomPath);
+				pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+			} else {
+				throw new IllegalStateException("This command cannot be run before a project has been created.");
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element root = (Element) pom.getLastChild();
+
+		// Stop if the plugin is already installed
+		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='maven-antrun-plugin']", root) != null) {
+			return;
+		}
+
+		Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
+		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
+
+		// Now install the plugin itself
+		Element plugin = pom.createElement("plugin");
+		Element groupId = pom.createElement("groupId");
+		groupId.setTextContent("org.codehaus.mojo");
+		plugin.appendChild(groupId);
+		Element artifactId = pom.createElement("artifactId");
+		artifactId.setTextContent("openjpa-maven-plugin");
+		plugin.appendChild(artifactId);
+		Element version = pom.createElement("version");
+		version.setTextContent("1.0");
+		plugin.appendChild(version);
+
+		Element configuration = pom.createElement("configuration");
+		Element includes = pom.createElement("includes");
+		includes.setTextContent("**/*.class");
+		configuration.appendChild(includes);
+		Element excludes = pom.createElement("excludes");
+		excludes.setTextContent("**/*_Roo_*.class");
+		configuration.appendChild(excludes);
+		Element addDefaultConstructor = pom.createElement("addDefaultConstructor");
+		addDefaultConstructor.setTextContent("true");
+		configuration.appendChild(addDefaultConstructor);
+
+		Element toolProperties = pom.createElement("toolProperties");
+		Element property = pom.createElement("property");
+		Element name = pom.createElement("name");
+		name.setTextContent("directory");
+		property.appendChild(name);
+		Element value = pom.createElement("value");
+		value.setTextContent("otherdirectoryvalue");
+		property.appendChild(value);
+		toolProperties.appendChild(property);
+		configuration.appendChild(toolProperties);
+		plugin.appendChild(configuration);
+		
+		Element executions = pom.createElement("executions");
+		Element execution = pom.createElement("execution");
+		Element id = pom.createElement("id");
+		id.setTextContent("enhancer");
+		Element phase = pom.createElement("phase");
+		phase.setTextContent("process-classes");
+		execution.appendChild(phase);
+		Element goals = pom.createElement("goals");
+		Element goal = pom.createElement("goal");
+		goal.setTextContent("enhance");
+		goals.appendChild(goal);
+		execution.appendChild(goals);
+		executions.appendChild(execution);
+		plugin.appendChild(executions);
+		
+		Element pluginDependencies = pom.createElement("dependencies");
+
+		Element dependency = pom.createElement("dependency");
+		groupId = pom.createElement("groupId");
+		artifactId = pom.createElement("artifactId");
+		version = pom.createElement("version");
+
+		groupId.setTextContent("org.apache.openjpa");
+		artifactId.setTextContent("openjpa");
+		version.setTextContent("2.0.0-beta2");
+
+		dependency.appendChild(groupId);
+		dependency.appendChild(artifactId);
+		dependency.appendChild(version);
+		
+		Element exclusions = pom.createElement("exclusions");
+		exclusions.appendChild(getExclusion(pom, "commons-logging","commons-logging"));
+		exclusions.appendChild(getExclusion(pom, "org.apache.geronimo.specs","geronimo-jms_1.1_spec"));
+		dependency.appendChild(exclusions);
+		
+		pluginDependencies.appendChild(dependency);
+		plugin.appendChild(pluginDependencies);	
+
+		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
+
+		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+	}
+
+	private Element getExclusion(Document pom, String groupId, String artefactId) {
+		Element exclusion = pom.createElement("exclusion");
+
+		Element exclusionGroupId = pom.createElement("groupId");
+		exclusionGroupId.setTextContent(groupId);
+		exclusion.appendChild(exclusionGroupId);
+
+		Element exclusionArtifactId = pom.createElement("artifactId");
+		exclusionArtifactId.setTextContent(artefactId);
+		exclusion.appendChild(exclusionArtifactId);
+		
+		return exclusion;
+	}
+
+	// private void installMavenPlugin(){
+	// String pomFilePath = "pom.xml";
+	// String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
+	// MutableFile pomMutableFile = null;
+	//		
+	// Document pom;
+	// try {
+	// if (fileManager.exists(pomPath)) {
+	// pomMutableFile = fileManager.updateFile(pomPath);
+	// pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+	// } else {
+	// throw new IllegalStateException("This command cannot be run before a project has been created.");
+	// }
+	// } catch (Exception e) {
+	// throw new IllegalStateException(e);
+	// }
+	//		
+	// Element root = (Element) pom.getLastChild();
+	//		
+	// // Stop if the plugin is already installed
+	// if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='maven-antrun-plugin']", root) != null) {
+	// return;
+	// }
+	//		
+	// Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
+	// Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
+	//
+	// // Now install the plugin itself
+	// Element plugin = pom.createElement("plugin");
+	// Element groupId = pom.createElement("groupId");
+	// groupId.setTextContent("org.apache.maven.plugins");
+	// plugin.appendChild(groupId);
+	// Element artifactId = pom.createElement("artifactId");
+	// artifactId.setTextContent("maven-antrun-plugin");
+	// plugin.appendChild(artifactId);
+	// Element version = pom.createElement("version");
+	// version.setTextContent("1.3");
+	// plugin.appendChild(version);
+	// Element executions = pom.createElement("executions");
+	// Element execution = pom.createElement("execution");
+	// Element phase = pom.createElement("phase");
+	// phase.setTextContent("process-classes");
+	// execution.appendChild(phase);
+	// Element configuration = pom.createElement("configuration");
+	// Element tasks = pom.createElement("tasks");
+	// Element task = pom.createElement("taskdef");
+	// task.setAttribute("name", "openjpac");
+	// task.setAttribute("classname", "org.apache.openjpa.ant.PCEnhancerTask");
+	// task.setAttribute("classpathref","maven.compile.classpath");
+	// tasks.appendChild(task);
+	// Element openjpac = pom.createElement("openjpac");
+	// Element classpath = pom.createElement("classpath");
+	// classpath.setAttribute("refid","maven.compile.classpath");
+	// openjpac.appendChild(classpath);
+	// tasks.appendChild(openjpac);
+	// configuration.appendChild(tasks);
+	// execution.appendChild(configuration);
+	// Element goals = pom.createElement("goals");
+	// Element goal = pom.createElement("goal");
+	// goal.setTextContent("run");
+	// goals.appendChild(goal);
+	// execution.appendChild(goals);
+	// executions.appendChild(execution);
+	// plugin.appendChild(executions);
+	//		
+	// XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
+	//
+	// XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+	// }
 }

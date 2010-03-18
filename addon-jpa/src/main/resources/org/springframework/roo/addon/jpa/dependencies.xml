@@ -2,22 +2,22 @@
 <dependencies>
 	<databases>
 		<database id="HYPERSONIC">
-			<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" />
+			<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
 		</database>
 		<database id="POSTGRES">
-			<dependency org="org.postgresql" name="com.springsource.org.postgresql.jdbc3" rev="8.3.603" />
+			<dependency org="postgresql" name="postgresql" rev="8.4-701.jdbc3" />
 		</database>
 		<database id="MYSQL">
-			<dependency org="com.mysql.jdbc" name="com.springsource.com.mysql.jdbc" rev="5.1.6" />
+			<dependency org="mysql" name="mysql-connector-java" rev="5.1.12" />
 		</database>
 		<database id="H2">
-			<dependency org="com.h2database" name="com.springsource.org.h2" rev="1.0.71" />
+			<dependency org="com.h2database" name="h2" rev="1.2.131" />
 		</database>
 		<database id="MSSQL">
-			<dependency  org="net.sourceforge.jtds" name="com.springsource.net.sourceforge.jtds" rev="1.2.2" />
+			<dependency org="net.sourceforge.jtds" name="jtds" rev="1.2.4" />
 		</database>
 		<database id="SYBASE">
-			<dependency org="net.sourceforge.jtds" name="com.springsource.net.sourceforge.jtds" rev="1.2.2" />
+			<dependency org="net.sourceforge.jtds" name="jtds" rev="1.2.4" />
 		</database>
 		<database id="DB2">
 			<dependency org="com.ibm" name="db2jcc" rev="3.50.152" />
@@ -28,53 +28,181 @@
 	</databases>
 	<ormProviders>
 		<provider id="HIBERNATE">
-			<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.3.1.ga" />
-			<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.3.2.GA" />
-			<dependency org="net.sourceforge.ehcache" name="com.springsource.net.sf.ehcache" rev="1.4.1" />
-			<dependency org="edu.emory.mathcs.backport" name="com.springsource.edu.emory.mathcs.backport" rev="3.1.0" />
-			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
-		</provider>
-		<provider id="OPENJPA">
-			<!-- using maven central for now -->
-			<dependency org="org.apache.openjpa" name="openjpa" rev="1.2.1" />
-			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
-		<!-- 
-			EBR does not include the latest version yet: https://issuetracker.springsource.com/browse/EBR-229
-			<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" />
-			<dependency org="org.slf4j" name="com.springsource.slf4j.log4j" rev="1.5.6" />
-		 -->
-		</provider>
-		<provider id="ECLIPSELINK">	 
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.1.0" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.antlr" rev="1.1.0" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.asm" rev="1.1.0" />
-			<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.1.0" />
-		</provider>
-	</ormProviders>
-	<persistence>
-		<provider id="JPA">
-			<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" />
-			<dependency org="org.slf4j" name="com.springsource.slf4j.api" rev="1.5.6" />
 			<dependency>
 				<groupId>org.hibernate</groupId>
-				<artifactId>com.springsource.org.hibernate.validator</artifactId>
-				<version>4.0.0.GA</version>
+				<artifactId>hibernate-core</artifactId>
+				<version>3.5.0-CR-2</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.slf4j</groupId>
 						<artifactId>slf4j-api</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm-attrs</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.transaction</groupId>
+						<artifactId>jta</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
-			<dependency org="javax.validation" name="com.springsource.javax.validation" rev="1.0.0.GA" />
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>3.5.0-CR-2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>dom4j</groupId>
+						<artifactId>dom4j</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency org="javax.persistence" name="persistence-api" rev="1.0" />
+			<repository>
+				<id>JBoss Repo</id>
+				<name>JBoss Repo</name>
+				<url>http://repository.jboss.com/maven2</url>
+			</repository>
+		</provider>
+		<provider id="OPENJPA">
+			<dependency>
+				<groupId>org.apache.openjpa</groupId>
+				<artifactId>openjpa</artifactId>
+				<version>2.0.0-beta2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-jms_1.1_spec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency org="javax.persistence" name="persistence-api" rev="1.0" />
+		</provider>
+		<provider id="ECLIPSELINK">
+			<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.0.1" />
+			<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.0" />
+			<repository>
+				<id>EclipseLink Repo</id>
+				<name>EclipseLink Repo</name>
+				<url>http://mirrors.ibiblio.org/pub/mirrors/eclipse/rt/eclipselink/maven.repo</url>
+			</repository>
+		</provider>
+	</ormProviders>
+	<persistence>
+		<provider id="JPA">
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>4.0.2.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" />
 		</provider>
 	</persistence>
 	<spring>
-		<dependency org="javax.transaction" name="com.springsource.javax.transaction" rev="1.1.0" />
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" />
-		<dependency org="org.springframework" name="org.springframework.jdbc" rev="${spring.version}" />
-		<dependency org="org.springframework" name="org.springframework.orm" rev="${spring.version}" />
-		<dependency org="org.springframework" name="org.springframework.transaction" rev="${spring.version}" />
-		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.dbcp" rev="1.2.2.osgi" />
+		<dependency org="cglib" name="cglib-nodep" rev="2.2" />
+		<dependency org="javax.transaction" name="transaction-api" rev="1.1" />
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+			<version>${spring.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-pool</groupId>
+			<artifactId>commons-pool</artifactId>
+			<version>1.5.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-pool</groupId>
+					<artifactId>commons-pool</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xerces</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xerces</groupId>
+					<artifactId>xercesImpl</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</spring>
 </dependencies>
