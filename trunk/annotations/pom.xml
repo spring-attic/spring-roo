@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.springframework.roo.annotations</artifactId>
+	<groupId>org.springframework.roo</groupId>
+	<version>${roo.version}</version>
+	<packaging>jar</packaging>
+	<name>Spring Roo - Annotations (ASLv2/GPLv3 Dual Licensed)</name>
+
+    <scm>
+        <connection>scm:svn:https://src.springsource.com/svn/roo/trunk</connection>
+        <developerConnection>scm:svn:https://src.springsource.com/svn/roo/trunk</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Milestone Repository</name>
+            <url>s3://maven.springframework.org/milestone</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>spring-snapshot</id>
+            <name>Spring Snapshot Repository</name>
+            <url>s3://maven.springframework.org/snapshot</url>
+        </snapshotRepository>
+
+        <site>
+            <id>static.springframework.org</id>
+            <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo/org.springframework.roo.annotations</url>
+        </site>
+
+    </distributionManagement>
+
+	<build>
+		<plugins>
+      		<plugin>
+	      		<groupId>org.codehaus.mojo</groupId>
+	      		<artifactId>buildnumber-maven-plugin</artifactId>
+	      		<version>1.0-beta-3</version>
+	      		<executions>
+	        		<execution>
+	          			<phase>validate</phase>        
+	          			<goals>
+	            			<goal>create</goal>
+	          			</goals>
+	        		</execution>
+	      		</executions>
+	      		<configuration>
+	        		<doCheck>false</doCheck>
+	        		<doUpdate>false</doUpdate>
+	      		</configuration>
+      		</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Implementation-Build>${buildNumber}</Implementation-Build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.0.4</version>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+            </plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.3</version>
+				<executions>
+					<execution>
+						<id>generate-sources</id>
+						<phase>generate-sources</phase>
+						<configuration>
+							<tasks>
+								<echo message="Deleting current content" />
+								<delete dir="${basedir}/src/main/java/org/"/>
+								<echo message="Copying over annotations" />
+                                <copy todir="${basedir}/src/main/java/" preservelastmodified="true">
+                                    <fileset dir="${basedir}/..">
+                                        <include name="**/Roo*.java"/>
+                                        <exclude name="core/**"/>
+                                    </fileset>
+                                    <!-- Discard the module names prefixes from each file path -->
+									<regexpmapper from="^(.*).src.main.java.(.*)$$" to="\2"/>
+                                </copy>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<!-- Required so the regexpmapper can be used in the Ant task -->
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-apache-regexp</artifactId>
+						<version>1.7.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies/>
+
+    <reporting>
+        <excludeDefaults>true</excludeDefaults>
+        <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-overview-plugin</groupId>
+                <artifactId>maven-overview-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <scopes><scope>compile</scope></scopes>
+                    <height>2000</height>
+                    <width>2000</width>
+                    <exclusions>
+                        <exclusion>
+                            <groupId>org.springframework.roo</groupId>
+                            <artifactId>org.springframework.roo.bootstrap</artifactId>
+                        </exclusion>
+                    </exclusions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <id>html</id>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <breakiterator>true</breakiterator>
+                    <links>
+                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                        <link>http://junit.sourceforge.net/javadoc/</link>
+                        <link>http://static.springsource.org/spring/docs/3.0.0.RELEASE/api/</link>
+                        <link>http://jline.sourceforge.net/javadoc/</link>
+                        <link>http://jansi.fusesource.org/maven/1.1/apidocs/</link>
+                    </links>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jdepend-maven-plugin</artifactId>
+                <version>2.0-beta-2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.1</version>
+                <reportSets>
+                  <reportSet>
+                  </reportSet>
+                </reportSets>
+            </plugin>           
+        </plugins>
+    </reporting>
+
+</project>

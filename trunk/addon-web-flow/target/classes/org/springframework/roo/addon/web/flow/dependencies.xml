@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<springWebFlow>
+		<dependency org="org.springframework.webflow" name="org.springframework.binding" rev="2.0.8.RELEASE" />
+		<dependency org="org.springframework.webflow" name="org.springframework.webflow" rev="2.0.8.RELEASE" />
+		<dependency org="org.springframework.webflow" name="org.springframework.js" rev="2.0.8.RELEASE" />	
+		<dependency org="org.springframework" name="org.springframework.transaction" rev="${spring.version}" />
+		<dependency org="org.jboss.el" name="com.springsource.org.jboss.el" rev="2.0.0.GA" />	
+	</springWebFlow>
+</dependencies>

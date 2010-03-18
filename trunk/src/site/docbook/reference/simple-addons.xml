@@ -1,0 +1,24 @@
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="simple-addons" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Simple Add-Ons</title>
+  <para>TBC.</para>
+  <section xml:id="simple-addons-fast-creation">
+    <title>Fast Creation</title>
+    <para>TBC</para>
+  </section>
+  <section xml:id="simple-addons-shell-interaction">
+    <title>Shell Interaction</title>
+    <para>TBC</para>
+  </section>
+  <section xml:id="simple-addons-operations">
+    <title>Operations</title>
+    <para>TBC</para>
+  </section>
+  <section xml:id="simple-addons-packaging">
+    <title>Packaging</title>
+    <para>TBC</para>
+  </section>
+  <section xml:id="simple-addons-distribution">
+    <title>Distribution</title>
+    <para>TBC</para>
+  </section>
+</chapter>

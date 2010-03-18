@@ -1,0 +1,116 @@
+/*
+To use this file:
+
+sudo apt-get install graphviz
+dot -Tpdf dependencies.dot -o dependencies.pdf
+
+*/
+
+digraph architecture {
+ size="8.5,11";
+ ratio="compress";
+ center=true;
+ compound=true;
+
+ subgraph cluster_architecture {
+  label="Module Dependencies";
+  AddonMaven [label="Maven Addon Module",shape=box];  
+  AddonObject [label="Object Addon Module"];
+  Bootstrap [label="Bootstrap Module"];
+  Classpath [label="Classpath Module"];  
+  ClasspathJavaparser [label="Classpath JavaParser Module",shape=box];      
+  FileMonitor [label="File Monitor Module"];  
+  FileMonitorMetadata [label="File Monitor Metadata Module"];  
+  FileMonitorPolling [label="File Monitor Polling Module"];    
+  FileUndo [label="File Undo Module"];   
+  Metadata [label="Metadata Module"];  
+  Model [label="Model Module"];  
+  ProcessManager [label="Process Manager Module"];    
+  Project [label="Project Module"];  
+  Shell [label="Shell Module"];   
+  ShellJline [label="Shell jLine Module",shape=box];    
+  Support [label="Support Module"]; 
+  
+  AddonMaven -> Support;
+  AddonMaven -> ProcessManager;
+  AddonMaven -> Project;
+  AddonMaven -> Metadata;
+
+  AddonObject -> Classpath; 
+  AddonObject -> ProcessManager; 
+
+  Bootstrap -> Support;
+  Bootstrap -> Shell;
+  Bootstrap -> ShellJline;
+  Bootstrap -> Metadata;
+  Bootstrap -> ProcessManager;
+  Bootstrap -> FileUndo;
+  Bootstrap -> FileMonitor;
+  Bootstrap -> FileMonitorPolling;
+  Bootstrap -> FileMonitorMetadata;
+  Bootstrap -> Project;
+  Bootstrap -> AddonMaven;
+  Bootstrap -> AddonObject;
+  Bootstrap -> ClasspathJavaparser;
+
+  Classpath -> Support;
+  Classpath -> FileMonitorMetadata;
+  Classpath -> Project;
+
+  ClasspathJavaparser -> Classpath;
+  ClasspathJavaparser -> ProcessManager; 
+
+  FileMonitor -> Support;
+
+  FileMonitorMetadata -> Support;
+  FileMonitorMetadata -> FileMonitor;
+  FileMonitorMetadata -> Metadata;
+
+  FileMonitorPolling -> Support;
+  FileMonitorPolling -> FileMonitor;
+
+  FileUndo -> Support;
+
+  Metadata -> Support;
+
+  Model -> Support;
+
+  ProcessManager -> Support;
+  ProcessManager -> FileUndo;
+  ProcessManager -> FileMonitor;
+  ProcessManager -> FileMonitorMetadata;
+  ProcessManager -> Project;
+
+  Project -> Support;
+  Project -> Model;
+  Project -> FileMonitorMetadata;
+  Project -> Metadata;
+
+  Shell -> Support;
+
+  ShellJline -> Support;
+  ShellJline -> Shell;  
+ }
+
+ subgraph cluster_external_dependencies {
+  label="External Dependencies";
+  Bootstrap [label="Bootstrap Module"];
+  SpringFramework [label="Spring Framework",style=filled,fillcolor=yellow]; 
+  Slf4jCommonsLogging [label="SLF4J Commons Logging Bridge",style=filled,fillcolor=yellow]; 
+  Slf4jJuli [label="SLF4J Juli Bridge",style=filled,fillcolor=yellow]; 
+  JavaParser [label="JavaParser",style=filled,fillcolor=yellow];
+  JLine [label="JLine",style=filled,fillcolor=yellow]; 
+  ASM [label="ASM",style=filled,fillcolor=yellow];   
+
+  Bootstrap -> SpringFramework;
+
+  SpringFramework -> ASM;
+  SpringFramework -> Slf4jCommonsLogging;
+  SpringFramework -> Slf4jJuli; 
+
+  ClasspathJavaparser -> JavaParser;
+
+  ShellJline -> JLine;
+ }
+}
+

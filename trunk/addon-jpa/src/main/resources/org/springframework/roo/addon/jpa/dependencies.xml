@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<databases>
+		<database id="HYPERSONIC">
+			<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
+		</database>
+		<database id="POSTGRES">
+			<dependency org="postgresql" name="postgresql" rev="8.4-701.jdbc3" />
+		</database>
+		<database id="MYSQL">
+			<dependency org="mysql" name="mysql-connector-java" rev="5.1.12" />
+		</database>
+		<database id="H2">
+			<dependency org="com.h2database" name="h2" rev="1.2.131" />
+		</database>
+		<database id="MSSQL">
+			<dependency org="net.sourceforge.jtds" name="jtds" rev="1.2.4" />
+		</database>
+		<database id="SYBASE">
+			<dependency org="net.sourceforge.jtds" name="jtds" rev="1.2.4" />
+		</database>
+		<database id="DB2">
+			<dependency org="com.ibm" name="db2jcc" rev="3.50.152" />
+		</database>
+		<database id="ORACLE">
+			<dependency org="com.oracle" name="ojdbc14" rev="10.2.0.2" />
+		</database>
+	</databases>
+	<ormProviders>
+		<provider id="HIBERNATE">
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>3.5.0-CR-2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>cglib</groupId>
+						<artifactId>cglib</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.sf.ehcache</groupId>
+						<artifactId>ehcache</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>asm</groupId>
+						<artifactId>asm-attrs</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.transaction</groupId>
+						<artifactId>jta</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>3.5.0-CR-2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<repository>
+				<id>JBoss Repo</id>
+				<name>JBoss Repo</name>
+				<url>http://repository.jboss.com/maven2</url>
+			</repository>
+		</provider>
+		<provider id="OPENJPA">
+			<dependency>
+				<groupId>org.apache.openjpa</groupId>
+				<artifactId>openjpa</artifactId>
+				<version>2.0.0-beta2</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.geronimo.specs</groupId>
+						<artifactId>geronimo-jms_1.1_spec</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- dependency org="org.slf4j" name="slf4j-log4j12" rev="1.5.8" / -->
+		</provider>
+		<provider id="ECLIPSELINK">
+			<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.0.1" />
+			<repository>
+				<id>EclipseLink Repo</id>
+				<name>EclipseLink Repo</name>
+				<url>http://mirrors.ibiblio.org/pub/mirrors/eclipse/rt/eclipselink/maven.repo</url>
+			</repository>
+		</provider>
+	</ormProviders>
+	<persistence>
+		<provider id="JPA">
+			<dependency org="javax.persistence" name="persistence-api" rev="1.0" />
+			<dependency org="org.slf4j" name="slf4j-api" rev="1.5.8" />
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>com.springsource.org.hibernate.validator</artifactId>
+				<version>4.0.0.GA</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" />
+		</provider>
+	</persistence>
+	<spring>
+		<dependency org="javax.transaction" name="transaction-api" rev="1.1" />
+		<dependency org="commons-dbcp" name="commons-dbcp" rev="1.4" />
+		<dependency org="org.springframework" name="spring-jdbc" rev="${spring.version}" />
+		<dependency org="org.springframework" name="spring-orm" rev="${spring.version}" />
+		<dependency org="org.springframework" name="spring-tx" rev="${spring.version}" />
+	</spring>
+</dependencies>

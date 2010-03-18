@@ -1,0 +1,44 @@
+======================================================================
+LEGAL NOTICES
+======================================================================
+
+All code in this project is original work, except as disclosed below.
+
+-----------------------------------------------------------------------
+
+Licensed Software: Spring Framework
+Software Web Site: http://www.springframework.org
+Effective License: Apache License, Version 2.0
+License Info Page: http://www.apache.org/licenses/LICENSE-2.0.html
+
+Statement as required by the license:
+
+  "This product includes software developed by the Spring Framework
+   Project (http://www.springframework.org)"
+
+Spring Framework is not a dependency of this module. It is noted in the
+legal section because the following files were originally derived from
+Spring Framework:
+
+org.springframework.roo.support.ant.AntPatchStringMatcher
+org.springframework.roo.support.ant.AntPathMatcher
+org.springframework.roo.support.ant.PathMatcher
+org.springframework.roo.support.style.DefaultToStringStyler
+org.springframework.roo.support.style.DefaultValueStyler
+org.springframework.roo.support.style.StylerUtils
+org.springframework.roo.support.style.ToStringCreator
+org.springframework.roo.support.style.ToStringStyler
+org.springframework.roo.support.style.ValueStyler
+org.springframework.roo.support.util.Assert
+org.springframework.roo.support.util.ClassUtils
+org.springframework.roo.support.util.CollectionUtils
+org.springframework.roo.support.util.DomUtils
+org.springframework.roo.support.util.CollectionUtils
+org.springframework.roo.support.util.FileCopyUtils
+org.springframework.roo.support.util.ObjectUtils
+org.springframework.roo.support.util.ReflectionUtils
+org.springframework.roo.support.util.StringUtils
+
+-----------------------------------------------------------------------
+
+[end]

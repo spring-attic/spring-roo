@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dependencies>
+	<springWebMvc>
+		<dependency org="org.springframework" name="spring-web" rev="${spring.version}" />
+		<dependency org="org.springframework" name="spring-webmvc" rev="${spring.version}" />
+		<dependency>
+			<groupId>org.springframework.webflow</groupId>
+			<artifactId>spring-js</artifactId>
+			<version>2.0.8.RELEASE</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-beans</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context-support</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.2.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency org="org.tuckey" name="com.springsource.org.tuckey.web.filters.urlrewrite" rev="3.1.0" />
+		<dependency org="javax.servlet" name="com.springsource.javax.servlet.jsp.jstl" rev="1.2.0" />
+		<dependency org="org.apache.el" name="com.springsource.org.apache.el" rev="6.0.20" />
+		<dependency org="org.joda" name="com.springsource.org.joda.time" rev="1.6.0" />
+		<dependency org="org.apache.tiles" name="tiles-jsp" rev="2.2.1" />
+		<dependency org="org.apache.tiles" name="tiles-core" rev="2.2.1" />
+	</springWebMvc>
+</dependencies>

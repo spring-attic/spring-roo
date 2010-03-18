@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.parent</artifactId>
+		<version>${roo.version}</version>
+	</parent>
+	<artifactId>org.springframework.roo.shell.jline</artifactId>
+	<packaging>jar</packaging>
+	<name>Spring Roo - Shell (JLine Implementation)</name>
+	<dependencies>
+        <!-- ROO modules -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.shell</artifactId>
+			<version>${roo.version}</version>
+		</dependency>
+        <!-- External modules -->
+		<dependency>
+			<groupId>net.sourceforge.jline</groupId>
+			<artifactId>com.springsource.jline</artifactId>
+			<!-- S2-A is a private patched version: see ROO-350 for details -->
+			<version>0.9.94.S2-A</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fusesource.jansi</groupId>
+			<artifactId>com.springsource.org.fusesource.jansi</artifactId>
+			<version>1.1.0</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>com.springsource.com.sun.jna</artifactId>
+			<version>3.2.3</version>
+			<scope>runtime</scope>
+		</dependency>
+	</dependencies>
+</project>
