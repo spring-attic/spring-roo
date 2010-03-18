@@ -680,7 +680,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
 					bodyBuilder.appendFormalLine("conversionService.addConverter(new org.springframework.core.convert.converter.Converter<" + conversionType.getSimpleTypeName() + ", String>() {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("@Override");
 					bodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
 					bodyBuilder.indent();
 					
