@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -45,8 +44,6 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class JspViewManager {
-	
-	private Logger log = Logger.getLogger(JspViewManager.class.getName());
 	
 	private List<FieldMetadata> fields; 
 	private BeanInfoMetadata beanInfoMetadata; 
@@ -113,7 +110,7 @@ public class JspViewManager {
 				readableFieldNames.append(",");
 			}
 			if(++fieldCounter < 7) {
-				fieldNames.append(field.getFieldName().getSymbolName());
+				fieldNames.append(Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())));
 				readableFieldNames.append(field.getFieldName().getReadableSymbolName());
 			}
 		}
@@ -173,7 +170,6 @@ public class JspViewManager {
 		for (FieldMetadata field : fields) {
 			//ignoring java.util.Map field types (see ROO-194)
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
-//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
 				continue;
 			}
 			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
@@ -184,10 +180,10 @@ public class JspViewManager {
 							.build();
 			if (field.getFieldType().equals(new JavaType(Date.class.getName()))) {
 				fieldDisplay.setAttribute("date", "true");
-				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}");
+				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
 			} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				fieldDisplay.setAttribute("calendar", "true");
-				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}");
+				fieldDisplay.setAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}");
 			}
 			fieldDisplay.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldDisplay));
 
@@ -308,7 +304,6 @@ public class JspViewManager {
 			}
 			//ignoring java.util.Map field types (see ROO-194)
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
-//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
 				continue;
 			}
 			Assert.notNull(field, "could not find field '" + paramName + "' in '" + type.getFullyQualifiedTypeName() + "'");
@@ -357,7 +352,7 @@ public class JspViewManager {
 				}
 			} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Date.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 				fieldElement = new XmlElementBuilder("field:datetime", document)
-									.addAttribute("dateTimePattern", "${" + entityName + "_" + paramName + "_date_format}")
+									.addAttribute("dateTimePattern", "${" + entityName + "_" + paramName.getSymbolName().toLowerCase() + "_date_format}")
 								.build();
 
 			} else {	
@@ -384,7 +379,6 @@ public class JspViewManager {
 			
 			//ignoring java.util.Map field types (see ROO-194)
 			if (fieldType.equals(new JavaType(Map.class.getName()))) {
-//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
 				continue;
 			}
 			if (fieldType.getFullyQualifiedTypeName().equals(Set.class.getName())) {
@@ -436,7 +430,7 @@ public class JspViewManager {
 					} 
 					// only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-							fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName + "_date_format}").build();
+							fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}").build();
 						
 						if (null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future"))) {
 							fieldElement.setAttribute("future", "true");
