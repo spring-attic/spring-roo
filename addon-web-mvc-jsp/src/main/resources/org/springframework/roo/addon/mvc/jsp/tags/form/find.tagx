@@ -15,9 +15,9 @@
     <div id="_title_div">
         <spring:message arguments="${label}" code="entity.find" var="title_msg"/>
         <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_div', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
-        <spring:url value="${path}?find=${finderName}" var="form_url"/>
+        <spring:url value="${path}" var="form_url" />
         <form:form action="${form_url}" method="GET">
-            <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
+            <input type="hidden" name="find" value="${finderName}" />
            	<jsp:doBody />
            	<div class="submit" id="${finderName}_submit">
                 <spring:message code="button.find" var="find_button"/>
