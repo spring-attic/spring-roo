@@ -171,6 +171,11 @@ public class JspViewManager {
 
 		//add field:display elements for each field
 		for (FieldMetadata field : fields) {
+			//ignoring java.util.Map field types (see ROO-194)
+			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+//				log.warning("Roo scaffolding does not support Map field type: (" + fieldType.getNameIncludingTypeParameters() + "." + field.getFieldName() + "). This field should be managed manually.");
+				continue;
+			}
 			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element fieldDisplay = new XmlElementBuilder("field:display", document)
 								.addAttribute("id", "s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
