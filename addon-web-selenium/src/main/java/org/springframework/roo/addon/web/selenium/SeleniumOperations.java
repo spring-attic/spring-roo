@@ -130,7 +130,7 @@ public class SeleniumOperations {
 
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
 		
-		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/form"));							
+		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));							
 //		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
 		
 		for (FieldMetadata field : getEligableFields()) {
@@ -394,7 +394,7 @@ public class SeleniumOperations {
 		td1.setTextContent("open");
 		
 		Node td2 = tr.appendChild(document.createElement("td"));
-		td2.setTextContent(linkTarget+"?lang=" + Locale.getDefault());
+		td2.setTextContent(linkTarget + (linkTarget.contains("?") ? "&" : "?") + "lang=" + Locale.getDefault());
 		
 		Node td3 = tr.appendChild(document.createElement("td"));
 		td3.setTextContent(" ");
