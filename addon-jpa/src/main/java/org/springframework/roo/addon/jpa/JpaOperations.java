@@ -381,6 +381,7 @@ public class JpaOperations {
 		Element execution = pom.createElement("execution");
 		Element id = pom.createElement("id");
 		id.setTextContent("enhancer");
+		execution.appendChild(id);
 		Element phase = pom.createElement("phase");
 		phase.setTextContent("process-classes");
 		execution.appendChild(phase);
