@@ -20,6 +20,7 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,6 +39,8 @@ public class JpaOperations {
 	private PathResolver pathResolver;
 	private MetadataService metadataService;
 	private ProjectOperations projectOperations;
+	
+	private static final String OPENJPA_VERSION = "2.0.0-beta2";
 
 	public JpaOperations(FileManager fileManager, PathResolver pathResolver, MetadataService metadataService, ProjectOperations projectOperations) {
 		Assert.notNull(fileManager, "File manager required");
@@ -343,165 +346,51 @@ public class JpaOperations {
 		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
 
 		// Now install the plugin itself
-		Element plugin = pom.createElement("plugin");
-		Element groupId = pom.createElement("groupId");
-		groupId.setTextContent("org.codehaus.mojo");
-		plugin.appendChild(groupId);
-		Element artifactId = pom.createElement("artifactId");
-		artifactId.setTextContent("openjpa-maven-plugin");
-		plugin.appendChild(artifactId);
-		Element version = pom.createElement("version");
-		version.setTextContent("1.0");
-		plugin.appendChild(version);
-
-		Element configuration = pom.createElement("configuration");
-		Element includes = pom.createElement("includes");
-		includes.setTextContent("**/*.class");
-		configuration.appendChild(includes);
-		Element excludes = pom.createElement("excludes");
-		excludes.setTextContent("**/*_Roo_*.class");
-		configuration.appendChild(excludes);
-		Element addDefaultConstructor = pom.createElement("addDefaultConstructor");
-		addDefaultConstructor.setTextContent("true");
-		configuration.appendChild(addDefaultConstructor);
-
-		Element toolProperties = pom.createElement("toolProperties");
-		Element property = pom.createElement("property");
-		Element name = pom.createElement("name");
-		name.setTextContent("directory");
-		property.appendChild(name);
-		Element value = pom.createElement("value");
-		value.setTextContent("otherdirectoryvalue");
-		property.appendChild(value);
-		toolProperties.appendChild(property);
-		configuration.appendChild(toolProperties);
-		plugin.appendChild(configuration);
-		
-		Element executions = pom.createElement("executions");
-		Element execution = pom.createElement("execution");
-		Element id = pom.createElement("id");
-		id.setTextContent("enhancer");
-		execution.appendChild(id);
-		Element phase = pom.createElement("phase");
-		phase.setTextContent("process-classes");
-		execution.appendChild(phase);
-		Element goals = pom.createElement("goals");
-		Element goal = pom.createElement("goal");
-		goal.setTextContent("enhance");
-		goals.appendChild(goal);
-		execution.appendChild(goals);
-		executions.appendChild(execution);
-		plugin.appendChild(executions);
-		
-		Element pluginDependencies = pom.createElement("dependencies");
-
-		Element dependency = pom.createElement("dependency");
-		groupId = pom.createElement("groupId");
-		artifactId = pom.createElement("artifactId");
-		version = pom.createElement("version");
-
-		groupId.setTextContent("org.apache.openjpa");
-		artifactId.setTextContent("openjpa");
-		version.setTextContent("2.0.0-beta2");
-
-		dependency.appendChild(groupId);
-		dependency.appendChild(artifactId);
-		dependency.appendChild(version);
-		
-		Element exclusions = pom.createElement("exclusions");
-		exclusions.appendChild(getExclusion(pom, "commons-logging","commons-logging"));
-		exclusions.appendChild(getExclusion(pom, "org.apache.geronimo.specs","geronimo-jms_1.1_spec"));
-		dependency.appendChild(exclusions);
-		
-		pluginDependencies.appendChild(dependency);
-		plugin.appendChild(pluginDependencies);	
+		Element plugin = new XmlElementBuilder("plugin", pom)
+								.addChild(new XmlElementBuilder("groupId", pom).setText("org.codehaus.mojo").build())
+								.addChild(new XmlElementBuilder("artifactId", pom).setText("openjpa-maven-plugin").build())
+								.addChild(new XmlElementBuilder("version", pom).setText("1.0").build())
+								.addChild(new XmlElementBuilder("configuration", pom)
+											.addChild(new XmlElementBuilder("includes", pom).setText("**/*.class").build())
+											.addChild(new XmlElementBuilder("excludes", pom).setText("**/*_Roo_*.class").build())
+											.addChild(new XmlElementBuilder("addDefaultConstructor", pom).setText("true").build())
+											.addChild(new XmlElementBuilder("toolProperties", pom)
+														.addChild(new XmlElementBuilder("property", pom)
+																	.addChild(new XmlElementBuilder("name", pom).setText("directory").build())
+																	.addChild(new XmlElementBuilder("value", pom).setText("otherdirectoryvalue").build())
+																.build())
+													.build())
+										.build())
+								.addChild(new XmlElementBuilder("executions", pom)
+														.addChild(new XmlElementBuilder("execution", pom)
+																		.addChild(new XmlElementBuilder("id", pom).setText("enhancer").build())
+																		.addChild(new XmlElementBuilder("phase", pom).setText("compile").build())
+																		.addChild(new XmlElementBuilder("goals", pom)
+																						.addChild(new XmlElementBuilder("goal", pom).setText("enhance").build())
+																					.build())
+																	.build())
+													.build())
+								.addChild(new XmlElementBuilder("dependencies", pom)
+														.addChild(new XmlElementBuilder("dependency", pom)
+																		.addChild(new XmlElementBuilder("groupId", pom).setText("org.apache.openjpa").build())
+																		.addChild(new XmlElementBuilder("artifactId", pom).setText("openjpa").build())
+																		.addChild(new XmlElementBuilder("version", pom).setText(OPENJPA_VERSION).build())
+																		.addChild(new XmlElementBuilder("exclusions", pom)
+																						.addChild(new XmlElementBuilder("exclusion", pom)
+																										.addChild(new XmlElementBuilder("groupId", pom).setText("commons-logging").build())
+																										.addChild(new XmlElementBuilder("artifactId", pom).setText("commons-logging").build())
+																									.build())
+																						.addChild(new XmlElementBuilder("exclusion", pom)
+																										.addChild(new XmlElementBuilder("groupId", pom).setText("org.apache.geronimo.specs").build())
+																										.addChild(new XmlElementBuilder("artifactId", pom).setText("geronimo-jms_1.1_spec").build())
+																									.build())
+																					.build())
+																	.build())
+													.build())
+							.build();
 
 		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
 
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 	}
-
-	private Element getExclusion(Document pom, String groupId, String artefactId) {
-		Element exclusion = pom.createElement("exclusion");
-
-		Element exclusionGroupId = pom.createElement("groupId");
-		exclusionGroupId.setTextContent(groupId);
-		exclusion.appendChild(exclusionGroupId);
-
-		Element exclusionArtifactId = pom.createElement("artifactId");
-		exclusionArtifactId.setTextContent(artefactId);
-		exclusion.appendChild(exclusionArtifactId);
-		
-		return exclusion;
-	}
-
-	// private void installMavenPlugin(){
-	// String pomFilePath = "pom.xml";
-	// String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
-	// MutableFile pomMutableFile = null;
-	//		
-	// Document pom;
-	// try {
-	// if (fileManager.exists(pomPath)) {
-	// pomMutableFile = fileManager.updateFile(pomPath);
-	// pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
-	// } else {
-	// throw new IllegalStateException("This command cannot be run before a project has been created.");
-	// }
-	// } catch (Exception e) {
-	// throw new IllegalStateException(e);
-	// }
-	//		
-	// Element root = (Element) pom.getLastChild();
-	//		
-	// // Stop if the plugin is already installed
-	// if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='maven-antrun-plugin']", root) != null) {
-	// return;
-	// }
-	//		
-	// Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
-	// Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
-	//
-	// // Now install the plugin itself
-	// Element plugin = pom.createElement("plugin");
-	// Element groupId = pom.createElement("groupId");
-	// groupId.setTextContent("org.apache.maven.plugins");
-	// plugin.appendChild(groupId);
-	// Element artifactId = pom.createElement("artifactId");
-	// artifactId.setTextContent("maven-antrun-plugin");
-	// plugin.appendChild(artifactId);
-	// Element version = pom.createElement("version");
-	// version.setTextContent("1.3");
-	// plugin.appendChild(version);
-	// Element executions = pom.createElement("executions");
-	// Element execution = pom.createElement("execution");
-	// Element phase = pom.createElement("phase");
-	// phase.setTextContent("process-classes");
-	// execution.appendChild(phase);
-	// Element configuration = pom.createElement("configuration");
-	// Element tasks = pom.createElement("tasks");
-	// Element task = pom.createElement("taskdef");
-	// task.setAttribute("name", "openjpac");
-	// task.setAttribute("classname", "org.apache.openjpa.ant.PCEnhancerTask");
-	// task.setAttribute("classpathref","maven.compile.classpath");
-	// tasks.appendChild(task);
-	// Element openjpac = pom.createElement("openjpac");
-	// Element classpath = pom.createElement("classpath");
-	// classpath.setAttribute("refid","maven.compile.classpath");
-	// openjpac.appendChild(classpath);
-	// tasks.appendChild(openjpac);
-	// configuration.appendChild(tasks);
-	// execution.appendChild(configuration);
-	// Element goals = pom.createElement("goals");
-	// Element goal = pom.createElement("goal");
-	// goal.setTextContent("run");
-	// goals.appendChild(goal);
-	// execution.appendChild(goals);
-	// executions.appendChild(execution);
-	// plugin.appendChild(executions);
-	//		
-	// XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
-	//
-	// XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
-	// }
 }
