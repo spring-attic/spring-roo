@@ -9,7 +9,7 @@
 	<properties>
 		<roo.version>1.1.0.M1</roo.version>
 		<spring.version>3.0.2.BUILD-SNAPSHOT</spring.version>
-		<aspectj.version>1.6.8</aspectj.version>
+		<aspectj.version>1.6.9.BUILD-SNAPSHOT</aspectj.version>
 		<slf4j.version>1.5.11</slf4j.version>
 	</properties>
 	<repositories>
