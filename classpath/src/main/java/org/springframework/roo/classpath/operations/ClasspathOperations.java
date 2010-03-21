@@ -202,7 +202,7 @@ public class ClasspathOperations {
 		
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
-			projectOperations.dependencyUpdate(new Dependency("javax.validation", "com.springsource.javax.validation", "1.0.0.GA"));
+			projectOperations.dependencyUpdate(new Dependency("javax.validation", "validation-api", "1.0.0.GA"));
 		}
 		
 		mutableTypeDetails.addField(fieldMetadata);
