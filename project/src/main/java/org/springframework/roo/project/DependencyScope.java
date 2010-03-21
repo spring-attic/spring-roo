@@ -9,7 +9,7 @@ package org.springframework.roo.project;
 public enum DependencyScope {
 	COMPILE,
 	PROVIDED,
-	RUN,
+	RUNTIME,
 	TEST,
 	SYSTEM,
 	IMPORT;
