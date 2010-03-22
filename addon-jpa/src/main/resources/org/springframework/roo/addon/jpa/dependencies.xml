@@ -151,7 +151,7 @@
 	</persistence>
 	<spring>
 		<dependency org="cglib" name="cglib-nodep" rev="2.2" />
-		<dependency org="javax.transaction" name="transaction-api" rev="1.1" />
+		<dependency org="javax.transaction" name="jta" rev="1.1" />
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
