@@ -40,6 +40,7 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -116,7 +117,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			builder.addMethod(getRegisterConvertersMethod());
 		}
 		if (specialDomainTypes.size() > 0) {
-			builder.addMethod(getAddReferenceDataMethod());
+			for (MethodMetadata method : getPopulateMethods()) {
+				builder.addMethod(method);
+			}
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
@@ -346,9 +349,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + entityName + ");");
-		if (specialDomainTypes.size() > 0) {
-			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
-		}
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -389,9 +389,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
-		if (specialDomainTypes.size() > 0) {
-			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
-		}
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -439,9 +436,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + entityName + ");");
-		if (specialDomainTypes.size() > 0) {
-			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
-		}
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -492,9 +486,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("if (" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + " == null) throw new IllegalArgumentException(\"An Identifier is required\");");
 		}
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
-		if (specialDomainTypes.size() > 0) {
-			bodyBuilder.appendFormalLine("addReferenceData(modelMap);");
-		}
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -529,6 +520,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			} else if (isEnumType(javaType)) {
 				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 				Assert.notNull(pluralMetadata, "Could not determine plural for '" + javaType.getFullyQualifiedTypeName() + "' type");
+
 				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 			} else if (isSpecialType(javaType)) {
 				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
@@ -539,8 +531,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			needModelMap = true;
 		}
 		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
-			setupFinderDateTimeFormatAttributes(methodMetadata.getParameterNames(), types, bodyBuilder, true);
-			needModelMap = true;
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + methodMetadata.getMethodName().getSymbolName() + "\";");
 
@@ -621,7 +612,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
 		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Calendar.class.getName()))) {
-			setupFinderDateTimeFormatAttributes(paramNames, paramTypes, bodyBuilder, false);
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
@@ -645,9 +636,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		bodyBuilder.appendFormalLine("if (binder.getConversionService() instanceof org.springframework.core.convert.support.GenericConversionService) {");
+		JavaType conversionService = new JavaType("org.springframework.core.convert.support.GenericConversionService");
+		String conversionServiceSimpleName = conversionService.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		bodyBuilder.appendFormalLine("if (binder.getConversionService() instanceof " + conversionServiceSimpleName + ") {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("org.springframework.core.convert.support.GenericConversionService conversionService = (org.springframework.core.convert.support.GenericConversionService) binder.getConversionService();");
+		bodyBuilder.appendFormalLine(conversionServiceSimpleName + " conversionService = (" + conversionServiceSimpleName + ") binder.getConversionService();");
 		
 		Set<JavaType> typesForConversion = specialDomainTypes;
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
@@ -677,8 +670,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				}
 				
 				if (elegibleMethods.size() > 0) {
+					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
 					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
-					bodyBuilder.appendFormalLine("conversionService.addConverter(new org.springframework.core.convert.converter.Converter<" + conversionType.getSimpleTypeName() + ", String>() {");
+					bodyBuilder.appendFormalLine("conversionService.addConverter(new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
 					bodyBuilder.indent();
 					bodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
 					bodyBuilder.indent();
@@ -708,7 +702,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
-		return new DefaultMethodMetadata(getId(), Modifier.PRIVATE, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
 	}
 	
 	private MethodMetadata getDateTimeFormatHelperMethod() {
@@ -727,38 +721,56 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Iterator<Map.Entry<JavaSymbolName, String>> it = dateTypes.entrySet().iterator();
 		while (it.hasNext()) {
 			Entry<JavaSymbolName, String> entry = it.next();
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + entry.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+			JavaType dateTimeFormat = new JavaType("org.joda.time.format.DateTimeFormat");
+			String dateTimeFormatSimple = dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+			JavaType localeContextHolder = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
+			String localeContextHolderSimple = localeContextHolder.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue() + "\", " + localeContextHolderSimple + ".getLocale()));");
 		}
 	
-		return new DefaultMethodMetadata(getId(), Modifier.PRIVATE, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
-	private MethodMetadata getAddReferenceDataMethod() {
-		JavaSymbolName addReferenceData = new JavaSymbolName("addReferenceData");
-		MethodMetadata addReferenceDataMethod = methodExists(addReferenceData);
-		if (addReferenceDataMethod != null)
-			return addReferenceDataMethod;
-	
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), new ArrayList<AnnotationMetadata>()));
-		
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("modelMap"));
-		
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		
+	private List<MethodMetadata> getPopulateMethods() {
+		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		for (JavaType type: specialDomainTypes) {
+			if (type.equals(beanInfoMetadata.getJavaBean())) {
+				continue;
+			}
+			String plural = "";
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+	
 			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 			if (typeEntityMetadata != null) {
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				bodyBuilder.appendFormalLine("return " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "();");
+				plural = typeEntityMetadata.getPlural();
 			} else if (isEnumType(type)) {
 				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
+				plural = pluralMetadata.getPlural();
+				JavaType arrays = new JavaType("java.util.Arrays");
+				bodyBuilder.appendFormalLine("return " + arrays.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+			}
+			
+			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + plural);
+			MethodMetadata addReferenceDataMethod = methodExists(populateMethodName);
+			if (addReferenceDataMethod != null)
+				continue;
+			
+			if (plural.length() > 0) {
+				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+				List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+				attributes.add(new StringAttributeValue(new JavaSymbolName("value"), plural.toLowerCase()));
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
+				
+				List<JavaType> typeParams = new ArrayList<JavaType>();
+				typeParams.add(type);
+				JavaType returnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams);
+			
+				methods.add(new DefaultMethodMetadata(getId(), Modifier.PUBLIC, populateMethodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput()));
 			}
 		}
-	
-		return new DefaultMethodMetadata(getId(), Modifier.PRIVATE, addReferenceData, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		return methods;
 	}
 
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
@@ -778,14 +790,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private SortedSet<JavaType> getSpecialDomainTypes() {
 		SortedSet<JavaType> specialTypes = new TreeSet<JavaType>();
-
 		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-
 			// not interested in identifiers and version fields
 			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
 				continue;
 			}
-
 			// not interested in fields that are not exposed via a mutator
 			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata)) {
@@ -810,14 +819,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private Map<JavaSymbolName, String> getDatePatterns() {
 		Map<JavaSymbolName, String> dates = new HashMap<JavaSymbolName, String>();
-
 		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-
 			// not interested in identifiers and version fields
 			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
 				continue;
 			}
-
 			// not interested in fields that are not exposed via a mutator
 			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata)) {
@@ -830,6 +836,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					if (annotation.getAnnotationType().equals(new JavaType("org.springframework.format.annotation.DateTimeFormat"))) {
 						if (annotation.getAttributeNames().contains(new JavaSymbolName("style"))) {
 							dates.put(fieldMetadata.getFieldName(), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+							for (String finder: entityMetadata.getDynamicFinders()) {
+								if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
+									dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+									dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+								}
+							}
 						}
 					}
 				}
@@ -870,32 +882,32 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return false;
 	}
 	
-	private void setupFinderDateTimeFormatAttributes(List<JavaSymbolName> paramNames, List<JavaType> paramTypes, InvocableMemberBodyBuilder bodyBuilder, boolean formMethod) {
-		for (int i = 0; i < paramTypes.size(); i++) {
-			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
-				JavaSymbolName fieldName = null;
-				if (paramNames.get(i).getSymbolName().startsWith("max") || paramNames.get(i).getSymbolName().startsWith("min")) {
-					fieldName = new JavaSymbolName(StringUtils.uncapitalize(paramNames.get(i).getSymbolName().substring(3)));
-				} else {
-					fieldName = paramNames.get(i);
-				}
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
-				if (field != null) {
-					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-					if (annotation != null) {
-						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
-						if (styleValue != null) {
-							if (formMethod) {
-								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + paramNames.get(i).getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
-							} else {
-								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+//	private void setupFinderDateTimeFormatAttributes(List<JavaSymbolName> paramNames, List<JavaType> paramTypes, InvocableMemberBodyBuilder bodyBuilder, boolean formMethod) {
+//		for (int i = 0; i < paramTypes.size(); i++) {
+//			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
+//				JavaSymbolName fieldName = null;
+//				if (paramNames.get(i).getSymbolName().startsWith("max") || paramNames.get(i).getSymbolName().startsWith("min")) {
+//					fieldName = new JavaSymbolName(StringUtils.uncapitalize(paramNames.get(i).getSymbolName().substring(3)));
+//				} else {
+//					fieldName = paramNames.get(i);
+//				}
+//				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
+//				if (field != null) {
+//					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+//					if (annotation != null) {
+//						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
+//						if (styleValue != null) {
+//							if (formMethod) {
+//								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + paramNames.get(i).getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+//							} else {
+//								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//	}
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
