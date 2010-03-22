@@ -189,11 +189,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
-		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	public String toString() {

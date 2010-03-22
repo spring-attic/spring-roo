@@ -41,6 +41,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Any getter produced by this metadata is automatically included in the {@link BeanInfoMetadata}.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -750,7 +751,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
 	/**
@@ -819,7 +824,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	/**
