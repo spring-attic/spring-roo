@@ -338,7 +338,7 @@ public class JpaOperations {
 		Element root = (Element) pom.getLastChild();
 
 		// Stop if the plugin is already installed
-		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='maven-antrun-plugin']", root) != null) {
+		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) != null) {
 			return;
 		}
 
