@@ -104,6 +104,11 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			<repository>
+				<id>JBoss Repo</id>
+				<name>JBoss Repo</name>
+				<url>http://repository.jboss.com/maven2</url>
+			</repository>
 		</provider>
 		<provider id="ECLIPSELINK">
 			<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.0.1" />
@@ -112,6 +117,11 @@
 				<id>EclipseLink Repo</id>
 				<name>EclipseLink Repo</name>
 				<url>http://mirrors.ibiblio.org/pub/mirrors/eclipse/rt/eclipselink/maven.repo</url>
+			</repository>
+			<repository>
+				<id>JBoss Repo</id>
+				<name>JBoss Repo</name>
+				<url>http://repository.jboss.com/maven2</url>
 			</repository>
 		</provider>
 	</ormProviders>
