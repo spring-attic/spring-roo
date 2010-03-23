@@ -68,7 +68,7 @@ public class BundleSymbolicNameConverter implements Converter {
 				for (Bundle bundle : bundles) {
 					String bsn = bundle.getSymbolicName();
 					if (bsn != null && bsn.startsWith(originalUserInput)) {
-						completions.add(bundle.getSymbolicName());
+						completions.add(bsn);
 					}
 				}
 			}
