@@ -1,12 +1,13 @@
 package org.springframework.roo.addon.mvc.jsp;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for Web-related add-on to be used by the Roo shell.
@@ -15,15 +16,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class JspCommands implements CommandMarker {
 	
-	private JspOperations jspOperations;
-	
-	public JspCommands(JspOperations webFlowOperations) {
-		Assert.notNull(webFlowOperations, "Jms operations required");
-		this.jspOperations = webFlowOperations;
-	}
+	@Reference private JspOperations jspOperations;
 	
 	@CliAvailabilityIndicator("controller class")
 	public boolean isInstallWebFlowAvailable() {

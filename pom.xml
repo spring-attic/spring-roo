@@ -6,13 +6,18 @@
     <packaging>pom</packaging>
     <version>1.1.0.M1</version>
     <name>Spring Roo</name>
+    <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
+    <inceptionYear>2009</inceptionYear>
+    <url>http://static.springframework.org/spring-roo/site/index.html</url>
 
     <modules>
-        <module>annotations</module>
+        <module>bootstrap</module>
+        <module>startlevel</module>
         <module>support</module>
-        <module>model</module>
         <module>shell</module>
         <module>shell-jline</module>
+        <module>felix</module>
+        <module>model</module>
         <module>metadata</module>
         <module>file-undo</module>
         <module>file-monitor</module>
@@ -22,44 +27,41 @@
         <module>classpath</module>
         <module>classpath-javaparser</module>
         <module>addon-maven</module>
+        <module>addon-beaninfo</module>
+        <module>addon-tostring</module>
+        <module>addon-javabean</module>
         <module>addon-plural</module>
         <module>addon-propfiles</module>
-        <module>addon-beaninfo</module>
         <module>addon-configurable</module>
         <module>addon-email</module>
-        <module>addon-javabean</module>
         <module>addon-jpa</module>
         <module>addon-jms</module>
+        <module>addon-entity</module>
         <module>addon-finder</module>
         <module>addon-logging</module>
-        <module>addon-entity</module>
         <module>addon-property-editor</module>
-        <module>addon-security</module>
-        <module>addon-tostring</module>
-        <module>addon-web-flow</module>
-        <module>addon-web-mvc-controller</module>
-        <module>addon-web-mvc-jsp</module>
-        <module>addon-web-menu</module>
-        <module>addon-web-selenium</module>
         <module>addon-dod</module>
         <module>addon-test</module>
         <module>addon-backup</module>
         <module>addon-serializable</module>
-
-        <module>bootstrap</module>
+        <module>addon-web-menu</module>
+        <module>addon-web-mvc-controller</module>
+        <module>addon-web-mvc-jsp</module>
+        <module>addon-security</module>
+        <module>addon-web-flow</module>
+        <module>addon-web-selenium</module>
+        <module>annotations</module>
     </modules>
 
     <organization>
-        <name>SpringSource, Inc</name>
-        <url>http://www.springsource.com/</url>
+        <name>VMware, Inc</name>
+        <url>http://www.vmware.com/</url>
     </organization>
-    <inceptionYear>2009</inceptionYear>
-    <url>http://static.springframework.org/spring-roo/site/index.html</url>
 
     <licenses>
         <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>>GNU General Public License (GPL), Version 3.0</name>
+            <url>http://www.gnu.org/copyleft/gpl.html</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -136,16 +138,23 @@
     <developers>
         <developer>
             <name>Ben Alex</name>
-            <id>benalex</id>
-            <email>benalex at users.sourceforge.net</email>
-            <organization>SpringSource</organization>
+            <id>balex</id>
+            <email>balex at vmware.com</email>
+            <organization>VMware</organization>
             <timezone>+10</timezone>
         </developer>
         <developer>
             <name>Stefan Schmidt</name>
-            <id>sschmidt</id>
-            <email>stefan.schmidt at springsource.com</email>
-            <organization>SpringSource</organization>
+            <id>schmidts</id>
+            <email>schmidts at vmware.com</email>
+            <organization>VMware</organization>
+            <timezone>+10</timezone>
+        </developer>
+        <developer>
+            <name>Alan Stewart</name>
+            <id>stewarta</id>
+            <email>stewarta at vmware.com</email>
+            <organization>VMware</organization>
             <timezone>+10</timezone>
         </developer>
     </developers>
@@ -168,6 +177,28 @@
         </dependency>
     </dependencies>
 
+    <dependencyManagement>
+      <dependencies>
+        <!-- OSGi -->
+         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <version>1.2.0</version>
+        </dependency>
+      </dependencies>
+    </dependencyManagement>
+
     <build>
         <extensions>
             <extension>
@@ -177,6 +208,52 @@
             </extension>
         </extensions>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.0.1</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Copyright>Copyright ${pom.organization.name}. All Rights Reserved.</Bundle-Copyright>
+                        <Bundle-DocURL>${pom.url}</Bundle-DocURL>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
+                    <excludeGroupIds>org.springframework.roo,org.osgi</excludeGroupIds>
+                    <includeScope>compile</includeScope>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <version>1.4.2</version>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <!--<phase>compile</phase>-->
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-help-plugin</artifactId>
@@ -205,7 +282,7 @@
                     <source>1.5</source>
                     <target>1.5</target>
                 </configuration>
-            </plugin>
+            </plugin><!--
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -222,30 +299,7 @@
                     <doCheck>false</doCheck>
                     <doUpdate>false</doUpdate>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                        </manifest>
-                        <manifestEntries>
-                            <Implementation-Build>${buildNumber}</Implementation-Build>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>

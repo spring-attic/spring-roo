@@ -7,7 +7,7 @@ package org.springframework.roo.shell;
  * Implementations of the shell are free to handle these requests in whatever
  * way they wish. Callers should not expect an exit request to be completed.
  * 
- * @author balex
+ * @author Ben Alex
  *
  */
 public final class ExitShellRequest {

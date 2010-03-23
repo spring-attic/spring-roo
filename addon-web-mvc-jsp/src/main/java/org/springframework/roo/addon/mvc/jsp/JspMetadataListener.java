@@ -11,17 +11,19 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.menu.MenuOperations;
-import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -35,7 +37,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -52,37 +53,21 @@ import org.w3c.dom.Document;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
 
-	private MetadataDependencyRegistry metadataDependencyRegistry;
-	private FileManager fileManager;
-	private MetadataService metadataService;
-	private BeanInfoMetadata beanInfoMetadata;
-	private MenuOperations menuOperations;
-	private JspOperations jspOperations;
-	private PathResolver pathResolver;
-	
-	public JspMetadataListener(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, PathResolver pathResolver, MenuOperations menuOperations, ClasspathOperations classpathOperations, WebMvcOperations mvcOperations) {
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		Assert.notNull(fileManager, "File manager required");
-		Assert.notNull(menuOperations, "Menu Operations required");
-		Assert.notNull(pathResolver, "Path resolver required");
-		Assert.notNull(classpathOperations, "Classpath operations required");
-		Assert.notNull(mvcOperations, "Web MVC operations required");
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		this.fileManager = fileManager;
-		this.menuOperations = menuOperations;		
-		this.pathResolver = pathResolver;
-		
-		metadataService.register(this);
-		
-		// Ensure we're notified of all metadata related to web scaffold metadata, in particular their initial creation
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private MenuOperations menuOperations;
+	@Reference private JspOperations jspOperations;
+	@Reference private PathResolver pathResolver;
+
+	private BeanInfoMetadata beanInfoMetadata;  // caution: concurrent access not supported
+
+	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
-	
-		jspOperations = new JspOperations(fileManager, metadataService, classpathOperations, mvcOperations, pathResolver, menuOperations);
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {

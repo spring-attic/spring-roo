@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -14,7 +17,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -26,21 +28,14 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class ControllerCommands implements CommandMarker {
 	
 	private static Logger logger = HandlerUtils.getLogger(ControllerCommands.class);
 	
-	private ControllerOperations controllerOperations;
-	private MetadataService metadataService;
-	
-	public ControllerCommands(ControllerOperations controllerOperations, MetadataService metadataService) {
-		Assert.notNull(controllerOperations, "ControllerOperations instance required");
-		Assert.notNull(metadataService, "MetadataService instance required");
-		
-		this.controllerOperations = controllerOperations;
-		this.metadataService = metadataService;
-	}
+	@Reference private ControllerOperations controllerOperations;
+	@Reference private MetadataService metadataService;
 	
 	@CliAvailabilityIndicator({"controller scaffold", "controller all"})
 	public boolean isNewControllerAvailable() {

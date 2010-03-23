@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
@@ -8,13 +12,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link WebScaffoldMetadata}.
@@ -23,15 +22,15 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class WebScaffoldMetadataProvider extends AbstractItdMetadataProvider {
 	
-	private ControllerOperations controllerOperations;
-	public WebScaffoldMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, ControllerOperations controllerOperations) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
-		Assert.notNull(controllerOperations, "Controller operations required");
+	@Reference private ControllerOperations controllerOperations;
+
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooWebScaffold.class.getName()));
-		this.controllerOperations = controllerOperations;
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

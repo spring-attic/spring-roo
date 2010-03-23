@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.entity;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
@@ -10,13 +14,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link EntityMetadata}.
@@ -25,21 +24,29 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class EntityMetadataProvider extends AbstractItdMetadataProvider {
 
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private PluralMetadataProvider pluralMetadataProvider;
+	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
+	
 	private boolean noArgConstructor = true;
 	
-	public EntityMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, ConfigurableMetadataProvider configurableMetadataProvider, PluralMetadataProvider pluralMetadataProvider, BeanInfoMetadataProvider beanInfoMetadataProvider) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
-		Assert.notNull(configurableMetadataProvider, "Configurable metadata provider required");
-		Assert.notNull(pluralMetadataProvider, "Plural metadata provider required");
-		Assert.notNull(beanInfoMetadataProvider, "Bean info metadata provider required");
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

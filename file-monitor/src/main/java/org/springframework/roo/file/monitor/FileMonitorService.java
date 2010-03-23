@@ -5,7 +5,6 @@ import java.util.SortedSet;
 
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEventListener;
-import org.springframework.roo.file.monitor.event.FileEventPublisher;
 
 /**
  * Provides a mechanism to monitor disk locations and publish events when those disk locations change.
@@ -25,7 +24,7 @@ import org.springframework.roo.file.monitor.event.FileEventPublisher;
  * @since 1.0
  *
  */
-public interface FileMonitorService extends FileEventPublisher {
+public interface FileMonitorService {
 	
 	/**
      * @return true if the monitor did not already contain the specified request

@@ -2,6 +2,8 @@ package org.springframework.roo.classpath.itd;
 
 import java.util.Set;
 
+import org.springframework.roo.model.JavaType;
+
 /**
  * An {@link ItdMetadataProvider} that is aware it provides particular {@link ItdProviderRole}s.
  * 
@@ -19,4 +21,8 @@ public interface ItdRoleAwareMetadataProvider extends ItdMetadataProvider {
 	 * @return the roles this provider offers (never null, but may be empty)
 	 */
 	Set<ItdProviderRole> getRoles();
+	
+	void addMetadataTrigger(JavaType javaType);
+	void removeMetadataTrigger(JavaType javaType);
+
 }

@@ -2,9 +2,9 @@ package org.springframework.roo.process.manager;
 
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.undo.UndoManager;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusProvider;
-import org.springframework.roo.process.manager.internal.InitialMonitoringRequest;
 
 /**
  * Provides coordinated execution of major ROO operations.
@@ -56,7 +56,7 @@ import org.springframework.roo.process.manager.internal.InitialMonitoringRequest
  *
  */
 public interface ProcessManager extends ProcessManagerStatusProvider {
-
+	
 	/**
 	 * Change the status from {@link ProcessManagerStatus#STARTING} to {@link ProcessManagerStatus#AVAILABLE}
 	 * and then immediately register the current working directory for monitoring. These functions should
@@ -101,4 +101,14 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
 	 */
 	boolean isDevelopmentMode();
 
+	public void timerBasedPoll();
+	
+	public void setDevelopmentMode(boolean developmentMode);
+
+	public void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
+
+	public long getMinimumDelayBetweenPoll();
+
+	public long getLastPollDuration();
+	
 }

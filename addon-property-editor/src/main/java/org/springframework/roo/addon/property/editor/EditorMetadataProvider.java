@@ -1,17 +1,16 @@
 package org.springframework.roo.addon.property.editor;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 
 /**
  * Provides {@link EditorMetadata}.
@@ -20,11 +19,12 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 	
-	public EditorMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooEditor.class.getName()));
 	}
 	

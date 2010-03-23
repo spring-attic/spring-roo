@@ -4,6 +4,7 @@ import java.util.List;
 
 import jline.Completor;
 
+import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.SimpleParser;
 import org.springframework.roo.support.util.Assert;
 
@@ -15,9 +16,9 @@ import org.springframework.roo.support.util.Assert;
  *
  */
 public class JLineCompletorAdapter implements Completor {
-	private SimpleParser simpleParser;
+	private Parser simpleParser;
 	
-	public JLineCompletorAdapter(SimpleParser simpleParser) {
+	public JLineCompletorAdapter(Parser simpleParser) {
 		Assert.notNull(simpleParser, "Simple Parser required");
 		this.simpleParser = simpleParser;
 	}

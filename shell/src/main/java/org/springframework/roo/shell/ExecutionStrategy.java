@@ -22,4 +22,12 @@ public interface ExecutionStrategy {
 	 * @throws RuntimeException which is handled by the {@link Shell} implementation
 	 */
 	Object execute(ParseResult parseResult) throws RuntimeException;
+	
+	/**
+	 * Indicates commands are able to be presented. This generally means all important
+	 * system startup activities have completed.
+	 * 
+	 * @return whether commands can be presented for processing at this time
+	 */
+	boolean isReadyForCommands();
 }

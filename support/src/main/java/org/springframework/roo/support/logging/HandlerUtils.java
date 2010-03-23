@@ -125,7 +125,7 @@ public abstract class HandlerUtils {
 	}
 	
 	/**
-	 * Forces all {@link Handler} instances registerd in the presented {@link Logger} to be flushed.
+	 * Forces all {@link Handler} instances registered in the presented {@link Logger} to be flushed.
 	 * 
 	 * @param logger to flush (required)
 	 * @return the number of {@link Handler}s flushed (may be 0 or above)

@@ -7,14 +7,29 @@
 		<version>1.1.0.M1</version>
 	</parent>
 	<artifactId>org.springframework.roo.model</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	<name>Spring Roo - Model</name>
 	<dependencies>
-        <!-- ROO modules -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.support</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
+        <!-- OSGi -->
+         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
 	</dependencies>
 </project>

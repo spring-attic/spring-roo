@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.jms;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -7,8 +11,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'install jms' add-on to be used by the ROO shell.
@@ -17,17 +19,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class JmsCommands implements CommandMarker {
 	
-	private JmsOperations jmsOperations;
+	@Reference private JmsOperations jmsOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 	
-	public JmsCommands(StaticFieldConverter staticFieldConverter, JmsOperations jmsOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(jmsOperations, "Jms operations required");
+	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(JmsProvider.class);
 		staticFieldConverter.add(JmsDestinationType.class);
-		this.jmsOperations = jmsOperations;
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(JmsProvider.class);
+		staticFieldConverter.remove(JmsDestinationType.class);
 	}
 	
 	@CliAvailabilityIndicator("jms setup")

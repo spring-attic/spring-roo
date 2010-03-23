@@ -2,9 +2,10 @@ package org.springframework.roo.shell.converters;
 
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 
 /**
  * {@link Converter} for {@link Boolean}.
@@ -13,7 +14,8 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopment;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
 public class BooleanConverter implements Converter {
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {

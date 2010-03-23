@@ -6,7 +6,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultItdTypeDetails;
 import org.springframework.roo.classpath.details.DefaultItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.metadata.internal.AbstractMetadataItem;
+import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;

@@ -3,12 +3,14 @@ package org.springframework.roo.classpath.itd;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -18,16 +20,12 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
 public class DefaultItdMetadataScanner implements ItdMetadataScanner {
 
-	private MetadataService metadataService;
+	@Reference private MetadataService metadataService;
 	
-	public DefaultItdMetadataScanner(MetadataService metadataService) {
-		Assert.notNull(metadataService, "Metadata service required");
-		this.metadataService = metadataService;
-	}
-
 	public Set<MetadataItem> getMetadata(String physicalTypeIdentifier) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Metadata identification string '" + physicalTypeIdentifier + "' is not valid for this metadata provider");
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);

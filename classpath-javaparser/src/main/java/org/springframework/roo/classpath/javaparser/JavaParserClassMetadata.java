@@ -12,8 +12,8 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
+import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.metadata.internal.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.FileManager;
@@ -22,6 +22,13 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Metadata returned by {@link JavaParserMetadataProvider}.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ *
+ */
 public class JavaParserClassMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
 	private static final Logger logger = HandlerUtils.getLogger(JavaParserClassMetadata.class);

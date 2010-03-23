@@ -1,30 +1,53 @@
 #/bin/shell
- 
-if [ -z "$ROO_CLASSPATH_FILE" ]; then
-    echo "WARNING: ROO_CLASSPATH_FILE environment variable is not set"
-    exit
-fi
- 
-if [ ! -f $ROO_CLASSPATH_FILE ]; then
-    echo "WARNING: $ROO_CLASSPATH_FILE file not found"
-    exit
-fi
 
-while true; do
- 
-    read ROO_CP <$ROO_CLASSPATH_FILE
+PRG="$0"
 
-    if [ -e "$ROO_ADDON_CLASSPATH_FILE" ]; then
-    read ADDON_CP <$ROO_ADDON_CLASSPATH_FILE
-    ROO_CP=$ROO_CP:$ADDON_CP
+while [ -h "$PRG" ]; do
+    ls=`ls -ld "$PRG"`
+    link=`expr "$ls" : '.*-> \(.*\)$'`
+    if expr "$link" : '/.*' > /dev/null; then
+        PRG="$link"
+    else
+        PRG=`dirname "$PRG"`/"$link"
     fi
-
-    ROO_CP=$ROO_CP:`echo $HOME/roo-dev/work/*.jar | sed 's/ /:/g'`
-
-    java -DdevelopmentMode=true $ROO_OPTS -Droo.home="$HOME/roo-dev" -cp $ROO_CP org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" $@
-    EXITED=$?
-    # echo Exited with $EXITED
-    if [ $EXITED -ne 100 -a $EXITED -ne 200 ]; then
-		break
-	fi
 done
+ROO_HOME=`dirname "$PRG"`
+
+# Absolute path
+ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
+
+# echo Resolved ROO_HOME: $ROO_HOME
+
+mkdir -p $ROO_HOME/bootstrap/target/osgi/bin
+mkdir -p $ROO_HOME/bootstrap/target/osgi/bundle
+mkdir -p $ROO_HOME/bootstrap/target/osgi/conf
+
+cp $ROO_HOME/bootstrap/src/main/bin/* $ROO_HOME/bootstrap/target/osgi/bin
+chmod +x $ROO_HOME/bootstrap/target/osgi/bin/*.sh
+
+cp $ROO_HOME/bootstrap/src/main/conf/* $ROO_HOME/bootstrap/target/osgi/conf
+
+# Most Roo bundles are not special and belong in "bundle"
+cp `find $ROO_HOME -wholename */target/org.springframework.roo.*.jar` $ROO_HOME/bootstrap/target/osgi/bundle
+
+# Most Roo dependencies are not special and belong in "bundle"
+cp `find $ROO_HOME -wholename */target/dependency/*.jar` $ROO_HOME/bootstrap/target/osgi/bundle
+
+# Now add the replacement "Main" class for launching Roo (this is not a bundle, but rather a normal JAR)
+cp $ROO_HOME/bootstrap/target/org.springframework.roo.bootstrap-*.jar $ROO_HOME/bootstrap/target/osgi/bin
+rm $ROO_HOME/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar
+
+# Now add the Felix OSGi service platform JAR so we can launch it all
+cp $ROO_HOME/bootstrap/target/dependency/org.apache.felix.framework-*.jar $ROO_HOME/bootstrap/target/osgi/bin
+rm $ROO_HOME/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar
+
+# Get rid of those annoying source files
+rm `find $ROO_HOME/bootstrap/target/osgi -name *-sources.jar`
+
+# Build a classpath containing our two magical startup JARs
+ROO_CP=`echo $ROO_HOME/bootstrap/target/osgi/bin/*.jar | sed 's/ /:/g'`
+
+# Hop, hop, hop...
+java -Droo.args="$@" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_HOME/bootstrap/target/osgi/cache" -Dfelix.auto.deploy.dir="$ROO_HOME/bootstrap/target/osgi/bundle" -Dfelix.config.properties="file:$ROO_HOME/bootstrap/target/osgi/conf/config.properties" -cp $ROO_CP org.springframework.roo.bootstrap.Main
+EXITED=$?
+echo Roo exited with code $EXITED

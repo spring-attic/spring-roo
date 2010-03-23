@@ -14,6 +14,13 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.MonitoringRequest;
@@ -22,7 +29,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -50,19 +56,25 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
+@Reference(name="fileEventListener", strategy=ReferenceStrategy.LOOKUP, policy=ReferencePolicy.DYNAMIC, referenceInterface=FileEventListener.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	
-	protected Set<FileEventListener> fileEventListeners = new CopyOnWriteArraySet<FileEventListener>();
 	private Set<MonitoringRequest> requests = new CopyOnWriteArraySet<MonitoringRequest>();
 	private Map<MonitoringRequest,Map<File,Long>> priorExecution =new WeakHashMap<MonitoringRequest,Map<File,Long>>();
 	private Set<String> notifyChanged = new HashSet<String>();
 	private Set<String> notifyCreated = new HashSet<String>();
 	private Set<String> notifyDeleted = new HashSet<String>();
 	private Set<MonitoringRequest> notifiedFailingRequests = new CopyOnWriteArraySet<MonitoringRequest>();
+	private ComponentContext context;
 	
+	protected void activate(ComponentContext context) {
+		this.context = context;
+	}
+
 	// Mutex
 	private Boolean lock = new Boolean(true);
 	
@@ -327,10 +339,19 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	 * @param eventsToPublish to publish (not null, but can be empty)
 	 */
 	private void publish(List<FileEvent> eventsToPublish) {
+		if (eventsToPublish.size() == 0) {
+			return;
+		}
+		Object[] listeners = context.locateServices("fileEventListener");
+		if (listeners == null) {
+			// no listeners, so just return
+			return;
+		}
 		if (eventsToPublish.size() > 0) {
 			for (FileEvent event : eventsToPublish) {
-				for (FileEventListener listener : fileEventListeners) {
-					listener.onFileEvent(event);
+				for (Object listener : listeners) {
+					FileEventListener l = (FileEventListener) listener;
+					l.onFileEvent(event);
 				}
 			}
 		}
@@ -440,20 +461,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public void addFileEventListener(FileEventListener fileEventListener) {
-		synchronized (lock) {
-			Assert.notNull(fileEventListener, "File event listener required");
-			fileEventListeners.add(fileEventListener);
-		}
-	}
-
-	public void removeFileEventListener(FileEventListener fileEventListener) {
-		synchronized (lock) {
-			Assert.notNull(fileEventListener, "File event listener required");
-			fileEventListeners.remove(fileEventListener);
-		}
-	}
-
 	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
 		synchronized (lock) {
 			Assert.hasText(antPath, "Ant path required");
@@ -497,5 +504,5 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			notifyDeleted.add(fileCanoncialPath);
 		}
 	}
-	
+
 }

@@ -23,7 +23,14 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
 
-import org.springframework.roo.shell.internal.AbstractShell;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
@@ -35,48 +42,65 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public final class SimpleParser {
+@Component
+@Service
+@References(value={
+		@Reference(name="converter", strategy=ReferenceStrategy.LOOKUP, policy=ReferencePolicy.DYNAMIC, referenceInterface=Converter.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE),
+		@Reference(name="commands", strategy=ReferenceStrategy.LOOKUP, policy=ReferencePolicy.DYNAMIC, referenceInterface=CommandMarker.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
+		})
+public final class SimpleParser implements Parser {
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
 
-	private Set<Object> targets = new HashSet<Object>();
-	private Set<Converter> converters = new HashSet<Converter>();
-	private Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
-
-	public SimpleParser() {
-		targets.add(this);
+	private ComponentContext context;
+	
+	protected void activate(ComponentContext context) {
+		this.context = context;
+	}
+	
+	private Set<Object> getTargets() {
+		return getSet("commands");
+	}
+	
+	private Set<Converter> getConverters() {
+		return getSet("converter");
 	}
 
-	/**
-	 * @param target an instance which is annotated with {@link CliCommand}, {@link CliOption} and {@link CliAvailabilityIndicator}
-	 */
-	public void addTarget(Object target) {
-		Assert.notNull(target, "Target required");
-		targets.add(target);
-
-		for (Method m : target.getClass().getMethods()) {
-			CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
-			if (availability != null) {
-				Assert.isTrue(m.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + m.toGenericString() + ")");
-				Assert.isTrue(m.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + m.toGenericString() + ")");
-				for (String cmd : availability.value()) {
-					Assert.isTrue(!availabilityIndicators.containsKey(cmd), "Cannot specify an availability indicator for '" + cmd + "' more than once");
-					MethodTarget methodTarget = new MethodTarget();
-					methodTarget.method = m;
-					methodTarget.target = target;
-					availabilityIndicators.put(cmd, methodTarget);
-				}
+	@SuppressWarnings("unchecked")
+	private <T> Set<T> getSet(String name) {
+		Set<T> result = new HashSet<T>();
+		Object[] objs = context.locateServices(name);
+		if (objs != null) {
+			for (Object o : objs) {
+				result.add((T) o);
 			}
 		}
+		if ("commands".equals(name)) {
+			result.add((T) this);
+		}
+		return result;
 	}
 
-	public void removeTarget(Object target) {
-		Assert.notNull(target, "Target required");
-		targets.remove(target);
-	}
+	private MethodTarget getAvailabilityIndicator(String command) {
+		MethodTarget methodTarget = null;
+		for (Object target : getTargets()) {
+			for (Method m : target.getClass().getMethods()) {
+				CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
+				if (availability != null) {
+					Assert.isTrue(m.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + m.toGenericString() + ")");
+					Assert.isTrue(m.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + m.toGenericString() + ")");
+					for (String cmd : availability.value()) {
+						if (cmd.equals(command)) {
+							Assert.isTrue(methodTarget == null, "Cannot specify an availability indicator for '" + cmd + "' more than once");
+							methodTarget = new MethodTarget();
+							methodTarget.method = m;
+							methodTarget.target = target;
+						}
+					}
+				}
+			}
 
-	public void addConverter(Converter converter) {
-		Assert.notNull(converter, "Converter required");
-		converters.add(converter);
+		}
+		return methodTarget;
 	}
 
 	public ParseResult parse(String buffer) {
@@ -204,7 +228,7 @@ public final class SimpleParser {
 				CliSimpleParserContext.setSimpleParserContext(this);
 				Object result;
 				Converter c = null;
-				for (Converter candidate : converters) {
+				for (Converter candidate : getConverters()) {
 					if (candidate.supports(requiredType, cliOption.optionContext())) {
 						// Found a usable converter
 						c = candidate;
@@ -213,7 +237,6 @@ public final class SimpleParser {
 				}
 				if (c == null) {
 					// Fallback to a normal SimpleTypeConverter and attempt conversion
-					// TODO: add simple type conversion
 					throw new IllegalStateException("TODO: Add basic type conversion");
 					// SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 					// result = simpleTypeConverter.convertIfNecessary(value, requiredType, mp);
@@ -243,7 +266,7 @@ public final class SimpleParser {
 		Set<MethodTarget> result = new HashSet<MethodTarget>();
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
-		for (Object o : targets) {
+		for (Object o : getTargets()) {
 			Method[] methods = o.getClass().getMethods();
 			for (Method m : methods) {
 				CliCommand cmd = m.getAnnotation(CliCommand.class);
@@ -253,7 +276,7 @@ public final class SimpleParser {
 						// Decide if this @CliCommand is available at this moment
 						Boolean available = null;
 						for (String value : cmd.value()) {
-							MethodTarget mt = this.availabilityIndicators.get(value);
+							MethodTarget mt = getAvailabilityIndicator(value);
 							if (mt != null) {
 								Assert.isNull(available, "More than one availability indicator is defined for '" + m.toGenericString() + "'");
 								try {
@@ -542,7 +565,7 @@ public final class SimpleParser {
 					// Manually determine if this non-mandatory but unspecifiedDefaultValue=* requiring option is able to be bound
 					if (!include.mandatory() && "*".equals(include.unspecifiedDefaultValue()) && !"".equals(value)) {
 						try {
-							for (Converter candidate : converters) {
+							for (Converter candidate : getConverters()) {
 								// Find the target parameter
 								Class<?> paramType = null;
 								int index = -1;
@@ -627,7 +650,7 @@ public final class SimpleParser {
 						String suffix = " ";
 
 						// Let's use a Converter if one is available
-						for (Converter candidate : converters) {
+						for (Converter candidate : getConverters()) {
 							if (candidate.supports(paramType, option.optionContext())) {
 								// Found a usable converter
 								boolean addSpace = candidate.getAllPossibleValues(allValues, paramType, lastOptionValue, option.optionContext(), methodTarget);
@@ -747,7 +770,7 @@ public final class SimpleParser {
 
 		// Compute the sections we'll be outputting, and get them into a nice order
 		SortedMap<String, Object> sections = new TreeMap<String, Object>();
-		next_target: for (Object target : targets) {
+		next_target: for (Object target : getTargets()) {
 			Method[] methods = target.getClass().getMethods();
 			for (Method m : methods) {
 				CliCommand cmd = m.getAnnotation(CliCommand.class);
@@ -989,7 +1012,7 @@ public final class SimpleParser {
 
 	public Set<String> getEveryCommand() {
 		SortedSet<String> result = new TreeSet<String>();
-		for (Object o : targets) {
+		for (Object o : getTargets()) {
 			Method[] methods = o.getClass().getMethods();
 			for (Method m : methods) {
 				CliCommand cmd = m.getAnnotation(CliCommand.class);

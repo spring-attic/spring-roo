@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.List;
 import java.util.SortedSet;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -13,8 +16,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides conversion to and from {@link JavaPackage}, with full support for using "~" as denoting the user's top-level package.
@@ -23,21 +24,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class JavaPackageConverter implements Converter {
 
-	private LastUsed lastUsed;
-	private MetadataService metadataService;
-	private FileManager fileManager;
-	
-	public JavaPackageConverter(LastUsed lastUsed, MetadataService metadataService, FileManager fileManager) {
-		Assert.notNull(lastUsed, "Last used required");
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(fileManager, "File manager required");
-		this.lastUsed = lastUsed;
-		this.metadataService = metadataService;
-		this.fileManager = fileManager;
-	}
+	@Reference private LastUsed lastUsed;
+	@Reference private MetadataService metadataService;
+	@Reference private FileManager fileManager;
 	
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {

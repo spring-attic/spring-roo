@@ -4,17 +4,18 @@ import java.io.File;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.internal.AbstractShell;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Shell commands for hinting services.
@@ -23,22 +24,15 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class HintCommands implements CommandMarker {
 	
 	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator; 
 
-	private MetadataService metadataService;
-	private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private FileManager fileManager;
 	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
-	
-	public HintCommands(MetadataService metadataService, FileManager fileManager) {
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(fileManager, "File manager required");
-		this.metadataService = metadataService;
-		this.fileManager = fileManager;
-		Assert.notNull(bundle, "Could not open hint resource bundle");
-	}
 	
 	@CliCommand(value="hint", help="Provides step-by-step hints and context-sensitive guidance")
 	public String hint(@CliOption(key={"", "topic"}, mandatory=false, optionContext="topics", help="The topic for which advice should be provided") String topic) {

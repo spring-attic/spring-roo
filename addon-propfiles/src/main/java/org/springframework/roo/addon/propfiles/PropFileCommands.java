@@ -2,14 +2,14 @@ package org.springframework.roo.addon.propfiles;
 
 import java.util.SortedSet;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'propfile' add-on to be used by the ROO shell.
@@ -18,16 +18,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class PropFileCommands implements CommandMarker {
 	
-	private PropFileOperations propFileOperations;
-	
-	public PropFileCommands(StaticFieldConverter staticFieldConverter, PropFileOperations loggingOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(loggingOperations, "Logging operations required");
-		this.propFileOperations = loggingOperations;
-	}
+	@Reference private PropFileOperations propFileOperations;
 	
 	@CliAvailabilityIndicator({"properties list", "properties set", "properties remove"})
 	public boolean isInstallWebFlowAvailable() {

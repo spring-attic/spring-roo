@@ -4,6 +4,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -24,26 +28,29 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Shell commands for {@link ClasspathOperations}.
+ * Shell commands for {@link ClasspathOperationsImpl}.
  * 
  * @author Ben Alex
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class ClasspathCommands implements CommandMarker {
-	private ClasspathOperations classpathOperations;
+	@Reference private ClasspathOperations classpathOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 
-	public ClasspathCommands(StaticFieldConverter converter, ClasspathOperations classpathOperations) {
-		Assert.notNull(classpathOperations, "Classpath operations required");
-		this.classpathOperations = classpathOperations;
-		converter.add(InheritanceType.class);
+	protected void activate(ComponentContext context) {
+		staticFieldConverter.add(InheritanceType.class);
 	}
 	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(InheritanceType.class);
+	}
+
 	@CliAvailabilityIndicator({"class", "dod", "test integration", "interface", "enum type", "enum constant"})
 	public boolean isProjectAvailable() {
 		return classpathOperations.isProjectAvailable();

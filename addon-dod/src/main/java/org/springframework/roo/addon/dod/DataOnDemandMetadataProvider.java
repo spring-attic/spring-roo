@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.dod;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.entity.EntityMetadata;
@@ -8,13 +12,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link DataOnDemandMetadata}.
@@ -23,17 +22,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvider {
 	
-	public DataOnDemandMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, ConfigurableMetadataProvider configurableMetadataProvider) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
-		
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		// DOD classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
-		Assert.notNull(configurableMetadataProvider, "Configurable metadata provider required");
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
-		
 		addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

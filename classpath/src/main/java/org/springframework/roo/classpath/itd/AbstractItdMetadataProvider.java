@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -51,13 +53,15 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @since 1.0
  *
  */
+@Component(componentAbstract=true)
 public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadataProvider, MetadataNotificationListener {
+
+	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference protected FileManager fileManager;
+	@Reference protected MetadataService metadataService;
 
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	private boolean dependsOnGovernorBeingAClass = true;
-	protected MetadataService metadataService;
-	protected MetadataDependencyRegistry metadataDependencyRegistry;
-	protected FileManager fileManager;
 	private Set<ItdProviderRole> roles = new HashSet<ItdProviderRole>();
 
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
@@ -65,20 +69,6 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 	
 	/** We don't care about trigger annotations; we always produce metadata */
 	private boolean ignoreTriggerAnnotations = false;
-
-	public AbstractItdMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager) {
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		Assert.notNull(fileManager, "File manager required");
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		this.fileManager = fileManager;
-		
-		// Ensure we're notified of all metadata related to physical Java types, in particular their initial creation
-		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		
-		metadataService.register(this);
-	}
 
 	public final void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {

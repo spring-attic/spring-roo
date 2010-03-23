@@ -56,28 +56,6 @@ import java.util.SortedSet;
 public interface MetadataService extends MetadataNotificationListener, MetadataCache {
 	
 	/**
-	 * Registers a {@link MetadataProvider} instance against this {@link MetadataService}.
-	 * An exception will be thrown if a different provider is already registered which offers
-	 * the same {@link MetadataProvider#getProvidesType()} as the provider which is being registered.
-	 * 
-	 * @param provider to register (mandatory)
-	 */
-	void register(MetadataProvider provider);
-	
-	/**
-	 * Deregisters a {@link MetadataProvider} instance from this {@link MetadataService}.
-	 * If an attempt is made to deregister a provider which was not actually registered in the first
-	 * place, the method will simply return.
-	 * 
-	 * <p>
-	 * The presented metadata identification string must return true when presented to
-	 * {@link MetadataIdentificationUtils#isIdentifyingClass(String)}.
-	 * 
-	 * @param metadataIdentificationString the provider to remove (required) 
-	 */
-	void deregister(String metadataIdentificationString);
-	
-	/**
 	 * Returns the {@link MetadataProvider} applicable for the given metadata identification string.
      *
 	 * <p>

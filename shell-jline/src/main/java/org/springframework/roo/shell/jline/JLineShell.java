@@ -11,21 +11,22 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
 
-import org.springframework.roo.shell.ExecutionStrategy;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.shell.AbstractShell;
+import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
-import org.springframework.roo.shell.SimpleParser;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatusListener;
-import org.springframework.roo.shell.internal.AbstractShell;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.logging.DeferredLogHandler;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 
@@ -43,21 +44,30 @@ import org.springframework.roo.support.util.ClassUtils;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
-public class JLineShell extends AbstractShell implements Shell {
+@Component(immediate=true)
+@Service
+public final class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
 
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
+	private ComponentContext context;
 	
     private ConsoleReader reader;
-    private SimpleParser parser;
     private boolean developmentMode = false;
     private FileWriter fileLog;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    
-	public JLineShell(ExecutionStrategy executionStrategy) {
-		super(executionStrategy);
-		
+
+	protected void activate(ComponentContext context) {
+		this.context = context;
+        Thread thread = new Thread(this, "JLine Shell");
+        thread.start();
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		this.context = null;
+	}
+	
+	public void run() {
 		try {
 			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
 				try {
@@ -76,12 +86,11 @@ public class JLineShell extends AbstractShell implements Shell {
 		
         JLineLogHandler handler = new JLineLogHandler(reader, this);
         JLineLogHandler.prohibitRedraw(); // affects this thread only
-        int detected = HandlerUtils.registerTargetHandler(Logger.getLogger(""), handler);
-        Assert.isTrue(detected > 0, "The default logger failed to provide any " + DeferredLogHandler.class.getName() + " instances");
+		Logger mainLogger = Logger.getLogger("");
+        removeHandlers(mainLogger);
+        mainLogger.addHandler(handler);
 
-        parser = new SimpleParser();
-        reader.addCompletor(new JLineCompletorAdapter(parser));
-		parser.addTarget(this);
+        reader.addCompletor(new JLineCompletorAdapter(getParser()));
 		
 		reader.setBellEnabled(true);
 		if (Boolean.getBoolean("jline.nobell")) {
@@ -96,7 +105,34 @@ public class JLineShell extends AbstractShell implements Shell {
         logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
         
         setShellStatus(ShellStatus.STARTED);
+
+        // Handle any "execute-then-quit" operation
+        String rooArgs = System.getProperty("roo.args");
+        if (rooArgs != null && !"".equals(rooArgs)) {
+            setShellStatus(ShellStatus.USER_INPUT);
+        	boolean success = executeCommand(rooArgs);
+            if (exitShellRequest == null) {
+            	// The command itself did not specify an exit shell code, so we'll fall back to something sensible here
+               	exitShellRequest = success ? ExitShellRequest.NORMAL_EXIT : ExitShellRequest.FATAL_EXIT;
+            }
+            setShellStatus(ShellStatus.SHUTTING_DOWN);
+            return;
+        }
+        
+        promptLoop();
+        Assert.notNull(exitShellRequest, "Prompt loop terminated without setting exit shell request to proper level");
 	}
+
+	private void removeHandlers(Logger l) {
+		Handler[] handlers = l.getHandlers();
+		if (handlers != null && handlers.length > 0) {
+			for (Handler h : handlers) {
+				l.removeHandler(h);
+			}
+		}
+	}
+	
+	public void stop() {}
 	
 	@Override
 	public void setPromptPath(String path) {
@@ -146,7 +182,8 @@ public class JLineShell extends AbstractShell implements Shell {
     public void promptLoop() {
     	setShellStatus(ShellStatus.USER_INPUT);
     	String line;
-        try {
+    	
+    	try {
             while (exitShellRequest == null && ( (line = reader.readLine() ) != null) ) {
             	JLineLogHandler.resetMessageTracking();
             	setShellStatus(ShellStatus.USER_INPUT);
@@ -164,10 +201,6 @@ public class JLineShell extends AbstractShell implements Shell {
         setShellStatus(ShellStatus.SHUTTING_DOWN);
     }
     
-	public SimpleParser getParser() {
-		return parser;
-	}
-
 	public void setDevelopmentMode(boolean developmentMode) {
 		JLineLogHandler.setIncludeThreadName(developmentMode);
 		this.developmentMode = developmentMode;
@@ -213,10 +246,16 @@ public class JLineShell extends AbstractShell implements Shell {
 	 *
 	 * @return the 'roo.home' system property
 	 */
+	@Override
 	protected String getHomeAsString() {
 		String rooHome = System.getProperty("roo.home");
 		Assert.hasText(rooHome, "roo.home system property is not set");
 		return rooHome;
 	}
 
+	@Override
+	protected ComponentContext getContext() {
+		return context;
+	}
+	
 }

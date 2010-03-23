@@ -2,13 +2,16 @@ package org.springframework.roo.classpath.javaparser;
 
 import java.io.File;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
@@ -22,7 +25,6 @@ import org.springframework.roo.project.ClasspathProvidingProjectMetadata;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -38,28 +40,19 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataProvider, FileEventListener {
 
 	public String getProvidesType() {
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();
 	}
 
-	private FileManager fileManager;
-	private MetadataService metadataService;
-	private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	
-	public JavaParserMetadataProvider(FileManager fileManager, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileMonitorService fileMonitorService) {
-		Assert.notNull(fileManager, "File manager required");
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		Assert.notNull(fileMonitorService, "File monitor service required");
-		this.fileManager = fileManager;
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		fileMonitorService.addFileEventListener(this);
-
-		metadataService.register(this);
+	protected void activate(ComponentContext context) {
 	}
 
 	private PathResolver getPathResolver() {

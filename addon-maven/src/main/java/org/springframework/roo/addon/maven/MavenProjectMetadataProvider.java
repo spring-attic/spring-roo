@@ -5,7 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.roo.file.monitor.FileMonitorService;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
@@ -26,7 +29,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectMetadataProvider;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -44,33 +46,23 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @since 1.0
  */
-@ScopeDevelopment
+@Component
+@Service
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
 
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
+	
+	@Reference private PathResolver pathResolver;
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 
-	private PathResolver pathResolver;
-	private FileManager fileManager;
-	private MetadataService metadataService;
-	private MetadataDependencyRegistry metadataDependencyRegistry;
-
-	private String pom;
-
-	public MavenProjectMetadataProvider(PathResolver pathResolver, FileManager fileManager, FileMonitorService fileMonitorService, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
-		Assert.notNull(pathResolver, "Path resolver required");
-		Assert.notNull(fileManager, "File manager required");
-		Assert.notNull(fileMonitorService, "File monitor service required");
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		this.pathResolver = pathResolver;
-		this.fileManager = fileManager;
+	protected void activate(ComponentContext context) {
 		this.pom = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		fileMonitorService.addFileEventListener(this);
-		metadataService.register(this);
 	}
 
+	private String pom;
+	
 	public MetadataItem get(String metadataIdentificationString) {
 		Assert.isTrue(ProjectMetadata.getProjectIdentifier().equals(metadataIdentificationString), "Unexpected metadata request '" + metadataIdentificationString + "' for this provider");
 

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.internal.AbstractMetadataItem;
+import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -33,6 +33,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 
+	// MID:org.springframework.roo.project.ProjectMetadata#the_project
 	private static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 	
 	private JavaPackage topLevelPackage;

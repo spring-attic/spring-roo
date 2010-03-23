@@ -2,6 +2,9 @@ package org.springframework.roo.classpath;
 
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -12,28 +15,16 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
-@ScopeDevelopmentShell
+@Component
+@Service
 public class MetadataCommands implements CommandMarker {
 	
-	private MetadataService metadataService;
-	private MetadataDependencyRegistry metadataDependencyRegistry;
-	private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	private ItdMetadataScanner itdMetadataScanner;
+	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	@Reference private ItdMetadataScanner itdMetadataScanner;
 	
-	public MetadataCommands(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, PhysicalTypeMetadataProvider physicalTypeMetadataProvider, ItdMetadataScanner itdMetadataScanner) {
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
-		Assert.notNull(itdMetadataScanner, "ITD metadata scanner required");
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		this.physicalTypeMetadataProvider = physicalTypeMetadataProvider;
-		this.itdMetadataScanner = itdMetadataScanner;
-	}
-
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
 	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
 		metadataDependencyRegistry.setTrace(level);

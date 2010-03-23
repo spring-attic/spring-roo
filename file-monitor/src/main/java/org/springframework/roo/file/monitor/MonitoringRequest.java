@@ -40,5 +40,12 @@ public abstract class MonitoringRequest {
 	public Set<FileOperation> getNotifyOn() {
 		return Collections.unmodifiableSet(notifyOn);
 	}
+
+	public static MonitoringRequest getInitialMonitoringRequest() {
+		MonitoringRequestEditor mre = new MonitoringRequestEditor();
+		mre.setAsText(".,CRUD");
+		MonitoringRequest mr = (MonitoringRequest)mre.getValue();
+		return mr;
+	}
 	
 }

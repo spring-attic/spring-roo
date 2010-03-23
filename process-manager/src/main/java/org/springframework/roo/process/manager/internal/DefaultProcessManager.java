@@ -1,9 +1,19 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.FrameworkEvent;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.startlevel.StartLevel;
 import org.springframework.roo.file.monitor.FileMonitorService;
+import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.process.manager.ActiveProcessManager;
@@ -11,7 +21,6 @@ import org.springframework.roo.process.manager.CommandCallback;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.process.manager.event.AbstractProcessManagerStatusPublisher;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ExceptionUtils;
@@ -23,35 +32,58 @@ import org.springframework.roo.support.util.ExceptionUtils;
  * @since 1.0
  *
  */
-@ScopeDevelopment
-public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager, Runnable {
+@Component
+@Service
+public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager {
 
 	private static final Logger logger = HandlerUtils.getLogger(DefaultProcessManager.class);
 	
+	@Reference private UndoManager undoManager;
+	@Reference private FileMonitorService fileMonitorService;
+	@Reference private StartLevel startLevel;
+	private Timer t = new Timer(true);
 	private boolean developmentMode = false;
-	private UndoManager undoManager;
-	private FileMonitorService fileMonitorService;
-	private InitialMonitoringRequest initialMonitoringRequest;
 	private long minimumDelayBetweenPoll = -1; // how many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
 	private long lastPollTime = 0; // what time the last poll was completed
 	private long lastPollDuration = 0; // how many ms the last poll actually took
 	
-	public DefaultProcessManager(UndoManager undoManager, FileMonitorService fileMonitorService, InitialMonitoringRequest initialMonitoringRequest) {
-		Assert.notNull(undoManager, "Undo manager is required");
-		Assert.notNull(fileMonitorService, "File monitor service is required");
-		Assert.notNull(initialMonitoringRequest, "Initial monitoring request is required");
-		this.undoManager = undoManager;
-		this.fileMonitorService = fileMonitorService;
-		this.initialMonitoringRequest = initialMonitoringRequest;
+	protected void activate(ComponentContext context) {
+		
+		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
+			public void frameworkEvent(FrameworkEvent event) {
+				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
+					if (startLevel.getStartLevel() >= 99) {
+						if (getProcessManagerStatus().equals(ProcessManagerStatus.STARTING)) {
+							completeStartup();
+						} else {
+						}
+					}
+				}
+			}
+		});
+		
+		// Now start a thread that will undertake a background poll every second
+		t.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
+					timerBasedPoll();
+				}
+			}
+		}, 0, 1000);
 	}
-	
+
+	protected void deactivate(ComponentContext context) {
+		t.cancel();
+	}
+
 	public void completeStartup() {
 		// Quick sanity check that we're being called at the correct time; we don't need to get a synchronization lock if the method shouldn't even run
 		Assert.isTrue(getProcessManagerStatus() == ProcessManagerStatus.STARTING, "Process manager must have a status of STARTING to complete startup");
 		synchronized (processManagerStatus) {
 			try {
 				// Register the initial monitoring request
-				doTransactionally(new MonitoringRequestCommand(fileMonitorService, initialMonitoringRequest.getMonitoringRequest(), true));
+				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialMonitoringRequest(), true));
 			} catch (Throwable t) {
 				logException(t);
 			} finally {
@@ -162,7 +194,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		return result;
 	}
 
-	public void run() {
+	public void timerBasedPoll() {
 		try {
 			if (minimumDelayBetweenPoll == 0) {
 				// Manual polling only, we never allow the timer to kick of a poll

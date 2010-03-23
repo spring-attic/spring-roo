@@ -7,7 +7,23 @@
 		<version>1.1.0.M1</version>
 	</parent>
 	<artifactId>org.springframework.roo.support</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	<name>Spring Roo - Support</name>
-	<dependencies/>
+	<description>Provides support services for Spring Roo's core and base add-ons.</description>
+    <dependencies>
+        <!-- OSGi -->
+         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+    </dependencies>
 </project>

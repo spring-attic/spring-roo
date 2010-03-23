@@ -3,7 +3,7 @@ package org.springframework.roo.shell;
 public final class CliSimpleParserContext {
 	private static ThreadLocal<SimpleParser> simpleParserContextHolder = new ThreadLocal<SimpleParser>();
 
-	public static SimpleParser getSimpleParserContext() {
+	public static Parser getSimpleParserContext() {
 		return simpleParserContextHolder.get();
 	}
 	

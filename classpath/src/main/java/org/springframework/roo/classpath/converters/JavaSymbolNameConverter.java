@@ -2,10 +2,11 @@ package org.springframework.roo.classpath.converters;
 
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 
 /**
  * Provides conversion to and from {@link JavaSymbolName}.
@@ -14,7 +15,8 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class JavaSymbolNameConverter implements Converter {
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {

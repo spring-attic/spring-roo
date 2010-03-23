@@ -1,12 +1,14 @@
 package org.springframework.roo.addon.logging;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'logging' add-on to be used by the ROO shell.
@@ -15,17 +17,21 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class LoggingCommands implements CommandMarker {
 	
-	private LoggingOperations loggingOperations;
+	@Reference private LoggingOperations loggingOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 	
-	public LoggingCommands(StaticFieldConverter staticFieldConverter, LoggingOperations loggingOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(loggingOperations, "Logging operations required");
+	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(LoggerPackage.class);
 		staticFieldConverter.add(LogLevel.class);
-		this.loggingOperations = loggingOperations;
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(LoggerPackage.class);
+		staticFieldConverter.remove(LogLevel.class);
 	}
 	
 	@CliAvailabilityIndicator("logging setup")

@@ -7,19 +7,77 @@
 		<version>1.1.0.M1</version>
 	</parent>
 	<artifactId>org.springframework.roo.addon.logging</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - Logging</name>
 	<dependencies>
-        <!-- ROO modules -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.process.manager</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.shell</artifactId>
-			<version>${roo.version}</version>
-		</dependency>
+        <!-- OSGi -->
+         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
+        <!-- Roo -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.classpath</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.monitor</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.undo</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.metadata</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.model</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.process.manager</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.project</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
 	</dependencies>
 </project>

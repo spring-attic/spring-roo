@@ -2,13 +2,14 @@ package org.springframework.roo.classpath.itd;
 
 import java.io.File;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -26,7 +27,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
 public class ItdFileDeletionService implements FileEventListener {
 
 	private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
@@ -40,14 +42,7 @@ public class ItdFileDeletionService implements FileEventListener {
 		}
 	}
 	
-	private FileManager fileManager;
-
-	public ItdFileDeletionService(FileMonitorService fileMonitorService, FileManager fileManager) {
-		Assert.notNull(fileMonitorService, "File monitor service required");
-		Assert.notNull(fileManager, "File manager required");
-		this.fileManager = fileManager;
-		fileMonitorService.addFileEventListener(this);
-	}
+	@Reference private FileManager fileManager;
 
 	public void onFileEvent(FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");

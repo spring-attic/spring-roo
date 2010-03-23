@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.security;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the security add-on to be used by the ROO shell.
@@ -13,15 +14,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class SecurityCommands implements CommandMarker {
 	
-	private SecurityOperations securityOperations;
-	
-	public SecurityCommands(SecurityOperations securityOperations) {
-		Assert.notNull(securityOperations, "Security operations required");
-		this.securityOperations = securityOperations;
-	}
+	@Reference private SecurityOperations securityOperations;
 	
 	@CliAvailabilityIndicator("security setup")
 	public boolean isInstallSecurityAvailable() {

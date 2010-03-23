@@ -35,26 +35,24 @@ Next double-check you meet the installation requirements:
  * Maven 2.0.9+ properly installed and working with your Java 5+
  * Internet access so that Maven can download required dependencies
 
-Next you need to setup two environment variables called
-ROO_CLASSPATH_FILE and MAVEN_OPTS. If you already have a MAVEN_OPTS,
-just check it has the memory sizes shown below (or greater). The
-ROO_CLASSPATH_FILE must point to "bootstrap/target/roo_classpath.txt"
-under your checkout directory. If you're following our checkout
+Next you need to setup an environment variable called MAVEN_OPTS.
+If you already have a MAVEN_OPTS, just check it has the memory sizes
+shown below (or greater).  If you're following our checkout
 instructions above and are on a *nix machine, you can just type:
 
   cd trunk
   echo export MAVEN_OPTS=\"-Xmx1024m -XX:MaxPermSize=512m\" >> ~/.bashrc
-  echo export ROO_CLASSPATH_FILE=\"`pwd`/bootstrap/target/roo_classpath.txt\" >> ~/.bashrc
   source ~/.bashrc
   echo $MAVEN_OPTS
      (example result: MAVEN_OPTS=-Xmx1024m -XX:MaxPermSize=512m)
-  echo $ROO_CLASSPATH_FILE
-     (example result: /home/balex/spring-roo/trunk/bootstrap/target/roo_classpath.txt)
 
 You're almost finished. You just need to wrap up with a symbolic link:
 
   sudo ln -s ~/spring-roo/trunk/bootstrap/roo-dev /usr/bin/roo-dev
   sudo chmod +x /usr/bin/roo-dev
+
+Note: You do not need a ROO_CLASSPATH_FILE environment variable. This
+was only required for the Roo 1.0.x development series.
 
 ======================================================================
 DEVELOPING WITHIN ECLIPSE
@@ -68,17 +66,11 @@ out of the box. You can setup M2_REPO manually within a normal Eclipse
 if you wish; just use Window > Preferences > Java > Build Path >
 Classpath Variables and set M2_REPO to the ~/.m2/repository directory.
 
-First of all change into the directory where you checked out Roo. A
-properly-setup system (as per the above directions) will put you into
-the correct directory via the following command:
+First of all change into the directory where you checked out Roo. Now
+you need to instruct Maven to produce .classpath and .project files
+for Eclipse:
 
-  cd `dirname $ROO_CLASSPATH_FILE`/../..
-
-Now you need to instruct Maven to produce .classpath and .project
-files for Eclipse. We'll also run the "compile" target, which causes
-the $ROO_CLASSPATH_FILE to be automatically updated:
-
-  mvn clean eclipse:clean eclipse:eclipse compile
+  mvn clean eclipse:clean eclipse:eclipse
 
 You should now be able to import the projects into STS/Eclipse. Click
 File > Import > Existing Projects into Workspace, and select the
@@ -91,34 +83,48 @@ At this stage you're free to open any class and edit it as normal.
 RUNNING THE COMMAND LINE TOOL
 ======================================================================
 
-The "roo-dev" command line tool is very similar to what normal users
-receive if they run "roo" from an official distribution. The main
-difference is "roo-dev" uses the classpath defined in the
-$ROO_CLASSPATH_FILE. The classpath defined in the $ROO_CLASSPATH_FILE
-is automatically maintained whenever you run the mvn "compile" target.
-The file will contain a classpath that includes the /target directory
-for every checked out Roo module. This lets you make changes to the
-Roo project within Eclipse and immediately have them reflected when
-you reload the "roo-dev" tool (specifically, you do NOT need to run
-any "mvn" command again, as this is relatively slow). Furthermore,
-the "roo-dev" tool is very fast to load, as it does not use Maven
-at all.
+Roo uses OSGi and OSGi requires compiled JARs. Therefore as you make
+changes in Roo, you'd normally need to "mvn package" the relevant
+project(s), then copy the resulting JAR files to the OSGi container.
 
-Because Roo is often used to build new projects, you should create
-a new directory (or empty your current directory) to test changes.
-For example:
+To simplify development and OSGi-related procedures, Roo's Maven POMs
+have been carefully configured to emit manifests, SCR descriptors and
+dependencies. These are mostly emitted when you use "mvn package".
 
-  mkdir ~/roo-test
-  cd ~/roo-test
+To try Roo out, you should type the following:
+
+  mvn install   (from the root Roo checkout location)
+  cd ~/some-directory
   roo-dev
 
-Once you quit Roo, you can clear out the present directory using
-"rm -rf * .*" and then simply "roo-dev" again. Be careful not to run
-this command except within a directory you wish to delete, though!
+Notice we used "mvn install" rather than "mvn package". This is simply
+for convenience, as it will allow you to change into any Roo module
+subdirectory and "mvn install". If you never "mvn install", you will
+need to "mvn install" from the root directory so internal build
+dependencies are preserved. You can use "mvn package" from the root if
+you prefer. "mvn install" just gives you more flexibility.
+
+Roo ships with a command line tool called "roo-dev". This is only
+maintained for *nix. It copies all relevant JARs from the Roo
+directories into ~/spring-roo/bootstrap/target/osgi. This directory
+represents a configured Roo OSGi instance. "roo-dev" also launches the
+OSGi container, which is currently Apache Felix.
+
+Be aware that Felix will cache the bundles you have installed each
+run (in /spring-roo/bootstrap/target/osgi/cache). It's therefore more
+common that instead of using "roo-dev", you will type a command like:
+
+  rm -rf ~/spring-roo/bootstrap/target/osgi; roo-dev
+
+The above guarantees your Felix instance is fully cleaned. The
+"roo-dev" command line tool doesn't do this for you, as you might
+wish to test the operation of other bundles with Roo core.
 
 ======================================================================
 DEBUGGING VIA ECLIPSE
 ======================================================================
+
+       **** Note as of ROO-728 this section is out of date ****
 
 Most of the time we just use the roo-dev command line tool directly
 from the command line. This we have found is the fastest approach and
@@ -131,11 +137,11 @@ fully hook into your operating system's keyboard and ANSI services.
 Anyhow, for some issues a debugger is worth the minor price of losing
 your full keyboard and colour services! :-)
 
-To setup debugging, open org.springframework.roo.bootstrap.Bootstrap.
+To setup debugging, open org.springframework.roo.bootstrap.Main.
 Note it has a Java "main" method. Execute the class using Run As >
 Java Application. Note the "Console" tab in Eclipse/STS will open.
 Type "quit" then hit enter. Now select Run > Debug Configurations.
-Select the Java Application > Bootstrap entry. Click on Arguments
+Select the Java Application > Main entry. Click on Arguments
 and then add the following VM Arguments:
 
 *nix machines:
@@ -236,6 +242,8 @@ contains pom.xml, set the svn:ignore property as follows:
 ======================================================================
 RELEASING
 ======================================================================
+
+       **** Note as of ROO-728 this section is out of date ****
 
 Roo is released on a regular basis by the Roo project team. To build a
 release, ensure you perform an "svn update" first and then run

@@ -1,5 +1,9 @@
 package org.springframework.roo.addon.email;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -7,8 +11,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'email' add-on to be used by the Roo shell.
@@ -17,16 +19,19 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class MailCommands implements CommandMarker {
 	
-	private MailOperations mailOperations;
+	@Reference private MailOperations mailOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 	
-	public MailCommands(StaticFieldConverter staticFieldConverter, MailOperations mailOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(mailOperations, "Jms operations required");
+	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(MailProtocol.class);
-		this.mailOperations = mailOperations;
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(MailProtocol.class);
 	}
 	
 	@CliAvailabilityIndicator("email sender setup")

@@ -40,11 +40,6 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	boolean executeCommand(String line);
 
 	/**
-	 * @return the parser (never null)
-	 */
-	SimpleParser getParser();
-	
-	/**
 	 * Indicates the shell should switch into a lower-level development mode. The exact meaning varies by
 	 * shell implementation.
 	 * 

@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -35,40 +39,43 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Additional shell commands for {@link ClasspathOperations}.
+ * Additional shell commands for {@link ClasspathOperationsImpl}.
  * 
  * @author Ben Alex
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class FieldCommands implements CommandMarker {
-	private ClasspathOperations classpathOperations;
+	@Reference private ClasspathOperations classpathOperations;
 	private final Set<String> legalNumericPrimitives = new HashSet<String>();
-	private MetadataService metadataService;
+	@Reference private MetadataService metadataService;
+	@Reference private StaticFieldConverter staticFieldConverter;
 
-	public FieldCommands(StaticFieldConverter staticFieldConverter, ClasspathOperations classpathOperations, MetadataService metadataService) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(classpathOperations, "Classpath operations required");
-		Assert.notNull(metadataService, "Metadata service required");
+	protected void activate(ComponentContext context) {
+		legalNumericPrimitives.add(Short.class.getName());
+		legalNumericPrimitives.add(Byte.class.getName());
+		legalNumericPrimitives.add(Integer.class.getName());
+		legalNumericPrimitives.add(Long.class.getName());
+		legalNumericPrimitives.add(Float.class.getName());
+		legalNumericPrimitives.add(Double.class.getName());
 		staticFieldConverter.add(Cardinality.class);
 		staticFieldConverter.add(Fetch.class);
 		staticFieldConverter.add(EnumType.class);
 		staticFieldConverter.add(DateTime.class);
-		this.classpathOperations = classpathOperations;
-		this.metadataService = metadataService;
-		this.legalNumericPrimitives.add(Short.class.getName());
-		this.legalNumericPrimitives.add(Byte.class.getName());
-		this.legalNumericPrimitives.add(Integer.class.getName());
-		this.legalNumericPrimitives.add(Long.class.getName());
-		this.legalNumericPrimitives.add(Float.class.getName());
-		this.legalNumericPrimitives.add(Double.class.getName());
 	}
 	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(Cardinality.class);
+		staticFieldConverter.remove(Fetch.class);
+		staticFieldConverter.remove(EnumType.class);
+		staticFieldConverter.remove(DateTime.class);
+	}
+
 	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean", "field enum"})
 	public boolean isJdkFieldManagementAvailable() {
 		return classpathOperations.isProjectAvailable();

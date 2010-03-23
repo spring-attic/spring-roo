@@ -1,12 +1,13 @@
 package org.springframework.roo.addon.web.selenium;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'selenium' add-on to be used by the ROO shell.
@@ -15,15 +16,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class SeleniumCommands implements CommandMarker {
 	
-	private SeleniumOperations seleniumOperations;
-	
-	public SeleniumCommands(SeleniumOperations seleniumOperations) {
-		Assert.notNull(seleniumOperations, "Selenium operations required");
-		this.seleniumOperations = seleniumOperations;
-	}
+	@Reference private SeleniumOperations seleniumOperations;
 	
 	@CliAvailabilityIndicator({"selenium test"})
 	public boolean isJdkFieldManagementAvailable() {

@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 
 /**
  * Provides conversion to and from {@link Path}.
@@ -16,7 +17,8 @@ import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class PathConverter implements Converter {
 
 	private SortedSet<String> legalValues = new TreeSet<String>();

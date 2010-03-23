@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.backup;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'backup' add-on to be used by the ROO shell.
@@ -13,16 +14,12 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class BackupCommands implements CommandMarker {	
 
-	private BackupOperations backupOperations;
+	@Reference private BackupOperations backupOperations;
 
-	public BackupCommands(BackupOperations backupOperations) {
-		Assert.notNull(backupOperations, "Backup operations required");
-		this.backupOperations = backupOperations;
-	}
-	
 	@CliAvailabilityIndicator("backup")
 	public boolean isBackupCommandAvailable() {		
 		return backupOperations.isBackupAvailable();

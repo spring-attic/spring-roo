@@ -1,18 +1,17 @@
 package org.springframework.roo.addon.tostring;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link ToStringMetadata}.
@@ -21,12 +20,16 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component(immediate=true)
+@Service
 public final class ToStringMetadataProvider extends AbstractItdMetadataProvider {
 
-	public ToStringMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager, BeanInfoMetadataProvider beanInfoMetadataProvider) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
-		Assert.notNull(beanInfoMetadataProvider, "Bean info metadata provider required");
+	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
+	
+	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		// Ensure we're notified of all metadata related to physical Java types, in particular their initial creation
+		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooToString.class.getName()));
 		addMetadataTrigger(new JavaType(RooToString.class.getName()));
 	}

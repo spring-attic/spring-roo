@@ -2,6 +2,10 @@ package org.springframework.roo.addon.jpa;
 
 import java.util.SortedSet;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -9,8 +13,6 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'jpa' add-on to be used by the ROO shell.
@@ -20,20 +22,22 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class JpaCommands implements CommandMarker {
 	
-	private JpaOperations jpaOperations;
-	private PropFileOperations propFileOperations;
+	@Reference private JpaOperations jpaOperations;
+	@Reference private PropFileOperations propFileOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 
-	public JpaCommands(StaticFieldConverter staticFieldConverter, JpaOperations jpaOperations, PropFileOperations propFileOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(jpaOperations, "JPA operations required");
-		Assert.notNull(propFileOperations, "Property file operations required");
+	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(JdbcDatabase.class);
 		staticFieldConverter.add(OrmProvider.class);
-		this.jpaOperations = jpaOperations;
-		this.propFileOperations = propFileOperations;
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(JdbcDatabase.class);
+		staticFieldConverter.remove(OrmProvider.class);
 	}
 	
 	@CliAvailabilityIndicator("persistence setup")

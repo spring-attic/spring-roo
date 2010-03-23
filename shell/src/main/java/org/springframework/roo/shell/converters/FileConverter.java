@@ -3,9 +3,10 @@ package org.springframework.roo.shell.converters;
 import java.io.File;
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -17,7 +18,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
 public class FileConverter implements Converter {
 
 	private static final String home = System.getProperty("user.home");

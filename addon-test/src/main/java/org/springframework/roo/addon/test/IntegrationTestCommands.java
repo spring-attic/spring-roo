@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.test;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
@@ -7,28 +10,20 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
- * Shell commands for {@link IntegrationTestOperations}.
+ * Shell commands for {@link IntegrationTestOperationsImpl}.
  * 
  * @author Ben Alex
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class IntegrationTestCommands implements CommandMarker {
-	private IntegrationTestOperations integrationTestOperations;
-	private ClasspathOperations classpathOperations;
+	@Reference private IntegrationTestOperations integrationTestOperations;
+	@Reference private ClasspathOperations classpathOperations;
 
-	public IntegrationTestCommands(IntegrationTestOperations integrationTestOperations, ClasspathOperations classpathOperations) {
-		Assert.notNull(integrationTestOperations, "Integration test operations required");
-		Assert.notNull(classpathOperations, "Classpath operations required");
-		this.integrationTestOperations = integrationTestOperations;
-		this.classpathOperations = classpathOperations;
-	}
-	
 	@CliAvailabilityIndicator({"test mock"})
 	public boolean isAvailable() {
 		return classpathOperations.isProjectAvailable();

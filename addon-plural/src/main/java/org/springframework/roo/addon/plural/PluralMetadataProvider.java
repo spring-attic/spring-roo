@@ -1,53 +1,12 @@
 package org.springframework.roo.addon.plural;
 
-import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
-import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
+import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
 
 /**
- * Provides {@link PluralMetadata}.
+ * Interface to methods available on {@link PluralMetadataProviderImpl}.
  * 
  * @author Ben Alex
- * @since 1.0
+ * @since 1.1
  *
  */
-@ScopeDevelopment
-public final class PluralMetadataProvider extends AbstractItdMetadataProvider {
-
-	public PluralMetadataProvider(MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, FileManager fileManager) {
-		super(metadataService, metadataDependencyRegistry, fileManager);
-		setIgnoreTriggerAnnotations(true);
-		setDependsOnGovernorBeingAClass(false);
-	}
-	
-	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		return new PluralMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
-	}
-	
-	public String getItdUniquenessFilenameSuffix() {
-		return "Plural";
-	}
-
-	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = PluralMetadata.getJavaType(metadataIdentificationString);
-		Path path = PluralMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
-	}
-
-	protected String createLocalIdentifier(JavaType javaType, Path path) {
-		return PluralMetadata.createIdentifier(javaType, path);
-	}
-
-	public String getProvidesType() {
-		return PluralMetadata.getMetadataIdentiferType();
-	}
-	
-}
+public interface PluralMetadataProvider extends ItdRoleAwareMetadataProvider {}

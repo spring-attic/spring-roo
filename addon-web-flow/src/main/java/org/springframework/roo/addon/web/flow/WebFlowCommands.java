@@ -1,11 +1,12 @@
 package org.springframework.roo.addon.web.flow;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Commands for the 'web flow' add-on to be used by the Roo shell.
@@ -14,15 +15,11 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class WebFlowCommands implements CommandMarker {
 	
-	private WebFlowOperations webFlowOperations;
-	
-	public WebFlowCommands(WebFlowOperations webFlowOperations) {
-		Assert.notNull(webFlowOperations, "Jms operations required");
-		this.webFlowOperations = webFlowOperations;
-	}
+	@Reference private WebFlowOperations webFlowOperations;
 	
 	@CliAvailabilityIndicator("web flow")
 	public boolean isInstallWebFlowAvailable() {

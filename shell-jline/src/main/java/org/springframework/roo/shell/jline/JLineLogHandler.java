@@ -30,12 +30,14 @@ public class JLineLogHandler extends Handler {
 	private static String lastMessage;
 	private static boolean includeThreadName = true;
 	private boolean ansiSupported;
-	
+    private String userInterfaceThreadName;
+
 	public JLineLogHandler(ConsoleReader reader, ShellPromptAccessor shellPromptAccessor) {
 		Assert.notNull(reader, "Console reader required");
 		Assert.notNull(shellPromptAccessor, "Shell prompt accessor required");
 		this.reader = reader;
 		this.shellPromptAccessor = shellPromptAccessor;
+		this.userInterfaceThreadName = Thread.currentThread().getName();
 		
 		this.ansiSupported = reader.getTerminal().isANSISupported();
 		
@@ -134,7 +136,7 @@ public class JLineLogHandler extends Handler {
 		
 	    String threadName;
 	    String eventString;
-	    if (includeThreadName && !"main".equals(Thread.currentThread().getName())) {
+		if (includeThreadName && !userInterfaceThreadName.equals(Thread.currentThread().getName())) {
 	    	threadName = "[" + Thread.currentThread().getName() + "]";
 	    	
 	    	// Build an event string that will indent nicely given the left hand side now contains a thread name

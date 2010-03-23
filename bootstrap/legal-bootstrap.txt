@@ -6,51 +6,28 @@ All code in this project is original work, except as disclosed below.
 
 -----------------------------------------------------------------------
 
-Licensed Software: Spring Framework
-Software Web Site: http://www.springframework.org
+Licensed Software: Apache Felix
+Software Web Site: http://felix.apache.org
 Effective License: Apache License, Version 2.0
 License Info Page: http://www.apache.org/licenses/LICENSE-2.0.html
 
 Statement as required by the license:
 
-  "This product includes software developed by the Spring Framework
-   Project (http://www.springframework.org)"
+"This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+Licensed under the Apache License 2.0.
 
-Spring Framework is a runtime dependency of this module. Spring
-Framework is used for dependency injection of components.
+This product includes software developed at
+The OSGi Alliance (http://www.osgi.org/).
+Copyright (c) OSGi Alliance (2000, 2007).
+Licensed under the Apache License 2.0."
 
------------------------------------------------------------------------
+Apache Felix is a runtime dependency of this module. Apache Felix
+provides an OSGi container to host the Roo system. The following
+source files were derived from those included in Apache Felix:
 
-Licensed Software: ANTLR
-Software Web Site: http://www.antlr.org/
-Effective License: The BSD License
-License Info Page: http://www.antlr.org/license.html
-
-ANTLR is a runtime dependency of this module, being a requirement of
-the Spring Framework runtime dependency.
-
------------------------------------------------------------------------
-
-Licensed Software: ASM
-Software Web Site: http://asm.ow2.org/index.html
-Effective License: (ASM license, appears similar to BSD)
-License Info Page: http://asm.ow2.org/license.html
-
-ASM is a runtime dependency of this module, being a requirement of
-the Spring Framework runtime dependency.
-
------------------------------------------------------------------------
-
-Licensed Software: SLF4J
-Software Web Site: http://www.slf4j.org/
-Effective License: (SLF4J license, stated as duplicate to MIT License)
-License Info Page: http://www.slf4j.org/license.html
-
-SLF4J is a runtime dependency of this module. It provides an
-alternative library that is API compatible with Commons Logging, which
-is a requirement of the Spring Framework runtime dependency. With the
-exception of Spring Framework, all other logging is undertaken via
-the standard JDK logging APIs and these do not require SLF4J.
+org.springframework.roo.bootstrap.Main
+org.springframework.roo.bootstrap.AutoProcessor
 
 -----------------------------------------------------------------------
 

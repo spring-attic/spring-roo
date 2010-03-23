@@ -10,12 +10,14 @@ import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
-import org.springframework.roo.support.lifecycle.ScopeDevelopment;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -30,7 +32,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@ScopeDevelopment
+@Component
+@Service
 public final class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
 
 	private static final Logger logger = HandlerUtils.getLogger(DefaultMetadataDependencyRegistry.class);
@@ -41,6 +44,9 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 	private String responsibleClass;
 	private Map<String,Long> timings = new HashMap<String, Long>();
 	
+	protected void activate(ComponentContext context) {
+	}
+
 	/** key: upstream dependency; value: list<downstream dependencies> */
 	private Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();
 	

@@ -5,14 +5,15 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -22,15 +23,11 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  *
  */
-@ScopeDevelopmentShell
+@Component
+@Service
 public class FinderCommands implements CommandMarker {
 	
-	private FinderOperations finderOperations;
-
-	public FinderCommands(FinderOperations finderOperations) {
-		Assert.notNull(finderOperations, "Finder operations required");
-		this.finderOperations = finderOperations;
-	}
+	@Reference private FinderOperations finderOperations;
 
 	@CliAvailabilityIndicator({"finder list", "finder add"})
 	public boolean isFinderCommandAvailable() {

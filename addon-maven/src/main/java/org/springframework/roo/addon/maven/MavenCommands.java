@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -13,21 +17,23 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.lifecycle.ScopeDevelopmentShell;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
-@ScopeDevelopmentShell
+@Component
+@Service
 public class MavenCommands implements CommandMarker {
 	
-	private MavenOperations mavenOperations;
+	@Reference private MavenOperations mavenOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
 
-	public MavenCommands(StaticFieldConverter staticFieldConverter, MavenOperations mavenOperations) {
-		Assert.notNull(staticFieldConverter, "Static field converter required");
-		Assert.notNull(mavenOperations, "Maven operations required");
+	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(Template.class);
-		this.mavenOperations = mavenOperations;
+	}
+
+	protected void deactivate(ComponentContext context) {
+		staticFieldConverter.remove(Template.class);
 	}
 
 	@CliAvailabilityIndicator("project")

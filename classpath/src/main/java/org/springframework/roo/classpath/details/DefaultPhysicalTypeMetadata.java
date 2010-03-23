@@ -4,7 +4,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
-import org.springframework.roo.metadata.internal.AbstractMetadataItem;
+import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 
