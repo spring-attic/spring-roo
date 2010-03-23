@@ -41,8 +41,10 @@ rm $ROO_HOME/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.ja
 cp $ROO_HOME/bootstrap/target/dependency/org.apache.felix.framework-*.jar $ROO_HOME/bootstrap/target/osgi/bin
 rm $ROO_HOME/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar
 
-# Get rid of those annoying source files
+# Get rid of those annoying source, test and annotation files
 rm `find $ROO_HOME/bootstrap/target/osgi -name *-sources.jar`
+rm `find $ROO_HOME/bootstrap/target/osgi -name *-tests.jar`
+rm `find $ROO_HOME/bootstrap/target/osgi -name org.springframework.roo.annotations-*.jar`
 
 # Build a classpath containing our two magical startup JARs
 ROO_CP=`echo $ROO_HOME/bootstrap/target/osgi/bin/*.jar | sed 's/ /:/g'`
