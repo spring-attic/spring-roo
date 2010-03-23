@@ -1,45 +1,34 @@
 @echo off
 setlocal enabledelayedexpansion
 
-if not "%ROO_CLASSPATH_FILE%" == "" goto ok
-echo Must set ROO_CLASSPATH_FILE to X:\checkout\spring-roo\bootstrap\target\roo_classpath.txt
-exit /b
+for %%? in ("%~dp0..") do set ROO_HOME=%%~f?
+rem echo Resolved ROO_HOME: "%ROO_HOME%"
 
-:ok
+if not exist "%ROO_HOME%\bootstrap\target\osgi\bin"    mkdir "%ROO_HOME%\bootstrap\target\osgi\bin" 
+if not exist "%ROO_HOME%\bootstrap\target\osgi\bundle" mkdir "%ROO_HOME%\bootstrap\target\osgi\bundle" 
+if not exist "%ROO_HOME%\bootstrap\target\osgi\conf"   mkdir "%ROO_HOME%\bootstrap\target\osgi\conf" 
 
-set ROO_HOME=%USERPROFILE%\roo-dev
+copy "%ROO_HOME%\bootstrap\src\main\bin\*.*"  "%ROO_HOME%\bootstrap\target\osgi\bin"  > NUL
+copy "%ROO_HOME%\bootstrap\src\main\conf\*.*" "%ROO_HOME%\bootstrap\target\osgi\conf" > NUL
 
-rem echo Using Roo classpath file [%ROO_CLASSPATH_FILE%]
+rem Most Roo bundles are not special and belong in "bundle"
+for /d %%d in ("%ROO_HOME%\*") do copy "%%d\target\org.springframework.roo.*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > NUL 2>&1
 
-:launch
-rem First two for-loops add only a single line from the given files, 
-rem so no delayed variable expansion is needed
-for /f "usebackq tokens=*" %%a in (%ROO_CLASSPATH_FILE%) do (
-	set ROO_CP=%%a
-)
-for /f "usebackq tokens=*" %%a in (%ROO_ADDON_CLASSPATH_FILE%) do (
-	set ROO_CP=%ROO_CP%;%%a
-)
-rem this loop requires delayed variable expension, hence the ! chars
-for %%a in ("%ROO_HOME%\work\*.jar") do (
-    set ROO_CP=!ROO_CP!;%%a
-)
+rem Most Roo dependencies are not special and belong in "bundle"
+for /d %%d in ("%ROO_HOME%\*") do copy "%%d\target\dependency\*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > NUL 2>&1
 
-rem echo Using Roo classpath ["%ROO_CP%"]
+rem Now add the replacement "Main" class for launching Roo (this is not a bundle, but rather a normal JAR)
+move "%ROO_HOME%\bootstrap\target\org.springframework.roo.bootstrap-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
 
-java -Djline.nobell=true -DdevelopmentMode=true %ROO_OPTS% -Droo.home="%ROO_HOME%" -cp "%ROO_CP%" org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" %*
+rem Now add the Felix OSGi service platform JAR so we can launch it all
+move "%ROO_HOME%\bootstrap\target\dependency\org.apache.felix.framework-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
 
-if "%errorlevel%" == "100" goto launch
-if "%errorlevel%" == "200" goto clean_work_dir
-goto end
+rem Get rid of those annoying source, test and annotation files
+for /d %%d in ("%ROO_HOME%\bootstrap\target\osgi\*") do del /q "%%d\*-sources.jar" "%%d\*-tests.jar" "%%d\org.springframework.roo.annotations-*.jar" > NUL 2>&1
 
-:clean_work_dir
-echo Cleaning out %ROO_HOME%\work, just a moment...
-rem first delete all work dir jars while they're not locked
-del /q "%ROO_HOME%\work\*.jar"
-rem now let Roo restore the work dir contents based on the current addons and quit
-java -DdevelopmentMode=true %ROO_OPTS% -Droo.home="%ROO_HOME%" -cp "%ROO_CP%" org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" addon cleanup > NUL
-rem finally restart Roo again
-goto launch
+rem Build a classpath containing our two magical startup JARs
+for %%a in ("%ROO_HOME%\bootstrap\target\osgi\bin\*.jar") do set ROO_CP=!ROO_CP!%%a;
 
-:end
+rem Hop, hop, hop...
+java -Droo.args="%*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="%ROO_HOME%\bootstrap\target\osgi\cache" -Dfelix.auto.deploy.dir="%ROO_HOME%\bootstrap\target\osgi\bundle" -Dfelix.config.properties="file:%ROO_HOME%\bootstrap\target\osgi\conf\config.properties" -cp "%ROO_CP%" org.springframework.roo.bootstrap.Main
+echo Roo exited with code %errorlevel%
