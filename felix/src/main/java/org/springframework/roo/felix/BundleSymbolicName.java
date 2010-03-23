@@ -34,7 +34,7 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 			throw new IllegalStateException("Bundle IDs cannot be retrieved as BundleContext unavailable");
 		}
 		for (Bundle b : bundles) {
-			if (b.getSymbolicName().equals(getKey())) {
+			if (getKey().equals(b.getSymbolicName())) {
 				return b.getBundleId();
 			}
 		}
@@ -50,7 +50,7 @@ public class BundleSymbolicName implements Comparable<BundleSymbolicName> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof BundleSymbolicName && this.compareTo((BundleSymbolicName)obj) == 0;
+		return obj instanceof BundleSymbolicName && this.compareTo((BundleSymbolicName)obj) == 0;
 	}
 
 	public final int compareTo(BundleSymbolicName o) {
