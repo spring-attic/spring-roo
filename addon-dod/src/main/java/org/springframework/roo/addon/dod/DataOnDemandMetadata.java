@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dod;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Metadata for {@link RooDataOnDemand}.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -466,6 +468,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					} else {
 						initializer = "new java.util.Date()";
 					}
+				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
+					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
+						initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH) - 1)";					} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
+						initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH) + 1)";
+					} else {
+						initializer = "java.util.Calendar.getInstance()";
+					}
 				} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 					initializer = "new Boolean(true)";
 				} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
@@ -523,6 +532,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 							}
 						}
 					}
+				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
+					initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 				}
 				
 				mandatoryMutators.add(mutatorMethod);
