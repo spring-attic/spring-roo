@@ -155,7 +155,7 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
 	private ConsoleReader createAnsiWindowsReader() throws Exception {
 		// get decorated OutputStream that parses ANSI-codes
 		@SuppressWarnings("unchecked")
-		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME).getMethod("out").invoke(null);
+		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader()).getMethod("out").invoke(null);
 		WindowsTerminal ansiTerminal = new WindowsTerminal() {
 			public boolean isANSISupported() { return true; }
 		};
