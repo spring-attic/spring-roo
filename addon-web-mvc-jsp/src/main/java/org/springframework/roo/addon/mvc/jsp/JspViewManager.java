@@ -207,7 +207,7 @@ public class JspViewManager {
 		//add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
 						.addAttribute("id", "fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-						.addAttribute("modelAttribute", entityName.toLowerCase())
+						.addAttribute("modelAttribute", entityName)
 						.addAttribute("path", controllerPath)
 					.build();
 		
@@ -240,7 +240,7 @@ public class JspViewManager {
 		//add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
 						.addAttribute("id", "fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-						.addAttribute("modelAttribute", entityName.toLowerCase())
+						.addAttribute("modelAttribute", entityName)
 					.build();	
 		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
