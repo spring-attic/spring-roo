@@ -23,7 +23,7 @@
 			</c:when>
 			<c:otherwise>
 				<spring:url value="" var="sizeUrl">
-					<spring:param name="page" value="${page}" />
+					<spring:param name="page" value="1" />
 					<spring:param name="size" value="${i}" />
 				</spring:url>		
 				<a href="${sizeUrl}">${i}</a>
