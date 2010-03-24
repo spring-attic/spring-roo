@@ -3,6 +3,7 @@ package org.springframework.roo.addon.mvc.jsp;
 import java.beans.Introspector;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,8 +53,8 @@ public class JspViewManager {
 	private FinderMetadata finderMetadata;
 	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 	private final String entityName;
-	private final String entityNamePlural;
 	private final String controllerPath;
+	private Map<JavaType, String> pluralCache;
 	
 	public JspViewManager(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
 		Assert.notNull(fields, "List of fields required");
@@ -64,6 +65,7 @@ public class JspViewManager {
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		this.fields = fields;
 		
+		this.pluralCache = new HashMap<JavaType, String>();
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.metadataService = metadataService;
@@ -71,10 +73,6 @@ public class JspViewManager {
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 
 		entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
-		Assert.notNull(pluralMetadata, "Could not determine plural for '" + entityName + "'");
-		entityNamePlural = pluralMetadata.getPlural().toLowerCase();
 		
 		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
 		
@@ -114,10 +112,9 @@ public class JspViewManager {
 				readableFieldNames.append(field.getFieldName().getReadableSymbolName());
 			}
 		}
-		
 		Element fieldTable = new XmlElementBuilder("field:table", document)
 								.addAttribute("id", "l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-								.addAttribute("data", "${" + entityNamePlural + "}")
+								.addAttribute("data", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
 								.addAttribute("columns", fieldNames.toString())
 								.addAttribute("columnHeadings", readableFieldNames.toString())
 							.build();
@@ -136,7 +133,7 @@ public class JspViewManager {
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
 								.addAttribute("id", "pl:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
-								.addAttribute("items", "${" + entityNamePlural + "}")
+								.addAttribute("items", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
 								.addChild(fieldTable)
 							.build();
 		
@@ -310,16 +307,12 @@ public class JspViewManager {
 			Element fieldElement = null;
 			
 			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type.getParameters().get(0), Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
-					
 					fieldElement = new XmlElementBuilder("field:select", document)
-										.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
+										.addAttribute("items", "${" + getPlural(type.getParameters().get(0)).toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-										.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
+										.addAttribute("path", "/" + getPlural(type.getParameters().get(0)).toLowerCase())
 									.build();
 					
 					FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(paramName);
@@ -328,26 +321,20 @@ public class JspViewManager {
 					}
 				}
 			} else if (isEnumType(type) && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				
 				fieldElement = new XmlElementBuilder("field:select", document)
-									.addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}")
-									.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
+									.addAttribute("items", "${" + getPlural(type).toLowerCase() + "}")
+									.addAttribute("path", "/" + getPlural(type).toLowerCase())
 								.build();
 				
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {	
 				fieldElement = document.createElement("field:checkbox");
 			} else if (isSpecialType(type)) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + field.getFieldType().getFullyQualifiedTypeName() + "' type");
-				
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
 					fieldElement = new XmlElementBuilder("field:select", document)
-										.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
+										.addAttribute("items", "${" + getPlural(type).toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-										.addAttribute("path", "/" + pluralMetadata.getPlural().toLowerCase())
+										.addAttribute("path", "/" + getPlural(type).toLowerCase())
 									.build();
 				}
 			} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Date.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
@@ -394,38 +381,33 @@ public class JspViewManager {
 				 fieldElement = document.createElement("field:checkbox");
 			//handle enum fields	 
 			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(fieldType)) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + fieldType.getFullyQualifiedTypeName() + "' type");
-				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + pluralMetadata.getPlural().toLowerCase() + "}").addAttribute("path", pluralMetadata.getPlural()).build();
+				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + getPlural(fieldType).toLowerCase() + "}").addAttribute("path", getPlural(fieldType).toLowerCase()).build();
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
 						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
 						//the link URL is determined as a best effort attempt following Roo REST conventions, this link might be wrong if custom paths are used
 						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
-						EntityMetadata typeEntityMetadata = getFieldType(field);
-						Assert.notNull(typeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
-
-						fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("path", "/" + typeEntityMetadata.getPlural().toLowerCase()).build();
+						EntityMetadata typeEntityMetadata = getEntityMetadataForField(field);
+						if (typeEntityMetadata != null) {
+							fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("path", "/" + typeEntityMetadata.getPlural().toLowerCase()).build();
+						}
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")
 							|| annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToOne")) {
 
-						EntityMetadata typeEntityMetadata = getFieldType(field);
-						Assert.notNull(typeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
-					
-						EntityMetadata referenceTypeEntityMetadata = getFieldType(field);
-						Assert.notNull(referenceTypeEntityMetadata, "Could not determine the plural name for the '" + Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())) + "' field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());						
-
-						fieldElement = new XmlElementBuilder("field:select", document)
-												.addAttribute("items", "${" + typeEntityMetadata.getPlural().toLowerCase() + "}")
-												.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-												.addAttribute("path", "/" + referenceTypeEntityMetadata.getPlural().toLowerCase())
-											.build();
-										
-						if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
-							fieldElement.setAttribute("multiple", "true");
+						JavaType referenceType = getJavaTypeForField(field);
+						if (referenceType != null) {
+							fieldElement = new XmlElementBuilder("field:select", document)
+													.addAttribute("items", "${" + getPlural(referenceType).toLowerCase() + "}")
+													.addAttribute("itemValue", getEntityMetadataForField(field).getIdentifierField().getFieldName().getSymbolName())
+													.addAttribute("path", "/" + getPlural(referenceType).toLowerCase())
+												.build();
+											
+							if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
+								fieldElement.setAttribute("multiple", "true");
+							}
 						}
 					} 
 					// only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
@@ -470,9 +452,8 @@ public class JspViewManager {
 			root.appendChild(fieldElement);
 		}
 	}
-
-	private EntityMetadata getFieldType(FieldMetadata field) {
-		EntityMetadata typeEntityMetadata;
+	
+	private JavaType getJavaTypeForField(FieldMetadata field) {
 		if (field.getFieldType().isCommonCollectionType()) {
 			//currently there is no scaffolding available for Maps (see ROO-194)
 			if(field.getFieldType().equals(new JavaType(Map.class.getName()))) {
@@ -482,11 +463,14 @@ public class JspViewManager {
 			if (parameters.size() == 0) {
 				throw new IllegalStateException("Could not determine the parameter type for the " + field.getFieldName().getSymbolName() + " field in " + beanInfoMetadata.getJavaBean().getSimpleTypeName());
 			}
-			typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(parameters.get(0), Path.SRC_MAIN_JAVA));
+			return parameters.get(0);
 		} else {
-			typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+			return field.getFieldType();
 		}
-		return typeEntityMetadata;
+	}
+
+	private EntityMetadata getEntityMetadataForField(FieldMetadata field) {
+		return (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(getJavaTypeForField(field), Path.SRC_MAIN_JAVA));
 	}
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
@@ -573,5 +557,19 @@ public class JspViewManager {
 		  return true;
 		}		
 		return false;
+	}
+	
+	private String getPlural(JavaType type) {
+		if (pluralCache.get(type) != null) {
+			return pluralCache.get(type);
+		}
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + type.getFullyQualifiedTypeName() + "' type");
+		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
+			pluralCache.put(type, pluralMetadata.getPlural());
+			return pluralMetadata.getPlural();
+		}
+		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
+		return pluralMetadata.getPlural() + "Items";	
 	}
 }

@@ -70,6 +70,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private String controllerPath;
 	private String entityName;
 	private Map<JavaSymbolName, String> dateTypes;
+	private Map<JavaType, String> pluralCache;
 
 	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -83,7 +84,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!isValid()) {
 			return;
 		}
-
+		this.pluralCache = new HashMap<JavaType, String>();
 		this.annotationValues = annotationValues;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
@@ -242,18 +243,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
+		
+		String plural = getPlural(beanInfoMetadata.getJavaBean()).toLowerCase();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (page != null || size != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
 		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getCountMethod().getMethodName() + "() / sizeNo;");
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		if (!dateTypes.isEmpty()) {
@@ -517,16 +520,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (javaType.isCommonCollectionType() && isSpecialType(javaType.getParameters().get(0))) {
 				javaType = javaType.getParameters().get(0);
 				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-			} else if (isEnumType(javaType)) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine plural for '" + javaType.getFullyQualifiedTypeName() + "' type");
-
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + pluralMetadata.getPlural().toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
+			} else if (isEnumType(javaType)) {		
+				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 			} else if (isSpecialType(javaType)) {
 				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			}
 			if (typeEntityMetadata != null) {
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + typeEntityMetadata.getPlural().toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 			}
 			needModelMap = true;
 		}
@@ -609,8 +609,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
-
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityMetadata.getPlural().toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
 		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Calendar.class.getName()))) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -737,51 +736,42 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (type.equals(beanInfoMetadata.getJavaBean())) {
 				continue;
 			}
-			String plural = "";
+			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 	
 			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 			if (typeEntityMetadata != null) {
 				bodyBuilder.appendFormalLine("return " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "();");
-				plural = typeEntityMetadata.getPlural();
 			} else if (isEnumType(type)) {
-				PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-				Assert.notNull(pluralMetadata, "Could not determine plural for '" + type.getFullyQualifiedTypeName() + "' type");
-				plural = pluralMetadata.getPlural();
 				JavaType arrays = new JavaType("java.util.Arrays");
 				bodyBuilder.appendFormalLine("return " + arrays.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
 			}
 			
-			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + plural);
+			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + getPlural(type));
 			MethodMetadata addReferenceDataMethod = methodExists(populateMethodName);
 			if (addReferenceDataMethod != null)
 				continue;
+		
+			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), getPlural(type).toLowerCase()));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
 			
-			if (plural.length() > 0) {
-				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-				List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-				attributes.add(new StringAttributeValue(new JavaSymbolName("value"), plural.toLowerCase()));
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ModelAttribute"), attributes));
-				
-				List<JavaType> typeParams = new ArrayList<JavaType>();
-				typeParams.add(type);
-				JavaType returnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams);
-			
-				methods.add(new DefaultMethodMetadata(getId(), Modifier.PUBLIC, populateMethodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput()));
-			}
+			List<JavaType> typeParams = new ArrayList<JavaType>();
+			typeParams.add(type);
+			JavaType returnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams);
+		
+			methods.add(new DefaultMethodMetadata(getId(), Modifier.PUBLIC, populateMethodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput()));
 		}
 		return methods;
 	}
 
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
-		// We have no access to method parameter information, so we scan by name
-		// alone and treat any match as authoritative
-		// We do not scan the superclass, as the caller is expected to know
-		// we'll only scan the current class
+		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative
+		// We do not scan the superclass, as the caller is expected to know we'll only scan the current class
 		for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
 			if (method.getMethodName().equals(methodName)) {
-				// Found a method of the expected name; we won't check method
-				// parameters though
+				// Found a method of the expected name; we won't check method parameters though
 				return method;
 			}
 		}
@@ -882,33 +872,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return false;
 	}
 	
-//	private void setupFinderDateTimeFormatAttributes(List<JavaSymbolName> paramNames, List<JavaType> paramTypes, InvocableMemberBodyBuilder bodyBuilder, boolean formMethod) {
-//		for (int i = 0; i < paramTypes.size(); i++) {
-//			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
-//				JavaSymbolName fieldName = null;
-//				if (paramNames.get(i).getSymbolName().startsWith("max") || paramNames.get(i).getSymbolName().startsWith("min")) {
-//					fieldName = new JavaSymbolName(StringUtils.uncapitalize(paramNames.get(i).getSymbolName().substring(3)));
-//				} else {
-//					fieldName = paramNames.get(i);
-//				}
-//				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
-//				if (field != null) {
-//					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-//					if (annotation != null) {
-//						AnnotationAttributeValue<?> styleValue = annotation.getAttribute(new JavaSymbolName("style"));
-//						if (styleValue != null) {
-//							if (formMethod) {
-//								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + paramNames.get(i).getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
-//							} else {
-//								bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + fieldName.getSymbolName().toLowerCase() + "_date_format\", org.joda.time.format.DateTimeFormat.patternForStyle(\"" + styleValue.getValue() + "\", org.springframework.context.i18n.LocaleContextHolder.getLocale()));");
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-
+	private String getPlural(JavaType type) {
+		if (pluralCache.get(type) != null) {
+			return pluralCache.get(type);
+		}
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + type.getFullyQualifiedTypeName() + "' type");
+		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
+			pluralCache.put(type, pluralMetadata.getPlural());
+			return pluralMetadata.getPlural();
+		}
+		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
+		return pluralMetadata.getPlural() + "Items";	
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

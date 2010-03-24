@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.scr.annotations.Component;
@@ -63,6 +65,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private MenuOperations menuOperations;
 	@Reference private JspOperations jspOperations;
 	@Reference private PathResolver pathResolver;
+	
+	private Map<JavaType, String> pluralCache;
 
 	private BeanInfoMetadata beanInfoMetadata;  // caution: concurrent access not supported
 
@@ -73,11 +77,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	public MetadataItem get(String metadataIdentificationString) {
 		// Work out the MIDs of the other metadata we depend on
 		// NB: The JavaType and Path are to the corresponding web scaffold controller class
+		pluralCache = new HashMap<JavaType, String>();
+		
 		JavaType javaType = JspMetadata.getJavaType(metadataIdentificationString);
 		Path path = JspMetadata.getPath(metadataIdentificationString);
 		String webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(javaType, path);
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
-
+		
 		if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
 			// Can't get the corresponding scaffold, so we certainly don't need to manage any JSPs at this time
 			return null;
@@ -177,10 +183,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		String resourceId = "label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase();
 		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
 		
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
-		Assert.notNull(pluralMetadata, "Could not determine plural for '" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "' type");
 		String pluralResourceId = resourceId + ".plural";
-		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(pluralMetadata.getPlural()).getReadableSymbolName());
+		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName());
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
 			JavaSymbolName fieldName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
@@ -191,7 +195,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		//Add 'list all' menu item
 		menuOperations.addMenuItem(
 				categoryName, 
-				new JavaSymbolName(entityMetadata.getPlural()),
+				new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())),
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}",
 				MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
@@ -201,13 +205,13 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
 				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName));
-				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + entityMetadata.getPlural() + "By", ""));
+				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
 				//Add 'Find by' menu item
 				menuOperations.addMenuItem(
 						categoryName, 
 						finderLabel, 
 						"global.menu.find",
-						"/" + controllerPath + "?find=" + finderName.replace("find" + entityMetadata.getPlural(), "") + "&form",
+						"/" + controllerPath + "?find=" + finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()), "") + "&form",
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
@@ -390,6 +394,20 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		    }
 	    }
     }
+    
+    private String getPlural(JavaType type) {
+		if (pluralCache.get(type) != null) {
+			return pluralCache.get(type);
+		}
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + type.getFullyQualifiedTypeName() + "' type");
+		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
+			pluralCache.put(type, pluralMetadata.getPlural());
+			return pluralMetadata.getPlural();
+		}
+		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
+		return pluralMetadata.getPlural() + "Items";	
+	}
     
     private JavaSymbolName getControllerPathSymbolName(String controllerPath) {
 		String cleanControllerPath[] = controllerPath.split("/");
