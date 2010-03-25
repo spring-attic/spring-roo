@@ -318,9 +318,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (null == repositories) {
 			repositories = document.createElement("repositories");
 		}
-
-		repositories.appendChild(new XmlElementBuilder("repository", document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("name", document).setText(repository.getName()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build());
-
+		
+		Element repositoryE = new XmlElementBuilder("repository", document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
+		if (repository.getName() != null) {
+			repositoryE.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
+		}
+		repositories.appendChild(repositoryE);
+		
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 

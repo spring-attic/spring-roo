@@ -25,16 +25,17 @@ public class Repository implements Comparable<Repository> {
 	 * Convenience constructor creating a repository instance
 	 * 
 	 * @param id the repository id (required)
-	 * @param name the repository name (required)
+	 * @param name the repository name (optional)
 	 * @param url the repository url (required)
 	 */
 	public Repository(String id, String name, String url) {
 		Assert.hasText(id, "Group ID required");
-		Assert.hasText(name, "Artifact ID required");
 		Assert.notNull(url, "URL required");
 		this.id = id;
-		this.name = name;
 		this.url = url;
+		if (name != null && name.length() > 0) {
+			this.name = name;
+		}
 	}
 	
 	/**
@@ -64,31 +65,54 @@ public class Repository implements Comparable<Repository> {
 	public Repository(Element element) {
 		Assert.notNull(element, "Element required");
 		this.id = XmlUtils.findRequiredElement("id", element).getTextContent();
-		this.name = XmlUtils.findRequiredElement("name", element).getTextContent();
 		this.url = XmlUtils.findRequiredElement("url", element).getTextContent();
+		Element name = XmlUtils.findFirstElement("name", element);
+		if (name != null) {
+			this.name = name.getTextContent();
+		}
 		if (null != XmlUtils.findFirstElement("snapshots", element)) {
 			this.enableSnapshots = new Boolean(XmlUtils.findRequiredElement("snapshots/enabled", element).getTextContent());
 		}
 	}
 
+	/**
+	 * The id of a repository
+	 * 
+	 * @return the id (never null)
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * The name of a repository
+	 * 
+	 * @return the name of the repository (null if not exists)
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * The url of a repository
+	 * 
+	 * @return the url (never null)
+	 */
 	public String getUrl() {
 		return url;
 	}
 	
+	/**
+	 * Indicates if snapshots are enabled
+	 * 
+	 * @return enableSnapshots
+	 */
 	public boolean isEnableSnapshots() {
 		return enableSnapshots;
 	}
 	
 	public int hashCode() {
-		return 11 * this.id.hashCode() * this.name.hashCode() * this.url.hashCode();
+		return 11 * this.id.hashCode() * this.url.hashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -100,9 +124,6 @@ public class Repository implements Comparable<Repository> {
 			throw new NullPointerException();
 		}
 		int result = this.id.compareTo(o.id);
-		if (result == 0) {
-			result = this.name.compareTo(o.name);
-		}
 		if (result == 0) {
 			result = this.url.compareTo(o.url);
 		}
