@@ -81,23 +81,6 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>EclipseLink issues</emphasis>: EclipseLink 1.x has an
-        issue that currently blocks its use with Roo. Specifically, you'll
-        receive a "mapping metadata cannot be applied to fields or properties
-        that are transient, static or abstract" ValidationException when
-        trying to load the application. The relevant EclipseLink bug number is
-        <link
-        xlink:href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=277550">277550</link>.
-        While this bug was resolved in October 2009 by the EclipseLink project
-        and is included in EclipseLink 2.0, Roo does not presently support
-        EclipseLink 2.0. Issue number <link
-        xlink:href="http://jira.springframework.org/browse/ROO-481">ROO-481</link>
-        represents the request to add EclipseLink 2.0 support to Roo, which
-        you are welcome to track if you are interested in using
-        EclipseLink.</para>
-      </listitem>
-
-      <listitem>
         <para><emphasis>Integration testing limitations</emphasis>: The data
         on demand mechanism (which is used for integration tests) has limited
         JSR 303 (Bean Validator) compatibility. Roo supports fields using
@@ -123,14 +106,6 @@
         clean</literal>" from within Roo itself.</para>
       </listitem>
 
-      <listitem xml:id="selenium-addon-known-issues">
-        <para><emphasis>Selenium Add-on</emphasis>: The maven selenium plugin
-        does not work on Mac OSX 10.6. This is a known issue to the developers
-        of this maven plugin and the progress on this issue can be tracked at
-        <link xlink:href="http://jira.openqa.org/browse/SRC-743">
-        http://jira.openqa.org/browse/SRC-743</link></para>
-      </listitem>
-
       <listitem>
         <para><emphasis>CSS considerations</emphasis>: The Web UI has been
         tested successfully with FireFox, Opera, Safari, Chrome, IE8 and IE6.
@@ -138,6 +113,17 @@
         JavaScript is disabled. We therefore do not recommend to run IE6
         without JavaScript when displaying the default scaffolded Roo Web
         interface.</para>
+      </listitem>
+      
+       <listitem>
+        <para><emphasis>Tomcat 5.5</emphasis>: Tomcat 5.5 can not be supported 
+        by the scaffolded Spring MVC Web UI. Tomcat 5.5 does not support the 
+        JSP 2.1 API. Roo makes extensive use of the JSP 2.1 API in the 
+        scaffolded Web UI (specifically expression language features). 
+        Furthermore, the JSP 2.0 API does not support JDK 5 enums (a feature 
+        that Roo would need). See <link
+        xlink:href="https://jira.springsource.org/browse/ROO-680">ROO-680</link> 
+        for more details.</para>
       </listitem>
     </itemizedlist>
   </section>
