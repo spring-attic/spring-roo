@@ -125,7 +125,7 @@
         xlink:href="https://jira.springsource.org/browse/ROO-680">ROO-680</link> 
         for more details.</para>
         <para>The following <link
-        xlink:href="http://forum.springsource.org/showpost.php?s=10e2df3cc266c9a85f8d473716d9b0c3&amp;p=287652&postcount=15">
+        xlink:href="http://forum.springsource.org/showpost.php?s=10e2df3cc266c9a85f8d473716d9b0c3&amp;p=287652&amp;postcount=15">
         forum post</link> offers a workaround for the JSP 2.1 incompatibility 
         issue. Please be aware that this has not been tested by the Roo team 
         and Tomcat 5.5 does officially support the JSP 2.0 API.</para>
