@@ -92,7 +92,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.controllerPath = annotationValues.getPath();
 		this.metadataService = metadataService;
 
-		specialDomainTypes = getSpecialDomainTypes();
+		specialDomainTypes = getSpecialDomainTypes(beanInfoMetadata.getJavaBean());
 		dateTypes = getDatePatterns();
 		
 		if (annotationValues.create) {
@@ -114,13 +114,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				builder.addMethod(getFinderMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
 			}
 		}
-		if (annotationValues.isRegisterConverters()) {
-			builder.addMethod(getRegisterConvertersMethod());
-		}
 		if (specialDomainTypes.size() > 0) {
 			for (MethodMetadata method : getPopulateMethods()) {
 				builder.addMethod(method);
 			}
+		}
+		if (annotationValues.isRegisterConverters()) {
+			builder.addMethod(getRegisterConvertersMethod());
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
@@ -643,14 +643,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		Set<JavaType> typesForConversion = specialDomainTypes;
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
-		
 		for (JavaType conversionType : typesForConversion) {
 			BeanInfoMetadata typeBeanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(conversionType, Path.SRC_MAIN_JAVA));
 			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(conversionType, Path.SRC_MAIN_JAVA));
 			List<MethodMetadata> elegibleMethods = new ArrayList<MethodMetadata>();
 			int fieldCounter = 3;
 			if (typeBeanInfoMetadata != null) {
-				//second run to find remaining fields
+				//determine fields to be included in converter
 				for (MethodMetadata accessor : typeBeanInfoMetadata.getPublicAccessors(false)) {
 					if (fieldCounter == 0) {
 						break;
@@ -662,7 +661,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 						}
 					}
 					FieldMetadata field = typeBeanInfoMetadata.getFieldForPropertyName(typeBeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-					if (field != null && !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() && !field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && !field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
+					if (field != null // should not happen
+							&& !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() // exclude collections and arrays
+							&& !getSpecialDomainTypes(conversionType).contains(field.getFieldType()) // exclude references to other domain objects as they are too verbose
+							&& !field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && !field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) /*exclude boolean values as they would not be meaningful in this presentation */) {
 						elegibleMethods.add(accessor);
 						fieldCounter--;
 					}
@@ -671,29 +673,37 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				if (elegibleMethods.size() > 0) {
 					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
 					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
-					bodyBuilder.appendFormalLine("conversionService.addConverter(new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
-					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
-					bodyBuilder.indent();
+					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
+					bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
+					
+					//register the converter method
+					InvocableMemberBodyBuilder converterBodyBuilder = new InvocableMemberBodyBuilder();
+					converterBodyBuilder.appendFormalLine("return new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
+					converterBodyBuilder.indent();
+					converterBodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
+					converterBodyBuilder.indent();
 					
 					StringBuilder sb = new StringBuilder();
-					sb.append("return ").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
+					sb.append("return new StringBuilder().append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
 					if (isEnumType(elegibleMethods.get(0).getReturnType())) {
 						sb.append(".name()");
 					}
+					sb.append(")");
 					for (int i = 1; i < elegibleMethods.size(); i++) {
-						sb.append(" + \" \" + ").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
+						sb.append(".append(\" \").append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
 						if (isEnumType(elegibleMethods.get(i).getReturnType())) {
 							sb.append(".name()");
 						}
+						sb.append(")");
 					}
-					sb.append(";");
+					sb.append(".toString();");
 					
-					bodyBuilder.appendFormalLine(sb.toString());
-					bodyBuilder.indentRemove();
-					bodyBuilder.appendFormalLine("}");
-					bodyBuilder.indentRemove();
-					bodyBuilder.appendFormalLine("});");
+					converterBodyBuilder.appendFormalLine(sb.toString());
+					converterBodyBuilder.indentRemove();
+					converterBodyBuilder.appendFormalLine("}");
+					converterBodyBuilder.indentRemove();
+					converterBodyBuilder.appendFormalLine("};");
+					builder.addMethod(new DefaultMethodMetadata(getId(), 0, converterMethodName, converter, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), converterBodyBuilder.getOutput()));
 				}
 			}
 		}
@@ -778,20 +788,29 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return null;
 	}
 
-	private SortedSet<JavaType> getSpecialDomainTypes() {
+	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType) {
 		SortedSet<JavaType> specialTypes = new TreeSet<JavaType>();
-		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+		BeanInfoMetadata bim = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (bim == null) { 
+			//unable to get metadata so it is not a JavaType in our project anyway.
+			return specialTypes;
+		}
+		EntityMetadata em = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (em == null) { 
+			//unable to get entity metadata so it is not a Entity in our project anyway.
+			return specialTypes;
+		}
+		for (MethodMetadata accessor : bim.getPublicAccessors(false)) {
 			// not interested in identifiers and version fields
-			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
+			if (accessor.equals(em.getIdentifierAccessor()) || accessor.equals(em.getVersionAccessor())) {
 				continue;
 			}
 			// not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata)) {
+			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(bim.getPropertyNameForJavaBeanMethod(accessor));
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();
-
 			if (type.isCommonCollectionType()) {
 				for (JavaType genericType : type.getParameters()) {
 					if (isSpecialType(genericType)) {
@@ -800,6 +819,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				}
 			} else {
 				if (isSpecialType(type)) {
+					
 					specialTypes.add(type);
 				}
 			}
@@ -816,7 +836,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 			// not interested in fields that are not exposed via a mutator
 			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata)) {
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();
@@ -853,20 +873,17 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return false;
 	}
 
-	private boolean hasMutator(FieldMetadata fieldMetadata) {
-		Assert.notNull(fieldMetadata, "Field metadata required");
-		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator))))
+	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
+		for (MethodMetadata mutator : bim.getPublicMutators()) {
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(bim.getPropertyNameForJavaBeanMethod(mutator))))
 				return true;
 		}
 		return false;
 	}
 
 	private boolean isSpecialType(JavaType javaType) {
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		// we are only interested if the type is part of our application and if
-		// no editor exists for it already
-		if (metadataService.get(physicalTypeIdentifier) != null) {
+		// we are only interested if the type is part of our application 
+		if (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null) {
 			return true;
 		}
 		return false;
