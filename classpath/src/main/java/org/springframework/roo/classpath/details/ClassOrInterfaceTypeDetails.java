@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaSymbolName;
  * information available via Java bytecode. For example, static initialisers and inner classes
  * are unsupported.
  * 
- * @author Ben Alexextends
+ * @author Ben Alex
  * @since 1.0
  *
  */

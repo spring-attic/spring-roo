@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -38,7 +37,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -57,8 +55,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JmsOperationsImpl implements JmsOperations {
-	
-	private static final Logger logger = HandlerUtils.getLogger(JmsOperationsImpl.class);
 	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;

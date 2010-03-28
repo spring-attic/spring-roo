@@ -173,7 +173,7 @@ public class FinderOperationsImpl implements FinderOperations {
 
 			if ("finders".equals(attributeName.getSymbolName())) {
 				// Ensure we have an array of strings
-				if (!(val instanceof ArrayAttributeValue)) {
+				if (!(val instanceof ArrayAttributeValue<?>)) {
 					logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
 					return;
 				}
