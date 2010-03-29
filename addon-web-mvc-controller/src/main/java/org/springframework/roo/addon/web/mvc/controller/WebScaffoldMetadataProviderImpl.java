@@ -24,7 +24,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate=true)
 @Service
-public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider {
+public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
 	
 	@Reference private ControllerOperations controllerOperations;
 
