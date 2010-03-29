@@ -16,13 +16,13 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
-import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -38,12 +38,14 @@ import org.w3c.dom.Element;
 @Service
 public class JpaOperationsImpl implements JpaOperations {
 	private static final Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
-	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
-	@Reference private ProjectOperations projectOperations;
-	
-	private static final String OPENJPA_VERSION = "2.0.0-beta2";
+	@Reference
+	private FileManager fileManager;
+	@Reference
+	private PathResolver pathResolver;
+	@Reference
+	private MetadataService metadataService;
+	@Reference
+	private ProjectOperations projectOperations;
 
 	public boolean isJpaInstallationPossible() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && !fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -63,10 +65,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		updateApplicationContext(database, jndi);
 		updateDependencies(ormProvider, database);
-
-		if (ormProvider == OrmProvider.OPENJPA) {
-			installMavenPlugin(); // Install openjpa-maven-plugin for enhancement
-		}
 	}
 
 	private void updateApplicationContext(JdbcDatabase database, String jndi) {
@@ -199,13 +197,13 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		Element dependencies = (Element) dependencyDoc.getFirstChild();
 
-		List<Element> databaseDepenencies = XmlUtils.findElements("/dependencies/databases/database[@id='" + database.getKey() + "']/dependency", dependencies);
-		for (Element dependency : databaseDepenencies) {
+		List<Element> databaseDependencies = XmlUtils.findElements("/dependencies/databases/database[@id='" + database.getKey() + "']/dependency", dependencies);
+		for (Element dependency : databaseDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 
-		List<Element> ormDepenencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/dependency", dependencies);
-		for (Element dependency : ormDepenencies) {
+		List<Element> ormDependencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/dependency", dependencies);
+		for (Element dependency : ormDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 
@@ -224,6 +222,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element repository : repositories) {
 			Repository repo = new Repository(repository);
 			projectOperations.addRepository(repo.getId(), repo.getName(), repo.getUrl());
+		}
+
+		if (ormProvider == OrmProvider.OPENJPA) {
+			installMavenPlugin(dependencies); // Install openjpa-maven-plugin for enhancement
 		}
 	}
 
@@ -304,7 +306,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return property;
 	}
 
-	private void installMavenPlugin() {
+	private void installMavenPlugin(Element dependencies) {
 		String pomFilePath = "pom.xml";
 		String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
 		MutableFile pomMutableFile = null;
@@ -323,60 +325,10 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		Element root = (Element) pom.getLastChild();
 
-		// Stop if the plugin is already installed
-		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) != null) {
-			return;
+		// Check if the plugin is already installed
+		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) == null) {
+			Element plugin = XmlUtils.findFirstElement("/dependencies/ormProviders/provider[@id='" + OrmProvider.OPENJPA.getKey() + "']/plugin", dependencies);
+			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
-
-		Element dependencies = XmlUtils.findRequiredElement("/project/dependencies", root);
-		Assert.notNull(dependencies, "Could not find the first dependencies element in pom.xml");
-
-		// Now install the plugin itself
-		Element plugin = new XmlElementBuilder("plugin", pom)
-								.addChild(new XmlElementBuilder("groupId", pom).setText("org.codehaus.mojo").build())
-								.addChild(new XmlElementBuilder("artifactId", pom).setText("openjpa-maven-plugin").build())
-								.addChild(new XmlElementBuilder("version", pom).setText("1.0").build())
-								.addChild(new XmlElementBuilder("configuration", pom)
-											.addChild(new XmlElementBuilder("includes", pom).setText("**/*.class").build())
-											.addChild(new XmlElementBuilder("excludes", pom).setText("**/*_Roo_*.class").build())
-											.addChild(new XmlElementBuilder("addDefaultConstructor", pom).setText("true").build())
-											.addChild(new XmlElementBuilder("toolProperties", pom)
-														.addChild(new XmlElementBuilder("property", pom)
-																	.addChild(new XmlElementBuilder("name", pom).setText("directory").build())
-																	.addChild(new XmlElementBuilder("value", pom).setText("otherdirectoryvalue").build())
-																.build())
-													.build())
-										.build())
-								.addChild(new XmlElementBuilder("executions", pom)
-														.addChild(new XmlElementBuilder("execution", pom)
-																		.addChild(new XmlElementBuilder("id", pom).setText("enhancer").build())
-																		.addChild(new XmlElementBuilder("phase", pom).setText("compile").build())
-																		.addChild(new XmlElementBuilder("goals", pom)
-																						.addChild(new XmlElementBuilder("goal", pom).setText("enhance").build())
-																					.build())
-																	.build())
-													.build())
-								.addChild(new XmlElementBuilder("dependencies", pom)
-														.addChild(new XmlElementBuilder("dependency", pom)
-																		.addChild(new XmlElementBuilder("groupId", pom).setText("org.apache.openjpa").build())
-																		.addChild(new XmlElementBuilder("artifactId", pom).setText("openjpa").build())
-																		.addChild(new XmlElementBuilder("version", pom).setText(OPENJPA_VERSION).build())
-																		.addChild(new XmlElementBuilder("exclusions", pom)
-																						.addChild(new XmlElementBuilder("exclusion", pom)
-																										.addChild(new XmlElementBuilder("groupId", pom).setText("commons-logging").build())
-																										.addChild(new XmlElementBuilder("artifactId", pom).setText("commons-logging").build())
-																									.build())
-																						.addChild(new XmlElementBuilder("exclusion", pom)
-																										.addChild(new XmlElementBuilder("groupId", pom).setText("org.apache.geronimo.specs").build())
-																										.addChild(new XmlElementBuilder("artifactId", pom).setText("geronimo-jms_1.1_spec").build())
-																									.build())
-																					.build())
-																	.build())
-													.build())
-							.build();
-
-		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
-
-		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 	}
 }

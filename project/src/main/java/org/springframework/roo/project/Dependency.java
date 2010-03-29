@@ -25,7 +25,7 @@ import org.w3c.dom.NodeList;
 public class Dependency implements Comparable<Dependency> {
 	private JavaPackage groupId;
 	private JavaSymbolName artifactId;
-	private String versionId;
+	private String version;
 	private DependencyType type;
 	private DependencyScope scope;
 	private List<Dependency> exclusions = new ArrayList<Dependency>();
@@ -35,15 +35,15 @@ public class Dependency implements Comparable<Dependency> {
 	 * 
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
-	 * @param versionId the version ID (required)
+	 * @param version the version (required)
 	 */
-	public Dependency(String groupId, String artifactId, String versionId) {
+	public Dependency(String groupId, String artifactId, String version) {
 		Assert.hasText(groupId, "Group ID required");
 		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(versionId, "Version ID required");
+		Assert.hasText(version, "Version ID required");
 		this.groupId = new JavaPackage(groupId);
 		this.artifactId = new JavaSymbolName(artifactId);
-		this.versionId = versionId;
+		this.version = version;
 		this.type = DependencyType.JAR;
 		this.scope = DependencyScope.COMPILE;
 	}
@@ -53,17 +53,17 @@ public class Dependency implements Comparable<Dependency> {
 	 * 
 	 * @param groupId the group ID (required)
 	 * @param artifactId the artifact ID (required)
-	 * @param versionId the version ID (required)
+	 * @param version the version ID (required)
 	 * @param exclusions the exclusions for this dependency
 	 */
-	public Dependency(String groupId, String artifactId, String versionId, List<Dependency> exclusions) {
+	public Dependency(String groupId, String artifactId, String version, List<Dependency> exclusions) {
 		Assert.hasText(groupId, "Group ID required");
 		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(versionId, "Version ID required");
+		Assert.hasText(version, "Version required");
 		Assert.notNull(exclusions, "Exclusions required");
 		this.groupId = new JavaPackage(groupId);
 		this.artifactId = new JavaSymbolName(artifactId);
-		this.versionId = versionId;
+		this.version = version;
 		this.type = DependencyType.JAR;
 		this.scope = DependencyScope.COMPILE;
 		this.exclusions = exclusions;
@@ -86,9 +86,9 @@ public class Dependency implements Comparable<Dependency> {
 
 			NodeList versionElements = dependency.getElementsByTagName("version");
 			if (versionElements.getLength() > 0) {
-				this.versionId = dependency.getElementsByTagName("version").item(0).getTextContent();
+				this.version = dependency.getElementsByTagName("version").item(0).getTextContent();
 			} else {
-				this.versionId = "";
+				this.version = "";
 			}
 
 			// POM attributes supported in Maven 3.1
@@ -149,7 +149,7 @@ public class Dependency implements Comparable<Dependency> {
 		else if (dependency.hasAttribute("org") && dependency.hasAttribute("name") && dependency.hasAttribute("rev")) {
 			this.groupId = new JavaPackage(dependency.getAttribute("org"));
 			this.artifactId = new JavaSymbolName(dependency.getAttribute("name"));
-			this.versionId = dependency.getAttribute("rev");
+			this.version = dependency.getAttribute("rev");
 			this.type = DependencyType.JAR;
 			this.scope = DependencyScope.COMPILE;
 			// TODO: implement exclusions parser for IVY format
@@ -170,12 +170,12 @@ public class Dependency implements Comparable<Dependency> {
 	public Dependency(JavaPackage groupId, JavaSymbolName artifactId, String versionId, DependencyType type, DependencyScope scope) {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.notNull(versionId, "Version ID required");
+		Assert.notNull(versionId, "Version required");
 		Assert.notNull(type, "Dependency type required");
 		Assert.notNull(scope, "Dependency scope required");
 		this.groupId = groupId;
 		this.artifactId = artifactId;
-		this.versionId = versionId;
+		this.version = versionId;
 		this.type = type;
 		this.scope = scope;
 	}
@@ -189,7 +189,7 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	public String getVersionId() {
-		return versionId;
+		return version;
 	}
 
 	public DependencyType getType() {
@@ -208,7 +208,7 @@ public class Dependency implements Comparable<Dependency> {
 	}
 
 	public int hashCode() {
-		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.versionId.hashCode() * (this.type != null ? this.type.hashCode() : 1) * (this.scope != null ? this.scope.hashCode() : 1);
+		return 11 * this.groupId.hashCode() * this.artifactId.hashCode() * this.version.hashCode() * (this.type != null ? this.type.hashCode() : 1) * (this.scope != null ? this.scope.hashCode() : 1);
 	}
 
 	public boolean equals(Object obj) {
@@ -224,7 +224,7 @@ public class Dependency implements Comparable<Dependency> {
 			result = this.artifactId.compareTo(o.artifactId);
 		}
 		if (result == 0) {
-			result = this.versionId.compareTo(o.versionId);
+			result = this.version.compareTo(o.version);
 		}
 		if (result == 0 && this.type != null) {
 			result = this.type.compareTo(o.type);
@@ -239,7 +239,7 @@ public class Dependency implements Comparable<Dependency> {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("groupId", groupId);
 		tsc.append("artifactId", artifactId);
-		tsc.append("versionId", versionId);
+		tsc.append("version", version);
 		tsc.append("type", type);
 		tsc.append("scope", scope);
 		return tsc.toString();

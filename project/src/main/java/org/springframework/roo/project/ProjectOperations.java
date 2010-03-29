@@ -49,10 +49,9 @@ public interface ProjectOperations {
 	 * 
 	 * @param groupId to add (required)
 	 * @param artifactId to add (required)
-	 * @param versionId to add (requireD)
+	 * @param version to add (required)
 	 */
-	void addDependency(JavaPackage groupId, JavaSymbolName artifactId,
-			String version);
+	void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
 
 	/**
 	 * Allows remove of an existing JAR dependency from the POM. 
@@ -63,10 +62,9 @@ public interface ProjectOperations {
 	 * 
 	 * @param groupId to remove (required)
 	 * @param artifactId to remove (required)
-	 * @param versionId to remove (requireD)
+	 * @param version to remove (required)
 	 */
-	void removeDependency(JavaPackage groupId, JavaSymbolName artifactId,
-			String version);
+	void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
 
 	/**
 	 * Allows addition of a repository to the POM. 
@@ -101,13 +99,9 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add 
 	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param groupId to add (required)
-	 * @param artifactId to add (required)
-	 * @param versionId to add (requireD)
-	 * @param executions to execute when the project is built (optional)
+	 * @param plugin to add (required)
 	 */
-	void addPluginDependency(JavaPackage groupId, JavaSymbolName artifactId,
-			String version, Execution... executions);
+	void addBuildPlugin(Plugin plugin);
 
 	/**
 	 * Allows remove of an existing build plugin from the POM. 
@@ -116,22 +110,16 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * build plugin from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param groupId to remove (required)
-	 * @param artifactId to remove (required)
-	 * @param versionId to remove (requireD)
+	 * @param plugin to add (required)
 	 */
-	void removeBuildPlugin(JavaPackage groupId, JavaSymbolName artifactId,
-			String version);
+	void removeBuildPlugin(Plugin plugin);
 
 	/**
 	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Dependency)}.
 	 * Always adds the presented dependency.
 	 * 
-	 * @param dependency build plugin to add (required)
-	 * @param executions to be executed when project is built (optional)
+	 * @param plugin to add (required)
 	 */
-	void buildPluginUpdate(Dependency buildPluginDependency,
-			Execution... executions);
-
+	void buildPluginUpdate(Plugin buildPlugin);
 }

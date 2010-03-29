@@ -6,7 +6,7 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
- * Simplified immutable representation of a dependency.
+ * Simplified immutable representation of a repository.
  * 
  * <p>
  * Structured after the model used by Maven and Ivy.
@@ -48,10 +48,11 @@ public class Repository implements Comparable<Repository> {
 	 */
 	public Repository(String id, String name, String url, boolean enableSnapshots) {
 		Assert.hasText(id, "Group ID required");
-		Assert.hasText(name, "Artifact ID required");
 		Assert.hasText(url, "URL required");
 		this.id = id;
-		this.name = name;
+		if (name != null && name.length() > 0) {
+			this.name = name;
+		}
 		this.url = url;
 		this.enableSnapshots = enableSnapshots;
 	}

@@ -141,5 +141,4 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			logger.warning("Unable to install log4j logging configuration");
 		}
 	}
-
 }

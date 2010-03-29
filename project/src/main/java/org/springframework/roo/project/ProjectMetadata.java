@@ -39,22 +39,22 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private JavaPackage topLevelPackage;
 	private String projectName;
 	private Set<Dependency> dependencies;
-	private Set<Dependency> buildPluginDependencies;
+	private Set<Plugin> buildPlugins;
 	private Set<Repository> repositories;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Dependency> buildPluginDependencies, Set<Repository> repositories, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
 		Assert.notNull(dependencies, "Dependencies required");
-		Assert.notNull(buildPluginDependencies, "Build plugin dependencies required");
+		Assert.notNull(buildPlugins, "Build plugins required");
 		Assert.notNull(repositories, "Repositories required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
 		this.dependencies = dependencies;
-		this.buildPluginDependencies = buildPluginDependencies;
+		this.buildPlugins = buildPlugins;
 		this.pathResolver = pathResolver;
 		this.repositories = repositories;
 	}
@@ -75,15 +75,15 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Convenience method for determining whether a particular build plugin dependency
+	 * Convenience method for determining whether a particular build plugin
 	 * is registered.
 	 * 
-	 * @param dependency to check (required)
-	 * @return whether the build plugin dependency is currently registered or not
+	 * @param plugin to check (required)
+	 * @return whether the build plugin is currently registered or not
 	 */
-	public boolean isBuildPluginDependencyRegistered(Dependency dependency) {
-		Assert.notNull(dependency, "Dependency to check is required");
-		return buildPluginDependencies.contains(dependency);
+	public boolean isBuildPluginRegistered(Plugin plugin) {
+		Assert.notNull(plugin, "Plugin to check is required");
+		return buildPlugins.contains(plugin);
 	}
 	
 	/**
@@ -137,27 +137,27 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * @return an unmodifiable collection of the build plugin dependencies (never null, but
+	 * @return an unmodifiable collection of the build plugins (never null, but
 	 * may be empty).
 	 */
-	public Set<Dependency> getBuildPluginDependencies() {
-		return Collections.unmodifiableSet(buildPluginDependencies);
+	public Set<Plugin> getBuildPlugin() {
+		return Collections.unmodifiableSet(buildPlugins);
 	}
 
 	/**
-	 * Locates any build plugin dependencies which match the presented dependency, excluding the version number.
-	 * This is useful for upgrade use cases, where it is necessary to locate any build plugin dependencies with
+	 * Locates any build plugins which match the presented plugin, excluding the version number.
+	 * This is useful for upgrade use cases, where it is necessary to locate any build plugins with
 	 * the same group, artifact and type identifications so that they can be removed.
 	 * 
-	 * @param dependency to locate (required; note the version number is ignored in comparisons)
-	 * @return any matching dependencies (never returns null, but may return an empty {@link Set})
+	 * @param plugin to locate (required; note the version number is ignored in comparisons)
+	 * @return any matching plugins (never returns null, but may return an empty {@link Set})
 	 */
-	public Set<Dependency> getBuildPluginDependenciesExcludingVersion(Dependency dependency) {
-		Assert.notNull(dependency, "Dependency to locate is required");
-		Set<Dependency> result = new HashSet<Dependency>();
-		for (Dependency d : buildPluginDependencies) {
-			if (dependency.getArtifactId().equals(d.getArtifactId()) && dependency.getGroupId().equals(d.getGroupId()) && dependency.getType().equals(d.getType())) {
-				result.add(d);
+	public Set<Plugin> getBuildPluginsExcludingVersion(Plugin plugin) {
+		Assert.notNull(plugin, "Plugin to locate is required");
+		Set<Plugin> result = new HashSet<Plugin>();
+		for (Plugin p : buildPlugins) {
+			if (plugin.getArtifactId().equals(p.getArtifactId()) && plugin.getGroupId().equals(p.getGroupId())) {
+				result.add(p);
 			}
 		}
 		return result;
@@ -171,9 +171,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("topLevelPackage", topLevelPackage);
 		tsc.append("projectName", projectName);
 		tsc.append("dependencies", dependencies);
-		tsc.append("buildPluginDependencies", buildPluginDependencies);
+		tsc.append("buildPlugins", buildPlugins);
 		tsc.append("pathResolver", pathResolver);
 		return tsc.toString();
 	}
-	
 }

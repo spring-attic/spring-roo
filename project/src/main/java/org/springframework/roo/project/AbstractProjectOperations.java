@@ -18,7 +18,6 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
- *
  */
 @Component(componentAbstract=true)
 public abstract class AbstractProjectOperations implements ProjectOperations {
@@ -100,7 +99,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	
 	public void updateProjectType(ProjectType projectType) {
 		Assert.notNull(projectType, "ProjectType required");
-		
 		projectMetadataProvider.updateProjectType(projectType);
 	}
 	
@@ -144,44 +142,35 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendRepositoryRemovalNotifications(repository);
 	}
 	
-	public final void addPluginDependency(
-				JavaPackage groupId, JavaSymbolName artifactId, String version,
-				Execution... executions) {
+	public final void addBuildPlugin(Plugin plugin) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(groupId, "Group ID required");
-		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
-		projectMetadataProvider.addBuildPluginDependency(dependency,executions);
+		Assert.notNull(plugin, "Plugin required");
+		projectMetadataProvider.addBuildPlugin(plugin);
 	}
 	
-	public final void removeBuildPlugin(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+	public final void removeBuildPlugin(Plugin plugin) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(groupId, "Group ID required");
-		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		Dependency dependency = new Dependency(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
-		projectMetadataProvider.removeBuildPluginDependency(dependency);
+		Assert.notNull(plugin, "Plugin required");
+		projectMetadataProvider.removeBuildPlugin(plugin);
 	}
 	
-	public void buildPluginUpdate(Dependency buildPluginDependency, Execution... executions) {
+	public void buildPluginUpdate(Plugin plugin) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(buildPluginDependency, "Dependency required");
+		Assert.notNull(plugin, "Plugin required");
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 		
-		if (projectMetadata.isBuildPluginDependencyRegistered(buildPluginDependency)) {
+		if (projectMetadata.isBuildPluginRegistered(plugin)) {
 			// Already exists, so just quit
 			return;
 		}
 		
-		// Delete any existing dependencies with a different version
-		for (Dependency existing : projectMetadata.getBuildPluginDependenciesExcludingVersion(buildPluginDependency)) {
-			projectMetadataProvider.removeBuildPluginDependency(existing);
+		// Delete any existing plugin with a different version
+		for (Plugin existing : projectMetadata.getBuildPluginsExcludingVersion(plugin)) {
+			projectMetadataProvider.removeBuildPlugin(existing);
 		}
 		
-		// Add the dependency
-		projectMetadataProvider.addBuildPluginDependency(buildPluginDependency,executions);
+		// Add the plugin
+		projectMetadataProvider.addBuildPlugin(plugin);
 	}
-
 }
