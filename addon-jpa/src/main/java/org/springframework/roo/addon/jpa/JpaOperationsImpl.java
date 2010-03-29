@@ -38,14 +38,10 @@ import org.w3c.dom.Element;
 @Service
 public class JpaOperationsImpl implements JpaOperations {
 	private static final Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
-	@Reference
-	private FileManager fileManager;
-	@Reference
-	private PathResolver pathResolver;
-	@Reference
-	private MetadataService metadataService;
-	@Reference
-	private ProjectOperations projectOperations;
+	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
+	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
 
 	public boolean isJpaInstallationPossible() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && !fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
