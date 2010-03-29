@@ -255,18 +255,23 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			Element executionsElement = document.createElement("executions");
 			for (Execution execution : executions) {
 				Element executionElement = document.createElement("execution");
+				
 				Element executionId = document.createElement("id");
 				executionId.setTextContent(execution.getId());
+				executionElement.appendChild(executionId);
+				
 				Element executionPhase = document.createElement("phase");
 				executionPhase.setTextContent(execution.getPhase());
+				executionElement.appendChild(executionPhase);
+				
 				Element goalsElement = document.createElement("goals");
 				for (String goal : execution.getGoals()) {
 					Element goalElement = document.createElement("goal");
 					goalElement.setTextContent(goal);
 					goalsElement.appendChild(goalElement);
 				}
-				executionElement.appendChild(executionId);
 				executionElement.appendChild(goalsElement);
+				
 				executionsElement.appendChild(executionElement);
 			}
 			pluginElement.appendChild(executionsElement);
@@ -429,7 +434,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 	
-	// Remove an element identified by plugn, whenever it occurs at path
+	// Remove an element identified by plugin, whenever it occurs at path
 	private void removeBuildPlugin(Plugin plugin, String containingPath, String path) {
 		Assert.notNull(plugin, "Plugin to remove required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
