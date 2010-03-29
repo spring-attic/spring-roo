@@ -88,99 +88,96 @@ public class Plugin implements Comparable<Plugin> {
 	 * @param plugin to parse (required)
 	 */
 	public Plugin(Element plugin) {
-		// Test if it has Maven format
-		if (plugin.hasChildNodes() && plugin.getElementsByTagName("artifactId").getLength() > 0) {
-			this.groupId = new JavaPackage("org.apache.maven.plugins");
-			if (plugin.getElementsByTagName("groupId").getLength() > 0) {
-				this.groupId = new JavaPackage(plugin.getElementsByTagName("groupId").item(0).getTextContent());
-			}
+		this.groupId = new JavaPackage("org.apache.maven.plugins");
+		if (plugin.getElementsByTagName("groupId").getLength() > 0) {
+			this.groupId = new JavaPackage(plugin.getElementsByTagName("groupId").item(0).getTextContent());
+		}
 
-			this.artifactId = new JavaSymbolName(plugin.getElementsByTagName("artifactId").item(0).getTextContent());
+		this.artifactId = new JavaSymbolName(plugin.getElementsByTagName("artifactId").item(0).getTextContent());
 
-			NodeList versionElements = plugin.getElementsByTagName("version");
-			if (versionElements.getLength() > 0) {
-				this.version = plugin.getElementsByTagName("version").item(0).getTextContent();
-			} else {
-				this.version = "";
-			}
+		NodeList versionElements = plugin.getElementsByTagName("version");
+		if (versionElements.getLength() > 0) {
+			this.version = plugin.getElementsByTagName("version").item(0).getTextContent();
+		} else {
+			this.version = "";
+		}
 
-			// Parsing for configuration
-			Element configuration = XmlUtils.findFirstElement("configuration", plugin);
-			if (configuration != null) {
-				this.configuration = new Configuration(configuration);
-			}
+		// Parsing for configuration
+		Element configuration = XmlUtils.findFirstElement("configuration", plugin);
+		if (configuration != null) {
+			this.configuration = new Configuration(configuration);
+		}
 
-			// Parsing for executions
-			List<Element> executionList = XmlUtils.findElements("executions/execution", plugin);
-			if (executionList.size() > 0) {
-				for (Element execution : executionList) {
-					Element executionId = XmlUtils.findFirstElement("id", execution);
-					String id = "";
-					if (executionId != null) {
-						id = executionId.getTextContent();
+		// Parsing for executions
+		List<Element> executionList = XmlUtils.findElements("executions/execution", plugin);
+		if (executionList.size() > 0) {
+			for (Element execution : executionList) {
+				Element executionId = XmlUtils.findFirstElement("id", execution);
+				String id = "";
+				if (executionId != null) {
+					id = executionId.getTextContent();
+				}
+				Element executionPhase = XmlUtils.findFirstElement("phase", execution);
+				String phase = "";
+				if (executionPhase != null) {
+					phase = executionPhase.getTextContent();
+				}
+				List<String> goals = new ArrayList<String>();
+				List<Element> goalList = XmlUtils.findElements("goals/goal", execution);
+				if (goalList.size() > 0) {
+					for (Element goal : goalList) {
+						goals.add(goal.getTextContent());
 					}
-					Element executionPhase = XmlUtils.findFirstElement("phase", execution);
-					String phase = "";
-					if (executionPhase != null) {
-						phase = executionPhase.getTextContent();
-					}
-					List<String> goals = new ArrayList<String>();
-					List<Element> goalList = XmlUtils.findElements("goals/goal", execution);
-					if (goalList.size() > 0) {
-						for (Element goal : goalList) {
-							goals.add(goal.getTextContent());
+				}
+				executions.add(new Execution(id, phase, goals.toArray(new String[] {})));
+			}
+		}
+
+		// Parsing for dependencies
+		List<Element> dependencyList = XmlUtils.findElements("dependencies/dependency", plugin);
+		if (dependencyList.size() > 0) {
+			for (Element dependency : dependencyList) {
+				Element dependencyGroupId = XmlUtils.findFirstElement("groupId", dependency);
+				String groupId = "";
+				if (dependencyGroupId != null) {
+					groupId = dependencyGroupId.getTextContent();
+				}
+
+				Element dependencyArtifactId = XmlUtils.findFirstElement("artifactId", dependency);
+				String artifactId = "";
+				if (dependencyArtifactId != null) {
+					artifactId = dependencyArtifactId.getTextContent();
+				}
+
+				Element dependencyVersion = XmlUtils.findFirstElement("version", dependency);
+				String version = "";
+				if (dependencyVersion != null) {
+					version = dependencyVersion.getTextContent();
+				}
+
+				Dependency dependencyElement = new Dependency(groupId, artifactId, version);
+
+				// Parsing for exclusions
+				List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
+				if (exclusionList.size() > 0) {
+					for (Element exclusion : exclusionList) {
+						Element exclusionElement = XmlUtils.findFirstElement("groupId", exclusion);
+						String exclusionId = "";
+						if (exclusionElement != null) {
+							exclusionId = exclusionElement.getTextContent();
+						}
+						Element exclusionArtifactE = XmlUtils.findFirstElement("artifactId", exclusion);
+						String exclusionArtifactId = "";
+						if (exclusionArtifactE != null) {
+							exclusionArtifactId = exclusionArtifactE.getTextContent();
+						}
+						if (!(exclusionArtifactId.length() < 1) && !(exclusionId.length() < 1)) {
+							dependencyElement.getExclusions().add(new Dependency(exclusionId, exclusionArtifactId, "ignored"));
 						}
 					}
-					executions.add(new Execution(id, phase, goals.toArray(new String[] {})));
 				}
-			}
 
-			// Parsing for dependencies
-			List<Element> dependencyList = XmlUtils.findElements("dependencies/dependency", plugin);
-			if (dependencyList.size() > 0) {
-				for (Element dependency : dependencyList) {
-					Element dependencyGroupId = XmlUtils.findFirstElement("groupId", dependency);
-					String groupId = "";
-					if (dependencyGroupId != null) {
-						groupId = dependencyGroupId.getTextContent();
-					}
-
-					Element dependencyArtifactId = XmlUtils.findFirstElement("artifactId", dependency);
-					String artifactId = "";
-					if (dependencyArtifactId != null) {
-						artifactId = dependencyArtifactId.getTextContent();
-					}
-
-					Element dependencyVersion = XmlUtils.findFirstElement("version", dependency);
-					String version = "";
-					if (dependencyVersion != null) {
-						version = dependencyVersion.getTextContent();
-					}
-
-					Dependency dependencyE = new Dependency(groupId, artifactId, version);
-
-					// Parsing for exclusions
-					List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
-					if (exclusionList.size() > 0) {
-						for (Element exclusion : exclusionList) {
-							Element exclusionE = XmlUtils.findFirstElement("groupId", exclusion);
-							String exclusionId = "";
-							if (exclusionE != null) {
-								exclusionId = exclusionE.getTextContent();
-							}
-							Element exclusionArtifactE = XmlUtils.findFirstElement("artifactId", exclusion);
-							String exclusionArtifactId = "";
-							if (exclusionArtifactE != null) {
-								exclusionArtifactId = exclusionArtifactE.getTextContent();
-							}
-							if (!(exclusionArtifactId.length() < 1) && !(exclusionId.length() < 1)) {
-								dependencyE.getExclusions().add(new Dependency(exclusionId, exclusionArtifactId, "ignored"));
-							}
-						}
-					}
-
-					this.dependencies.add(dependencyE);
-				}
+				this.dependencies.add(dependencyElement);
 			}
 		}
 	}

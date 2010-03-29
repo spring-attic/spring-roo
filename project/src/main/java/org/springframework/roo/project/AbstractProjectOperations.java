@@ -26,6 +26,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	private Set<DependencyListener> listeners = new HashSet<DependencyListener>();
 	private Set<RepositoryListener> repoListeners = new HashSet<RepositoryListener>();
+	private Set<PluginListener> pluginListeners = new HashSet<PluginListener>();
 
 	public final boolean isDependencyModificationAllowed() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -97,6 +98,25 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 	}
 	
+	public void addPluginListener(PluginListener listener) {
+		this.pluginListeners.add(listener);
+	}
+	
+	public void removePluginListener(PluginListener listener) {
+		this.pluginListeners.remove(listener);
+	}
+	
+	private void sendPluginAdditionNotifications(Plugin p) {
+		for (PluginListener listener : pluginListeners) {
+			listener.pluginAdded(p);
+		}
+	}
+	
+	private void sendPluginRemovalNotifications(Plugin p) {
+		for (PluginListener listener : pluginListeners) {
+			listener.pluginRemoved(p);
+		}
+	}
 	public void updateProjectType(ProjectType projectType) {
 		Assert.notNull(projectType, "ProjectType required");
 		projectMetadataProvider.updateProjectType(projectType);
@@ -146,12 +166,14 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
 		projectMetadataProvider.addBuildPlugin(plugin);
+		sendPluginAdditionNotifications(plugin);
 	}
 	
 	public final void removeBuildPlugin(Plugin plugin) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
 		projectMetadataProvider.removeBuildPlugin(plugin);
+		sendPluginRemovalNotifications(plugin);
 	}
 	
 	public void buildPluginUpdate(Plugin plugin) {

@@ -10,15 +10,6 @@ public interface ProjectOperations {
 	boolean isPerformCommandAllowed();
 
 	/**
-	 * Verifies if the specified dependency is present. If it is present, silently returns. If it is not
-	 * present, removes any dependency which matches {@link ProjectMetadata#getDependenciesExcludingVersion(Dependency)}.
-	 * Always adds the presented dependency.
-	 * 
-	 * @param dependency to add (required)
-	 */
-	void dependencyUpdate(Dependency dependency);
-
-	/**
 	 * Register a listener to track changes in build dependencies
 	 */
 	void addDependencyListener(DependencyListener listener);
@@ -37,7 +28,18 @@ public interface ProjectOperations {
 	 * Remove a repository listener from change tracking
 	 */
 	void removeRepositoryListener(RepositoryListener listener);
+	
+	
+	/**
+	 * Register a listener to track changes in build plugins
+	 */
+	void addPluginListener(PluginListener listener);
 
+	/**
+	 * Remove a build plugin listener from change tracking
+	 */
+	void removePluginListener(PluginListener listener);
+	
 	void updateProjectType(ProjectType projectType);
 
 	/**
@@ -65,6 +67,15 @@ public interface ProjectOperations {
 	 * @param version to remove (required)
 	 */
 	void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
+
+	/**
+	 * Verifies if the specified dependency is present. If it is present, silently returns. If it is not
+	 * present, removes any dependency which matches {@link ProjectMetadata#getDependenciesExcludingVersion(Dependency)}.
+	 * Always adds the presented dependency.
+	 * 
+	 * @param dependency to add (required)
+	 */
+	void dependencyUpdate(Dependency dependency);
 
 	/**
 	 * Allows addition of a repository to the POM. 
@@ -116,8 +127,8 @@ public interface ProjectOperations {
 
 	/**
 	 * Verifies if the specified  build plugin is present. If it is present, silently returns. If it is not
-	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Dependency)}.
-	 * Always adds the presented dependency.
+	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
+	 * Always adds the presented plugin.
 	 * 
 	 * @param plugin to add (required)
 	 */

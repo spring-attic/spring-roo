@@ -147,7 +147,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Locates any build plugins which match the presented plugin, excluding the version number.
 	 * This is useful for upgrade use cases, where it is necessary to locate any build plugins with
-	 * the same group, artifact and type identifications so that they can be removed.
+	 * the same group and artifact identifications so that they can be removed.
 	 * 
 	 * @param plugin to locate (required; note the version number is ignored in comparisons)
 	 * @return any matching plugins (never returns null, but may return an empty {@link Set})
@@ -163,7 +163,6 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return result;
 	}
 
-	
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

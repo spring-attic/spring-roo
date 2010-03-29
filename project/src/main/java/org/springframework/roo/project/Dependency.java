@@ -40,7 +40,7 @@ public class Dependency implements Comparable<Dependency> {
 	public Dependency(String groupId, String artifactId, String version) {
 		Assert.hasText(groupId, "Group ID required");
 		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version ID required");
+		Assert.hasText(version, "Version required");
 		this.groupId = new JavaPackage(groupId);
 		this.artifactId = new JavaSymbolName(artifactId);
 		this.version = version;
