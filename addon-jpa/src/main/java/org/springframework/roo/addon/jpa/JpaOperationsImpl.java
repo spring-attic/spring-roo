@@ -221,7 +221,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		if (ormProvider == OrmProvider.OPENJPA) {
-			installMavenPlugin(dependencies); // Install openjpa-maven-plugin for enhancement
+			installOpenJpaMavenPlugin(dependencies); // Install openjpa-maven-plugin for enhancement
+		} else {
+			removeOpenJpaMavenPlugin(dependencies); // Remove openjpa-maven-plugin as only required for OpenJpa
 		}
 	}
 
@@ -302,7 +304,23 @@ public class JpaOperationsImpl implements JpaOperations {
 		return property;
 	}
 
-	private void installMavenPlugin(Element dependencies) {
+	private void installOpenJpaMavenPlugin(Element dependencies) {
+		// Check if the plugin is already installed
+		if (!hasOpenJpaPlugin(getPomLastChild())) {
+			Element plugin = getOpenJpaPlugin(dependencies);
+			projectOperations.addBuildPlugin(new Plugin(plugin));
+		}
+	}
+
+	private void removeOpenJpaMavenPlugin(Element dependencies) {
+		// Check if the plugin is already installed
+		if (hasOpenJpaPlugin(getPomLastChild())) {
+			Element plugin = getOpenJpaPlugin(dependencies);
+			projectOperations.removeBuildPlugin(new Plugin(plugin));
+		}
+	}
+
+	private Element getPomLastChild() {
 		String pomFilePath = "pom.xml";
 		String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
 		MutableFile pomMutableFile = null;
@@ -318,13 +336,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
+		return (Element) pom.getLastChild();
+	}
 
-		Element root = (Element) pom.getLastChild();
+	private boolean hasOpenJpaPlugin(Element root) {
+		return XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) != null;
+	}
 
-		// Check if the plugin is already installed
-		if (XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) == null) {
-			Element plugin = XmlUtils.findFirstElement("/dependencies/ormProviders/provider[@id='" + OrmProvider.OPENJPA.getKey() + "']/plugin", dependencies);
-			projectOperations.addBuildPlugin(new Plugin(plugin));
-		}
+	private Element getOpenJpaPlugin(Element dependencies) {
+		return XmlUtils.findFirstElement("/dependencies/ormProviders/provider[@id='" + OrmProvider.OPENJPA.getKey() + "']/plugin", dependencies);
 	}
 }
