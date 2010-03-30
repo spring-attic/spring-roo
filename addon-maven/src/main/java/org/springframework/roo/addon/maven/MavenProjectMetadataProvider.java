@@ -105,7 +105,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			dependencies.add(d);
 		}
 
-		// Build build plugin dependencies list
+		// Build plugins list
 		Set<Plugin> buildPlugins = new HashSet<Plugin>();
 		for (Element plugin : XmlUtils.findElements("/project/build/plugins/plugin", rootElement)) {
 			Plugin p = new Plugin(plugin);

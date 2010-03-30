@@ -202,6 +202,17 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element dependency : ormDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
+		// Remove dependencies from other providers
+		if (ormProvider == OrmProvider.OPENJPA) {
+			removeDependencies(OrmProvider.HIBERNATE, dependencies);			
+			removeDependencies(OrmProvider.ECLIPSELINK, dependencies);			
+		} else if (ormProvider == OrmProvider.HIBERNATE) {
+			removeDependencies(OrmProvider.OPENJPA, dependencies);			
+			removeDependencies(OrmProvider.ECLIPSELINK, dependencies);			
+		} else if (ormProvider == OrmProvider.ECLIPSELINK) {
+			removeDependencies(OrmProvider.HIBERNATE, dependencies);			
+			removeDependencies(OrmProvider.OPENJPA, dependencies);	
+		}
 
 		// Hard coded to JPA & Hibernate Validator for now
 		List<Element> jpaDependencies = XmlUtils.findElements("/dependencies/persistence/provider[@id='JPA']/dependency", dependencies);
@@ -221,6 +232,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		installOrRemoveOpenJpaPlugin(ormProvider, dependencies); // Check whether openjpa-maven-plugin is installed
+	}
+
+	private void removeDependencies(OrmProvider ormProvider, Element dependencies) {
+		List<Element> ormDependencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.getKey() + "']/dependency", dependencies);
+		for (Element dependency : ormDependencies) {
+			projectOperations.removeDependency(new Dependency(dependency));
+		}
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {

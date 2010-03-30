@@ -122,6 +122,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		projectMetadataProvider.updateProjectType(projectType);
 	}
 	
+	public final void addDependency(Dependency dependency) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency required");
+		projectMetadataProvider.addDependency(dependency);
+		sendDependencyAdditionNotifications(dependency);		
+	}
+	
 	public final void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
@@ -132,6 +139,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyAdditionNotifications(dependency);
 	}
 	
+	public final void removeDependency(Dependency dependency) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency required");
+		projectMetadataProvider.removeDependency(dependency);
+		sendDependencyAdditionNotifications(dependency);		
+	}
+
 	public final void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
@@ -163,21 +177,21 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 	
 	public final void addBuildPlugin(Plugin plugin) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
 		projectMetadataProvider.addBuildPlugin(plugin);
 		sendPluginAdditionNotifications(plugin);
 	}
 	
 	public final void removeBuildPlugin(Plugin plugin) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
 		projectMetadataProvider.removeBuildPlugin(plugin);
 		sendPluginRemovalNotifications(plugin);
 	}
 	
 	public void buildPluginUpdate(Plugin plugin) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin modification prohibited at this time");
 		Assert.notNull(plugin, "Plugin required");
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata unavailable");

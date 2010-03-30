@@ -29,7 +29,6 @@ public interface ProjectOperations {
 	 */
 	void removeRepositoryListener(RepositoryListener listener);
 	
-	
 	/**
 	 * Register a listener to track changes in build plugins
 	 */
@@ -49,11 +48,33 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
+	 * @param dependency to add (required)
+	 */
+	void addDependency(Dependency dependency);
+
+	/**
+	 * Allows addition of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
 	 * @param groupId to add (required)
 	 * @param artifactId to add (required)
 	 * @param version to add (required)
 	 */
 	void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
+
+	/**
+	 * Allows removal of a JAR dependency to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param dependency to remove (required)
+	 */
+	void removeDependency(Dependency dependency);
 
 	/**
 	 * Allows remove of an existing JAR dependency from the POM. 
