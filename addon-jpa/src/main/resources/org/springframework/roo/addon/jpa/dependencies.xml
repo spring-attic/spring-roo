@@ -34,10 +34,6 @@
 				<version>3.5.0-CR-2</version>
 				<exclusions>
 					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
 						<groupId>cglib</groupId>
 						<artifactId>cglib</artifactId>
 					</exclusion>
@@ -68,10 +64,6 @@
 				<artifactId>hibernate-entitymanager</artifactId>
 				<version>3.5.0-CR-2</version>
 				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
 					<exclusion>
 						<groupId>cglib</groupId>
 						<artifactId>cglib</artifactId>
@@ -174,10 +166,6 @@
 				<artifactId>hibernate-validator</artifactId>
 				<version>4.0.2.GA</version>
 				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
 					<exclusion>
 						<groupId>javax.xml.bind</groupId>
 						<artifactId>jaxb-api</artifactId>
