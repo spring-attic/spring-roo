@@ -228,7 +228,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		Element rootElement = (Element) document.getFirstChild();
 		Element plugins = XmlUtils.findFirstElement("/project/build/plugins", rootElement);
-		Assert.notNull(plugins, "Plugins unable addBuildPluginDependencyto be found");
+		Assert.notNull(plugins, "Plugins unable to be found");
 
 		Element pluginElement = document.createElement("plugin");
 		Element groupId = document.createElement("groupId");
