@@ -220,11 +220,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			projectOperations.addRepository(repo.getId(), repo.getName(), repo.getUrl());
 		}
 
-		if (ormProvider == OrmProvider.OPENJPA) {
-			installOpenJpaMavenPlugin(dependencies); // Install openjpa-maven-plugin for enhancement
-		} else {
-			removeOpenJpaMavenPlugin(dependencies); // Remove openjpa-maven-plugin as only required for OpenJpa
-		}
+		installOrRemoveOpenJpaPlugin(ormProvider, dependencies); // Check whether openjpa-maven-plugin is installed
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
@@ -304,19 +300,15 @@ public class JpaOperationsImpl implements JpaOperations {
 		return property;
 	}
 
-	private void installOpenJpaMavenPlugin(Element dependencies) {
-		// Check if the plugin is already installed
-		if (!hasOpenJpaPlugin(getPomLastChild())) {
-			Element plugin = getOpenJpaPlugin(dependencies);
-			projectOperations.addBuildPlugin(new Plugin(plugin));
-		}
-	}
-
-	private void removeOpenJpaMavenPlugin(Element dependencies) {
-		// Check if the plugin is already installed
-		if (hasOpenJpaPlugin(getPomLastChild())) {
-			Element plugin = getOpenJpaPlugin(dependencies);
-			projectOperations.removeBuildPlugin(new Plugin(plugin));
+	private void installOrRemoveOpenJpaPlugin(OrmProvider ormProvider, Element dependencies) {
+		boolean hasOpenJpaPlugin = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", getPomLastChild()) != null;
+		if (!(ormProvider == OrmProvider.OPENJPA && hasOpenJpaPlugin)) {
+			Element plugin = XmlUtils.findFirstElement("/dependencies/ormProviders/provider[@id='" + OrmProvider.OPENJPA.getKey() + "']/plugin", dependencies);
+			if (ormProvider != OrmProvider.OPENJPA && hasOpenJpaPlugin) {
+				projectOperations.removeBuildPlugin(new Plugin(plugin));
+			} else if (ormProvider == OrmProvider.OPENJPA && !hasOpenJpaPlugin) {
+				projectOperations.addBuildPlugin(new Plugin(plugin));
+			}
 		}
 	}
 
@@ -337,13 +329,5 @@ public class JpaOperationsImpl implements JpaOperations {
 			throw new IllegalStateException(e);
 		}
 		return (Element) pom.getLastChild();
-	}
-
-	private boolean hasOpenJpaPlugin(Element root) {
-		return XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId='openjpa-maven-plugin']", root) != null;
-	}
-
-	private Element getOpenJpaPlugin(Element dependencies) {
-		return XmlUtils.findFirstElement("/dependencies/ormProviders/provider[@id='" + OrmProvider.OPENJPA.getKey() + "']/plugin", dependencies);
 	}
 }
