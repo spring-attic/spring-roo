@@ -7,9 +7,9 @@
 	</springJms>
 	<jmsProviders>
 		<provider id="ACTIVEMQ_IN_MEMORY">
-			<dependency org="org.apache.activemq" name="apache-activemq" rev="5.3.0" />
+			<dependency org="org.apache.activemq" name="activemq-core" rev="5.3.1" />
 			<dependency org="org.apache.xbean" name="xbean-spring" rev="3.6" />
-			<dependency org="org.apache.geronimo.specs" name="cgeronimo-j2ee-management_1.0_spec" rev="1.0.1" />
+			<dependency org="org.apache.geronimo.specs" name="geronimo-j2ee-management_1.0_spec" rev="1.0.1" />
 		</provider>
 	</jmsProviders>
 </dependencies>
