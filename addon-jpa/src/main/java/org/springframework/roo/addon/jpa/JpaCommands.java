@@ -20,12 +20,12 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
- *
+ * 
  */
 @Component
 @Service
 public class JpaCommands implements CommandMarker {
-	
+
 	@Reference private JpaOperations jpaOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
@@ -34,29 +34,28 @@ public class JpaCommands implements CommandMarker {
 		staticFieldConverter.add(JdbcDatabase.class);
 		staticFieldConverter.add(OrmProvider.class);
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
 		staticFieldConverter.remove(JdbcDatabase.class);
 		staticFieldConverter.remove(OrmProvider.class);
 	}
-	
+
 	@CliAvailabilityIndicator("persistence setup")
 	public boolean isInstallJpaAvailable() {
 		return jpaOperations.isJpaInstallationPossible() || jpaOperations.isJpaInstalled();
 	}
-	
-	@CliCommand(value="persistence setup", help="Install or updates a JPA persistence provider in your project")
+
+	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project")
 	public void installJpa(
-			@CliOption(key={"provider"}, mandatory=true, help="The persistence provider to support") OrmProvider ormProvider,
-			@CliOption(key={"","database"}, mandatory=true, help="The database to support") JdbcDatabase jdbcDatabase,			
-			@CliOption(key={"jndiDataSource"}, mandatory=false, help="The JNDI datasource to use") String jndi,
-			@CliOption(key={"databaseName"}, mandatory=false, help="The database name to use") String databaseName,
-			@CliOption(key={"userName"}, mandatory=false, help="The username to use") String userName,
-			@CliOption(key={"password"}, mandatory=false, help="The password to use") String password
-			) {
+			@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
+			@CliOption(key = { "", "database" }, mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
+			@CliOption(key = { "jndiDataSource" }, mandatory = false, help = "The JNDI datasource to use") String jndi, 
+			@CliOption(key = { "databaseName" }, mandatory = false, help = "The database name to use") String databaseName, 
+			@CliOption(key = { "userName" }, mandatory = false, help = "The username to use") String userName, 
+			@CliOption(key = { "password" }, mandatory = false, help = "The password to use") String password) {
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi);
-		
+
 		if (jndi == null || 0 == jndi.length()) {
 			if (null != databaseName && 0 != databaseName.length()) {
 				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.url", jdbcDatabase.getConnectionString() + (databaseName.startsWith("/") ? databaseName : "/" + databaseName));
@@ -69,25 +68,29 @@ public class JpaCommands implements CommandMarker {
 			}
 		}
 	}
-	
-	@CliCommand(value="database properties list", help="Shows database configuration details")
+
+	@CliCommand(value = "database properties list", help = "Shows database configuration details")
 	public SortedSet<String> databaseProperties() {
 		return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
 	}
-	
-	@CliCommand(value="database properties set", help="Changes a particular database property")
-	public void databaseSet(@CliOption(key="key", mandatory=true, help="The property key that should be changed") String key, @CliOption(key="value", mandatory=true, help="The new vale for this property key") String value) {
+
+	@CliCommand(value = "database properties set", help = "Changes a particular database property")
+	public void databaseSet(
+			@CliOption(key = "key", mandatory = true, help = "The property key that should be changed") String key, 
+			@CliOption(key = "value", mandatory = true, help = "The new vale for this property key") String value) {
+
 		propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key, value);
 	}
 
-	@CliCommand(value="database properties remove", help="Removes a particular database property")
-	public void databaseRemove(@CliOption(key={"","key"}, mandatory=true, help="The property key that should be removed") String key) {
+	@CliCommand(value = "database properties remove", help = "Removes a particular database property")
+	public void databaseRemove(
+			@CliOption(key = { "", "key" }, mandatory = true, help = "The property key that should be removed") String key) {
+
 		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key);
 	}
-	
-	@CliAvailabilityIndicator({"database properties remove", "database properties set", "database properties list"})
+
+	@CliAvailabilityIndicator( { "database properties remove", "database properties set", "database properties list" })
 	public boolean isJpaInstalled() {
 		return jpaOperations.isJpaInstalled();
 	}
-	
 }

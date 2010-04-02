@@ -27,6 +27,14 @@ public class EnumAttributeValue extends AbstractAnnotationAttributeValue<EnumDet
 		this.value = value;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Enum<?> getAsEnum() throws ClassNotFoundException {
+		Class<?> enumType = getClass().getClassLoader().loadClass(this.value.getType().getFullyQualifiedTypeName());
+		Assert.isTrue(enumType.isEnum(), "Should have obtained an Enum but failed for type '" + enumType.getName() + "'");
+		String name = this.value.getField().getSymbolName();
+		return Enum.valueOf((Class<? extends Enum>) enumType, name);
+	}
+	
 	public EnumDetails getValue() {
 		return value;
 	}
@@ -34,5 +42,4 @@ public class EnumAttributeValue extends AbstractAnnotationAttributeValue<EnumDet
 	public String toString() {
 		return getName() + " -> " + value.toString();
 	}
-	
 }

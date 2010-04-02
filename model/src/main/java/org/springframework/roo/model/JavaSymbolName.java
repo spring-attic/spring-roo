@@ -7,7 +7,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Immutable representation of a Java field name, method name, or other common legal Java identifer.
+ * Immutable representation of a Java field name, method name, or other common legal Java identifier.
  * 
  * <p>
  * Ensures the field is properly formed.
@@ -59,7 +59,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		Pattern p = Pattern.compile("[A-Z][^A-Z]*");
         Matcher m = p.matcher(StringUtils.capitalize(symbolName));
 		StringBuilder string = new StringBuilder();
-        while(m.find()){
+        while (m.find()) {
             string.append(m.group()).append(" ");
         }
 		return string.toString().trim();
@@ -71,7 +71,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName)obj).symbolName);
+		return obj != null && obj instanceof JavaSymbolName && this.symbolName.equals(((JavaSymbolName) obj).symbolName);
 	}
 
 	public final int compareTo(JavaSymbolName o) {
@@ -159,5 +159,4 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		Assert.isTrue(!name.endsWith("."), "The name cannot end with a period");
 		*/
 	}
-
 }

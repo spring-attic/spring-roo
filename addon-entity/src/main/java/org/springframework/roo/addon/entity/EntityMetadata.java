@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.operations.RooIdentifierStrategy;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
@@ -42,6 +43,7 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Alan Stewart
  * @since 1.0
  *
  */
@@ -50,7 +52,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+	private static final JavaType SEQUENCE_GENERATOR = new JavaType("javax.persistence.SequenceGenerator");
+	private static final JavaType TABLE_GENERATOR = new JavaType("javax.persistence.TableGenerator");
 
 	private EntityMetadata parent;
 	private boolean noArgConstructor;
@@ -58,6 +63,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
+	@AutoPopulate private RooIdentifierStrategy identifierStrategy = RooIdentifierStrategy.AUTO;
 	@AutoPopulate private String identifierField = "id";
 	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
@@ -91,7 +97,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			AutoPopulationUtils.populate(this, annotation);
 		}
 
-		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.
+		// Determine the "entityManager" field we have access to. This is guaranteisGovernorProvidingSequenceGeneratorAnnotationed to be accessible to the ITD.
 		FieldMetadata entityManager = getEntityManagerField();
 		builder.addField(entityManager);
 		
@@ -103,6 +109,18 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getIdentifierAccessor());
 		builder.addMethod(getIdentifierMutator());
 		
+		// Add the possible type-level @SequenceGenerator to the ITD
+		if (!isGovernorProvidingGeneratorAnnotation(SEQUENCE_GENERATOR)) {
+			// The annotation metadata should go into the ITD
+			builder.addTypeAnnotation(getSequenceGenerator());
+		}
+		
+		// Add the possible type-level @TableGenerator to the ITD
+		if (!isGovernorProvidingGeneratorAnnotation(TABLE_GENERATOR)) {
+			// The annotation metadata should go into the ITD
+			builder.addTypeAnnotation(getTableGenerator());
+		}
+
 		// Add version field and accessor
 		builder.addField(getVersionField());
 		builder.addMethod(getVersionAccessor());
@@ -125,10 +143,78 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 	
+	private boolean isGovernorProvidingGeneratorAnnotation(JavaType generatorType) {
+		return MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), generatorType) != null;	
+	}
+
+	/**
+	 * Lookup any existing @SequenceGenerator on the governor and return it.
+	 * If there is no @SequenceGenerator on the governor, this method will return
+	 * an annotation to be added to the ITD but only if the user has requested
+	 * a @GenerationType.SEQUENCE. In any other case it will return null.
+	 * 
+	 * @return an annotation metadata on the governor or ITD or null
+	 */
+	public AnnotationMetadata getSequenceGenerator() {
+		// First check if the governor provides this annotation
+		AnnotationMetadata result = MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), SEQUENCE_GENERATOR);
+		if (result != null) {
+			// The governor provided the annotation, so that's what we return
+			return result;
+		}
+		// Let's decide if we even need to add this annotation to the ITD
+		if (identifierStrategy != RooIdentifierStrategy.SEQUENCE) {
+			// The user isn't wanting this sort of generation strategy
+			return null;
+		}
+		// So we need to provide one in the ITD
+		String entityName = getEntityNameAsUpperCase();
+		List<AnnotationAttributeValue<?>> sequenceGeneratorAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		sequenceGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), entityName + "_SEQ_GEN"));
+		sequenceGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("sequenceName"), entityName + "_SEQ"));
+		AnnotationMetadata sequenceGeneratorAnnotation = new DefaultAnnotationMetadata(SEQUENCE_GENERATOR, sequenceGeneratorAttributes);
+		return sequenceGeneratorAnnotation;
+	}
+
+	/**
+	 * Lookup any existing @TableGenerator on the governor and return it.
+	 * If there is no @TableGenerator on the governor, this method will return
+	 * an annotation to be added to the ITD but only if the user has requested
+	 * a @GenerationType.TABLE. In any other case it will return null.
+	 * 
+	 * @return an annotation metadata on the governor or ITD or null
+	 */
+	public AnnotationMetadata getTableGenerator() {
+		// First check if the governor provides this annotation
+		AnnotationMetadata result = MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), TABLE_GENERATOR);
+		if (result != null) {
+			// The governor provided the annotation, so that's what we return
+			return result;
+		}
+		// Let's decide if we even need to add this annotation to the ITD
+		if (identifierStrategy != RooIdentifierStrategy.TABLE) {
+			// The user isn't wanting this sort of generation strategy
+			return null;
+		}
+		// So we need to provide one in the ITD
+		String entityName = getEntityNameAsUpperCase();
+		List<AnnotationAttributeValue<?>> tableGeneratorAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		tableGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), entityName + "_TABLE_GEN"));
+		tableGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("table"), entityName + "_GEN"));
+		tableGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("pkColumnName"), entityName + "_GEN_ID"));
+		tableGeneratorAttributes.add(new StringAttributeValue(new JavaSymbolName("valueColumnName"), entityName + "_GEN_VAL"));
+		AnnotationMetadata tableGeneratorAnnotation = new DefaultAnnotationMetadata(TABLE_GENERATOR, tableGeneratorAttributes);
+		return tableGeneratorAnnotation;
+	}
+
+	private String getEntityNameAsUpperCase() {
+		return governorTypeDetails.getName().getSimpleTypeName().toUpperCase();
+	}
+
 	/**
 	 * Locates the identifier field.
 	 * 
-	 * <p>
+	 * <p>		
 	 * If a parent is defined, it must provide the field.
 	 * 
 	 * <p>
@@ -144,7 +230,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Try to locate an existing field with @javax.persistence.Id
-		List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
+		List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = found.get(0);
@@ -152,7 +238,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		if ("".equals(identifierField)) {
-			// force a default
+			// Force a default
 			identifierField = "id";
 		}
 		
@@ -177,13 +263,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// We need to create one
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Id"), new ArrayList<AnnotationAttributeValue<?>>());
+		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(ID, new ArrayList<AnnotationAttributeValue<?>>());
 		annotations.add(idAnnotation);
 		
-		List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName("AUTO"))));
-		AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
-		annotations.add(generatedValueAnnotation);
+		// Add @javax.persistence.GeneratedValue to the identifier if required 
+		switch (identifierStrategy) {
+			case NONE:
+				break;
+			default:
+				addGeneratedValueAnnotation(annotations);
+				break;
+		}
 		
 		// Compute the column name, as required
 		String columnName = idField.getSymbolName();
@@ -200,7 +290,29 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
 		return field;
 	}
-	
+
+	private void addGeneratedValueAnnotation(List<AnnotationMetadata> annotations) {
+		List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		
+		// Add the "strategy" attribute to the @GeneratedValue
+		generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(identifierStrategy.name()))));
+		
+		// Add the "generator" attribute to the @GeneratedValue if the user has a sequence or table strategy
+		if (identifierStrategy == RooIdentifierStrategy.SEQUENCE || identifierStrategy == RooIdentifierStrategy.TABLE) {
+			boolean isSequence = identifierStrategy == RooIdentifierStrategy.SEQUENCE;
+			String generatorText = isSequence ? "@SequenceGenerator" : "@TableGenerator";
+			AnnotationMetadata applicableGeneratorMd = isSequence ? getSequenceGenerator() : getTableGenerator();
+			Assert.notNull(applicableGeneratorMd, "Should have obtained a " + generatorText + " but failed to for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			AnnotationAttributeValue<?> name = applicableGeneratorMd.getAttribute(new JavaSymbolName("name"));
+			Assert.notNull(name, generatorText + " failed to provide a name on type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isInstanceOf(StringAttributeValue.class, name, generatorText + " name attribute should have been a string for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			StringAttributeValue theName = (StringAttributeValue) name;
+			generatedValueAttributes.add(new StringAttributeValue(new JavaSymbolName("generator"), theName.getValue()));
+		}
+		AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
+		annotations.add(generatedValueAnnotation);
+	}
+		
 	/**
 	 * Locates the identifier accessor method.
 	 * 
@@ -630,7 +742,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
 		} else {
-			// persist
+			// Persist
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
@@ -642,7 +754,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public MethodMetadata getEntityManagerMethod() {
 		if (parent != null) {
-			// the parent is required to guarantee this is available
+			// The parent is required to guarantee this is available
 			return parent.getEntityManagerMethod();
 		}
 		
@@ -662,9 +774,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
-			// create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
+			// Create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
 			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){");
-			// handle any abstract methods in this class
+			// Handle any abstract methods in this class
 			bodyBuilder.indent();
 			for (MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
 				if (Modifier.isAbstract(method.getModifier())) {
@@ -686,7 +798,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		} else {
-			// instantiate using the no-argument constructor (we know this is available as the entity must comply with the JPA no-arg constructor requirement)
+			// Instantiate using the no-argument constructor (we know this is available as the entity must comply with the JPA no-arg constructor requirement)
 			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "()." + getEntityManagerField().getFieldName().getSymbolName() + ";");
 		}
 		
@@ -883,5 +995,4 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-
 }
