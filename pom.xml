@@ -44,6 +44,7 @@
         <module>addon-test</module>
         <module>addon-backup</module>
         <module>addon-serializable</module>
+        <module>addon-solr</module>
         <module>addon-web-menu</module>
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-jsp</module>
@@ -555,7 +556,7 @@
 
     <properties>
         <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
-        <spring.version>3.0.2.BUILD-SNAPSHOT</spring.version>
+        <spring.version>3.0.2.RELEASE</spring.version>
         <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
         <roo.version>1.1.0.M1</roo.version>
     </properties>
