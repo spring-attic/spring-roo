@@ -44,7 +44,6 @@
         <module>addon-test</module>
         <module>addon-backup</module>
         <module>addon-serializable</module>
-        <module>addon-solr</module>
         <module>addon-web-menu</module>
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-jsp</module>
