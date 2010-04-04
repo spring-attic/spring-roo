@@ -1,20 +1,20 @@
 <jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:spring="http://www.springframework.org/tags" xmlns:form="http://www.springframework.org/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<jsp:directive.tag import="java.util.ArrayList"/>
 	<jsp:output omit-xml-declaration="yes"/>
 
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="data" type="java.util.Collection" required="true" description="The collection to be displayed in the table"/>
-	<jsp:directive.attribute name="columns" type="java.lang.String" required="true" description="The columns to be displayed in the table (comma separated list)"/>
-	<jsp:directive.attribute name="columnHeadings" type="java.lang.String" required="false" description="The column headings to be displayed in the table (comma separated list)"/>
 	<jsp:directive.attribute name="typeIdFieldName" type="java.lang.String" required="false" description="The identifier field name for the type (defaults to 'id')"/>
 	<jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" description="Include 'update' link into table (default true)"/>
 	<jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" description="Include 'delete' link into table (default true)"/>
 	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 
-	<c:if test="${empty columnHeadings}">
-		<c:set var="columnHeadings" value="${columns}" />
-	</c:if>
+	<c:set var="columnProperties" scope="request"/>
+	<c:set var="columnLabels" scope="request"/>
 	
+	<jsp:doBody/>
+		
 	<c:if test="${empty typeIdFieldName}">
 		<c:set var="typeIdFieldName" value="id" />
 	</c:if>
@@ -45,7 +45,7 @@
 	<table>
 		<thead>
 			<tr>
-				<c:forTokens items="${columnHeadings}" delims="," var="columnHeading">
+				<c:forTokens items="${columnLabels}" delims="," var="columnHeading">
 		          <th><c:out value="${columnHeading}" /></th>
 		        </c:forTokens>
 		        <th></th>
@@ -55,7 +55,7 @@
 		</thead>
         <c:forEach items="${data}" var="item">
            <tr>
-           	   <c:forTokens items="${columns}" delims="," var="column">
+           	   <c:forTokens items="${columnProperties}" delims="," var="column">
 	                <td>
 	                    <c:out value="${fn:substring(item[column], 0, 10)}"/>
 	                </td>

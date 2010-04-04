@@ -90,33 +90,16 @@ public class JspViewManager {
 		//add document namespaces
 		Element div = new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
-								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
+								.addAttribute("xmlns:table", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build();
 		document.appendChild(div);
 		
-		//create field:table element
-		StringBuilder fieldNames = new StringBuilder(6);
-		StringBuilder readableFieldNames = new StringBuilder(6);
-		
-		int fieldCounter = 0;
-		for (FieldMetadata field : fields) {
-			if (fieldCounter > 0) {
-				fieldNames.append(",");
-				readableFieldNames.append(",");
-			}
-			if(++fieldCounter < 7) {
-				fieldNames.append(Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())));
-				readableFieldNames.append(field.getFieldName().getReadableSymbolName());
-			}
-		}
-		Element fieldTable = new XmlElementBuilder("field:table", document)
+		Element fieldTable = new XmlElementBuilder("table:table", document)
 								.addAttribute("id", "l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("data", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
-								.addAttribute("columns", fieldNames.toString())
-								.addAttribute("columnHeadings", readableFieldNames.toString())
 							.build();
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
@@ -129,6 +112,18 @@ public class JspViewManager {
 			fieldTable.setAttribute("customPath", controllerPath);
 		}
 		fieldTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldTable));
+		
+		int fieldCounter = 0;
+		for (FieldMetadata field : fields) {
+			if(++fieldCounter < 7) {
+				Element columnElement = new XmlElementBuilder("table:column", document)
+											.addAttribute("id", "c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
+											.addAttribute("property", Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())))
+										.build();
+				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
+				fieldTable.appendChild(columnElement);
+			}
+		}
 		
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
