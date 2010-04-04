@@ -29,23 +29,6 @@
 	<mvc:view-controller path="/resourceNotFound" />
 	<mvc:view-controller path="/dataAccessFailure" />
 
-	<!-- Resolves logical view names returned by Controllers to Tiles; a view
-		 name to resolve is treated as the name of a tiles definition -->
-	<bean class="org.springframework.js.ajax.AjaxUrlBasedViewResolver" id="tilesViewResolver">
-		<property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
-	</bean>
-
-	<!-- Configures the Tiles layout system -->
-	<bean class="org.springframework.web.servlet.view.tiles2.TilesConfigurer" id="tilesConfigurer">
-		<property name="definitions">
-			<list>
-				<value>/WEB-INF/layouts/layouts.xml</value>
-				<!-- Scan views directory for Tiles configurations -->
-				<value>/WEB-INF/views/**/views.xml</value>
-			</list>
-		</property>
-	</bean>
-
 	<!-- Resolves localized messages*.properties and application.properties files in the application to	allow for internationalization. 
 		The messages*.properties files translate Roo generated messages which are part of the admin interface, the application.properties
 		resource bundle localizes all application specific messages such as entity names and menu items. -->

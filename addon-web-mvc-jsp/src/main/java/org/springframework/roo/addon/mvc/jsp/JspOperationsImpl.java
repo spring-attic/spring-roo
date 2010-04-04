@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.mvc.jsp;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,17 +37,24 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * Provides operations to create various view layer resources.
  * 
  * @author Stefan Schmidt
+ * @author Jeremy Grelle
  * @since 1.0
  *
  */
@@ -61,6 +69,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MenuOperations menuOperations;
 	@Reference private TilesOperations tilesOperations;
+	@Reference private ProjectOperations projectOperations;
 	private ComponentContext context;
 	
 	protected void activate(ComponentContext context) {
@@ -76,7 +85,10 @@ public class JspOperationsImpl implements JspOperations {
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.notNull(projectMetadata, "Unable to obtain path resolver");	
+		Assert.notNull(projectMetadata, "Unable to obtain path resolver");		
+		 
+		//install tiles config
+		configureTiles();
 		
 		//install styles
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"));
@@ -235,6 +247,65 @@ public class JspOperationsImpl implements JspOperations {
 		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
 	}
 	
+	/**
+	 * Adds Tiles Maven dependencies and updates the MVC config to include Tiles view support 
+	 * 
+	 */
+	private void configureTiles() {
+		//add tiles dependencies to pom
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "layout/dependencies.xml");
+		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
+		Document dependencyDoc;
+		try {
+			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element dependenciesElement = dependencyDoc.getDocumentElement();
+		
+		List<Element> springDependencies = XmlUtils.findElements("/dependencies/tiles/dependency", dependenciesElement);
+		for(Element dependency : springDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependency));
+		}
+		
+		//add config to MVC app context
+		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		MutableFile mutableMvcConfigFile = fileManager.updateFile(mvcConfig);
+		Document mvcConfigDocument;
+		try {
+			mvcConfigDocument = XmlUtils.getDocumentBuilder().parse(mutableMvcConfigFile.getInputStream());
+		} catch (Exception ex) {
+			throw new IllegalStateException("Could not open Spring MVC config file '" + mvcConfig + "'", ex);
+		}
+
+		Element beans = mvcConfigDocument.getDocumentElement();
+		
+		if (null != XmlUtils.findFirstElement("/beans/bean[@id='tilesViewResolver']", beans) ||
+				null != XmlUtils.findFirstElement("/beans/bean[@id='tilesConfigurer']", beans)) {
+			return; //tiles is already configured, nothing to do
+		}
+		
+		InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "layout/tiles-mvc-config-template.xml");
+		Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
+		Document configDoc;
+		try {
+			configDoc = XmlUtils.getDocumentBuilder().parse(configTemplateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element configElement = configDoc.getDocumentElement();	
+		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
+
+		for (Element bean : tilesConfig) {
+			Node importedBean = mvcConfigDocument.importNode(bean, true);
+			beans.appendChild(importedBean);
+		}
+
+		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
+	}
+	
 	 /**
      * Changes the specified property, throwing an exception if the file does not exist.
      * 
@@ -265,6 +336,8 @@ public class JspOperationsImpl implements JspOperations {
 	    if (null == readProps.getProperty(key)) {
 	    	MutableFile mutableFile = fileManager.updateFile(filePath);
 		    Properties props = new Properties() {
+				private static final long serialVersionUID = 1L;
+
 				//override the keys() method to order the keys alphabetically
 		        @Override 
 		        @SuppressWarnings("unchecked")
