@@ -46,6 +46,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private MenuOperations menuOperations;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private JspOperations jspOperations;
+	@Reference private TilesOperations tilesOperations;
 	
 	public boolean isInstallWebFlowAvailable() {		
 		return getPathResolver() != null && !fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
@@ -135,11 +136,9 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 				"/" + flowDirectoryId,
 				null);
 		
-		TilesOperations tilesOperations = new TilesOperations(flowDirectoryId, fileManager, pathResolver, "config/webmvc-config.xml");
-		tilesOperations.addViewDefinition("view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx");
-		tilesOperations.addViewDefinition("view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-2.jspx");
-		tilesOperations.addViewDefinition("end-state", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/end-state.jspx");
-		tilesOperations.writeToDiskIfNecessary();
+		tilesOperations.addViewDefinition(flowDirectoryId, "view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx");
+		tilesOperations.addViewDefinition(flowDirectoryId, "view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-2.jspx");
+		tilesOperations.addViewDefinition(flowDirectoryId, "end-state", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/end-state.jspx");
 
 		updateDependencies();
 	}	

@@ -60,6 +60,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private MenuOperations menuOperations;
+	@Reference private TilesOperations tilesOperations;
 	private ComponentContext context;
 	
 	protected void activate(ComponentContext context) {
@@ -231,9 +232,7 @@ public class JspOperationsImpl implements JspOperations {
 				"/" + folderName + "/index",
 				null);
 		
-		TilesOperations tilesOperations = new TilesOperations(folderName, fileManager, pathResolver, "config/webmvc-config.xml");
-		tilesOperations.addViewDefinition(folderName + "/index", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
-		tilesOperations.writeToDiskIfNecessary();
+		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
 	}
 	
 	 /**

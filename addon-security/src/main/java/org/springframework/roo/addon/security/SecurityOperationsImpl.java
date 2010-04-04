@@ -36,6 +36,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private TilesOperations tilesOperations;
 	
 	private static final Dependency DEPENDENCY_CORE = new Dependency("org.springframework.security", "spring-security-core", "3.0.2.RELEASE");
 	private static final Dependency DEPENDENCY_CONFIG = new Dependency("org.springframework.security", "spring-security-config", "3.0.2.RELEASE");
@@ -83,9 +84,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		}
 		
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/views.xml"))) {
-			TilesOperations tilesOperations = new TilesOperations("/", fileManager, pathResolver, "config/webmvc-config.xml");
-			tilesOperations.addViewDefinition("login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
-			tilesOperations.writeToDiskIfNecessary();
+			tilesOperations.addViewDefinition("", "login", TilesOperations.PUBLIC_TEMPLATE, "/WEB-INF/views/login.jspx");
 		}
 				
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");

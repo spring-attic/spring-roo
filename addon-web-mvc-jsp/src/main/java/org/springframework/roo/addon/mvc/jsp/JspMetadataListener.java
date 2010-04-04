@@ -65,6 +65,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private MenuOperations menuOperations;
 	@Reference private JspOperations jspOperations;
 	@Reference private PathResolver pathResolver;
+	@Reference private TilesOperations tilesOperations;
 	
 	private Map<JavaType, String> pluralCache;
 
@@ -144,16 +145,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			Assert.isTrue(file.isDirectory(), destinationDirectory + " is a file, when a directory was expected");
 		}
 		
-		TilesOperations tilesOperations = new TilesOperations(controllerPath, fileManager, pathResolver, "config/webmvc-config.xml");
-		
 		// By now we have a directory to put the JSPs inside
 		String listPath1 = destinationDirectory + "/list.jspx";
 		writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
-		tilesOperations.addViewDefinition(controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
+		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "list", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/list.jspx");
 
 		String showPath = destinationDirectory + "/show.jspx";
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
-		tilesOperations.addViewDefinition(controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
+		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
 		JavaSymbolName categoryName = getControllerPathSymbolName(controllerPath);
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
@@ -166,18 +165,18 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 					"global.menu.new",
 					"/" + controllerPath + "?form",
 					MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			tilesOperations.addViewDefinition(controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
+			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} 
 		else {
 			menuOperations.cleanUpMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			tilesOperations.removeViewDefinition(controllerPath + "/" + "create");
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "create", controllerPath);
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
 			String listPath = destinationDirectory + "/update.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getUpdateDocument());
-			tilesOperations.addViewDefinition(controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
+			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "update", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/update.jspx");
 		} else {
-			tilesOperations.removeViewDefinition(controllerPath + "/" + "update");
+			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
 		}		
 		//setup labels for i18n support
 		String resourceId = "label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase();
@@ -217,15 +216,12 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
 					setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId + "." + paramName.getSymbolName().toLowerCase(), paramName.getReadableSymbolName());
 				}
-				tilesOperations.addViewDefinition(controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
+				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}
 		}
 		
 		//clean up links to finders which are removed by now
 		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);
-		
-		//finally write the tiles definition if necessary
-		tilesOperations.writeToDiskIfNecessary();
 		
 		return md;
 	}
