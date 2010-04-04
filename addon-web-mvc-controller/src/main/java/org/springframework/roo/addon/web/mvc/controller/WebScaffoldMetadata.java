@@ -703,7 +703,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					converterBodyBuilder.appendFormalLine("}");
 					converterBodyBuilder.indentRemove();
 					converterBodyBuilder.appendFormalLine("};");
-					builder.addMethod(new DefaultMethodMetadata(getId(), 0, converterMethodName, converter, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), converterBodyBuilder.getOutput()));
+					List<JavaType> params = new ArrayList<JavaType>();
+					params.add(conversionType);
+					params.add(new JavaType(String.class.getName()));
+					JavaType parameterizedConverter = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
+					builder.addMethod(new DefaultMethodMetadata(getId(), 0, converterMethodName, parameterizedConverter, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), converterBodyBuilder.getOutput()));
 				}
 			}
 		}
