@@ -1,11 +1,21 @@
 package org.springframework.roo.classpath.javaparser.details;
 
+import japa.parser.JavaParser;
+import japa.parser.ParseException;
+import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.TypeParameter;
+import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
 import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.TypeDeclaration;
+import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.AnnotationExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.BlockStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -125,4 +136,137 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 		tsc.append("body", body);
 		return tsc.toString();
 	}
+	
+	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, boolean permitFlush, Set<JavaSymbolName> typeParameters) {
+		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(members, "Members required");
+		Assert.notNull(constructor, "Method required");
+		
+		// Start with the basic constructor
+		ConstructorDeclaration d = new ConstructorDeclaration();
+		d.setModifiers(JavaParserUtils.getJavaParserModifier(constructor.getModifier()));
+		d.setName(PhysicalTypeIdentifier.getJavaType(constructor.getDeclaredByMetadataId()).getSimpleTypeName());
+		
+		// Add any constructor-level annotations (not parameter annotations)
+		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
+		d.setAnnotations(annotations);
+		for (AnnotationMetadata annotation : constructor.getAnnotations()) {
+			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation, false);
+		}
+	
+		// Add any constructor parameters, including their individual annotations and type parameters
+		List<Parameter> parameters = new ArrayList<Parameter>();
+		d.setParameters(parameters);
+		int index = -1;
+		for (AnnotatedJavaType constructorParameter : constructor.getParameterTypes()) {
+			index++;
+
+			// Add the parameter annotations applicable for this parameter type
+			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
+	
+			for (AnnotationMetadata parameterAnnotation : constructorParameter.getAnnotations()) {
+				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation, false);
+			}
+			
+			// Compute the parameter name
+			String parameterName = constructor.getParameterNames().get(index).getSymbolName();
+			
+			// Compute the parameter type
+			Type parameterType = null;
+			if (constructorParameter.getJavaType().isPrimitive()) {
+				parameterType = JavaParserUtils.getType(constructorParameter.getJavaType());
+			} else {
+				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), constructorParameter.getJavaType());
+				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
+				
+				// Add any type arguments presented for the return type
+				if (constructorParameter.getJavaType().getParameters().size() > 0) {
+					List<Type> typeArgs = new ArrayList<Type>();
+					cit.setTypeArgs(typeArgs);
+					for (JavaType parameter : constructorParameter.getJavaType().getParameters()) {
+						//NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+						//typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+						typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
+					}
+					
+				}
+				parameterType = cit;
+			}
+
+			// Create a Java Parser constructor parameter and add it to the list of parameters
+			Parameter p = new Parameter(parameterType, new VariableDeclaratorId(parameterName));
+			p.setAnnotations(parameterAnnotations);
+			parameters.add(p);
+		}
+		
+		// Set the body
+		if (constructor.getBody() == null || constructor.getBody().length() == 0) {
+			d.setBlock(new BlockStmt());
+		} else {
+			// There is a body.
+			// We need to make a fake constructor that we can have JavaParser parse.
+			// Easiest way to do that is to build a simple source class containing the required method and re-parse it.
+			
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("class TemporaryClass {\n");
+			sb.append("  TemporaryClass() {\n");
+			sb.append(constructor.getBody());
+			sb.append("\n");
+			sb.append("  }\n");
+			sb.append("}\n");
+			ByteArrayInputStream bais = new ByteArrayInputStream(sb.toString().getBytes());
+			CompilationUnit ci;
+			try {
+				ci = JavaParser.parse(bais);
+			} catch (ParseException pe) {
+				throw new IllegalStateException("Illegal state: JavaParser did not parse correctly", pe);
+			}
+			List<TypeDeclaration> types = ci.getTypes();
+			if (types == null || types.size() != 1) {
+				throw new IllegalArgumentException("Method body invalid");
+			}
+			TypeDeclaration td = types.get(0);
+			List<BodyDeclaration> bodyDeclarations = td.getMembers();
+			if (bodyDeclarations == null || bodyDeclarations.size() != 1) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return body declarations correctly");
+			}
+			BodyDeclaration bd = bodyDeclarations.get(0);
+			if (!(bd instanceof ConstructorDeclaration)) {
+				throw new IllegalStateException("Illegal state: JavaParser did not return a method declaration correctly");
+			}
+			ConstructorDeclaration cd = (ConstructorDeclaration) bd;
+			d.setBlock(cd.getBlock());
+		}
+	
+		// Locate where to add this constructor; also verify if this method already exists
+		for (BodyDeclaration bd : members) {
+			if (bd instanceof ConstructorDeclaration) {
+				// Next constructor should appear after this current constructor
+				ConstructorDeclaration cd = (ConstructorDeclaration) bd;
+				if (cd.getParameters().size() == d.getParameters().size()) {
+					// Possible match, we need to consider parameter types as well now
+					JavaParserConstructorMetadata jpmm = new JavaParserConstructorMetadata(constructor.getDeclaredByMetadataId(), cd, compilationUnitServices, typeParameters);
+					boolean matchesFully = true;
+					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
+						if (!existingParameter.getJavaType().equals(constructor.getParameterTypes().get(index))) {
+							matchesFully = false;
+							break;
+						}
+					}
+					if (matchesFully) {
+						throw new IllegalStateException("Constructor '" + constructor.getParameterNames() + "' already exists with identical parameters");
+					}
+				}
+			}
+		}
+	
+		// Add the constructor to the end of the compilation unit
+		members.add(d);
+		
+		if (permitFlush) {
+			compilationUnitServices.flush();
+		}
+	}
+
 }
