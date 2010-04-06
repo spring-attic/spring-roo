@@ -293,24 +293,29 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private void addGeneratedValueAnnotation(List<AnnotationMetadata> annotations) {
 		List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		
+
 		// Add the "strategy" attribute to the @GeneratedValue
 		generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(identifierStrategy.name()))));
-		
-		// Add the "generator" attribute to the @GeneratedValue if the user has a sequence or table strategy
+
 		if (identifierStrategy == RooIdentifierStrategy.SEQUENCE || identifierStrategy == RooIdentifierStrategy.TABLE) {
-			boolean isSequence = identifierStrategy == RooIdentifierStrategy.SEQUENCE;
-			String generatorText = isSequence ? "@SequenceGenerator" : "@TableGenerator";
-			AnnotationMetadata applicableGeneratorMd = isSequence ? getSequenceGenerator() : getTableGenerator();
-			Assert.notNull(applicableGeneratorMd, "Should have obtained a " + generatorText + " but failed to for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			AnnotationAttributeValue<?> name = applicableGeneratorMd.getAttribute(new JavaSymbolName("name"));
-			Assert.notNull(name, generatorText + " failed to provide a name on type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isInstanceOf(StringAttributeValue.class, name, generatorText + " name attribute should have been a string for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			StringAttributeValue theName = (StringAttributeValue) name;
-			generatedValueAttributes.add(new StringAttributeValue(new JavaSymbolName("generator"), theName.getValue()));
+			addExtraGeneratedValueAttributes(generatedValueAttributes);
 		}
+
 		AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
 		annotations.add(generatedValueAnnotation);
+	}
+
+	private void addExtraGeneratedValueAttributes(List<AnnotationAttributeValue<?>> generatedValueAttributes) {
+		// Add the "generator" attribute to the @GeneratedValue if the user has a sequence or table strategy
+		boolean isSequence = identifierStrategy == RooIdentifierStrategy.SEQUENCE;
+		String generatorText = isSequence ? "@SequenceGenerator" : "@TableGenerator";
+		AnnotationMetadata applicableGeneratorMd = isSequence ? getSequenceGenerator() : getTableGenerator();
+		Assert.notNull(applicableGeneratorMd, "Should have obtained a " + generatorText + " but failed to for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+		AnnotationAttributeValue<?> name = applicableGeneratorMd.getAttribute(new JavaSymbolName("name"));
+		Assert.notNull(name, generatorText + " failed to provide a name on type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+		Assert.isInstanceOf(StringAttributeValue.class, name, generatorText + " name attribute should have been a string for type '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+		StringAttributeValue theName = (StringAttributeValue) name;
+		generatedValueAttributes.add(new StringAttributeValue(new JavaSymbolName("generator"), theName.getValue()));
 	}
 		
 	/**
