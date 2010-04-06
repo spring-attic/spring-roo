@@ -66,7 +66,7 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 * @param methodMetadata to search (required, and must be a "get", "set" or "is" method)
 	 * @return the name of the property (never returned null)
 	 */
-	public JavaSymbolName getPropertyNameForJavaBeanMethod(MethodMetadata methodMetadata) {
+	public static JavaSymbolName getPropertyNameForJavaBeanMethod(MethodMetadata methodMetadata) {
 		Assert.notNull(methodMetadata, "Method metadata is required");
 		String name = methodMetadata.getMethodName().getSymbolName();
 		if (name.startsWith("set") || name.startsWith("get")) {
