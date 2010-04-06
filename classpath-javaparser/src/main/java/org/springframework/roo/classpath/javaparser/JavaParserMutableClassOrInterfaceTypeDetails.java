@@ -19,6 +19,8 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -525,12 +527,33 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
         	JavaParserMethodMetadata.addMethod(compilationUnitServices, typeDeclaration.getMembers(), candidate, false, null);
         }
         
-        // Write to disk
-		MutableFile mutableFile = fileManager.createFile(fileIdentifier);
+        // Write to disk, or update a file if it is already present
+		String newContents = compilationUnit.toString();
+        MutableFile mutableFile = null;
+		if (fileManager.exists(fileIdentifier)) {
+			// First verify if the file has even changed
+			File f = new File(fileIdentifier);
+			String existing = null;
+			try {
+				existing = FileCopyUtils.copyToString(new FileReader(f));
+			} catch (IOException ignoreAndJustOverwriteIt) {}
+			
+			if (!newContents.equals(existing)) {
+				mutableFile = fileManager.updateFile(fileIdentifier);
+			}
+			
+		} else {
+			mutableFile = fileManager.createFile(fileIdentifier);
+			Assert.notNull(mutableFile, "Could not create Java output file '" + fileIdentifier + "'");
+		}
+		
 		try {
-			FileCopyUtils.copy(compilationUnit.toString(), new OutputStreamWriter(mutableFile.getOutputStream()));
+			if (mutableFile != null) {
+				// If mutableFile was null, that means the source == destination content
+				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
+			}
 		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not create '" + fileIdentifier + "'", ioe);
+			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 	}
 
