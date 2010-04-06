@@ -117,8 +117,9 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 			List<Type> fieldTypeArgs = new ArrayList<Type>();
 			fieldType.setTypeArgs(fieldTypeArgs);
 			for (JavaType parameter : field.getFieldType().getParameters()) {
-				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+//				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+//				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+				fieldTypeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 			}
 		}
 		

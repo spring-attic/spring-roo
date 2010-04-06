@@ -388,7 +388,7 @@ public class JavaParserUtils  {
 	}
 	
 	/**
-	 * Converts the indicated {@link JavaType} into a {@link ClassOrInterfaceType}.
+	 * Converts the indicated {@link NameExpr} into a {@link ClassOrInterfaceType}.
 	 * 
 	 * <p>
 	 * Note that no effort is made to manage imports etc.
@@ -554,6 +554,15 @@ public class JavaParserUtils  {
 		}
 		return null;
 	}
+	
+	public static final ReferenceType importParametersForType(JavaType targetType, List<ImportDeclaration> imports, JavaType typeToImport) {
+		Assert.notNull(targetType, "Target type is required");
+		Assert.notNull(imports, "Compilation unit imports required");
+		Assert.notNull(typeToImport, "Java type to import is required");
+		
+		// TODO: do the import magic, but we'll defer that
+		return new ReferenceType(getClassOrInterfaceType(new NameExpr(typeToImport.toString())));
+	}
 
 	/**
 	 * Attempts to import the presented {@link JavaType}.
@@ -590,12 +599,22 @@ public class JavaParserUtils  {
 			return new NameExpr(typeToImport.getNameIncludingTypeParameters());
 		}
 		
+		// This is pretty crude, but at least it emits source code for people (forget imports, though!)
+		if (typeToImport.getArgName() != null) {
+			return new NameExpr(typeToImport.toString());
+		}
+		
 		// Handle if the type doesn't have a package at all
 		if (typeToImport.isDefaultPackage()) {
 			return new NameExpr(typeToImport.getSimpleTypeName());
 		}
 		
-		NameExpr typeToImportExpr = new QualifiedNameExpr(new NameExpr(typeToImport.getPackage().getFullyQualifiedPackageName()), typeToImport.getSimpleTypeName());
+		NameExpr typeToImportExpr;
+		if (typeToImport.getEnclosingType() == null) {
+			typeToImportExpr = new QualifiedNameExpr(new NameExpr(typeToImport.getPackage().getFullyQualifiedPackageName()), typeToImport.getSimpleTypeName());
+		} else {
+			typeToImportExpr = new QualifiedNameExpr(new NameExpr(typeToImport.getEnclosingType().getFullyQualifiedTypeName()), typeToImport.getSimpleTypeName());
+		}
 		
 		ImportDeclaration newImport = new ImportDeclaration(typeToImportExpr, false, false);
 		

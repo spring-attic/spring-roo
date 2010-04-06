@@ -13,6 +13,7 @@ import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
+import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 
 import java.io.ByteArrayInputStream;
@@ -169,6 +170,10 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		Assert.notNull(members, "Members required");
 		Assert.notNull(method, "Method required");
 		
+		if (typeParameters == null) {
+			typeParameters = new HashSet<JavaSymbolName>();
+		}
+		
 		// Create the return type we should use
 		Type returnType = null;
 		if (method.getReturnType().isPrimitive()) {
@@ -182,12 +187,21 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 				List<Type> typeArgs = new ArrayList<Type>();
 				cit.setTypeArgs(typeArgs);
 				for (JavaType parameter : method.getReturnType().getParameters()) {
-					NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-					typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+					//NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+					//typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+					typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 				}
 			}
 			
-			returnType = cit;
+			// Handle arrays
+			if (method.getReturnType().isArray()) {
+				ReferenceType rt = new ReferenceType();
+				rt.setArrayCount(method.getReturnType().getArray());
+				rt.setType(cit);
+				returnType = rt;
+			} else {
+				returnType = cit;
+			}
 		}
 		
 		// Start with the basic method
@@ -259,7 +273,10 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		
 		// Set the body
 		if (method.getBody() == null || method.getBody().length() == 0) {
-			d.setBody(new BlockStmt());
+			// Never set the body if an abstract method
+			if (!Modifier.isAbstract(method.getModifier())) {
+				d.setBody(new BlockStmt());
+			}
 		} else {
 			// There is a body.
 			// We need to make a fake method that we can have JavaParser parse.
