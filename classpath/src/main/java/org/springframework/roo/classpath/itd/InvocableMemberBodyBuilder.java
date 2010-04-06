@@ -15,6 +15,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class InvocableMemberBodyBuilder {
 	
+	private boolean reset = false;
+	
 	private int indentLevel = 0;
 	
 	private StringBuilder stringBuilder = new StringBuilder();
@@ -37,6 +39,7 @@ public class InvocableMemberBodyBuilder {
 	 */
 	public InvocableMemberBodyBuilder reset() {
 		indentLevel = 0;
+		reset = true;
 		return this;
 	}
 
@@ -98,7 +101,11 @@ public class InvocableMemberBodyBuilder {
 	}
 	
 	public String getOutput() {
-		Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not " + indentLevel + ") to terminate!");
+		if (reset) {
+			Assert.isTrue(this.indentLevel == 0, "Indent level must be 0 (not " + indentLevel + ") to terminate following a reset!");
+		} else {
+			Assert.isTrue(this.indentLevel == 2, "Indent level must be 2 (not " + indentLevel + ") to terminate (use reset to indent to level 0)!");
+		}
 		return stringBuilder.toString();
 	}
 
