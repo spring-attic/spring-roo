@@ -26,6 +26,7 @@ import org.springframework.roo.support.util.Assert;
  * without providing the actual executable body for that member.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -43,6 +44,8 @@ public final class DefaultItdTypeDetailsBuilder {
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
+	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
+	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 	
 	// package protected, as we prefer users to use DefaultItdTypeDetails.getBuilder().
 	DefaultItdTypeDetailsBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
@@ -60,7 +63,7 @@ public final class DefaultItdTypeDetailsBuilder {
 	 * @return an immutable {@link DefaultItdTypeDetails} representing the current state of the builder (never null)
 	 */
 	public DefaultItdTypeDetails build() {
-		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations);
+		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations, fieldAnnotations, methodAnnotations);
 	}
 
 	public ImportRegistrationResolver getImportRegistrationResolver() {
@@ -122,5 +125,20 @@ public final class DefaultItdTypeDetailsBuilder {
 		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(build(), md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 		typeAnnotations.add(md);
 	}
+
+	public void addFieldAnnotation(DeclaredFieldAnnotationDetails declaredFieldAnnotationDetails) {
+		if (declaredFieldAnnotationDetails == null) {
+			return;
+		}
+		Assert.isTrue(!declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations().contains(declaredFieldAnnotationDetails.getFieldAnnotation()), "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		fieldAnnotations.add(declaredFieldAnnotationDetails);
+	}
 	
+	public void addMethodAnnotation(DeclaredMethodAnnotationDetails declaredMethodAnnotationDetails) {
+		if (declaredMethodAnnotationDetails == null) {
+			return;
+		}
+		Assert.isTrue(!declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations().contains(declaredMethodAnnotationDetails.getMethodAnnotation()), "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName()+ "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		methodAnnotations.add(declaredMethodAnnotationDetails);
+	}
 }

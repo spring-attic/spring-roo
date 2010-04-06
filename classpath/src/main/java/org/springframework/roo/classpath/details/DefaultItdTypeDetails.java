@@ -16,6 +16,7 @@ import org.springframework.roo.support.util.Assert;
  * Default representation of an {@link ItdTypeDetails}.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -33,6 +34,8 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private Set<JavaType> registeredImports = new HashSet<JavaType>();
+	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
+	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 	
 	public DefaultItdTypeDetails(ClassOrInterfaceTypeDetails governor, JavaType aspect,
 			boolean privilegedAspect, Set<JavaType> registeredImports,
@@ -41,7 +44,9 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			List<MethodMetadata> declaredMethods,
 			List<JavaType> extendsTypes,
 			List<JavaType> implementsTypes,
-			List<AnnotationMetadata> typeAnnotations) {
+			List<AnnotationMetadata> typeAnnotations,
+			List<DeclaredFieldAnnotationDetails> fieldAnnotations,
+			List<DeclaredMethodAnnotationDetails> methodAnnotations) {
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
 		
@@ -75,6 +80,14 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 
 		if (typeAnnotations != null) {
 			this.typeAnnotations = typeAnnotations;
+		}
+		
+		if (fieldAnnotations != null) {
+			this.fieldAnnotations = fieldAnnotations;
+		}
+		
+		if (methodAnnotations != null) {
+			this.methodAnnotations = methodAnnotations;
 		}
 	}
 	
@@ -130,6 +143,14 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		return Collections.unmodifiableList(typeAnnotations);
 	}
 	
+	public List<DeclaredFieldAnnotationDetails> getFieldAnnotations() {
+		return Collections.unmodifiableList(fieldAnnotations);
+	}
+	
+	public List<DeclaredMethodAnnotationDetails> getMethodAnnotations() {
+		return Collections.unmodifiableList(methodAnnotations);
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", governor);
@@ -141,6 +162,8 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		tsc.append("declaredFields", declaredFields);
 		tsc.append("declaredMethods", declaredMethods);
 		tsc.append("extendsTypes", extendsTypes);
+		tsc.append("fieldAnnotations", fieldAnnotations);
+		tsc.append("methodAnnotations", methodAnnotations);
 		tsc.append("typeAnnotations", typeAnnotations);
 		return tsc.toString();
 	}

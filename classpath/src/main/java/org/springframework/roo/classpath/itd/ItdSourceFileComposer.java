@@ -7,6 +7,8 @@ import java.util.TreeSet;
 
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
+import org.springframework.roo.classpath.details.DeclaredMethodAnnotationDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -22,6 +24,7 @@ import org.springframework.roo.support.util.Assert;
  * A simple way of producing an inter-type declaration source file.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  *
  */
@@ -65,6 +68,8 @@ public class ItdSourceFileComposer {
 		appendExtendsTypes();
 		appendImplementsTypes();
 		appendTypeAnnotations();
+		appendFieldAnnotations();
+		appendMethodAnnotations();
 		appendFields();
 		appendConstructors();
 		appendMethods();
@@ -136,6 +141,61 @@ public class ItdSourceFileComposer {
 			this.append(introductionTo.getSimpleTypeName());
 			this.append(": ");
 			outputAnnotation(typeAnnotation);
+			this.append(";");
+			this.newLine(false);
+			this.newLine();
+		}
+	}
+	
+	private void appendFieldAnnotations() {
+		List<DeclaredFieldAnnotationDetails> fieldAnnotations = itdTypeDetails.getFieldAnnotations();
+		if (fieldAnnotations == null || fieldAnnotations.size() == 0) {
+			return;
+		}
+		
+		content = true;
+		
+		for (DeclaredFieldAnnotationDetails fieldDetails : fieldAnnotations) {	
+			this.appendIndent();
+			this.append("declare @field: * ");
+			this.append(introductionTo.getSimpleTypeName());
+			this.append(".");
+			this.append(fieldDetails.getFieldMetadata().getFieldName().getSymbolName());
+			this.append(": ");
+			outputAnnotation(fieldDetails.getFieldAnnotation());
+			this.append(";");
+			this.newLine(false);
+			this.newLine();
+		}
+	}
+	
+	private void appendMethodAnnotations() {
+		List<DeclaredMethodAnnotationDetails> methodAnnotations = itdTypeDetails.getMethodAnnotations();
+		if (methodAnnotations == null || methodAnnotations.size() == 0) {
+			return;
+		}
+		
+		content = true;
+		
+		for (DeclaredMethodAnnotationDetails methodDetails : methodAnnotations) {	
+			this.appendIndent();
+			this.append("declare @method: ");
+			this.append(Modifier.toString(methodDetails.getMethodMetadata().getModifier()));
+			this.append(" ");
+			this.append(methodDetails.getMethodMetadata().getReturnType().getNameIncludingTypeParameters());
+			this.append(" ");
+			this.append(introductionTo.getSimpleTypeName());
+			this.append(".");
+			this.append(methodDetails.getMethodMetadata().getMethodName().getSymbolName());
+			this.append("(");
+			for (int i = 0; i < methodDetails.getMethodMetadata().getParameterTypes().size(); i++) {
+				this.append(methodDetails.getMethodMetadata().getParameterTypes().get(i).getJavaType().getNameIncludingTypeParameters(false, resolver));
+				if (i != methodDetails.getMethodMetadata().getParameterTypes().size() - 1) {
+					this.append(",");
+				}
+			}
+			this.append("): ");
+			outputAnnotation(methodDetails.getMethodAnnotation());
 			this.append(";");
 			this.newLine(false);
 			this.newLine();
