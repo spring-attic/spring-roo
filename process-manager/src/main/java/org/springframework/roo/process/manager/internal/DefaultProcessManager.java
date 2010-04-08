@@ -32,7 +32,7 @@ import org.springframework.roo.support.util.ExceptionUtils;
  * @since 1.0
  *
  */
-@Component
+@Component(immediate=true)
 @Service
 public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager {
 
