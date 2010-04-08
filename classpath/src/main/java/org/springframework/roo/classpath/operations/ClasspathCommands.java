@@ -288,7 +288,7 @@ public class ClasspathCommands implements CommandMarker {
 		String serialVersionUidField = "serialVersionUID";
 		declaredFields.add(new DefaultFieldMetadata(serialVersionUidField, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, new JavaSymbolName(serialVersionUidField), JavaType.LONG_PRIMITIVE, getUid(), new ArrayList<AnnotationMetadata>()));
 		
-		// Create a default id field in class as a java.lang.Long. The user needs add the fields to the class to form the composite key as required.
+		// Create a default id field in class as a java.lang.Long. The user needs to add the fields to form the composite key as required.
 		List<AnnotationMetadata> fieldAnnotations = new ArrayList<AnnotationMetadata>();
 		fieldAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Id"), new ArrayList<AnnotationAttributeValue<?>>()));
 		
