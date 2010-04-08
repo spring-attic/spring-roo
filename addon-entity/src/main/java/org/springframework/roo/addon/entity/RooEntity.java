@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.roo.addon.beaninfo.RooBeanInfo;
-import org.springframework.roo.classpath.operations.RooIdentifierStrategy;
 
 /**
  * Provides services related to JPA.
@@ -42,13 +41,6 @@ public @interface RooEntity {
 	 */
 	String identifierField() default "id";
 	
-	/**
-	 * Specifies whether to creates a JPA @GeneratedValue annotation for the identifier.
-	 * 
-	 * @return the name of the identifier strategy to use (defaults to "AUTO"; must be provided)
-	 */
-	RooIdentifierStrategy identifierStrategy() default RooIdentifierStrategy.AUTO;
-
 	/**
 	 * Specifies the column name that should be used for the identifier field. By default this is generally
 	 * made identical to the {@link #identifierField()}, although it will be made unique as required for

@@ -54,7 +54,7 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		
 		// Now we walk the inheritance hierarchy until we find some existing EntityMetadata
 		EntityMetadata parent = null;
-		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails)governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
+		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
 		while (superCid != null && parent == null) {
 			String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
 			Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
@@ -109,6 +109,4 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	public void setNoArgConstructor(boolean noArgConstructor) {
 		this.noArgConstructor = noArgConstructor;
 	}
-	
-	
 }
