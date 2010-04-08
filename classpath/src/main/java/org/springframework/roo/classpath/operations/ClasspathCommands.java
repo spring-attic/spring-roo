@@ -3,7 +3,6 @@ package org.springframework.roo.classpath.operations;
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
