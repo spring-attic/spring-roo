@@ -41,8 +41,7 @@ public interface ClasspathOperations {
 	 * @param requiredClassOrInterface that should be parsed (required)
 	 * @return the details (never returns null)
 	 */
-	ClassOrInterfaceTypeDetails getClassOrInterface(
-			JavaType requiredClassOrInterface);
+	ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface);
 
 	/**
 	 * Creates a new class, with the location name name provided in the details.
@@ -54,8 +53,7 @@ public interface ClasspathOperations {
 	 */
 	void generateClassFile(ClassOrInterfaceTypeDetails details);
 
-	void addEnumConstant(String physicalTypeIdentifier,
-			JavaSymbolName constantName);
+	void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName);
 
 	/**
 	 * Adds a new field to an existing class.
@@ -83,5 +81,4 @@ public interface ClasspathOperations {
 	 * @param path the location for the new data on demand class (required)
 	 */
 	void newDod(JavaType entity, JavaType name, Path path);
-
 }

@@ -227,7 +227,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, annotations, null);
 		generateClassFile(details);
 	}
-	
+		
 	/**
 	 * @param entity the entity to lookup required 
 	 * @return the type details (never null; throws an exception if it cannot be obtained or parsed)

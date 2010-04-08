@@ -1,8 +1,11 @@
 package org.springframework.roo.classpath.operations;
 
+import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -11,13 +14,21 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.DefaultConstructorMetadata;
+import org.springframework.roo.classpath.details.DefaultFieldMetadata;
+import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -29,13 +40,14 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Shell commands for {@link ClasspathOperationsImpl}.
  * 
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
- * 
  */
 @Component
 @Service
@@ -178,7 +190,6 @@ public class ClasspathCommands implements CommandMarker {
 			@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") boolean testAutomatically, 
 			@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") String table, 
 			@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
-			@CliOption(key = "identifierStrategy", mandatory = false, unspecifiedDefaultValue = "AUTO", specifiedDefaultValue = "AUTO", help = "Which @javax.persistence.GeneratedValue strategy to apply, if any, to the identifier of this entity") RooIdentifierStrategy identifierStrategy, 
 			@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
 			@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
 			@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
@@ -191,7 +202,6 @@ public class ClasspathCommands implements CommandMarker {
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
-
 		if (testAutomatically && createAbstract) {
 			// We can't test an abstract class
 			throw new IllegalArgumentException("Automatic tests cannot be created for an abstract entity; remove the --testAutomatically or --abstract option");
@@ -213,15 +223,12 @@ public class ClasspathCommands implements CommandMarker {
 		if (identifierField != null) {
 			entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), identifierField));
 		}
-		if (identifierStrategy != null && identifierStrategy != RooIdentifierStrategy.AUTO) {
-			entityAttrs.add(new EnumAttributeValue(new JavaSymbolName("identifierStrategy"), new EnumDetails(new JavaType("org.springframework.roo.classpath.operations.RooIdentifierStrategy"), new JavaSymbolName(identifierStrategy.name()))));			
-		}
 		if (identifierColumn != null) {
 			entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), identifierColumn));
 		}
 		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
 			entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
-		}
+		} 
 		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
 
 		if (table != null) {
@@ -256,9 +263,75 @@ public class ClasspathCommands implements CommandMarker {
 		}
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, entityAnnotations, null);
 		classpathOperations.generateClassFile(details);
+		
+		// Create entity identifier class if required
+		if (!identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
+			createIdentifierClass(identifierType, identifierField, identifierColumn);
+		}
 
 		if (testAutomatically) {
 			classpathOperations.newIntegrationTest(name);
 		}
+	}
+
+	private void createIdentifierClass(JavaType identifierType, String identifierField, String identifierColumn) {
+		String idClassMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+		String fieldName = identifierField == null || "".equals(identifierField.trim()) ? "id" : identifierField;
+		
+		//  Annotate class with @javax.persistence.Embeddable
+		List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
+		typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Embeddable"), new ArrayList<AnnotationAttributeValue<?>>()));
+				
+		List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
+
+		// Add serialVersionUID field to the declared fields list
+		String serialVersionUidField = "serialVersionUID";
+		declaredFields.add(new DefaultFieldMetadata(serialVersionUidField, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, new JavaSymbolName(serialVersionUidField), JavaType.LONG_PRIMITIVE, getUid(), new ArrayList<AnnotationMetadata>()));
+		
+		// Create a default id field in class as a java.lang.Long. The user needs add the fields to the class to form the composite key as required.
+		List<AnnotationMetadata> fieldAnnotations = new ArrayList<AnnotationMetadata>();
+		fieldAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Id"), new ArrayList<AnnotationAttributeValue<?>>()));
+		
+		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		String columnName = identifierColumn == null || "".equals(identifierColumn.trim()) ? fieldName : identifierColumn;
+		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
+		fieldAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes));
+
+		FieldMetadata id = new DefaultFieldMetadata(fieldName, Modifier.PRIVATE, new JavaSymbolName(fieldName), JavaType.LONG_OBJECT, null, fieldAnnotations);
+		String idFieldSymbolName = id.getFieldName().getSymbolName();
+		declaredFields.add(id);
+		
+		// Create a constructor 
+		List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
+		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
+		constructorBodyBuilder.appendFormalLine("this." + idFieldSymbolName + " = " + idFieldSymbolName + ";");
+		
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(JavaType.LONG_OBJECT);
+		
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName(fieldName));
+		
+		declaredConstructors.add(new DefaultConstructorMetadata("constructorId", Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), constructorBodyBuilder.getOutput()));
+		
+		// Create accessor method for id field
+		List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+		String requiredAccessorName = "get" + StringUtils.capitalize(idFieldSymbolName);
+		InvocableMemberBodyBuilder accessorBodyBuilder = new InvocableMemberBodyBuilder();
+		accessorBodyBuilder.appendFormalLine("return this." + idFieldSymbolName + ";");
+		MethodMetadata idAccessor = new DefaultMethodMetadata(fieldName, Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), accessorBodyBuilder.getOutput());
+		declaredMethods.add(idAccessor);
+		
+		// Class must also implement Serializable
+		List<JavaType> implementsTypes = new ArrayList<JavaType>();
+		implementsTypes.add(new JavaType(Serializable.class.getName()));
+		
+		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(idClassMetadataId, identifierType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, declaredConstructors, declaredFields, declaredMethods, null, null, implementsTypes, typeAnnotations, null);
+		classpathOperations.generateClassFile(idClassDetails);
+	}
+	
+	private String getUid() {
+		Random random = new Random(new Date().getTime());
+		return random.nextLong() + "L";
 	}
 }
