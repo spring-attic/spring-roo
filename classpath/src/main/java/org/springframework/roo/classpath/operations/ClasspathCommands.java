@@ -331,7 +331,7 @@ public class ClasspathCommands implements CommandMarker {
 	}
 	
 	private String getUid() {
-		Random random = new Random(new Date().getTime());
+		Random random = new Random(System.nanoTime());
 		return random.nextLong() + "L";
 	}
 }
