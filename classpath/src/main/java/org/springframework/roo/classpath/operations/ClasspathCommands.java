@@ -296,7 +296,7 @@ public class ClasspathCommands implements CommandMarker {
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
 		fieldAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes));
 
-		FieldMetadata id = new DefaultFieldMetadata(fieldName, Modifier.PRIVATE, new JavaSymbolName(fieldName), JavaType.LONG_OBJECT, null, fieldAnnotations);
+		FieldMetadata id = new DefaultFieldMetadata(idClassMetadataId, Modifier.PRIVATE, new JavaSymbolName(fieldName), JavaType.LONG_OBJECT, null, fieldAnnotations);
 		String idFieldSymbolName = id.getFieldName().getSymbolName();
 		declaredFields.add(id);
 		
@@ -311,16 +311,16 @@ public class ClasspathCommands implements CommandMarker {
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(fieldName));
 		
-		declaredConstructors.add(new DefaultConstructorMetadata("constructorId", Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), constructorBodyBuilder.getOutput()));
+		declaredConstructors.add(new DefaultConstructorMetadata(idClassMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), constructorBodyBuilder.getOutput()));
 		
 		// Create accessor method for id field
 		List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 		String requiredAccessorName = "get" + StringUtils.capitalize(idFieldSymbolName);
 		InvocableMemberBodyBuilder accessorBodyBuilder = new InvocableMemberBodyBuilder();
 		accessorBodyBuilder.appendFormalLine("return this." + idFieldSymbolName + ";");
-		MethodMetadata idAccessor = new DefaultMethodMetadata(fieldName, Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), accessorBodyBuilder.getOutput());
+		MethodMetadata idAccessor = new DefaultMethodMetadata(idClassMetadataId, Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), accessorBodyBuilder.getOutput());
 		declaredMethods.add(idAccessor);
-		
+
 		// Class must also implement Serializable
 		List<JavaType> implementsTypes = new ArrayList<JavaType>();
 		implementsTypes.add(new JavaType(Serializable.class.getName()));
