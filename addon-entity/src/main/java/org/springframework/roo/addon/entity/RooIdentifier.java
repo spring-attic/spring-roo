@@ -48,5 +48,4 @@ public @interface RooIdentifier {
 	 * @return the name of the identifier column to use (default to ""; in this case it is automatic)
 	 */
 	String identifierColumn() default "";
-
 }
