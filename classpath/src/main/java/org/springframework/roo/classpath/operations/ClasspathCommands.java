@@ -266,7 +266,6 @@ public class ClasspathCommands implements CommandMarker {
 		// Produce identifier itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		List<AnnotationMetadata> identifierAnnotations = new ArrayList<AnnotationMetadata>();
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
 		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
 		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"), new ArrayList<AnnotationAttributeValue<?>>()));
 		
