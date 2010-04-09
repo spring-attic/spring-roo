@@ -4,7 +4,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.serializable.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -27,7 +26,6 @@ import org.springframework.roo.project.Path;
 public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider implements IdentifierMetadataProvider {
 
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	
 	private boolean noArgConstructor = true;
@@ -35,7 +33,6 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
@@ -43,14 +40,13 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 	
 	protected void deactivate(ComponentContext context) {
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
-		
-		// Now we walk the inheritance hierarchy until we find some existing EntityMetadata
+
+		// Now we walk the inheritance hierarchy until we find some existing IdentifierMetadata
 		IdentifierMetadata parent = null;
 		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
 		while (superCid != null && parent == null) {
@@ -60,10 +56,10 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 			parent = (IdentifierMetadata) metadataService.get(superCidLocalIdentifier);
 			superCid = superCid.getSuperclass();
 		}
-				
+
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		
+
 		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor);
 	}
 	
