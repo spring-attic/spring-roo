@@ -89,7 +89,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		if (annotation != null) {
-			// builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Entity"), new ArrayList<AnnotationAttributeValue<?>>()));
 			AutoPopulationUtils.populate(this, annotation);
 		}
 

@@ -1,0 +1,11 @@
+package org.springframework.roo.addon.entity;
+
+import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+
+/**
+ * Interface to {@link IdentifierMetadataProviderImpl}.
+ * 
+ * @author Alan Stewart
+ * @since 1.1
+ */
+public interface IdentifierMetadataProvider extends ItdRoleAwareMetadataProvider {}

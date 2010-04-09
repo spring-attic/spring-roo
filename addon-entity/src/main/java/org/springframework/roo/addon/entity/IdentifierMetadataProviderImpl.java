@@ -6,8 +6,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
-import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.addon.plural.PluralMetadataProvider;
+import org.springframework.roo.addon.serializable.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -18,85 +17,73 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
 /**
- * Provides {@link EntityMetadata}.
+ * Provides {@link IdentifierMetadata}.
  * 
- * @author Ben Alex
- * @since 1.0
- *
+ * @author Alan Stewart
+ * @since 1.1
  */
 @Component(immediate = true)
 @Service
-public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvider implements EntityMetadataProvider {
+public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider implements IdentifierMetadataProvider {
 
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
-	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
+	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	
 	private boolean noArgConstructor = true;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		serializableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
-		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	protected void deactivate(ComponentContext context) {
-		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
+		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		serializableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		
 		// Now we walk the inheritance hierarchy until we find some existing EntityMetadata
-		EntityMetadata parent = null;
+		IdentifierMetadata parent = null;
 		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
 		while (superCid != null && parent == null) {
 			String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
 			Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
 			String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
-			parent = (EntityMetadata) metadataService.get(superCidLocalIdentifier);
+			parent = (IdentifierMetadata) metadataService.get(superCidLocalIdentifier);
 			superCid = superCid.getSuperclass();
 		}
-		
-		// We also need the plural
-		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
-		Path path = EntityMetadata.getPath(metadataIdentificationString);
-		String key = PluralMetadata.createIdentifier(javaType, path);
-		PluralMetadata beanInfo = (PluralMetadata) metadataService.get(key);
-		metadataDependencyRegistry.registerDependency(key, metadataIdentificationString);
-		if (beanInfo == null) {
-			// Can't acquire the plural
-			return null;
-		}
-		
+				
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural());
+		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
-		return "Entity";
+		return "Identifier";
 	}
 
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
-		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
-		Path path = EntityMetadata.getPath(metadataIdentificationString);
+		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
+		Path path = IdentifierMetadata.getPath(metadataIdentificationString);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		return physicalTypeIdentifier;
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
-		return EntityMetadata.createIdentifier(javaType, path);
+		return IdentifierMetadata.createIdentifier(javaType, path);
 	}
 
 	public String getProvidesType() {
-		return EntityMetadata.getMetadataIdentiferType();
+		return IdentifierMetadata.getMetadataIdentiferType();
 	}
 
 	/**
