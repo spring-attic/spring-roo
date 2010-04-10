@@ -105,7 +105,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * Locates declared fields.
 	 * 
 	 * <p>
-	 * If no parent is defined, one field will be located or created. All declared and inherited fields will be returned.
+	 * If no parent is defined, one will be located or created. All declared fields will be returned.
 	 * 
 	 * @return fields (never returns null)
 	 */
