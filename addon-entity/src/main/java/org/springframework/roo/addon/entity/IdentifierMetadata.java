@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -32,9 +31,6 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * Metadata for {@link RooIdentifier}.
  * 
- * <p>
- * Any getter produced by this metadata is automatically included in the {@link BeanInfoMetadata}.
- * 
  * @author Alan Stewart
  * @since 1.1
  */
@@ -42,7 +38,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	private static final String PROVIDES_TYPE_STRING = IdentifierMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType EMBEDDABLE = new JavaType("javax.persistence.Embeddable");
 
 	private boolean noArgConstructor;
@@ -109,8 +104,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			return parent.getIdentifierFields();
 		}
 
-		// Try to locate existing fields with @javax.persistence.Id
-		List<FieldMetadata> foundIds = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
+		// Locate all declared fields 
+		List<FieldMetadata> foundIds = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
 		if (foundIds.size() > 0) {
 			return foundIds;
 		}
@@ -136,9 +131,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		// We need to create one
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		JavaType annotationType = ID;
-		AnnotationMetadata identifierAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(identifierAnnotation);
 
 		// Compute the column name, as required
 		String columnName = idField.getSymbolName();
@@ -176,7 +168,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			if (!getId().equals(id.getDeclaredByMetadataId())) {
 				MethodMetadata accessor = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
 				if (accessor != null) {
-					Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided @javax.persistence.Id field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+					Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 					accessors.add(accessor);
 				} else {
 					accessors.add(getAccessor(id));
