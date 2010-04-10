@@ -19,4 +19,14 @@ import org.springframework.roo.addon.serializable.RooSerializable;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooIdentifier {
+	
+	/**
+	 * @return whether to generate getters for each non-transient field declared in this class (defaults to true)
+	 */
+	boolean gettersByDefault() default true;
+
+	/**
+	 * @return whether to generate setters for each non-transient field declared in this class (defaults to true)
+	 */
+	boolean settersByDefault() default true;
 }

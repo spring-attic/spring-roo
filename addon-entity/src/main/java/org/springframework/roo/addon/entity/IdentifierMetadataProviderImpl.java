@@ -28,7 +28,7 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	
-	private boolean noArgConstructor = true;
+	private boolean noArgConstructor = false;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());

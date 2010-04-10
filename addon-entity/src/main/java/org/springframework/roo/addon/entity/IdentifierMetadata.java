@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -18,6 +19,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -43,6 +45,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private boolean noArgConstructor;
 	private IdentifierMetadata parent;
 	
+	// From annotation
+	@AutoPopulate private boolean gettersByDefault = true;
+	@AutoPopulate private boolean settersByDefault = true;
+
 	public IdentifierMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, IdentifierMetadata parent, boolean noArgConstructor) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -66,18 +72,23 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Obtain a no-arg constructor, if one is appropriate to provide
 		builder.addConstructor(getNoArgConstructor());
 
-		// Add identifier fields and accessors (no mutators)
-		List<FieldMetadata> fields = getIdentifierFields();
+		// Add declared fields and accessors and mutators
+		List<FieldMetadata> fields = getFields();
 		for (FieldMetadata field : fields) {
 			builder.addField(field);
 		}
-		List<MethodMetadata> accessors = getIdentifierAccessors();
-		for (MethodMetadata accessor : accessors) {
-			builder.addMethod(accessor);
+		if (gettersByDefault) {
+			List<MethodMetadata> accessors = getAccessors();
+			for (MethodMetadata accessor : accessors) {
+				builder.addMethod(accessor);
+			}
 		}
-
-		// Add a constructor with the id fields required
-		builder.addConstructor(getConstructor());
+		if (settersByDefault) {
+			List<MethodMetadata> mutators = getMutators();
+			for (MethodMetadata mutator : mutators) {
+				builder.addMethod(mutator);
+			}
+		}
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -91,88 +102,82 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	}
 
 	/**
-	 * Locates the identifier fields.
+	 * Locates declared fields.
 	 * 
 	 * <p>
-	 * If no parent is defined, one will be located or created. Any declared or inherited field which has the
-	 * @javax.persistence.Id annotation will be taken as the identifier and returned.
+	 * If no parent is defined, one field will be located or created. All declared and inherited fields will be returned.
 	 * 
-	 * @return the identifiers (never returns null)
+	 * @return fields (never returns null)
 	 */
-	public List<FieldMetadata> getIdentifierFields() {
-		if (parent != null) {
-			return parent.getIdentifierFields();
+	public List<FieldMetadata> getFields() {
+		// Locate all declared fields
+		List<FieldMetadata> declaredFields = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
+		if (!declaredFields.isEmpty()) {
+			return declaredFields;
 		}
-
-		// Locate all declared fields 
-		List<FieldMetadata> foundIds = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
-		if (foundIds.size() > 0) {
-			return foundIds;
-		}
-
-		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
-		int index = -1;
-		JavaSymbolName idField = null;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = fieldName + "id";
-
-			idField = new JavaSymbolName(fieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, idField) == null) {
-				// Found a usable field name
-				break;
-			}
-		}
-
-		// We need to create one
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-
-		// Compute the column name, as required
-		String columnName = idField.getSymbolName();
-		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
-		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
-		annotations.add(columnAnnotation);
 
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		fields.add(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, new JavaType(Long.class.getName()), null, annotations));
+
+		if (parent == null) {
+			// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
+			int index = -1;
+			JavaSymbolName idField = null;
+			while (true) {
+				// Compute the required field name
+				index++;
+				String fieldName = "";
+				for (int i = 0; i < index; i++) {
+					fieldName = fieldName + "_";
+				}
+				fieldName = fieldName + "id";
+
+				idField = new JavaSymbolName(fieldName);
+				if (MemberFindingUtils.getField(governorTypeDetails, idField) == null) {
+					// Found a usable field name
+					break;
+				}
+			}
+
+			// We need to create one
+			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+
+			// Compute the column name, as required
+			String columnName = idField.getSymbolName();
+			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
+			AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
+			annotations.add(columnAnnotation);
+
+			fields.add(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, new JavaType(Long.class.getName()), null, annotations));
+		}
 		return fields;
 	}
 
 	/**
-	 * Locates the identifier accessor methods.
+	 * Locates the accessor methods.
 	 * 
 	 * <p>
-	 * If {@link #getIdentifierFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class. 
+	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class. 
 	 * 
 	 * @return the accessors (never returns null)
 	 */
-	public List<MethodMetadata> getIdentifierAccessors() {
-		if (parent != null) {
-			return parent.getIdentifierAccessors();
-		}
+	public List<MethodMetadata> getAccessors() {
+		List<MethodMetadata> accessors = new LinkedList<MethodMetadata>();
 
-		List<MethodMetadata> accessors = new ArrayList<MethodMetadata>();
-
-		// Locate the identifier fields, and compute the names of the accessors that will be produced
-		List<FieldMetadata> ids = getIdentifierFields();
-		for (FieldMetadata id : ids) {
-			String requiredAccessorName = getRequiredAccessorName(id);
+		// Locate the declared fields, and compute the names of the accessors that will be produced
+		List<FieldMetadata> fields = getFields();
+		for (FieldMetadata field : fields) {
+			String requiredAccessorName = getRequiredAccessorName(field);
 
 			// See if the user provided the field and the accessor method
-			if (!getId().equals(id.getDeclaredByMetadataId())) {
+			if (!getId().equals(field.getDeclaredByMetadataId())) {
 				MethodMetadata accessor = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
 				if (accessor != null) {
 					Assert.isTrue(Modifier.isPublic(accessor.getModifier()), "User provided field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-					accessors.add(accessor);
 				} else {
-					accessors.add(getAccessor(id));
+					accessor = getAccessor(field);
 				}
+				accessors.add(accessor);				
 			}
 		}
 
@@ -180,22 +185,85 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			return accessors;
 		}
 
-		// No accessor declared in governor so produce a public accessor for the default id field
-		FieldMetadata id = ids.get(0);
-		accessors.add(getAccessor(id));
+		// No accessor declared in governor so produce a public accessor for the default ITD field if there is no parent
+		if (!fields.isEmpty()) {
+			FieldMetadata id = fields.get(0);
+			accessors.add(getAccessor(id));
+		}
 
-		return new ArrayList<MethodMetadata>(accessors);
+		return accessors;
 	}
 	
-	private MethodMetadata getAccessor(FieldMetadata id) {
-		String requiredAccessorName = getRequiredAccessorName(id);
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	private String getRequiredAccessorName(FieldMetadata field) {
+		return "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
 
-	private String getRequiredAccessorName(FieldMetadata id) {
-		return "get" + StringUtils.capitalize(id.getFieldName().getSymbolName());
+	private MethodMetadata getAccessor(FieldMetadata field) {
+		String requiredAccessorName = getRequiredAccessorName(field);
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), field.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	/**
+	 * Locates the mutator methods.
+	 * 
+	 * <p>
+	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class. 
+	 * 
+	 * @return the mutators (never returns null)
+	 */
+	public List<MethodMetadata> getMutators() {
+		List<MethodMetadata> mutators = new LinkedList<MethodMetadata>();
+
+		// Locate the declared fields, and compute the names of the mutators that will be produced
+		List<FieldMetadata> fields = getFields();
+		for (FieldMetadata field : fields) {
+			String requiredMutatorName = getRequiredMutatorName(field);
+
+			List<JavaType> paramTypes = new ArrayList<JavaType>();
+			paramTypes.add(field.getFieldType());
+
+			// See if the user provided the field and the mutator method
+			if (!getId().equals(field.getDeclaredByMetadataId())) {
+				MethodMetadata mutator = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
+				if (mutator != null) {
+					Assert.isTrue(Modifier.isPublic(mutator.getModifier()), "User provided field but failed to provide a public '" + requiredMutatorName + "(" + field.getFieldName().getSymbolName() + ")' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+				} else {
+					mutator = getMutator(field);
+				}
+				mutators.add(mutator);
+			}
+		}
+
+		if (!mutators.isEmpty()) {
+			return mutators;
+		}
+
+		// No mutator declared in governor so produce a public mutator for the default ITD field if there is no parent
+		if (!fields.isEmpty()) {
+			FieldMetadata id = fields.get(0);
+			mutators.add(getMutator(id));
+		}
+
+		return mutators;
+	}
+	
+	private String getRequiredMutatorName(FieldMetadata field) {
+		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+	}
+
+	private MethodMetadata getMutator(FieldMetadata field) {
+		String requiredMutatorName = getRequiredMutatorName(field);
+
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(field.getFieldType());
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(field.getFieldName());
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
 	/**
@@ -230,49 +298,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		return new DefaultConstructorMetadata(getId(), Modifier.PRIVATE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
-	}
-
-	/**
-	 * Locates the parameterised constructor for this class with the specified id fields, if available.
-	 * 
-	 * <p>
-	 * If a class defines the parameterised constructor with the specified id fields, it is returned (irrespective of access modifiers).
-	 * 
-	 * <p>
-	 * If a class does not define an parameterised constructor, one might be created.
-	 * 
-	 * @return the constructor
-	 */
-	public ConstructorMetadata getConstructor() {
-		// Locate the identifier fields
-		List<FieldMetadata> ids = getIdentifierFields();
-
-		// Compute the constructor parameters
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-		for (FieldMetadata id : ids) {
-			paramTypes.add(id.getFieldType());
-		}
-
-		// Search for an existing constructor
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
-		if (result != null) {
-			// Found an existing parameterised constructor on this class, so return it
-			return result;
-		}
-
-		// Create the constructor
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		for (FieldMetadata id : ids) {
-			paramNames.add(id.getFieldName());
-		}
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("super();");
-		for (FieldMetadata id : ids) {
-			bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = " + id.getFieldName().getSymbolName() + ";");
-		}
-
-		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 
 	public static final String getMetadataIdentiferType() {
