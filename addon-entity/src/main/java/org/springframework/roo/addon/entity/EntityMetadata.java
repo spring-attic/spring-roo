@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -25,6 +26,7 @@ import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMeta
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -188,11 +190,16 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		boolean hasIdClass = !identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.");
 		JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
-		AnnotationMetadata identifierAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(identifierAnnotation);
-				
+		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
+		annotations.add(idAnnotation);
+					
 		// Compute the column name, as required
 		if (!hasIdClass) {
+			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName("AUTO"))));
+			AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
+			annotations.add(generatedValueAnnotation);
+
 			String columnName = idField.getSymbolName();
 			if (!"".equals(this.identifierColumn)) {
 				// User has specified an alternate column name
