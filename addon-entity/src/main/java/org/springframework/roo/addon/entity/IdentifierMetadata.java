@@ -367,7 +367,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		for (FieldMetadata field : fields) {
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " ? 1231 : 1237);");
-			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("result = prime * result + " + getRequiredAccessorName(field) + "();");
 			} else  {
 				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " == null ? 0 : " + field.getFieldName().getSymbolName() + ".hashCode());");
