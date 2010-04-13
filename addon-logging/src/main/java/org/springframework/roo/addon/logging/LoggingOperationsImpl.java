@@ -41,7 +41,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		Assert.notNull(loggerPackage, "LoggerPackage required");
 		
 		setupProperties(logLevel, loggerPackage);
-//		setupWebXml();
+		// setupWebXml();
 	}
 	
 	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
@@ -70,7 +70,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		for (String packageName : loggerPackage.getPackageNames()) {
 			if (LoggerPackage.ROOT.equals(loggerPackage)) {
 				props.remove("log4j.rootLogger");
-				props.setProperty("log4j.rootLogger", logLevel.getKey() + ", stdout, R");
+				props.setProperty("log4j.rootLogger", logLevel.getKey() + ", stdout");
 			} else {						
 				packageName = packageName.equals("TO_BE_CHANGED_BY_LISTENER") ? topLevelPackage.getFullyQualifiedPackageName() : packageName;
 				props.remove("log4j.logger." + packageName);
