@@ -90,6 +90,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			}
 		}
 
+		// Add equals and hashcode methods
+		builder.addMethod(getEqualsMethod());
+		builder.addMethod(getHashCodeMethod());
+	
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -111,13 +115,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 */
 	public List<FieldMetadata> getFields() {
 		// Locate all declared fields
-		List<FieldMetadata> declaredFields = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
-		if (!declaredFields.isEmpty()) {
-			return declaredFields;
+		List<FieldMetadata> fields = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
+		if (!fields.isEmpty()) {
+			return fields;
 		}
 
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-
+		// If there is no parent create a default id field in the ITD
 		if (parent == null) {
 			// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 			int index = -1;
@@ -187,8 +190,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		// No accessor declared in governor so produce a public accessor for the default ITD field if there is no parent
 		if (!fields.isEmpty()) {
-			FieldMetadata id = fields.get(0);
-			accessors.add(getAccessor(id));
+			accessors.add(getAccessor(fields.get(0)));
 		}
 
 		return accessors;
@@ -242,8 +244,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		// No mutator declared in governor so produce a public mutator for the default ITD field if there is no parent
 		if (!fields.isEmpty()) {
-			FieldMetadata id = fields.get(0);
-			mutators.add(getMutator(id));
+			mutators.add(getMutator(fields.get(0)));
 		}
 
 		return mutators;
@@ -298,6 +299,83 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		return new DefaultConstructorMetadata(getId(), Modifier.PRIVATE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+	}
+
+	public MethodMetadata getEqualsMethod() {
+		// See if the user provided the equals method
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(new JavaType("java.lang.Object"));
+		MethodMetadata equalsMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("equals"), paramTypes);
+		if (equalsMethod != null) {
+			return equalsMethod;
+		}
+
+		// Locate declared fields
+		List<FieldMetadata> fields = getFields();
+		if (fields.isEmpty()) {
+			return null;
+		}
+
+		String typeName = governorTypeDetails.getName().getSimpleTypeName();
+		
+		// Create the method
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("if (this == obj) return true;");
+		bodyBuilder.appendFormalLine("if (obj == null) return false;");
+		bodyBuilder.appendFormalLine("if (!(obj instanceof " + typeName + ")) return false;");
+		bodyBuilder.appendFormalLine(typeName + " other = (" + typeName + ") obj;");
+		
+		bodyBuilder.appendIndent();
+		bodyBuilder.append("return ");
+		
+		int count = 0;
+		for (FieldMetadata field : fields) {
+			bodyBuilder.append(getRequiredAccessorName(field) + "() == other." + getRequiredAccessorName(field) + "()");
+			if (count < fields.size() - 1) {
+				bodyBuilder.append(" && ");
+			}
+			count++;
+		}
+		bodyBuilder.append(";");
+		bodyBuilder.newLine();
+	
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("obj"));
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	
+	public MethodMetadata getHashCodeMethod() {
+		// See if the user provided the hashCode method
+		MethodMetadata hashCodeMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
+		if (hashCodeMethod != null) {
+			return hashCodeMethod;
+		}
+		
+		// Locate declared fields
+		List<FieldMetadata> fields = getFields();
+		if (fields.isEmpty()) {
+			return null;
+		}
+		
+		// Create the method
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("final int prime = 31;");
+		bodyBuilder.appendFormalLine("int result = 17;");
+			
+		for (FieldMetadata field : fields) {
+			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " ? 1231 : 1237);");
+			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("result = prime * result + " + getRequiredAccessorName(field) + "();");
+			} else  {
+				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " == null ? 0 : " + field.getFieldName().getSymbolName() + ".hashCode());");
+			}
+		}
+		bodyBuilder.appendFormalLine("return result;");
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("hashCode"), JavaType.INT_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
 	public static final String getMetadataIdentiferType() {
