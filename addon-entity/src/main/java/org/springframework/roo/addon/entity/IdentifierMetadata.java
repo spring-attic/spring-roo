@@ -44,7 +44,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 	private boolean noArgConstructor;
 	private IdentifierMetadata parent;
-	
+
 	// From annotation
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
@@ -93,7 +93,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Add equals and hashcode methods
 		builder.addMethod(getEqualsMethod());
 		builder.addMethod(getHashCodeMethod());
-	
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
@@ -160,7 +160,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * Locates the accessor methods.
 	 * 
 	 * <p>
-	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class. 
+	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
 	 * 
 	 * @return the accessors (never returns null)
 	 */
@@ -180,7 +180,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				} else {
 					accessor = getAccessor(field);
 				}
-				accessors.add(accessor);				
+				accessors.add(accessor);
 			}
 		}
 
@@ -195,7 +195,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		return accessors;
 	}
-	
+
 	private String getRequiredAccessorName(FieldMetadata field) {
 		return "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
@@ -211,7 +211,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * Locates the mutator methods.
 	 * 
 	 * <p>
-	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class. 
+	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class.
 	 * 
 	 * @return the mutators (never returns null)
 	 */
@@ -249,7 +249,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		return mutators;
 	}
-	
+
 	private String getRequiredMutatorName(FieldMetadata field) {
 		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
@@ -317,60 +317,69 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		String typeName = governorTypeDetails.getName().getSimpleTypeName();
-		
+
 		// Create the method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (this == obj) return true;");
 		bodyBuilder.appendFormalLine("if (obj == null) return false;");
 		bodyBuilder.appendFormalLine("if (!(obj instanceof " + typeName + ")) return false;");
 		bodyBuilder.appendFormalLine(typeName + " other = (" + typeName + ") obj;");
-		
-		bodyBuilder.appendIndent();
-		bodyBuilder.append("return ");
-		
-		int count = 0;
+
 		for (FieldMetadata field : fields) {
-			bodyBuilder.append(getRequiredAccessorName(field) + "() == other." + getRequiredAccessorName(field) + "()");
-			if (count < fields.size() - 1) {
-				bodyBuilder.append(" && ");
+			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("if (" + getRequiredAccessorName(field) + "() != other." + getRequiredAccessorName(field) + "()) return false;");
+			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("if (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) != Double.doubleToLongBits(other." + getRequiredAccessorName(field) + "())) return false;");
+			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("if (Float.floatToIntBits(" + getRequiredAccessorName(field) + "()) != Float.floatToIntBits(other." + getRequiredAccessorName(field) + "())) return false;");
+			} else {
+				bodyBuilder.appendFormalLine("if (" + getRequiredAccessorName(field) + "() == null) {");
+				bodyBuilder.indent();
+				bodyBuilder.appendFormalLine("if (other." + getRequiredAccessorName(field) + "() != null) return false;");
+				bodyBuilder.indentRemove();
+				bodyBuilder.appendFormalLine("} else if (!" + getRequiredAccessorName(field) + "().equals(other." + getRequiredAccessorName(field) + "())) return false;");
 			}
-			count++;
 		}
-		bodyBuilder.append(";");
-		bodyBuilder.newLine();
-	
+		bodyBuilder.appendFormalLine("return true;");
+
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
-	
 	public MethodMetadata getHashCodeMethod() {
 		// See if the user provided the hashCode method
 		MethodMetadata hashCodeMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
 		if (hashCodeMethod != null) {
 			return hashCodeMethod;
 		}
-		
+
 		// Locate declared fields
 		List<FieldMetadata> fields = getFields();
 		if (fields.isEmpty()) {
 			return null;
 		}
-		
+
 		// Create the method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("final int prime = 31;");
 		bodyBuilder.appendFormalLine("int result = 17;");
-			
+
+		String header = "result = prime * result + ";
 		for (FieldMetadata field : fields) {
-			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) || field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " ? 1231 : 1237);");
-			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("result = prime * result + " + getRequiredAccessorName(field) + "();");
-			} else  {
-				bodyBuilder.appendFormalLine("result = prime * result + (" + field.getFieldName().getSymbolName() + " == null ? 0 : " + field.getFieldName().getSymbolName() + ".hashCode());");
+			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " ? 1231 : 1237);");
+			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine(header + getRequiredAccessorName(field) + "();");
+			} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine(header + "(int) (" + getRequiredAccessorName(field) + "() ^ (" + getRequiredAccessorName(field) + "() >>> 32));");
+			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine(header + "(int) (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) ^ (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) >>> 32));");
+			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine(header + "Float.floatToIntBits(" + getRequiredAccessorName(field) + "());");
+			} else {
+				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + field.getFieldName().getSymbolName() + ".hashCode());");
 			}
 		}
 		bodyBuilder.appendFormalLine("return result;");
