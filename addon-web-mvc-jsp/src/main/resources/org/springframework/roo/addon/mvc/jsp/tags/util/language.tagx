@@ -16,7 +16,7 @@
     	</spring:url>	
     	<spring:url var="img_en" value="/static/images/gb.png" />    	
     	<spring:message code="global.language.switch" arguments="English" var="lang_en"/>
-    	<a href="${url_en}" title="${lang_en}"><img src="${img_en}" alt="${lang_en}"/></a>
+    	<a href="${url_en}" title="${lang_en}"><img class="flag" src="${img_en}" alt="${lang_en}"/></a>
     	<c:out value=" "/>
 
     	<spring:url var="img_de" value="/static/images/de.png" />
@@ -30,7 +30,7 @@
     		</c:if>	    		
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Deutsch" var="lang_de"/>			    	
-    	<a href="${url_de}" title="${lang_de}"><img src="${img_de}" alt="${lang_de}"/></a>
+    	<a href="${url_de}" title="${lang_de}"><img class="flag" src="${img_de}" alt="${lang_de}"/></a>
     	<c:out value=" "/>
 
     	<spring:url var="img_sv" value="/static/images/sv.png" />
@@ -44,7 +44,7 @@
     		</c:if>	    		
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Svenska" var="lang_sv"/>			    	
-    	<a href="${url_sv}" title="${lang_sv}"><img src="${img_sv}" alt="${lang_sv}"/></a>
+    	<a href="${url_sv}" title="${lang_sv}"><img class="flag" src="${img_sv}" alt="${lang_sv}"/></a>
     	<c:out value=" "/>
 
     	<spring:url var="img_es" value="/static/images/es.png" />
@@ -58,7 +58,7 @@
     		</c:if>	    		
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Espanol" var="lang_es"/>
-    	<a href="${url_es}" title="${lang_es}"><img src="${img_es}" alt="${lang_es}"/></a>
+    	<a href="${url_es}" title="${lang_es}"><img class="flag" src="${img_es}" alt="${lang_es}"/></a>
     	<c:out value=" "/>
 
     	<spring:url var="img_it" value="/static/images/it.png" />
@@ -72,7 +72,7 @@
     		</c:if>	    		
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Italiano" var="lang_it"/>
-    	<a href="${url_it}" title="${lang_it}"><img src="${img_it}" alt="${lang_it}"/></a>
+    	<a href="${url_it}" title="${lang_it}"><img class="flag" src="${img_it}" alt="${lang_it}"/></a>
 		<c:out value=" "/>
 		
 		<spring:url var="img_nl" value="/static/images/nl.png" />
@@ -86,7 +86,7 @@
     		</c:if>	    		
     	</spring:url>	
     	<spring:message code="global.language.switch" arguments="Nederlandse" var="lang_nl"/>
-    	<a href="${url_nl}" title="${lang_nl}"><img src="${img_nl}" alt="${lang_nl}"/></a>
+    	<a href="${url_nl}" title="${lang_nl}"><img class="flag" src="${img_nl}" alt="${lang_nl}"/></a>
     	
     </span>
     

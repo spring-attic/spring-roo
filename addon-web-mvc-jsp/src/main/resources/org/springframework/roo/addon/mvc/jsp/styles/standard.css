@@ -201,21 +201,9 @@ a:visited {
 	color: #7db223;
 }
 
-ul {
-	list-style: disc url(../images/bullet-arrow.png);
-}
-
 li {
 	padding-top: 5px;
 	text-align: left;
-}
-
-li ul {
-	list-style: square url(../images/sub-bullet.gif);
-}
-
-li ul li ul {
-	list-style: circle none;
 }
 
 ul li {
@@ -348,8 +336,13 @@ fieldset th {
 }
 
 .dijitTextarea{
-        min-height:5.5em !important;
-        max-height:22em !important;
-        overflow-y: auto !important;
-        max-width: 183px;
+    min-height:5.5em !important;
+    max-height:22em !important;
+    overflow-y: auto !important;
+    max-width: 183px;
+}
+
+.flag {
+	height: 11px;
+	width: 16px;
 }
