@@ -46,8 +46,13 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private long minimumDelayBetweenPoll = -1; // how many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
 	private long lastPollTime = 0; // what time the last poll was completed
 	private long lastPollDuration = 0; // how many ms the last poll actually took
+	private String workingDir = null; // the working directory of the current roo project
 	
 	protected void activate(ComponentContext context) {
+		
+		// obtain the working directory from the framework properties
+		// TODO CD move constant to proper location
+		workingDir = context.getBundleContext().getProperty("roo.working.directory");
 		
 		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
@@ -83,7 +88,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		synchronized (processManagerStatus) {
 			try {
 				// Register the initial monitoring request
-				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialMonitoringRequest(), true));
+				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialMonitoringRequest(workingDir), true));
 			} catch (Throwable t) {
 				logException(t);
 			} finally {

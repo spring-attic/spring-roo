@@ -41,9 +41,12 @@ public abstract class MonitoringRequest {
 		return Collections.unmodifiableSet(notifyOn);
 	}
 
-	public static MonitoringRequest getInitialMonitoringRequest() {
+	public static MonitoringRequest getInitialMonitoringRequest(String workingDir) {
+		if (workingDir == null) {
+			workingDir = ".";
+		}
 		MonitoringRequestEditor mre = new MonitoringRequestEditor();
-		mre.setAsText(".,CRUD");
+		mre.setAsText(workingDir + ",CRUD");
 		MonitoringRequest mr = (MonitoringRequest)mre.getValue();
 		return mr;
 	}

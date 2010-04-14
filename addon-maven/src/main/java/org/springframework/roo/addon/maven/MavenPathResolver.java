@@ -19,14 +19,16 @@ import org.springframework.roo.project.PathInformation;
  * @since 1.0
  *
  */
-@Component
+@Component(immediate=true)
 @Service
 public class MavenPathResolver extends AbstractPathResolver {
 
 	private List<PathInformation> pathInformation = new ArrayList<PathInformation>();
 
 	protected void activate(ComponentContext context) {
-		File root = MonitoringRequest.getInitialMonitoringRequest().getFile();
+		// TODO CD move constant to proper location
+		String workingDir = context.getBundleContext().getProperty("roo.working.directory");
+		File root = MonitoringRequest.getInitialMonitoringRequest(workingDir).getFile();
 		pathInformation.add(new PathInformation(Path.SRC_MAIN_JAVA, true, new File(root, "src/main/java")));
 		pathInformation.add(new PathInformation(Path.SRC_MAIN_RESOURCES, true, new File(root, "src/main/resources")));
 		pathInformation.add(new PathInformation(Path.SRC_TEST_JAVA, true, new File(root, "src/test/java")));
