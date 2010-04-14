@@ -106,13 +106,16 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			return null;
 		}
 		
+		this.beanInfoMetadata = beanInfoMetadata;
+		
+		//install web artifacts only if Spring MVC config is missing
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
+			jspOperations.installCommonViewArtefacts();
+		}
+		
 		String finderMetadataKey = FinderMetadata.createIdentifier(EntityMetadata.getJavaType(entityMetadataKey), path);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 
-		this.beanInfoMetadata = beanInfoMetadata;
-		
-		jspOperations.installCommonViewArtefacts();
-		
 		JspMetadata md = new JspMetadata(metadataIdentificationString, beanInfoMetadata, webScaffoldMetadata);
 
 		installImage("images/show.png");
