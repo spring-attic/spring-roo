@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -116,9 +117,24 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	public List<FieldMetadata> getFields() {
 		// Locate all declared fields
 		List<FieldMetadata> fields = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
+		
+		// Remove fields with static and transient modifiers
+		for (Iterator<FieldMetadata> iter = fields.iterator(); iter.hasNext();) {
+			FieldMetadata field = iter.next();
+			if (Modifier.isStatic(field.getModifier()) || Modifier.isTransient(field.getModifier())) {
+				iter.remove();
+			}
+		}
+
+		// Remove fields with the @Transient annotation
+		List<FieldMetadata> transientAnnotatedFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Transient"));
+		if (fields.containsAll(transientAnnotatedFields)) {
+			fields.removeAll(transientAnnotatedFields);
+		}
+
 		if (!fields.isEmpty()) {
 			return fields;
-		}
+		}		
 
 		// If there is no parent create a default id field in the ITD
 		if (parent == null) {
@@ -326,18 +342,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		bodyBuilder.appendFormalLine(typeName + " other = (" + typeName + ") obj;");
 
 		for (FieldMetadata field : fields) {
+			String fieldName = field.getFieldName().getSymbolName();
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (" + getRequiredAccessorName(field) + "() != other." + getRequiredAccessorName(field) + "()) return false;");
+				bodyBuilder.appendFormalLine("if (" + fieldName + " != other." + fieldName + ") return false;");
 			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) != Double.doubleToLongBits(other." + getRequiredAccessorName(field) + "())) return false;");
+				bodyBuilder.appendFormalLine("if (Double.doubleToLongBits(" + fieldName + ") != Double.doubleToLongBits(other." + fieldName + ")) return false;");
 			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine("if (Float.floatToIntBits(" + getRequiredAccessorName(field) + "()) != Float.floatToIntBits(other." + getRequiredAccessorName(field) + "())) return false;");
+				bodyBuilder.appendFormalLine("if (Float.floatToIntBits(" + fieldName + ") != Float.floatToIntBits(other." + fieldName + ")) return false;");
 			} else {
-				bodyBuilder.appendFormalLine("if (" + getRequiredAccessorName(field) + "() == null) {");
+				bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
 				bodyBuilder.indent();
-				bodyBuilder.appendFormalLine("if (other." + getRequiredAccessorName(field) + "() != null) return false;");
+				bodyBuilder.appendFormalLine("if (other." + fieldName + " != null) return false;");
 				bodyBuilder.indentRemove();
-				bodyBuilder.appendFormalLine("} else if (!" + getRequiredAccessorName(field) + "().equals(other." + getRequiredAccessorName(field) + "())) return false;");
+				bodyBuilder.appendFormalLine("} else if (!" + fieldName + ".equals(other." + fieldName + ")) return false;");
 			}
 		}
 		bodyBuilder.appendFormalLine("return true;");
@@ -368,18 +385,19 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		String header = "result = prime * result + ";
 		for (FieldMetadata field : fields) {
+			String fieldName = field.getFieldName().getSymbolName();
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " ? 1231 : 1237);");
+				bodyBuilder.appendFormalLine(header + "(" + fieldName + " ? 1231 : 1237);");
 			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + getRequiredAccessorName(field) + "();");
+				bodyBuilder.appendFormalLine(header + fieldName + ";");
 			} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(int) (" + getRequiredAccessorName(field) + "() ^ (" + getRequiredAccessorName(field) + "() >>> 32));");
+				bodyBuilder.appendFormalLine(header + "(int) (" + fieldName + " ^ (" + fieldName + " >>> 32));");
 			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "(int) (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) ^ (Double.doubleToLongBits(" + getRequiredAccessorName(field) + "()) >>> 32));");
+				bodyBuilder.appendFormalLine(header + "(int) (Double.doubleToLongBits(" + fieldName + ") ^ (Double.doubleToLongBits(" + fieldName + ") >>> 32));");
 			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
-				bodyBuilder.appendFormalLine(header + "Float.floatToIntBits(" + getRequiredAccessorName(field) + "());");
+				bodyBuilder.appendFormalLine(header + "Float.floatToIntBits(" + fieldName + ");");
 			} else {
-				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + field.getFieldName().getSymbolName() + ".hashCode());");
+				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + fieldName + ".hashCode());");
 			}
 		}
 		bodyBuilder.appendFormalLine("return result;");
