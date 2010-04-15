@@ -11,71 +11,76 @@
 	<jsp:directive.attribute name="disabled" type="java.lang.Boolean" required="false" description="Specify if this field should be enabled"/>
 	<jsp:directive.attribute name="multiple" type="java.lang.Boolean" required="false" description="Specify if the select box should allow multiple selections"/>
 	<jsp:directive.attribute name="disableFormBinding" type="java.lang.Boolean" required="false" description="Set to true to disable Spring form binding"/>
+	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
-	<c:if test="${empty disabled}">
-		<c:set value="false" var="disabled"/>
-	</c:if>
+	<c:if test="${empty render or render}">
 	
-	<c:if test="${empty label}">
-		<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
-	</c:if>
+		<c:if test="${empty disabled}">
+			<c:set value="false" var="disabled"/>
+		</c:if>
+		
+		<c:if test="${empty label}">
+			<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
+		</c:if>
+		
+		<c:if test="${empty required}">
+			<c:set value="false" var="required"/>
+		</c:if>
+		
+		<c:if test="${empty multiple}">
+			<c:set value="false" var="multiple"/>
+		</c:if>
 	
-	<c:if test="${empty required}">
-		<c:set value="false" var="required"/>
-	</c:if>
-	
-	<c:if test="${empty multiple}">
-		<c:set value="false" var="multiple"/>
-	</c:if>
-
-    <div id="${field}_id">
-		<c:choose>
-			<c:when test="${not empty items}">
-	            <label for="_${field}_id"><c:out value="${label}"/>:</label>
-	            <c:choose>
-	            	<c:when test="${empty itemValue}">
-	            		<c:choose>
-	            			<c:when test="${disableFormBinding}">
-	            				<select id="_${field}_id" name="${field}" multiple="${multiple}">
-	            					<c:forEach items="${items}" var="item">
-	            						<option value="${item_label}"><spring:eval expression="item"/></option>
-	            					</c:forEach>
-	            				</select>
-	            			</c:when>
-	            			<c:otherwise>
-	            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}"/>
-	            			</c:otherwise>
-	            		</c:choose>
-	            	</c:when>
-					<c:otherwise>
-						<c:choose>
-	            			<c:when test="${disableFormBinding}">
-	            				<select id="_${field}_id" name="${field}" multiple="${multiple}">
-	            					<c:forEach items="${items}" var="item">
-	            						<option value="${item[itemValue]}"><spring:eval expression="item"/></option>
-	            					</c:forEach>
-	            				</select>
-	            			</c:when>
-	            			<c:otherwise>
-	            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}" itemValue="${itemValue}"/>
-	            			</c:otherwise>
-	            		</c:choose>
-					</c:otherwise>
-	            </c:choose>
-	            <c:choose>
-	            	<c:when test="${multiple == false}">
-	            		<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); </script>
-	            	</c:when>
-					<c:otherwise>
-						<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType: 'dijit.form.MultiSelect', widgetAttrs : {}})); </script>
-					</c:otherwise>
-	            </c:choose>
-	       </c:when>
-	        <c:otherwise>
-	        	<field:reference field="${field}" id="${id}" path="${path}" required="${required}"/>
-	        </c:otherwise>
-        </c:choose>
-    </div>
-    <br/>
+	    <div id="${field}_id">
+			<c:choose>
+				<c:when test="${not empty items}">
+		            <label for="_${field}_id"><c:out value="${label}"/>:</label>
+		            <c:choose>
+		            	<c:when test="${empty itemValue}">
+		            		<c:choose>
+		            			<c:when test="${disableFormBinding}">
+		            				<select id="_${field}_id" name="${field}" multiple="${multiple}">
+		            					<c:forEach items="${items}" var="item">
+		            						<option value="${item_label}"><spring:eval expression="item"/></option>
+		            					</c:forEach>
+		            				</select>
+		            			</c:when>
+		            			<c:otherwise>
+		            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}"/>
+		            			</c:otherwise>
+		            		</c:choose>
+		            	</c:when>
+						<c:otherwise>
+							<c:choose>
+		            			<c:when test="${disableFormBinding}">
+		            				<select id="_${field}_id" name="${field}" multiple="${multiple}">
+		            					<c:forEach items="${items}" var="item">
+		            						<option value="${item[itemValue]}"><spring:eval expression="item"/></option>
+		            					</c:forEach>
+		            				</select>
+		            			</c:when>
+		            			<c:otherwise>
+		            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}" itemValue="${itemValue}"/>
+		            			</c:otherwise>
+		            		</c:choose>
+						</c:otherwise>
+		            </c:choose>
+		            <c:choose>
+		            	<c:when test="${multiple == false}">
+		            		<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType: 'dijit.form.FilteringSelect', widgetAttrs : {hasDownArrow : true}})); </script>
+		            	</c:when>
+						<c:otherwise>
+							<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType: 'dijit.form.MultiSelect', widgetAttrs : {}})); </script>
+						</c:otherwise>
+		            </c:choose>
+		       </c:when>
+		        <c:otherwise>
+		        	<field:reference field="${field}" id="${id}" path="${path}" required="${required}"/>
+		        </c:otherwise>
+	        </c:choose>
+	    </div>
+	    <br/>
+	    
+    </c:if>
 </jsp:root>

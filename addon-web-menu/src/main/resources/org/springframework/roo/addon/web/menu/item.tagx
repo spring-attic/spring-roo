@@ -6,20 +6,25 @@
 	<jsp:directive.attribute name="url" type="java.lang.String" required="true" description="The link URL"/>
 	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this menu item"/>
 	<jsp:directive.attribute name="messageCode" type="java.lang.String" required="false" description="The global message code to be used (works in conjunction with label)"/>
+	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
-	<c:if test="${empty label}">
-		<spring:message code="menu.item.${fn:toLowerCase(name)}.label" var="label"/>
-	</c:if>
-	
-	<c:if test="${not empty messageCode}">
-		<spring:message code="${messageCode}" var="label" arguments="${label}" />
-	</c:if>
-	
-	<li id="${id}">
-        <spring:url value="${url}" var="menu_item_url"/>
-        <a href="${menu_item_url}" title="${label}">
-        	<c:out value="${label}" />
-        </a>
-    </li>
+	<c:if test="${empty render or render}">
+
+		<c:if test="${empty label}">
+			<spring:message code="menu.item.${fn:toLowerCase(name)}.label" var="label"/>
+		</c:if>
+		
+		<c:if test="${not empty messageCode}">
+			<spring:message code="${messageCode}" var="label" arguments="${label}" />
+		</c:if>
+		
+		<li id="${id}">
+	        <spring:url value="${url}" var="menu_item_url"/>
+	        <a href="${menu_item_url}" title="${label}">
+	        	<c:out value="${label}" />
+	        </a>
+	    </li>
+    
+    </c:if>	
 </jsp:root>
