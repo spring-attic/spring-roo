@@ -339,6 +339,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		bodyBuilder.appendFormalLine("if (this == obj) return true;");
 		bodyBuilder.appendFormalLine("if (obj == null) return false;");
 		bodyBuilder.appendFormalLine("if (!(obj instanceof " + typeName + ")) return false;");
+		if (parent != null) {
+			bodyBuilder.appendFormalLine("if (!super.equals(obj)) return false;");
+		}
 		bodyBuilder.appendFormalLine(typeName + " other = (" + typeName + ") obj;");
 
 		for (FieldMetadata field : fields) {
@@ -384,6 +387,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		bodyBuilder.appendFormalLine("int result = 17;");
 
 		String header = "result = prime * result + ";
+		if (parent != null) {
+			bodyBuilder.appendFormalLine(header + "super.hashCode();");
+		}
 		for (FieldMetadata field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
