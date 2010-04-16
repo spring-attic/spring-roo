@@ -371,6 +371,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	    if (null == readProps.getProperty(key)) {
 	    	MutableFile mutableFile = fileManager.updateFile(filePath);
 		    Properties props = new Properties() {
+				private static final long serialVersionUID = 1L;
+
 				//override the keys() method to order the keys alphabetically
 		        @Override 
 		        @SuppressWarnings("unchecked")

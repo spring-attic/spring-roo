@@ -100,6 +100,7 @@ public class JspViewManager {
 		Element fieldTable = new XmlElementBuilder("table:table", document)
 								.addAttribute("id", "l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("data", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
+								.addAttribute("path", webScaffoldAnnotationValues.getPath())
 							.build();
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
@@ -107,9 +108,6 @@ public class JspViewManager {
 		}
 		if (!webScaffoldAnnotationValues.isDelete()) {
 			fieldTable.setAttribute("delete", "false");
-		}
-		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
-			fieldTable.setAttribute("customPath", controllerPath);
 		}
 		fieldTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldTable));
 		
