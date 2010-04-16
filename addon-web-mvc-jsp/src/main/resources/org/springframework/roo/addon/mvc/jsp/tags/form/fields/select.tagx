@@ -42,7 +42,7 @@
 		            			<c:when test="${disableFormBinding}">
 		            				<select id="_${field}_id" name="${field}" multiple="${multiple}">
 		            					<c:forEach items="${items}" var="item">
-		            						<option value="${item_label}"><spring:eval expression="item"/></option>
+		            						<option value="${item}"><spring:eval expression="item"/></option>
 		            					</c:forEach>
 		            				</select>
 		            			</c:when>

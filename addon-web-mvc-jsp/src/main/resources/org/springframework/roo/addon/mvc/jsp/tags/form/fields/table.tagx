@@ -4,10 +4,10 @@
 
 	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
 	<jsp:directive.attribute name="data" type="java.util.Collection" required="true" description="The collection to be displayed in the table"/>
+	<jsp:directive.attribute name="path" type="java.lang.String" required="true" description="Specify the URL path"/>
 	<jsp:directive.attribute name="typeIdFieldName" type="java.lang.String" required="false" description="The identifier field name for the type (defaults to 'id')"/>
 	<jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" description="Include 'update' link into table (default true)"/>
 	<jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" description="Include 'delete' link into table (default true)"/>
-	<jsp:directive.attribute name="customPath" type="java.lang.String" required="false" description="Specify to customize the URL path (default is the simple type name of types in data collection)"/>
 	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
@@ -29,21 +29,8 @@
 		<c:if test="${empty delete}">
 			<c:set var="delete" value="true" />
 		</c:if>
-		
-		<c:if test="${not empty data[0]}">
-			<c:set var="typeName" value="${data[0].class.simpleName}" />
-		</c:if>
-	
-		<c:choose>
-			<c:when test="${not empty customPath}">
-				<c:set var="typePath" value="${customPath}" />
-			</c:when>
-			<c:otherwise>
-				<c:if test="${not empty typeName}">
-					<c:set var="typePath" value="${fn:toLowerCase(typeName)}" />
-				</c:if>
-			</c:otherwise>
-		</c:choose>
+
+		<c:set var="typeName" value="${fn:split(id,'.')[fn:length(fn:split(id,'.')) - 1]}"/>
 		
 		<table>
 			<thead>
@@ -52,8 +39,12 @@
 			          <th><c:out value="${columnHeading}" /></th>
 			        </c:forTokens>
 			        <th></th>
-			        <th></th>
-			        <th></th>
+			        <c:if test="${update}">
+			        	<th></th>
+			        </c:if>
+			        <c:if test="${delete}">
+			        	<th></th>
+			        </c:if>
 				</tr>
 			</thead>
 	        <c:forEach items="${data}" var="item">
@@ -64,16 +55,16 @@
 		                </td>
 	               </c:forTokens>
 	               <td>
-	                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="show_form_url"/>
+	                   <spring:url value="${path}/${item[typeIdFieldName]}" var="show_form_url"/>
 	                   <spring:url value="/static/images/show.png" var="show_image_url"/>
 	                   <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
 	                   <a href="${show_form_url}" alt="${show_label}" title="${show_label}">
 	                       <input alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" type="image" value="${show_label}"/>
 	                   </a>
 	               </td>
-	               <td>
-	               	   <c:if test="${update}">
-		                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="update_form_url">
+	               <c:if test="${update}">
+	              		<td>
+		                   <spring:url value="${path}/${item[typeIdFieldName]}" var="update_form_url">
 		                   		<spring:param name="form" />
 		                   </spring:url>
 		                   <spring:url value="/static/images/update.png" var="update_image_url"/>
@@ -81,11 +72,11 @@
 		                   <a href="${update_form_url}" alt="${update_label}" title="${update_label}">
 	                       		<input alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" type="image" value="${update_label}"/>
 	                   	   </a>    
-	                   </c:if>
-	               </td>
-	               <td>
-	               	   <c:if test="${delete}">
-		                   <spring:url value="${typePath}/${item[typeIdFieldName]}" var="delete_form_url"/>
+	               		</td>
+	               </c:if>
+	               <c:if test="${delete}">
+	               	   <td>
+		                   <spring:url value="${path}/${item[typeIdFieldName]}" var="delete_form_url"/>
 		                   <spring:url value="/static/images/delete.png" var="delete_image_url"/>
 		                   <form:form action="${delete_form_url}" method="DELETE">
 		                       <spring:message arguments="${typeName}" code="entity.delete" var="delete_label"/>
@@ -97,14 +88,14 @@
 		                           <input name="size" type="hidden" value="${param.size}"/>
 		                       </c:if>
 		                   </form:form>
-	                   </c:if>
-	               </td>
+		                </td>
+	                </c:if>
 	           </tr>
 	       </c:forEach>
 	       <tr class="footer">
 	           <td colspan="10">
 	               <span class="new">
-	                   <spring:url value="/${typePath}" var="create_url">
+	                   <spring:url value="/${path}" var="create_url">
 	                   		<spring:param name="form" />
 	                   </spring:url>
 	                   <a href="${create_url}">
@@ -122,4 +113,5 @@
 		</table>
 		
 	</c:if>
+
 </jsp:root>

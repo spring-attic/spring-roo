@@ -18,7 +18,7 @@
 	        <label for="_${field}_id"><c:out value="${label}"/>:</label>
 	        <c:choose>
 	        	<c:when test="${disableFormBinding}">
-	        		<input id="_${field}_id" name="${field}" type="radio" value="true">(true)</input>
+	        		<input id="_${field}_id" name="${field}" type="checkbox" value="true" />
 	        	</c:when>
 	        	<c:otherwise>
 	        		<form:checkbox id="_${field}_id" path="${field}" />
