@@ -232,6 +232,10 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		installOrRemoveOpenJpaPlugin(ormProvider, dependencies); // Check whether openjpa-maven-plugin is installed
+		
+		if (database.getKey().equals(JdbcDatabase.ORACLE.getKey()) || database.getKey().equals(JdbcDatabase.DB2.getKey())) {
+			logger.warning("The " + database.getKey() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+		}
 	}
 
 	private void removeDependencies(OrmProvider ormProvider, Element dependencies) {
