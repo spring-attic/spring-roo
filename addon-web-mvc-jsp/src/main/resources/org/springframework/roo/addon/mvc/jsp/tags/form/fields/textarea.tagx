@@ -41,7 +41,7 @@
 					<spring:message argumentSeparator="," arguments="${label}, " code="field.simple.validation" var="field_validation"/>
 				</c:otherwise>
 			</c:choose>
-		    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.form.SimpleTextarea'})); </script>
+		    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.form.SimpleTextarea', widgetAttrs:{}})); </script>
 		</div>
 		<br/>
 		
