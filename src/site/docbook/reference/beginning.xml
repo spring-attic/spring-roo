@@ -293,6 +293,14 @@ com.springsource.roo.pizzashop roo&gt;
     provider as a comment in that file. Note that by default your JPA provider
     will drop all database tables each time it reloads. As such you'll
     certainly want to change this setting.</para>
+    <para>Please note: The Oracle and DB2 JDBC drivers are not available in 
+    public maven repositories. Roo will install standard dependencies for these
+    drivers (if selected) but you may need to adjust the version number or
+    package name according to your database version. You can use the following
+    maven command to install your driver into your local maven repository:
+    <code>mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14 
+    -Dversion=10.2.0.2 -Dpackaging=jar -Dfile=/path/to/file</code> (example 
+    for the Oracle driver)</para>
   </section>
 
   <section xml:id="beginning-step-2">
