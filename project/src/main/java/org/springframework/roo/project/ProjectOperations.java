@@ -125,9 +125,20 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
+	 * @param repository to add (required)
+	 */
+	void addRepository(Repository repository);
+
+	/**
+	 * Allows addition of a repository to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
 	 * @param id to add (required)
 	 * @param name to add (required)
-	 * @param url to add (requireD)
+	 * @param url to add (required)
 	 */
 	void addRepository(String id, String name, String url);
 
@@ -138,9 +149,20 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param id to add (required)
-	 * @param name to add (required)
-	 * @param url to add (requireD)
+	 * @param repository to remove (required)
+	 */
+	void removeRepository(Repository repository);
+
+	/**
+	 * Allows remove of an existing repository from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param id to remove (required)
+	 * @param name to remove (required)
+	 * @param url to remove (required)
 	 */
 	void removeRepository(String id, String name, String url);
 
@@ -153,7 +175,7 @@ public interface ProjectOperations {
 	 * 
 	 * @param id to add (required)
 	 * @param name to add (required)
-	 * @param url to add (requireD)
+	 * @param url to add (required)
 	 */
 	void addPluginRepository(String id, String name, String url);
 
@@ -164,9 +186,9 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param id to add (required)
-	 * @param name to add (required)
-	 * @param url to add (requireD)
+	 * @param id to remove (required)
+	 * @param name to remove (required)
+	 * @param url to remove (required)
 	 */
 	void removePluginRepository(String id, String name, String url);
 
@@ -197,7 +219,7 @@ public interface ProjectOperations {
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
 	 * Always adds the presented plugin.
 	 * 
-	 * @param plugin to add (required)
+	 * @param plugin to remove (required)
 	 */
 	void buildPluginUpdate(Plugin buildPlugin);
 	
@@ -208,8 +230,19 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
+	 * @param property to add (required)
+	 */
+	void addProperty(Property property);
+
+	/**
+	 * Allows addition of a property to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
 	 * @param name to add (required)
-	 * @param value to add (requireD)
+	 * @param value to add (required)
 	 */
 	void addProperty(String name, String value);
 
@@ -220,8 +253,18 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param name to add (required)
-	 * @param value to add (requireD)
+	 * @param property to remove (required)
 	 */
-	void removeProperty(String name, String value);
+	void removeProperty(Property property);
+
+	/**
+	 * Allows remove of an existing property from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param name to remove (required)
+	 */
+	void removeProperty(String name);
 }

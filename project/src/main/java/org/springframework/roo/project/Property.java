@@ -28,6 +28,15 @@ public class Property implements Comparable<Property> {
 	}
 	
 	/**
+	 * Convenience constructor creating a property instance
+	 * 
+	 * @param name the property name (required)
+	 */	
+	public Property(String name) {
+		this.name = name;
+	}
+
+	/**
 	 * Convenience constructor for creating a property instance from a 
 	 * XML Element
 	 * 
@@ -59,11 +68,7 @@ public class Property implements Comparable<Property> {
 		
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
+		return name.hashCode();
 	}
 
 	@Override
@@ -75,28 +80,11 @@ public class Property implements Comparable<Property> {
 		if (!(obj instanceof Property))
 			return false;
 		Property other = (Property) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
+		return name.equals(other.name);
 	}
 
 	public int compareTo(Property o) {
-		if (o == null) {
-			throw new NullPointerException();
-		}
-		int result = name != null ? name.compareTo(o.name) : 0;
-		if (result == 0) {
-			result = value != null ? value.compareTo(o.value) : 0;
-		}
-		return result;
+		return name.compareTo(o.name);
 	}
 
 	public String toString() {

@@ -38,28 +38,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 	
-	public void dependencyUpdate(Dependency dependency) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
-		Assert.notNull(dependency, "Dependency required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
-		
-		if (projectMetadata.isDependencyRegistered(dependency)) {
-			// Already exists, so just quit
-			return;
-		}
-		
-		// Delete any existing dependencies with a different version
-		for (Dependency existing : projectMetadata.getDependenciesExcludingVersion(dependency)) {
-			projectMetadataProvider.removeDependency(existing);
-			sendDependencyRemovalNotifications(existing);
-		}
-		
-		// Add the dependency
-		projectMetadataProvider.addDependency(dependency);
-		sendDependencyAdditionNotifications(dependency);
-	}
-
 	public void addDependencyListener(DependencyListener listener) {
 		this.listeners.add(listener);
 	}
@@ -199,6 +177,35 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyRemovalNotifications(dependency);
 	}
 	
+	public void dependencyUpdate(Dependency dependency) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(dependency, "Dependency required");
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(projectMetadata, "Project metadata unavailable");
+		
+		if (projectMetadata.isDependencyRegistered(dependency)) {
+			// Already exists, so just quit
+			return;
+		}
+		
+		// Delete any existing dependencies with a different version
+		for (Dependency existing : projectMetadata.getDependenciesExcludingVersion(dependency)) {
+			projectMetadataProvider.removeDependency(existing);
+			sendDependencyRemovalNotifications(existing);
+		}
+		
+		// Add the dependency
+		projectMetadataProvider.addDependency(dependency);
+		sendDependencyAdditionNotifications(dependency);
+	}
+
+	public final void addRepository(Repository repository) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		projectMetadataProvider.addRepository(repository);
+		sendRepositoryAdditionNotifications(repository);
+	}
+
 	public final void addRepository(String id, String name, String url) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
@@ -208,6 +215,13 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendRepositoryAdditionNotifications(repository);
 	}
 	
+	public final void removeRepository(Repository repository) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		projectMetadataProvider.removeRepository(repository);
+		sendRepositoryRemovalNotifications(repository);
+	}
+
 	public final void removeRepository(String id, String name, String url) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
@@ -267,8 +281,16 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		
 		// Add the plugin
 		projectMetadataProvider.addBuildPlugin(plugin);
+		sendPluginAdditionNotifications(plugin);
 	}
 	
+	public final void addProperty(Property property) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
+		Assert.notNull(property, "Property required");		
+		projectMetadataProvider.addProperty(property);
+		sendPropertyAdditionNotifications(property);
+	}
+
 	public final void addProperty(String name, String value) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
 		Assert.hasText(name, "Name required");
@@ -278,11 +300,17 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendPropertyAdditionNotifications(property);
 	}
 	
-	public final void removeProperty(String name, String value) {
+	public final void removeProperty(Property property) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
+		Assert.notNull(property, "Property required");		
+		projectMetadataProvider.removeProperty(property);
+		sendPropertyRemovalNotifications(property);
+	}
+
+	public final void removeProperty(String name) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
 		Assert.hasText(name, "Name required");
-		Assert.hasText(value, "Value required");
-		Property property = new Property(name, value);
+		Property property = new Property(name);
 		projectMetadataProvider.removeProperty(property);
 		sendPropertyRemovalNotifications(property);
 	}

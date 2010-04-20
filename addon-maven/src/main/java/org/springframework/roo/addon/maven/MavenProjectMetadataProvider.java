@@ -102,15 +102,13 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		// Build dependencies list
 		Set<Dependency> dependencies = new HashSet<Dependency>();
 		for (Element dependency : XmlUtils.findElements("/project/dependencies/dependency", rootElement)) {
-			Dependency d = new Dependency(dependency);
-			dependencies.add(d);
+			dependencies.add(new Dependency(dependency));
 		}
 
 		// Build plugins list
 		Set<Plugin> buildPlugins = new HashSet<Plugin>();
 		for (Element plugin : XmlUtils.findElements("/project/build/plugins/plugin", rootElement)) {
-			Plugin p = new Plugin(plugin);
-			buildPlugins.add(p);
+			buildPlugins.add(new Plugin(plugin));
 		}
 
 		// Build repositories list
@@ -125,7 +123,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			pluginRepositories.add(new PluginRepository(pluginRepo));
 		}
 
-		// Pom properties list
+		// Build properties list
 		Set<Property> pomProperties = new HashSet<Property>();
 		for (Element prop : XmlUtils.findElements("/project/properties/*", rootElement)) {
 			pomProperties.add(new Property(prop));
