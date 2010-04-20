@@ -117,7 +117,7 @@ public class Repository implements Comparable<Repository> {
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Repository && this.compareTo((Repository)obj) == 0;
+		return obj != null && obj instanceof Repository && this.compareTo((Repository) obj) == 0;
 	}
 
 	public int compareTo(Repository o) {

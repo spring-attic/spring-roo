@@ -92,7 +92,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to add the specified plugin repository. If the plugin repository already exists according
-	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(PluginRepository)}, the method silently returns.
+	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)}, the method silently returns.
 	 * Otherwise the repository is added.
 	 * 
 	 * <p>
@@ -101,11 +101,11 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin repository to add (required)
 	 */
-	public void addPluginRepository(PluginRepository pluginRepository);
+	public void addPluginRepository(Repository repository);
 	
 	/**
 	 * Attempts to remove the specified plugin repository. If the plugin repository does not 
-	 * exist according to {@link ProjectMetadata#isPluginRepositoryRegistered(PluginRepository)},
+	 * exist according to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)},
 	 * the method silently returns. Otherwise the located plugin repository is removed.
 	 * 
 	 * <p>
@@ -114,7 +114,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin repository to remove (required)
 	 */
-	public void removePluginRepository(PluginRepository pluginRepository);
+	public void removePluginRepository(Repository repository);
 
 	/**
 	 * Attempts to add the specified property. If the property already exists 

@@ -10,8 +10,7 @@ package org.springframework.roo.project;
  */
 public interface RepositoryListener {
 
-	void repositoryAdded(Repository r);
+	void repositoryAdded(Repository repositiory);
 
-	void repositoryRemoved(Repository r);
-
+	void repositoryRemoved(Repository reypository);
 }

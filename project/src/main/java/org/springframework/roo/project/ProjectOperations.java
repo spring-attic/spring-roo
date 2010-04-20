@@ -32,12 +32,12 @@ public interface ProjectOperations {
 	/**
 	 * Register a listener to track changes in plugin repositories
 	 */
-	void addPluginRepositoryListener(PluginRepositoryListener listener);
+	void addPluginRepositoryListener(RepositoryListener listener);
 
 	/**
 	 * Remove a plugin repository listener from change tracking
 	 */
-	void removePluginRepositoryListener(PluginRepositoryListener listener);
+	void removePluginRepositoryListener(RepositoryListener listener);
 
 	/**
 	 * Register a listener to track changes in build plugins
@@ -173,11 +173,33 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
+	 * @param repository to add (required)
+	 */
+	void addPluginRepository(Repository repository);
+	
+	/**
+	 * Allows addition of a plugin repository to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
 	 * @param id to add (required)
 	 * @param name to add (required)
 	 * @param url to add (required)
 	 */
 	void addPluginRepository(String id, String name, String url);
+
+	/**
+	 * Allows remove of an existing plugin repository from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param plugin repository to remove (required)
+	 */
+	void removePluginRepository(Repository repository);
 
 	/**
 	 * Allows remove of an existing plugin repository from the POM. 

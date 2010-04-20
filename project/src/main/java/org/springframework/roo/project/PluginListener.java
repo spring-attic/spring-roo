@@ -9,7 +9,7 @@ package org.springframework.roo.project;
  */
 public interface PluginListener {
 
-	void pluginAdded(Plugin p);
+	void pluginAdded(Plugin plugin);
 
-	void pluginRemoved(Plugin p);
+	void pluginRemoved(Plugin plugin);
 }

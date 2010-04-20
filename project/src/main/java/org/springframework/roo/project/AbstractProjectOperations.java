@@ -25,8 +25,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	@Reference protected ProjectMetadataProvider projectMetadataProvider;
 
 	private Set<DependencyListener> listeners = new HashSet<DependencyListener>();
-	private Set<RepositoryListener> repoListeners = new HashSet<RepositoryListener>();
-	private Set<PluginRepositoryListener> pluginRepoListeners = new HashSet<PluginRepositoryListener>();
+	private Set<RepositoryListener> repositoryListeners = new HashSet<RepositoryListener>();
+	private Set<RepositoryListener> pluginRepositoryListeners = new HashSet<RepositoryListener>();
 	private Set<PluginListener> pluginListeners = new HashSet<PluginListener>();
 	private Set<PropertyListener> propertyListeners = new HashSet<PropertyListener>();
 
@@ -46,55 +46,55 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		this.listeners.remove(listener);
 	}
 	
-	private void sendDependencyAdditionNotifications(Dependency d) {
+	private void sendDependencyAdditionNotifications(Dependency dependency) {
 		for (DependencyListener listener : listeners) {
-			listener.dependencyAdded(d);
+			listener.dependencyAdded(dependency);
 		}
 	}
 	
-	private void sendDependencyRemovalNotifications(Dependency d) {
+	private void sendDependencyRemovalNotifications(Dependency dependency) {
 		for (DependencyListener listener :listeners) {
-			listener.dependencyRemoved(d);
+			listener.dependencyRemoved(dependency);
 		}
 	}
 	
 	public void addRepositoryListener(RepositoryListener listener) {
-		this.repoListeners.add(listener);
+		this.repositoryListeners.add(listener);
 	}
 	
 	public void removeRepositoryListener(RepositoryListener listener) {
-		this.repoListeners.remove(listener);
+		this.repositoryListeners.remove(listener);
 	}
 	
-	private void sendRepositoryAdditionNotifications(Repository r) {
-		for (RepositoryListener listener : repoListeners) {
-			listener.repositoryAdded(r);
+	private void sendRepositoryAdditionNotifications(Repository repository) {
+		for (RepositoryListener listener : repositoryListeners) {
+			listener.repositoryAdded(repository);
 		}
 	}
 	
-	private void sendRepositoryRemovalNotifications(Repository r) {
-		for (RepositoryListener listener : repoListeners) {
-			listener.repositoryRemoved(r);
+	private void sendRepositoryRemovalNotifications(Repository repository) {
+		for (RepositoryListener listener : repositoryListeners) {
+			listener.repositoryRemoved(repository);
 		}
 	}
 	
-	public void addPluginRepositoryListener(PluginRepositoryListener listener) {
-		this.pluginRepoListeners.add(listener);
+	public void addPluginRepositoryListener(RepositoryListener listener) {
+		this.pluginRepositoryListeners.add(listener);
 	}
 	
-	public void removePluginRepositoryListener(PluginRepositoryListener listener) {
-		this.pluginRepoListeners.remove(listener);
+	public void removePluginRepositoryListener(RepositoryListener listener) {
+		this.pluginRepositoryListeners.remove(listener);
 	}
 	
-	private void sendPluginRepositoryAdditionNotifications(PluginRepository pluginRepository) {
-		for (PluginRepositoryListener listener : pluginRepoListeners) {
-			listener.pluginRepositoryAdded(pluginRepository);
+	private void sendPluginRepositoryAdditionNotifications(Repository repository) {
+		for (RepositoryListener listener : pluginRepositoryListeners) {
+			listener.repositoryAdded(repository);
 		}
 	}
 	
-	private void sendPluginRepositoryRemovalNotifications(PluginRepository pluginRepository) {
-		for (PluginRepositoryListener listener : pluginRepoListeners) {
-			listener.pluginRepositoryRemoved(pluginRepository);
+	private void sendPluginRepositoryRemovalNotifications(Repository repository) {
+		for (RepositoryListener listener : pluginRepositoryListeners) {
+			listener.repositoryRemoved(repository);
 		}
 	}
 	
@@ -231,22 +231,36 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendRepositoryRemovalNotifications(repository);
 	}
 	
+	public final void addPluginRepository(Repository repository) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		projectMetadataProvider.addPluginRepository(repository);
+		sendPluginRepositoryAdditionNotifications(repository);
+	}
+
 	public final void addPluginRepository(String id, String name, String url) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
 		Assert.hasText(url, "URL required");
-		PluginRepository pluginRepository = new PluginRepository(id, name, url);
-		projectMetadataProvider.addPluginRepository(pluginRepository);
-		sendPluginRepositoryAdditionNotifications(pluginRepository);
+		Repository repository = new Repository(id, name, url);
+		projectMetadataProvider.addPluginRepository(repository);
+		sendPluginRepositoryAdditionNotifications(repository);
 	}
 	
+	public final void removePluginRepository(Repository repository) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
+		Assert.notNull(repository, "Repository required");
+		projectMetadataProvider.removePluginRepository(repository);
+		sendPluginRepositoryRemovalNotifications(repository);
+	}
+
 	public final void removePluginRepository(String id, String name, String url) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
 		Assert.hasText(url, "URL required");
-		PluginRepository pluginRepository = new PluginRepository(id, name, url);
-		projectMetadataProvider.removePluginRepository(pluginRepository);
-		sendPluginRepositoryRemovalNotifications(pluginRepository);
+		Repository repository = new Repository(id, name, url);
+		projectMetadataProvider.removePluginRepository(repository);
+		sendPluginRepositoryRemovalNotifications(repository);
 	}
 	
 	public final void addBuildPlugin(Plugin plugin) {

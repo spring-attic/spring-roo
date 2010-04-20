@@ -26,7 +26,6 @@ import org.springframework.roo.project.Execution;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
-import org.springframework.roo.project.PluginRepository;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectMetadataProvider;
 import org.springframework.roo.project.ProjectType;
@@ -113,14 +112,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Build repositories list
 		Set<Repository> repositories = new HashSet<Repository>();
-		for (Element repo : XmlUtils.findElements("/project/repositories/repository", rootElement)) {
-			repositories.add(new Repository(repo));
+		for (Element repository : XmlUtils.findElements("/project/repositories/repository", rootElement)) {
+			repositories.add(new Repository(repository));
 		}
 		
 		// Build plugin repositories list
-		Set<PluginRepository> pluginRepositories = new HashSet<PluginRepository>();
-		for (Element pluginRepo : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", rootElement)) {
-			pluginRepositories.add(new PluginRepository(pluginRepo));
+		Set<Repository> pluginRepositories = new HashSet<Repository>();
+		for (Element pluginRepository : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", rootElement)) {
+			pluginRepositories.add(new Repository(pluginRepository));
 		}
 
 		// Build properties list
@@ -336,11 +335,33 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	}
 
 	public void addRepository(Repository repository) {
-		Assert.notNull(repository, "Repository to add required");
+		addRepository("repositories", "repository", repository);
+	}
+
+	public void removeRepository(Repository repository) {
+		removeRepository("/project/repositories/repository", repository);
+	}
+
+	public void addPluginRepository(Repository repository) {
+		addRepository("pluginRepositories", "pluginRepository", repository);
+	}
+
+	public void removePluginRepository(Repository repository) {
+		removeRepository("/project/pluginRepositories/pluginRepository", repository);
+	}
+	
+	private void addRepository(String parentElementName, String elementName, Repository repository) {
+		Assert.notNull(repository, "Repository required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(md, "Project metadata is not yet available, so repository addition is unavailable");
-		if (md.isRepositoryRegistered(repository)) {
-			return;
+		if (elementName.equals("pluginRepository")) {
+			if (md.isPluginRepositoryRegistered(repository)) {
+				return;
+			}
+		} else {
+			if (md.isRepositoryRegistered(repository)) {
+				return;
+			}
 		}
 
 		MutableFile mutableFile = fileManager.updateFile(pom);
@@ -352,26 +373,32 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element repositories = XmlUtils.findFirstElement("/project/repositories", document.getDocumentElement());
+		Element repositories = XmlUtils.findFirstElement("/project/" + parentElementName, document.getDocumentElement());
 		if (null == repositories) {
-			repositories = document.createElement("repositories");
+			repositories = document.createElement(parentElementName);
 		}
 		
-		Element repositoryE = new XmlElementBuilder("repository", document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
+		Element repositoryElement = new XmlElementBuilder(elementName, document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
 		if (repository.getName() != null) {
-			repositoryE.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
+			repositoryElement.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
 		}
-		repositories.appendChild(repositoryE);
+		repositories.appendChild(repositoryElement);
 		
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
-	public void removeRepository(Repository repository) {
-		Assert.notNull(repository, "Repository to remove required");
+	private void removeRepository(String repositoriesXpath, Repository repository) {
+		Assert.notNull(repository, "Repository required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(md, "Project metadata is not yet available, so repository removal is unavailable");
-		if (!md.isRepositoryRegistered(repository)) {
-			return;
+		Assert.notNull(md, "Project metadata is not yet available, so plugin repository removal is unavailable");
+		if (repositoriesXpath.contains("pluginRepository")) {
+			if (!md.isPluginRepositoryRegistered(repository)) {
+				return;
+			}
+		} else {
+			if (!md.isRepositoryRegistered(repository)) {
+				return;
+			}
 		}
 
 		MutableFile mutableFile = fileManager.updateFile(pom);
@@ -383,7 +410,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		for (Element candidate : XmlUtils.findElements("/project/repositories/repository", document.getDocumentElement())) {
+		for (Element candidate : XmlUtils.findElements(repositoriesXpath, document.getDocumentElement())) {
 			if (repository.equals(new Repository(candidate))) {
 				// Found it
 				candidate.getParentNode().removeChild(candidate);
@@ -394,65 +421,6 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
-	public void addPluginRepository(PluginRepository pluginRepository) {
-		Assert.notNull(pluginRepository, "PluginRepository to add required");
-		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(md, "Project metadata is not yet available, so plugin repository addition is unavailable");
-		if (md.isPluginRepositoryRegistered(pluginRepository)) {
-			return;
-		}
-
-		MutableFile mutableFile = fileManager.updateFile(pom);
-
-		Document document;
-		try {
-			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
-		}
-
-		Element repositories = XmlUtils.findFirstElement("/project/pluginRepositories", document.getDocumentElement());
-		if (null == repositories) {
-			repositories = document.createElement("pluginRepositories");
-		}
-		
-		Element pluginRepositoryElement = new XmlElementBuilder("pluginRepository", document).addChild(new XmlElementBuilder("id", document).setText(pluginRepository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(pluginRepository.getUrl()).build()).build();
-		if (pluginRepository.getName() != null) {
-			pluginRepositoryElement.appendChild(new XmlElementBuilder("name", document).setText(pluginRepository.getName()).build());
-		}
-		repositories.appendChild(pluginRepositoryElement);
-		
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-	}
-
-	public void removePluginRepository(PluginRepository pluginRepository) {
-		Assert.notNull(pluginRepository, "PluginRepository to remove required");
-		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(md, "Project metadata is not yet available, so plugin repository removal is unavailable");
-		if (!md.isPluginRepositoryRegistered(pluginRepository)) {
-			return;
-		}
-
-		MutableFile mutableFile = fileManager.updateFile(pom);
-
-		Document document;
-		try {
-			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
-		} catch (Exception ex) {
-			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
-		}
-
-		for (Element candidate : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", document.getDocumentElement())) {
-			if (pluginRepository.equals(new PluginRepository(candidate))) {
-				// Found it
-				candidate.getParentNode().removeChild(candidate);
-				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
-			}
-		}
-
-		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-	}
-		
 	public void addProperty(Property property) {
 		Assert.notNull(property, "Property to add required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());

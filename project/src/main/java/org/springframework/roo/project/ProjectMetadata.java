@@ -41,11 +41,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private Set<Dependency> dependencies;
 	private Set<Plugin> buildPlugins;
 	private Set<Repository> repositories;
-	private Set<PluginRepository> pluginRepositories;
+	private Set<Repository> pluginRepositories;
 	private Set<Property> pomProperties;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<PluginRepository> pluginRepositories, Set<Property> pomProperties, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<Repository> pluginRepositories, Set<Property> pomProperties, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
@@ -99,9 +99,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @param plugin repository to check (required)
 	 * @return whether the plugin repository is currently registered or not
 	 */
-	public boolean isPluginRepositoryRegistered(PluginRepository pluginRepository) {
-		Assert.notNull(pluginRepository, "Plugin repository to check is required");
-		return pluginRepositories.contains(pluginRepository);
+	public boolean isPluginRepositoryRegistered(Repository repository) {
+		Assert.notNull(repository, "Plugin repository to check is required");
+		return pluginRepositories.contains(repository);
 	}
 
 	/**
