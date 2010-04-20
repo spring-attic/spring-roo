@@ -53,14 +53,14 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to remove the specified build plugin dependency. If the dependency does not 
-	 * exist according to {@link ProjectMetadata#isBuildPluginDependencyRegistered(Dependency)},
+	 * exist according to {@link ProjectMetadata#isBuildPluginDependencyRegistered(Plugin)},
 	 * the method silently returns. Otherwise the located dependency is removed.
 	 * 
 	 * <p>
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param dependency to remove (required)
+	 * @param plugin to remove (required)
 	 */
 	public void removeBuildPlugin(Plugin plugin);
 	
@@ -90,6 +90,58 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 */
 	public void removeRepository(Repository repository);
 	
+	/**
+	 * Attempts to add the specified plugin repository. If the plugin repository already exists according
+	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(PluginRepository)}, the method silently returns.
+	 * Otherwise the repository is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param plugin repository to add (required)
+	 */
+	public void addPluginRepository(PluginRepository pluginRepository);
+	
+	/**
+	 * Attempts to remove the specified plugin repository. If the plugin repository does not 
+	 * exist according to {@link ProjectMetadata#isPluginRepositoryRegistered(PluginRepository)},
+	 * the method silently returns. Otherwise the located plugin repository is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param plugin repository to remove (required)
+	 */
+	public void removePluginRepository(PluginRepository pluginRepository);
+
+	/**
+	 * Attempts to add the specified property. If the property already exists 
+	 * according to {@link ProjectMetadata#isBuildPropertyRegistered(Property)}, 
+	 * the method silently returns. Otherwise the property is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param property to add (required)
+	 */
+	public void addProperty(Property property);
+	
+	/**
+	 * Attempts to remove the specified property dependency. If the dependency does not 
+	 * exist according to {@link ProjectMetadata#isPropertyDependencyRegistered(Property)},
+	 * the method silently returns. Otherwise the located dependency is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param property to remove (required)
+	 */
+	public void removeProperty(Property property);
+
 	/**
 	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the 
 	 * project packaging is not defined it will create a new definition.

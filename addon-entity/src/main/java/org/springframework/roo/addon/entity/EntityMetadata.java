@@ -188,7 +188,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// We need to create one
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		boolean hasIdClass = !identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.");
+		boolean hasGaeKey = identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key"));
+		boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || hasGaeKey);
 		JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
 		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
 		annotations.add(idAnnotation);
@@ -196,7 +197,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Compute the column name, as required
 		if (!hasIdClass) {
 			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName("AUTO"))));
+			String generationType = hasGaeKey ? "IDENTITY" : "AUTO";
+			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
 			AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
 			annotations.add(generatedValueAnnotation);
 

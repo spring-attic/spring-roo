@@ -26,7 +26,9 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 
 	private Set<DependencyListener> listeners = new HashSet<DependencyListener>();
 	private Set<RepositoryListener> repoListeners = new HashSet<RepositoryListener>();
+	private Set<PluginRepositoryListener> pluginRepoListeners = new HashSet<PluginRepositoryListener>();
 	private Set<PluginListener> pluginListeners = new HashSet<PluginListener>();
+	private Set<PropertyListener> propertyListeners = new HashSet<PropertyListener>();
 
 	public final boolean isDependencyModificationAllowed() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -98,6 +100,26 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		}
 	}
 	
+	public void addPluginRepositoryListener(PluginRepositoryListener listener) {
+		this.pluginRepoListeners.add(listener);
+	}
+	
+	public void removePluginRepositoryListener(PluginRepositoryListener listener) {
+		this.pluginRepoListeners.remove(listener);
+	}
+	
+	private void sendPluginRepositoryAdditionNotifications(PluginRepository pluginRepository) {
+		for (PluginRepositoryListener listener : pluginRepoListeners) {
+			listener.pluginRepositoryAdded(pluginRepository);
+		}
+	}
+	
+	private void sendPluginRepositoryRemovalNotifications(PluginRepository pluginRepository) {
+		for (PluginRepositoryListener listener : pluginRepoListeners) {
+			listener.pluginRepositoryRemoved(pluginRepository);
+		}
+	}
+	
 	public void addPluginListener(PluginListener listener) {
 		this.pluginListeners.add(listener);
 	}
@@ -117,6 +139,27 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 			listener.pluginRemoved(p);
 		}
 	}
+
+	public void addPropertyListener(PropertyListener listener) {
+		this.propertyListeners.add(listener);
+	}
+	
+	public void removePropertyListener(PropertyListener listener) {
+		this.propertyListeners.remove(listener);
+	}
+	
+	private void sendPropertyAdditionNotifications(Property p) {
+		for (PropertyListener listener : propertyListeners) {
+			listener.propertyAdded(p);
+		}
+	}
+	
+	private void sendPropertyRemovalNotifications(Property p) {
+		for (PropertyListener listener : propertyListeners) {
+			listener.propertyRemoved(p);
+		}
+	}
+
 	public void updateProjectType(ProjectType projectType) {
 		Assert.notNull(projectType, "ProjectType required");
 		projectMetadataProvider.updateProjectType(projectType);
@@ -159,7 +202,6 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	public final void addRepository(String id, String name, String url) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
-		Assert.hasText(name, "Name required");
 		Assert.hasText(url, "URL required");
 		Repository repository = new Repository(id, name, url);
 		projectMetadataProvider.addRepository(repository);
@@ -167,13 +209,30 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	}
 	
 	public final void removeRepository(String id, String name, String url) {
-		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
 		Assert.hasText(id, "ID required");
-		Assert.hasText(name, "Name required");
 		Assert.hasText(url, "URL required");
 		Repository repository = new Repository(id, name, url);
 		projectMetadataProvider.removeRepository(repository);
 		sendRepositoryRemovalNotifications(repository);
+	}
+	
+	public final void addPluginRepository(String id, String name, String url) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
+		Assert.hasText(id, "ID required");
+		Assert.hasText(url, "URL required");
+		PluginRepository pluginRepository = new PluginRepository(id, name, url);
+		projectMetadataProvider.addPluginRepository(pluginRepository);
+		sendPluginRepositoryAdditionNotifications(pluginRepository);
+	}
+	
+	public final void removePluginRepository(String id, String name, String url) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Plugin repository modification prohibited at this time");
+		Assert.hasText(id, "ID required");
+		Assert.hasText(url, "URL required");
+		PluginRepository pluginRepository = new PluginRepository(id, name, url);
+		projectMetadataProvider.removePluginRepository(pluginRepository);
+		sendPluginRepositoryRemovalNotifications(pluginRepository);
 	}
 	
 	public final void addBuildPlugin(Plugin plugin) {
@@ -208,5 +267,23 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		
 		// Add the plugin
 		projectMetadataProvider.addBuildPlugin(plugin);
+	}
+	
+	public final void addProperty(String name, String value) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
+		Assert.hasText(name, "Name required");
+		Assert.hasText(value, "Value required");
+		Property property = new Property(name, value);
+		projectMetadataProvider.addProperty(property);
+		sendPropertyAdditionNotifications(property);
+	}
+	
+	public final void removeProperty(String name, String value) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Property modification prohibited at this time");
+		Assert.hasText(name, "Name required");
+		Assert.hasText(value, "Value required");
+		Property property = new Property(name, value);
+		projectMetadataProvider.removeProperty(property);
+		sendPropertyRemovalNotifications(property);
 	}
 }

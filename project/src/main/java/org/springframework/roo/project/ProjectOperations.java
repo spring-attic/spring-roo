@@ -30,6 +30,16 @@ public interface ProjectOperations {
 	void removeRepositoryListener(RepositoryListener listener);
 	
 	/**
+	 * Register a listener to track changes in plugin repositories
+	 */
+	void addPluginRepositoryListener(PluginRepositoryListener listener);
+
+	/**
+	 * Remove a plugin repository listener from change tracking
+	 */
+	void removePluginRepositoryListener(PluginRepositoryListener listener);
+
+	/**
 	 * Register a listener to track changes in build plugins
 	 */
 	void addPluginListener(PluginListener listener);
@@ -39,6 +49,16 @@ public interface ProjectOperations {
 	 */
 	void removePluginListener(PluginListener listener);
 	
+	/**
+	 * Register a listener to track changes in pom properties
+	 */
+	void addPropertyListener(PropertyListener listener);
+
+	/**
+	 * Remove a property listener from change tracking
+	 */
+	void removePropertyListener(PropertyListener listener);
+
 	void updateProjectType(ProjectType projectType);
 
 	/**
@@ -116,13 +136,39 @@ public interface ProjectOperations {
 	 * 
 	 * <p>
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
-	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
 	 * @param id to add (required)
 	 * @param name to add (required)
 	 * @param url to add (requireD)
 	 */
 	void removeRepository(String id, String name, String url);
+
+	/**
+	 * Allows addition of a plugin repository to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param id to add (required)
+	 * @param name to add (required)
+	 * @param url to add (requireD)
+	 */
+	void addPluginRepository(String id, String name, String url);
+
+	/**
+	 * Allows remove of an existing plugin repository from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param id to add (required)
+	 * @param name to add (required)
+	 * @param url to add (requireD)
+	 */
+	void removePluginRepository(String id, String name, String url);
 
 	/**
 	 * Allows addition of a build plugin to the POM. 
@@ -154,4 +200,28 @@ public interface ProjectOperations {
 	 * @param plugin to add (required)
 	 */
 	void buildPluginUpdate(Plugin buildPlugin);
+	
+	/**
+	 * Allows addition of a property to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param name to add (required)
+	 * @param value to add (requireD)
+	 */
+	void addProperty(String name, String value);
+
+	/**
+	 * Allows remove of an existing property from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param name to add (required)
+	 * @param value to add (requireD)
+	 */
+	void removeProperty(String name, String value);
 }

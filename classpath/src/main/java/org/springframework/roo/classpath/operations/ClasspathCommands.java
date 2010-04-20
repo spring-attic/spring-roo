@@ -253,7 +253,7 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.generateClassFile(details);
 		
 		// Create entity identifier class if required
-		if (!identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.")) {
+		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")))) {
 			createIdentifierClass(identifierType, identifierField, identifierColumn);
 		}
 

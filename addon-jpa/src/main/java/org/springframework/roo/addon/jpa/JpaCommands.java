@@ -48,7 +48,7 @@ public class JpaCommands implements CommandMarker {
 	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project")
 	public void installJpa(
 			@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
-			@CliOption(key = { "", "database" }, mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
+			@CliOption(key = { "database" }, mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
 			@CliOption(key = { "jndiDataSource" }, mandatory = false, help = "The JNDI datasource to use") String jndi, 
 			@CliOption(key = { "databaseName" }, mandatory = false, help = "The database name to use") String databaseName, 
 			@CliOption(key = { "userName" }, mandatory = false, help = "The username to use") String userName, 

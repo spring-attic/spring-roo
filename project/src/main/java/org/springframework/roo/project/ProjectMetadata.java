@@ -41,15 +41,19 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private Set<Dependency> dependencies;
 	private Set<Plugin> buildPlugins;
 	private Set<Repository> repositories;
+	private Set<PluginRepository> pluginRepositories;
+	private Set<Property> pomProperties;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<PluginRepository> pluginRepositories, Set<Property> pomProperties, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
 		Assert.notNull(dependencies, "Dependencies required");
 		Assert.notNull(buildPlugins, "Build plugins required");
 		Assert.notNull(repositories, "Repositories required");
+		Assert.notNull(pluginRepositories, "Plugin repositories required");
+		Assert.notNull(pomProperties, "POM properties required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
@@ -57,6 +61,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		this.buildPlugins = buildPlugins;
 		this.pathResolver = pathResolver;
 		this.repositories = repositories;
+		this.pomProperties = pomProperties;
+		this.pluginRepositories = pluginRepositories;
 	}
 
 	public static final String getProjectIdentifier() {
@@ -75,6 +81,30 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
+	 * Convenience method for determining whether a particular repository
+	 * is registered.
+	 * 
+	 * @param repository to check (required)
+	 * @return whether the repository is currently registered or not
+	 */
+	public boolean isRepositoryRegistered(Repository repository) {
+		Assert.notNull(repository, "Repository to check is required");
+		return repositories.contains(repository);
+	}
+
+	/**
+	 * Convenience method for determining whether a particular plugin repository
+	 * is registered.
+	 * 
+	 * @param plugin repository to check (required)
+	 * @return whether the plugin repository is currently registered or not
+	 */
+	public boolean isPluginRepositoryRegistered(PluginRepository pluginRepository) {
+		Assert.notNull(pluginRepository, "Plugin repository to check is required");
+		return pluginRepositories.contains(pluginRepository);
+	}
+
+	/**
 	 * Convenience method for determining whether a particular build plugin
 	 * is registered.
 	 * 
@@ -85,19 +115,18 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(plugin, "Plugin to check is required");
 		return buildPlugins.contains(plugin);
 	}
-	
 	/**
-	 * Convenience method for determining whether a particular repository
+	 * Convenience method for determining whether a particular pom property
 	 * is registered.
 	 * 
-	 * @param reopository to check (required)
-	 * @return whether the repository is currently registered or not
+	 * @param property to check (required)
+	 * @return whether the property is currently registered or not
 	 */
-	public boolean isRepositoryRegistered(Repository repository) {
-		Assert.notNull(repository, "Repository to check is required");
-		return repositories.contains(repository);
+	public boolean isPropertyRegistered(Property property) {
+		Assert.notNull(property, "Property to check is required");
+		return pomProperties.contains(property);
 	}
-
+	
 	public JavaPackage getTopLevelPackage() {
 		return topLevelPackage;
 	}
@@ -171,6 +200,9 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("projectName", projectName);
 		tsc.append("dependencies", dependencies);
 		tsc.append("buildPlugins", buildPlugins);
+		tsc.append("repositories", repositories);
+		tsc.append("pluginRepositories", pluginRepositories);
+		tsc.append("pomProperties", pomProperties);
 		tsc.append("pathResolver", pathResolver);
 		return tsc.toString();
 	}
