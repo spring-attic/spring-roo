@@ -32,13 +32,11 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * Provides {@link ProjectMetadata}.
@@ -337,26 +335,26 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	}
 
 	public void addRepository(Repository repository) {
-		addRepository("repositories", "repository", repository);
+		addRepository(repository, "repositories", "repository");
 	}
 
 	public void removeRepository(Repository repository) {
-		removeRepository("/project/repositories/repository", repository);
+		removeRepository(repository, "/project/repositories/repository");
 	}
 
 	public void addPluginRepository(Repository repository) {
-		addRepository("pluginRepositories", "pluginRepository", repository);
+		addRepository(repository, "pluginRepositories", "pluginRepository");
 	}
 
 	public void removePluginRepository(Repository repository) {
-		removeRepository("/project/pluginRepositories/pluginRepository", repository);
+		removeRepository(repository, "/project/pluginRepositories/pluginRepository");
 	}
 	
-	private void addRepository(String parentElementName, String elementName, Repository repository) {
+	private void addRepository(Repository repository, String containingPath, String path) {
 		Assert.notNull(repository, "Repository required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(md, "Project metadata is not yet available, so repository addition is unavailable");
-		if (elementName.equals("pluginRepository")) {
+		if (path.equals("pluginRepository")) {
 			if (md.isPluginRepositoryRegistered(repository)) {
 				return;
 			}
@@ -375,12 +373,12 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element repositories = XmlUtils.findFirstElement("/project/" + parentElementName, document.getDocumentElement());
+		Element repositories = XmlUtils.findFirstElement("/project/" + containingPath, document.getDocumentElement());
 		if (null == repositories) {
-			repositories = document.createElement(parentElementName);
+			repositories = document.createElement(containingPath);
 		}
 		
-		Element repositoryElement = new XmlElementBuilder(elementName, document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
+		Element repositoryElement = new XmlElementBuilder(path, document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
 		if (repository.getName() != null) {
 			repositoryElement.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
 		}
@@ -389,11 +387,11 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
-	private void removeRepository(String repositoriesXpath, Repository repository) {
+	private void removeRepository(Repository repository, String path) {
 		Assert.notNull(repository, "Repository required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(md, "Project metadata is not yet available, so plugin repository removal is unavailable");
-		if (repositoriesXpath.contains("pluginRepository")) {
+		if (path.contains("pluginRepository")) {
 			if (!md.isPluginRepositoryRegistered(repository)) {
 				return;
 			}
@@ -412,7 +410,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		for (Element candidate : XmlUtils.findElements(repositoriesXpath, document.getDocumentElement())) {
+		for (Element candidate : XmlUtils.findElements(path, document.getDocumentElement())) {
 			if (repository.equals(new Repository(candidate))) {
 				// Found it
 				candidate.getParentNode().removeChild(candidate);
@@ -440,19 +438,24 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element pomProperties = XmlUtils.findFirstElement("/project/properties", document.getDocumentElement());
-		if (null == pomProperties) {
-			pomProperties = document.createElement("properties");
+		Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), document.getDocumentElement());
+		if (existing != null) {
+			existing.setTextContent(property.getValue());
+		} else {
+			Element properties = XmlUtils.findFirstElement("/project/properties", document.getDocumentElement());
+			if (null == properties) {
+				properties = document.createElement("properties");
+			}
+
+			Element propertyElement = new XmlElementBuilder(property.getName(), document).setText(property.getValue()).build();
+			properties.appendChild(propertyElement);
 		}
-		
-		Element propertyElement = new XmlElementBuilder(property.getName(), document).setText(property.getValue()).build();
-		pomProperties.appendChild(propertyElement);
-		
+
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
 	public void removeProperty(Property property) {
-		Assert.notNull(property, "PluginRepository to remove required");
+		Assert.notNull(property, "Property to remove required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(md, "Project metadata is not yet available, so property removal is unavailable");
 		if (!md.isPropertyRegistered(property)) {
@@ -471,19 +474,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element rootElement = (Element) document.getFirstChild();
 		Element properties = XmlUtils.findFirstElement("/project/properties", rootElement);
 
-		boolean propertyRemoved = false;
 		for (Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
 				// Found it
 				properties.removeChild(candidate);
-				propertyRemoved = true;
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
-		
-		if (propertyRemoved) {
-			removeBlankLines(properties);
-		}
+		XmlUtils.removeTextNodes(properties);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
@@ -526,18 +524,14 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element rootElement = (Element) document.getFirstChild();
 		Element dependencies = XmlUtils.findFirstElement(containingPath, rootElement);
 
-		boolean dependencyRemoved = false;
 		for (Element candidate : XmlUtils.findElements(path, rootElement)) {
 			if (dependency.equals(new Dependency(candidate))) {
 				// Found it
 				dependencies.removeChild(candidate);
-				dependencyRemoved = true;
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
-		if (dependencyRemoved) {
-			removeBlankLines(dependencies);
-		}
+		XmlUtils.removeTextNodes(dependencies);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
@@ -563,29 +557,15 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element rootElement = (Element) document.getFirstChild();
 		Element plugins = XmlUtils.findFirstElement(containingPath, rootElement);
 
-		boolean pluginRemoved = false;
 		for (Element candidate : XmlUtils.findElements(path, rootElement)) {
 			if (plugin.equals(new Plugin(candidate))) {
 				// Found it
 				plugins.removeChild(candidate);
-				pluginRemoved = true;
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
-		if (pluginRemoved) {
-			removeBlankLines(plugins);
-		}
+		XmlUtils.removeTextNodes(plugins);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-	}
-	
-	private void removeBlankLines(Element element) {
-		NodeList nodeList = element.getChildNodes();
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
-			if (node != null && node.getNodeType() == Node.TEXT_NODE && !StringUtils.hasText(node.getNodeValue())) {
-				element.removeChild(node);
-			}
-		}
 	}
 }

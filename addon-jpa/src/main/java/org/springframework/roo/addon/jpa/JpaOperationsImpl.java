@@ -413,10 +413,10 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
-				List<Element> pomProperties = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/properties/*", dependencies);
-				for (Element propertyElement : pomProperties) {
-					projectOperations.removeProperty(new Property(propertyElement));
-				}
+				// List<Element> pomProperties = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/properties/*", dependencies);
+				// for (Element propertyElement : pomProperties) {
+				// projectOperations.removeProperty(new Property(propertyElement));
+				// }
 
 				List<Element> ormDependencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/dependency", dependencies);
 				for (Element dependency : ormDependencies) {

@@ -192,6 +192,25 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return result;
 	}
 
+	/**
+	 * Locates any properties which match the presented property, excluding the value.
+	 * This is useful for upgrade use cases, where it is necessary to locate any properties with
+	 * the name so that they can be removed.
+	 * 
+	 * @param property to locate (required; note the value is ignored in comparisons)
+	 * @return any matching properties (never returns null, but may return an empty {@link Set})
+	 */
+	public Set<Property> getPropertiesExcludingValue(Property property) {
+		Assert.notNull(property, "Property to locate is required");
+		Set<Property> result = new HashSet<Property>();
+		for (Property p : pomProperties) {
+			if (property.getName().equals(p.getName())) {
+				result.add(p);
+			}
+		}
+		return result;
+	}
+	
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
