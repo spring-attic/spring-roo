@@ -148,9 +148,9 @@
 		</provider>
 		<provider id="GOOGLE_APP_ENGINE">
 			<properties>
-			    <datanucleus.version>1.1.5</datanucleus.version>
-			    <gae.version>1.3.2</gae.version>
+				<gae.version>1.3.2</gae.version>
 				<gae.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
+				<datanucleus.version>1.1.5</datanucleus.version>
 			</properties>
 			<dependency>
 				<groupId>org.datanucleus</groupId>

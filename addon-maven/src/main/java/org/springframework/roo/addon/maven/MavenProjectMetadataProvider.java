@@ -37,6 +37,7 @@ import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Provides {@link ProjectMetadata}.
@@ -466,13 +467,17 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
+		Element rootElement = (Element) document.getFirstChild();
+		Element properties = XmlUtils.findFirstElement("/project/properties", rootElement);
+
 		for (Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
 				// Found it
-				candidate.getParentNode().removeChild(candidate);
+				properties.removeChild(candidate);
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
+		removeBlankLines(properties);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
@@ -522,6 +527,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
+		removeBlankLines(dependencies);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
@@ -554,7 +560,18 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
+		removeBlankLines(plugins);
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+	}
+	
+	private void removeBlankLines(Element element) {
+		NodeList nodeList = element.getChildNodes();
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Node node = nodeList.item(i);
+			if (node != null && node.getNodeType() == Node.TEXT_NODE) {
+				element.removeChild(node);
+			}
+		}
 	}
 }
