@@ -34,23 +34,26 @@ import org.w3c.dom.NodeList;
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
  * 
  */
-public abstract class XmlUtils {
-
+public final class XmlUtils {
 	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
 	private static final XPath xpath = XPathFactory.newInstance().newXPath();
 	private static final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 	
+	private XmlUtils() {
+	}
+
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
 	}
-//
-//	public static final void writeMalformedXml(OutputStream outputEntry, NodeList nodes) {
-//		writeMalformedXml(createIndentingTransformer(), outputEntry, nodes);
-//	}
+
+	// public static final void writeMalformedXml(OutputStream outputEntry, NodeList nodes) {
+	// writeMalformedXml(createIndentingTransformer(), outputEntry, nodes);
+	// }
 
 	public static final void writeXml(Transformer transformer, OutputStream outputEntry, Document document) {
 		Assert.notNull(transformer, "Transformer required");
@@ -266,11 +269,28 @@ public abstract class XmlUtils {
 	 * @return a new document builder (never null)
 	 */
 	public static final DocumentBuilder getDocumentBuilder() {
-//		factory.setNamespaceAware(true);
+		// factory.setNamespaceAware(true);
 		try {
 			return factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
 			throw new IllegalStateException(ex);
+		}
+	}
+	
+	/**
+	 * Removes empty text nodes from the specified element
+	 * 
+	 * @param element the element where empty etxt nodes will be removed
+	 */
+	public static void removeTextNodes(Element element) {
+		if (element.hasChildNodes()) {
+			NodeList nodeList = element.getChildNodes();
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Node node = nodeList.item(i);
+				if (node != null && node.getNodeType() == Node.TEXT_NODE && !StringUtils.hasText(node.getNodeValue())) {
+					element.removeChild(node);
+				}
+			}
 		}
 	}
 }
