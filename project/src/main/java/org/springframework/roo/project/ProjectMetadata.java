@@ -28,11 +28,11 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Alan Stewart
  * @since 1.0
  *
  */
 public class ProjectMetadata extends AbstractMetadataItem {
-
 	// MID:org.springframework.roo.project.ProjectMetadata#the_project
 	private static final String PROJECT_IDENTIFIER = MetadataIdentificationUtils.create(ProjectMetadata.class.getName(), "the_project");
 	
