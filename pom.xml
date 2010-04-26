@@ -50,6 +50,7 @@
         <module>addon-security</module>
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
+	<module>addon-gwt</module>
         <module>annotations</module>
     </modules>
 

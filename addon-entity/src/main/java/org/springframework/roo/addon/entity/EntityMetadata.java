@@ -63,7 +63,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
 	@AutoPopulate private String identifierField = "id";
 	@AutoPopulate private String identifierColumn = "";
-	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
+	@AutoPopulate private JavaType versionType = new JavaType(Long.class.getName());
 	@AutoPopulate private String versionField = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
