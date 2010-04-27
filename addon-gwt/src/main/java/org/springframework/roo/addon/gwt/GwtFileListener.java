@@ -191,9 +191,12 @@ public class GwtFileListener implements FileEventListener {
 		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
 		bb.appendFormalLine("import java.util.Collections;");
 		bb.appendFormalLine("import java.util.HashMap;");
+		bb.appendFormalLine("import java.util.HashSet;");
 		bb.appendFormalLine("import java.util.Map;");
+		bb.appendFormalLine("import java.util.Set;");
 		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RequestFactory.Config;");
 		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RequestFactory.RequestDefinition;");
+		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
 		bb.appendFormalLine("public class " + destType.getFullName() + " implements Config {");
 		bb.indent();
 
@@ -231,6 +234,19 @@ public class GwtFileListener implements FileEventListener {
 		bb.indentRemove();
 		bb.appendFormalLine("}");
 
+		bb.appendFormalLine("public Set<Class<? extends Record>> recordTypes() {");
+		bb.indent();
+		bb.appendFormalLine("Set<Class<? extends Record>> records = new HashSet<Class<? extends Record>>();");
+		locate = MirrorType.RECORD;
+		antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+			bb.appendFormalLine("records.add(" + fullPath + ".class);");
+		}
+		bb.appendFormalLine("return records;");
+		bb.indentRemove();
+		bb.appendFormalLine("}");
+		
 		bb.indentRemove();
 		bb.appendFormalLine("}");
 		write(destFile, bb.getOutput(), fileManager);
@@ -274,11 +290,11 @@ public class GwtFileListener implements FileEventListener {
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
 			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
 			JavaType listViewType = new JavaType(MirrorType.LIST_VIEW.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_VIEW.getSuffix());
 			JavaType findAllRequester = new JavaType(MirrorType.FIND_ALL_REQUESTER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.FIND_ALL_REQUESTER.getSuffix());
-			bb.appendFormalLine("if (newPlace.getRecord().equals(" + keyType.getFullyQualifiedTypeName() + ".class)) {");
+			bb.appendFormalLine("if (newPlace.getRecord().equals(" + javaType.getFullyQualifiedTypeName() + ".class)) {");
 			bb.indent();
 			bb.appendFormalLine(listViewType.getSimpleTypeName() + " newView = new " + listViewType.getSimpleTypeName() + "(placeRenderer.render(newPlace), places, requests);");
 			bb.appendFormalLine("newView.setDelegate(new " + findAllRequester.getSimpleTypeName() + "(requests, newView));");

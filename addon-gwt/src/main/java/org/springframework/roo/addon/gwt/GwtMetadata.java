@@ -154,15 +154,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL, new JavaSymbolName("TYPE"), fieldType, fieldInitializer, null);
 		fields.add(fieldMetadata);
 
-		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record) {
-		// super(record);
+		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record, com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation writeOperation) {
+		// super(record, writeOperation);
 		// }
 		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
 		constructorParameterTypes.add(getDestinationJavaType(MirrorType.RECORD));
+		constructorParameterTypes.add(new JavaType("com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation"));
 		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
 		constructorParameterNames.add(new JavaSymbolName("record"));
+		constructorParameterNames.add(new JavaSymbolName("writeOperation"));
 		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-		constructorBodyBuilder.appendFormalLine("super(record);");
+		constructorBodyBuilder.appendFormalLine("super(record, writeOperation);");
 		ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
 		constructors.add(constructorMetadata);
 
