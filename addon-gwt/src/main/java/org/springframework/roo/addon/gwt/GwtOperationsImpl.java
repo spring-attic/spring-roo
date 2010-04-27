@@ -83,6 +83,9 @@ public class GwtOperationsImpl implements GwtOperations {
 			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
 		
+		// Add GWT natures and builder names to maven eclipse plugin
+		updateMavenEclipsePlugin();
+		
 		// Update web.xml
 		updateWebXml(projectMetadata);
 		
@@ -157,6 +160,52 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		return (Element) dependencyDoc.getFirstChild();
 	}
+	
+	private void updateMavenEclipsePlugin() {
+		String pom = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
+		
+		Document pomDoc;
+		InputStream is = null;
+		try {
+			MutableFile mutablePom = fileManager.updateFile(pom);
+			is = mutablePom.getInputStream();
+			pomDoc = XmlUtils.getDocumentBuilder().parse(is);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		} finally {
+			if (is != null) {
+				try {
+					is.close();
+				}
+				catch (IOException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		}
+		
+		Element pomRoot = (Element) pomDoc.getFirstChild();
+		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+		for (Element pluginElement : pluginElements) {
+			Plugin plugin = new Plugin(pluginElement);
+			if ("maven-eclipse-plugin".equals(plugin.getArtifactId().getSymbolName()) && "org.apache.maven.plugins".equals(plugin.getGroupId().getFullyQualifiedPackageName())) {
+				// add in the builder configuration
+				Element newEntry = new XmlElementBuilder("buildCommand", pomDoc).addChild(new XmlElementBuilder("name", pomDoc).setText("com.google.gwt.eclipse.core.gwtProjectValidator").build()).build();
+				Element ctx = XmlUtils.findRequiredElement("configuration/additionalBuildcommands/buildCommand[last()]", pluginElement);
+				ctx.getParentNode().appendChild(newEntry);
+
+				// add in the additional nature
+				newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.gwt.eclipse.core.gwtNature").build();
+				ctx = XmlUtils.findRequiredElement("configuration/additionalProjectnatures/projectnature[last()]", pluginElement);
+				ctx.getParentNode().appendChild(newEntry);
+				
+				plugin = new Plugin(pluginElement);
+				projectOperations.removeBuildPlugin(plugin);
+				projectOperations.addBuildPlugin(plugin);
+			}
+ 		}
+	}
+
 	
 	private void updateWebXml(ProjectMetadata projectMetadata) {
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
