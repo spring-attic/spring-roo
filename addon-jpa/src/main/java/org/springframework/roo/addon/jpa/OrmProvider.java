@@ -12,17 +12,27 @@ import org.springframework.roo.support.style.ToStringCreator;
 public enum OrmProvider {
 	HIBERNATE("org.hibernate.ejb.HibernatePersistence"), 
 	OPENJPA("org.apache.openjpa.persistence.PersistenceProviderImpl"), 
-	ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"), 
-	GOOGLE_APP_ENGINE("org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider");
+	ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"),
+	DATANUCLEUS("org.datanucleus.jpa.PersistenceProviderImpl", "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider");
 
 	private String adapter;
+	private String alternateAdapter;
+
+	private OrmProvider(String adapter, String alternateAdapter) {
+		this.adapter = adapter;
+		this.alternateAdapter = alternateAdapter;
+	}
 
 	private OrmProvider(String adapter) {
-		this.adapter = adapter;
+		this(adapter, "");
 	}
 
 	public String getAdapter() {
 		return adapter;
+	}
+
+	public String getAlternateAdapter() {
+		return alternateAdapter;
 	}
 
 	public String toString() {

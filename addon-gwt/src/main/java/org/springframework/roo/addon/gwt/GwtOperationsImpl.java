@@ -150,8 +150,8 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 	
 	private Element getConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "dependencies.xml");
-		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
+		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
 		Document dependencyDoc;
 		try {
 			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);

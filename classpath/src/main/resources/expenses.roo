@@ -1,6 +1,6 @@
 project --topLevelPackage com.springsource.extrack
 
-persistence setup --provider OPENJPA --database HYPERSONIC_IN_MEMORY
+persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE
 /*
 enum type --class ~.server.reference.Status
 enum constant --name Draft // -> submitted
