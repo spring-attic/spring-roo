@@ -2,8 +2,8 @@
 SPRING ROO - DEVELOPER INSTRUCTIONS
 ======================================================================
 
-Thanks for checkout out Spring Roo from Subversion. These instructions
-details how to get started with your freshly checked-out source tree.
+Thanks for checkout out Spring Roo from Git. These instructions detail
+how to get started with your freshly checked-out source tree.
 
 These instructions are aimed at experienced developers looking to
 develop Spring Roo itself. If you are new to Spring Roo or would
@@ -20,13 +20,8 @@ ONE-TIME SETUP INSTRUCTIONS
 We'll assume you typed the following to checkout Roo (if not, adjust
 the paths in the following instructions accordingly):
 
-  mkdir ~/spring-roo
-  cd ~/spring-roo
-  svn co https://anonsvn.springframework.org/svn/spring-roo/trunk/
-
-Those with commit rights should use the following SVN URL instead:
-
-  svn co https://src.springframework.org/svn/spring-roo/trunk/
+  cd ~
+  git clone git://git.springsource.org/roo/roo.git
 
 Next double-check you meet the installation requirements:
 
@@ -48,7 +43,7 @@ instructions above and are on a *nix machine, you can just type:
 
 You're almost finished. You just need to wrap up with a symbolic link:
 
-  sudo ln -s ~/spring-roo/trunk/bootstrap/roo-dev /usr/bin/roo-dev
+  sudo ln -s ~/roo/bootstrap/roo-dev /usr/bin/roo-dev
   sudo chmod +x /usr/bin/roo-dev
 
 Note: You do not need a ROO_CLASSPATH_FILE environment variable. This
@@ -106,15 +101,15 @@ you prefer. "mvn install" just gives you more flexibility.
 
 Roo ships with a command line tool called "roo-dev". This is only
 maintained for *nix. It copies all relevant JARs from the Roo
-directories into ~/spring-roo/bootstrap/target/osgi. This directory
+directories into ~/roo/bootstrap/target/osgi. This directory
 represents a configured Roo OSGi instance. "roo-dev" also launches the
 OSGi container, which is currently Apache Felix.
 
 Be aware that Felix will cache the bundles you have installed each
-run (in /spring-roo/bootstrap/target/osgi/cache). It's therefore more
+run (in /roo/bootstrap/target/osgi/cache). It's therefore more
 common that instead of using "roo-dev", you will type a command like:
 
-  rm -rf ~/spring-roo/bootstrap/target/osgi; roo-dev
+  rm -rf ~/roo/bootstrap/target/osgi; roo-dev
 
 The above guarantees your Felix instance is fully cleaned. The
 "roo-dev" command line tool doesn't do this for you, as you might
@@ -221,23 +216,19 @@ used to ensure metadata remains immutable, cachable and memory
 efficient even in a large project.
 
 ======================================================================
-SUBVERSION POLICIES
+GIT POLICIES
 ======================================================================
 
-When checking into SVN, you must provide a commit message which begins
-with the relevant Roo Jira issue tracking number. For example:
+When checking into Git, you must provide a commit message which begins
+with the relevant Roo Jira issue tracking number. The message should
+be in the form "ROO-xxx: Title of the Jira Issue". For example:
 
   ROO-1234: Name of the task as stated in Jira
 
 You are free to place whatever text you like under this prefix. The
 prefix ensures FishEye is able to correlate the commit with Jira.
 
-You should not commit any IDE or Maven-generated files to Subversion.
-In practical terms this means whenever you create a new directory that
-contains pom.xml, set the svn:ignore property as follows:
-
-  svn propset svn:ignore ".*
-  target" directory_name_to_set
+You should not commit any IDE or Maven-generated files into Git.
 
 ======================================================================
 RELEASING
@@ -275,11 +266,8 @@ If performing a GA release (ie *.RELEASE) upload the ZIP to
 
 x-amz-meta-release.type:release
 
-In addition, a SVN branch should be created using the copy command:
-
-  svn copy https://src.springframework.org/svn/spring-roo/trunk \
-    https://src.springframework.org/svn/spring-roo/release-1.0.0.GA \
-    -m "ROO-1234: Tagging the 1.0.0.GA release"
+In addition, a Git tag should be created in the form w.x.y.zzzz (note
+there is no prefix or suffix to the Git tag).
 
 Once you've built a release, be aware your $ROO_CLASSPATH_FILE will no
 longer point to the correct target directories. You should re-run the
