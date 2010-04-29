@@ -222,7 +222,7 @@ public class JspOperationsImpl implements JspOperations {
 
 		classpathOperations.generateClassFile(details);
 
-		webMvcOperations.installMvcArtefacts();
+		webMvcOperations.installAllWebMvcArtifacts();
 
 		installCommonViewArtefacts();
 

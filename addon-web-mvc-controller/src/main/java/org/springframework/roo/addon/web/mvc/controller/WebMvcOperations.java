@@ -8,6 +8,8 @@ package org.springframework.roo.addon.web.mvc.controller;
  */
 public interface WebMvcOperations {
 
-	void installMvcArtefacts();
+	void installMinmalWebArtefacts();
+	
+	void installAllWebMvcArtifacts();
 
 }

@@ -82,7 +82,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		Document mvcAppCtx;
 		try {
 			if (!fileManager.exists(mvcContextPath)) {
-				webMvcOperations.installMvcArtefacts();
+				webMvcOperations.installAllWebMvcArtifacts();
 				jspOperations.installCommonViewArtefacts();
 			}
 			mvcContextMutableFile = fileManager.updateFile(mvcContextPath);

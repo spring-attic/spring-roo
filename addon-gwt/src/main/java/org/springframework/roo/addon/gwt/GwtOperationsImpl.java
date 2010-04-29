@@ -26,6 +26,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -220,11 +221,11 @@ public class GwtOperationsImpl implements GwtOperations {
 			throw new IllegalStateException(e);
 		}
 		
-		Element webXmlRoot = (Element) webXmlDoc.getFirstChild();
-		addContextParam(projectMetadata, webXmlDoc, webXmlRoot);
-		addListener(projectMetadata, webXmlDoc, webXmlRoot);
-		addServlet(projectMetadata, webXmlDoc, webXmlRoot);
-		addServletMapping(projectMetadata, webXmlDoc, webXmlRoot);
+		Element webXmlRoot = webXmlDoc.getDocumentElement();
+		
+		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
+		WebXmlUtils.addListener(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener", webXmlDoc, "Temporary workaround");
+		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/expenses/data", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
 		removeIfFound("/web-app/filter-mapping[filter-name='UrlRewriteFilter']", webXmlRoot);  // temporary (need to discuss with Stefan whether we need to rewrite everything)
@@ -234,42 +235,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		removeIfFound("/web-app/servlet-mapping[url-pattern='/app/*']", webXmlRoot);  // temporary (due to dispatcher servlet removal)
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
-	}
-	
-	private void addContextParam(ProjectMetadata projectMetadata, Document webXmlDoc, Element webXmlRoot) {
-		Element newEntry = new XmlElementBuilder("context-param", webXmlDoc)
-									.addChild(new XmlElementBuilder("param-name", webXmlDoc).setText("servlet.serverOperation").build())
-									.addChild(new XmlElementBuilder("param-value", webXmlDoc).setText(GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations").build())
-								.build();
-		Element ctx = XmlUtils.findRequiredElement("/web-app/context-param[last()]", webXmlRoot);
-		ctx.getParentNode().insertBefore(newEntry, ctx.getNextSibling());
-	}
-	
-	private void addListener(ProjectMetadata projectMetadata, Document webXmlDoc, Element webXmlRoot) {
-		Element newEntry = new XmlElementBuilder("listener", webXmlDoc)
-									.addChild(new XmlElementBuilder("listener-class", webXmlDoc).setText(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener").build())
-								.build();
-		// It's key this listener comes before ContextLoaderListener
-		Element ctx = XmlUtils.findFirstElement("/web-app/listener", webXmlRoot);
-		ctx.getParentNode().insertBefore(newEntry, ctx);
-	}
-
-	private void addServlet(ProjectMetadata projectMetadata, Document webXmlDoc, Element webXmlRoot) {
-		Element newEntry = new XmlElementBuilder("servlet", webXmlDoc)
-									.addChild(new XmlElementBuilder("servlet-name", webXmlDoc).setText("requestFactory").build())
-									.addChild(new XmlElementBuilder("servlet-class", webXmlDoc).setText("com.google.gwt.requestfactory.server.RequestFactoryServlet").build())
-								.build();
-		Element ctx = XmlUtils.findFirstElement("/web-app/servlet-mapping", webXmlRoot);
-		ctx.getParentNode().insertBefore(newEntry, ctx);
-	}
-
-	private void addServletMapping(ProjectMetadata projectMetadata, Document webXmlDoc, Element webXmlRoot) {
-		Element newEntry = new XmlElementBuilder("servlet-mapping", webXmlDoc)
-									.addChild(new XmlElementBuilder("servlet-name", webXmlDoc).setText("requestFactory").build())
-									.addChild(new XmlElementBuilder("url-pattern", webXmlDoc).setText("/expenses/data").build())
-								.build();
-		Element ctx = XmlUtils.findRequiredElement("/web-app/servlet-mapping[last()]", webXmlRoot);
-		ctx.getParentNode().insertBefore(newEntry, ctx);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
