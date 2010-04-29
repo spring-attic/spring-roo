@@ -29,7 +29,9 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -58,12 +60,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private EntityMetadata parent;
 	private boolean noArgConstructor;
 	private String plural;
+	private ProjectMetadata projectMetadata;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
 	@AutoPopulate private String identifierField = "id";
 	@AutoPopulate private String identifierColumn = "";
-	@AutoPopulate private JavaType versionType = new JavaType(Long.class.getName());
+	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
 	@AutoPopulate private String versionField = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
@@ -75,7 +78,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
 
-	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural) {
+	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.hasText(plural, "Plural required for '" + identifier + "'");
@@ -87,6 +90,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.parent = parent;
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
+		this.projectMetadata = projectMetadata;
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -188,8 +192,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// We need to create one
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		boolean hasGaeKey = identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key"));
-		boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || hasGaeKey);
+		boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")));
 		JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
 		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
 		annotations.add(idAnnotation);
@@ -197,7 +200,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Compute the column name, as required
 		if (!hasIdClass) {
 			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			String generationType = hasGaeKey ? "IDENTITY" : "AUTO";
+			String generationType = isGaeDetected() ? "IDENTITY" : "AUTO";
 			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
 			AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
 			annotations.add(generatedValueAnnotation);
@@ -869,6 +872,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return plural;
 	}
 
+	private boolean isGaeDetected() {
+		for (Dependency dependency : projectMetadata.getDependencies()) {
+			if ("com.google.appengine".equals(dependency.getGroupId().getFullyQualifiedPackageName()) && "appengine-api-1.0-sdk".equals(dependency.getArtifactId().getSymbolName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

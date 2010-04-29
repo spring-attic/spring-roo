@@ -27,6 +27,15 @@
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
 			<version>1.2</version>
+			<configuration>
+				<logLevel>INFO</logLevel>
+				<style>PRETTY</style>
+				<gwtVersion>2.0.999</gwtVersion>
+				<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+				<modules>
+					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
+				</modules>
+			</configuration>
 			<executions>
 				<execution>
 					<goals>

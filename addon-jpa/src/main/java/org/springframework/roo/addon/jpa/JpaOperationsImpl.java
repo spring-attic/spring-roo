@@ -41,6 +41,7 @@ import org.w3c.dom.Element;
 public class JpaOperationsImpl implements JpaOperations {
 	private static final Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
+	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
@@ -59,25 +60,31 @@ public class JpaOperationsImpl implements JpaOperations {
 		Assert.notNull(database, "JDBC database required");
 
 		updatePersistenceXml(ormProvider, database);
+		updateGaeXml(ormProvider, database);
 		if (jndi == null || jndi.length() == 0) {
 			updateDatabaseProperties(ormProvider, database);
 		}
 
 		updateApplicationContext(ormProvider, database, jndi);
-		updatePomProperties(ormProvider);
+		updatePomProperties(ormProvider, database);
 		updateDependencies(ormProvider, database);
-		updateRepositories(ormProvider);
-		updatePluginRepositories(ormProvider);
-		updateBuildPlugins(ormProvider);
-		updateGaeXml(ormProvider);
+		updateRepositories(ormProvider, database);
+		updatePluginRepositories(ormProvider, database);
+		updateBuildPlugins(ormProvider, database);
 		
 		// Remove unnecessary artifacts not specific to current JPA provider
-		cleanup(ormProvider);
+		cleanup(ormProvider, database);
 	}
 
-	private void updatePomProperties(OrmProvider ormProvider) {
-		List<Element> pomProperties = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.name() + "']/properties/*", getDependencies());
-		for (Element property : pomProperties) {
+	private void updatePomProperties(OrmProvider ormProvider, JdbcDatabase database) {
+		Element configuration = getConfiguration();
+		
+		List<Element> databaseProperties = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/properties/*", configuration);
+		for (Element property : databaseProperties) {
+			projectOperations.addProperty(new Property(property));
+		}
+		List<Element> providerProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/properties/*", configuration);
+		for (Element property : providerProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
 	}
@@ -104,7 +111,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id='dataSource']", root);
 		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id='dataSource']", root);
 
-		if (ormProvider == OrmProvider.GOOGLE_APP_ENGINE) {
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
 			if (dataSource != null) {
 				root.removeChild(dataSource);
 			}
@@ -160,13 +167,19 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		entityManagerFactory = appCtx.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
-		if (ormProvider == OrmProvider.GOOGLE_APP_ENGINE) {
+		
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
 			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
 		} else {
 			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-			entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
+			if (ormProvider == OrmProvider.DATANUCLEUS) {
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", PERSISTENCE_UNIT_NAME, appCtx));
+			} else {
+				entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
+			}
 		}
+		
 		root.appendChild(entityManagerFactory);
 
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
@@ -174,115 +187,88 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database) {
 		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+		boolean databaseExists = fileManager.exists(databasePath);
 
-		MutableFile databaseMutableFile = null;
-		Properties props = new Properties();
-
-		try {
-			if (fileManager.exists(databasePath)) {
-				databaseMutableFile = fileManager.updateFile(databasePath);
-				props.load(databaseMutableFile.getInputStream());
-			} else {
-				databaseMutableFile = fileManager.createFile(databasePath);
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
-				Assert.notNull(templateInputStream, "Could not acquire database properties template");
-				props.load(templateInputStream);
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
+			if (databaseExists) {
+				fileManager.delete(databasePath);
+				return;
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-
-		props.put("database.driverClassName", database.getDriverClassName());
-
-		String connectionString = database.getConnectionString();
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-		props.put("database.url", connectionString);
-
-		if (database.equals(JdbcDatabase.HYPERSONIC_IN_MEMORY) || database.equals(JdbcDatabase.HYPERSONIC_PERSISTENT) || database.equals(JdbcDatabase.H2_IN_MEMORY)) {
-			props.put("database.username", "sa");
 		} else {
-			props.put("database.username", "");
-			logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
-		}
+			MutableFile databaseMutableFile = null;
+			Properties props = new Properties();
 
-		props.put("database.password", "");
+			try {
+				if (databaseExists) {
+					databaseMutableFile = fileManager.updateFile(databasePath);
+					props.load(databaseMutableFile.getInputStream());
+				} else {
+					databaseMutableFile = fileManager.createFile(databasePath);
+					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
+					Assert.notNull(templateInputStream, "Could not acquire database properties template");
+					props.load(templateInputStream);
+				}
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
 
-		try {
-			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+			props.put("database.driverClassName", database.getDriverClassName());
+
+			String connectionString = database.getConnectionString();
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+			props.put("database.url", connectionString);
+
+			String username = "";
+			switch (database) {
+				case HYPERSONIC_IN_MEMORY:
+				case HYPERSONIC_PERSISTENT:
+				case H2_IN_MEMORY:
+					username = "sa";
+					break;
+				default:
+					logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+					break;
+			}
+
+			props.put("database.username", username);
+			props.put("database.password", "");
+
+			try {
+				props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
 		}
 	}
 
 	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {
-		Element dependencies = getDependencies();
+		Element configuration = getConfiguration();
 
-		List<Element> databaseDependencies = XmlUtils.findElements("/dependencies/databases/database[@id='" + database.getKey() + "']/dependency", dependencies);
+		List<Element> databaseDependencies = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
 
-		List<Element> ormDependencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.name() + "']/dependency", dependencies);
+		List<Element> ormDependencies = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/dependencies/dependency", configuration);
 		for (Element dependencyElement : ormDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
 
 		// Hard coded to JPA & Hibernate Validator for now
-		List<Element> jpaDependencies = XmlUtils.findElements("/dependencies/persistence/provider[@id='JPA']/dependency", dependencies);
+		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jpaDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
 
-		List<Element> springDependencies = XmlUtils.findElements("/dependencies/spring/dependency", dependencies);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
 
-		if (database.getKey().equals(JdbcDatabase.ORACLE.getKey()) || database.getKey().equals(JdbcDatabase.DB2.getKey())) {
-			logger.warning("The " + database.getKey() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
+			logger.warning("The " + database.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
 		}
-	}
-
-	private void updateRepositories(OrmProvider ormProvider) {
-		Element dependencies = getDependencies();
-
-		List<Element> repositories = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.name() + "']/repository", dependencies);
-		for (Element repositoryElement : repositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
-		}
-
-		List<Element> jpaRepositories = XmlUtils.findElements("/dependencies/persistence/provider[@id='JPA']/repository", dependencies);
-		for (Element repositoryElement : jpaRepositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
-		}
-	}
-
-	private void updatePluginRepositories(OrmProvider ormProvider) {
-		List<Element> pluginRepositories = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.name() + "']/pluginRepository", getDependencies());
-		for (Element pluginRepositoryElement : pluginRepositories) {
-			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
-		}
-	}
-
-	private void updateBuildPlugins(OrmProvider ormProvider) {
-		List<Element> plugins = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + ormProvider.name() + "']/plugin", getDependencies());
-		for (Element pluginElement : plugins) {
-			projectOperations.addBuildPlugin(new Plugin(pluginElement));
-		}
-	}
-
-	private Element getDependencies() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "dependencies.xml");
-		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
-		Document dependencyDoc;
-		try {
-			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		return (Element) dependencyDoc.getFirstChild();
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
@@ -322,130 +308,225 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		// Set attributes for GAE-specific requirements
-		if (ormProvider == OrmProvider.GOOGLE_APP_ENGINE) {
-			persistenceElement.setAttribute("version", "1.0");
-			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
-			persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
-			persistenceUnit.removeAttribute("transaction-type");
-		} else {
-			persistenceElement.setAttribute("version", "2.0");
-			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
-			persistenceUnit.setAttribute("name", "persistenceUnit");
-			persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
+		switch (database) {
+			case GOOGLE_APP_ENGINE:
+				persistenceElement.setAttribute("version", "1.0");
+				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
+				persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
+				persistenceUnit.removeAttribute("transaction-type");
+				break;
+			default:
+				persistenceElement.setAttribute("version", "2.0");
+				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
+				persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
+				persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
+				break;
 		}
-
+		
 		// Add provider element
 		Element provider = persistence.createElement("provider");
-		provider.setTextContent(ormProvider.getAdapter());
+		provider.setTextContent(database == JdbcDatabase.GOOGLE_APP_ENGINE ? ormProvider.getAlternateAdapter() : ormProvider.getAdapter());
 		persistenceUnit.appendChild(provider);
 
 		// Add properties
 		Element properties = persistence.createElement("properties");
 		switch (ormProvider) {
 			case HIBERNATE:
-				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + database.getKey()), persistence));
+				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
 				properties.appendChild(persistence.createComment("value='create' to build a new database on each run; value='update' to modify an existing database; value='create-drop' means the same as 'create' but also drops tables when Hibernate closes; value='validate' makes no changes to the database")); // ROO-627
 				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", "create", persistence));
 				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
 				break;
 			case OPENJPA:
-				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + database.getKey()), persistence));
+				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
 				properties.appendChild(persistence.createComment("value='buildSchema' to runtime forward map the DDL SQL; value='validate' makes no changes to the database")); // ROO-627
 				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
 				break;
 			case ECLIPSELINK:
-				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + database.getKey()), persistence));
+				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
 				properties.appendChild(persistence.createComment("value='drop-and-create-tables' to build a new database on each run; value='create-tables' creates new tables if needed; value='none' makes no changes to the database")); // ROO-627
 				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
 				properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
 				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 				break;
-			case GOOGLE_APP_ENGINE:
-				properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
-				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", "appengine", persistence));
+			case DATANUCLEUS:
+				if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+					properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
+					properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
+					properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", database.getConnectionString(), persistence));
+				} else {
+					properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", database.getDriverClassName(), persistence));
+					
+					String connectionString = database.getConnectionString();
+					ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+					connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+					properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
+					
+					String username = "";
+					String password = "";
+					switch (database) {
+						case HYPERSONIC_IN_MEMORY:
+						case HYPERSONIC_PERSISTENT:
+						case H2_IN_MEMORY:
+							username = "sa";
+							break;
+						default:
+							logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
+							break;
+					}
+					properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", username, persistence));
+					properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
+
+					properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
+					properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
+					properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
+				}
 				break;
-		}
+			}
 
 		persistenceUnit.appendChild(properties);
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
 	}
 
-	private void updateGaeXml(OrmProvider ormProvider) {
+	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase database) {
 		String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
-
-		MutableFile appengineMutableFile = null;
-		Document appengine;
-		try {
-			if (fileManager.exists(appenginePath)) {
-				appengineMutableFile = fileManager.updateFile(appenginePath);
-				appengine = XmlUtils.getDocumentBuilder().parse(appengineMutableFile.getInputStream());
-			} else {
-				appengineMutableFile = fileManager.createFile(appenginePath);
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
-				Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
-				appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-			}
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Element rootElement = appengine.getDocumentElement();
-		Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
-		applicationElement.setTextContent(projectMetadata.getProjectName());
-
-		XmlUtils.writeXml(appengineMutableFile.getOutputStream(), appengine);
-
+		boolean appenginePathExists = fileManager.exists(appenginePath);
 		String loggingPropertiesPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
-		if (!fileManager.exists(loggingPropertiesPath)) {
+		boolean loggingPropertiesPathExists = fileManager.exists(loggingPropertiesPath);
+
+		if (database != JdbcDatabase.GOOGLE_APP_ENGINE) {
+			if (appenginePathExists) {
+				fileManager.delete(appenginePath);
+			}
+			if (loggingPropertiesPathExists) {
+				fileManager.delete(loggingPropertiesPath);
+			}
+			return;
+		} else {
+			MutableFile appengineMutableFile = null;
+			Document appengine;
 			try {
-				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
-				FileCopyUtils.copy(templateInputStream, fileManager.createFile(loggingPropertiesPath).getOutputStream());
-			} catch (IOException e) {
+				if (appenginePathExists) {
+					appengineMutableFile = fileManager.updateFile(appenginePath);
+					appengine = XmlUtils.getDocumentBuilder().parse(appengineMutableFile.getInputStream());
+				} else {
+					appengineMutableFile = fileManager.createFile(appenginePath);
+					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "appengine-web-template.xml");
+					Assert.notNull(templateInputStream, "Could not acquire appengine-web.xml template");
+					appengine = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+				}
+			} catch (Exception e) {
 				throw new IllegalStateException(e);
+			}
+
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			Element rootElement = appengine.getDocumentElement();
+			Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
+			applicationElement.setTextContent(projectMetadata.getProjectName());
+
+			XmlUtils.writeXml(appengineMutableFile.getOutputStream(), appengine);
+
+			if (!loggingPropertiesPathExists) {
+				try {
+					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "logging.properties");
+					FileCopyUtils.copy(templateInputStream, fileManager.createFile(loggingPropertiesPath).getOutputStream());
+				} catch (IOException e) {
+					throw new IllegalStateException(e);
+				}
 			}
 		}
 	}
 
-	private void cleanup(OrmProvider ormProvider) {
-		Element dependencies = getDependencies();
+	private void updateRepositories(OrmProvider ormProvider, JdbcDatabase database) {
+		Element configuration = getConfiguration();
+
+		List<Element> databaseRepositories = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/repositories/repository", configuration);
+		for (Element repositoryElement : databaseRepositories) {
+			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+		List<Element> ormRepositories = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/repositories/repository", configuration);
+		for (Element repositoryElement : ormRepositories) {
+			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+		List<Element> jpaRepositories = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/repositories/repository", configuration);
+		for (Element repositoryElement : jpaRepositories) {
+			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+	}
+
+	private void updatePluginRepositories(OrmProvider ormProvider, JdbcDatabase database) {
+		Element configuration = getConfiguration();
+
+		List<Element> databasePluginRepositories = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/pluginRepositories/pluginRepository", configuration);
+		for (Element pluginRepositoryElement : databasePluginRepositories) {
+			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
+		}
+		List<Element> ormPluginRepositories = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/pluginRepositories/pluginRepository", configuration);
+		for (Element pluginRepositoryElement : ormPluginRepositories) {
+			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
+		}
+	}
+
+	private void updateBuildPlugins(OrmProvider ormProvider, JdbcDatabase database) {
+		Element configuration = getConfiguration();
+
+		List<Element> databasePlugins = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/plugins/plugin", configuration);
+		for (Element pluginElement : databasePlugins) {
+			projectOperations.addBuildPlugin(new Plugin(pluginElement));
+		}
+		List<Element> ormPlugins = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/plugins/plugin", configuration);
+		for (Element pluginElement : ormPlugins) {
+			projectOperations.addBuildPlugin(new Plugin(pluginElement));
+		}
+	}
+
+	private void cleanup(OrmProvider ormProvider, JdbcDatabase database) {
+		Element configuration = getConfiguration();
 
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
-				// List<Element> pomProperties = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/properties/*", dependencies);
-				// for (Element propertyElement : pomProperties) {
-				// projectOperations.removeProperty(new Property(propertyElement));
-				// }
-
-				List<Element> ormDependencies = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/dependency", dependencies);
-				for (Element dependency : ormDependencies) {
-					projectOperations.removeDependency(new Dependency(dependency));
-				}
-
-				List<Element> plugins = XmlUtils.findElements("/dependencies/ormProviders/provider[@id='" + provider.name() + "']/plugin", dependencies);
-				for (Element pluginElement : plugins) {
-					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
+				for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
+					if (jdbcDatabase != database) {
+						removeArtifacts(configuration, jdbcDatabase, provider);
+					}
 				}
 			}
+		}
+	}
+
+	private void removeArtifacts(Element configuration, JdbcDatabase database, OrmProvider provider) {
+		// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
+		// for (Element propertyElement : pomProperties) {
+		// projectOperations.removeProperty(new Property(propertyElement));
+		// }
+
+		List<Element> ormDependencies = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/dependencies/dependency", configuration);
+		for (Element dependencyElement : ormDependencies) {
+			projectOperations.removeDependency(new Dependency(dependencyElement));
+		}
+
+		List<Element> databasePlugins = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/plugins/plugin", configuration);
+		for (Element pluginElement : databasePlugins) {
+			projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 		}
 		
-		if (ormProvider != OrmProvider.GOOGLE_APP_ENGINE) {
-			String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
-			if (fileManager.exists(appenginePath)) {
-				fileManager.delete(appenginePath);
-			}
-
-			String loggingPropertiesPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
-			if (fileManager.exists(loggingPropertiesPath)) {
-				fileManager.delete(loggingPropertiesPath);
-			}
-		} else {
-			String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
-			if (fileManager.exists(databasePath)) {
-				fileManager.delete(databasePath);
-			}
+		List<Element> providerPlugins = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/plugins/plugin", configuration);
+		for (Element pluginElement : providerPlugins) {
+			projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 		}
+	}
+
+	private Element getConfiguration() {
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
+		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
+		Document configurationDoc;
+		try {
+			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		return (Element) configurationDoc.getFirstChild();
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {

@@ -159,6 +159,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		
 		classpathOperations.generateClassFile(details);
 		
-		webMvcOperations.installMvcArtefacts();
+		webMvcOperations.installAllWebMvcArtifacts();
 	}
 }

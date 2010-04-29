@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,6 +14,7 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Commands for the 'jpa' add-on to be used by the ROO shell.
@@ -25,6 +27,7 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 @Component
 @Service
 public class JpaCommands implements CommandMarker {
+	private static Logger logger = HandlerUtils.getLogger(JpaCommands.class);
 
 	@Reference private JpaOperations jpaOperations;
 	@Reference private PropFileOperations propFileOperations;
@@ -53,6 +56,11 @@ public class JpaCommands implements CommandMarker {
 			@CliOption(key = { "databaseName" }, mandatory = false, help = "The database name to use") String databaseName, 
 			@CliOption(key = { "userName" }, mandatory = false, help = "The username to use") String userName, 
 			@CliOption(key = { "password" }, mandatory = false, help = "The password to use") String password) {
+
+		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE && ormProvider != OrmProvider.DATANUCLEUS) {
+			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for the Google App Engine");
+			return;
+		}
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi);
 

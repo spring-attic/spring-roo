@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides {@link EntityMetadata}.
@@ -77,7 +78,9 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+
+		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural(), projectMetadata);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

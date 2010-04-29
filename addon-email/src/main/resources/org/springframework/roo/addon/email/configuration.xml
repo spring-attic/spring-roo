@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+	<email>
+		<dependencies>
+			<dependency org="org.springframework" name="spring-context-support" rev="${spring.version}" />
+			<dependency org="javax.mail" name="mail" rev="1.4.1" />
+			<dependency org="javax.activation" name="activation" rev="1.1.1" />
+		</dependencies>
+	</email>
+</configuration>

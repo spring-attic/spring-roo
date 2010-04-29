@@ -56,12 +56,11 @@ import org.w3c.dom.Node;
  * @author Stefan Schmidt
  * @author Jeremy Grelle
  * @since 1.0
- *
+ * 
  */
 @Component
 @Service
 public class JspOperationsImpl implements JspOperations {
-
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ClasspathOperations classpathOperations;
@@ -71,7 +70,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private TilesOperations tilesOperations;
 	@Reference private ProjectOperations projectOperations;
 	private ComponentContext context;
-	
+
 	protected void activate(ComponentContext context) {
 		this.context = context;
 	}
@@ -80,59 +79,57 @@ public class JspOperationsImpl implements JspOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 
-	public void installCommonViewArtefacts() {			
+	public void installCommonViewArtefacts() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.notNull(projectMetadata, "Unable to obtain path resolver");		
-		 
-		//install tiles config
-		configureTiles();
-		
-		//install styles
+		Assert.notNull(projectMetadata, "Unable to obtain path resolver");
+
+		// Install tiles config
+		updateConfiguration();
+
+		// Install styles
 		copyDirectoryContents("images/*.*", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/images"));
-		
-		//install styles
+
+		// Install styles
 		copyDirectoryContents("styles/*.css", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/styles"));
 		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes"));
 
-		//install layout
+		// Install layout
 		copyDirectoryContents("layout/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
 		copyDirectoryContents("layout/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
 		copyDirectoryContents("layout/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
 
-		//install common view files
+		// Install common view files
 		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
 
-		//install tags
+		// Install tags
 		copyDirectoryContents("tags/form/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form"));
 		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"));
 		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"));
 		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"));
-		
-		//install message resources
+
+		// Install message resources
 		copyDirectoryContents("i18n/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/"));
 
 		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
-				//TODO
+				// TODO
 				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application.name", projectMetadata.getProjectName().substring(0,1).toUpperCase() +  projectMetadata.getProjectName().substring(1));
+				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application.name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1));
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
 		}
-	}	
-	
-	
+	}
+
 	/**
 	 * Creates a new Spring MVC controller.
 	 * 
 	 * <p>
-	 * Request mappings assigned by this method will always commence with "/" and end with "/**".
-	 * You may present this prefix and/or this suffix if you wish, although it will automatically be added
+	 * Request mappings assigned by this method will always commence with "/" and end with "/**". You may present this prefix and/or this suffix if you wish, although it will automatically be added
 	 * should it not be provided.
 	 * 
 	 * @param controller the controller class to create (required)
@@ -140,11 +137,11 @@ public class JspOperationsImpl implements JspOperations {
 	 */
 	public void createManualController(JavaType controller, String preferredMapping) {
 		Assert.notNull(controller, "Controller Java Type required");
-		
+
 		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 		String folderName = null;
-		
-		//create annotation @RequestMapping("/myobject/**")
+
+		// Create annotation @RequestMapping("/myobject/**")
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		if (preferredMapping == null || preferredMapping.length() == 0) {
 			String typeName = controller.getSimpleTypeName();
@@ -168,8 +165,8 @@ public class JspOperationsImpl implements JspOperations {
 		}
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), preferredMapping));
 		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
-		
-		//create annotation @Controller
+
+		// Create annotation @Controller
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		AnnotationMetadata controllerAnnotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
 
@@ -177,7 +174,7 @@ public class JspOperationsImpl implements JspOperations {
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
 		annotations.add(controllerAnnotation);
-		
+
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 
 		List<AnnotationMetadata> getMethodAnnotations = new ArrayList<AnnotationMetadata>();
@@ -213,7 +210,7 @@ public class JspOperationsImpl implements JspOperations {
 		postParamNames.add(new JavaSymbolName("response"));
 		MethodMetadata postMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, postMethodAnnotations, null, null);
 		methods.add(postMethod);
-		
+
 		List<AnnotationMetadata> indexMethodAnnotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> indexMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		indexMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), indexMethodAttributes));
@@ -222,54 +219,49 @@ public class JspOperationsImpl implements JspOperations {
 		methods.add(indexMethod);
 
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
-		
+
 		classpathOperations.generateClassFile(details);
-		
-		webMvcOperations.installMvcArtefacts();
-		
+
+		webMvcOperations.installAllWebMvcArtifacts();
+
 		installCommonViewArtefacts();
-		
+
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + folderName + "/index.jspx")).getOutputStream());
 		} catch (IOException e) {
 			new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 		}
-		
+
 		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName());
-		
-		menuOperations.addMenuItem( 
-				new JavaSymbolName("Controller"), 
-				new JavaSymbolName(controller.getSimpleTypeName()), 
-				"global.menu.new", 
-				"/" + folderName + "/index",
-				null);
-		
+
+		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName(controller.getSimpleTypeName()), "global.menu.new", "/" + folderName + "/index", null);
+
 		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
 	}
-	
+
 	/**
-	 * Adds Tiles Maven dependencies and updates the MVC config to include Tiles view support 
+	 * Adds Tiles Maven dependencies and updates the MVC config to include Tiles view support
 	 * 
 	 */
-	private void configureTiles() {
-		//add tiles dependencies to pom
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "layout/dependencies.xml");
-		Assert.notNull(templateInputStream, "Could not acquire dependencies.xml file");
-		Document dependencyDoc;
+	private void updateConfiguration() {
+		// Add tiles dependencies to pom
+		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "layout/configuration.xml");
+		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
+		Document configurationDoc;
 		try {
-			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 
-		Element dependenciesElement = dependencyDoc.getDocumentElement();
-		
-		List<Element> springDependencies = XmlUtils.findElements("/dependencies/tiles/dependency", dependenciesElement);
-		for(Element dependency : springDependencies) {
+		Element configurationElement = configurationDoc.getDocumentElement();
+
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configurationElement);
+		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
-		
-		//add config to MVC app context
+
+		// Add config to MVC app context
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		MutableFile mutableMvcConfigFile = fileManager.updateFile(mvcConfig);
 		Document mvcConfigDocument;
@@ -280,12 +272,11 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		Element beans = mvcConfigDocument.getDocumentElement();
-		
-		if (null != XmlUtils.findFirstElement("/beans/bean[@id='tilesViewResolver']", beans) ||
-				null != XmlUtils.findFirstElement("/beans/bean[@id='tilesConfigurer']", beans)) {
-			return; //tiles is already configured, nothing to do
+
+		if (null != XmlUtils.findFirstElement("/beans/bean[@id='tilesViewResolver']", beans) || null != XmlUtils.findFirstElement("/beans/bean[@id='tilesConfigurer']", beans)) {
+			return; // Tiles is already configured, nothing to do
 		}
-		
+
 		InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "layout/tiles-mvc-config-template.xml");
 		Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
 		Document configDoc;
@@ -295,7 +286,7 @@ public class JspOperationsImpl implements JspOperations {
 			throw new IllegalStateException(e);
 		}
 
-		Element configElement = configDoc.getDocumentElement();	
+		Element configElement = configDoc.getDocumentElement();
 		List<Element> tilesConfig = XmlUtils.findElements("/config/bean", configElement);
 
 		for (Element bean : tilesConfig) {
@@ -305,62 +296,66 @@ public class JspOperationsImpl implements JspOperations {
 
 		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
 	}
-	
-	 /**
-     * Changes the specified property, throwing an exception if the file does not exist.
-     * 
-     * @param propertyFilePath the location of the property file (required)
-     * @param propertyFilename the name of the property file within the specified path (required)
-     * @param key the property key to update (required)
-     * @param value the property value to set into the property key (required)
-     */
-    private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-	    Assert.notNull(propertyFilePath, "Property file path required");
-	    Assert.hasText(propertyFilename, "Property filename required");
-	    Assert.hasText(key, "Key required");
-	    Assert.hasText(value, "Value required");
 
-	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+	/**
+	 * Changes the specified property, throwing an exception if the file does not exist.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to update (required)
+	 * @param value the property value to set into the property key (required)
+	 */
+	private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+		Assert.notNull(propertyFilePath, "Property file path required");
+		Assert.hasText(propertyFilename, "Property filename required");
+		Assert.hasText(key, "Key required");
+		Assert.hasText(value, "Value required");
 
-	    Properties readProps = new Properties();
-	    try {
-            if (fileManager.exists(filePath)) {
-            	
-            	readProps.load(fileManager.getInputStream(filePath));
-            } else {
-            	throw new IllegalStateException("Properties file not found");
-            }
-	    } catch (IOException ioe) {
-	    	throw new IllegalStateException(ioe);
-	    }
-	    if (null == readProps.getProperty(key)) {
-	    	MutableFile mutableFile = fileManager.updateFile(filePath);
-		    Properties props = new Properties() {
+		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+
+		Properties readProps = new Properties();
+		try {
+			if (fileManager.exists(filePath)) {
+
+				readProps.load(fileManager.getInputStream(filePath));
+			} else {
+				throw new IllegalStateException("Properties file not found");
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+		if (null == readProps.getProperty(key)) {
+			MutableFile mutableFile = fileManager.updateFile(filePath);
+			Properties props = new Properties() {
 				private static final long serialVersionUID = 1L;
 
-				//override the keys() method to order the keys alphabetically
-		        @Override 
-		        @SuppressWarnings("unchecked")
-		        public synchronized Enumeration keys() {
-		        	final Object[] keys = keySet().toArray();
-		        	Arrays.sort(keys);
-		        	return new Enumeration() {
-			        	int i = 0;
-			        	public boolean hasMoreElements() { return i < keys.length; }
-			        		public Object nextElement() { return keys[i++]; }
-			        	};
-		        	}
-		    	};
-		    try {
-		    	props.load(mutableFile.getInputStream());	
-				props.setProperty(key, value);   
-		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
-		    } catch (IOException ioe) {
-		    	throw new IllegalStateException(ioe);
-		    }
-	    }
-    }
-    
+				// Override the keys() method to order the keys alphabetically
+				@Override
+				@SuppressWarnings("unchecked")
+				public synchronized Enumeration keys() {
+					final Object[] keys = keySet().toArray();
+					Arrays.sort(keys);
+					return new Enumeration() {
+						int i = 0;
+						public boolean hasMoreElements() {
+							return i < keys.length;
+						}
+						public Object nextElement() {
+							return keys[i++];
+						}
+					};
+				}
+			};
+			try {
+				props.load(mutableFile.getInputStream());
+				props.setProperty(key, value);
+				props.store(mutableFile.getOutputStream(), "Updated " + new Date());
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
+		}
+	}
+
 	/**
 	 * This method will copy the contents of a directory to another if the resource does not already exist in the target directory
 	 * 
@@ -370,20 +365,20 @@ public class JspOperationsImpl implements JspOperations {
 	private void copyDirectoryContents(String sourceAntPath, String targetDirectory) {
 		Assert.hasText(sourceAntPath, "Source path required");
 		Assert.hasText(targetDirectory, "Target directory required");
-		
+
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
-		
+
 		if (!fileManager.exists(targetDirectory)) {
 			fileManager.createDirectory(targetDirectory);
 		}
-		
+
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
 		Set<URL> urls = TemplateUtils.findMatchingClasspathResources(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
-		for (URL url: urls) {
-			String fileName =  url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+		for (URL url : urls) {
+			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			if (!fileManager.exists(targetDirectory + fileName)) {
 				try {
 					FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetDirectory + fileName).getOutputStream());

@@ -58,7 +58,6 @@ import org.w3c.dom.Document;
 @Component(immediate=true)
 @Service
 public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
-
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;

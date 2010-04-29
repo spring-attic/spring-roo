@@ -17,6 +17,7 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.WebXmlUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -26,6 +27,7 @@ import org.w3c.dom.Element;
  * Provides security installation services.
  *
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  */
 @Component
@@ -89,44 +91,18 @@ public class SecurityOperationsImpl implements SecurityOperations {
 				
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		
-		MutableFile mutableWebXml = null;
-		Document webXmlDoc;
 		try {
 			if (fileManager.exists(webXml)) {
-				mutableWebXml = fileManager.updateFile(webXml);
-				webXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableWebXml.getInputStream());
+				MutableFile mutableWebXml = fileManager.updateFile(webXml);
+				Document webXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableWebXml.getInputStream());
+				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.FIRST, null, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, "Spring Security Filter");		
+				XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 			} else {
 				throw new IllegalStateException("Could not acquire " + webXml);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		} 	
-		
-		Element root = (Element) webXmlDoc.getFirstChild();
-		
-		Element filter = webXmlDoc.createElement("filter");
-		Element filterName = webXmlDoc.createElement("filter-name");
-		filterName.setTextContent("springSecurityFilterChain");
-		Element filterClass = webXmlDoc.createElement("filter-class");
-		filterClass.setTextContent("org.springframework.web.filter.DelegatingFilterProxy");
-		filter.appendChild(filterName);
-		filter.appendChild(filterClass);
-		
-		Element filterMapping = webXmlDoc.createElement("filter-mapping");
-		Element urlPattern = webXmlDoc.createElement("url-pattern");
-		Element filterName2 = webXmlDoc.createElement("filter-name");
-		filterName2.setTextContent("springSecurityFilterChain");
-		urlPattern.setTextContent("/*");
-		filterMapping.appendChild(filterName2);
-		filterMapping.appendChild(urlPattern);
-		
-		Element ctx = XmlUtils.findRequiredElement("/web-app/context-param[last()]", root);
-		ctx.getParentNode().insertBefore(filter, ctx.getNextSibling());
-
-		Element fm = XmlUtils.findRequiredElement("/web-app/filter-mapping[filter-name='Spring OpenEntityManagerInViewFilter']", root);
-		fm.getParentNode().insertBefore(filterMapping, fm.getNextSibling());
-		
-		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
+		} 			
 		
 		//include static view controller handler to webmvc-config.xml
 		String webMvc = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");

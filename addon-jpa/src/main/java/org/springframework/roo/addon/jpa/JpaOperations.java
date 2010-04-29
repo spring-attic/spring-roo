@@ -20,5 +20,4 @@ public interface JpaOperations {
 	 * @param database the database (HSQL, H2, MySql, etc)
 	 */
 	public abstract void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi);
-
 }
