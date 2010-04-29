@@ -81,7 +81,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		        	logger.fine(line);
 	        	}
 	        	if (!"".equals(line.trim())) {
-		        	boolean success = executeCommand(line);
+		        	boolean success = executeScriptLine(line);
 		        	if (!success) {
 		        		// Abort script processing, given something went wrong
 		        		throw new IllegalStateException("Script execution aborted");
@@ -93,6 +93,15 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	    	throw new IllegalStateException(e);
 	    }
 	    logger.fine("Milliseconds required: " + (new Date().getTime() - started));
+	}
+	
+	/**
+	 * Execute the single line from a script.
+	 * <p>
+	 * This method can be overridden by sub-classes to pre-process script lines. 
+	 */
+	protected boolean executeScriptLine(String line) {
+		return executeCommand(line);
 	}
 	
 	public boolean executeCommand(String line) {
