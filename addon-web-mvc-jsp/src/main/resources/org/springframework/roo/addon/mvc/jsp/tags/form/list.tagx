@@ -26,7 +26,7 @@
 	        		<jsp:doBody />
 	        	</c:when>
 	        	<c:otherwise>
-	        		<spring:message arguments="${label}" code="entity.not.found.single"/>
+	        		<spring:message arguments="${label}" code="entity.not.found"/>
 	        	</c:otherwise>
 	        </c:choose>
 	     </div>
