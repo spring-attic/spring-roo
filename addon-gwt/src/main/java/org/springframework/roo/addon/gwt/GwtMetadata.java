@@ -237,7 +237,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		// extends Record
 		extendsTypes.add(new JavaType("com.google.gwt.valuestore.shared.Record"));
-
+		
 		// Decide fields we'll be mapping
 		SortedMap<JavaSymbolName, JavaType> propToGwtSideType = new TreeMap<JavaSymbolName, JavaType>();
 		Map<JavaSymbolName, JavaType> propToWrapperType = new HashMap<JavaSymbolName, JavaType>();
@@ -783,6 +783,13 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<AnnotationAttributeValue<?>> rooGwtMirroredFromConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		rooGwtMirroredFromConfig.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooGwtMirroredFrom.class.getName()), rooGwtMirroredFromConfig));
+	
+		// @ServerType(type = Employee.class)
+		JavaType serverType = new JavaType("com.google.gwt.sample.expenses.gwt.request.ServerType");
+		List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("type"), governorTypeDetails.getName()));
+		annotations.add(new DefaultAnnotationMetadata(serverType, serverTypeAttributes));
+		
 		return annotations;
 	}
 
