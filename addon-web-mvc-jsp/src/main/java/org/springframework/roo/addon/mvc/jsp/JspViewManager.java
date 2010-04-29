@@ -100,7 +100,7 @@ public class JspViewManager {
 		Element fieldTable = new XmlElementBuilder("table:table", document)
 								.addAttribute("id", "l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 								.addAttribute("data", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
-								.addAttribute("path", webScaffoldAnnotationValues.getPath())
+								.addAttribute("path", controllerPath)
 							.build();
 		
 		if (!webScaffoldAnnotationValues.isUpdate()) {
