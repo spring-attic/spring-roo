@@ -61,6 +61,7 @@ public final class XmlUtils {
 		Assert.notNull(document, "Document required");
 		
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		document.normalize();
 		
 		try {
 			transformer.transform(new DOMSource(document), createUnixStreamResultForEntry(outputEntry));
@@ -139,22 +140,43 @@ public final class XmlUtils {
 	 * @return the Element if discovered (null if not found)
 	 */
 	public static Element findFirstElement(String xPathExpression, Element root) {
+		Node node = findNode(xPathExpression, root);
+		if (node != null && node instanceof Element) {
+			return (Element) node;
+		}
+		return null;
+	}
+	
+	/**
+	 * Checks in under a given root element whether it can find a child node
+	 * which matches the XPath expression supplied. Returns {@link Node} if
+	 * exists.
+	 * 
+	 * Please note that the XPath parser used is NOT namespace aware. So if you
+	 * want to find a element <beans><sec:http> you need to use the following
+	 * XPath expression '/beans/http'.
+	 * 
+	 * @param xPathExpression the xPathExpression (required)
+	 * @param root the parent DOM element (required)
+	 * 
+	 * @return the Node if discovered (null if not found)
+	 */
+	public static Node findNode(String xPathExpression, Element root) {
 		if (xPathExpression == null || root == null || xPathExpression.length() == 0) {
 			throw new IllegalArgumentException("Xpath expression and root element required");
 		}
-
-		Element rootElement = null;
+		Node node = null;
 		try {
 			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
 			if (expr == null) {
 				expr = xpath.compile(xPathExpression);
 				compiledExpressionCache.put(xPathExpression, expr);
 			}
-			rootElement = (Element) expr.evaluate(root, XPathConstants.NODE);
+			node = (Node) expr.evaluate(root, XPathConstants.NODE);
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
 		}
-		return rootElement;
+		return node;
 	}
 
 	/**
@@ -256,6 +278,7 @@ public final class XmlUtils {
 	public static final Transformer createIndentingTransformer() {
 		Transformer xformer;
 		try {
+			transformerFactory.setAttribute("indent-number", 4);
 			xformer = transformerFactory.newTransformer();
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
