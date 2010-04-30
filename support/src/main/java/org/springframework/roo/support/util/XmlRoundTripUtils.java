@@ -133,8 +133,10 @@ public abstract class XmlRoundTripUtils {
 									originalDocumentChanged = true;
 								} 
 							} else { //if hash codes don't match we will mark the element as z="user-managed"
-								originalElement.setAttribute("z", "user-managed"); //mark the element as 'user-managed' if the hash codes don't match any more
-								originalDocumentChanged = true;
+								if (!originalElementHashCode.equals("user-managed")) {
+									originalElement.setAttribute("z", "user-managed"); //mark the element as 'user-managed' if the hash codes don't match any more
+									originalDocumentChanged = true;
+								}
 							}	
 						}
 					}
