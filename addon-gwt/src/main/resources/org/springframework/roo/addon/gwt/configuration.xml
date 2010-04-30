@@ -31,7 +31,8 @@
 				<logLevel>INFO</logLevel>
 				<style>PRETTY</style>
 				<gwtVersion>2.0.999</gwtVersion>
-				<webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
+				<runTarget>ApplicationScaffold.html</runTarget>
+				<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 				<modules>
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
 				</modules>
