@@ -528,7 +528,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private String getProviderXPath(OrmProvider provider) {
-		return "/configuration/ormProviders/ormProvider[@id='" + provider.name() + "']";
+		return "/configuration/ormProviders/provider[@id='" + provider.name() + "']";
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {
