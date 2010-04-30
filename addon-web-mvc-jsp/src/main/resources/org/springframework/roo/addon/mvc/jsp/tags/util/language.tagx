@@ -10,6 +10,12 @@
 	    	<spring:message code="global.language" />
 	    	<c:out value=": "/>
 	    	<spring:url var="url_en" value="">
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 				<spring:param name="lang" value="en" />
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
@@ -17,6 +23,7 @@
 	    		<c:if test="${not empty param.size}">
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>
+
 	    	</spring:url>	
 	    	<spring:url var="img_en" value="/static/images/gb.png" />    	
 	    	<spring:message code="global.language.switch" arguments="English" var="lang_en"/>
@@ -25,6 +32,12 @@
 	
 	    	<spring:url var="img_de" value="/static/images/de.png" />
 	    	<spring:url var="url_de" value="">
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 	    		<spring:param name="lang" value="de" />
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
@@ -40,6 +53,12 @@
 	    	<spring:url var="img_sv" value="/static/images/sv.png" />
 	    	<spring:url var="url_sv" value="">
 	    		<spring:param name="lang" value="sv" />
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
 	    		</c:if>
@@ -53,6 +72,12 @@
 	
 	    	<spring:url var="img_es" value="/static/images/es.png" />
 	    	<spring:url var="url_es" value="">
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 	    		<spring:param name="lang" value="es" />
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
@@ -67,6 +92,12 @@
 	
 	    	<spring:url var="img_it" value="/static/images/it.png" />
 	    	<spring:url var="url_it" value="">
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 	    		<spring:param name="lang" value="it" />
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
@@ -81,6 +112,12 @@
 			
 			<spring:url var="img_nl" value="/static/images/nl.png" />
 	    	<spring:url var="url_nl" value="">
+	    		<c:if test="${null ne param.form}">
+	    			<spring:param name="form" />
+	    		</c:if>
+	    	    <c:if test="${not empty param.find}">
+	    			<spring:param name="find" value="${param.find}" />
+	    		</c:if>
 	    		<spring:param name="lang" value="nl" />
 				<c:if test="${not empty param.page}">
 	   				<spring:param name="page" value="${param.page}" />
