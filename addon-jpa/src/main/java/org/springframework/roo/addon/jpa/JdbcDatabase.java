@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.jpa;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.springframework.roo.support.style.ToStringCreator;
 
 /**
