@@ -181,6 +181,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		root.appendChild(entityManagerFactory);
+		XmlUtils.removeTextNodes(root);
 
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
