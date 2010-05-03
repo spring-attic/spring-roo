@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
 	<databases>
-		<database id="H2_IN_MEMORY">
+		<database id="H2">
 			<dependencies>
 				<dependency org="com.h2database" name="h2" rev="1.2.131" />
 			</dependencies>
 		</database>
-		<database id="HYPERSONIC_IN_MEMORY">
-			<dependencies>
-				<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
-			</dependencies>
-		</database>
-		<database id="HYPERSONIC_PERSISTENT">
+		<database id="HYPERSONIC">
 			<dependencies>
 				<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
 			</dependencies>
@@ -46,7 +41,7 @@
 				<dependency org="com.ibm" name="db2jcc" rev="3.50.152" />
 			</dependencies>
 		</database>
-		<database id="GOOGLE_APP_ENGINE">
+		<database id="GAE">
 			<properties>
 				<gae.version>1.3.2</gae.version>
 				<gae.home>${settings.localRepository}/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>

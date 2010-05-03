@@ -168,8 +168,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		Document pomDoc;
 		InputStream is = null;
+		MutableFile mutablePom = null;
 		try {
-			MutableFile mutablePom = fileManager.updateFile(pom);
+			mutablePom = fileManager.updateFile(pom);
 			is = mutablePom.getInputStream();
 			pomDoc = XmlUtils.getDocumentBuilder().parse(is);
 		} catch (Exception e) {
@@ -205,6 +206,19 @@ public class GwtOperationsImpl implements GwtOperations {
 				projectOperations.addBuildPlugin(plugin);
 			}
  		}
+		
+		// Fix output directory
+		Element outputDirectory = XmlUtils.findFirstElement("/project/build/outputDirectory", pomRoot);
+		if (outputDirectory != null) {
+			outputDirectory.setTextContent("${project.build.directory}/${project.build.finalName}/WEB-INF/classes");
+		}
+		else {
+			Element newEntry = new XmlElementBuilder("outputDirectory", pomDoc).setText("${project.build.directory}/${project.build.finalName}/WEB-INF/classes").build();
+			Element ctx = XmlUtils.findRequiredElement("/project/build", pomRoot);
+			ctx.appendChild(newEntry);
+		}
+		// TODO CD is there a better way of doing this here?
+		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
 	

@@ -72,18 +72,18 @@ public class JpaOperationsImpl implements JpaOperations {
 		updatePluginRepositories(ormProvider, database);
 		updateBuildPlugins(ormProvider, database);
 		
-		// Remove unnecessary artifacts not specific to current JPA provider
+		// Remove unnecessary artifacts not specific to current database and JPA provider
 		cleanup(ormProvider, database);
 	}
 
 	private void updatePomProperties(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 		
-		List<Element> databaseProperties = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/properties/*", configuration);
+		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
-		List<Element> providerProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/properties/*", configuration);
+		List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
 		for (Element property : providerProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
@@ -181,6 +181,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		
 		root.appendChild(entityManagerFactory);
+		XmlUtils.removeTextNodes(root);
 
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
@@ -245,12 +246,12 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 
-		List<Element> databaseDependencies = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/dependencies/dependency", configuration);
+		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
 
-		List<Element> ormDependencies = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/dependencies/dependency", configuration);
+		List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : ormDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
@@ -308,19 +309,16 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		// Set attributes for GAE-specific requirements
-		switch (database) {
-			case GOOGLE_APP_ENGINE:
-				persistenceElement.setAttribute("version", "1.0");
-				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
-				persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
-				persistenceUnit.removeAttribute("transaction-type");
-				break;
-			default:
-				persistenceElement.setAttribute("version", "2.0");
-				persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
-				persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
-				persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
-				break;
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+			persistenceElement.setAttribute("version", "1.0");
+			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
+			persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
+			persistenceUnit.removeAttribute("transaction-type");
+		} else {
+			persistenceElement.setAttribute("version", "2.0");
+			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
+			persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
+			persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
 		}
 		
 		// Add provider element
@@ -440,11 +438,11 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateRepositories(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 
-		List<Element> databaseRepositories = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/repositories/repository", configuration);
+		List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(database) + "/repositories/repository", configuration);
 		for (Element repositoryElement : databaseRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
-		List<Element> ormRepositories = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/repositories/repository", configuration);
+		List<Element> ormRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/repositories/repository", configuration);
 		for (Element repositoryElement : ormRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
@@ -457,11 +455,11 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updatePluginRepositories(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 
-		List<Element> databasePluginRepositories = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/pluginRepositories/pluginRepository", configuration);
+		List<Element> databasePluginRepositories = XmlUtils.findElements(getDbXPath(database) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
 		}
-		List<Element> ormPluginRepositories = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/pluginRepositories/pluginRepository", configuration);
+		List<Element> ormPluginRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : ormPluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
 		}
@@ -470,11 +468,11 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateBuildPlugins(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 
-		List<Element> databasePlugins = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/plugins/plugin", configuration);
+		List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(database) + "/plugins/plugin", configuration);
 		for (Element pluginElement : databasePlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
-		List<Element> ormPlugins = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + ormProvider.name() + "']/plugins/plugin", configuration);
+		List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (Element pluginElement : ormPlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
@@ -483,36 +481,33 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void cleanup(OrmProvider ormProvider, JdbcDatabase database) {
 		Element configuration = getConfiguration();
 
-		for (OrmProvider provider : OrmProvider.values()) {
-			if (provider != ormProvider) {
-				for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
-					if (jdbcDatabase != database) {
-						removeArtifacts(configuration, jdbcDatabase, provider);
-					}
+		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
+			if (!jdbcDatabase.getKey().equals(database.getKey())) {
+				List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
+				for (Element dependencyElement : databaseDependencies) {
+					projectOperations.removeDependency(new Dependency(dependencyElement));
+				}
+				List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
+				for (Element pluginElement : databasePlugins) {
+					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 				}
 			}
 		}
-	}
-
-	private void removeArtifacts(Element configuration, JdbcDatabase database, OrmProvider provider) {
-		// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
-		// for (Element propertyElement : pomProperties) {
-		// projectOperations.removeProperty(new Property(propertyElement));
-		// }
-
-		List<Element> ormDependencies = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/dependencies/dependency", configuration);
-		for (Element dependencyElement : ormDependencies) {
-			projectOperations.removeDependency(new Dependency(dependencyElement));
-		}
-
-		List<Element> databasePlugins = XmlUtils.findElements("/configuration/databases/database[@id='" + database.name() + "']/plugins/plugin", configuration);
-		for (Element pluginElement : databasePlugins) {
-			projectOperations.removeBuildPlugin(new Plugin(pluginElement));
-		}
-		
-		List<Element> providerPlugins = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/plugins/plugin", configuration);
-		for (Element pluginElement : providerPlugins) {
-			projectOperations.removeBuildPlugin(new Plugin(pluginElement));
+		for (OrmProvider provider : OrmProvider.values()) {
+			if (provider != ormProvider) {
+				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
+				// for (Element propertyElement : pomProperties) {
+				// projectOperations.removeProperty(new Property(propertyElement));
+				// }
+				List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(provider) + "/dependencies/dependency", configuration);
+				for (Element dependencyElement : ormDependencies) {
+					projectOperations.removeDependency(new Dependency(dependencyElement));
+				}
+				List<Element> providerPlugins = XmlUtils.findElements(getProviderXPath(provider) + "/plugins/plugin", configuration);
+				for (Element pluginElement : providerPlugins) {
+					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
+				}
+			}
 		}
 	}
 
@@ -527,6 +522,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		return (Element) configurationDoc.getFirstChild();
+	}
+
+	private String getDbXPath(JdbcDatabase database) {
+		return "/configuration/databases/database[@id='" + database.getKey() + "']";
+	}
+
+	private String getProviderXPath(OrmProvider provider) {
+		return "/configuration/ormProviders/provider[@id='" + provider.name() + "']";
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {
