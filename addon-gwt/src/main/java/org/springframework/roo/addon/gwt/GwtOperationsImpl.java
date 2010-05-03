@@ -36,6 +36,7 @@ import org.w3c.dom.Element;
  * Provides GWT installation services.
  *
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.1
  */
 @Component
@@ -89,6 +90,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		// Update web.xml
 		updateWebXml(projectMetadata);
+		
+		// Update urlrewrite.xml
+		updateUrlRewriteXml();
 		
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
@@ -242,13 +246,38 @@ public class GwtOperationsImpl implements GwtOperations {
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/expenses/data", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
-		removeIfFound("/web-app/filter-mapping[filter-name='UrlRewriteFilter']", webXmlRoot);  // temporary (need to discuss with Stefan whether we need to rewrite everything)
-		// TODO: This is crazy!
 		removeIfFound("/web-app/servlet[servlet-class='org.springframework.web.servlet.DispatcherServlet']", webXmlRoot);  // temporary (due to JSR 303 being used and classloader issues in m2eclipse)
 		// TODO: This is crazy!
 		removeIfFound("/web-app/servlet-mapping[url-pattern='/app/*']", webXmlRoot);  // temporary (due to dispatcher servlet removal)
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
+	}
+	
+	private void updateUrlRewriteXml() {
+		String urlrewriteXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/urlrewrite.xml");
+		Assert.isTrue(fileManager.exists(urlrewriteXml), "urlrewrite.xml not found; cannot continue");
+		
+		MutableFile mutableUrlrewriteXml = null;
+		Document urlrewriteXmlDoc;
+		try {
+			mutableUrlrewriteXml = fileManager.updateFile(urlrewriteXml);
+			urlrewriteXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableUrlrewriteXml.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		Element root = urlrewriteXmlDoc.getDocumentElement();
+		Element firstRule = XmlUtils.findRequiredElement("/urlrewrite/rule", root);
+		
+		root.insertBefore(new XmlElementBuilder("rule", urlrewriteXmlDoc)
+										.addChild(new XmlElementBuilder("from", urlrewriteXmlDoc).setText("/applicationScaffold/**").build())
+										.addChild(new XmlElementBuilder("to", urlrewriteXmlDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
+									.build(), firstRule);
+		root.insertBefore(new XmlElementBuilder("rule", urlrewriteXmlDoc)
+								.addChild(new XmlElementBuilder("from", urlrewriteXmlDoc).setText("/ApplicationScaffold.html").build())
+								.addChild(new XmlElementBuilder("to", urlrewriteXmlDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
+							.build(), firstRule);
+		
+		XmlUtils.writeXml(mutableUrlrewriteXml.getOutputStream(), urlrewriteXmlDoc);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
