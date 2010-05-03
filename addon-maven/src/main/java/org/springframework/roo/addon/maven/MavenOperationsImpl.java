@@ -124,7 +124,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above)
 		if (majorJavaVersion == 5 && !template.isAddOn()) {
-			dependencyUpdate(new Dependency("javax.annotation", "com.springsource.javax.annotation", "1.0.0"));
+			dependencyUpdate(new Dependency("javax.annotation", "jsr250-api", "1.0"));
 		}
 
 		if (template.isAddOn()) {
