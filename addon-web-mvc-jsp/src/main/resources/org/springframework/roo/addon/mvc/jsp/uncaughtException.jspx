@@ -1,9 +1,7 @@
-<div xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<div xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>
-	<script type="text/javascript">dojo.require("dijit.TitlePane")</script>
-   	<div id="_title">
-	    <spring:message var="title" code="error.uncaughtexception.title" />
-	    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
+    <spring:message var="title" code="error.uncaughtexception.title" />
+	<page:page id="title" title="${title}">
 		<h2>${title}</h2>
 		<p><spring:message code="error.uncaughtexception.problemdescription" /></p>
 		<c:if test="${not empty exception}">
@@ -25,5 +23,5 @@
 				</div>
 			</p>
 		</c:if>
-	</div>
+	</page:page>
 </div>
