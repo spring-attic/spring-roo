@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -26,6 +27,8 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
@@ -70,9 +73,43 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 	/** We don't care about trigger annotations; we always produce metadata */
 	private boolean ignoreTriggerAnnotations = false;
 
+	private boolean isNotificationForJavaType(String mid) {
+		return MetadataIdentificationUtils.getMetadataClass(mid).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType()));
+	}
+	
 	public final void notify(String upstreamDependency, String downstreamDependency) {
+		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency) && !isNotificationForJavaType(upstreamDependency)) {
+			// This notification is NOT for a JavaType, and did NOT identify a specific downstream instance, so we must compute
+			// all possible downstream dependencies by a disk scan.
+			
+			// Scan for every .java file in the project and create a MID specific to this subclass for each
+			List<String> allMids = new ArrayList<String>();
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			PathResolver pathResolver = projectMetadata.getPathResolver();
+			for (Path path : pathResolver.getSourcePaths()) {
+				FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(path)), null);
+				String antPath = pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java";
+				for (FileDetails fileDetails : fileManager.findMatchingAntPath(antPath)) {
+					String fullPath = srcRoot.getRelativeSegment(fileDetails.getCanonicalPath());
+					fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
+					JavaType javaType = new JavaType(fullPath);
+					String mid = createLocalIdentifier(javaType, path);
+					allMids.add(mid);
+				}
+			}
+			
+			for (String mid : allMids) {
+				metadataService.evict(mid);
+				if (get(mid) != null) {
+					metadataDependencyRegistry.notifyDownstream(mid);
+				}
+			}
+	
+			return;
+		}
+		
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
-			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "')");
+			Assert.isTrue(isNotificationForJavaType(upstreamDependency), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "')");
 			
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
