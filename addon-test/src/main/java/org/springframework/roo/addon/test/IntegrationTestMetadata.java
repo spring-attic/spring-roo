@@ -127,7 +127,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));
 			builder.addField(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName("dod"), dodGovernor, null, annotations));
 		}
-		
 	}
 
 	/**
@@ -341,7 +340,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		return method;
 	}
 
-
 	/**
 	 * @return a test for the persist method, if available and requested (may return null)
 	 */
@@ -396,14 +394,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>()));
-/*			
-		        org.junit.Assert.assertNotNull("Data on demand for 'PetType' failed to initialize correctly", petTypeDataOnDemand.getRandomPersistentEntity());        
-        java.lang.Long id = petTypeDataOnDemand.getRandomPersistentEntity().getId();        
-        org.junit.Assert.assertNotNull("Data on demand for 'PetType' failed to provide an identifier", id);        
-        PetType.findPetType(id).remove();        
-        org.junit.Assert.assertNull("Failed to remove 'PetType' with identifier '" + id + "'", PetType.findPetType(id));        
-	
-	*/		
+			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 			bodyBuilder.appendFormalLine(identifierAccessorMethod.getReturnType().getFullyQualifiedTypeName() + " id = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()." + identifierAccessorMethod.getMethodName().getSymbolName() + "();");
@@ -411,6 +402,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 			bodyBuilder.appendFormalLine("obj." + removeMethod.getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id));");
 
 			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
