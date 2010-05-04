@@ -210,6 +210,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 		if (newStatus.equals(ShellStatus.SHUTTING_DOWN)) {
 			try {
 				System.setProperty("roo.exit", new Integer(rooShell.getExitShellRequest().getExitCode()).toString());
+				System.setProperty("developmentMode", new Boolean(rooShell.isDevelopmentMode()).toString());
 				perform("shutdown");
 			} catch (Exception e) {
 				throw new IllegalStateException(e);

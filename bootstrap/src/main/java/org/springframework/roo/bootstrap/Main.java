@@ -274,6 +274,7 @@ public class Main {
 	        }
 
 	        // Print welcome banner.  // **** CHANGE FROM ORIGINAL FELIX VERSION ****
+	        long startedNanoseconds = System.nanoTime();
 //	        System.out.println("\nWelcome to Felix");
 //	        System.out.println("================\n");
 	        // **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
@@ -295,6 +296,12 @@ public class Main {
 	            
 	            // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 	            int exitCode = System.getProperty("roo.exit") == null ? 0 : new Integer(System.getProperty("roo.exit")).intValue();
+	            boolean devModeAtShutdown = System.getProperty("developmentMode") == null ? false : System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
+	            if (devModeAtShutdown) {
+	            	long uptimeNanoseconds = System.nanoTime() - startedNanoseconds;
+	            	System.out.println("Total execution time " + uptimeNanoseconds / 1000000 + " ms");
+	            }
+	            
 	            System.exit(exitCode);
 	            // **** END OF CHANGE FROM ORIGINAL FELIX VERSION ****
 	        }
