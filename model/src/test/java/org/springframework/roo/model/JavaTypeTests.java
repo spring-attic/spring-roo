@@ -17,6 +17,7 @@ public class JavaTypeTests {
 		Assert.assertEquals(new JavaType("foo.My"), new JavaType("foo.My.Sar").getEnclosingType());
 		// enclosing type in declared package several levels deep
 		Assert.assertEquals(new JavaType("foo.bar.My"), new JavaType("foo.bar.My.Sar").getEnclosingType());
+		Assert.assertEquals("com.foo._MyBar", new JavaType("com.foo._MyBar").getFullyQualifiedTypeName());
 	}
 	
 }
