@@ -2,11 +2,18 @@
 <configuration>
 	<springWebFlow>
 		<dependencies>
-			<dependency org="org.springframework.webflow" name="org.springframework.binding" rev="2.0.8.RELEASE" />
-			<dependency org="org.springframework.webflow" name="org.springframework.webflow" rev="2.0.8.RELEASE" />
-			<dependency org="org.springframework.webflow" name="org.springframework.js" rev="2.0.8.RELEASE" />
-			<dependency org="org.springframework" name="org.springframework.transaction" rev="${spring.version}" />
-			<dependency org="org.jboss.el" name="com.springsource.org.jboss.el" rev="2.0.0.GA" />
+			<dependency org="org.springframework.webflow" name="spring-binding" rev="2.0.9.RELEASE" />
+			<dependency org="org.springframework.webflow" name="spring-webflow" rev="2.0.9.RELEASE" />
+			<dependency org="org.springframework.webflow" name="spring-js" rev="2.0.9.RELEASE" />
+			<dependency org="org.springframework" name="spring-tx" rev="${spring.version}" />
+			<dependency org="org.jboss.el" name="jboss-el" rev="2.0.1.GA" />
 		</dependencies>
+		<repositories>
+			<repository>
+				<id>JBoss Repo</id>
+				<name>JBoss Repo</name>
+				<url>http://repository.jboss.com/maven2</url>
+			</repository>
+		</repositories>
 	</springWebFlow>
 </configuration>

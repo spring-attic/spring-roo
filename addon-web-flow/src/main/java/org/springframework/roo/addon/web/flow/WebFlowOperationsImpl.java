@@ -21,6 +21,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -150,6 +151,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configurationElement);
 		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
+		}
+		
+		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configurationElement);
+		for (Element repository : repositories) {
+			projectOperations.addRepository(new Repository(repository));
 		}
 
 		projectOperations.updateProjectType(ProjectType.WAR);
