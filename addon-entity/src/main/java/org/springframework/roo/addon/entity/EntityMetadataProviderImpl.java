@@ -37,6 +37,7 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));

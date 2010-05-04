@@ -193,7 +193,10 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		
 		// Finally, evict downstream dependencies (ie metadata that previously depended on this now-evicted metadata)
 		for (String downstream : metadataDependencyRegistry.getDownstream(metadataIdentificationString)) {
-			evict(downstream);
+			// We only need to evict if it is an instance, as only an instance will ever go into the cache
+			if (MetadataIdentificationUtils.isIdentifyingInstance(downstream)) {
+				evict(downstream);
+			}
 		}
 	}
 
