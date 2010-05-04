@@ -51,7 +51,8 @@
 	           <tr>
 	           	   <c:forTokens items="${columnProperties}" delims="," var="column">
 		                <td>
-		                    <c:out value="${fn:substring(item[column], 0, 10)}"/>
+		                	<spring:eval expression="item[column]" var="item_s"/>
+			                <c:out value="${fn:substring(item_s, 0, 10)}"/>
 		                </td>
 	               </c:forTokens>
 	               <td>

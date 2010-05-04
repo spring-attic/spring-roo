@@ -193,6 +193,8 @@ public class JspViewManager {
 								.addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
+								.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
+								.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
 								.addAttribute("version", "2.0")
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
@@ -202,6 +204,7 @@ public class JspViewManager {
 						.addAttribute("id", "fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 						.addAttribute("modelAttribute", entityName)
 						.addAttribute("path", controllerPath)
+						.addAttribute("render", "${empty dependencies}")
 					.build();
 		
 		if (!controllerPath.toLowerCase().equals(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())) {
@@ -209,10 +212,27 @@ public class JspViewManager {
 		}
 		
 		createFieldsForCreateAndUpdate(document, formCreate, "create");
-		
 		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
+		
+		Element fieldReference = new XmlElementBuilder("field:reference", document)
+										.addAttribute("field", "${dependency[0]}")
+										.addAttribute("id", "s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + ".${dependency[0]}")
+										.addAttribute("path", "/${dependency[1]}").build();
+		fieldReference.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldReference));
+		
+		Element formPage = new XmlElementBuilder("form:page", document)
+									.addAttribute("id", "fs:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+									.addAttribute("title", beanInfoMetadata.getJavaBean().getSimpleTypeName())
+									.addAttribute("render", "${not empty dependencies}")
+									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.dependency.required").build())
+									.addChild(new XmlElementBuilder("c:forEach", document).addAttribute("var", "dependency").addAttribute("items", "${dependencies}")
+													.addChild(new XmlElementBuilder("p", document).addChild(fieldReference).build())
+												.build())
+								.build();
+		formPage.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formPage));
 
 		div.appendChild(formCreate);
+		div.appendChild(formPage);
 
 		return document;
 	}
@@ -383,7 +403,7 @@ public class JspViewManager {
 						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
 						EntityMetadata typeEntityMetadata = getEntityMetadataForField(field);
 						if (typeEntityMetadata != null) {
-							fieldElement = new XmlElementBuilder("field:reference", document).addAttribute("path", "/" + typeEntityMetadata.getPlural().toLowerCase()).build();
+							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity.reference.not.managed").addAttribute("messageCodeAttribute", beanInfoMetadata.getJavaBean().getSimpleTypeName()).build();
 						}
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")

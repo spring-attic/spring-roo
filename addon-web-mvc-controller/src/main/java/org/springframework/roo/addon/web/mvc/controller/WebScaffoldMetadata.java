@@ -395,6 +395,32 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
+		boolean listAdded = false;
+		for (MethodMetadata accessorMethod: beanInfoMetadata.getPublicAccessors()) {
+			if (specialDomainTypes.contains(accessorMethod.getReturnType())) {
+				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessorMethod));
+				if (null != field && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull"))) {
+					EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(accessorMethod.getReturnType(), Path.SRC_MAIN_JAVA));
+					if (entityMetadata != null) {
+						if (!listAdded) {
+							String listShort = new JavaType("java.util.List").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+							String arrayListShort = new JavaType("java.util.ArrayList").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+							bodyBuilder.appendFormalLine(listShort + " dependencies = new " + arrayListShort + "();");
+							listAdded = true;
+						}
+						bodyBuilder.appendFormalLine("if (" + accessorMethod.getReturnType().getSimpleTypeName() + "." + entityMetadata.getCountMethod().getMethodName().getSymbolName() + "() == 0) {");
+						bodyBuilder.indent();
+						//adding string array which has the fieldName at position 0 and the path at position 1
+						bodyBuilder.appendFormalLine("dependencies.add(new String[]{\"" + field.getFieldName().getSymbolName() + "\", \"" + entityMetadata.getPlural().toLowerCase() + "\"});");
+						bodyBuilder.indentRemove();
+						bodyBuilder.appendFormalLine("}");
+					}
+				}
+			}
+		}
+		if (listAdded) {
+			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"dependencies\", dependencies);");
+		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
