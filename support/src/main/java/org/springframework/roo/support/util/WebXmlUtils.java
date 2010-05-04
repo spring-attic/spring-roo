@@ -218,14 +218,14 @@ public abstract class WebXmlUtils {
 			}
 		}
 		appendChildIfNotPresent(servlet, new XmlElementBuilder("servlet-class", webXml).setText(className).build(), webXml);
-		if (loadOnStartup != null) {
-			appendChildIfNotPresent(servlet, new XmlElementBuilder("load-on-startup", webXml).setText(loadOnStartup.toString()).build(), webXml);
-		}
 		for (WebXmlParam initParam: initParams) {
 			appendChildIfNotPresent(servlet, new XmlElementBuilder("init-param", webXml)
 							.addChild(new XmlElementBuilder("param-name", webXml).setText(initParam.getName()).build())
 							.addChild(new XmlElementBuilder("param-value", webXml).setText(initParam.getValue()).build())
 						.build(), webXml);
+		}
+		if (loadOnStartup != null) {
+			appendChildIfNotPresent(servlet, new XmlElementBuilder("load-on-startup", webXml).setText(loadOnStartup.toString()).build(), webXml);
 		}
 		
 		//create servlet mapping
