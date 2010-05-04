@@ -1,9 +1,7 @@
-<div xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<div xmlns:spring="http://www.springframework.org/tags"  xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
 	<jsp:output omit-xml-declaration="yes"/>
-	<script type="text/javascript">dojo.require("dijit.TitlePane");</script>
 	<spring:message var="title" code="webflow.state2.title" />
-	<div id="_title">
-		<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title}'}})); </script>
+	<page:page id="title" title="${title}">
 		<h1>${title}</h1>	
 		<p><spring:message code="webflow.state2.message" /></p>	
 		<form method="POST" >
@@ -12,5 +10,5 @@
 				<input type="submit" id="cancel" name="_eventId_cancel" value="${end}"/>	
 			</div>		
 		</form>
-	</div>
+	</page:page>
 </div>
