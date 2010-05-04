@@ -93,6 +93,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Obtain top level package
 		Element groupIdElement = XmlUtils.findFirstElement("/project/groupId", rootElement);
+		Assert.notNull(groupIdElement, "Maven pom.xml must provide a <groupId> for the <project>");
 		String topLevelPackageString = groupIdElement.getTextContent();
 		Assert.hasText(topLevelPackageString, "Top level package name could not be determined from POM '" + pom + "'");
 		Assert.isTrue(!topLevelPackageString.endsWith("."), "Top level package name cannot end with a period (was '" + topLevelPackageString + "')");
