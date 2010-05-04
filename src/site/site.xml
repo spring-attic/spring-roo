@@ -42,6 +42,7 @@
 			<item name="Shell" href="http://static.springsource.org/spring-roo/org.springframework.roo.shell" />
 			<item name="Shell (JLine)" href="http://static.springsource.org/spring-roo/org.springframework.roo.shell.jline" />
 			<item name="Metadata" href="http://static.springsource.org/spring-roo/org.springframework.roo.metadata" />
+			<item name="Process Manager" href="http://static.springsource.org/spring-roo/org.springframework.roo.process.manager" />
 			<item name="File Undo" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.undo" />
 			<item name="File Monitor" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.monitor" />
 			<item name="File Monitor (Polling)" href="http://static.springsource.org/spring-roo/org.springframework.roo.file.monitor.polling" />
