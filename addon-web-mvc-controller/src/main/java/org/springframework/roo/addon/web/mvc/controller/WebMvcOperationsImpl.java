@@ -118,6 +118,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("defaultHtmlEscape", "true"), webXml, "Enable escaping of form submission contents");
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("contextConfigLocation", "classpath*:META-INF/spring/applicationContext*.xml"), webXml, null);
 		WebXmlUtils.addFilter("CharacterEncodingFilter", "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
+			WebXmlUtils.addFilter("Spring OpenEntityManagerInViewFilter", "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", webXml, null);
+		}
 		WebXmlUtils.addFilter("UrlRewriteFilter", "org.tuckey.web.filters.urlrewrite.UrlRewriteFilter", "/*", webXml, null);
 		WebXmlUtils.addFilter("HttpMethodFilter", "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", webXml, null);
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
@@ -128,9 +131,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/app/uncaughtException", webXml, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/app/resourceNotFound", webXml, null);
 
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
-			WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.FIRST, null, "Spring OpenEntityManagerInViewFilter", "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", webXml, null);
-		}
+		
 		
 		writeToDiskIfNecessary(webXmlFile, webXml);
 	}

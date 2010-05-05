@@ -161,7 +161,7 @@ public abstract class WebXmlUtils {
 				Assert.hasText(filterPositionFilterName, "The filter position filter class name is required when using FilterPosition.AFTER");
 				insertAfter(filter, "filter-mapping[filter-name = '" + filterPositionFilterName + "']", webXml);
 			} else {
-				insertBetween(filterMappingE, "filter", "listener", webXml);
+				insertBetween(filterMappingE, "filter-mapping", "listener", webXml);
 			}
 		}
 		appendChildIfNotPresent(filterMappingE, new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build(), webXml);
