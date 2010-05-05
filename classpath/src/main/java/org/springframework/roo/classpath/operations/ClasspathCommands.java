@@ -151,11 +151,17 @@ public class ClasspathCommands implements CommandMarker {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
 		}
 
+		Assert.isTrue(isEntityReasonablyNamed(entity), "Cannot create data on demand for an entity named 'Test' or 'TestCase' under any circumstances");
+
 		if (clazz == null) {
 			clazz = new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
 		}
 
 		classpathOperations.newDod(entity, clazz, Path.SRC_TEST_JAVA);
+	}
+
+	private boolean isEntityReasonablyNamed(JavaType entity) {
+		return !entity.getSimpleTypeName().startsWith("Test") && !entity.getSimpleTypeName().endsWith("TestCase") && !entity.getSimpleTypeName().endsWith("Test");
 	}
 
 	@CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")
@@ -167,6 +173,8 @@ public class ClasspathCommands implements CommandMarker {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
 		}
 
+		Assert.isTrue(isEntityReasonablyNamed(entity), "Cannot create an integration test for an entity named 'Test' or 'TestCase' under any circumstances");
+		
 		classpathOperations.newIntegrationTest(entity);
 	}
 
@@ -196,8 +204,14 @@ public class ClasspathCommands implements CommandMarker {
 		}
 
 		// Reject attempts to name the entity "Test", due to possible clashes with data on demand (see ROO-50)
-		if (name.getSimpleTypeName().startsWith("Test") || name.getSimpleTypeName().endsWith("TestCase") || name.getSimpleTypeName().endsWith("Test")) {
-			throw new IllegalArgumentException("Entity name rejected as conflicts with test execution defaults; please remove 'Test' and/or 'TestCase'");
+		// We will allow this to happen, though if the user insists on it via --permitReservedWords (see ROO-666)
+		if (!isEntityReasonablyNamed(name)) {
+			if (permitReservedWords && testAutomatically) {
+				throw new IllegalArgumentException("Entity name cannot contain 'Test' or 'TestCase' as you are requesting tests; remove --testAutomatically or rename the proposed entity");
+			}
+			if (!permitReservedWords) {
+				throw new IllegalArgumentException("Entity name rejected as conflicts with test execution defaults; please remove 'Test' and/or 'TestCase'");
+			}
 		}
 
 		// Produce entity itself
