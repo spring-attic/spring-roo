@@ -52,6 +52,7 @@ public class JpaCommands implements CommandMarker {
 	public void installJpa(
 			@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
 			@CliOption(key = { "database" }, mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
+			@CliOption(key = { "applicationId" }, mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") String applicationId, 
 			@CliOption(key = { "jndiDataSource" }, mandatory = false, help = "The JNDI datasource to use") String jndi, 
 			@CliOption(key = { "databaseName" }, mandatory = false, help = "The database name to use") String databaseName, 
 			@CliOption(key = { "userName" }, mandatory = false, help = "The username to use") String userName, 
@@ -62,7 +63,7 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi);
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId);
 
 		if (jndi == null || 0 == jndi.length()) {
 			if (null != databaseName && 0 != databaseName.length()) {

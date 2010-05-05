@@ -24,6 +24,7 @@ import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -54,13 +55,13 @@ public class JpaOperationsImpl implements JpaOperations {
 	public boolean isJpaInstalled() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
+	
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
 		updatePersistenceXml(ormProvider, database);
-		updateGaeXml(ormProvider, database);
+		updateGaeXml(ormProvider, database, applicationId);
 		if (jndi == null || jndi.length() == 0) {
 			updateDatabaseProperties(ormProvider, database);
 		}
@@ -386,7 +387,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
 	}
 
-	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase database) {
+	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase database, String applicationId) {
 		String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
 		boolean appenginePathExists = fileManager.exists(appenginePath);
 		String loggingPropertiesPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
@@ -417,10 +418,9 @@ public class JpaOperationsImpl implements JpaOperations {
 				throw new IllegalStateException(e);
 			}
 
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 			Element rootElement = appengine.getDocumentElement();
 			Element applicationElement = XmlUtils.findFirstElement("/appengine-web-app/application", rootElement);
-			applicationElement.setTextContent(projectMetadata.getProjectName());
+			applicationElement.setTextContent(StringUtils.hasText(applicationId) ? applicationId : getProjectName());
 
 			XmlUtils.writeXml(appengineMutableFile.getOutputStream(), appengine);
 
@@ -433,6 +433,10 @@ public class JpaOperationsImpl implements JpaOperations {
 				}
 			}
 		}
+	}
+	
+	private String getProjectName() {
+		return ((ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier())).getProjectName();
 	}
 
 	private void updateRepositories(OrmProvider ormProvider, JdbcDatabase database) {
