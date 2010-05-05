@@ -392,12 +392,8 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		}
 		JavaParserMethodMetadata.addMethod(this, members, methodMetadata, true, typeParameterNames);
 	}
-
-	public static final void createType(FileManager fileManager, final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
-		Assert.notNull(fileManager, "File manager required");
-		Assert.notNull(cit, "Class or interface type details required");
-		Assert.hasText(fileIdentifier, "File identifier required");
-
+	
+	public static final String getOutput(final ClassOrInterfaceTypeDetails cit) {
 		// Create a compilation unit to store the type to be created
 		final CompilationUnit compilationUnit = new CompilationUnit();
 		
@@ -527,9 +523,17 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
         	JavaParserMethodMetadata.addMethod(compilationUnitServices, typeDeclaration.getMembers(), candidate, false, null);
         }
         
-        // Write to disk, or update a file if it is already present
-		String newContents = compilationUnit.toString();
-        MutableFile mutableFile = null;
+		return compilationUnit.toString();
+	}
+	
+	public static final void createType(FileManager fileManager, final ClassOrInterfaceTypeDetails cit, String fileIdentifier) {
+		Assert.notNull(fileManager, "File manager required");
+		Assert.notNull(cit, "Class or interface type details required");
+		Assert.hasText(fileIdentifier, "File identifier required");
+		
+		final String newContents = getOutput(cit);
+
+		MutableFile mutableFile = null;
 		if (fileManager.exists(fileIdentifier)) {
 			// First verify if the file has even changed
 			File f = new File(fileIdentifier);
