@@ -595,6 +595,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), StringUtils.uncapitalize(paramNames.get(i).getSymbolName())));
+			if (paramTypes.get(i).equals(JavaType.BOOLEAN_PRIMITIVE) || paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
+				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
+			}
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes));
 			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
 				JavaSymbolName fieldName = null;
@@ -613,10 +616,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 			annotatedParamTypes.add(new AnnotatedJavaType(paramTypes.get(i), annotations));
 
-			if (!paramTypes.get(i).isPrimitive()) {
+			if (!paramTypes.get(i).isPrimitive() && !paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
 				bodyBuilder.appendFormalLine("if (" + paramNames.get(i).getSymbolName() + " == null" + (paramTypes.get(i).equals(new JavaType(String.class.getName())) ? " || " + paramNames.get(i).getSymbolName() + ".length() == 0" : "") + ") throw new IllegalArgumentException(\"A " + paramNames.get(i).getSymbolNameCapitalisedFirstLetter() + " is required.\");");
 			}
-			methodParams.append(paramNames.get(i) + ", ");
+			if (paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
+				methodParams.append(paramNames.get(i) + " == null ? new Boolean(false) : " + paramNames.get(i) + ", ");
+			} else {
+				methodParams.append(paramNames.get(i) + ", ");
+			}
 		}
 
 		if (methodParams.length() > 0) {
