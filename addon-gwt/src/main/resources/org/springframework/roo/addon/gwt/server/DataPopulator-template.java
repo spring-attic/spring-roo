@@ -14,7 +14,7 @@ public class DataPopulator implements ApplicationListener<ContextRefreshedEvent>
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (event.getApplicationContext().getParent() == null) {
+		if (event.getApplicationContext().getParent() == null && Employee.findAllEmployees().isEmpty()) {
 			Employee abc = new Employee();
 			abc.setUserName("abc");
 			abc.setDisplayName("Able B. Charlie");
@@ -22,7 +22,7 @@ public class DataPopulator implements ApplicationListener<ContextRefreshedEvent>
 
 			Long id = abc.getId();
 			abc.setSupervisorId(id);
-			abc.persist();
+			abc.merge();
 
 			Employee def = new Employee();
 			def.setUserName("def");
