@@ -102,14 +102,14 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 				String accessorName = accessor.getMethodName().getSymbolName();
-				String fieldName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
+				String fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				String accessorText = accessorName + "()";
 				if (accessor.getReturnType().isCommonCollectionType()) {
 					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
 				} else if (accessor.getReturnType().isArray()) {
 					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
-				} else if (new JavaType(Calendar.class.getName()).equals(accessor.getReturnType())) {
-					accessorText = accessorName + "().getTime()";
+				} else if (Calendar.class.getName().equals(accessor.getReturnType().getFullyQualifiedTypeName())) {
+					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
 				}
 				map.put(fieldName, accessorText);
 				order.add(fieldName);
