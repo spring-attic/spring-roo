@@ -1,6 +1,7 @@
 project --topLevelPackage com.springsource.extrack
 
 persistence setup --provider DATANUCLEUS --database HYPERSONIC_IN_MEMORY
+// persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 /*
 enum type --class ~.server.reference.Status
 enum constant --name Draft // -> submitted
@@ -14,8 +15,9 @@ enum constant --name Declined // -> draft
 entity --class ~.server.domain.Employee --testAutomatically
 field string --fieldName userName --sizeMin 2 --sizeMax 30
 field string --fieldName displayName --sizeMin 2 --sizeMax 30
+field number --type java.lang.Long supervisorId
 //field string --fieldName password --sizeMin 2 --sizeMax 30
-field reference --fieldName supervisor --type ~.server.domain.Employee
+//field reference --fieldName supervisor --type ~.server.domain.Employee
 //field boolean --fieldName accountant --notNull
 //field boolean --fieldName administrator --notNull
 
@@ -51,6 +53,7 @@ field number --fieldName amount --type java.lang.Float --notNull --min 0
 
 field set --class ~.server.domain.Report --fieldName items --element ~.server.domain.ReportItem --mappedBy report --notNull false --cardinality ONE_TO_MANY
 finder add --class com.springsource.extrack.server.domain.ReportItem --finderName findReportItemsByReport
+finder add --class ~.server.domain.Employee --finderName findEmployeesBySupervisorId
 
 */
 

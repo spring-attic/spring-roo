@@ -242,7 +242,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 		
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
-		WebXmlUtils.addListener(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener", webXmlDoc, "Temporary workaround");
+	    // WebXmlUtils.addListener(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener", webXmlDoc, "Temporary workaround");
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/app/expenses/data", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
