@@ -216,9 +216,9 @@ public class ItdSourceFileComposer {
 			this.append(introductionTo.getSimpleTypeName());
 			this.append(" extends ");
 			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(extendsType)) {
-				this.append(extendsType.getFullyQualifiedTypeName());
+				this.append(extendsType.getNameIncludingTypeParameters());
 			} else {
-				this.append(extendsType.getSimpleTypeName());
+				this.append(extendsType.getNameIncludingTypeParameters(false, resolver));
 			}
 			this.append(";");
 			this.newLine(false);
