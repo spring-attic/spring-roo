@@ -26,7 +26,7 @@
 			<c:set value="false" var="required"/>
 		</c:if>
 		
-		<script type="text/javascript">dojo.require("dijit.Editor");</script>
+		<script type="text/javascript">dojo.require("dijit.form.SimpleTextarea");</script>
 		<div id="${field}_id">
 		    <label for="_${field}_id"><c:out value="${label}"/>:</label>
 		    <form:textarea id="_${field}_id" path="${field}" disabled="${disabled}"/>
