@@ -41,6 +41,7 @@ public class AddOnJumpstartOperationsImpl implements AddOnJumpstartOperations {
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 		installIfNeeded("Commands.java", projectMetadata);
 		installIfNeeded("Operations.java", projectMetadata);
+		installIfNeeded("OperationsImpl.java", projectMetadata);
 		installIfNeeded("PropertyName.java", projectMetadata);
 		installIfNeeded("assembly.xml", projectMetadata);
 		writeTextFile("readme.txt", "welcome to my addon!", projectMetadata);
@@ -70,7 +71,6 @@ public class AddOnJumpstartOperationsImpl implements AddOnJumpstartOperations {
 				throw new IllegalStateException("Unable to create '" + targetFilename + "'", ioe);
 			}
 		}
-		
 	}
 	
 	private void writeTextFile(String fullPathFromRoot, String message, ProjectMetadata projectMetadata) {
@@ -92,6 +92,4 @@ public class AddOnJumpstartOperationsImpl implements AddOnJumpstartOperations {
 			throw new IllegalStateException(ioe);
 		}
 	}
-
-	
 }
