@@ -130,6 +130,27 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
+	 * Locates an annotation on this class and its superclasses.
+	 * 
+	 * @param classOrInterfaceTypeDetails to search (required)
+	 * @param annotationType annotation to locate (required)
+	 * @return the annotation, if ever found (or null if not found)
+	 */
+	public static final AnnotationMetadata getTypeAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotationType) {
+		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
+		Assert.notNull(annotationType, "Annotation type required");
+		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
+		while (current != null) {
+			AnnotationMetadata result = getDeclaredTypeAnnotation(current, annotationType);
+			if (result != null) {
+				return result;
+			}
+			current = current.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
 	 * Locates all methods on this class and its superclasses.
 	 * 
 	 * @param classOrInterfaceTypeDetails to search (required)
