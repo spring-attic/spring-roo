@@ -100,7 +100,6 @@
 	</dependencies>
 	<build>
 		<plugins>
-<<<<<<< HEAD
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
@@ -129,7 +128,6 @@
 					</execution>
 				</executions>
 			</plugin>
-=======
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -157,7 +155,6 @@
                     </execution>
                 </executions>
             </plugin>
->>>>>>> ROO-788 Project Addon Template out of date
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-help-plugin</artifactId>
