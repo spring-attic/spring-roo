@@ -342,6 +342,11 @@ fieldset th {
         max-width: 183px;
 }
 
+.RichTextEditable{
+    min-height:18em !important;
+    max-height:18em !important;
+}
+
 .flag {
 	height: 11px;
 	width: 16px;

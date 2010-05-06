@@ -13,7 +13,7 @@
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${empty render or render}">
-	
+
 		<c:if test="${empty disabled}">
 			<c:set value="false" var="disabled"/>
 		</c:if>
@@ -26,9 +26,10 @@
 			<c:set value="false" var="required"/>
 		</c:if>
 		
+		<script type="text/javascript">dojo.require("dijit.Editor");</script>
 		<div id="${field}_id">
 		    <label for="_${field}_id"><c:out value="${label}"/>:</label>
-		    <form:textarea id="_${field}_id" path="${field}" />
+		    <form:textarea id="_${field}_id" path="${field}" disabled="${disabled}"/>
 		    <br/>
 		    <form:errors cssClass="errors" id="_${field}_error_id" path="${field}"/>
 		    <spring:message arguments="${label}" code="field.invalid" var="field_invalid"/>
@@ -41,7 +42,7 @@
 					<spring:message argumentSeparator="," arguments="${label}, " code="field.simple.validation" var="field_validation"/>
 				</c:otherwise>
 			</c:choose>
-		    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.form.SimpleTextarea', widgetAttrs:{}})); </script>
+		    <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.form.SimpleTextarea', widgetAttrs : {disabled : ${disabled}}})); </script>
 		</div>
 		<br/>
 		
