@@ -201,6 +201,24 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!hasIdClass) {
 			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			String generationType = isGaeDetected() ? "IDENTITY" : "AUTO";
+			
+			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+			if ("AUTO".equals(generationType)) {
+				AnnotationMetadata inheritence = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Inheritance"));
+				if (inheritence != null) {
+					AnnotationAttributeValue<?> value = inheritence.getAttribute(new JavaSymbolName("strategy"));
+					if (value instanceof EnumAttributeValue) {
+						EnumAttributeValue enumAttributeValue = (EnumAttributeValue) value;
+						EnumDetails details = enumAttributeValue.getValue();
+						if ("javax.persistence.InheritanceType".equals(details.getType().getFullyQualifiedTypeName())) {
+							if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
+								generationType = "TABLE";
+							}
+						}
+					}
+				}
+			}
+			
 			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
 			AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
 			annotations.add(generatedValueAnnotation);
@@ -220,7 +238,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
 		return field;
 	}
-		
+	
 	/**
 	 * Locates the identifier accessor method.
 	 * 
