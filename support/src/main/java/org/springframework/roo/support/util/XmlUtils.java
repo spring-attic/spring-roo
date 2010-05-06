@@ -47,44 +47,35 @@ public final class XmlUtils {
 	private XmlUtils() {
 	}
 
+	/**
+	 * Write an XML document to the outputstream provided. This will use the preconfigured Roo provided Transformer.
+	 * 
+	 * @param outputEntry The output stream to write to.
+	 * @param document The document to write
+	 */
 	public static final void writeXml(OutputStream outputEntry, Document document) {
 		writeXml(createIndentingTransformer(), outputEntry, document);
 	}
 
-	// public static final void writeMalformedXml(OutputStream outputEntry, NodeList nodes) {
-	// writeMalformedXml(createIndentingTransformer(), outputEntry, nodes);
-	// }
-
+	/**
+	 * Write an XML document to the outputstream provided. This will use the provided Transformer.
+	 * 
+	 * @param transformer The transformer (can be obtained from XmlUtils.createIndentingTransformer())
+	 * @param outputEntry The output stream to write to.
+	 * @param document The document to write
+	 */
 	public static final void writeXml(Transformer transformer, OutputStream outputEntry, Document document) {
 		Assert.notNull(transformer, "Transformer required");
 		Assert.notNull(outputEntry, "Output entry required");
 		Assert.notNull(document, "Document required");
 		
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		document.normalize();
-		
 		try {
 			transformer.transform(new DOMSource(document), createUnixStreamResultForEntry(outputEntry));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
 	}
-
-//	public static final void writeMalformedXml(Transformer transformer, OutputStream outputEntry, NodeList nodes) {
-//		Assert.notNull(transformer, "Transformer required");
-//		Assert.notNull(outputEntry, "Output entry required");
-//		Assert.notNull(nodes, "NodeList required");
-//
-//		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-//
-//		try {
-//			for (int i = 0; i < nodes.getLength(); i++) {
-//				transformer.transform(new DOMSource(nodes.item(i)), createUnixStreamResultForEntry(outputEntry));
-//			}
-//		} catch (Exception ex) {
-//			throw new IllegalStateException(ex);
-//		}
-//	}
 	
 	/**
 	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
