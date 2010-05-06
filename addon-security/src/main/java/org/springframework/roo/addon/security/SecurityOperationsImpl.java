@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.mvc.jsp.TilesOperations;
+import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -95,7 +96,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 			if (fileManager.exists(webXml)) {
 				MutableFile mutableWebXml = fileManager.updateFile(webXml);
 				Document webXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableWebXml.getInputStream());
-				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.FIRST, null, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, "Spring Security Filter");		
+				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BEFORE, null, WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, null);		
 				XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 			} else {
 				throw new IllegalStateException("Could not acquire " + webXml);

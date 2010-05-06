@@ -51,7 +51,7 @@ public abstract class WebXmlUtils {
 		Element descriptionE = XmlUtils.findFirstElement("/web-app/description", webXml.getDocumentElement());
 		if (descriptionE == null) {
 			descriptionE = webXml.createElement("description");
-			insertBetween(descriptionE, "display-name", "context-param", webXml);
+			insertBetween(descriptionE, "display-name[last()]", "context-param", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(descriptionE, comment, webXml);
 			}
@@ -75,7 +75,7 @@ public abstract class WebXmlUtils {
 			contextParamE = new XmlElementBuilder("context-param", webXml)
 						.addChild(new XmlElementBuilder("param-name", webXml).setText(contextParam.getName()).build())
 					.build();
-			insertBetween(contextParamE, "description", "filter", webXml);	
+			insertBetween(contextParamE, "description[last()]", "filter", webXml);	
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(contextParamE, comment, webXml);
 			}
@@ -96,14 +96,14 @@ public abstract class WebXmlUtils {
 	 * @param initParams (optional)
 	 */
 	public static void addFilter(String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
-		addFilterAtPosition(FilterPosition.LAST, null, filterName, filterClass, urlPattern, webXml, comment, initParams);
+		addFilterAtPosition(FilterPosition.LAST, null, null, filterName, filterClass, urlPattern, webXml, comment, initParams);
 	}
 
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added at the FilterPosition specified.
 	 * 
 	 * @param filterPosition Filter position (required)
-	 * @param filterPositionFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
+	 * @param beforeFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
 	 * @param filterName (required)
 	 * @param filterClass the fully qualified name of the filter type (required)
 	 * @param urlPattern (required)
@@ -111,7 +111,7 @@ public abstract class WebXmlUtils {
 	 * @param comment (optional)
 	 * @param initParams (optional)
 	 */
-	public static void addFilterAtPosition(FilterPosition filterPosition, String filterPositionFilterName, String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
+	public static void addFilterAtPosition(FilterPosition filterPosition, String afterFilterName, String beforeFilterName, String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(filterName, "Filter name required");
 		Assert.hasText(filterClass, "Filter class required");
@@ -126,13 +126,17 @@ public abstract class WebXmlUtils {
 			if (filterPosition.equals(FilterPosition.FIRST)) {
 				insertBetween(filter, "context-param", "filter", webXml);
 			} else if (filterPosition.equals(FilterPosition.BEFORE)) {
-				Assert.hasText(filterPositionFilterName, "The filter position filter name is required when using FilterPosition.BEFORE");
-				insertBefore(filter, "filter[filter-name = '" + filterPositionFilterName + "']", webXml);
+				Assert.hasText(beforeFilterName, "The filter position filter name is required when using FilterPosition.BEFORE");
+				insertBefore(filter, "filter[filter-name = '" + beforeFilterName + "']", webXml);
 			} else if (filterPosition.equals(FilterPosition.AFTER)) {
-				Assert.hasText(filterPositionFilterName, "The filter position filter name is required when using FilterPosition.AFTER");
-				insertAfter(filter, "filter[filter-name = '" + filterPositionFilterName + "']", webXml);
+				Assert.hasText(afterFilterName, "The filter position filter name is required when using FilterPosition.AFTER");
+				insertAfter(filter, "filter[filter-name = '" + afterFilterName + "']", webXml);
+			} else if (filterPosition.equals(FilterPosition.BETWEEN)) {
+				Assert.hasText(beforeFilterName, "The 'before' filter name is required when using FilterPosition.BETWEEN");
+				Assert.hasText(afterFilterName, "The 'after' filter name is required when using FilterPosition.BETWEEN");
+				insertBetween(filter, "filter[filter-name = '" + afterFilterName + "']", "filter[filter-name = '" + beforeFilterName + "']", webXml);
 			} else {
-				insertBetween(filter, "context-param", "filter-mapping", webXml);
+				insertBetween(filter, "context-param[last()]", "filter-mapping", webXml);
 			}
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(filter, comment, webXml);
@@ -155,13 +159,13 @@ public abstract class WebXmlUtils {
 			if (filterPosition.equals(FilterPosition.FIRST)) {
 				insertBetween(filterMappingE, "filter", "filter-mapping", webXml);
 			} else if (filterPosition.equals(FilterPosition.BEFORE)) {
-				Assert.hasText(filterPositionFilterName, "The filter position filter name is required when using FilterPosition.BEFORE");
-				insertBefore(filter, "filter-mapping[filter-name = '" + filterPositionFilterName + "']", webXml);
+				insertBefore(filterMappingE, "filter-mapping[filter-name = '" + beforeFilterName + "']", webXml);
 			} else if (filterPosition.equals(FilterPosition.AFTER)) {
-				Assert.hasText(filterPositionFilterName, "The filter position filter class name is required when using FilterPosition.AFTER");
-				insertAfter(filter, "filter-mapping[filter-name = '" + filterPositionFilterName + "']", webXml);
+				insertAfter(filterMappingE, "filter-mapping[filter-name = '" + beforeFilterName + "']", webXml);
+			} else if (filterPosition.equals(FilterPosition.BETWEEN)) {
+				insertBetween(filterMappingE, "filter-mapping[filter-name = '" + afterFilterName + "']", "filter-mapping[filter-name = '" + beforeFilterName + "']", webXml);
 			} else {
-				insertBetween(filterMappingE, "filter-mapping", "listener", webXml);
+				insertBetween(filterMappingE, "filter-mapping[last()]", "listener", webXml);
 			}
 		}
 		appendChildIfNotPresent(filterMappingE, new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build(), webXml);
@@ -183,7 +187,7 @@ public abstract class WebXmlUtils {
 			listener = new XmlElementBuilder("listener", webXml)
 						.addChild(new XmlElementBuilder("listener-class", webXml).setText(className).build())
 					.build();
-			insertBetween(listener, "filter-mapping", "servlet", webXml);
+			insertBetween(listener, "filter-mapping[last()]", "servlet", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(listener, comment, webXml);
 			}
@@ -212,7 +216,7 @@ public abstract class WebXmlUtils {
 			servlet = new XmlElementBuilder("servlet", webXml)
 						.addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build())
 					.build();
-			insertBetween(servlet, "listener", "servlet-mapping", webXml);
+			insertBetween(servlet, "listener[last()]", "servlet-mapping", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(servlet, comment, webXml);
 			}
@@ -234,7 +238,7 @@ public abstract class WebXmlUtils {
 			servletMapping = new XmlElementBuilder("servlet-mapping", webXml)
 								.addChild(new XmlElementBuilder("servlet-name", webXml).setText(servletName).build())
 							.build();
-			insertBetween(servletMapping, "servlet", "session-config", webXml);
+			insertBetween(servletMapping, "servlet[last()]", "session-config", webXml);
 		}
 		if (urlPattern != null && urlPattern.length() > 0) {
 			appendChildIfNotPresent(servletMapping, new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build(), webXml);
@@ -257,7 +261,7 @@ public abstract class WebXmlUtils {
 		Element sessionConfig = XmlUtils.findFirstElement("/web-app/session-config", webXml.getDocumentElement());
 		if (sessionConfig == null) {
 			sessionConfig = webXml.createElement("session-config");			
-			insertBetween(sessionConfig, "servlet-mapping", "welcome-file-list", webXml);
+			insertBetween(sessionConfig, "servlet-mapping[last()]", "welcome-file-list", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(sessionConfig, comment, webXml);
 			}
@@ -279,7 +283,7 @@ public abstract class WebXmlUtils {
 		Element welcomeFile = XmlUtils.findFirstElement("/web-app/welcome-file-list", webXml.getDocumentElement());
 		if (welcomeFile == null) {
 			welcomeFile = webXml.createElement("welcome-file-list");
-			insertBetween(welcomeFile,"session-config", "error-page", webXml);
+			insertBetween(welcomeFile,"session-config[last()]", "error-page", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(welcomeFile, comment, webXml);
 			}
@@ -305,7 +309,7 @@ public abstract class WebXmlUtils {
 			errorPage = new XmlElementBuilder("error-page", webXml)
 								.addChild(new XmlElementBuilder("exception-type", webXml).setText(exceptionType).build())
 							.build();
-			insertBetween(errorPage, "welcome-file-list", "the-end", webXml);
+			insertBetween(errorPage, "welcome-file-list[last()]", "the-end", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(errorPage, comment, webXml);
 			}
@@ -331,7 +335,7 @@ public abstract class WebXmlUtils {
 			errorPage = new XmlElementBuilder("error-page", webXml)
 								.addChild(new XmlElementBuilder("error-code", webXml).setText(errorCode.toString()).build())
 							.build();
-			insertBetween(errorPage, "welcome-file-list", "the-end", webXml);
+			insertBetween(errorPage, "welcome-file-list[last()]", "the-end", webXml);
 			if (comment != null && comment.length() > 0) {
 				addCommentBefore(errorPage, comment, webXml);
 			}
@@ -348,7 +352,7 @@ public abstract class WebXmlUtils {
 			return;
 		} 
 		
-		Element afterElement = XmlUtils.findFirstElement("/web-app/" + afterElementName + "[last()]", doc.getDocumentElement());
+		Element afterElement = XmlUtils.findFirstElement("/web-app/" + afterElementName, doc.getDocumentElement());
 		if (afterElement != null && afterElement.getNextSibling() != null && afterElement.getNextSibling() instanceof Element) {
 			doc.getDocumentElement().insertBefore(element, afterElement.getNextSibling());
 			addLineBreakBefore(element, doc);
@@ -450,6 +454,6 @@ public abstract class WebXmlUtils {
 	 *
 	 */
 	public static enum FilterPosition {
-		FIRST, LAST, BEFORE, AFTER;
+		FIRST, LAST, BEFORE, AFTER, BETWEEN;
 	}
 }
