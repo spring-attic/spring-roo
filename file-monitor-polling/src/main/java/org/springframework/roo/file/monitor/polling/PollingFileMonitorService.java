@@ -487,21 +487,45 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		}
 	}
 
-	public void notifyChanged(String fileCanoncialPath) {
+	/**
+	 * Decides whether we want to store this notification. This only happens if a monitoring request
+	 * has indicated it is interested in this request. See ROO-794 for details.
+	 * 
+	 * @param fileCanonicalPath to potentially keep
+	 * @return true if the notification is able to be kept
+	 */
+	private boolean isNotificationUnderKnownMonitoringRequest(String fileCanonicalPath) {
 		synchronized (lock) {
-			notifyChanged.add(fileCanoncialPath);
+			for (MonitoringRequest request : requests) {
+				if (isWithin(request, fileCanonicalPath)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public void notifyChanged(String fileCanonicalPath) {
+		synchronized (lock) {
+			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				notifyChanged.add(fileCanonicalPath);
+			}
 		}
 	}
 
-	public void notifyCreated(String fileCanoncialPath) {
+	public void notifyCreated(String fileCanonicalPath) {
 		synchronized (lock) {
-			notifyCreated.add(fileCanoncialPath);
+			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				notifyCreated.add(fileCanonicalPath);
+			}
 		}
 	}
 
-	public void notifyDeleted(String fileCanoncialPath) {
+	public void notifyDeleted(String fileCanonicalPath) {
 		synchronized (lock) {
-			notifyDeleted.add(fileCanoncialPath);
+			if (isNotificationUnderKnownMonitoringRequest(fileCanonicalPath)) {
+				notifyDeleted.add(fileCanonicalPath);
+			}
 		}
 	}
 
