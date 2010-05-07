@@ -34,7 +34,7 @@ field string --fieldName name --sizeMin 2 --sizeMax 30
 */
 
 entity --class ~.server.domain.Report --testAutomatically
-field date --fieldName created --type java.util.Date --past --notNull
+//field date --fieldName created --type java.util.Date --past --notNull
 //field enum --fieldName status --type ~.server.reference.Status --notNull
 //field reference --fieldName reporter --type ~.server.domain.Employee --notNull
 field string --fieldName purpose --sizeMin 3 --sizeMax 100
@@ -44,7 +44,7 @@ field string --fieldName purpose --sizeMin 3 --sizeMax 100
 /*
 entity --class ~.server.domain.ReportItem --testAutomatically
 field reference --fieldName report --type ~.server.domain.Report --notNull
-field date --fieldName incurred --type java.util.Date --past --notNull
+//field date --fieldName incurred --type java.util.Date --past --notNull
 field reference --fieldName costCentre --type ~.server.domain.CostCentre --notNull
 field reference --fieldName type --type ~.server.domain.Type --notNull
 field string --fieldName purpose --sizeMin 3 --sizeMax 100
@@ -60,7 +60,7 @@ finder add --class ~.server.domain.Employee --finderName findEmployeesBySupervis
 /*
 entity --class ~.server.domain.Audit --testAutomatically
 field reference --fieldName report --type ~.server.domain.Report --notNull
-field date --fieldName eventDate --type java.util.Date --past --notNull
+//field date --fieldName eventDate --type java.util.Date --past --notNull
 field string --fieldName description --sizeMin 3 --sizeMax 1024
 */
 
