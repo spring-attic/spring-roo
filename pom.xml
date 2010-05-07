@@ -48,6 +48,7 @@
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-security</module>
+	<module>addon-solr</module>
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
 	<module>addon-gwt</module>
