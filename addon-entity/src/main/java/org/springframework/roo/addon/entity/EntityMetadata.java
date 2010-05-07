@@ -663,7 +663,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("} else {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = this." + getEntityManagerField().getFieldName().getSymbolName() + ".find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, this." + getIdentifierField().getFieldName().getSymbolName() + ");");
+			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = this." + getEntityManagerField().getFieldName().getSymbolName() + ".find(this.getClass(), this." + getIdentifierField().getFieldName().getSymbolName() + ");");
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(attached);");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
