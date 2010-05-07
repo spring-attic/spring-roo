@@ -8,6 +8,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -31,6 +33,8 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 /**
  * Provides GWT installation services.
@@ -259,9 +263,11 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		MutableFile mutableUrlrewriteXml = null;
 		Document urlrewriteXmlDoc;
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		builder.setEntityResolver(new UrlRewriteDtdResolver());
 		try {
 			mutableUrlrewriteXml = fileManager.updateFile(urlrewriteXml);
-			urlrewriteXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableUrlrewriteXml.getInputStream());
+			urlrewriteXmlDoc = builder.parse(mutableUrlrewriteXml.getInputStream());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -285,6 +291,17 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (toRemove != null) {
 			toRemove.getParentNode().removeChild(toRemove);
 			toRemove = null;
+		}
+	}
+	
+	private class UrlRewriteDtdResolver implements EntityResolver {		
+		public InputSource resolveEntity (String publicId, String systemId) {
+			if (systemId.equals("http://tuckey.org/res/dtds/urlrewrite3.0.dtd")) {				
+				return new InputSource(TemplateUtils.getTemplate(GwtOperationsImpl.class, "dtd/urlrewrite3.0.dtd"));
+			} else {
+				// use the default behaviour
+				return null;
+			}
 		}
 	}
 }
