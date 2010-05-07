@@ -58,7 +58,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
 	
 	public boolean isProjectAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 	}
 	
 	/**
