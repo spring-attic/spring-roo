@@ -36,7 +36,6 @@
 				<modules>
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
 				</modules>
-                <runTarget>ApplicationScaffold.html</runTarget>
 			</configuration>
 			<executions>
 				<execution>
