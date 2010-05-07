@@ -35,7 +35,7 @@ public class FinderCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="finder list", help="List all finders for a given target (must be an entity")
-	public SortedSet<String> listFinders(@CliOption(key="class", mandatory=true, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
+	public SortedSet<String> listFinders(@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
 			@CliOption(key={"","depth"}, mandatory=false, unspecifiedDefaultValue="1", specifiedDefaultValue="1", help="The depth of attribute combinations to be generated for the finders") Integer depth,
 			@CliOption(key="filter", mandatory=false, help="A comma separated list of strings that must be present in a filter to be included") String filter) {
 		Set<String> requiredEntries = new HashSet<String>();
