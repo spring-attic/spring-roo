@@ -8,12 +8,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilder;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.web.mvc.controller.UrlRewriteOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -33,8 +32,6 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 
 /**
  * Provides GWT installation services.
@@ -51,6 +48,8 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private UrlRewriteOperations urlRewriteOperations;
+	
 	private ComponentContext context;
 	
 	protected void activate(ComponentContext context) {
@@ -258,32 +257,20 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 	
 	private void updateUrlRewriteXml() {
-		String urlrewriteXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/urlrewrite.xml");
-		Assert.isTrue(fileManager.exists(urlrewriteXml), "urlrewrite.xml not found; cannot continue");
-		
-		MutableFile mutableUrlrewriteXml = null;
-		Document urlrewriteXmlDoc;
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		builder.setEntityResolver(new UrlRewriteDtdResolver());
-		try {
-			mutableUrlrewriteXml = fileManager.updateFile(urlrewriteXml);
-			urlrewriteXmlDoc = builder.parse(mutableUrlrewriteXml.getInputStream());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		Element root = urlrewriteXmlDoc.getDocumentElement();
+		Document urlRewriteDoc = urlRewriteOperations.getUrlRewriteDocument();
+		Element root = urlRewriteDoc.getDocumentElement();
 		Element firstRule = XmlUtils.findRequiredElement("/urlrewrite/rule", root);
 		
-		root.insertBefore(new XmlElementBuilder("rule", urlrewriteXmlDoc)
-										.addChild(new XmlElementBuilder("from", urlrewriteXmlDoc).setText("/applicationScaffold/**").build())
-										.addChild(new XmlElementBuilder("to", urlrewriteXmlDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+										.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationScaffold/**").build())
+										.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
 									.build(), firstRule);
-		root.insertBefore(new XmlElementBuilder("rule", urlrewriteXmlDoc)
-								.addChild(new XmlElementBuilder("from", urlrewriteXmlDoc).setText("/ApplicationScaffold.html").build())
-								.addChild(new XmlElementBuilder("to", urlrewriteXmlDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationScaffold.html").build())
+								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
 							.build(), firstRule);
 		
-		XmlUtils.writeXml(mutableUrlrewriteXml.getOutputStream(), urlrewriteXmlDoc);
+		urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
@@ -291,17 +278,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (toRemove != null) {
 			toRemove.getParentNode().removeChild(toRemove);
 			toRemove = null;
-		}
-	}
-	
-	private class UrlRewriteDtdResolver implements EntityResolver {		
-		public InputSource resolveEntity (String publicId, String systemId) {
-			if (systemId.equals("http://tuckey.org/res/dtds/urlrewrite3.0.dtd")) {				
-				return new InputSource(TemplateUtils.getTemplate(GwtOperationsImpl.class, "dtd/urlrewrite3.0.dtd"));
-			} else {
-				// use the default behaviour
-				return null;
-			}
 		}
 	}
 }
