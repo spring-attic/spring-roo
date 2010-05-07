@@ -50,7 +50,7 @@
 				<dependency>
 					<groupId>com.google.appengine.orm</groupId>
 					<artifactId>datanucleus-appengine</artifactId>
-					<version>1.0.6.final</version>
+					<version>1.0.7.rc1</version>
 				</dependency>
 				<dependency>
 					<groupId>com.google.appengine</groupId>
@@ -175,7 +175,7 @@
 					<artifactId>openjpa-maven-plugin</artifactId>
 					<version>1.0</version>
 					<configuration>
-						<includes>**/*.class</includes>
+						<includes>**/domain/*.class</includes>
 						<excludes>**/*_Roo_*.class</excludes>
 						<addDefaultConstructor>true</addDefaultConstructor>
 						<toolProperties>

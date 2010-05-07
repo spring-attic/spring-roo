@@ -13,13 +13,15 @@ public enum GwtPath {
 	GWT_SCAFFOLD_GENERATED,
 	GWT_UI,
 	SERVER,
-	WEB;
+	WEB,
+        STYLE, 
+        STYLE_CLIENT;
 	
 	private String segmentName() {
 		if (GWT_ROOT.equals(this)) {
 			return "/gwt";
 		} else if (GWT_PLACE.equals(this)) {
-			return "/gwt/place";
+			return "/gwt/scaffold/place";
 		} else if (GWT_REQUEST.equals(this)) {
 			return "/gwt/request";
 		} else if (GWT_SCAFFOLD.equals(this)) {
@@ -30,7 +32,12 @@ public enum GwtPath {
 			return "/gwt/ui";
 		} else if (SERVER.equals(this)) {
 			return "/server";
-		} else {
+		} else if(STYLE.equals(this)) {
+                     return "/gwt/style"; 
+                } 
+                else if(STYLE_CLIENT.equals(this)) {
+                     return "/gwt/style/client"; 
+                }else {
 			return "/";
 		}
 	}
@@ -44,7 +51,11 @@ public enum GwtPath {
 			segmentName = "server/";
 		} else if (segmentName.equals("/")) {
 			segmentName = "web/";
-		} else {
+		} else if(STYLE.equals(this)) {
+                  return "style-template/*";
+                } else if(STYLE_CLIENT.equals(this)) {
+                  return "style-template/client/*";
+                } else {
 			segmentName = segmentName.substring(5) + "/";
 		}
 		return segmentName + "*-template.*";
@@ -54,7 +65,8 @@ public enum GwtPath {
 		String packagePath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', '/') + segmentName();
 		if (WEB.equals(this)) {
 			return projectMetadata.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
-		} else {
+		}
+                else {
 			return projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath);
 		}
 	}

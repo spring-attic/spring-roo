@@ -36,9 +36,12 @@
 				<modules>
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
 				</modules>
+                <runTarget>ApplicationScaffold.html</runTarget>
 			</configuration>
 			<executions>
 				<execution>
+                     <id>gwtcompile</id>
+                     <phase>compile</phase>
 					<goals>
 						<goal>compile</goal>
 					</goals>

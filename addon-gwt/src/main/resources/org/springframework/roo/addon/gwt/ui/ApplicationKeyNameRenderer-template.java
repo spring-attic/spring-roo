@@ -1,6 +1,6 @@
 package __TOP_LEVEL_PACKAGE__.gwt.ui;
 
-import com.google.gwt.user.client.ui.Renderer;
+import com.google.gwt.app.util.Renderer;
 import com.google.gwt.valuestore.shared.Record;
 
 /**

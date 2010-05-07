@@ -22,9 +22,23 @@ public enum MirrorType {
 	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler"),
 	REQUEST(GwtPath.GWT_REQUEST, "Request"),
 	REQUEST_SERVER_SIDE_OPERATIONS(GwtPath.GWT_REQUEST, "RequestServerSideOperations"),
+        ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper"),
+        SCAFFOLD_PLACE(GwtPath.GWT_PLACE, "ScaffoldPlace"),
+        DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity"),
+        EDIT_ACTIVITY(GwtPath.GWT_UI, "EditActivity"),
+        LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity"),
 	FIND_ALL_REQUESTER(GwtPath.GWT_SCAFFOLD_GENERATED, "FindAllRequester"),
 	DETAILS_BUILDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsBuilder"),
-	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView");
+	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView"),
+        LIST_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "ListViewBinder"),
+        DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder"),
+        DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView"),
+  
+        EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder"),
+        EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView"),
+  
+  ;
+  
 
 	private GwtPath path;
 	private String suffix;

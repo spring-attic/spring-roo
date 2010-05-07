@@ -122,11 +122,12 @@ public class GwtOperationsImpl implements GwtOperations {
 			metadataService.get(id);
 		}
 	}
-
+  
 	private void copyDirectoryContents(GwtPath gwtPath, ProjectMetadata projectMetadata) {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
-		
+
+          System.err.println("Trying to copy "+sourceAntPath);
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
@@ -139,14 +140,17 @@ public class GwtOperationsImpl implements GwtOperations {
 		Set<URL> urls = TemplateUtils.findMatchingClasspathResources(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (URL url: urls) {
-			String fileName =  url.getPath().substring(url.getPath().lastIndexOf("/") + 1).replace("-template", "");
+                  String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+                  System.err.println("Filename is "+fileName);
+                  fileName =  fileName.replace("-template", "");
+                        
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
 				try {
 					// Read template and insert the user's package
 					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
 					input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-					
+				        input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
 					// Output the file for the user
 					MutableFile mutableFile = fileManager.createFile(targetFilename);
 					FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
@@ -246,7 +250,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
 	    // WebXmlUtils.addListener(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener", webXmlDoc, "Temporary workaround");
-		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/app/expenses/data", null, webXmlDoc, null);
+		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/expenses/data", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
 		removeIfFound("/web-app/servlet[servlet-class='org.springframework.web.servlet.DispatcherServlet']", webXmlRoot);  // temporary (due to JSR 303 being used and classloader issues in m2eclipse)
