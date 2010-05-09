@@ -3,6 +3,7 @@ package org.springframework.roo.addon.maven;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
@@ -103,39 +104,67 @@ public class MavenCommands implements CommandMarker {
 	public void mvn(@CliOption(key="mavenCommand", mandatory=true, help="User-specified Maven command (eg test:test)") String extra) throws IOException {
 		File root = new File(mavenOperations.getProjectRoot());
 		Assert.isTrue(root.isDirectory() && root.exists(), "Project root does not currently exist as a directory ('" + root.getCanonicalPath() + "')");
-		BufferedReader input = null;
+		
+		String cmd = null;
+		if (File.separatorChar == '\\') {
+			cmd = "mvn.bat " + extra;
+		} else {
+			cmd = "mvn " + extra;
+		}
+		Process p = Runtime.getRuntime().exec(cmd, null, root);
+	    
+		// Ensure separate threads are used for logging, as per ROO-652
+		LoggingInputStream input = new LoggingInputStream(p.getInputStream());
+		LoggingInputStream errors = new LoggingInputStream(p.getErrorStream());
+		
+		input.start();
+		errors.start();
+ 		
 		try {
-			String cmd = null;
-			if (File.separatorChar == '\\') {
-				cmd = "mvn.bat " + extra;
-			} else {
-				cmd = "mvn " + extra;
-			}
-			Process p = Runtime.getRuntime().exec(cmd, null, root);
-		    input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			p.waitFor();
+		} catch (InterruptedException e) {
+			throw new IllegalStateException(e);
+		}
+		
+	}
+	
+	private class LoggingInputStream extends Thread {
+
+		private BufferedReader inputStream;
+		
+		public LoggingInputStream(InputStream inputStream) {
+			this.inputStream = new BufferedReader(new InputStreamReader(inputStream));
+		}
+		
+		@Override
+		public void run() {
 		    String line;
-		    while ((line = input.readLine()) != null) {
-		    	if (line.startsWith("[ERROR]")) {
-		    		logger.severe(line);
-		    	} else if (line.startsWith("[WARNING]")) {
-		    		logger.warning(line);
-		    	} else {
-		    		logger.info(line);
+		    try {
+			    while ((line = inputStream.readLine()) != null) {
+			    	if (line.startsWith("[ERROR]")) {
+			    		logger.severe(line);
+			    	} else if (line.startsWith("[WARNING]")) {
+			    		logger.warning(line);
+			    	} else {
+			    		logger.info(line);
+			    	}
+			    }
+		    } catch (IOException ioe) {
+		    	if (ioe.getMessage().contains("No such file or directory") || // for *nix/Mac
+		    		ioe.getMessage().contains("CreateProcess error=2"))       // for Windows
+		    	{
+		    		logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");
+		    	}
+		    } finally {
+		    	if (inputStream != null) {
+		    		try {
+		    			inputStream.close();
+		    		} catch (IOException ignore) {}
 		    	}
 		    }
-	    } catch (IOException ioe) {
-	    	if (ioe.getMessage().contains("No such file or directory") || // for *nix/Mac
-	    		ioe.getMessage().contains("CreateProcess error=2"))       // for Windows
-	    	{
-	    		logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");
-	    		return;
-	    	}
-	    	throw ioe;
-	    } finally {
-	    	if (input != null) {
-	    		input.close();
-	    	}
-	    }
+
+		}
+		
 	}
 
 }
