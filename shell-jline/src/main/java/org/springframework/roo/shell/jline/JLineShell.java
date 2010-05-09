@@ -113,8 +113,8 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
         	boolean success = executeCommand(rooArgs);
             if (exitShellRequest == null) {
             	// The command itself did not specify an exit shell code, so we'll fall back to something sensible here
-               	exitShellRequest = success ? ExitShellRequest.NORMAL_EXIT : ExitShellRequest.FATAL_EXIT;
                 executeCommand("quit"); // ROO-839
+               	exitShellRequest = success ? ExitShellRequest.NORMAL_EXIT : ExitShellRequest.FATAL_EXIT;
             }
             setShellStatus(ShellStatus.SHUTTING_DOWN);
         } else {
