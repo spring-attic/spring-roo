@@ -291,13 +291,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     		sb.append("                \\ _    +-.").append(System.getProperty("line.separator"));
     		sb.append("                 \\`-=--^-' \\").append(System.getProperty("line.separator"));
     		sb.append("                  \\   \\     |\\--------------------------+").append(System.getProperty("line.separator"));
-    		sb.append("                 _/    \\    |  Thanks for loading ROO!  |").append(System.getProperty("line.separator"));
+    		sb.append("                 _/    \\    |  Thanks for loading Roo!  |").append(System.getProperty("line.separator"));
     		sb.append("                (  .    Y   +---------------------------+").append(System.getProperty("line.separator"));
     		sb.append("               /\"\\ `---^--v---.").append(System.getProperty("line.separator"));
     		sb.append("              / _ `---\"T~~\\/~\\/").append(System.getProperty("line.separator"));
     		sb.append("             / \" ~\\.      !").append(System.getProperty("line.separator"));
     		sb.append("       _    Y      Y.~~~ /'").append(System.getProperty("line.separator"));
-    		sb.append("      Y^|   |      | ROO 7").append(System.getProperty("line.separator"));
+    		sb.append("      Y^|   |      | Roo 7").append(System.getProperty("line.separator"));
     		sb.append("      | l   |     / .   /'").append(System.getProperty("line.separator"));
     		sb.append("      | `L  | Y .^/   ~T").append(System.getProperty("line.separator"));
     		sb.append("      |  l  ! | |/  | |               ____  ____  ____").append(System.getProperty("line.separator"));
@@ -317,57 +317,25 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		
 		return sb.toString();
 	}
-
+	
 	public static String versionInfo() {
-		// Try to determine the SVN version
-		String svnRev = null;
+		// Try to determine the bundle version
+		String bundleVersion = null;
 		try {
 			String classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation().toString();
-			
 			if (classContainer.endsWith(".jar")) {
-				// Attempt to obtain the SVN version from the manifest
+				// Attempt to obtain the "Bundle-Version" version from the manifest
 				URL manifestUrl = new URL("jar:" + classContainer + "!/META-INF/MANIFEST.MF");
 				Manifest manifest = new Manifest(manifestUrl.openStream());
-				svnRev = manifest.getMainAttributes().getValue("Implementation-Build");
-			} else {
-				// We're likely in development mode, so try to obtain it via the "svnversion" external tool
-				if (classContainer.startsWith("file:")) {
-					String location = classContainer.substring(5);
-					File f = new File(location).getParentFile().getParentFile().getParentFile();
-					if (f.exists()) {
-						String line;
-						Process p = Runtime.getRuntime().exec("svnversion -n " + f.getCanonicalPath());
-					    BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-					    try {
-						    while ((line = input.readLine()) != null) {
-						    	svnRev = line;
-						    }
-					    } finally {
-				    		input.close();
-					    }
-					}
-				}
+				bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
 			}
-			
 		} catch (Exception ignoreAndMoveOn) {}
 		
-		String formalBuild = AbstractShell.class.getPackage().getImplementationVersion();
-		
-		// Build the version details
-		StringBuilder sb = new StringBuilder();
-		if (formalBuild == null) {
-			sb.append("ENGINEERING BUILD");
-		} else {
-			sb.append(formalBuild);
-		}
-
-		if (svnRev == null) {
-			sb.append(" [rev unknown]");
-		} else {
-			sb.append(" [rev ").append(svnRev).append("]");
+		if (bundleVersion == null) {
+			return "UNKNOWN VERSION";
 		}
 		
-		return sb.toString();
+		return bundleVersion;
 	}
 
 	public String getShellPrompt() {
