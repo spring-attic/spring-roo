@@ -114,12 +114,14 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
             if (exitShellRequest == null) {
             	// The command itself did not specify an exit shell code, so we'll fall back to something sensible here
                	exitShellRequest = success ? ExitShellRequest.NORMAL_EXIT : ExitShellRequest.FATAL_EXIT;
+                executeCommand("quit"); // ROO-839
             }
             setShellStatus(ShellStatus.SHUTTING_DOWN);
-            return;
+        } else {
+            // Normal RPEL processing
+        	promptLoop();
         }
         
-        promptLoop();
         Assert.notNull(exitShellRequest, "Prompt loop terminated without setting exit shell request to proper level");
 	}
 
