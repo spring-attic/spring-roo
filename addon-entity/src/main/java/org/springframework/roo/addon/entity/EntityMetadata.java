@@ -528,7 +528,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * <p>
 	 * If a class does not define a no-arg constructor, one might be created. It will only be created if
 	 * the {@link #noArgConstructor} is true AND there is at least one other constructor declared
-	 * in the source file. If a constructor is created, it will have a private access modifier.
+	 * in the source file. If a constructor is created, it will have a public access modifier.
 	 * 
 	 * @return the constructor (may return null if no constructor is to be produced)
 	 */
@@ -558,7 +558,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create the constructor
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
-		return new DefaultConstructorMetadata(getId(), Modifier.PRIVATE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 	
 	/**
