@@ -91,9 +91,6 @@ public class Activator implements BundleActivator {
 			if (srs != null) {
 				for (ServiceReference sr : srs) {
 					String className = getClassName(sr, context);
-					if (sr != null) {
-						context.ungetService(sr);
-					}
 					if (className == null) {
 						// Something went wrong
 						continue;
