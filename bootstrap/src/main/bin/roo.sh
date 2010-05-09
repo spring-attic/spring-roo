@@ -26,23 +26,42 @@ case "`uname`" in
         ;;
 esac
 
+# Build a classpath containing our two magical startup JARs
+ROO_CP=`echo $ROO_HOME/bin/*.jar | sed 's/ /:/g'`
+# echo ROO_CP: $ROO_CP
+
+# Store file locations in variables to facilitate Cygwin conversion if needed
+
+ROO_OSGI_FRAMEWORK_STORAGE="$ROO_HOME/cache"
+# echo "ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
+
+ROO_AUTO_DEPLOY_DIRECTORY="$ROO_HOME/bundle"
+# echo "ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
+
+ROO_CONFIG_FILE_PROPERTIES="$ROO_HOME/conf/config.properties"
+# echo "ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
+
+cygwin=false;
+case "`uname`" in
+    CYGWIN*)
+        cygwin=true
+        ;;
+esac
+
 if [ "$cygwin" = "true" ]; then
 	export ROO_HOME="`cygpath -wp $ROO_HOME`"
-	export JAVA_HOME="`cygpath -wp "$JAVA_HOME"`"
-	export EXT_DIR=""$ROO_HOME\\dist";"$ROO_HOME\\lib";"$ROO_HOME\\work";"$JAVA_HOME\\jre\\lib\\ext""
+	export ROO_CP="`cygpath -wp $ROO_CP`"
+	export ROO_OSGI_FRAMEWORK_STORAGE="`cygpath -wp $ROO_OSGI_FRAMEWORK_STORAGE`"
+	export ROO_AUTO_DEPLOY_DIRECTORY="`cygpath -wp $ROO_AUTO_DEPLOY_DIRECTORY`"
+	export ROO_CONFIG_FILE_PROPERTIES="`cygpath -wp $ROO_CONFIG_FILE_PROPERTIES`"
 	# echo "Modified ROO_HOME: $ROO_HOME"
-	# echo "Modified JAVA_HOME: $JAVA_HOME"
-else
-	export EXT_DIR="$ROO_HOME/dist:$ROO_HOME/lib:$ROO_HOME/work:$JAVA_HOME/jre/lib/ext"
+	# echo "Modified ROO_CP: $ROO_CP"
+	# echo "Modified ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"
+	# echo "Modified ROO_AUTO_DEPLOY_DIRECTORY: $ROO_AUTO_DEPLOY_DIRECTORY"
+	# echo "Modified ROO_CONFIG_FILE_PROPERTIES: $ROO_CONFIG_FILE_PROPERTIES"
 fi
 
-# echo "Final EXT_DIR: $EXT_DIR"
-
-while true; do
-	java -Djava.ext.dirs="$EXT_DIR" $ROO_OPTS -Droo.home="$ROO_HOME" org.springframework.roo.bootstrap.Bootstrap "classpath:roo-bootstrap.xml" $@
-    EXITED=$?
-    # echo Exited with $EXITED
-    if [ $EXITED -ne 100 -a $EXITED -ne 200 ]; then
-		break
-	fi
-done
+# Hop, hop, hop...
+java -Droo.args="$@" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp $ROO_CP org.springframework.roo.bootstrap.Main
+EXITED=$?
+echo Roo exited with code $EXITED

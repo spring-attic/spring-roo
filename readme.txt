@@ -289,13 +289,9 @@ Learn more about this at http://sysmonblog.co.uk/misc/git_by_example/.
 RELEASING
 ======================================================================
 
-       **** Note as of ROO-728 this section is out of date ****
+Roo is released on a regular basis by the Roo project team.
 
-Roo is released on a regular basis by the Roo project team. To build a
-release, ensure you perform an "svn update" first and then run
-"svnversion" to verify a standard Subversion revision number is given.
-
-the following command is used from the root SVN location:
+The following command is used from the root checkout location:
 
   mvn clean install site assembly:assembly deploy site:deploy
 
@@ -311,9 +307,9 @@ The target/spring-roo-<version>.zip should be uploaded to
 /dist.springframework.org/milestone/ROO/. Also upload an SHA1 file.
 The following S3 properties must be set on the upload release ZIP:
 
-x-amz-meta-bundle.version:1.0.0.M1
+x-amz-meta-bundle.version:1.1.0.M1
 x-amz-meta-release.type:milestone
-x-amz-meta-package.file.name:spring-roo-1.0.0.M1.zip
+x-amz-meta-package.file.name:spring-roo-1.1.0.M1.zip
 x-amz-meta-project.name:Spring Roo
 
 If performing a GA release (ie *.RELEASE) upload the ZIP to
@@ -323,10 +319,6 @@ x-amz-meta-release.type:release
 
 In addition, a Git tag should be created in the form w.x.y.zzzz (note
 there is no prefix or suffix to the Git tag).
-
-Once you've built a release, be aware your $ROO_CLASSPATH_FILE will no
-longer point to the correct target directories. You should re-run the
-"mvn clean eclipse:clean eclipse:eclipse compile" command to fix this.
 
 ======================================================================
 HELP
