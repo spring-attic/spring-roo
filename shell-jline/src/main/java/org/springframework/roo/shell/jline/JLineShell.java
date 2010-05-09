@@ -56,7 +56,8 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
     private boolean developmentMode = false;
     private FileWriter fileLog;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+	private ShellStatusListener statusListener; // ROO-836
+	
 	protected void activate(ComponentContext context) {
 		this.context = context;
         Thread thread = new Thread(this, "JLine Shell");
@@ -65,6 +66,9 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
 	
 	protected void deactivate(ComponentContext context) {
 		this.context = null;
+		if (statusListener != null) {
+			removeShellStatusListener(statusListener);
+		}
 	}
 	
 	public void run() {
@@ -121,8 +125,6 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
             // Normal RPEL processing
         	promptLoop();
         }
-        
-        Assert.notNull(exitShellRequest, "Prompt loop terminated without setting exit shell request to proper level");
 	}
 
 	private void removeHandlers(Logger l) {
@@ -163,13 +165,14 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
 		};
 		ansiTerminal.initializeTerminal();
 		// make sure to reset the original shell's colors on shutdown by closing the stream
-		addShellStatusListener(new ShellStatusListener() {
+		statusListener = new ShellStatusListener() {
 			public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
 				if (newStatus == ShellStatus.SHUTTING_DOWN) {
 					ansiOut.close();
 				}
 			}
-		});
+		};
+		addShellStatusListener(statusListener);
 		return new ConsoleReader(
 			new FileInputStream(FileDescriptor.in),
         	new PrintWriter(
