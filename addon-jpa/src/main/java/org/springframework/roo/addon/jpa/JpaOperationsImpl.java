@@ -228,6 +228,8 @@ public class JpaOperationsImpl implements JpaOperations {
 				case H2_IN_MEMORY:
 					username = "sa";
 					break;
+				case DERBY:
+					break;
 				default:
 					logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
 					break;
