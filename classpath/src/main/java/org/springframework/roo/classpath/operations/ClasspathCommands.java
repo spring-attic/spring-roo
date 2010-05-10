@@ -61,6 +61,10 @@ public class ClasspathCommands implements CommandMarker {
 		return classpathOperations.isPersistentClassAvailable();
 	}
 
+	@CliCommand(value="focus", help="Changes focus to a different type")
+	public void focus(@CliOption(key="class", mandatory=true, optionContext="update,project", help="The type to focus on") JavaType typeName) {
+	}
+	
 	@CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
 	public void createClass(
 			@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
