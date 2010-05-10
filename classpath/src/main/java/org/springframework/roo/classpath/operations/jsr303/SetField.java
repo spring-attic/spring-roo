@@ -68,12 +68,20 @@ public class SetField extends CollectionField {
 		if (mappedBy != null) {
 			attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
 		}
-		if (cardinality.equals(Cardinality.ONE_TO_MANY)) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
-		} else if (cardinality.equals(Cardinality.MANY_TO_MANY)) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
-		} else {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+		
+		switch (cardinality) {
+			case ONE_TO_MANY:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+				break;
+			case MANY_TO_MANY:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+				break;
+			case ONE_TO_ONE:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
+				break;
+			default:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+				break;
 		}
 	}
 
@@ -90,5 +98,4 @@ public class SetField extends CollectionField {
 	public void setMappedBy(JavaSymbolName mappedBy) {
 		this.mappedBy = mappedBy;
 	}
-	
 }

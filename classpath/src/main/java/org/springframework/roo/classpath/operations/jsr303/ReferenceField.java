@@ -74,12 +74,19 @@ public class ReferenceField extends FieldDetails {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
 		}
 		
-		if (cardinality.equals(Cardinality.ONE_TO_MANY)) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
-		} else if (cardinality.equals(Cardinality.MANY_TO_MANY)) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
-		} else {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+		switch (cardinality) {
+			case ONE_TO_MANY:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+				break;
+			case MANY_TO_MANY:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+				break;
+			case ONE_TO_ONE:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
+				break;
+			default:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+				break;
 		}
 		
 		List<AnnotationAttributeValue<?>> jcAttrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -87,7 +94,5 @@ public class ReferenceField extends FieldDetails {
 			jcAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
 		}
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumn"), jcAttrs));
-		
 	}
-
 }
