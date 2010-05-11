@@ -13,9 +13,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
@@ -119,6 +116,7 @@ public class GwtFileListener implements FileEventListener {
 //                updateScaffoldActivities(fileManager, projectMetadata);
                 updateMasterActivities();
                 updateDetailsActivities();
+                updateMobileActivities();
                 updatePlaceFilter();
                 updateBasePlaceFilter();
 	}
@@ -446,6 +444,44 @@ public class GwtFileListener implements FileEventListener {
     }
   }
   
+  
+   public void updateMobileActivities() {
+    try {
+      SharedType type = SharedType.MOBILE_ACTIVITIES;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      addReference(ctx, SharedType.APP_RECORD_PLACE);
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      addReference(ctx, SharedType.APP_PLACE_FILTER);
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("name", simpleName);
+        ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
+        ent.put("activitiesMapper", simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
+        imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
+        ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
   public void updateDetailsActivities() {
     try {
       SharedType type = SharedType.DETAILS_ACTIVITIES;
@@ -468,6 +504,7 @@ public class GwtFileListener implements FileEventListener {
             .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
         Map<String, String> ent = new HashMap<String, String>();
         ent.put("name", simpleName);
+        ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
         ent.put("activitiesMapper", simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
         imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
         ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());

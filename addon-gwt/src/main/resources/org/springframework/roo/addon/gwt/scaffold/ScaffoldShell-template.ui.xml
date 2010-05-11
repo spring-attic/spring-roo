@@ -4,7 +4,9 @@
   xmlns:a='urn:import:com.google.gwt.app.client'>
 
   <ui:style>
-   .disabled {
+    @def contentWidth 800px;
+
+    .disabled {
      color: gray;
     }
     
@@ -13,7 +15,14 @@
      }
 
     .banner {
-       background-color: #D1EEEE;
+       background-color: #777;
+       color: #fff;
+       width: 800px;
+       margin-left: auto;
+       margin-right: auto;
+       -moz-border-radius: 10px;
+       -webkit-border-radius: 10px;
+       margin-top: 1.5em;
      }
 
     .title {
@@ -22,41 +31,76 @@
      }
 
     .error {
-     position: absolute;
-     left: 12%;
-     right: 12%;
-     text-align: center;
-     background-color: red;
+       position: absolute;
+       left: 12%;
+       right: 12%;
+       text-align: center;
+       background-color: red;
     }
 
     .users {
      position: absolute;
      right: 0;
     }
-  </ui:style>
 
+    .centered {
+      width: contentWidth;
+      margin-right: auto;
+      margin-left: auto;
+    }
+
+    .content {
+      position: relative;
+      margin-top: 2em;
+      border-top: 2px solid #888;
+      overflow: auto;
+     }
+
+     .entities {
+       position: absolute;
+       left: 0;
+       top: 0;
+       bottom: 0;
+       width: 15em;
+     }
+
+     .entitiesList {
+       border: none;
+       height: 100%;
+       outline: none;
+       font-weight: bold;
+     }
+
+     .master {
+       margin-left: 15em;
+     }
+
+     .details {
+       margin-left: 15em;
+     }
+  </ui:style>
+ 
   <g:DockLayoutPanel unit='EM'>
-    <g:north size='4.5'>
+    <g:north size='6'>
       <g:HTML styleName='{style.banner}'>
         <div class='{style.error}' ui:field='error'></div>
-        <h2 class='{style.title}'>Expenses Entity Browser</h2>
+        <h2 class='{style.title}'>Your Entities</h2>
       </g:HTML>
     </g:north>
-    
-    <g:west size='15'>
-      <a:ListBoxPlacePickerView width='90%' visibleItemCount='10' ui:field='placesBox'/>
-    </g:west>
 
     <g:center>
-      <g:FlowPanel addStyleNames='{style.body}'>
-      <g:SimplePanel ui:field='master'>
-        <g:HTML>
-          <h3>Welcome to __PROJECT_NAME__</h3>
-          <p>Choose an entity set from the list on the left to get started</p>
-        </g:HTML>
-      </g:SimplePanel>
-      <g:SimplePanel ui:field='details'>
-      </g:SimplePanel>
+      <g:FlowPanel styleName='{style.content} {style.centered}'>
+        <g:SimplePanel styleName='{style.entities}'>
+          <a:ListBoxPlacePickerView styleName="{style.entitiesList}" width='100%' visibleItemCount='10' ui:field='placesBox'/>
+        </g:SimplePanel>
+        <g:SimplePanel styleName="{style.master}" ui:field='master'>
+          <g:HTML>
+            <h3>Welcome to __PROJECT_NAME__</h3>
+            <span>Choose an entity set from the list on the left to get started</span>
+          </g:HTML>
+        </g:SimplePanel>
+        <g:SimplePanel styleName="{style.master}" ui:field='details'>
+        </g:SimplePanel>
       </g:FlowPanel>
     </g:center>
   </g:DockLayoutPanel>

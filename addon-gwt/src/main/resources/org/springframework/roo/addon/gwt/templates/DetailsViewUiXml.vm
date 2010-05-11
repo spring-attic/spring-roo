@@ -19,11 +19,14 @@
      }
       
     .bar {
-      margin-top: 2em;
+      float:right;
+     }
+     .underlined {
+       border-bottom: 2px solid #666;
      }
   </ui:style>
   <g:HTMLPanel>
-    <h3><ui:msg>${entity.name} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+    <h3 class='{style.underlined}'><ui:msg>${entity.name} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
     <div class='{style.fields}'>
 #foreach ($prop in $entity.properties)  
       <div><span class='{style.label}'>${prop.readableName}:</span> <span ui:field='${prop.name}'></span></div>

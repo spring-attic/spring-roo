@@ -14,12 +14,12 @@ public final class $className implements
     ActivityMapper<${shared.applicationPlace}> {
 
 #foreach ($ent in $entities)
-  private final ActivityMapper<${ent.detailsPlace}> ${ent.name}Activities;
+  private final ActivityMapper<${ent.detailsPlace}> ${ent.nameUncapitalized}Activities;
 #end  
   public $className(${shared.requestFactory} requestFactory,
       PlaceController<${shared.applicationPlace}> placeController) {
 #foreach ($ent in $entities)
-    this.${ent.name}Activities = new ${ent.activitiesMapper}(
+    this.${ent.nameUncapitalized}Activities = new ${ent.activitiesMapper}(
         requestFactory, placeController); 
 #end
   }
@@ -28,7 +28,7 @@ public final class $className implements
     return place.acceptFilter(new ${shared.basePlaceFilter}<Activity>(null) {
 #foreach ($ent in $entities)
       public Activity filter(${ent.detailsPlace} place) {
-        return ${ent.name}Activities.getActivity(place);
+        return ${ent.nameUncapitalized}Activities.getActivity(place);
       }
 #end
     });

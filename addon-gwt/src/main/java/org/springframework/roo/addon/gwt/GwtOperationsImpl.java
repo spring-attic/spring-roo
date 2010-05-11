@@ -149,13 +149,17 @@ public class GwtOperationsImpl implements GwtOperations {
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
 				try {
-					// Read template and insert the user's package
-					String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
-					input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-				        input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
-					// Output the file for the user
-					MutableFile mutableFile = fileManager.createFile(targetFilename);
-					FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
+                                        if(targetFilename.endsWith("png")) {
+                                          FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
+                                        } else {
+					  // Read template and insert the user's package
+					  String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
+					  input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+				          input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
+					  // Output the file for the user
+					  MutableFile mutableFile = fileManager.createFile(targetFilename);
+				      	  FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
+                                        }
 				} catch (IOException ioe) {
 					throw new IllegalStateException("Unable to create '" + targetFilename + "'", ioe);
 				}

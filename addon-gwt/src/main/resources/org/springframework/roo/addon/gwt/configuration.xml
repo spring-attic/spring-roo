@@ -42,6 +42,7 @@
 				<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 				<modules>
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
+                    <module>com.springsource.extrack.gwt.ApplicationMobileScaffold</module>
 				</modules>
                 <runTarget>ApplicationScaffold.html</runTarget>
 			</configuration>

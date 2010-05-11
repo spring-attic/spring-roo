@@ -342,7 +342,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 				}
 
 				JavaType returnType = accessor.getReturnType();
-				boolean isDomainObject = !(returnType.equals(JavaType.BOOLEAN_OBJECT) || returnType.equals(JavaType.INT_OBJECT) || returnType.equals(JavaType.LONG_OBJECT) || returnType.equals(JavaType.STRING_OBJECT) || returnType.equals(new JavaType("java.util.Date")));
+				boolean isDomainObject = !(returnType.equals(JavaType.BOOLEAN_OBJECT) || returnType.equals(JavaType.INT_OBJECT) || returnType.equals(JavaType.LONG_OBJECT) || returnType.equals(JavaType.STRING_OBJECT)
+                                    || returnType.equals(JavaType.DOUBLE_OBJECT) || returnType.equals(JavaType.FLOAT_OBJECT) || returnType.equals(new JavaType("java.util.Date")));
 				if (isDomainObject) {
 					gwtSideType = getDestinationJavaType(returnType, MirrorType.RECORD);
 				} else {
@@ -535,10 +536,17 @@ public class GwtMetadata extends AbstractMetadataItem {
     private String getter;
     private String setter;
 
+    private JavaType type;
+
     public Property(String getter, String name, String setter) {
       this.getter = getter;
       this.name = name;
       this.setter = setter;
+    }
+
+    public Property(String getter, String name, String setting, JavaType returnType) {
+      this(getter, name, setting);
+      this.type = returnType;
     }
 
     public String getName() {
@@ -554,8 +562,33 @@ public class GwtMetadata extends AbstractMetadataItem {
       return getter;
     }
 
+    public String getType() {
+      return type.getFullyQualifiedTypeName();
+    }
+    
     public void setGetter(String getter) {
       this.getter = getter;
+    }
+    
+    public boolean isNonString() {
+      return type != null && type.equals(new JavaType("java.util.Date"));
+    }
+    
+    public String getBinder() {
+      return isNonString() ? "d:DateBox" : "g:TextBox";  
+    }
+    
+    public String getEditor() {
+      return isNonString() ? "DateBox" : "TextBox";  
+    }
+      
+    public String getFormatter() {
+      return isNonString() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
+    }
+    
+    public String getRenderer() {
+      return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : 
+          "new Renderer<"+getType()+">() {\n      public String render("+getType()+" obj) {\n        return String.valueOf(obj);\n      }    \n}";
     }
     
     public String getReadableName() {
@@ -598,7 +631,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         continue;
       }
       String getter = f.getMethodName().getSymbolName();
-      props.add(new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3)));
+      props.add(new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), f.getReturnType()));
     }
     eMap.put("properties", props);
     return context;

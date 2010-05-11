@@ -9,7 +9,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.valuestore.ui.AbstractRecordListView;
 import com.google.gwt.valuestore.ui.PropertyColumn;
-
+import com.google.gwt.app.util.DateTimeFormatRenderer;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.app.util.Renderer;
 #declareImports()
 
 import java.util.ArrayList;
@@ -36,8 +38,8 @@ public class ${className} extends AbstractRecordListView<${entity.record}> {
     // TODO These should be <g:col> elements in a <g:table> in the ui.xml file
 
     List<PropertyColumn<${entity.record}, ?>> columns = new ArrayList<PropertyColumn<${entity.record}, ?>>();
-#foreach ($field in $entity.fields)
-    columns.add(PropertyColumn.<${entity.record}> getStringPropertyColumn(${entity.record}.$field));
+#foreach ($prop in $entity.properties)
+    columns.add(new PropertyColumn<${entity.record}, ${prop.type}>(${entity.record}.${prop.name}, ${prop.renderer}));  
 #end
     return columns;
   }

@@ -1,0 +1,47 @@
+#parse ("common.vm")
+package $packageName;
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.PlaceController;
+#declareImports()
+
+/**
+ * Finds the activity to run for a particular {@link ScaffoldPlace}.
+ */
+public final class $className implements
+    ActivityMapper<${shared.applicationPlace}> {
+
+  private final ActivityMapper<${shared.listPlace}> listActivitiesBuilder;
+#foreach ($ent in $entities)
+  private final ActivityMapper<${ent.detailsPlace}> ${ent.nameUncapitalized}ActivitiesBuilder;
+#end  
+
+  /**
+   * @param requestFactory
+   * @param placeController
+   */
+  public $className(
+      ActivityMapper<${shared.listPlace}> listActivitiesBuilder,
+      ${shared.requestFactory} requestFactory,
+      PlaceController<${shared.applicationPlace}> placeController) {
+    this.listActivitiesBuilder = listActivitiesBuilder;
+#foreach ($ent in $entities)
+    this.${ent.nameUncapitalized}ActivitiesBuilder = new ${ent.activitiesMapper}(
+        requestFactory, placeController); 
+#end
+  }
+
+   public Activity getActivity(${shared.applicationPlace} place) {
+    return place.acceptFilter(new ${shared.placeFilter}<Activity>() {
+#foreach ($ent in $entities)
+      public Activity filter(${ent.detailsPlace} place) {
+        return ${ent.nameUncapitalized}ActivitiesBuilder.getActivity(place);
+      }
+#end
+      public Activity filter(${shared.listPlace} place) {
+        return listActivitiesBuilder.getActivity(place);
+      }
+    });
+  }
+}

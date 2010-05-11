@@ -24,6 +24,7 @@ public enum SharedType {
         LIST_ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ListActivitiesMapper", "listActivitiesMapper", "ListActivitiesMapper.vm"),
         MASTER_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldMasterActivities", "masterActivities", "ScaffoldMasterActivities.vm"),
         DETAILS_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldDetailsActivities", "detailsActivities", "ScaffoldDetailsActivities.vm"),
+        MOBILE_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldMobileActivities", "mobileActivities", "ScaffoldMobileActivities.vm"),
         BASE_PLACE_FILTER(GwtPath.GWT_PLACE, "BasePlaceFilter", "basePlaceFilter", "BasePlaceFilter.vm")
   
   ;
