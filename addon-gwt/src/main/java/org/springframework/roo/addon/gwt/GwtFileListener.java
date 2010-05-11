@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import com.sun.tools.internal.xjc.model.CTypeRef;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
