@@ -514,8 +514,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.PersistenceContext"), new ArrayList<AnnotationAttributeValue<?>>());
 			annotations.add(annotation);
 			
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
-			return field;
+			return new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
 		}
 	}
 	
@@ -650,12 +649,14 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Use the getEntityManager() method to acquire an entity manager (the method will throw an exception if it cannot be acquired)
 		bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + " == null) this." + getEntityManagerField().getFieldName().getSymbolName() + " = " + entityManagerMethod.getMethodName().getSymbolName() + "();");
 		
+		JavaType returnType = JavaType.VOID_PRIMITIVE;
 		if ("flush".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 		} else if ("merge".equals(entityManagerDelegate)) {
+			returnType = new JavaType(governorTypeDetails.getName().getSimpleTypeName());
 			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " merged = this." + getEntityManagerField().getFieldName().getSymbolName() + ".merge(this);");
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
-			bodyBuilder.appendFormalLine("this." + getIdentifierField().getFieldName().getSymbolName() + " = merged." + getIdentifierAccessor().getMethodName().getSymbolName() + "();");
+			bodyBuilder.appendFormalLine("return merged;");
 		} else if ("remove".equals(entityManagerDelegate)) {
 			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + ".contains(this)) {");
 			bodyBuilder.indent();
@@ -671,7 +672,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Persist
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	/**
