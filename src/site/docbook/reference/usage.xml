@@ -302,8 +302,8 @@ quit
 
     <para>In relation to IDEs, we highly recommend that you use <link
     xlink:href="http://www.springsource.com/products/sts">SpringSource Tool
-    Suite</link>. STS is a significantly extended version (and free!) of the
-    pervasive Eclipse IDE. From a Roo perspective, STS preintegrates the
+    Suite</link> (STS). STS is a significantly extended version (and free!) of
+    the pervasive Eclipse IDE. From a Roo perspective, STS preintegrates the
     latest <link xlink:href="http://www.eclipse.org/ajdt/">AspectJ Development
     Tools</link> (AJDT) and also offers an inbuilt Roo shell. The inbuilt Roo
     shell means you do not need to run the normal Roo shell if you are using
@@ -314,6 +314,16 @@ quit
     messages emitted by Roo are actually links that you can click to open the
     corresponding file in an Eclipse editor. There are other goodies too, like
     extra commands to deploy to SpringSource tc Server.</para>
+
+    <para>You'll need to use STS 2.3.3 and above if you'd like to use Roo
+    1.1.0.M1 or above. Because the release cycle of STS and Roo differ, when
+    you download STS you'll generally find it includes a version of Roo that
+    might not be the absolute latest. This is not a problem. All you need to
+    do is ensure you're using the latest releases STS and then within the IDE
+    select Window &gt; Preferences &gt; Spring &gt; Roo Support. Next select
+    "Add..." and find the directory which contains the latest Roo release. You
+    probably also want to tick the newly-selected Roo release, making it the
+    default for your projects when they're imported into STS.</para>
 
     <para>Naturally Roo works well with standard Eclipse as well. All you need
     to do is ensure you install the latest <link
@@ -336,7 +346,7 @@ quit
     File &gt; Import &gt; General &gt; Maven Projects menu option is
     sufficient.</para>
 
-    <para>Irrespective of how you iport your project into Eclipse (ie via the
+    <para>Irrespective of how you import your project into Eclipse (ie via the
     <link linkend="command-index-perform-eclipse">perform eclipse</link>
     command or via m2eclipse) you should be aware that the project will not be
     a Web Tools Project (WTP) until such time as you install your first web
