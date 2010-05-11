@@ -1,6 +1,7 @@
 package org.springframework.roo.support.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -306,6 +307,19 @@ public final class XmlUtils {
 				}
 			}
 		}
+	}
+	
+	public static Element getConfiguration(Class<?> clazz) {
+		InputStream templateInputStream = TemplateUtils.getTemplate(clazz, "configuration.xml");
+		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
+		Document configurationDoc;
+		try {
+			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		return (Element) configurationDoc.getFirstChild();
 	}
 }
 

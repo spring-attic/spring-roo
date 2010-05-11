@@ -78,7 +78,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updatePomProperties(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 		
 		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
 		for (Element property : databaseProperties) {
@@ -247,7 +247,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
@@ -444,7 +444,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateRepositories(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(database) + "/repositories/repository", configuration);
 		for (Element repositoryElement : databaseRepositories) {
@@ -461,7 +461,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updatePluginRepositories(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Element> databasePluginRepositories = XmlUtils.findElements(getDbXPath(database) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
@@ -474,7 +474,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateBuildPlugins(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(database) + "/plugins/plugin", configuration);
 		for (Element pluginElement : databasePlugins) {
@@ -487,7 +487,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void cleanup(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey())) {
@@ -517,19 +517,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				}
 			}
 		}
-	}
-
-	private Element getConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		return (Element) configurationDoc.getFirstChild();
 	}
 
 	private String getDbXPath(JdbcDatabase database) {
