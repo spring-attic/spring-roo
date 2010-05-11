@@ -73,14 +73,14 @@ public class SetField extends CollectionField {
 			case ONE_TO_MANY:
 				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
 				break;
-			case MANY_TO_MANY:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+			case MANY_TO_ONE:
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
 				break;
 			case ONE_TO_ONE:
 				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
 				break;
 			default:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
 				break;
 		}
 	}
