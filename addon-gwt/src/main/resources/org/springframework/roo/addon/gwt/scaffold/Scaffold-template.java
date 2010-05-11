@@ -26,6 +26,8 @@ import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ApplicationKeyNameRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
+import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
+
 
 /**
  * Application for browsing the entities of the Expenses app.
@@ -53,18 +55,36 @@ public class Scaffold implements EntryPoint {
     placePicker.setPlaces(getTopPlaces());
 
     /*
-     * The body is run by an ActivitManager that listens for PlaceChange events
-     * and finds the corresponding Activity to run
+     * The app is run by ActivityManager instances that listen for place change
+     * events and run the appropriate Activity
+     * 
+     * The top half runs list activities of a traditional master / details view,
+     * although here "master" is a misnomer. The two ActivityManagers are
+     * completely independent of one another.
      */
+    final ActivityManager<ApplicationPlace> masterActivityManager = new ActivityManager<ApplicationPlace>(
+        new ScaffoldMasterActivities(new ListActivitiesMapper(eventBus,
+            requestFactory, placeController)), eventBus);
 
-    final ActivityMapper<ApplicationPlace> mapper = new ScaffoldActivities(
-        requestFactory, placeController);
-    final ActivityManager<ApplicationPlace> activityManager = new ActivityManager<ApplicationPlace>(
-        mapper, eventBus);
 
-    activityManager.setDisplay(new Activity.Display() {
+    masterActivityManager.setDisplay(new Activity.Display() {
       public void showActivityWidget(IsWidget widget) {
-        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+        shell.getMasterPanel().setWidget(
+            widget == null ? null : widget.asWidget());
+      }
+    });
+
+    /*
+     * The bottom half handles details
+     */
+    final ActivityManager<ApplicationPlace> detailsActivityManager = new ActivityManager<ApplicationPlace>(
+        new ScaffoldDetailsActivities(requestFactory, placeController),
+        eventBus);
+
+    detailsActivityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getDetailsPanel().setWidget(
+            widget == null ? null : widget.asWidget());
       }
     });
 
@@ -80,8 +100,7 @@ public class Scaffold implements EntryPoint {
 
   private List<ApplicationListPlace> getTopPlaces() {
     final List<ApplicationListPlace> rtn = new ArrayList<ApplicationListPlace>();
-    ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.
-        EntityTypesProcessor() {
+    ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.EntityTypesProcessor() {
       public void processType(Class<? extends Record> recordType) {
         rtn.add(new ApplicationListPlace(recordType));
       }

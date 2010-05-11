@@ -1,0 +1,44 @@
+#parse("common.vm")
+package ${packageName};
+
+import com.google.gwt.bikeshed.list.client.CellTable;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.valuestore.ui.AbstractRecordListView;
+import com.google.gwt.valuestore.ui.PropertyColumn;
+
+#declareImports()
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * {@link AbstractRecordListView} specialized to {@link ${entity.name}Key}} values.
+ */
+public class ${className} extends AbstractRecordListView<${entity.record}> {
+  interface Binder extends UiBinder<HTMLPanel, ${className}> {
+  }
+
+  private static final Binder BINDER = GWT.create(Binder.class);
+
+  @UiField CellTable<${entity.record}> table;
+  @UiField Button newButton;
+  
+  public ${className}() {
+    init(BINDER.createAndBindUi(this), table, newButton, getColumns());
+  }
+
+  protected List<PropertyColumn<${entity.record}, ?>> getColumns() {
+    // TODO These should be <g:col> elements in a <g:table> in the ui.xml file
+
+    List<PropertyColumn<${entity.record}, ?>> columns = new ArrayList<PropertyColumn<${entity.record}, ?>>();
+#foreach ($field in $entity.fields)
+    columns.add(PropertyColumn.<${entity.record}> getStringPropertyColumn(${entity.record}.$field));
+#end
+    return columns;
+  }
+}

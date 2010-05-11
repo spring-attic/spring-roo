@@ -3,6 +3,7 @@ package org.springframework.roo.addon.gwt;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,9 +12,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -122,7 +123,10 @@ public class GwtMetadata extends AbstractMetadataItem {
                 this.listViewBinder = buildListViewBinder(MirrorType.LIST_VIEW_BINDER, MirrorType.LIST_VIEW);
                 this.detailsViewBinder = buildListViewBinder(MirrorType.DETAILS_VIEW_BINDER, MirrorType.DETAILS_VIEW);
                 this.editViewBinder = buildListViewBinder(MirrorType.EDIT_VIEW_BINDER, MirrorType.EDIT_VIEW);
-    
+                buildEditActivity();
+                buildDetailsActivity();
+                buildListActivity();
+
 		buildListView();
                 buildListViewUiXml();
 		buildDetailsView();  
@@ -139,23 +143,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 		result.add(recordChanged);
 		result.add(changeHandler);
 		result.add(record);
-//		result.add(details);
+
                 result.add(listViewBinder);
-//		result.add(listView);
+
                 result.add(detailsViewBinder);
-//		result.add(detailsView);
                 result.add(editViewBinder);
-//		result.add(editView);
+
 		result.add(request);
 		result.add(requestServerSideOperations);
-//		result.add(findAllRequester);
-                result.add(activityMapper);
-                result.add(applicationPlace);
-                for(int i=0; i<result.size(); i++) {
-                  if(result.get(i) == null) {
-                    System.err.println("I'th "+i+" is null");
-                  }
-                }
+
+            
 		return result;
 	}
 
@@ -252,154 +249,33 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
         private void buildActivitiesMapper() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.ACTIVITIES_MAPPER);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
+          try {
+            MirrorType type = MirrorType.ACTIVITIES_MAPPER;
+            VelocityContext ctx = buildContext(type);
+            addReference(ctx, MirrorType.SCAFFOLD_PLACE);
+            addReference(ctx, MirrorType.DETAIL_ACTIVITY);
+            addReference(ctx, MirrorType.EDIT_ACTIVITY);
+            addReference(ctx, SharedType.APP_PLACE);
+            addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+            writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR+type.getVelocityTemplate());
+          } catch (Exception e) {
+            e.printStackTrace();  
+          }
 
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		// Java Type: ActivityMapper<EmployeeScaffoldPlace>
-		List<JavaType> activityMapperTypeParams = new ArrayList<JavaType>();
-		activityMapperTypeParams.add(getDestinationJavaType(MirrorType.SCAFFOLD_PLACE));
-		JavaType activityMapperType = new JavaType("com.google.gwt.app.place.ActivityMapper", 0, DataType.TYPE, null, activityMapperTypeParams);
-
-                implementsTypes.add(activityMapperType);
-          
-		
-		// private final ApplicationRequestFactory requests;
-		JavaType fieldType = getDestinationJavaType(SharedType.APP_REQUEST_FACTORY);
-		String fieldInitializer = null;
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.FINAL, new JavaSymbolName("requests"), fieldType, fieldInitializer, null);
-		fields.add(fieldMetadata);
-          
-             
-                 // Java Type: PlaceController<ApplicationPlace>
-		List<JavaType> placeControllerTypeParams = new ArrayList<JavaType>();
-		placeControllerTypeParams.add(getDestinationJavaType(SharedType.APP_PLACE));
-          
-               // private final PlaceController<ApplicationPlace> requests;
-		JavaType fieldType2 = new JavaType("com.google.gwt.app.place.PlaceController", 0, DataType.TYPE, null,  placeControllerTypeParams);
-          
-		FieldMetadata fieldMetadata2 = new DefaultFieldMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.FINAL, new JavaSymbolName("placeController"), fieldType2, fieldInitializer, null);
-		fields.add(fieldMetadata2);
-
-                 
-		// public EmployeeActivitiesMapper(ApplicationRequestFactory req, PlaceController<ApplicationPlace> controller)
-		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
-		constructorParameterTypes.add(getDestinationJavaType(SharedType.APP_REQUEST_FACTORY));
-		constructorParameterTypes.add(fieldType2);
-		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
-		constructorParameterNames.add(new JavaSymbolName("requests"));
-		constructorParameterNames.add(new JavaSymbolName("placeController"));
-		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-		constructorBodyBuilder.appendFormalLine("this.requests = requests;");
-                constructorBodyBuilder.appendFormalLine("this.placeController = placeController;");
-          
-		ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
-		constructors.add(constructorMetadata);
-
-		// public getActivity(EmployeeScaffoldPlace place)
-		JavaSymbolName method1Name = new JavaSymbolName("getActivity");
-		JavaType method1ReturnType = new JavaType("com.google.gwt.app.place.Activity");
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-                method1ParameterTypes.add(getDestinationJavaType(MirrorType.SCAFFOLD_PLACE));
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-                method1ParameterNames.add(new JavaSymbolName("place"));
-		InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-		method1BodyBuilder.appendFormalLine("switch (place.getOperation()) {");
-                method1BodyBuilder.appendFormalLine("case DETAILS:");
-                method1BodyBuilder.appendFormalLine(" return new "+getDestinationJavaType(MirrorType.DETAIL_ACTIVITY)+"(place.getId(), requests);");
-                method1BodyBuilder.appendFormalLine("case EDIT:");
-                method1BodyBuilder.appendFormalLine(" return new "+getDestinationJavaType(MirrorType.EDIT_ACTIVITY)+"(place.getId(), requests, placeController);");
-                method1BodyBuilder.appendFormalLine("}");
-                method1BodyBuilder.appendFormalLine("throw new IllegalArgumentException(\"Unknown Operation \" + place.getOperation());");
-                
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, method1BodyBuilder.getOutput());
-		methods.add(method1Metadata);
-
-
-		this.activityMapper = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
   
         private void buildApplicationPlace() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.SCAFFOLD_PLACE);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-                extendsTypes.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE));
-		
-          
-		
-                 
-		// public ReportScaffoldPlace(ReportRecord record, Operation operation)
-		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
-		constructorParameterTypes.add(getDestinationJavaType(MirrorType.RECORD));
-		constructorParameterTypes.add(new JavaType(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName()+".Operation"));
-		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
-		constructorParameterNames.add(new JavaSymbolName("record"));
-		constructorParameterNames.add(new JavaSymbolName("operation"));
-		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-		constructorBodyBuilder.appendFormalLine("super(record.getId(), operation);");
-          
-		ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
-		constructors.add(constructorMetadata);
-
-          
-                // TODO: (cromwellian) Bug! Can't declare 2 constructors in Roo!
-//                // public ReportScaffoldPlace(String, Operation operation)
-//		List<JavaType> constructor2ParameterTypes = new ArrayList<JavaType>();
-//		constructor2ParameterTypes.add(JavaType.STRING_OBJECT);
-//                constructor2ParameterTypes.add(new JavaType(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName()+".Operation"));
-//		List<JavaSymbolName> constructor2ParameterNames = new ArrayList<JavaSymbolName>();
-//		constructor2ParameterNames.add(new JavaSymbolName("id"));
-//		constructor2ParameterNames.add(new JavaSymbolName("operation"));
-//		InvocableMemberBodyBuilder constructor2BodyBuilder = new InvocableMemberBodyBuilder();
-//		constructor2BodyBuilder.appendFormalLine("super(id, operation);");
-          
-                
-//		ConstructorMetadata constructor2Metadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructor2ParameterTypes), constructor2ParameterNames, null, constructor2BodyBuilder.getOutput());
-//		constructors.add(constructor2Metadata);
-          
-		// public void accept(ApplicationPlaceProcessor visitor)
-		JavaSymbolName method1Name = new JavaSymbolName("accept");
-		JavaType method1ReturnType = JavaType.VOID_PRIMITIVE;
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-                method1ParameterTypes.add(getDestinationJavaType(SharedType.APP_PLACE_PROCESSOR));
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-                method1ParameterNames.add(new JavaSymbolName("visitor"));
-		InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-		method1BodyBuilder.appendFormalLine("visitor.process(this);");
-          
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, method1BodyBuilder.getOutput());
-		methods.add(method1Metadata);
-
-
-                // TODO: (cromwellian) No way to declare member type params!
-               // public <T> T acceptFilter(ApplicationPlaceFilter visitor)
-                JavaSymbolName method2Name = new JavaSymbolName("acceptFilter");
-                JavaType method2ReturnType = new JavaType("com.google.gwt.app.place.Activity");
-          List<JavaType> method2ParameterTypes = new ArrayList<JavaType>();
-          method2ParameterTypes.add(getDestinationJavaType(SharedType.APP_PLACE_FILTER));
-          List<JavaSymbolName> method2ParameterNames = new ArrayList<JavaSymbolName>();
-          method2ParameterNames.add(new JavaSymbolName("filter"));
-          InvocableMemberBodyBuilder method2BodyBuilder = new InvocableMemberBodyBuilder();
-          method2BodyBuilder.appendFormalLine("return filter.filter(this);");
-          MethodMetadata method2Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method2Name, method2ReturnType, AnnotatedJavaType.convertFromJavaTypes(method2ParameterTypes), method2ParameterNames, null, null, method2BodyBuilder.getOutput());
-          methods.add(method2Metadata);
-
-          
-		this.applicationPlace = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
-	}
+          try {
+            MirrorType type = MirrorType.SCAFFOLD_PLACE;
+            VelocityContext ctx = buildContext(type);
+            addReference(ctx, SharedType.APP_PLACE_FILTER);
+            addReference(ctx, SharedType.APP_PLACE_PROCESSOR);
+            addReference(ctx, SharedType.APP_RECORD_PLACE);
+            writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR+type.getVelocityTemplate());
+          } catch (Exception e) {
+            e.printStackTrace();  
+          }
+        }
   
 	private void buildChangeHandler() {
 		String destinationMetadataId = getDestinationMetadataId(MirrorType.CHANGED_HANDLER);
@@ -439,10 +315,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		List<JavaType> implementsTypes = new ArrayList<JavaType>();
 
-                List<AnnotationAttributeValue<?>> attribs = new ArrayList<AnnotationAttributeValue<?>>();
-                 
-                attribs.add(new ClassAttributeValue(new JavaSymbolName("type"), beanInfoMetadata.getJavaBean()));
-                attribs.add(new StringAttributeValue(new JavaSymbolName("token"), governorTypeDetails.getName().getSimpleTypeName()));
+
+//                attribs.add(new ClassAttributeValue(new JavaSymbolName("type"), beanInfoMetadata.getJavaBean()));
+//                attribs.add(new StringAttributeValue(new JavaSymbolName("token"), governorTypeDetails.getName().getSimpleTypeName()));
+
           
 //                typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.ServerType"),  attribs));
           
@@ -496,6 +372,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 		}
 
+                FieldMetadata tokenField = new DefaultFieldMetadata(destinationMetadataId, Modifier.PUBLIC, new JavaSymbolName("TOKEN"), JavaType.STRING_OBJECT, "\""+name.getSimpleTypeName()+"\"", new ArrayList<AnnotationMetadata>() );
+                fields.add(tokenField);
+          
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
 			JavaSymbolName fieldName = propertyName;
 			List<JavaType> fieldArgs = new ArrayList<JavaType>();
@@ -532,503 +411,255 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.record = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 
-	private void buildDetailsBuilder() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.DETAILS_BUILDER);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		// static void append(StringBuilder list, EmployeeRecord record) {
-		// list.append("<div>");
-		// list.append("<label>").append("User Name: ").append("</label>");
-		// list.append("<span>").append(record.getUserName()).append("</span>");
-		// list.append("</div>");
-		// }
-		JavaSymbolName methodName = new JavaSymbolName("append");
-		JavaType methodReturnType = JavaType.VOID_PRIMITIVE;
-		List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
-		methodParameterTypes.add(new JavaType("java.lang.StringBuilder"));
-		methodParameterTypes.add(getDestinationJavaType(MirrorType.RECORD));
-		List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
-		methodParameterNames.add(new JavaSymbolName("list"));
-		methodParameterNames.add(new JavaSymbolName("record"));
-		InvocableMemberBodyBuilder methodBodyBuilder = new InvocableMemberBodyBuilder();
-
-		for (MethodMetadata m : record.getDeclaredMethods()) {
-			if (Modifier.isStatic(m.getModifier()) || !m.getMethodName().getSymbolName().startsWith("get")) {
-				// Skip this method
-				continue;
-			}
-			String label = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(m).getReadableSymbolName();
-			String methodInvocation = m.getMethodName() + "()";
-			methodBodyBuilder.appendFormalLine("list.append(\"<div>\");");
-			methodBodyBuilder.appendFormalLine("list.append(\"<label>\").append(\"" + label + ": \").append(\"</label>\");");
-			methodBodyBuilder.appendFormalLine("list.append(\"<span>\").append(record." + methodInvocation + ").append(\"</span>\");");
-			methodBodyBuilder.appendFormalLine("list.append(\"</div>\");");
-		}
-
-		MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.STATIC, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, null, null, methodBodyBuilder.getOutput());
-		methods.add(methodMetadata);
-
-		this.details = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.FINAL, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
-	}
-
+	
          
-         private void buildUiListView() {
-                  String destinationMetadataId = getDestinationMetadataId(MirrorType.LIST_VIEW);
-                  JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
+    
 
-                  List<AnnotationMetadata> typeAnnotations = createAnnotations();
-                  List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-                  List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-                  List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-                  List<JavaType> extendsTypes = new ArrayList<JavaType>();
-                  List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-                  // extends com.google.gwt.valuestore.ui.RecordListView<EmployeeRecord>
-                  List<JavaType> extendsTypeParams = new ArrayList<JavaType>();
-                  extendsTypeParams.add(getDestinationJavaType(MirrorType.RECORD));
-                  extendsTypes.add(new JavaType("com.google.gwt.valuestore.ui.AbstractRecordListView", 0, DataType.TYPE, null, extendsTypeParams));
-
-                  // public EmployeeListView(String headingMessage, ApplicationPlaces places, ApplicationRequestFactory requests) {
-                  // super(headingMessage, getColumns(places), getHeaders());
-                  // }
-                  List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
-                  constructorParameterTypes.add(JavaType.STRING_OBJECT);
-                  constructorParameterTypes.add(getDestinationJavaType(SharedType.APP_PLACES));
-                  constructorParameterTypes.add(getDestinationJavaType(SharedType.APP_REQUEST_FACTORY));
-                  List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
-                  constructorParameterNames.add(new JavaSymbolName("headingMessage"));
-                  constructorParameterNames.add(new JavaSymbolName("places"));
-                  constructorParameterNames.add(new JavaSymbolName("requests"));
-                  InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-                  constructorBodyBuilder.appendFormalLine("super(headingMessage, getColumns(places), getHeaders());");
-                  ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
-                  constructors.add(constructorMetadata);
-
-                  // private static List<Header<?>> getHeaders() {
-                  // List<Header<?>> headers = new ArrayList<Header<?>>();
-                  // for (final Property<?> property : getProps()) {
-                  // headers.add(new TextHeader(property.getName()));
-                  // }
-                  // return headers;
-                  // }
-                  JavaSymbolName method1Name = new JavaSymbolName("getHeaders");
-                  List<JavaType> method1ReturnParams = new ArrayList<JavaType>();
-                  List<JavaType> method1ReturnParam1 = new ArrayList<JavaType>();
-                  method1ReturnParam1.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-                  method1ReturnParams.add(new JavaType("com.google.gwt.bikeshed.list.client.Header", 0, DataType.TYPE, null, method1ReturnParam1));
-                  JavaType method1ReturnType = new JavaType("java.util.List", 0, DataType.TYPE, null, method1ReturnParams);
-                  List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-                  List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-                  InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-                  method1BodyBuilder.appendFormalLine("List<com.google.gwt.bikeshed.list.client.Header<?>> headers = new java.util.ArrayList<com.google.gwt.bikeshed.list.client.Header<?>>();");
-                  method1BodyBuilder.appendFormalLine("for (final com.google.gwt.valuestore.shared.Property<?> property : getProps()) {");
-                  method1BodyBuilder.indent();
-                  method1BodyBuilder.appendFormalLine("headers.add(new com.google.gwt.bikeshed.list.client.TextHeader(property.getName()));");
-                  method1BodyBuilder.indentRemove();
-                  method1BodyBuilder.appendFormalLine("}");
-                  method1BodyBuilder.appendFormalLine("return headers;");
-                  MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.STATIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, method1BodyBuilder.getOutput());
-                  methods.add(method1Metadata);
-
-                  // public Collection<Property<?>> getProperties() {
-                  // return getProps();
-                  // }
-                  JavaSymbolName method2Name = new JavaSymbolName("getProperties");
-                  List<JavaType> method2ReturnParams = new ArrayList<JavaType>();
-                  List<JavaType> method2ReturnParam1 = new ArrayList<JavaType>();
-                  method2ReturnParam1.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-                  method2ReturnParams.add(new JavaType("com.google.gwt.valuestore.shared.Property", 0, DataType.TYPE, null, method2ReturnParam1));
-                  JavaType method2ReturnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, method2ReturnParams);
-                  List<JavaType> method2ParameterTypes = new ArrayList<JavaType>();
-                  List<JavaSymbolName> method2ParameterNames = new ArrayList<JavaSymbolName>();
-                  InvocableMemberBodyBuilder method2BodyBuilder = new InvocableMemberBodyBuilder();
-                  method2BodyBuilder.appendFormalLine("return getProps();");
-                  MethodMetadata method2Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method2Name, method2ReturnType, AnnotatedJavaType.convertFromJavaTypes(method2ParameterTypes), method2ParameterNames, null, null, method2BodyBuilder.getOutput());
-                  methods.add(method2Metadata);
-
-                  // public static Collection<com.google.gwt.valuestore.shared.Property<?>> getProps() {
-                  // List<Property<?>> properties = new ArrayList<Property<?>>();
-                  // properties.add(EmployeeRecord.userName);
-                  // properties.add(EmployeeRecord.displayName);
-                  // return properties;
-                  // }
-                  JavaSymbolName method3Name = new JavaSymbolName("getProps");
-                  List<JavaType> method3ReturnParams = new ArrayList<JavaType>();
-                  List<JavaType> method3ReturnParam1 = new ArrayList<JavaType>();
-                  method3ReturnParam1.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-                  method3ReturnParams.add(new JavaType("com.google.gwt.valuestore.shared.Property", 0, DataType.TYPE, null, method3ReturnParam1));
-                  JavaType method3ReturnType = new JavaType("java.util.Collection", 0, DataType.TYPE, null, method3ReturnParams);
-                  List<JavaType> method3ParameterTypes = new ArrayList<JavaType>();
-                  List<JavaSymbolName> method3ParameterNames = new ArrayList<JavaSymbolName>();
-                  InvocableMemberBodyBuilder method3BodyBuilder = new InvocableMemberBodyBuilder();
-                  method3BodyBuilder.appendFormalLine("java.util.List<com.google.gwt.valuestore.shared.Property<?>> properties = new java.util.ArrayList<com.google.gwt.valuestore.shared.Property<?>>();");
-                  for (FieldMetadata f : record.getDeclaredFields()) {
-                          if (!f.getFieldType().getParameters().get(0).equals(JavaType.STRING_OBJECT)) {
-                                  // We only support strings for now
-                                  continue;
-                          }
-                          String field = getDestinationJavaType(MirrorType.RECORD).getSimpleTypeName() + "." + f.getFieldName().getSymbolName();
-                          method3BodyBuilder.appendFormalLine("properties.add(" + field + ");");
-                  }
-                  method3BodyBuilder.appendFormalLine("return properties;");
-                  MethodMetadata method3Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.STATIC, method3Name, method3ReturnType, AnnotatedJavaType.convertFromJavaTypes(method3ParameterTypes), method3ParameterNames, null, null, method3BodyBuilder.getOutput());
-                  methods.add(method3Metadata);
-
-                  // private static List<Column<EmployeeRecord, ?, ?>> getColumns(ApplicationPlaces places) {
-                  JavaSymbolName method4Name = new JavaSymbolName("getColumns");
-                  List<JavaType> method4ReturnParams = new ArrayList<JavaType>();
-                  List<JavaType> method4ReturnParam1 = new ArrayList<JavaType>();
-                  method4ReturnParam1.add(getDestinationJavaType(MirrorType.RECORD));
-                  method4ReturnParam1.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-                  method4ReturnParam1.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-                  method4ReturnParams.add(new JavaType("com.google.gwt.bikeshed.list.client.Column", 0, DataType.TYPE, null, method4ReturnParam1));
-                  JavaType method4ReturnType = new JavaType("java.util.List", 0, DataType.TYPE, null, method4ReturnParams);
-                  List<JavaType> method4ParameterTypes = new ArrayList<JavaType>();
-                  method4ParameterTypes.add(getDestinationJavaType(SharedType.APP_PLACES));
-                  List<JavaSymbolName> method4ParameterNames = new ArrayList<JavaSymbolName>();
-                  method4ParameterNames.add(new JavaSymbolName("places"));
-                  String entityRecord = getDestinationJavaType(MirrorType.RECORD).getSimpleTypeName();
-                  InvocableMemberBodyBuilder method4BodyBuilder = new InvocableMemberBodyBuilder();
-                  method4BodyBuilder.appendFormalLine("final ApplicationPlaces p = places;");
-                  JavaType method4ArrayList = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, method4ReturnParams);
-                  method4BodyBuilder.appendFormalLine(method4ReturnType.toString() + " columns = new " + method4ArrayList.toString() + "();");
-                  for (MethodMetadata m : record.getDeclaredMethods()) {
-                          if (Modifier.isStatic(m.getModifier()) || !m.getMethodName().getSymbolName().startsWith("get")) {
-                                  // skip this method
-                                  continue;
-                          }
-                          if (!m.getReturnType().equals(JavaType.STRING_OBJECT)) {
-                                  // we only support strings for now
-                                  continue;
-                          }
-                          method4BodyBuilder.appendFormalLine("columns.add(new com.google.gwt.bikeshed.list.client.TextColumn<" + entityRecord + ">() {");
-                          method4BodyBuilder.indent();
-                          method4BodyBuilder.appendFormalLine("public String getValue(" + entityRecord + " object) {");
-                          method4BodyBuilder.indent();
-                          String methodInvocation = m.getMethodName() + "()";
-                          method4BodyBuilder.appendFormalLine("return object." + methodInvocation + ";");
-                          method4BodyBuilder.indentRemove();
-                          method4BodyBuilder.appendFormalLine("}");
-                          method4BodyBuilder.indentRemove();
-                          method4BodyBuilder.appendFormalLine("});");
-                  }
-                  method4BodyBuilder.appendFormalLine("columns.add(new com.google.gwt.bikeshed.list.client.IdentityColumn<" + entityRecord + ">(new com.google.gwt.bikeshed.cells.client.ActionCell<" + entityRecord + ">(\"Show\", p.<" + entityRecord + "> getDetailsGofer())));");
-                  method4BodyBuilder.appendFormalLine("return columns;");
-                  MethodMetadata method4Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.STATIC, method4Name, method4ReturnType, AnnotatedJavaType.convertFromJavaTypes(method4ParameterTypes), method4ParameterNames, null, null, method4BodyBuilder.getOutput());
-                  methods.add(method4Metadata);
-
-                  this.listView = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.FINAL, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
-          }
+  private void addReference(VelocityContext ctx, MirrorType type) {
+    addImport((List<String>)ctx.get("imports"), type);
+    Map<String, String> eMap = (Map<String, String>) ctx.get("entity");
+    eMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+  }
+    
+  private void addReference(VelocityContext ctx, SharedType type) {
+    addImport((List<String>)ctx.get("imports"), type);
+    Map<String, String> sMap = (Map<String, String>) ctx.get("shared");
+    sMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+  }
   
-   private void buildListView() {
-
-      MirrorType locate = MirrorType.RECORD;
-      MirrorType dType = MirrorType.LIST_VIEW;
+  private void addImport(List<String> imports, SharedType type) {
+    imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
+  }
   
-      String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".java";
-      JavaType javaType = getDestinationJavaType(dType);
-       String clazz = javaType.getSimpleTypeName();
+  private void addImport(List<String> imports, MirrorType type) {
+    imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
+  }
+  
+  private void buildEditActivity() {
+
+     try {
+      MirrorType type = MirrorType.EDIT_ACTIVITY;
+      VelocityContext ctx = buildContext(MirrorType.EDIT_ACTIVITY);
+      List<String> imports = (List<String>) ctx.get("imports");
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      addReference(ctx, MirrorType.SCAFFOLD_PLACE);
+      addReference(ctx, SharedType.APP_RECORD_PLACE);
+      addReference(ctx, MirrorType.EDIT_VIEW);
        
-        InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-        bb.reset();
-        bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-        bb.appendFormalLine("import com.google.gwt.bikeshed.list.client.CellTable;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiField;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiBinder;");
-        bb.appendFormalLine("import com.google.gwt.core.client.GWT;");   
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListView;");                         
-  
-        bb.appendFormalLine("import com.google.gwt.app.util.PassthroughRenderer;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.HTMLPanel;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListActivity;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.PropertyColumn;");
-
-        bb.appendFormalLine("import java.util.List;");
-        bb.appendFormalLine("import java.util.ArrayList;");
-     
-        bb.appendFormalLine("import "+ getDestinationJavaType(locate).getFullyQualifiedTypeName() + ";");
-
-        String recordType = getDestinationJavaType(MirrorType.RECORD).getFullyQualifiedTypeName();
-        bb.appendFormalLine(
-            "public class " + clazz + " extends AbstractRecordListView<" + recordType + "> {");
-        bb.indent();
-        bb.appendFormalLine("interface Binder extends UiBinder<HTMLPanel, "+clazz+"> {}");
-        
-        bb.appendFormalLine("private static final Binder BINDER = GWT.create(Binder.class);");
-        bb.appendFormalLine("@UiField CellTable<"+recordType+"> table;");
-        
-        bb.appendFormalLine("public "+clazz+"() {");
-        bb.indent();
-        bb.appendFormalLine("init(BINDER.createAndBindUi(this), table, getColumns());");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        bb.appendFormalLine("protected List<PropertyColumn<"+recordType+", ?>> getColumns() {");
-        bb.indent();
-        bb.appendFormalLine("List<PropertyColumn<"+recordType+", ?>> columns = new ArrayList<PropertyColumn<"+recordType+", ?>>();");
-        for (FieldMetadata f : record.getDeclaredFields()) {
-           JavaType fType = f.getFieldType().getParameters().get(0);
-           if(fType.getFullyQualifiedTypeName().equals(JavaType.STRING_OBJECT.getFullyQualifiedTypeName())) {
-             bb.appendFormalLine("columns.add(com.google.gwt.valuestore.ui.PropertyColumn.<"+recordType+"> getStringPropertyColumn("+recordType+"." + f.getFieldName()+"));");
-           } else {
-             bb.appendFormalLine("columns.add(new com.google.gwt.valuestore.ui.PropertyColumn<"+recordType+","+fType.getFullyQualifiedTypeName()+">("+recordType+"." + f.getFieldName()+", PassthroughRenderer.<"+fType.getFullyQualifiedTypeName()+">instance()));");
-           }
-        }
-        bb.appendFormalLine("return columns;");
-        bb.appendFormalLine("}");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-        bb.indentRemove();
-        write(destFile, bb.getOutput(), fileManager);
-      
+      imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName()+".Operation");
+       
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR +type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();  
     }
+  }
+  
+  private void buildDetailsActivity() {
+
+     try {
+      MirrorType type = MirrorType.DETAIL_ACTIVITY;
+       
+      VelocityContext ctx = buildContext(MirrorType.DETAIL_ACTIVITY);
+      List<String> imports = (List<String>) ctx.get("imports");
+       
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      addReference(ctx, MirrorType.SCAFFOLD_PLACE);
+      addReference(ctx, MirrorType.DETAILS_VIEW);
+      imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName()+".Operation");
+       
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR +type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();  
+    }
+  }
+  
+  private void buildListActivity() {
+
+     try {
+      MirrorType type = MirrorType.LIST_ACTIVITY;
+       
+      VelocityContext ctx = buildContext(MirrorType.LIST_ACTIVITY);
+      List<String> imports = (List<String>) ctx.get("imports");
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_RECORD_PLACE);
+      addReference(ctx, MirrorType.SCAFFOLD_PLACE);
+      addReference(ctx, MirrorType.LIST_VIEW);
+      addReference(ctx, MirrorType.RECORD_CHANGED);
+      addReference(ctx, MirrorType.CHANGED_HANDLER);
+      imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName()+".Operation");
+       
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR +type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();  
+    }
+  }
+
+  private void buildListView() {
+    try {
+      writeWithTemplate(MirrorType.LIST_VIEW, "org/springframework/roo/addon/gwt/templates/ListView.vm");
+    } catch (Exception e) {
+      e.printStackTrace();  
+    }
+  }
+
+   private void writeWithTemplate(MirrorType destType,  String templateFile)
+      throws Exception {
+    String destFile= destType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName()+".java";
+    writeWithTemplate(destFile,  buildContext(destType), templateFile);
+  }
+  
+  private void writeWithTemplate(MirrorType destType, VelocityContext context, String templateFile)
+      throws Exception {
+    String destFile= destType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName()+".java";
+    writeWithTemplate(destFile, context, templateFile);
+  }
+  
+  private void writeWithTemplate(String destFile, VelocityContext context, String templateFile)
+      throws Exception {
+    VelocityEngine engine = new VelocityEngine();
+    engine.setProperty("resource.loader", "mine");
+    engine.setProperty("mine.resource.loader.instance", new TemplateResourceLoader());
+
+    StringWriter sw = new StringWriter();
+    engine.getTemplate(templateFile).merge(context, sw);
+    write(destFile, sw.toString(), fileManager);
+  }
+  
+  public static class Property {
+    private String name;
+    private String getter;
+    private String setter;
+
+    public Property(String getter, String name, String setter) {
+      this.getter = getter;
+      this.name = name;
+      this.setter = setter;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getSetter() {
+      return setter;
+    }
+
+    public String getGetter() {
+    
+      return getter;
+    }
+
+    public void setGetter(String getter) {
+      this.getter = getter;
+    }
+    
+    public String getReadableName() {
+      return new JavaSymbolName(name).getReadableSymbolName();
+    }
+  }
+
+  private VelocityContext buildContext(MirrorType destType) {
+    JavaType javaType = getDestinationJavaType(destType);
+    String clazz = javaType.getSimpleTypeName();
+    JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
+
+    VelocityContext context = new VelocityContext();
+    context.put("shared", new HashMap());
+    HashMap eMap = new HashMap();
+    context.put("entity", eMap);
+    context.put("className", clazz);
+    context.put("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+    ArrayList<String> imports = new ArrayList<String>();
+    imports.add(recordType.getFullyQualifiedTypeName());
+    context.put("imports", imports);
+    eMap.put("name", governorTypeDetails.getName().getSimpleTypeName());
+    eMap.put("pluralName", entityMetadata.getPlural());
+    eMap.put("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
+    eMap.put("record", recordType.getSimpleTypeName());
+    eMap.put("pluralName", entityMetadata.getPlural());
+
+    ArrayList<String> fieldNames = new ArrayList<String>();
+    for (FieldMetadata f : record.getDeclaredFields()) {
+      if(f.getFieldName().getSymbolName().equals("TOKEN")) {
+        continue;
+      }
+      fieldNames.add(f.getFieldName().getSymbolName());
+    }
+    eMap.put("fields", fieldNames);
+
+    ArrayList<Property> props = new ArrayList<Property>();
+    for (MethodMetadata f : record.getDeclaredMethods()) {
+      if (!f.getMethodName().getSymbolName().startsWith("get")) {
+        continue;
+      }
+      String getter = f.getMethodName().getSymbolName();
+      props.add(new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3)));
+    }
+    eMap.put("properties", props);
+    return context;
+  }
+ 
   
    private void buildListViewUiXml() {
 
       MirrorType dType = MirrorType.LIST_VIEW;
   
       String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".ui.xml";
-      StringBuilder sb = new StringBuilder();
-      sb.append("<!DOCTYPE ui:UiBinder SYSTEM \"http://dl.google.com/gwt/DTD/xhtml.ent\">\n"
-          + "<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'\n"
-          + "  xmlns:g='urn:import:com.google.gwt.user.client.ui'\n"
-          + "  xmlns:b='urn:import:com.google.gwt.bikeshed.list.client'>\n" + "  <g:HTMLPanel>\n"
-          + "    <h3><ui:msg>"+entityMetadata.getPlural()+"</ui:msg></h3>\n" + "    <b:CellTable ui:field='table'/>\n" + "  </g:HTMLPanel>\n"
-          + "</ui:UiBinder>");
-     
-        write(destFile, sb.toString(), fileManager);
-      
-    }
+     try {
+       writeWithTemplate(destFile, buildContext(dType), "org/springframework/roo/addon/gwt/templates/ListViewUiXml.vm");
+     } catch (Exception e) {
+       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+     }
+   }
   
   private void buildDetailsView() {
-
-      MirrorType locate = MirrorType.RECORD;
-      MirrorType dType = MirrorType.DETAILS_VIEW;
-  
-      String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".java";
-      JavaType javaType = getDestinationJavaType(dType);
-       String clazz = javaType.getSimpleTypeName();
-       
-        InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-        bb.reset();
-        bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-        bb.appendFormalLine("import com.google.gwt.dom.client.SpanElement;");
-    
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiField;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiBinder;");
-        bb.appendFormalLine("import com.google.gwt.core.client.GWT;");   
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListView;");                         
-  
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.HTMLPanel;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.Composite;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.Widget;");
-    
-       
-        bb.appendFormalLine("import "+ getDestinationJavaType(locate).getFullyQualifiedTypeName() + ";");
-
-        String recordType = getDestinationJavaType(MirrorType.RECORD).getFullyQualifiedTypeName();
-        bb.appendFormalLine(
-            "public class " + clazz + " extends Composite implements " + getDestinationJavaType(MirrorType.DETAIL_ACTIVITY).getFullyQualifiedTypeName()+".View {");
-        bb.indent();
-        bb.appendFormalLine("interface Binder extends UiBinder<HTMLPanel, "+clazz+"> {}");
-        
-        bb.appendFormalLine("private static final Binder BINDER = GWT.create(Binder.class);");
-        bb.appendFormalLine("private "+recordType+" record;");                                
-    
-        bb.appendFormalLine("@UiField SpanElement idSpan;");
-        bb.appendFormalLine("@UiField SpanElement versionSpan;");
-       
-        for(FieldMetadata f : record.getDeclaredFields()) {
-          bb.appendFormalLine("@UiField SpanElement "+f.getFieldName().getSymbolName()+";");
-        }
-        
-        bb.appendFormalLine("public "+clazz+"() {");
-        bb.indent();
-        bb.appendFormalLine("initWidget(BINDER.createAndBindUi(this));");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        bb.appendFormalLine("public Widget asWidget() { return this; }");
-        bb.appendFormalLine("public "+recordType+" getValue() { return record; }");
-        bb.appendFormalLine("public void setValue("+recordType+" record) {");
-        bb.indent();
-        bb.appendFormalLine("this.record = record;");
-        bb.appendFormalLine("this.idSpan.setInnerText(String.valueOf(record.getId()));");
-        bb.appendFormalLine("this.versionSpan.setInnerText(String.valueOf(record.getVersion()));");
-        
-        for (MethodMetadata f : record.getDeclaredMethods()) {
-           if(!f.getMethodName().getSymbolName().startsWith("get")) {
-             continue;
-           }
-          String field = StringUtils.uncapitalize(f.getMethodName().getSymbolName().substring(3));
-           bb.appendFormalLine(field+".setInnerText(String.valueOf(record."+f.getMethodName().getSymbolName()+"()));");
-        }
-        bb.appendFormalLine("}");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-        bb.indentRemove();
-        write(destFile, bb.getOutput(), fileManager);
-      
+    try {
+      writeWithTemplate(MirrorType.DETAILS_VIEW, "org/springframework/roo/addon/gwt/templates/DetailsView.vm");
+    } catch (Exception e) {
+      e.printStackTrace(); 
     }
-  
-    private void buildDetailsViewUiXml() {
+  }
 
-      MirrorType dType = MirrorType.DETAILS_VIEW;
-  
-      String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".ui.xml";
-      StringBuilder sb = new StringBuilder();
-      sb.append("<!DOCTYPE ui:UiBinder SYSTEM \"http://dl.google.com/gwt/DTD/xhtml.ent\">\n"
-          + "<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'\n"
-          + "  xmlns:g='urn:import:com.google.gwt.user.client.ui'>\n" + "  <g:HTMLPanel>\n");
-          sb.append("    <h3><ui:msg>"+entityMetadata.getPlural()+" <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>");
-          for(FieldMetadata field : record.getDeclaredFields()) {
-            sb.append("<div><span>"+field.getFieldName().getReadableSymbolName()+"</span><span ui:field='"+field.getFieldName().getSymbolName()+"'></span></div>");
-          }
-          sb.append("</g:HTMLPanel>\n" + "</ui:UiBinder>");
-     
-        write(destFile, sb.toString(), fileManager);
-      
+  private void buildDetailsViewUiXml() {
+    MirrorType dType = MirrorType.DETAILS_VIEW;
+
+    String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar
+        + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
+    try {
+      writeWithTemplate(destFile, buildContext(dType), "org/springframework/roo/addon/gwt/templates/DetailsViewUiXml.vm");
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-  
-    private void buildEditView() {
+  }
 
-      MirrorType locate = MirrorType.RECORD;
-      MirrorType dType = MirrorType.EDIT_VIEW;
-  
-      String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".java";
-      JavaType javaType = getDestinationJavaType(dType);
-       String clazz = javaType.getSimpleTypeName();
-       
-        InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-        bb.reset();
-        bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-        bb.appendFormalLine("import com.google.gwt.dom.client.SpanElement;");
-        bb.appendFormalLine("import com.google.gwt.dom.client.DivElement;");
-      
-        bb.appendFormalLine("import com.google.gwt.app.client.EditorSupport;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiField;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiBinder;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiHandler;");
-      
-        bb.appendFormalLine("import com.google.gwt.core.client.GWT;");   
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListView;");                         
-  
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.HTMLPanel;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.Composite;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.Widget;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.Button;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.TextBox;");
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.InlineLabel;");
-        bb.appendFormalLine("import java.util.Map; ");
-                                                               
-        bb.appendFormalLine("import com.google.gwt.valuestore.shared.DeltaValueStore;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.shared.Property;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.RecordEditView;");
-        bb.appendFormalLine("import com.google.gwt.event.logical.shared.ValueChangeEvent;");
-        bb.appendFormalLine("import com.google.gwt.event.dom.client.ClickEvent;");
-         
-        bb.appendFormalLine("import java.util.Set;");
-        bb.appendFormalLine("import java.util.HashSet;");
-      
-        bb.appendFormalLine("import "+ getDestinationJavaType(locate).getFullyQualifiedTypeName() + ";");
-
-        String recordType = getDestinationJavaType(MirrorType.RECORD).getFullyQualifiedTypeName();
-        bb.appendFormalLine(
-            "public class " + clazz + " extends Composite implements RecordEditView<" + recordType +"> {");
-        bb.indent();
-        bb.appendFormalLine("interface Binder extends UiBinder<HTMLPanel, "+clazz+"> {}");
-        bb.appendFormalLine("interface DataBinder extends EditorSupport<"+getDestinationJavaType(MirrorType.RECORD)+","+getDestinationJavaType(MirrorType.EDIT_VIEW)+"> {\n" + "  }");
-      
-        bb.appendFormalLine("private static final Binder BINDER = GWT.create(Binder.class);");
-        bb.appendFormalLine("private static final DataBinder DATA_BINDER = GWT.create(DataBinder.class);");
-      
-        for(FieldMetadata f : record.getDeclaredFields()) {
-          bb.appendFormalLine("@UiField TextBox "+f.getFieldName().getSymbolName()+";");
-        }
-        bb.appendFormalLine("@UiField Button save;");
-        bb.appendFormalLine("@UiField InlineLabel id;");
-        bb.appendFormalLine("@UiField InlineLabel version;");
-        bb.appendFormalLine("@UiField DivElement errors;");
-
-      
-        bb.appendFormalLine("private Delegate delegate;");
-        bb.appendFormalLine("private DeltaValueStore deltas;");
-        bb.appendFormalLine("private "+recordType+" record;");                                
-        bb.appendFormalLine("public "+clazz+"() {");
-        bb.indent();
-        bb.appendFormalLine("initWidget(BINDER.createAndBindUi(this));");
-        bb.appendFormalLine("DATA_BINDER.init(this);");
-      
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        bb.appendFormalLine("public Widget asWidget() { return this; }");
-        bb.appendFormalLine("public DeltaValueStore getDeltaValueStore() { return deltas; }");
-        bb.appendFormalLine("public "+recordType+" getValue() { return record; }");
-        bb.appendFormalLine("public void setDelegate(Delegate delegate) { this.delegate = delegate; }");
-        bb.appendFormalLine("public void setDeltaValueStore(DeltaValueStore deltas) { this.deltas = deltas; }");
-      
-        bb.appendFormalLine("public void setValue("+recordType+" value) {");
-        bb.indent();
-        bb.appendFormalLine("this.record = value;");
-        bb.appendFormalLine("DATA_BINDER.setValue(this, value);");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        bb.appendFormalLine("public void setEnabled(boolean enabled) {");
-        bb.indent();
-        bb.appendFormalLine("DATA_BINDER.setEnabled(this, enabled);");
-        bb.appendFormalLine("save.setEnabled(enabled);");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-      
-        bb.appendFormalLine("public void showErrors(Map<String, String> errorMap) {");
-        bb.indent();
-        bb.appendFormalLine("DATA_BINDER.showErrors(this, errorMap);");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        bb.appendFormalLine("public Set<Property<?>> getProperties() {");
-        bb.indent();
-        bb.appendFormalLine("return DATA_BINDER.getProperties();");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-      
-        
-        bb.appendFormalLine("@UiHandler(\"save\") void onSave(ClickEvent event) { delegate.saveClicked(); }");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-        write(destFile, bb.getOutput(), fileManager);
-      
-    }
-    
-    private void buildEditViewUiXml() {
+  private void buildEditView() {
 
       MirrorType dType = MirrorType.EDIT_VIEW;
-  
-      String destFile= dType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName()+".ui.xml";
-      StringBuilder sb = new StringBuilder();
-      sb.append("<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'\n"
-          + "  xmlns:g='urn:import:com.google.gwt.user.client.ui' >\n" + "  <g:HTMLPanel>\n"
-          + "    <h3><ui:msg>Edit "+entityMetadata.getPlural()+" <g:InlineLabel ui:field='id'></g:InlineLabel>" 
-          + " (<g:InlineLabel ui:field='version'/>)</ui:msg></h3>");
-          sb.append("<div ui:field='errors' style='background-color: red;'></div>");
-          for(FieldMetadata field : record.getDeclaredFields()) {
-            sb.append("<div><span>"+field.getFieldName().getReadableSymbolName()+"</span><g:TextBox ui:field='"+field.getFieldName().getSymbolName()+"'></g:TextBox></div>");
-          }
-          sb.append("<g:Button ui:field='save'>Save</g:Button></g:HTMLPanel>\n" + "</ui:UiBinder>");
-     
-        write(destFile, sb.toString(), fileManager);
-      
+
+    try {
+      writeWithTemplate(dType, "org/springframework/roo/addon/gwt/templates/EditView.vm");
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
+  }
+
+  private void buildEditViewUiXml() {
+    MirrorType dType = MirrorType.EDIT_VIEW;
+
+    String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar
+        + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
+    try {
+      writeWithTemplate(destFile, buildContext(dType),
+          "org/springframework/roo/addon/gwt/templates/EditViewUiXml.vm");
+    } catch (Exception e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
+  }
   
        private void write(String destFile, String newContents, FileManager fileManager) {
 		// Write to disk, or update a file if it is already present
@@ -1059,9 +690,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 	}
-   
-  
-
       
         private DefaultClassOrInterfaceTypeDetails buildListViewBinder(
             MirrorType binderMirrorType, MirrorType viewType) {
@@ -1077,18 +705,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 
             
 
+
           	// private static final Binder BINDER = GWT.create(Binder.class)
                 List<JavaType> binderParams = new ArrayList<JavaType>();
                 binderParams.add(new JavaType("com.google.gwt.user.client.ui.HTMLPanel"));
                 binderParams.add(getDestinationJavaType(viewType));
 		JavaType binderType = new JavaType("com.google.gwt.uibinder.client.UiBinder", 0, DataType.TYPE, null, binderParams );
                 extendsTypes.add(binderType);
-                
-
 		return new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
-  
-     
   
 	private void buildRequest() {
 		String destinationMetadataId = getDestinationMetadataId(MirrorType.REQUEST);
@@ -1177,8 +802,6 @@ public class GwtMetadata extends AbstractMetadataItem {
                 toExport.add(exportMethod(findMethod));
                 toExport.add(exportMethod(countMethod));
                 toExport.add(exportMethod(findEntriesMethod));
-
-                
 
     
 		// Add the enums themselves
@@ -1329,66 +952,7 @@ public class GwtMetadata extends AbstractMetadataItem {
     return e1;
   }
 
-  private void buildFindAllRequester() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.FIND_ALL_REQUESTER);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		implementsTypes.add(new JavaType("com.google.gwt.valuestore.ui.RecordListView.Delegate"));
-
-		// private final RecordListView<EmployeeKey> view;
-		List<JavaType> field1Params = new ArrayList<JavaType>();
-		field1Params.add(getDestinationJavaType(MirrorType.RECORD));
-		JavaType field1Type = new JavaType("com.google.gwt.valuestore.ui.AbstractRecordListView", 0, DataType.TYPE, null, field1Params);
-		FieldMetadata field1Metadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.FINAL, new JavaSymbolName("view"), field1Type, null, null);
-		fields.add(field1Metadata);
-
-		// private final ApplicationRequestFactory requests;
-		JavaType field2Type = getDestinationJavaType(SharedType.APP_REQUEST_FACTORY);
-		FieldMetadata field2Metadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PRIVATE + Modifier.FINAL, new JavaSymbolName("requests"), field2Type, null, null);
-		fields.add(field2Metadata);
-
-		// public EmployeeFindAllRequester(ApplicationRequestFactory requests, RecordListView<EmployeeKey> view) {
-		// this.view = view;
-		// this.requests = requests;
-		// }
-		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
-		constructorParameterTypes.add(field2Type);
-		constructorParameterTypes.add(field1Type);
-		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
-		constructorParameterNames.add(new JavaSymbolName("requests"));
-		constructorParameterNames.add(new JavaSymbolName("view"));
-		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-		constructorBodyBuilder.appendFormalLine("this.view = view;");
-		constructorBodyBuilder.appendFormalLine("this.requests = requests;");
-		ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
-		constructors.add(constructorMetadata);
-
-		// public void onRangeChanged(int start, int length) {
-		// requests.employeeRequest().findAllEmployees().forProperties(view.getProperties()).to(view).fire();
-		// }
-		JavaSymbolName method1Name = new JavaSymbolName("onRangeChanged");
-		JavaType method1ReturnType = JavaType.VOID_PRIMITIVE;
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-		method1ParameterTypes.add(JavaType.INT_PRIMITIVE);
-		method1ParameterTypes.add(JavaType.INT_PRIMITIVE);
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		method1ParameterNames.add(new JavaSymbolName("start"));
-		method1ParameterNames.add(new JavaSymbolName("length"));
-		List<AnnotationMetadata> method1Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-		method1BodyBuilder.appendFormalLine("requests." + getFindAllMethodGwtSize() + ".forProperties(view.getProperties()).to(view).fire();");
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, method1Annotations, null, method1BodyBuilder.getOutput());
-		methods.add(method1Metadata);
-
-		this.findAllRequester = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC + Modifier.FINAL, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
-	}
 
 	class ExportedMethod {
 		JavaSymbolName operationName; // mandatory

@@ -4,12 +4,16 @@
   xmlns:a='urn:import:com.google.gwt.app.client'>
 
   <ui:style>
-    .disabled {
+   .disabled {
      color: gray;
     }
+    
+    .body {
+       overflow:auto;
+     }
 
     .banner {
-       background-color: wheat;
+       background-color: #D1EEEE;
      }
 
     .title {
@@ -44,12 +48,16 @@
     </g:west>
 
     <g:center>
-      <g:SimplePanel ui:field='body'>
-      <g:HTML>
-      <h3>Welcome to Expenses</h3>
-      <p>Choose an entity set from the list on the left to get started</p>
-      </g:HTML>
+      <g:FlowPanel addStyleNames='{style.body}'>
+      <g:SimplePanel ui:field='master'>
+        <g:HTML>
+          <h3>Welcome to __PROJECT_NAME__</h3>
+          <p>Choose an entity set from the list on the left to get started</p>
+        </g:HTML>
       </g:SimplePanel>
+      <g:SimplePanel ui:field='details'>
+      </g:SimplePanel>
+      </g:FlowPanel>
     </g:center>
   </g:DockLayoutPanel>
 </ui:UiBinder>

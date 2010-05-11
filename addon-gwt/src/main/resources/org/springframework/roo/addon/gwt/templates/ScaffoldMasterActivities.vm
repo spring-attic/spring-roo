@@ -1,0 +1,31 @@
+#parse ("common.vm")
+package $packageName;
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+#declareImports()
+
+/**
+ * Finds the activity to run for a particular {@link ScaffoldPlace} in the top
+ * half of the {@link ScaffoldShell}.
+ */
+public final class $className implements
+    ActivityMapper<${shared.applicationPlace}> {
+
+  private final ActivityMapper<${shared.listPlace}> listActivities;
+
+  private Activity last = null;
+
+  public $className(
+      ActivityMapper<${shared.listPlace}> listActivities) {
+    this.listActivities = listActivities;
+  }
+
+  public Activity getActivity(${shared.applicationPlace} place) {
+    if (place instanceof ${shared.listPlace}) {
+      last = listActivities.getActivity((${shared.listPlace}) place);
+    }
+
+    return last;
+  }
+}

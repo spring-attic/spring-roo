@@ -1,0 +1,36 @@
+#parse ("common.vm")
+package $packageName;
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.PlaceController;
+#declareImports()
+
+/**
+ * Maps {@link ${entity.detailsPlace} instances to the {@link Activity} to run.
+ */
+public class $className implements
+    ActivityMapper<${entity.detailPlace}> {
+  private final ${shared.requestFactory} requests;
+  private final PlaceController<${shared.applicationPlace}> placeController;
+
+  public $className(${shared.requestFactory} requests,
+      PlaceController<${shared.applicationPlace}> placeController) {
+    this.requests = requests;
+    this.placeController = placeController;
+  }
+
+  public Activity getActivity(${entity.detailPlace} place) {
+    switch (place.getOperation()) {
+      case DETAILS:
+        return new ${entity.detailsActivity}(place.getId(), requests, placeController);
+
+      case EDIT:
+        return new ${entity.editActivity}(place.getId(), requests,
+            placeController);
+    }
+
+    throw new IllegalArgumentException("Unknown operation "
+        + place.getOperation());
+  }
+}

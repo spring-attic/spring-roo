@@ -1,15 +1,23 @@
 package org.springframework.roo.addon.gwt;
 
+import com.sun.tools.internal.xjc.model.CTypeRef;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
@@ -36,8 +44,10 @@ public class GwtFileListener implements FileEventListener {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 
-	public void onFileEvent(FileEvent fileEvent) {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+  private ProjectMetadata projectMetadata;
+
+  public void onFileEvent(FileEvent fileEvent) {
+		projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata == null) {
 			return;
 		}
@@ -103,15 +113,16 @@ public class GwtFileListener implements FileEventListener {
 		updateApplicationRequestFactory(fileManager, projectMetadata);
 		updateApplicationServerSideOperations(fileManager, projectMetadata);
 		updateListPlaceRendered(fileManager, projectMetadata);
-                updateListActivitiesMapper(fileManager, projectMetadata);
+                updateListActivitiesMapper();
+
                 updatePlaceProcessor(fileManager, projectMetadata);
-                updatePlaceFilter(fileManager, projectMetadata);
                 // TODO: (cromwellian) don't know if I'm supposed to be doing
                 // this here instead of GwtMetaData, but I'm low on time
-                updateListActivity(fileManager, projectMetadata);
-                updateDetailsActivity(fileManager, projectMetadata);
-                updateEditActivity(fileManager, projectMetadata);
-                updateScaffoldActivities(fileManager, projectMetadata);
+//                updateScaffoldActivities(fileManager, projectMetadata);
+                updateMasterActivities();
+                updateDetailsActivities();
+                updatePlaceFilter();
+                updateBasePlaceFilter();
 	}
 
 	private void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
@@ -193,359 +204,6 @@ public class GwtFileListener implements FileEventListener {
 		write(destFile, bb.getOutput(), fileManager);
 	}
 
-  private void updateListActivity(FileManager fileManager, ProjectMetadata projectMetadata) {
-
-    MirrorType locate = MirrorType.RECORD;
-    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
-        + locate.getSuffix() + ".java";
-    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-      String fullPath = fd.getFile().getName()
-          .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-      String clazz = fullPath.substring(0, fullPath.length() - locate.getSuffix().length());
-      JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-
-      MirrorType dType = MirrorType.LIST_ACTIVITY;
-      String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + clazz
-          + dType.getSuffix() + ".java";
-      InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-      bb.reset();
-      bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-      bb.appendFormalLine("import com.google.gwt.app.place.PlaceController;");
-      bb.appendFormalLine("import com.google.gwt.bikeshed.list.shared.Range;");
-      bb.appendFormalLine("import com.google.gwt.requestfactory.shared.Receiver;");
-      bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RecordListRequest;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListActivity;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.ui.RecordListView;");
-      bb.appendFormalLine("import " + getQualifiedType(MirrorType.SCAFFOLD_PLACE, projectMetadata, clazz) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(MirrorType.RECORD, projectMetadata, clazz) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_PLACE, projectMetadata) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_RECORD_PLACE, projectMetadata) + ".Operation;");
-
-      String recordType = getQualifiedType(MirrorType.RECORD, projectMetadata, clazz);
-      bb.appendFormalLine(
-          "public class " + clazz + dType.getSuffix() + " extends AbstractRecordListActivity<" + recordType + "> {");
-      bb.indent();
-      bb.appendFormalLine("private static RecordListView<" + recordType + "> defaultView;");
-      bb.appendFormalLine("private static RecordListView<" + recordType + "> getDefaultView() {");
-      bb.indent();
-      bb.appendFormalLine("if (defaultView == null) {");
-      bb.indent();
-      bb.appendFormalLine(
-          " defaultView = new " + getQualifiedType(MirrorType.LIST_VIEW, projectMetadata, clazz) + "();");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("return defaultView;");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      String appFactory = getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata);
-      bb.appendFormalLine("private final " + appFactory + " requests;");
-      bb.appendFormalLine("private final PlaceController<ApplicationPlace> placeController;");
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"("+appFactory+" requests, PlaceController<ApplicationPlace> placeController) {");
-      bb.appendFormalLine("  this(requests, getDefaultView(), placeController);");
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"("+appFactory+" requests, RecordListView<"+recordType+"> view, PlaceController<ApplicationPlace> placeController) {");
-      bb.appendFormalLine("  super(view);");
-      bb.appendFormalLine("  this.requests = requests;");
-      bb.appendFormalLine("  this.placeController = placeController;");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public void edit("+recordType+" record) {");
-      bb.appendFormalLine("  placeController.goTo(new "+getQualifiedType(MirrorType.SCAFFOLD_PLACE, projectMetadata, clazz)+"(record, Operation.EDIT));");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public void showDetails("+recordType+" record) {");
-      bb.appendFormalLine("  placeController.goTo(new "+getQualifiedType(MirrorType.SCAFFOLD_PLACE, projectMetadata, clazz)+"(record, Operation.DETAILS));");
-      bb.appendFormalLine("}");
-      
-      
-      bb.appendFormalLine("protected RecordListRequest<"+recordType+"> createRangeRequest(Range range) {");
-      bb.appendFormalLine("  return requests."+StringUtils.uncapitalize(clazz)+"Request().find"+clazz+"Entries(range.getStart(), range.getLength());");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("protected void fireCountRequest(Receiver<Long> callback) {");
-      bb.appendFormalLine("  requests."+StringUtils.uncapitalize(clazz)+"Request().count"+clazz+"s().to(callback).fire();");
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      write(destFile, bb.getOutput(), fileManager);
-    }
-  }
-
-  private void updateListView(FileManager fileManager, ProjectMetadata projectMetadata) {
-
-      MirrorType locate = MirrorType.RECORD;
-      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
-          + locate.getSuffix() + ".java";
-      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-        String fullPath = fd.getFile().getName()
-            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-        String clazz = fullPath.substring(0, fullPath.length() - locate.getSuffix().length());
-        JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-
-        MirrorType dType = MirrorType.LIST_VIEW;
-        String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + clazz
-            + dType.getSuffix() + ".java";
-        InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-        bb.reset();
-        bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-        bb.appendFormalLine("import com.google.gwt.bikeshed.list.client.CellTable;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiField;");
-        bb.appendFormalLine("import com.google.gwt.uibinder.client.UiBinder;");
-                                
-        bb.appendFormalLine("import com.google.gwt.user.client.ui.HTMLPanel;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.AbstractRecordListActivity;");
-        bb.appendFormalLine("import com.google.gwt.valuestore.ui.PropertyColumn;");
-        bb.appendFormalLine("import " + getQualifiedType(MirrorType.RECORD, projectMetadata, clazz) + ";");
-
-        String recordType = getQualifiedType(MirrorType.RECORD, projectMetadata, clazz);
-        bb.appendFormalLine(
-            "public class " + clazz + dType.getSuffix() + " extends AbstractRecordListView<" + recordType + "> {");
-        bb.indent();
-        bb.appendFormalLine("interface Binder extends UiBinder<HTMLPanel, "+clazz+dType.getSuffix()+"> {}");
-        
-        bb.appendFormalLine("private static final Binder BINDER = GWT.create(Binder.class);");
-        bb.appendFormalLine("@UiField CellTable<"+recordType+"> table;");
-        
-        bb.appendFormalLine("public "+clazz+dType.getSuffix()+"() {");
-        bb.indent();
-        bb.appendFormalLine("init(BINDER.createAndBindUi(this), table, getColumns());");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-        bb.indent();
-        
-       
-     
-      
-        bb.appendFormalLine("protected List<PropertyColumn<"+recordType+", ?>> getColumns() {");
-        bb.indent();
-        bb.appendFormalLine("List<PropertyColumn<"+recordType+", ?>> columns = new ArrayList<PropertyColumn<"+recordType+", ?>>();");
-        bb.appendFormalLine("}");
-        bb.indentRemove();
-        bb.appendFormalLine("}");
-        write(destFile, bb.getOutput(), fileManager);
-      }
-    }
-
-  
-  private void updateDetailsActivity(FileManager fileManager, ProjectMetadata projectMetadata) {
-
-    MirrorType locate = MirrorType.RECORD;
-    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
-        + locate.getSuffix() + ".java";
-    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-      String fullPath = fd.getFile().getName()
-          .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-      String clazz = fullPath.substring(0, fullPath.length() - locate.getSuffix().length());
-      JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-
-      MirrorType dType = MirrorType.DETAIL_ACTIVITY;
-      String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + clazz
-          + dType.getSuffix() + ".java";
-      InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-      bb.reset();
-      bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-      bb.appendFormalLine("import com.google.gwt.app.place.AbstractActivity;");
-      bb.appendFormalLine("import com.google.gwt.app.util.IsWidget;");
-      bb.appendFormalLine("import com.google.gwt.requestfactory.shared.Receiver;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.shared.Value;");
-      bb.appendFormalLine("import com.google.gwt.user.client.ui.TakesValue;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.ui.RecordListView;");
-      
-      bb.appendFormalLine("import " + getQualifiedType(MirrorType.RECORD, projectMetadata, clazz) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata) + ";");
-
-      String recordType = getQualifiedType(MirrorType.RECORD, projectMetadata, clazz);
-      bb.appendFormalLine(
-          "public class " + clazz + dType.getSuffix() + " extends AbstractActivity {");
-      bb.indent();
-      bb.appendFormalLine("public interface View extends TakesValue<"+recordType+">, IsWidget {}");
-      bb.appendFormalLine("private static View defaultView;");
-      bb.appendFormalLine("private static View getDefaultView() {");
-      bb.indent();
-      bb.appendFormalLine("if (defaultView == null) {");
-      bb.indent();
-      bb.appendFormalLine(
-          " defaultView = new " + getQualifiedType(MirrorType.DETAILS_VIEW, projectMetadata, clazz) + "();");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("return defaultView;");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      String appFactory = getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata);
-      bb.appendFormalLine("private final " + appFactory + " requests;");
-      bb.appendFormalLine("private final View view;");
-      bb.appendFormalLine("private String id;");
-      
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"(String id, "+appFactory+" requests) {");
-      bb.appendFormalLine("  this(id, requests, getDefaultView());");
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"(String id, "+appFactory+" requests, View view) {");
-      bb.appendFormalLine("  this.id = id;");
-      bb.appendFormalLine("  this.requests = requests;");
-      bb.appendFormalLine("  this.view = view;");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public void start(final Display display) {");
-      bb.appendFormalLine("  Receiver<"+recordType+"> callback = new Receiver<"+recordType+">() {");
-      bb.indent();
-      bb.appendFormalLine("public void onSuccess("+recordType+" record) {");
-      bb.indent();
-      bb.appendFormalLine("view.setValue(record);");
-      bb.appendFormalLine("display.showActivityWidget(view);");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("};");
-      bb.appendFormalLine("requests."+StringUtils.uncapitalize(clazz)+"Request().find"+clazz+"(Value.of(id)).to(callback).fire();");
-      bb.appendFormalLine("}");
-      
-    
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      write(destFile, bb.getOutput(), fileManager);
-    }
-  }
-  
-  private void updateEditActivity(FileManager fileManager, ProjectMetadata projectMetadata) {
-
-    MirrorType locate = MirrorType.RECORD;
-    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
-        + locate.getSuffix() + ".java";
-    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-      String fullPath = fd.getFile().getName()
-          .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-      String clazz = fullPath.substring(0, fullPath.length() - locate.getSuffix().length());
-      JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-
-      MirrorType dType = MirrorType.EDIT_ACTIVITY;
-      String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + clazz
-          + dType.getSuffix() + ".java";
-      InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-      bb.reset();
-      bb.appendFormalLine("package " + dType.getPath().packageName(projectMetadata) + ";");
-      bb.appendFormalLine("import com.google.gwt.app.place.AbstractActivity;");
-      bb.appendFormalLine("import com.google.gwt.app.place.PlaceController;");
-      bb.appendFormalLine("import com.google.gwt.requestfactory.shared.Receiver;");
-      bb.appendFormalLine("import com.google.gwt.user.client.Window;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.shared.Value;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.shared.DeltaValueStore;");
-      bb.appendFormalLine("import com.google.gwt.valuestore.ui.RecordEditView;");
-      bb.appendFormalLine("import com.google.gwt.requestfactory.shared.SyncResult;");
-      bb.appendFormalLine("import java.util.Set;");
-      bb.appendFormalLine("import " + getQualifiedType(MirrorType.RECORD, projectMetadata, clazz) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_PLACE, projectMetadata) + ";");
-      bb.appendFormalLine("import " + getQualifiedType(SharedType.APP_LIST_PLACE, projectMetadata) + ";");
-      
-      String recordType = getQualifiedType(MirrorType.RECORD, projectMetadata, clazz);
-      bb.appendFormalLine(
-          "public class " + clazz + dType.getSuffix() + " extends AbstractActivity implements RecordEditView.Delegate {");
-      bb.indent();
-      bb.appendFormalLine("private static RecordEditView<" + recordType + "> defaultView;");
-      bb.appendFormalLine("private static RecordEditView<" + recordType + "> getDefaultView() {");
-      bb.indent();
-      bb.appendFormalLine("if (defaultView == null) {");
-      bb.indent();
-      bb.appendFormalLine(
-          " defaultView = new " + getQualifiedType(MirrorType.EDIT_VIEW, projectMetadata, clazz) + "();");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("return defaultView;");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      String appFactory = getQualifiedType(SharedType.APP_REQUEST_FACTORY, projectMetadata);
-      bb.appendFormalLine("private final " + appFactory + " requests;");
-      bb.appendFormalLine("private final RecordEditView<"+recordType+"> view;");
-      bb.appendFormalLine("private final String id;");
-      bb.appendFormalLine("private final PlaceController<"+getQualifiedType(SharedType.APP_PLACE, projectMetadata)+"> placeController;");
-      bb.appendFormalLine("private DeltaValueStore deltas;");
-      
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"(String id, "+appFactory+" requests, PlaceController<"+getQualifiedType(SharedType.APP_PLACE, projectMetadata)+"> placeController) {");
-      bb.appendFormalLine("  this(id, getDefaultView(), requests, placeController);");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public "+clazz + dType.getSuffix()+"(String id, RecordEditView<"+recordType+"> view, "+appFactory+" requests, PlaceController<"+getQualifiedType(SharedType.APP_PLACE, projectMetadata)+"> placeController) {");
-      bb.appendFormalLine("  this.requests = requests;");
-      bb.appendFormalLine("  this.id = id;");
-      bb.appendFormalLine("  this.view = view;");
-      bb.appendFormalLine("  this.deltas = requests.getValueStore().spawnDeltaView();");
-      bb.appendFormalLine("  this.placeController = placeController;");
-      bb.appendFormalLine("  view.setDelegate(this);");
-      bb.appendFormalLine("  view.setDeltaValueStore(deltas);");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public void saveClicked() {");
-      bb.appendFormalLine("  if (deltas.isChanged()) {");
-      bb.indent();
-      bb.appendFormalLine("view.setEnabled(false);");
-      bb.appendFormalLine("final DeltaValueStore toCommit = deltas;");
-      bb.appendFormalLine("deltas = null;");
-      bb.appendFormalLine("Receiver<Set<SyncResult>> receiver = new Receiver<Set<SyncResult>>() {");
-      bb.indent();
-      bb.appendFormalLine("public void onSuccess(Set<SyncResult> response) {");
-      bb.indent();
-      bb.appendFormalLine("boolean hasViolations = false;");
-      bb.appendFormalLine("for (SyncResult syncResult : response) {");
-      bb.indent();
-      bb.appendFormalLine("if (syncResult.getRecord().getId().equals(id)) {");
-      bb.indent();
-      bb.appendFormalLine("if (syncResult.hasViolations()) {");
-      bb.indent();
-      bb.appendFormalLine("hasViolations = true;");
-      bb.appendFormalLine("view.showErrors(syncResult.getViolations());");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("if (!hasViolations) { placeController.goTo(new "+getQualifiedType(SharedType.APP_LIST_PLACE, projectMetadata)+"("+clazz+"Record.class)); }");
-      bb.appendFormalLine("else {");
-      bb.indent();
-      bb.appendFormalLine("view.setEnabled(true);");
-      bb.appendFormalLine("deltas = toCommit;");
-      bb.appendFormalLine("deltas.clearUsed();");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("};");
-      
-      bb.appendFormalLine("requests.syncRequest(toCommit).to(receiver).fire();");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public void start(final Display display) {");
-      bb.appendFormalLine("  Receiver<"+recordType+"> callback = new Receiver<"+recordType+">() {");
-      bb.indent();
-      bb.appendFormalLine("public void onSuccess("+recordType+" record) {");
-      bb.indent();
-      bb.appendFormalLine("view.setEnabled(true);");
-      bb.appendFormalLine("view.setValue(record);");
-      bb.appendFormalLine("view.showErrors(null);");
-      bb.appendFormalLine("display.showActivityWidget(view);");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.indentRemove();
-      bb.appendFormalLine("};");
-      bb.appendFormalLine("requests."+StringUtils.uncapitalize(clazz)+"Request().find"+clazz+"(Value.of(id)).to(callback).fire();");
-      bb.appendFormalLine("}");
-      
-      bb.appendFormalLine("public boolean willStop() {");
-      bb.indent();
-      bb.appendFormalLine("return deltas == null || !deltas.isChanged() || Window.confirm(\"Dude! Really drop your edits?\");");
-      bb.indentRemove();
-      bb.appendFormalLine("}");
-      bb.appendFormalLine("}");
-      write(destFile, bb.getOutput(), fileManager);
-    }
-  }
-  
   public static String getQualifiedType(MirrorType type, ProjectMetadata projectMetadata,
       String clazz) {
     return type.getPath().packageName(projectMetadata)
@@ -625,245 +283,10 @@ public class GwtFileListener implements FileEventListener {
 		write(destFile, bb.getOutput(), fileManager);
 	}
 
-	private void updateScaffoldListViewBuilder(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.SCAFFOLD_LIST_VIEW_BUILDER;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import java.util.HashMap;");
-		bb.appendFormalLine("import java.util.Map;");
-		bb.appendFormalLine("import com.google.gwt.app.util.Renderer;");
-		bb.appendFormalLine("import com.google.gwt.valuestore.ui.RecordListView;");
-		bb.appendFormalLine("import " + SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
-		bb.appendFormalLine("import " + SharedType.APP_PLACES.getFullyQualifiedTypeName(projectMetadata) + ";");
-		bb.appendFormalLine("import " + SharedType.APP_REQUEST_FACTORY.getFullyQualifiedTypeName(projectMetadata) + ";");
+	
 
-		bb.appendFormalLine("public class " + destType.getFullName() + " {");
-		bb.indent();
-		bb.appendFormalLine("private final " + SharedType.APP_REQUEST_FACTORY.getFullName() + " requests;");
-		bb.appendFormalLine("private final Renderer<" + SharedType.APP_LIST_PLACE.getFullName() + "> placeRenderer;");
-		bb.appendFormalLine("private final " + SharedType.APP_PLACES.getFullName() + " places;");
-		bb.appendFormalLine("private final Map<" + SharedType.APP_LIST_PLACE.getFullName() + ", RecordListView<?>> viewMap = new HashMap<" + SharedType.APP_LIST_PLACE.getFullName() + ", RecordListView<?>>();");
-
-		bb.appendFormalLine("public ScaffoldListViewBuilder(" + SharedType.APP_PLACES.getFullName() + " places, " + SharedType.APP_REQUEST_FACTORY.getFullName() + " requests, Renderer<" + SharedType.APP_LIST_PLACE.getFullName() + "> placeRenderer) {");
-		bb.indent();
-		bb.appendFormalLine("this.places = places;");
-		bb.appendFormalLine("this.requests = requests;");
-		bb.appendFormalLine("this.placeRenderer = placeRenderer;");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("public RecordListView<?> getListView(final " + SharedType.APP_LIST_PLACE.getFullName() + " newPlace) {");
-		bb.indent();
-
-		bb.appendFormalLine("if (!viewMap.containsKey(newPlace)) {");
-		bb.indent();
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-			JavaType listViewType = new JavaType(MirrorType.LIST_VIEW.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_VIEW.getSuffix());
-			JavaType findAllRequester = new JavaType(MirrorType.FIND_ALL_REQUESTER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.FIND_ALL_REQUESTER.getSuffix());
-			bb.appendFormalLine("if (newPlace.getRecord().equals(" + javaType.getFullyQualifiedTypeName() + ".class)) {");
-			bb.indent();
-			bb.appendFormalLine(listViewType.getSimpleTypeName() + " newView = new " + listViewType.getSimpleTypeName() + "(placeRenderer.render(newPlace), places, requests);");
-			bb.appendFormalLine("newView.setDelegate(new " + findAllRequester.getSimpleTypeName() + "(requests, newView));");
-			bb.appendFormalLine("viewMap.put(newPlace, newView);");
-			bb.indentRemove();
-			bb.appendFormalLine("}");
-		}
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("return viewMap.get(newPlace);");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		write(destFile, bb.getOutput(), fileManager);
-	}
-
-	private void updateScaffoldDetailsViewBuilder(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.SCAFFOLD_DETAILS_VIEW_BUILDER;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
-
-		bb.appendFormalLine("public class " + destType.getFullName() + " {");
-		bb.indent();
-
-		bb.appendFormalLine("public static void appendHtmlDescription(final StringBuilder list, final Record entity) {");
-		bb.indent();
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-			JavaType listViewType = new JavaType(MirrorType.DETAILS_BUILDER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.DETAILS_BUILDER.getSuffix());
-			bb.appendFormalLine("if (entity instanceof " + keyType.getFullyQualifiedTypeName() + ") {");
-			bb.indent();
-			bb.appendFormalLine(listViewType.getSimpleTypeName() + ".append(list, (" + keyType.getFullyQualifiedTypeName() + ") entity);");
-			bb.indentRemove();
-			bb.appendFormalLine("}");
-		}
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		write(destFile, bb.getOutput(), fileManager);
-	}
-
-        private void updateListActivitiesMapper(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.LIST_ACTIVITIES_MAPPER;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import com.google.gwt.app.place.Activity;");
-                bb.appendFormalLine("import com.google.gwt.app.place.ActivityMapper;");
-                bb.appendFormalLine("import com.google.gwt.app.place.PlaceController;");
-                           
-		bb.appendFormalLine("import " + SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
-
-		bb.appendFormalLine("public class " + destType.getFullName() + " implements ActivityMapper<" + SharedType.APP_LIST_PLACE.getFullName() + "> {");
-		bb.indent();
-                bb.appendFormalLine("private final "+SharedType.APP_REQUEST_FACTORY.getFullyQualifiedTypeName(projectMetadata)+" requests;");
-                bb.appendFormalLine("private final PlaceController<"+SharedType.APP_PLACE.getFullyQualifiedTypeName(projectMetadata)+"> placeController;");
-                bb.appendFormalLine("public "+SharedType.LIST_ACTIVITIES_MAPPER.getFullName()+"("+SharedType.APP_REQUEST_FACTORY.getFullyQualifiedTypeName(projectMetadata)+" requests, PlaceController<"+SharedType.APP_PLACE.getFullyQualifiedTypeName(projectMetadata)+"> placeController) {") ;
-                bb.indent();
-                bb.appendFormalLine("this.requests = requests;");
-                bb.appendFormalLine("this.placeController = placeController;");
-                bb.indentRemove();
-                bb.appendFormalLine("}");
-          
-		bb.appendFormalLine("public Activity getActivity("+SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata)+" place) {");
-                bb.indent();
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-			bb.appendFormalLine("if (place.getType().equals(" + keyType.getFullyQualifiedTypeName() + ".class)) {");
-			bb.indent();
-			bb.appendFormalLine("return new " + MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_ACTIVITY.getSuffix()+ "(requests, placeController);");
-			bb.indentRemove();
-			bb.appendFormalLine("}");
-		}
-		bb.appendFormalLine("throw new RuntimeException(\"Unable to locate an activity for \" + place);");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		write(destFile, bb.getOutput(), fileManager);
-	}
-  
-        private void updateScaffoldActivities(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.SCAFFOLD_ACTIVITIES;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import com.google.gwt.app.place.Activity;");
-                bb.appendFormalLine("import com.google.gwt.app.place.ActivityMapper;");
-                bb.appendFormalLine("import com.google.gwt.app.place.PlaceController;");
-                           
-                bb.appendFormalLine("import " + SharedType.APP_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
-		bb.appendFormalLine("import " + SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
-                bb.appendFormalLine("import " + SharedType.APP_PLACE_FILTER.getFullyQualifiedTypeName(projectMetadata) + ";");
-                bb.appendFormalLine("import " + SharedType.APP_REQUEST_FACTORY.getFullyQualifiedTypeName(projectMetadata) + ";");
-                bb.appendFormalLine("import " + SharedType.LIST_ACTIVITIES_MAPPER.getFullyQualifiedTypeName(projectMetadata) + ";");
-                
-                MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-                List<String> entityNames = new ArrayList<String>();
-                for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-                        bb.appendFormalLine("import "+MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix()+";");
-                        bb.appendFormalLine("import "+MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix()+";");
-                        entityNames.add(simpleName);
-                }
-          
-		bb.appendFormalLine("public class " + destType.getFullName() + " implements ActivityMapper<" + SharedType.APP_PLACE.getFullName() + "> {");
-		bb.indent();
-                bb.appendFormalLine("private final ActivityMapper<"+SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata)+"> listActivitiesBuilder;");
-                for(String entityName : entityNames) {
-                  bb.appendFormalLine("private final ActivityMapper<"+entityName+MirrorType.SCAFFOLD_PLACE.getSuffix()+"> "+StringUtils.uncapitalize(entityName)+"ActivitiesBuilder;");
-                }
-          
-                bb.appendFormalLine("public "+SharedType.SCAFFOLD_ACTIVITIES.getFullName()+"("+SharedType.APP_REQUEST_FACTORY.getFullyQualifiedTypeName(projectMetadata)+" requests, PlaceController<"+SharedType.APP_PLACE.getFullyQualifiedTypeName(projectMetadata)+"> placeController) {") ;
-                bb.indent();
-                bb.appendFormalLine("this.listActivitiesBuilder = new "+SharedType.LIST_ACTIVITIES_MAPPER.getFullName()+"(requests, placeController);");
-                for(String entityName : entityNames) {
-                  bb.appendFormalLine("this."+StringUtils.uncapitalize(entityName)+"ActivitiesBuilder = new "+entityName+MirrorType.ACTIVITIES_MAPPER.getSuffix()+"(requests, placeController);");
-                }
-                bb.indentRemove();
-                bb.appendFormalLine("}");
-          
-		bb.appendFormalLine("public Activity getActivity("+SharedType.APP_PLACE.getFullyQualifiedTypeName(projectMetadata)+" place) {");
-                bb.indent();
-		
-                bb.appendFormalLine("return place.acceptFilter(new "+SharedType.APP_PLACE_FILTER.getFullName()+"<Activity>() {");
-                bb.indent();
-                bb.appendFormalLine("public Activity filter("+SharedType.APP_LIST_PLACE.getFullName()+" place) {");
-                bb.indent();
-                bb.appendFormalLine("return listActivitiesBuilder.getActivity(place);");
-                bb.appendFormalLine("}");
-                bb.indentRemove();
-		for (String entityName : entityNames) {
-		    bb.appendFormalLine("public Activity filter("+entityName+MirrorType.SCAFFOLD_PLACE.getSuffix()+" place) {");
-                    bb.indent();
-                    bb.appendFormalLine("return "+StringUtils.uncapitalize(entityName)+"ActivitiesBuilder.getActivity(place);");
-                    bb.indentRemove();	
-                    bb.appendFormalLine("}");
-		}
-                bb.indentRemove();
-                bb.appendFormalLine("});");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		write(destFile, bb.getOutput(), fileManager);
-	}
-  
-        private void updatePlaceFilter(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.APP_PLACE_FILTER;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-
-		bb.appendFormalLine("public interface " + destType.getFullName() + "<T> {");
-		bb.indent();
-
-		bb.appendFormalLine("com.google.gwt.app.place.Activity filter(ApplicationListPlace object);");
-           
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-                        bb.appendFormalLine("com.google.gwt.app.place.Activity filter("+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix()+" place);");
-		}
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		write(destFile, bb.getOutput(), fileManager);
- 	}
+         
+       
   
          private void updatePlaceProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType destType = SharedType.APP_PLACE_PROCESSOR;
@@ -889,7 +312,6 @@ public class GwtFileListener implements FileEventListener {
 		bb.appendFormalLine("}");
 		write(destFile, bb.getOutput(), fileManager);
 	}
-  
 	private void updateListPlaceRendered(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType destType = SharedType.LIST_PLACE_RENDERER;
 		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
@@ -963,4 +385,210 @@ public class GwtFileListener implements FileEventListener {
 			fileManager.delete(canonicalPath);
 		}
 	}
+
+  public void updatePlaceFilter() {
+    try {
+      SharedType type = SharedType.APP_PLACE_FILTER;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void updateBasePlaceFilter() {
+    try {
+      SharedType type = SharedType.BASE_PLACE_FILTER;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE_FILTER);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void updateDetailsActivities() {
+    try {
+      SharedType type = SharedType.DETAILS_ACTIVITIES;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_RECORD_PLACE);
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      addReference(ctx, SharedType.BASE_PLACE_FILTER);
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("name", simpleName);
+        ent.put("activitiesMapper", simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
+        imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.ACTIVITIES_MAPPER.getSuffix());
+        ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void updateListActivitiesMapper() {
+    try {
+      SharedType type = SharedType.LIST_ACTIVITIES_MAPPER;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("name", simpleName);
+        ent.put("listActivity", simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
+        imports.add(MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType
+            .LIST_ACTIVITY.getSuffix());
+        ent.put("record", simpleName + MirrorType.RECORD.getSuffix());
+        imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType
+            .RECORD.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void updateMasterActivities() {
+    try {
+      SharedType type = SharedType.MASTER_ACTIVITIES;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR+type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace(); 
+    }
+  }
+  
+  private VelocityContext buildContext(SharedType destType) {
+    JavaType javaType = new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
+    String clazz = javaType.getSimpleTypeName();
+
+    VelocityContext context = new VelocityContext();
+    context.put("shared", new HashMap());
+    HashMap eMap = new HashMap();
+    context.put("className", clazz);
+    context.put("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+    ArrayList<String> imports = new ArrayList<String>();
+    context.put("imports", imports);
+    return context;
+  }
+  
+   private void writeWithTemplate(SharedType destType,  String templateFile)
+      throws Exception {
+    String destFile= destType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName()+".java";
+    writeWithTemplate(destFile,  buildContext(destType), templateFile);
+  }
+
+  private JavaType getDestinationJavaType(SharedType destType) {
+    return new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
+  }
+
+  private void writeWithTemplate(SharedType destType, VelocityContext context, String templateFile)
+      throws Exception {
+    String destFile= destType.getPath(). canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName()+".java";
+    writeWithTemplate(destFile, context, templateFile);
+  }
+  
+  private void writeWithTemplate(String destFile, VelocityContext context, String templateFile)
+      throws Exception {
+    VelocityEngine engine = new VelocityEngine();
+    engine.setProperty("resource.loader", "mine");
+    engine.setProperty("mine.resource.loader.instance", new TemplateResourceLoader());
+
+    StringWriter sw = new StringWriter();
+    engine.getTemplate(templateFile).merge(context, sw);
+    write(destFile, sw.toString(), fileManager);
+  }
+  
+  private void addReference(VelocityContext ctx, MirrorType type, String entity) {
+    addImport((List<String>)ctx.get("imports"), type, entity);
+    Map<String, String> eMap = (Map<String, String>) ctx.get("entity");
+    eMap.put(type.getVelocityName(), entity + type.getSuffix());
+  }
+    
+  private void addReference(VelocityContext ctx, SharedType type) {
+    addImport((List<String>)ctx.get("imports"), type);
+    Map<String, String> sMap = (Map<String, String>) ctx.get("shared");
+    sMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+  }
+  
+  private void addImport(List<String> imports, SharedType type) {
+    imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
+  }
+  
+  private void addImport(List<String> imports, MirrorType type, String entity) {
+    imports.add(type.getPath().packageName(projectMetadata)+"."+entity+type.getSuffix());
+  }
 }

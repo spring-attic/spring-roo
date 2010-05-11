@@ -24,7 +24,7 @@ public class ApplicationListPlace extends ApplicationPlace {
   }
 
   @Override
-  public Activity acceptFilter(ApplicationPlaceFilter filter) {
+  public <T> T acceptFilter(ApplicationPlaceFilter<T> filter) {
     return filter.filter(this);
   }
 

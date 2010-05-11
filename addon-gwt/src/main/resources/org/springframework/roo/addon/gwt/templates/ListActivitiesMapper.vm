@@ -1,0 +1,38 @@
+#parse ("common.vm")
+package $packageName;
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.event.shared.HandlerManager;
+#declareImports()
+
+/**
+ * The class that knows what {@link Activity} to run when the user goes to a
+ * particular {@link ListScaffoldPlace}.
+ * <p>
+ * To create a new list activity, copy one of the existing ones (and the
+ * corresponding view), and register it here.
+ */
+public class $className implements ActivityMapper<${shared.listPlace}> {
+  private final ${shared.requestFactory} requests;
+  private final PlaceController<${shared.applicationPlace}> placeController;
+  private HandlerManager eventBus;
+
+  public $className(HandlerManager eventBus,
+      ${shared.requestFactory} requests,
+      PlaceController<${shared.applicationPlace}> placeController) {
+    this.eventBus = eventBus;
+    this.requests = requests;
+    this.placeController = placeController;
+  }
+
+  public Activity getActivity(${shared.listPlace} place) {
+#foreach ($ent in $entities) 
+    if (place.getType().equals(${ent.record}.class)) {
+      return new ${ent.listActivity}(eventBus, requests, placeController);
+    }
+#end
+    throw new RuntimeException("Unable to locate a activity for " + place);
+  }
+}

@@ -1,0 +1,28 @@
+#parse ("common.vm")
+package $packageName;
+
+#declareImports()
+
+/**
+ * A place in the scaffold app for working with an ${entity.record}.
+ */
+public class $className extends ${shared.applicationRecordPlace} {
+
+  public $className(${entity.record} record, Operation operation) {
+    super(record.getId(), operation);
+  }
+
+  public $className(String id, Operation operation) {
+    super(id, operation);
+  }
+
+  @Override
+  public void accept(${shared.placeProcessor} visitor) {
+    visitor.process(this);
+  }
+
+  @Override
+  public <T> T acceptFilter(${shared.placeFilter}<T> filter) {
+    return filter.filter(this);
+  }
+}

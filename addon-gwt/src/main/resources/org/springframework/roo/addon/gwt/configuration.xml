@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
+    <repositories>
+        <repository>
+           <id>vegatesting</id>
+           <name>Vegatesting</name>
+           <url>https://vegatesting.googlecode.com/svn/trunk/gwt/maven</url>
+        </repository>
+    </repositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
@@ -36,6 +43,7 @@
 				<modules>
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
 				</modules>
+                <runTarget>ApplicationScaffold.html</runTarget>
 			</configuration>
 			<executions>
 				<execution>

@@ -24,6 +24,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -88,6 +89,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
 		
+                updateRepositories();
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
 		
@@ -232,7 +234,16 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
-	
+  
+        private void updateRepositories() {
+		Element configuration = getConfiguration();
+
+		List<Element> vegaRepositories = XmlUtils.findElements("/configuration/repositories/repository", configuration);
+		for (Element repositoryElement : vegaRepositories) {
+			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+	}
+  
 	private void updateWebXml(ProjectMetadata projectMetadata) {
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXml), "web.xml not found; cannot continue");
@@ -274,7 +285,11 @@ public class GwtOperationsImpl implements GwtOperations {
 								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
 							.build(), firstRule);
 		
-		urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
+                root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/expenses/**").build())
+								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/expenses/$1").build())
+							.build(), firstRule);
+                urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {

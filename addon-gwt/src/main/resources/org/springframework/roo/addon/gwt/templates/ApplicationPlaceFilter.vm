@@ -1,0 +1,14 @@
+#parse ("common.vm")
+package $packageName;
+/**
+ * Implemented by objects that filter {@link ${shared.applicationPlace} subtypes to other
+ * objects.
+ * 
+ * @param <T> the type to filter to 
+ */
+public interface $className<T> {
+  T filter(${shared.listPlace} place);
+#foreach ($ent in $entities)   
+  T filter(${ent.detailsPlace} place);
+#end
+}
