@@ -114,20 +114,19 @@
         without JavaScript when displaying the default scaffolded Roo Web
         interface.</para>
       </listitem>
-      
-       <listitem>
-        <para><emphasis>Tomcat 5.5</emphasis>: Tomcat 5.5 can not be supported 
-        by the scaffolded Spring MVC Web UI. Tomcat 5.5 does not support the 
-        JSP 2.1 API. Roo makes extensive use of the JSP 2.1 API in the 
-        scaffolded Web UI (specifically expression language features). 
-        Furthermore, the JSP 2.0 API does not support JDK 5 enums (a feature 
+
+      <listitem>
+        <para><emphasis>Tomcat 5.5</emphasis>: Tomcat 5.5 can not be supported
+        by the scaffolded Spring MVC Web UI. Tomcat 5.5 does not support the
+        JSP 2.1 API. Roo makes extensive use of the JSP 2.1 API in the
+        scaffolded Web UI (specifically expression language features).
+        Furthermore, the JSP 2.0 API does not support JDK 5 enums (a feature
         that Roo would need). See <link
-        xlink:href="https://jira.springsource.org/browse/ROO-680">ROO-680</link> 
-        for more details.</para>
-        <para>The following <link
+        xlink:href="https://jira.springsource.org/browse/ROO-680">ROO-680</link>
+        for more details. The following <link
         xlink:href="http://forum.springsource.org/showpost.php?s=10e2df3cc266c9a85f8d473716d9b0c3&amp;p=287652&amp;postcount=15">
-        forum post</link> offers a workaround for the JSP 2.1 incompatibility 
-        issue. Please be aware that this has not been tested by the Roo team 
+        forum post</link> offers a workaround for the JSP 2.1 incompatibility
+        issue. Please be aware that this has not been tested by the Roo team
         and Tomcat 5.5 does officially support the JSP 2.0 API.</para>
       </listitem>
     </itemizedlist>
@@ -232,6 +231,29 @@
     <para>If you experience any difficulty with upgrading your projects,
     please use the <link linkend="resources-forums">community support
     forum</link> for assistance.</para>
+  </section>
+
+  <section>
+    <title>Upgrading to 1.1.0.M1</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.0.2.RELEASE to Spring Roo 1.1.0.M1 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+
+      <listitem>
+        <para>If you used Roo 1.0.2's web MVC scaffolding, be aware there are
+        considerable changes to the web tier to support our new MVC features
+        (such as JSPX round-tripping and easy tags). The recommended approach
+        is therefore to start a new project with Roo 1.1.0.M1 to identify the
+        changes that are needed to <code>src/main/webapp</code>.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="upgrade-1.0.2.RELEASE">
