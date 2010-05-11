@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.email;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,7 +33,6 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -344,18 +342,9 @@ public class MailOperationsImpl implements MailOperations {
 	}
 
 	private void updateConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		Element configurationElement = (Element) configurationDoc.getFirstChild();
-
-		List<Element> dependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configurationElement);
+		List<Element> dependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
 		for (Element dependency : dependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}

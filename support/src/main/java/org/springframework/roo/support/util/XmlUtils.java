@@ -309,17 +309,33 @@ public final class XmlUtils {
 		}
 	}
 	
-	public static Element getConfiguration(Class<?> clazz) {
-		InputStream templateInputStream = TemplateUtils.getTemplate(clazz, "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
+	/**
+	 * Returns the root element of an addon's configuration file.
+	 * 
+	 * @param clazz which owns the configuration
+	 * @param configurationPath the path of the configuration file.
+	 * @return the configuration root element 
+	 */
+	public static Element getConfiguration(Class<?> clazz, String configurationPath) {
+		InputStream templateInputStream = TemplateUtils.getTemplate(clazz, configurationPath);
+		Assert.notNull(templateInputStream, "Could not acquire " + configurationPath + " file");
+		Document configurationDocument;
 		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			configurationDocument = getDocumentBuilder().parse(templateInputStream);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-
-		return (Element) configurationDoc.getFirstChild();
+		return configurationDocument.getDocumentElement();
+	}
+	
+	/**
+	 * Returns the root element of an addon's configuration file.
+	 * 
+	 * @param clazz which owns the configuration
+	 * @return the configuration root element 
+	 */
+	public static Element getConfiguration(Class<?> clazz) {
+		return getConfiguration(clazz, "configuration.xml");
 	}
 }
 

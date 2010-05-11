@@ -59,11 +59,14 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	}
 
 	public void installSecurity() {
+		// Parse the configuration.xml file
+		Element configuration = XmlUtils.getConfiguration(getClass());
+		
 		// Add POM properties
-		updatePomProperties();
+		updatePomProperties(configuration);
 
 		// Add dependencies to POM
-		updateDependencies();
+		updateDependencies(configuration);
 
 		// Copy the template across
 		String destination = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
@@ -127,18 +130,14 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		XmlUtils.writeXml(mutableConfigXml.getOutputStream(), webConfigDoc);
 	}
 
-	private void updatePomProperties() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updatePomProperties(Element configuration) {
 		List<Element> databaseProperties = XmlUtils.findElements("/configuration/spring-security/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
 	}
 
-	private void updateDependencies() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updateDependencies(Element configuration) {
 		List<Element> databaseDependencies = XmlUtils.findElements("/configuration/spring-security/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));

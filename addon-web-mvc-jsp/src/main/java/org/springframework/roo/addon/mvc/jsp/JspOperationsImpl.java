@@ -245,18 +245,9 @@ public class JspOperationsImpl implements JspOperations {
 	 */
 	private void updateConfiguration() {
 		// Add tiles dependencies to pom
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "layout/configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Element configuration = XmlUtils.getConfiguration(getClass(), "layout/configuration.xml");
 
-		Element configurationElement = configurationDoc.getDocumentElement();
-
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configurationElement);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}

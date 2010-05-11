@@ -163,18 +163,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void updateConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		Element configurationElement = (Element) configurationDoc.getFirstChild();
-
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebMvc/dependencies/dependency", configurationElement);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebMvc/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}

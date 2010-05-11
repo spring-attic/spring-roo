@@ -66,20 +66,23 @@ public class JpaOperationsImpl implements JpaOperations {
 			updateDatabaseProperties(ormProvider, database);
 		}
 
+
 		updateApplicationContext(ormProvider, database, jndi);
-		updatePomProperties(ormProvider, database);
-		updateDependencies(ormProvider, database);
-		updateRepositories(ormProvider, database);
-		updatePluginRepositories(ormProvider, database);
-		updateBuildPlugins(ormProvider, database);
+		
+		// Parse the configuration.xml file
+		Element configuration = XmlUtils.getConfiguration(getClass());
+
+		updatePomProperties(configuration, ormProvider, database);
+		updateDependencies(configuration, ormProvider, database);
+		updateRepositories(configuration, ormProvider, database);
+		updatePluginRepositories(configuration, ormProvider, database);
+		updateBuildPlugins(configuration, ormProvider, database);
 		
 		// Remove unnecessary artifacts not specific to current database and JPA provider
-		cleanup(ormProvider, database);
+		cleanup(configuration, ormProvider, database);
 	}
 
-	private void updatePomProperties(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-		
+	private void updatePomProperties(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {	
 		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
@@ -246,9 +249,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDependencies(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
@@ -443,9 +444,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return ((ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier())).getProjectName();
 	}
 
-	private void updateRepositories(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updateRepositories(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(database) + "/repositories/repository", configuration);
 		for (Element repositoryElement : databaseRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
@@ -460,9 +459,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updatePluginRepositories(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updatePluginRepositories(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databasePluginRepositories = XmlUtils.findElements(getDbXPath(database) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
@@ -473,9 +470,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateBuildPlugins(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void updateBuildPlugins(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(database) + "/plugins/plugin", configuration);
 		for (Element pluginElement : databasePlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
@@ -486,9 +481,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void cleanup(OrmProvider ormProvider, JdbcDatabase database) {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
+	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey())) {
 				List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);

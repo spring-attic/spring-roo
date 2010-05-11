@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.web.flow;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -22,7 +21,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -137,23 +135,14 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	}
 
 	private void updateConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		Element configurationElement = (Element) configurationDoc.getFirstChild();
-
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configurationElement);
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 		
-		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configurationElement);
+		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
 		for (Element repository : repositories) {
 			projectOperations.addRepository(new Repository(repository));
 		}

@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.jms;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -221,23 +220,14 @@ public class JmsOperationsImpl implements JmsOperations {
 	}
 
 	private void updateConfiguration(JmsProvider jmsProvider) {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document configurationDoc;
-		try {
-			configurationDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-
-		Element configurationElement = (Element) configurationDoc.getFirstChild();
-
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/springJms/dependencies/dependency", configurationElement);
+		Element configuration = XmlUtils.getConfiguration(getClass());
+		
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/springJms/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 
-		List<Element> dependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id='" + jmsProvider.getKey() + "']/dependencies/dependency", configurationElement);
+		List<Element> dependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id='" + jmsProvider.getKey() + "']/dependencies/dependency", configuration);
 		for (Element dependency : dependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
