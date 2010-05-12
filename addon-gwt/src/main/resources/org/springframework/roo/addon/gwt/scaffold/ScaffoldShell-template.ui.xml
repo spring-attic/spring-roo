@@ -91,7 +91,7 @@
     <g:center>
       <g:FlowPanel styleName='{style.content} {style.centered}'>
         <g:SimplePanel styleName='{style.entities}'>
-          <a:ListBoxPlacePickerView styleName="{style.entitiesList}" width='100%' visibleItemCount='10' ui:field='placesBox'/>
+          <a:CellListPlacePickerView styleName="{style.entitiesList}" width='100%' pageSize='8' ui:field='placesBox'/>
         </g:SimplePanel>
         <g:SimplePanel styleName="{style.master}" ui:field='master'>
           <g:HTML>

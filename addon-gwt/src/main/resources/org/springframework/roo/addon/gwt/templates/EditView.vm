@@ -19,6 +19,10 @@ import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.Property;
 import com.google.gwt.valuestore.ui.RecordEditView;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.user.client.ui.DoubleBox;
+import com.google.gwt.user.client.ui.LongBox;
+import com.google.gwt.user.client.ui.IntegerBox;
+
 
 import java.util.ArrayList;
 import java.util.List;

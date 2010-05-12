@@ -575,10 +575,17 @@ public class GwtMetadata extends AbstractMetadataItem {
     }
     
     public String getBinder() {
+      if(type.equals(JavaType.DOUBLE_OBJECT)) return "g:DoubleBox";
+      if(type.equals(JavaType.LONG_OBJECT)) return "g:LongBox";
+      if(type.equals(JavaType.INT_OBJECT)) return "g:IntegerBox";
       return isNonString() ? "d:DateBox" : "g:TextBox";  
     }
     
     public String getEditor() {
+      if(type.equals(JavaType.DOUBLE_OBJECT)) return "DoubleBox";
+      if(type.equals(JavaType.LONG_OBJECT)) return "LongBox";
+      if(type.equals(JavaType.INT_OBJECT)) return "IntegerBox";
+
       return isNonString() ? "DateBox" : "TextBox";  
     }
       
