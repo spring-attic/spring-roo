@@ -61,7 +61,7 @@
 
       <listitem>
         <para><link
-        xlink:href="http://www.oracle.com/index.html">Oracle</link> * </para>
+        xlink:href="http://www.oracle.com/index.html">Oracle</link> *</para>
       </listitem>
 
       <listitem>
@@ -120,7 +120,7 @@
     <para>The persistence setup command can be run at any time - this means
     you can also run it to change your ORM provider or database when you plan
     to move your application between your development setup (ie Hibernate +
-    HSQLDB) to your production setup (EclipseLink + DB2). </para>
+    HSQLDB) to your production setup (EclipseLink + DB2).</para>
 
     <para>Running the persistence setup command in the Roo shell takes care of
     configuring several aspects in your project:</para>
@@ -139,14 +139,24 @@
         is an example for the EclipseLink ORM provider and HSQL
         database:</para>
 
-        <para><programlisting>&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"&gt;    
+        <para><programlisting>&lt;persistence xmlns="http://java.sun.com/xml/ns/persistence" 
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0" 
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence 
+                                 http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"&gt;    
+
     &lt;persistence-unit name="persistenceUnit" transaction-type="RESOURCE_LOCAL"&gt;
         &lt;provider&gt;org.eclipse.persistence.jpa.PersistenceProvider&lt;/provider&gt;
         &lt;properties&gt;
-            &lt;property name="eclipselink.target-database" value="org.eclipse.persistence.platform.database.HSQLPlatform"/&gt;
-            &lt;!--value='drop-and-create-tables' to build a new database on each run; value='create-tables' creates new tables if needed; value='none' makes no changes to the database--&gt;
+            &lt;property name="eclipselink.target-database" 
+                      value="org.eclipse.persistence.platform.database.HSQLPlatform"/&gt;
+
+            &lt;!--value='drop-and-create-tables' to build a new database on each run; 
+                value='create-tables' creates new tables if needed; 
+                value='none' makes no changes to the database--&gt;
             &lt;property name="eclipselink.ddl-generation" value="drop-and-create-tables"/&gt;
+
             &lt;property name="eclipselink.ddl-generation.output-mode" value="database"/&gt;
+
             &lt;property name="eclipselink.weaving" value="static"/&gt;
         &lt;/properties&gt;
     &lt;/persistence-unit&gt;
@@ -197,7 +207,8 @@ database.driverClassName=org.hsqldb.jdbcDriver
 
 &lt;tx:annotation-driven mode="aspectj" transaction-manager="transactionManager"/&gt;
     
-&lt;bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" id="entityManagerFactory"&gt;
+&lt;bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" 
+      id="entityManagerFactory"&gt;
     &lt;property name="dataSource" ref="dataSource"/&gt;
 &lt;/bean&gt;
 </programlisting></para>
@@ -356,12 +367,15 @@ public class Person {
     
     public static final EntityManager Person.entityManager() {
         EntityManager em = new Person().entityManager;
-        if (em == null) throw new IllegalStateException("Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)");
+        if (em == null) throw new IllegalStateException("Entity manager has not been \
+                        injected (is the Spring Aspects JAR configured as an AJC/AJDT \
+                        aspects library?)");
         return em;
     }
     
     public static long Person.countPeople() {
-        return ((Number) entityManager().createQuery("select count(o) from Person o").getSingleResult()).longValue();
+        return ((Number) entityManager().createQuery("select count(o) from Person o")
+                                        .getSingleResult()).longValue();
     }
     
     @SuppressWarnings("unchecked")
@@ -376,7 +390,8 @@ public class Person {
     
     @SuppressWarnings("unchecked")
     public static List&lt;Person&gt; Person.findPersonEntries(int firstResult, int maxResults) {
-        return entityManager().createQuery("select o from Person o").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
+        return entityManager().createQuery("select o from Person o")
+                   .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 }
 </programlisting>As can be seen, the Person_Roo_Entity.aj ITD introduces three
@@ -456,7 +471,7 @@ private Date birthDay;
     retrieved from the database in a transparent fashion. The @DateTimeFormat
     annotation is part of the Spring framework and takes care of automatically
     converting between String and Date values when necessary (especially Web
-    frontends frequently take advantage of these converters). </para>
+    frontends frequently take advantage of these converters).</para>
 
     <para>Also note that Roo created a Person_Roo_JavaBean.aj ITD to generate
     accessors and mutators for the birthDay field and it also updated the
@@ -480,7 +495,7 @@ private Date birthDay;
       <listitem>
         <para>The <link linkend="command-index-field-reference">field
         reference</link> command will create a JPA many-to-one (default) or
-        one-to-one relationship: </para>
+        one-to-one relationship:</para>
 
         <para><programlisting>~.Person roo&gt; field reference --fieldName car --type com.foo.Car
 </programlisting>The field definition added to the Person type contains the
@@ -554,7 +569,7 @@ private Set&lt;Car&gt; cars = new HashSet&lt;Car&gt;();</programlisting>To
         role="bold">--cardinality</emphasis> attribute. To achieve a true m:n
         relationship you will need to issue the <link
         linkend="command-index-field-set">field set</link> commands for both
-        sides of the relationship. </para>
+        sides of the relationship.</para>
       </listitem>
     </orderedlist>
 
