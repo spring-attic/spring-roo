@@ -16,18 +16,23 @@
 
     .banner {
        background-color: #777;
-       color: #fff;
-       width: 800px;
-       margin-left: auto;
-       margin-right: auto;
-       -moz-border-radius: 10px;
-       -webkit-border-radius: 10px;
+       -moz-border-radius-topleft: 10px;
+       -webkit-border-top-left-radius: 10px;
+       -moz-border-radius-topright: 10px;
+       -webkit-border-top-right-radius: 10px;
        margin-top: 1.5em;
+       height: 4em;
      }
 
     .title {
-       text-align: left;
-       margin-left: 1em;
+       color: white;
+       padding: 1em;
+       position: absolute;
+       color: #def;
+     }
+
+     .title h2 {
+       margin:0;
      }
 
     .error {
@@ -51,9 +56,13 @@
 
     .content {
       position: relative;
-      margin-top: 2em;
-      border-top: 2px solid #888;
-      overflow: auto;
+      border: 1px solid #888;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -moz-border-radius-bottomleft: 10px;
+      -webkit-border-bottom-left-radius: 10px;
+      -moz-border-radius-bottomright: 10px;
+      -webkit-border-bottom-right-radius: 10px;
      }
 
      .entities {
@@ -61,45 +70,48 @@
        left: 0;
        top: 0;
        bottom: 0;
-       width: 15em;
+       width: 11em;
      }
 
      .entitiesList {
-       border: none;
+       border-right: 1px solid #888;
        height: 100%;
        outline: none;
-       font-weight: bold;
      }
 
-     .master {
-       margin-left: 15em;
+     .entitiesList > div > div {
+       padding-left: 1em;
+       padding-top: 5px;
+       padding-bottom: 5px;
      }
 
-     .details {
-       margin-left: 15em;
+     .entityDetails {
+       margin-left: 12em;
      }
   </ui:style>
  
-  <g:DockLayoutPanel unit='EM'>
+   <g:DockLayoutPanel unit='EM'>
     <g:north size='6'>
-      <g:HTML styleName='{style.banner}'>
-        <div class='{style.error}' ui:field='error'></div>
-        <h2 class='{style.title}'>Your Entities</h2>
+      <g:HTML styleName='{style.centered}'>
+        <div class='{style.banner}'>
+          <div class='{style.error}' ui:field='error'></div>
+          <span class='{style.title}'><h2>Your Entities</h2></span>
+        </div>
       </g:HTML>
     </g:north>
-
+    <g:south size='4'><g:HTML></g:HTML></g:south>
     <g:center>
       <g:FlowPanel styleName='{style.content} {style.centered}'>
         <g:SimplePanel styleName='{style.entities}'>
-          <a:CellListPlacePickerView styleName="{style.entitiesList}" width='100%' pageSize='8' ui:field='placesBox'/>
+          <a:CellListPlacePickerView styleName="{style.entitiesList}" width='100%' pageSize='100' ui:field='placesBox'/>
         </g:SimplePanel>
-        <g:SimplePanel styleName="{style.master}" ui:field='master'>
+        <g:SimplePanel styleName="{style.entityDetails}" ui:field='master'>
           <g:HTML>
-            <h3>Welcome to __PROJECT_NAME__</h3>
+            <h3>Welcome to the __PROJECT_NAME__</h3>
             <span>Choose an entity set from the list on the left to get started</span>
           </g:HTML>
         </g:SimplePanel>
-        <g:SimplePanel styleName="{style.master}" ui:field='details'>
+        <g:SimplePanel styleName="{style.entityDetails}" ui:field='details'>
         </g:SimplePanel>
       </g:FlowPanel>
     </g:center>
