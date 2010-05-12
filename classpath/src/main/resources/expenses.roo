@@ -2,67 +2,38 @@ project --topLevelPackage com.springsource.extrack
 
 persistence setup --provider DATANUCLEUS --database HYPERSONIC_IN_MEMORY
 // persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
-/*
-enum type --class ~.server.reference.Status
-enum constant --name Draft // -> submitted
-enum constant --name Submitted // -> approved_manager -> declined
-enum constant --name Approved_Manager // -> approved_accounting
-enum constant --name Approved_Accounting // -> paid -> declined
-enum constant --name Paid // -> finish
-enum constant --name Declined // -> draft
-*/
 
 entity --class ~.server.domain.Employee --testAutomatically
-field string --fieldName userName --sizeMin 2 --sizeMax 30
-field string --fieldName displayName --sizeMin 2 --sizeMax 30
-field number --type java.lang.Long supervisorId
+field string --fieldName userName --sizeMin 3 --sizeMax 30
+field string --fieldName department
+field string --fieldName displayName
+field string --fieldName password
+field number --type java.lang.Long supervisorKey
+
+entity --class ~.server.domain.Report --testAutomatically
+// field date --fieldName created --type java.util.Date --past --notNull
+field date --fieldName created --type java.util.Date
+field string --fieldName department
+field string --fieldName notes
+field string --fieldName purpose
+field string --fieldName purposeLowerCase
+field number --type java.lang.Long reporterKey
+field number --type java.lang.Long approvedSupervisorKey
+
+entity --class ~.server.domain.Expense --testAutomatically
+field number --type java.lang.Double amount
+field string --fieldName approval
+field string --fieldName category
+// field date --fieldName date --type java.util.Date --past
+field date --fieldName created --type java.util.Date
+field string --fieldName description
+field string --fieldName reasonDenied
+field number --type java.lang.Long reportId
+
 //field string --fieldName password --sizeMin 2 --sizeMax 30
 //field reference --fieldName supervisor --type ~.server.domain.Employee
 //field boolean --fieldName accountant --notNull
 //field boolean --fieldName administrator --notNull
-
-/*
-entity --class ~.server.domain.Currency --testAutomatically
-field string --fieldName code --sizeMin 3 --sizeMax 3
-field string --fieldName name --sizeMin 2 --sizeMax 30
-
-entity --class ~.server.domain.CostCentre --testAutomatically
-field string --fieldName name --sizeMin 2 --sizeMax 30
-
-entity --class ~.server.domain.Type --testAutomatically
-field string --fieldName name --sizeMin 2 --sizeMax 30
-*/
-
-entity --class ~.server.domain.Report --testAutomatically
-//field date --fieldName created --type java.util.Date --past --notNull
-//field enum --fieldName status --type ~.server.reference.Status --notNull
-//field reference --fieldName reporter --type ~.server.domain.Employee --notNull
-field string --fieldName purpose --sizeMin 3 --sizeMax 100
-//field reference --fieldName approvedSupervisor --type ~.server.domain.Employee
-//field reference --fieldName approvedAccountant --type ~.server.domain.Employee
-
-/*
-entity --class ~.server.domain.ReportItem --testAutomatically
-field reference --fieldName report --type ~.server.domain.Report --notNull
-//field date --fieldName incurred --type java.util.Date --past --notNull
-field reference --fieldName costCentre --type ~.server.domain.CostCentre --notNull
-field reference --fieldName type --type ~.server.domain.Type --notNull
-field string --fieldName purpose --sizeMin 3 --sizeMax 100
-field reference --fieldName currency --type ~.server.domain.Currency --notNull
-field number --fieldName amount --type java.lang.Float --notNull --min 0
-
-field set --class ~.server.domain.Report --fieldName items --element ~.server.domain.ReportItem --mappedBy report --notNull false --cardinality ONE_TO_MANY
-finder add --class com.springsource.extrack.server.domain.ReportItem --finderName findReportItemsByReport
-finder add --class ~.server.domain.Employee --finderName findEmployeesBySupervisorId
-
-*/
-
-/*
-entity --class ~.server.domain.Audit --testAutomatically
-field reference --fieldName report --type ~.server.domain.Report --notNull
-//field date --fieldName eventDate --type java.util.Date --past --notNull
-field string --fieldName description --sizeMin 3 --sizeMax 1024
-*/
 
 controller all --package ~.web
 
