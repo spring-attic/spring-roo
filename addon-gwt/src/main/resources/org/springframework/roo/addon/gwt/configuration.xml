@@ -44,7 +44,6 @@
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
                     <module>com.springsource.extrack.gwt.ApplicationMobileScaffold</module>
 				</modules>
-                <runTarget>ApplicationScaffold.html</runTarget>
 			</configuration>
 			<executions>
 				<execution>
