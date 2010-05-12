@@ -82,6 +82,8 @@
     <xi:include href="base-overview.xml" />
 
 	<xi:include href="base-persistence.xml" />
+	
+	<xi:include href="base-web.xml" />
   </part>
 
   <part xml:id="internals">
