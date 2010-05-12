@@ -382,7 +382,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			fieldArgs.add(propToGwtSideType.get(propertyName));
 
 			JavaType fieldType = new JavaType(propToWrapperType.get(propertyName).getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
-			String fieldInitializer = "new " + fieldType + "(\"" + propertyName.getSymbolName() + "\", " + propToGwtSideType.get(propertyName).getFullyQualifiedTypeName() + ".class)";
+			String fieldInitializer = "new " + fieldType + "(\"" + propertyName.getSymbolName() + "\", \"" + propertyName.getReadableSymbolName() + "\", " + propToGwtSideType.get(propertyName).getFullyQualifiedTypeName() + ".class)";
 			FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.INTERFACE, fieldName, fieldType, fieldInitializer, null);
 			fields.add(fieldMetadata);
 		}
