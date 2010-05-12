@@ -289,8 +289,8 @@ public class GwtOperationsImpl implements GwtOperations {
 							.build(), firstRule);
 		
                 root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/expenses/**").build())
-								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/expenses/$1").build())
+								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/gwtRequest").build())
+								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/gwtRequest").build())
 							.build(), firstRule);
                 urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
 	}
