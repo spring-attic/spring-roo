@@ -84,6 +84,8 @@
 	<xi:include href="base-persistence.xml" />
 	
 	<xi:include href="base-web.xml" />
+
+	<xi:include href="base-solr.xml" />
   </part>
 
   <part xml:id="internals">
