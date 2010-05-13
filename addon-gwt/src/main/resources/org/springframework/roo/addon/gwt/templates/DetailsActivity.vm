@@ -88,6 +88,7 @@ public class $className extends AbstractActivity implements
   }
 
   public void start(final Display display) {
+    this.display = display;
     Receiver<${entity.record}> callback = new Receiver<${entity.record}>() {
       public void onSuccess(${entity.record} record) {
         view.setValue(record);
