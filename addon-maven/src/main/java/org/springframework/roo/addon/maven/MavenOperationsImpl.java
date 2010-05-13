@@ -97,8 +97,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		// Apply special add-on convention rules
 		if (Template.ROO_ADDON_SIMPLE.equals(template)) {
 			Assert.isTrue(majorJavaVersion == 5, "Roo add-ons must be Java 5 only");
-			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().startsWith("com.") || topLevelPackage.getFullyQualifiedPackageName().startsWith("org.") || topLevelPackage.getFullyQualifiedPackageName().startsWith("net."), "Roo add-ons must have a top-level package starting with .com or .net or .org; eg com.mycompany.myproject.roo.addon");
-			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().endsWith(".roo.addon"), "Roo add-ons must have a package name ending in .roo.addon; eg com.mycompany.myproject.roo.addon");
 			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().equals(projectName), "Roo add-ons must have the same project name as the top-level-package name");
 		}
 
