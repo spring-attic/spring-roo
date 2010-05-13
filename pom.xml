@@ -258,18 +258,26 @@
                                         <echo message="No need to copy '${project.name}'"/>
                                     </then>
                                     <else>
-                                        <mkdir dir="${project.build.directory}/dependency"/>
-                                        <copy todir="${project.parent.build.directory}/bundle/" preservelastmodified="true">
-                                            <fileset dir="${project.build.directory}">
-                                                <include name="*.jar"/>
-                                                <exclude name="*-sources.jar"/>
-                                                <exclude name="org.springframework.roo.bootstrap-*.jar"/>
-                                            </fileset>
-                                            <fileset dir="${project.build.directory}/dependency">
-                                                <include name="*.jar"/>
-                                                <exclude name="org.apache.felix.framework-*.jar"/>
-                                            </fileset>
-                                        </copy>
+                                        <if>
+                                            <equals arg1="${project.parent.build.directory}" arg2="${project.parent.build.directory}"/>
+                                            <then>
+                                                <echo message="Skipping as ${project.parent.build.directory} not set"/>
+                                            </then>
+                                            <else>
+                                                <mkdir dir="${project.build.directory}/dependency"/>
+                                                <copy todir="${project.parent.build.directory}/bundle/" preservelastmodified="true">
+                                                    <fileset dir="${project.build.directory}">
+                                                        <include name="*.jar"/>
+                                                        <exclude name="*-sources.jar"/>
+                                                        <exclude name="org.springframework.roo.bootstrap-*.jar"/>
+                                                    </fileset>
+                                                    <fileset dir="${project.build.directory}/dependency">
+                                                        <include name="*.jar"/>
+                                                        <exclude name="org.apache.felix.framework-*.jar"/>
+                                                    </fileset>
+                                                </copy>
+                                            </else>
+                                        </if>
                                     </else>
                                 </if>
 							</tasks>
