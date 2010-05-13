@@ -119,6 +119,7 @@ public class GwtFileListener implements FileEventListener {
                 updateMobileActivities();
                 updatePlaceFilter();
                 updateBasePlaceFilter();
+                updatePlaceTypeFilter();
 	}
 
 	private void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
@@ -443,8 +444,40 @@ public class GwtFileListener implements FileEventListener {
       e.printStackTrace();
     }
   }
-  
-  
+    
+  @SuppressWarnings("unchecked")
+  public void updatePlaceTypeFilter() {
+    try {
+      SharedType type = SharedType.APP_PLACE_TO_RECORD_TYPE;
+      VelocityContext ctx = buildContext(type);
+      addReference(ctx, SharedType.APP_PLACE_FILTER);
+      addReference(ctx, SharedType.APP_LIST_PLACE);
+      
+      MirrorType locate = MirrorType.RECORD;
+      String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**"
+          + locate.getSuffix() + ".java";
+      ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+      ctx.put("entities", entities);
+      ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
+      for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+        String fullPath = fd.getFile().getName()
+            .substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+        String simpleName = fullPath
+            .substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+        Map<String, String> ent = new HashMap<String, String>();
+        ent.put("detailsPlace", simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.SCAFFOLD_PLACE.getSuffix());
+        imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata)+"."+simpleName+MirrorType.RECORD.getSuffix());
+        ent.put("record", simpleName + MirrorType.RECORD.getSuffix());
+        entities.add(ent);
+      }
+
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+    
    public void updateMobileActivities() {
     try {
       SharedType type = SharedType.MOBILE_ACTIVITIES;
@@ -560,6 +593,9 @@ public class GwtFileListener implements FileEventListener {
       VelocityContext ctx = buildContext(type);
       addReference(ctx, SharedType.APP_PLACE);
       addReference(ctx, SharedType.APP_LIST_PLACE);
+      addReference(ctx, SharedType.APP_PLACE_TO_RECORD_TYPE);
+      addReference(ctx, SharedType.APP_RECORD_PLACE);
+      addReference(ctx, SharedType.LIST_ACTIVITIES_MAPPER);
       writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR+type.getVelocityTemplate());
     } catch (Exception e) {
       e.printStackTrace(); 
