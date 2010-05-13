@@ -3,38 +3,43 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'>
  <ui:style>
     .fields {
-       margin: 0.5em;
-     }
-     
-    .fields div {
-       margin: 0.5em;
-     }
-      
+      margin-top: 0.5em;
+      margin-left: 1em;
+    }
     .label {
-      font-weight:bold;
-     }
-     
+      min-height: 25px;
+      font-weight: bold;
+    }
     .button {
       margin-right: 1em;
-     }
-      
+    }
     .bar {
-      float:right;
-     }
-     .underlined {
-       border-bottom: 2px solid #666;
-     }
+      margin-left: 1em;
+    }
+    .header {
+      margin-left: 1em;
+      color: #4B4A4A;
+      text-shadow: #ddf 1px 1px 0;
+      margin-bottom: 0;
+    }
+    .underline {
+      border-bottom: 2px solid #6F7277;
+    }
   </ui:style>
   <g:HTMLPanel>
-    <h3 class='{style.underlined}'><ui:msg>${entity.name} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
-    <div class='{style.fields}'>
-#foreach ($prop in $entity.properties)  
-      <div><span class='{style.label}'>${prop.readableName}:</span> <span ui:field='${prop.name}'></span></div>
-#end
+    <div class='{style.underline}'>
+      <h3 class='{style.header}'><ui:msg>${entity.name} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
     </div>
+
+    <table class='{style.fields}'>
+#foreach ($prop in $entity.properties)  
+      <tr><td><div class='{style.label}'>${prop.readableName}:</div></td><td><span ui:field='${prop.name}'></span></td></tr>
+#end
+    </table>
+
   <div class="{style.bar}">
-  <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>
-  <g:Anchor ui:field='delete'>Delete</g:Anchor>
+    <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>
+    <g:Anchor ui:field='delete'>Delete</g:Anchor>
    </div>
   </g:HTMLPanel>
 </ui:UiBinder>

@@ -4,48 +4,48 @@
   xmlns:a='urn:import:com.google.gwt.app.client'>
 
   <ui:style>
-    @def contentWidth 800px;
+    @def contentWidth 850px;
 
     .disabled {
-     color: gray;
+      color: gray;
     }
-    
+
     .body {
-       overflow:auto;
-     }
+      overflow:auto;
+    }
 
     .banner {
-       background-color: #777;
-       -moz-border-radius-topleft: 10px;
-       -webkit-border-top-left-radius: 10px;
-       -moz-border-radius-topright: 10px;
-       -webkit-border-top-right-radius: 10px;
-       margin-top: 1.5em;
-       height: 4em;
-     }
+      background-color: #777;
+      -moz-border-radius-topleft: 10px;
+      -webkit-border-top-left-radius: 10px;
+      -moz-border-radius-topright: 10px;
+      -webkit-border-top-right-radius: 10px;
+      margin-top: 1.5em;
+      height: 4em;
+    }
 
     .title {
-       color: white;
-       padding: 1em;
-       position: absolute;
-       color: #def;
-     }
+      color: white;
+      padding: 1em;
+      position: absolute;
+      color: #def;
+    }
 
-     .title h2 {
-       margin:0;
-     }
+    .title h2 {
+      margin:0;
+    }
 
     .error {
-       position: absolute;
-       left: 12%;
-       right: 12%;
-       text-align: center;
-       background-color: red;
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      text-align: center;
+      background-color: red;
     }
 
     .users {
-     position: absolute;
-     right: 0;
+      position: absolute;
+      right: 0;
     }
 
     .centered {
@@ -56,7 +56,7 @@
 
     .content {
       position: relative;
-      border: 1px solid #888;
+      border: 1px solid #ddf;
       overflow-y: auto;
       overflow-x: hidden;
       -moz-border-radius-bottomleft: 10px;
@@ -74,7 +74,7 @@
      }
 
      .entitiesList {
-       border-right: 1px solid #888;
+       border-right: 1px solid #ddf;
        height: 100%;
        outline: none;
      }
@@ -86,7 +86,7 @@
      }
 
      .entityDetails {
-       margin-left: 12em;
+       margin-left: 11em;
      }
   </ui:style>
  
@@ -95,21 +95,17 @@
       <g:HTML styleName='{style.centered}'>
         <div class='{style.banner}'>
           <div class='{style.error}' ui:field='error'></div>
-          <span class='{style.title}'><h2>Your Entities</h2></span>
+          <span class='{style.title}'><h2>Data Browser</h2></span>
         </div>
       </g:HTML>
     </g:north>
-    <g:south size='4'><g:HTML></g:HTML></g:south>
+    <g:south size='2'><g:HTML></g:HTML></g:south>
     <g:center>
       <g:FlowPanel styleName='{style.content} {style.centered}'>
         <g:SimplePanel styleName='{style.entities}'>
           <a:CellListPlacePickerView styleName="{style.entitiesList}" width='100%' pageSize='100' ui:field='placesBox'/>
         </g:SimplePanel>
         <g:SimplePanel styleName="{style.entityDetails}" ui:field='master'>
-          <g:HTML>
-            <h3>Welcome to the __PROJECT_NAME__</h3>
-            <span>Choose an entity set from the list on the left to get started</span>
-          </g:HTML>
         </g:SimplePanel>
         <g:SimplePanel styleName="{style.entityDetails}" ui:field='details'>
         </g:SimplePanel>

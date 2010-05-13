@@ -3,42 +3,49 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'>
   <ui:style>
-     .fields {
-       margin: 0.5em;
-     }
-     
-    .fields div {
-       margin: 0.5em;
-     }
-      
+    .fields {
+      margin-top: 0.5em;
+      margin-left: 1em;
+    }
     .label {
-      font-weight:bold;
-     }
-     
+      min-height: 25px;
+      font-weight: bold;
+    }
     .button {
       margin-right: 1em;
-     }
-      
+    }
     .bar {
-      float: right;
-     }
-     .underlined {
-       border-bottom: 2px solid #666;
-     }
+      margin-left: 1em;
+    }
+    .header {
+      margin-left: 1em;
+      color: #4B4A4A;
+      text-shadow: #ddf 1px 1px 0;
+      margin-bottom: 0;
+    }
+    .underline {
+      border-bottom: 2px solid #6F7277;
+    }
   </ui:style>
  
   <g:HTMLPanel>
-    <h3 ui:field="editTitle"><ui:msg>Edit ${entity.name} <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg></h3>
-    <h3 class='{style.underlined}' ui:field='createTitle'><ui:msg>New ${entity.name}</ui:msg></h3>
-    <div ui:field='errors' style='background-color: red; '></div>
-    <div class="{style.fields}">
-#foreach ($prop in $entity.properties)  
-      <div><span class='{style.label}'>${prop.readableName}:</span> <${prop.binder} ui:field='${prop.name}'></${prop.binder}></div>
-#end
+    <div class='{style.underline}'>    
+      <h3 class='{style.header}' ui:field="editTitle">
+        <ui:msg>Edit ${entity.name} <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg>
+      </h3>
+      <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New ${entity.name}</ui:msg></h3>
     </div>
+    <div ui:field='errors' style='background-color: red; '></div>
+
+    <table class="{style.fields}">
+#foreach ($prop in $entity.properties)  
+      <tr><td><div class='{style.label}'>${prop.readableName}:</div></td><td><${prop.binder} ui:field='${prop.name}'></${prop.binder}></td></tr>
+#end
+    </table>
+
     <div class='{style.bar}'>
-    <g:Button addStyleNames='{style.button}' ui:field='save'>Save</g:Button>
-    <g:Button addStyleNames='{style.button}' ui:field='cancel'>Cancel</g:Button>
+      <g:Button addStyleNames='{style.button}' ui:field='save'>Save</g:Button>
+      <g:Button addStyleNames='{style.button}' ui:field='cancel'>Cancel</g:Button>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>
