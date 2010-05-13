@@ -9,7 +9,7 @@
 	<properties>
 		<roo.version>1.1.0.M1</roo.version>
 		<spring.version>3.0.2.RELEASE</spring.version>
-		<aspectj.version>1.6.9.BUILD-SNAPSHOT</aspectj.version>
+		<aspectj.version>1.6.9.M2</aspectj.version>
 		<slf4j.version>1.6.0</slf4j.version>
 	</properties>
 	<repositories>
@@ -20,6 +20,14 @@
 			</snapshots>
 			<name>Springframework Maven SNAPSHOT Repository</name>
 			<url>http://maven.springframework.org/snapshot</url>
+		</repository>
+		<repository>
+			<id>spring-maven-milestone</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<name>Springframework Maven MILESTONE Repository</name>
+			<url>http://maven.springframework.org/milestone</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
