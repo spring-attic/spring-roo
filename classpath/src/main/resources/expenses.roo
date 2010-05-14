@@ -39,4 +39,4 @@ controller all --package ~.web
 
 gwt setup
 
-logging setup --level DEBUG
+logging setup --level INFO
