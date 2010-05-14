@@ -46,6 +46,14 @@
 			<name>SpringSource Enterprise Bundle Repository - External Bundle Milestones</name>
 			<url>http://repository.springsource.com/maven/bundles/milestone</url>
 		</pluginRepository>
+		<pluginRepository>
+			<id>spring-maven-milestone</id>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<name>Springframework Maven MILESTONE Repository</name>
+			<url>http://maven.springframework.org/milestone</url>
+		</pluginRepository>
 	</pluginRepositories>
 	<dependencies>
 		<!-- General dependencies for standard applications -->
