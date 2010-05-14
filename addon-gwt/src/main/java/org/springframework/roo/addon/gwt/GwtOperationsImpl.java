@@ -13,6 +13,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.web.mvc.controller.UrlRewriteOperations;
+import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -50,6 +51,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlRewriteOperations urlRewriteOperations;
+	@Reference private WebMvcOperations mvcOperations;
 	
 	private ComponentContext context;
 	
@@ -62,10 +64,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (project == null) {
 			return false;
 		}
-		// Do not permit installation unless they have a web project
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
-			return false;
-		}
 		// Do not permit installation if they have a gwt package already in their project
 		String root = GwtPath.GWT_ROOT.canonicalFileSystemPath(project);
 		return !fileManager.exists(root);
@@ -75,6 +73,11 @@ public class GwtOperationsImpl implements GwtOperations {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project could not be retrieved");
 		
+		// Install web pieces if not already installed
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
+			mvcOperations.installAllWebMvcArtifacts();
+		}
+
 		Element configuration = getConfiguration();
 
 		// Add dependencies

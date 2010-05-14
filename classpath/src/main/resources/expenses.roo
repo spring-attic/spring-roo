@@ -35,7 +35,7 @@ field number --type java.lang.Long reportId
 //field boolean --fieldName accountant --notNull
 //field boolean --fieldName administrator --notNull
 
-controller all --package ~.web
+//controller all --package ~.web
 
 gwt setup
 
