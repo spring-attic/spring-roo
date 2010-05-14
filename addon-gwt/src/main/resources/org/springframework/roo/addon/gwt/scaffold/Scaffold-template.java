@@ -15,6 +15,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.requestfactory.shared.RequestEvent;
+import com.google.gwt.requestfactory.shared.RequestEvent.State;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
@@ -47,6 +50,21 @@ public class Scaffold implements EntryPoint {
     /* Top level UI */
 
     final ScaffoldShell shell = new ScaffoldShell();
+
+    /* Display loading notifications when we touch the network. */
+
+    eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {
+      // Only show loading status if a request isn't serviced in 250ms.
+      private static final int LOADING_TIMEOUT = 250;
+
+      public void onRequestEvent(RequestEvent requestEvent) {
+	if (requestEvent.getState() == State.SENT) {
+	  shell.getMole().showDelayed(LOADING_TIMEOUT);
+	} else {
+	  shell.getMole().hide();
+	}
+      }
+    });
 
     /* Left side lets us pick from all the types of entities */
 

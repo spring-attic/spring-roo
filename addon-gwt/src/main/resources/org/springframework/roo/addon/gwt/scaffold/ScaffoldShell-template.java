@@ -1,5 +1,6 @@
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
+import com.google.gwt.app.client.NotificationMole;
 import com.google.gwt.app.place.PlacePickerView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -22,6 +23,7 @@ public class ScaffoldShell extends Composite {
   @UiField SimplePanel details;
   @UiField PlacePickerView<ApplicationListPlace> placesBox;
   @UiField DivElement error;
+  @UiField NotificationMole mole;
 
   public ScaffoldShell() {
     initWidget(BINDER.createAndBindUi(this));
@@ -39,6 +41,13 @@ public class ScaffoldShell extends Composite {
    */
   public SimplePanel getMasterPanel() {
     return master;
+  }
+
+  /**
+   * @return the notification mole for loading feedback
+   */
+  public NotificationMole getMole() {
+    return mole;
   }
 
   /**

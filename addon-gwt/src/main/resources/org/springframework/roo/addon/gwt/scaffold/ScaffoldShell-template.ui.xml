@@ -3,6 +3,8 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:a='urn:import:com.google.gwt.app.client'>
 
+  <ui:image field='gwtLogo'></ui:image>
+  <ui:image field='rooLogo'></ui:image>
   <ui:style>
     @def contentWidth 850px;
 
@@ -88,7 +90,23 @@
      .entityDetails {
        margin-left: 11em;
      }
-  </ui:style>
+     @sprite .gwtLogo {
+       gwt-image: 'gwtLogo';
+       float:right;
+     }
+     @sprite .rooLogo {
+       gwt-image: 'rooLogo';
+       float:right;
+     }
+     .logos {
+       color: #aaa;
+       font-size: 0.8em;
+       width: 160px;
+       margin-left: auto;
+       margin-right: auto;
+       text-align: right;
+     }
+   </ui:style>
  
    <g:DockLayoutPanel unit='EM'>
     <g:north size='6'>
@@ -99,16 +117,25 @@
         </div>
       </g:HTML>
     </g:north>
-    <g:south size='2'><g:HTML></g:HTML></g:south>
+    <g:south size='2'>
+      <g:HTML>
+        <div class='{style.logos}'>
+          <span>Powered by: </span>
+          <a href='http://code.google.com/webtoolkit/'><div class='{style.gwtLogo}'></div></a>
+          <a href='http://www.springsource.org/roo/'><div class='{style.rooLogo}'></div></a>
+        </div>
+      </g:HTML>
+    </g:south>
     <g:center>
       <g:FlowPanel styleName='{style.content} {style.centered}'>
         <g:SimplePanel styleName='{style.entities}'>
           <a:CellListPlacePickerView styleName="{style.entitiesList}" width='100%' pageSize='100' ui:field='placesBox'/>
         </g:SimplePanel>
-        <g:SimplePanel styleName="{style.entityDetails}" ui:field='master'>
-        </g:SimplePanel>
-        <g:SimplePanel styleName="{style.entityDetails}" ui:field='details'>
-        </g:SimplePanel>
+        <g:FlowPanel>
+           <a:NotificationMole animationDuration='0' message='loading...' ui:field='mole'></a:NotificationMole>
+        <g:SimplePanel styleName="{style.entityDetails}" ui:field='master'></g:SimplePanel>
+	</g:FlowPanel>
+        <g:SimplePanel styleName="{style.entityDetails}" ui:field='details'></g:SimplePanel>
       </g:FlowPanel>
     </g:center>
   </g:DockLayoutPanel>
