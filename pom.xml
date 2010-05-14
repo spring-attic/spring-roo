@@ -259,7 +259,7 @@
                                     </then>
                                     <else>
                                         <if>
-                                            <equals arg1="${project.parent.build.directory}" arg2="${project.parent.build.directory}"/>
+                                            <equals arg1="${project.parent.build.directory}" arg2="$${project.parent.build.directory}"/>
                                             <then>
                                                 <echo message="Skipping as ${project.parent.build.directory} not set"/>
                                             </then>
