@@ -107,15 +107,6 @@ public class GwtOperationsImpl implements GwtOperations {
 			copyDirectoryContents(path, projectMetadata);
 		}
 		
-		// TODO: This is crazy!
-		// Kill all controllers - temporary until we get the classpath issues with Hibernate Validator sorted out
-		{
-			String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*Controller.java";
-			for (FileDetails fd: fileManager.findMatchingAntPath(antPath)) {
-				fileManager.delete(fd.getCanonicalPath());
-			}
-		}
-		
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
@@ -145,7 +136,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (URL url: urls) {
                   String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
-                  System.err.println("Filename is "+fileName);
+//                  System.err.println("Filename is "+fileName);
                   fileName =  fileName.replace("-template", "");
                         
 			String targetFilename = targetDirectory + fileName;
@@ -266,7 +257,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 		
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
-	    // WebXmlUtils.addListener(GwtPath.SERVER.packageName(projectMetadata) + ".ForceInitializationOfMavenClasspathContainerEntries_Roo_Listener", webXmlDoc, "Temporary workaround");
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
