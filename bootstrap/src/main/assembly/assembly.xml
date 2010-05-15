@@ -98,6 +98,15 @@
 				<include>legal-*.txt</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<outputDirectory>/legal</outputDirectory>
+			<directory>addon-gwt</directory>
+			<lineEnding>unix</lineEnding>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<includes>
+				<include>legal-*.txt</include>
+			</includes>
+		</fileSet>
         <fileSet>
             <outputDirectory>/conf</outputDirectory>
             <directory>bootstrap/src/main/conf</directory>
