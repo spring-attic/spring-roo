@@ -2,6 +2,7 @@ package org.springframework.roo.process.manager.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * Default implementation of {@link FileManager}.
@@ -196,5 +198,35 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 	public int scan() {
 		return ((NotifiableFileMonitorService)fileMonitorService).scanNotified();
 	}
+
+	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
+		MutableFile mutableFile = null;
+		if (exists(fileIdentifier)) {
+			// First verify if the file has even changed
+			File f = new File(fileIdentifier);
+			String existing = null;
+			try {
+				existing = FileCopyUtils.copyToString(new FileReader(f));
+			} catch (IOException ignoreAndJustOverwriteIt) {}
+			
+			if (!newContents.equals(existing)) {
+				mutableFile = updateFile(fileIdentifier);
+			}
+			
+		} else {
+			mutableFile = createFile(fileIdentifier);
+			Assert.notNull(mutableFile, "Could not create file '" + fileIdentifier + "'");
+		}
+		
+		try {
+			if (mutableFile != null) {
+				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
+		}
+		
+	}
+
 	
 }

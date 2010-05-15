@@ -1,8 +1,6 @@
 package org.springframework.roo.classpath.itd;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,12 +23,10 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
-import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.FileCopyUtils;
 
 /**
  * Provides common functionality used by ITD-based generators.
@@ -283,33 +279,7 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 				if (itdSourceFileComposer.isContent()) {
 					String itd = itdSourceFileComposer.getOutput();
 					
-					MutableFile mutableFile = null;
-					if (fileManager.exists(itdFilename)) {
-						// First verify if the file has even changed
-						File f = new File(itdFilename);
-						String existing = null;
-						try {
-							existing = FileCopyUtils.copyToString(new FileReader(f));
-						} catch (IOException ignoreAndJustOverwriteIt) {}
-						
-						if (!itd.equals(existing)) {
-							mutableFile = fileManager.updateFile(itdFilename);
-						}
-						
-					} else {
-						mutableFile = fileManager.createFile(itdFilename);
-						Assert.notNull(mutableFile, "Could not create ITD file '" + itdFilename + "'");
-					}
-					
-					try {
-						if (mutableFile != null) {
-							FileCopyUtils.copy(itd.getBytes(), mutableFile.getOutputStream());
-							//FileCopyUtils.copy(itd, new OutputStreamWriter(mutableFile.getOutputStream()));
-						}
-					} catch (IOException ioe) {
-						throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-					}
-					
+					fileManager.createOrUpdateTextFileIfRequired(itdFilename, itd);
 					// Important to exit here, so we don't proceed onto the delete operation below
 					// (as we have a valid ITD that has been written out by now)
 					return metadata;

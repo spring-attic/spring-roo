@@ -118,6 +118,20 @@ public interface FileManager {
 	MutableFile updateFile(String fileIdentifier);
 	
 	/**
+	 * Provides a simple way to create or update a file, skipping any modification if the
+	 * file's contents match the proposed contents. This should only be called for text
+	 * files.
+	 * 
+	 * <p>
+	 * Implementations guarantee to {@link #createDirectory(String)} as
+	 * required to create any required parent directories.
+	 * 
+	 * @param fileIdentifier to create or update as appropriate (required)
+	 * @param newContents the replacement contents (required)
+	 */
+	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents);
+	
+	/**
 	 * Obtains an already-existing file for reading. The path should be in canonical file name format.
 	 * 
 	 * @param fileIdentifier to read that already exists (required)

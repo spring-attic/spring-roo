@@ -19,8 +19,6 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -533,32 +531,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		
 		final String newContents = getOutput(cit);
 
-		MutableFile mutableFile = null;
-		if (fileManager.exists(fileIdentifier)) {
-			// First verify if the file has even changed
-			File f = new File(fileIdentifier);
-			String existing = null;
-			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {}
-			
-			if (!newContents.equals(existing)) {
-				mutableFile = fileManager.updateFile(fileIdentifier);
-			}
-			
-		} else {
-			mutableFile = fileManager.createFile(fileIdentifier);
-			Assert.notNull(mutableFile, "Could not create Java output file '" + fileIdentifier + "'");
-		}
-		
-		try {
-			if (mutableFile != null) {
-				// If mutableFile was null, that means the source == destination content
-				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-		}
+		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
 	}
 
 	public String toString() {
