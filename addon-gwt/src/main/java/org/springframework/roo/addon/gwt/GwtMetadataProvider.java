@@ -45,6 +45,8 @@ import org.springframework.roo.support.util.Assert;
  * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes". 
  * 
  * @author Ben Alex
+ * @author Alan Stewart
+ * @author Ray Cromwell
  * @since 1.1
  *
  */

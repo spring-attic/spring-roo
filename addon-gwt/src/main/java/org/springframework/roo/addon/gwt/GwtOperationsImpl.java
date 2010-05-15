@@ -39,7 +39,9 @@ import org.w3c.dom.Element;
  * Provides GWT installation services.
  *
  * @author Ben Alex
+ * @author Alan Stewart
  * @author Stefan Schmidt
+ * @author Ray Cromwell
  * @since 1.1
  */
 @Component
@@ -286,9 +288,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		
 		// TODO: This is crazy!
-		removeIfFound("/web-app/servlet[servlet-class='org.springframework.web.servlet.DispatcherServlet']", webXmlRoot);  // temporary (due to JSR 303 being used and classloader issues in m2eclipse)
+		//removeIfFound("/web-app/servlet[servlet-class='org.springframework.web.servlet.DispatcherServlet']", webXmlRoot);  // temporary (due to JSR 303 being used and classloader issues in m2eclipse)
 		// TODO: This is crazy!
-		removeIfFound("/web-app/servlet-mapping[url-pattern='/app/*']", webXmlRoot);  // temporary (due to dispatcher servlet removal)
+		//removeIfFound("/web-app/servlet-mapping[url-pattern='/app/*']", webXmlRoot);  // temporary (due to dispatcher servlet removal)
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}

@@ -30,11 +30,14 @@ field string --fieldName description
 field string --fieldName reasonDenied
 field number --type java.lang.Long reportId
 
+// NB: "field reference" does not work as of GWT 2.1.0.M1 / Roo 1.1.0.M1
+
 //field string --fieldName password --sizeMin 2 --sizeMax 30
 //field reference --fieldName supervisor --type ~.server.domain.Employee
 //field boolean --fieldName accountant --notNull
 //field boolean --fieldName administrator --notNull
 
+// you can have normal MVC controllers in your app, but we don't need them here
 //controller all --package ~.web
 
 gwt setup

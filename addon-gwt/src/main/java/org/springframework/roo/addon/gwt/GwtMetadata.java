@@ -55,6 +55,7 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Ray Cromwell
  * @since 1.1
  *
  */
