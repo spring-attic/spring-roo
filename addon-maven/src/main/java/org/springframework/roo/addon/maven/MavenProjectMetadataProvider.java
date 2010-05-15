@@ -192,6 +192,11 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				// Keep the XML short, we don't need "compile" given it's the default
 				depElement.appendChild(scope);
 			}
+                        if (DependencyScope.SYSTEM.equals(dependency.getScope()) && dependency.getSystemPath() != null) {
+                          Element systemPath = document.createElement("systemPath");
+                          systemPath.setTextContent(dependency.getSystemPath());
+                          depElement.appendChild(systemPath);
+                        }
 		}
 
 		// Add exclusions if they are defined

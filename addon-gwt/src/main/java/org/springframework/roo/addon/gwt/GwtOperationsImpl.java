@@ -54,8 +54,10 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private WebMvcOperations mvcOperations;
 	
 	private ComponentContext context;
-	
-	protected void activate(ComponentContext context) {
+
+        private boolean isGae;
+
+  protected void activate(ComponentContext context) {
 		this.context = context;
 	}
 	
@@ -78,6 +80,9 @@ public class GwtOperationsImpl implements GwtOperations {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
+                // Add GWT natures and builder names to maven eclipse plugin
+		updateMavenEclipsePlugin();
+          
 		Element configuration = getConfiguration();
 
 		// Add dependencies
@@ -86,22 +91,29 @@ public class GwtOperationsImpl implements GwtOperations {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 		
+                if(isGaeEnabled()) {
+                  // add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
+                  for (Element dependency : XmlUtils.findElements("/configuration/gaedependencies/dependency", configuration)) {
+                    projectOperations.dependencyUpdate(new Dependency(dependency));
+                  }
+                
+                }
+          
 		// Add POM plugin
-		List<Element> plugins = XmlUtils.findElements("/configuration/plugins/plugin", configuration);
+		List<Element> plugins = XmlUtils.findElements(isGaeEnabled() ? "/configuration/gaeplugins/plugin" : "/configuration/plugins/plugin", configuration);
 		for (Element plugin : plugins) {
 			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
 		
                 updateRepositories();
-		// Add GWT natures and builder names to maven eclipse plugin
-		updateMavenEclipsePlugin();
+		
 		
 		// Update web.xml
 		updateWebXml(projectMetadata);
 		
 		// Update urlrewrite.xml
 		updateUrlRewriteXml();
-		
+             
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
 			copyDirectoryContents(path, projectMetadata);
@@ -197,6 +209,8 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		
 		Element pomRoot = (Element) pomDoc.getFirstChild();
+                isGae = XmlUtils.findElements("/project/build/plugins/plugin[artifactId = 'maven-gae-plugin']", pomRoot).size() > 0;
+          
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
@@ -210,11 +224,15 @@ public class GwtOperationsImpl implements GwtOperations {
 				newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.gwt.eclipse.core.gwtNature").build();
 				ctx = XmlUtils.findRequiredElement("configuration/additionalProjectnatures/projectnature[last()]", pluginElement);
 				ctx.getParentNode().appendChild(newEntry);
-				
+                                // if gae plugin configured, add gaeNature
+				if (isGaeEnabled()) {
+                                  newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.appengine.eclipse.core.gaeNature").build();
+                                  ctx.getParentNode().appendChild(newEntry);
+                                }
 				plugin = new Plugin(pluginElement);
 				projectOperations.removeBuildPlugin(plugin);
 				projectOperations.addBuildPlugin(plugin);
-			}
+			} 
  		}
 		
 		// Fix output directory
@@ -231,13 +249,21 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
-  
+        private boolean isGaeEnabled() {
+                return isGae;
+        }
+
         private void updateRepositories() {
 		Element configuration = getConfiguration();
 
 		List<Element> vegaRepositories = XmlUtils.findElements("/configuration/repositories/repository", configuration);
 		for (Element repositoryElement : vegaRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+          
+                List<Element> vegaPluginRepositories = XmlUtils.findElements("/configuration/pluginRepositories/pluginRepository", configuration);
+		for (Element repositoryElement : vegaRepositories) {
+			projectOperations.addPluginRepository(new Repository(repositoryElement));
 		}
 	}
   
