@@ -53,6 +53,7 @@
 					<module>com.springsource.extrack.gwt.ApplicationScaffold</module>
                     <module>com.springsource.extrack.gwt.ApplicationMobileScaffold</module>
 				</modules>
+                <copyWebapp>true</copyWebapp>
 			</configuration>
 			<executions>
 				<execution>
