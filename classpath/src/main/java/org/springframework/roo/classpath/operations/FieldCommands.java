@@ -137,6 +137,8 @@ public class FieldCommands implements CommandMarker {
 			@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 			@CliOption(key = "decimalMin", mandatory = false, help = "The BigDecimal string-based representation of the minimum value") String decimalMin, 
 			@CliOption(key = "decimalMax", mandatory = false, help = "The BigDecimal string based representation of the maximum value") String decimalMax, 
+			@CliOption(key = "digitsInteger", mandatory = false, help = "Maximum number of integral digits accepted for this number") Integer digitsInteger, 
+			@CliOption(key = "digitsFraction", mandatory = false, help = "Maximum number of fractional digits accepted for this number") Integer digitsFraction, 
 			@CliOption(key = "min", mandatory = false, help = "The minimum value") Long min, 
 			@CliOption(key = "max", mandatory = false, help = "The maximum value") Long max, 
 			@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
@@ -155,10 +157,13 @@ public class FieldCommands implements CommandMarker {
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (decimalMin != null) fieldDetails.setDecimalMin(decimalMin);
 		if (decimalMax != null) fieldDetails.setDecimalMax(decimalMax);
+		if (digitsInteger != null) fieldDetails.setDigitsInteger(digitsInteger);
+		if (digitsFraction != null) fieldDetails.setDigitsFraction(digitsFraction);
 		if (min != null) fieldDetails.setMin(min);
 		if (max != null) fieldDetails.setMax(max);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+		Assert.isTrue(fieldDetails.isDigitsSetCorrectly(), "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
