@@ -28,5 +28,12 @@ public interface MutableFile {
 	InputStream getInputStream();
 	
 	OutputStream getOutputStream();
+	
+	/**
+	 * Permits presentation of additional information about a change being made via {@link #getOutputStream()}.
+	 * 
+	 * @param message the additional information (can be null or empty to clear any extra information)
+	 */
+	void setDescriptionOfChange(String message);
 
 }

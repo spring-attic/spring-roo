@@ -8,6 +8,7 @@ import java.io.OutputStream;
 
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -23,12 +24,19 @@ public class DefaultMutableFile implements MutableFile {
 
 	private File file;
 	private NotifiableFileMonitorService fileMonitorService;
+	private ManagedMessageRenderer managedMessageRenderer;
 	
-	public DefaultMutableFile(File file, NotifiableFileMonitorService fileMonitorService) {
+	public void setDescriptionOfChange(String message) {
+		this.managedMessageRenderer.setDescriptionOfChange(message);
+	}
+
+	public DefaultMutableFile(File file, NotifiableFileMonitorService fileMonitorService, FilenameResolver filenameResolver) {
 		Assert.notNull(file, "File required");
+		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
 		Assert.isTrue(file.exists(), "A mutable file must actually exist");
 		this.file = file;
+		this.managedMessageRenderer = new ManagedMessageRenderer(filenameResolver, file);
 		// null is permitted
 		this.fileMonitorService = fileMonitorService;
 	}
@@ -54,7 +62,7 @@ public class DefaultMutableFile implements MutableFile {
 		Assert.isTrue(file.exists(), "A mutable file must actually exist");
 
 		try {
-			return new MonitoredOutputStream(file, fileMonitorService);
+			return new MonitoredOutputStream(file, managedMessageRenderer, fileMonitorService);
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Unable to acquire output stream for file '" + getCanonicalPath() + "'", ioe);
 		}

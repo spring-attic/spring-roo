@@ -37,7 +37,6 @@ public class UpdateFile implements UndoableOperation {
 		}
 		this.actual = actual;
 		undoManager.add(this);
-		logger.fine("Managed " + filenameResolver.getMeaningfulName(actual));
 	}
 	
 	public void reset() {}

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Ensures the {@link NotifiableFileMonitorService#notifyChanged(String)} method is invoked when 
@@ -24,27 +25,33 @@ public class MonitoredOutputStream extends FileOutputStream {
 
 	private String fileCanonicalPath;
 	private NotifiableFileMonitorService fileMonitorService;
+	private ManagedMessageRenderer managedMessageRenderer;
 	
 	/**
 	 * Constructs a {@link MonitoredOutputStream}.
 	 * 
 	 * @param file the file to output to (required)
+	 * @param managedMessageRenderer a rendered for outputting a message once the output stream is closed (required)
 	 * @param fileMonitorService an optional monitoring service (null is acceptable)
 	 * @throws FileNotFoundException if the file cannot be found
 	 */
-	public MonitoredOutputStream(File file, NotifiableFileMonitorService fileMonitorService) throws FileNotFoundException {
+	public MonitoredOutputStream(File file, ManagedMessageRenderer managedMessageRenderer, NotifiableFileMonitorService fileMonitorService) throws FileNotFoundException {
 		super(file);
+		Assert.notNull(file, "File required");
+		Assert.notNull(managedMessageRenderer, "Message rendered required");
 		try {
 			this.fileCanonicalPath = file.getCanonicalPath();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
 		this.fileMonitorService = fileMonitorService;
+		this.managedMessageRenderer = managedMessageRenderer;
 	}
 	
 	@Override
 	public void close() throws IOException {
 		super.close();
+		this.managedMessageRenderer.logManagedMessage();
 		if (fileMonitorService != null) {
 			fileMonitorService.notifyChanged(fileCanonicalPath);
 		}
