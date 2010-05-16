@@ -211,12 +211,34 @@
         </extensions>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>                    
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>git</executable>
+                    <arguments>
+                        <argument>log</argument>
+                        <argument>--pretty=format:Git-Commit-Hash: %H</argument>
+                        <argument>-n1</argument>
+                    </arguments>
+                    <outputFile>${project.build.directory}/build-number.mf</outputFile>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <version>2.0.1</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <_include>${project.build.directory}/build-number.mf</_include>
                         <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
                         <Bundle-Copyright>Copyright ${pom.organization.name}. All Rights Reserved.</Bundle-Copyright>
                         <Bundle-DocURL>${pom.url}</Bundle-DocURL>

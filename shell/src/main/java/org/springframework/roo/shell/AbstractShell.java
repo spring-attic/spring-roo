@@ -321,6 +321,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	public static String versionInfo() {
 		// Try to determine the bundle version
 		String bundleVersion = null;
+		String gitCommitHash = null;
 		try {
 			String classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation().toString();
 			if (classContainer.endsWith(".jar")) {
@@ -328,14 +329,30 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				URL manifestUrl = new URL("jar:" + classContainer + "!/META-INF/MANIFEST.MF");
 				Manifest manifest = new Manifest(manifestUrl.openStream());
 				bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
+				gitCommitHash = manifest.getMainAttributes().getValue("Git-Commit-Hash");
 			}
 		} catch (Exception ignoreAndMoveOn) {}
 		
-		if (bundleVersion == null) {
-			return "UNKNOWN VERSION";
+		StringBuilder sb = new StringBuilder();
+		
+		if (bundleVersion != null) {
+			sb.append(bundleVersion);
 		}
 		
-		return bundleVersion;
+		if (gitCommitHash != null) {
+			if (sb.length() > 0) {
+				sb.append(" "); // to separate from version
+			}
+			sb.append("[rev ");
+			sb.append(gitCommitHash.substring(0,7));
+			sb.append("]");
+		}
+		
+		if (sb.length() == 0) {
+			sb.append("UNKNOWN VERSION");
+		}
+		
+		return sb.toString();
 	}
 
 	public String getShellPrompt() {
