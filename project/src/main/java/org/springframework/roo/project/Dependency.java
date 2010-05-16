@@ -247,6 +247,13 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		return result;
 	}
+	
+	/**
+	 * @return a simple description, as would be used for console output
+	 */
+	public String getSimpleDescription() {
+		return groupId + ":" + artifactId + ":" + version;
+	}
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

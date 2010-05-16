@@ -159,6 +159,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		dependencies.appendChild(createDependencyElement(dependency, document));
 
+		mutableFile.setDescriptionOfChange("Added dependency " + dependency.getSimpleDescription());
+		
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
