@@ -12,21 +12,28 @@ public class ManagedMessageRenderer {
 	private FilenameResolver filenameResolver;
 	private File file;
 	private String descriptionOfChange = null;
+	private boolean createOperation;
 	
 	public void setDescriptionOfChange(String message) {
 		this.descriptionOfChange = message;
 	}
 	
-	public ManagedMessageRenderer(FilenameResolver filenameResolver, File file) {
+	public ManagedMessageRenderer(FilenameResolver filenameResolver, File file, boolean createOperation) {
 		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.notNull(file, "File to manage required");
 		this.filenameResolver = filenameResolver;
 		this.file = file;
+		this.createOperation = createOperation;
 	}
 	
 	void logManagedMessage() {
 		StringBuilder message = new StringBuilder();
-		message.append("Managed " + filenameResolver.getMeaningfulName(file));
+		if (createOperation) {
+			message.append("Created ");
+		} else {
+			message.append("Managed ");
+		}
+		message.append(filenameResolver.getMeaningfulName(file));
 		if (descriptionOfChange != null && descriptionOfChange.length() > 0) {
 			message.append(" [");
 			message.append(descriptionOfChange);

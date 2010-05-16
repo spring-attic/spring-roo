@@ -33,7 +33,6 @@ public class CreateFile implements UndoableOperation {
 			throw new IllegalStateException("Unable to create file '" + this.actual + "'", ioe);
 		}
 		undoManager.add(this);
-		logger.fine("Created " + filenameResolver.getMeaningfulName(actual));
 	}
 	
 	public void reset() {}

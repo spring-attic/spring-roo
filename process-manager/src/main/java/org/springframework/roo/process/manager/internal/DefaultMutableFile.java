@@ -8,7 +8,6 @@ import java.io.OutputStream;
 
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.undo.FilenameResolver;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -30,13 +29,13 @@ public class DefaultMutableFile implements MutableFile {
 		this.managedMessageRenderer.setDescriptionOfChange(message);
 	}
 
-	public DefaultMutableFile(File file, NotifiableFileMonitorService fileMonitorService, FilenameResolver filenameResolver) {
+	public DefaultMutableFile(File file, NotifiableFileMonitorService fileMonitorService, ManagedMessageRenderer managedMessageRenderer) {
 		Assert.notNull(file, "File required");
-		Assert.notNull(filenameResolver, "Filename resolver required");
+		Assert.notNull(managedMessageRenderer, "Message renderer required");
 		Assert.isTrue(file.isFile(), "A mutable file must actually be a file (not a directory)");
 		Assert.isTrue(file.exists(), "A mutable file must actually exist");
 		this.file = file;
-		this.managedMessageRenderer = new ManagedMessageRenderer(filenameResolver, file);
+		this.managedMessageRenderer = managedMessageRenderer;
 		// null is permitted
 		this.fileMonitorService = fileMonitorService;
 	}

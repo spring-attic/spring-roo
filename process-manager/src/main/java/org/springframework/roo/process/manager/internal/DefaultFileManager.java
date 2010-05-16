@@ -113,7 +113,8 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			createDirectory(FileDetails.getCanonicalPath(parentDirectory));
 		}
 		new CreateFile(undoManager, filenameResolver, actual);
-		return new DefaultMutableFile(actual, null, filenameResolver);
+		ManagedMessageRenderer renderer = new ManagedMessageRenderer(filenameResolver, actual, true);
+		return new DefaultMutableFile(actual, null, renderer);
 	}
 
 	public void delete(String fileIdentifier) {
@@ -135,7 +136,8 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		File actual = new File(fileIdentifier);
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
 		new UpdateFile(undoManager, filenameResolver, actual);
-		return new DefaultMutableFile(actual, fileMonitorService, filenameResolver);
+		ManagedMessageRenderer renderer = new ManagedMessageRenderer(filenameResolver, actual, false);
+		return new DefaultMutableFile(actual, fileMonitorService, renderer);
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
