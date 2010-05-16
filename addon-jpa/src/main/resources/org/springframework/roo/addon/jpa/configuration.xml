@@ -176,7 +176,7 @@
 					<artifactId>openjpa-maven-plugin</artifactId>
 					<version>1.0</version>
 					<configuration>
-						<includes>**/domain/*.class</includes>
+						<includes>**/*.class</includes>
 						<excludes>**/*_Roo_*.class</excludes>
 						<addDefaultConstructor>true</addDefaultConstructor>
 						<toolProperties>
