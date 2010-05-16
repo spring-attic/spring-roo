@@ -26,6 +26,7 @@ public class MonitoredOutputStream extends FileOutputStream {
 	private String fileCanonicalPath;
 	private NotifiableFileMonitorService fileMonitorService;
 	private ManagedMessageRenderer managedMessageRenderer;
+	private boolean logged = false;
 	
 	/**
 	 * Constructs a {@link MonitoredOutputStream}.
@@ -38,7 +39,7 @@ public class MonitoredOutputStream extends FileOutputStream {
 	public MonitoredOutputStream(File file, ManagedMessageRenderer managedMessageRenderer, NotifiableFileMonitorService fileMonitorService) throws FileNotFoundException {
 		super(file);
 		Assert.notNull(file, "File required");
-		Assert.notNull(managedMessageRenderer, "Message rendered required");
+		Assert.notNull(managedMessageRenderer, "Message renderer required");
 		try {
 			this.fileCanonicalPath = file.getCanonicalPath();
 		} catch (IOException ioe) {
@@ -47,11 +48,33 @@ public class MonitoredOutputStream extends FileOutputStream {
 		this.fileMonitorService = fileMonitorService;
 		this.managedMessageRenderer = managedMessageRenderer;
 	}
+
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		if (!logged) logNow();
+		super.write(b, off, len);
+	}
+
+	@Override
+	public void write(byte[] b) throws IOException {
+		if (!logged) logNow();
+		super.write(b);
+	}
+
+	@Override
+	public void write(int b) throws IOException {
+		if (!logged) logNow();
+		super.write(b);
+	}
 	
+	private void logNow() {
+		logged = true;
+		this.managedMessageRenderer.logManagedMessage();
+	}
+
 	@Override
 	public void close() throws IOException {
 		super.close();
-		this.managedMessageRenderer.logManagedMessage();
 		if (fileMonitorService != null) {
 			fileMonitorService.notifyChanged(fileCanonicalPath);
 		}
