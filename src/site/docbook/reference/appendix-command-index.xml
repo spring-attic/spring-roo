@@ -1,62 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.0.2.RELEASE [rev 636].</para>
+    <para>This appendix was automatically built from Roo 1.1.0.M1 [rev 9a9d46d].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
-    <section xml:id="command-index-add-on-commands">
-        <title>Add On Commands</title>
-        <para>Add On Commands are contained in org.springframework.roo.bootstrap.AddOnCommands.</para>
-        <section xml:id="command-index-addon-cleanup">
-            <title>addon cleanup</title>
-            <para>Cleans the $ROO_HOME/work directory so it only contains correct JARs as per $ROO_HOME/add-ons</para>
-            <programlisting><![CDATA[addon cleanup]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-addon-install">
-            <title>addon install</title>
-            <para>Installs a new add-on to the $ROO_HOME/add-ons directory</para>
-            <programlisting><![CDATA[addon install --url]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--url</term>
-                    <listitem>
-                        <para>The URL to obtain the add-on ZIP file from; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--automaticRestart</term>
-                    <listitem>
-                        <para>Causes an automatic shell restart to occur if changes are made; default: 'true'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-addon-list">
-            <title>addon list</title>
-            <para>Lists add-ons installed in the $ROO_HOME/add-ons directory</para>
-            <programlisting><![CDATA[addon list]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-addon-uninstall">
-            <title>addon uninstall</title>
-            <para>Removes an existing add-on from the $ROO_HOME/add-ons directory</para>
-            <programlisting><![CDATA[addon uninstall --pattern]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--pattern</term>
-                    <listitem>
-                        <para>The filename pattern to remove; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--automaticRestart</term>
-                    <listitem>
-                        <para>Causes an automatic shell restart to occur if changes are made; default: 'true'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-    </section>
     <section xml:id="command-index-backup-commands">
         <title>Backup Commands</title>
         <para>Backup Commands are contained in org.springframework.roo.addon.backup.BackupCommands.</para>
@@ -64,48 +10,6 @@
             <title>backup</title>
             <para>Backup your project to a zip file</para>
             <programlisting><![CDATA[backup]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-    </section>
-    <section xml:id="command-index-bootstrap-commands">
-        <title>Bootstrap Commands</title>
-        <para>Bootstrap Commands are contained in org.springframework.roo.bootstrap.BootstrapCommands.</para>
-        <section xml:id="command-index-development-mode">
-            <title>development mode</title>
-            <para>Switches the system into development mode (greater diagnostic information)</para>
-            <programlisting><![CDATA[development mode]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--enabled</term>
-                    <listitem>
-                        <para>Activates development mode; default: 'true'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-poll-now">
-            <title>poll now</title>
-            <para>Perform a manual file system poll</para>
-            <programlisting><![CDATA[poll now]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-poll-speed">
-            <title>poll speed</title>
-            <para>Changes the file system polling speed</para>
-            <programlisting><![CDATA[poll speed --ms]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--ms</term>
-                    <listitem>
-                        <para>The number of milliseconds between each poll; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-poll-status">
-            <title>poll status</title>
-            <para>Display file system polling information</para>
-            <programlisting><![CDATA[poll status]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
     </section>
@@ -246,6 +150,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
@@ -299,6 +209,19 @@
                     <term>--permitReservedWords</term>
                     <listitem>
                         <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-focus">
+            <title>focus</title>
+            <para>Changes focus to a different type</para>
+            <programlisting><![CDATA[focus --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The type to focus on; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -394,6 +317,306 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-felix-delegator">
+        <title>Felix Delegator</title>
+        <para>Felix Delegator are contained in org.springframework.roo.felix.FelixDelegator.</para>
+        <section xml:id="command-index-exit">
+            <title>exit</title>
+            <para>Exits the shell</para>
+            <programlisting><![CDATA[exit]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-felix-shell">
+            <title>felix shell</title>
+            <para>Passes a command directly through to the Felix shell infrastructure</para>
+            <programlisting><![CDATA[felix shell]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--[default]</term>
+                    <listitem>
+                        <para>The command to pass to Felix (WARNING: no validation or security checks are performed); default: 'help'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-find">
+            <title>osgi find</title>
+            <para>Finds bundles by name</para>
+            <programlisting><![CDATA[osgi find --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>A bundle symbolic name to find; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-headers">
+            <title>osgi headers</title>
+            <para>Display headers for a specific bundle</para>
+            <programlisting><![CDATA[osgi headers]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>Limit results to a specific bundle symbolic name; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-install">
+            <title>osgi install</title>
+            <para>Installs a bundle JAR from a given URL</para>
+            <programlisting><![CDATA[osgi install --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to obtain the bundle from; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-log">
+            <title>osgi log</title>
+            <para>Displays the OSGi log information</para>
+            <programlisting><![CDATA[osgi log]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--maximumEntries</term>
+                    <listitem>
+                        <para>The maximum number of log messages to display; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--level</term>
+                    <listitem>
+                        <para>The minimum level of messages to display; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-deploy">
+            <title>osgi obr deploy</title>
+            <para>Deploys a specific OSGi Bundle Repository (OBR) bundle</para>
+            <programlisting><![CDATA[osgi obr deploy --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to deploy; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-info">
+            <title>osgi obr info</title>
+            <para>Displays information on a specific OSGi Bundle Repository (OBR) bundle</para>
+            <programlisting><![CDATA[osgi obr info --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to display information for; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-list">
+            <title>osgi obr list</title>
+            <para>Lists all available bundles from the OSGi Bundle Repository (OBR) system</para>
+            <programlisting><![CDATA[osgi obr list]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--keywords</term>
+                    <listitem>
+                        <para>Keywords to locate; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-start">
+            <title>osgi obr start</title>
+            <para>Starts a specific OSGi Bundle Repository (OBR) bundle</para>
+            <programlisting><![CDATA[osgi obr start --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to start; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-add">
+            <title>osgi obr url add</title>
+            <para>Adds a new OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url add --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to add (eg http://felix.apache.org/obr/releases.xml); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-list">
+            <title>osgi obr url list</title>
+            <para>Lists the currently-configured OSGi Bundle Repository (OBR) repository file URLs</para>
+            <programlisting><![CDATA[osgi obr url list]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-refresh">
+            <title>osgi obr url refresh</title>
+            <para>Refreshes an existing OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url refresh --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to refresh (list existing URLs via 'osgi obr url list'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-obr-url-remove">
+            <title>osgi obr url remove</title>
+            <para>Removes an existing OSGi Bundle Repository (OBR) repository file URL</para>
+            <programlisting><![CDATA[osgi obr url remove --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to remove (list existing URLs via 'osgi obr url list'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-ps">
+            <title>osgi ps</title>
+            <para>Displays OSGi bundle information</para>
+            <programlisting><![CDATA[osgi ps]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--format</term>
+                    <listitem>
+                        <para>The format of bundle information; default: 'BUNDLE_NAME'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-resolve">
+            <title>osgi resolve</title>
+            <para>Resolves a specific bundle ID</para>
+            <programlisting><![CDATA[osgi resolve --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to resolve; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-scr-config">
+            <title>osgi scr config</title>
+            <para>Lists the current SCR configuration</para>
+            <programlisting><![CDATA[osgi scr config]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-osgi-scr-disable">
+            <title>osgi scr disable</title>
+            <para>Disables a specific SCR-defined component</para>
+            <programlisting><![CDATA[osgi scr disable --componentId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--componentId</term>
+                    <listitem>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-scr-enable">
+            <title>osgi scr enable</title>
+            <para>Enables a specific SCR-defined component</para>
+            <programlisting><![CDATA[osgi scr enable --componentId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--componentId</term>
+                    <listitem>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-scr-info">
+            <title>osgi scr info</title>
+            <para>Lists information about a specific SCR-defined component</para>
+            <programlisting><![CDATA[osgi scr info --componentId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--componentId</term>
+                    <listitem>
+                        <para>The specific component identifier (use 'osgi scr list' to list component identifiers); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-scr-list">
+            <title>osgi scr list</title>
+            <para>Lists all SCR-defined components</para>
+            <programlisting><![CDATA[osgi scr list]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleId</term>
+                    <listitem>
+                        <para>Limit results to a specific bundle; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-uninstall">
+            <title>osgi uninstall</title>
+            <para>Uninstalls a specific bundle</para>
+            <programlisting><![CDATA[osgi uninstall --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to uninstall; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-update">
+            <title>osgi update</title>
+            <para>Updates a specific bundle</para>
+            <programlisting><![CDATA[osgi update --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The specific bundle to update ; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to obtain the updated bundle from; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-version">
+            <title>osgi version</title>
+            <para>Displays OSGi framework version</para>
+            <programlisting><![CDATA[osgi version]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-field-commands">
@@ -672,6 +895,18 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--digitsInteger</term>
+                    <listitem>
+                        <para>Maximum number of integral digits accepted for this number; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--digitsFraction</term>
+                    <listitem>
+                        <para>Maximum number of fractional digits accepted for this number; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--min</term>
                     <listitem>
                         <para>The minimum value; no default value</para>
@@ -772,7 +1007,7 @@
         </section>
         <section xml:id="command-index-field-reference">
             <title>field reference</title>
-            <para>Adds a private reference field to an existing Java source file (ie the 'many' side of a many-to-one)</para>
+            <para>Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)</para>
             <programlisting><![CDATA[field reference --fieldName --type]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -845,7 +1080,7 @@
         </section>
         <section xml:id="command-index-field-set">
             <title>field set</title>
-            <para>Adds a private Set field to an existing Java source file (ie the 'one' side of a many-to-one)</para>
+            <para>Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)</para>
             <programlisting><![CDATA[field set --fieldName --element]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -1039,12 +1274,12 @@
         <section xml:id="command-index-finder-list">
             <title>finder list</title>
             <para>List all finders for a given target (must be an entity</para>
-            <programlisting><![CDATA[finder list --class]]></programlisting>
+            <programlisting><![CDATA[finder list]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--class</term>
                     <listitem>
-                        <para>The controller or entity for which the finders are generated; default if option not present: '*' (mandatory) </para>
+                        <para>The controller or entity for which the finders are generated; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1060,6 +1295,16 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-gwt-commands">
+        <title>Gwt Commands</title>
+        <para>Gwt Commands are contained in org.springframework.roo.addon.gwt.GwtCommands.</para>
+        <section xml:id="command-index-gwt-setup">
+            <title>gwt setup</title>
+            <para>Install Google Web Toolkit (GWT) into your project</para>
+            <programlisting><![CDATA[gwt setup]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-hint-commands">
@@ -1127,12 +1372,6 @@
             <title>date</title>
             <para>Displays the local date and time</para>
             <programlisting><![CDATA[date]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-exit">
-            <title>exit</title>
-            <para>Exits the shell</para>
-            <programlisting><![CDATA[exit]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
         <section xml:id="command-index-script">
@@ -1303,6 +1542,12 @@
                     <term>--database</term>
                     <listitem>
                         <para>The database to support; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--applicationId</term>
+                    <listitem>
+                        <para>The Google App Engine application identifier to use; default if option not present: 'the project's name'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1640,6 +1885,48 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-process-manager-commands">
+        <title>Process Manager Commands</title>
+        <para>Process Manager Commands are contained in org.springframework.roo.process.manager.ProcessManagerCommands.</para>
+        <section xml:id="command-index-development-mode">
+            <title>development mode</title>
+            <para>Switches the system into development mode (greater diagnostic information)</para>
+            <programlisting><![CDATA[development mode]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--enabled</term>
+                    <listitem>
+                        <para>Activates development mode; default: 'true'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-poll-now">
+            <title>poll now</title>
+            <para>Perform a manual file system poll</para>
+            <programlisting><![CDATA[poll now]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-poll-speed">
+            <title>poll speed</title>
+            <para>Changes the file system polling speed</para>
+            <programlisting><![CDATA[poll speed --ms]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--ms</term>
+                    <listitem>
+                        <para>The number of milliseconds between each poll; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-poll-status">
+            <title>poll status</title>
+            <para>Display file system polling information</para>
+            <programlisting><![CDATA[poll status]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
     <section xml:id="command-index-prop-file-commands">
         <title>Prop File Commands</title>
         <para>Prop File Commands are contained in org.springframework.roo.addon.propfiles.PropFileCommands.</para>
@@ -1779,6 +2066,42 @@
             <para>Writes the reference guide XML fragments (in DocBook format) into the current working directory</para>
             <programlisting><![CDATA[reference guide]]></programlisting>
             <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section xml:id="command-index-solr-commands">
+        <title>Solr Commands</title>
+        <para>Solr Commands are contained in org.springframework.roo.addon.solr.SolrCommands.</para>
+        <section xml:id="command-index-solr-add">
+            <title>solr add</title>
+            <para>Make target type searchable</para>
+            <programlisting><![CDATA[solr add]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The target type which is made searchable; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-solr-all">
+            <title>solr all</title>
+            <para>Make all elegible project types searchable</para>
+            <programlisting><![CDATA[solr all]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-solr-setup">
+            <title>solr setup</title>
+            <para>Install a support for Solr search integration</para>
+            <programlisting><![CDATA[solr setup]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--searchServerUrl</term>
+                    <listitem>
+                        <para>The Url of the Solr search server; default: 'http://localhost:8983/solr'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </section>
     </section>
     <section xml:id="command-index-web-flow-commands">
