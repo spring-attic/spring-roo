@@ -286,12 +286,10 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
-		
-		// TODO: This is crazy!
-		//removeIfFound("/web-app/servlet[servlet-class='org.springframework.web.servlet.DispatcherServlet']", webXmlRoot);  // temporary (due to JSR 303 being used and classloader issues in m2eclipse)
-		// TODO: This is crazy!
-		//removeIfFound("/web-app/servlet-mapping[url-pattern='/app/*']", webXmlRoot);  // temporary (due to dispatcher servlet removal)
 
+		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
+		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
+		
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
 	
