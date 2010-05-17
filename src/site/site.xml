@@ -86,9 +86,8 @@
 		</menu>
 
 		<menu name="Twitter" inherit="none">
-			<item name="#roo Hash Key" href="http://search.twitter.com/search?q=%23roo" />
-			<item name="Ben Alex" href="http://twitter.com/benalexau" />
-			<item name="Stefan Schmidt" href="http://twitter.com/schmidtstefan" />
+			<item name="@SpringRoo Hash Key" href="http://twitter.com/#search?q=%40SpringRoo" />
+			<item name="Roo Team on Twitter" href="http://twitter.com/SpringRoo/roo-team" />
         </menu>
 
 		<menu ref="reports"/>
