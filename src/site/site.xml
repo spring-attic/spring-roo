@@ -86,8 +86,8 @@
 		</menu>
 
 		<menu name="Twitter" inherit="none">
-			<item name="@SpringRoo Hash Key" href="http://twitter.com/#search?q=%40SpringRoo" />
-			<item name="Roo Team on Twitter" href="http://twitter.com/SpringRoo/roo-team" />
+			<item name="@SpringRoo Search Key" href="http://twitter.com/#search?q=%40SpringRoo" />
+			<item name="Roo Team on Twitter" href="http://twitter.com/SpringRoo/roo-team/members" />
         </menu>
 
 		<menu ref="reports"/>
