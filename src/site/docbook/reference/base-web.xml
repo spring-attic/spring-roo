@@ -78,8 +78,7 @@
 
   <para>The following sections will offer further details about available
   commands to generate Web MVC artifacts and also the new JSP(X)
-  round-tripping model introduced in Roo 1.1.0.<link
-  linkend="???"></link></para>
+  round-tripping model introduced in Roo 1.1.0.</para>
 
   <section>
     <title>Controller commands</title>

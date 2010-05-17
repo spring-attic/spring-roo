@@ -450,21 +450,12 @@ quit
     <title>Add-On Installation and Removal</title>
 
     <para>Roo supports the installation and removal of third-party add-ons.
-    Roo add-ons adopt a simple convention where all add-ons are incorporated
-    into the Roo shell's startup classpath.</para>
-
-    <para>In essence add-ons are shipped as <code>.zip</code> files which are
-    placed into the <code>$ROO_HOME/add-ons</code> directory. The Roo <link
-    linkend="command-index-addon-cleanup">addon cleanup</link> command will
-    then expand the <code>.jar</code> files inside the <code>.zip</code> file
-    and place them into the <code>$ROO_HOME/work</code> directory. It will
-    naturally remove unnecessary <code>.jar</code> files from
-    <code>$ROO_HOME/work</code> as well (eg if an add-on was uninstalled). The
-    Roo startup scripts (<code>roo.bat</code> and <code>roo.sh</code>) will
-    automatically include the files in <code>$ROO_HOME/work</code>.</para>
-
-    <para>The relevant <link linkend="command-index-add-on-commands">add-on
-    commands</link> can be found in the command index.</para>
+    Roo 1.1.0.M1 significantly enhances its add-on infrastructure to build
+    upon OSGi. This replaces the earlier convention of add-ons being included
+    in the Roo shell's startup classpath. In Roo 1.1.0.M2 we will be adding
+    support for discovering and installing add-ons from remote OBR
+    repositoies. In the meantime you can use Roo's "osgi" commands to manually
+    specify bundles to install and remove from the running shell.</para>
   </section>
 
   <section xml:id="usage-recommendations">

@@ -142,8 +142,8 @@
       following commands and note the console output:</para>
 
       <programlisting>roo&gt; <emphasis role="bold">project --topLevelPackage com.aspectj.rocks</emphasis>
-roo&gt; <emphasis role="bold">persistence setup --database HYPERSONIC_IN_MEMORY --provider OPENJPA</emphasis>
-roo&gt; <emphasis role="bold">entity --class Hello</emphasis>
+roo&gt; <emphasis role="bold">persistence setup --database HYPERSONIC_IN_MEMORY --provider HIBERNATE</emphasis>
+roo&gt; <emphasis role="bold">entity --class ~.Hello</emphasis>
 Created SRC_MAIN_JAVA/com/aspectj/rocks
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello.java
 Created SRC_MAIN_JAVA/com/aspectj/rocks/Hello_Roo_Entity.aj
@@ -223,12 +223,14 @@ privileged aspect Hello_Roo_ToString {
 $ <emphasis role="bold">javap -classpath target/classes/.:target/test-classes/. com.aspectj.rocks.Hello</emphasis>
 Compiled from "Hello.java"
 public class com.aspectj.rocks.Hello extends java.lang.Object implements org.springframework.beans.factory.aspectj.ConfigurableObject{
-    public transient javax.persistence.EntityManager ajc$interField$com_aspectj_rocks$entityManager;
-    public java.lang.Long ajc$interField$com_aspectj_rocks_Hello_Roo_Entity$id;
-    public java.lang.Integer ajc$interField$com_aspectj_rocks_Hello_Roo_Entity$version;
+    transient javax.persistence.EntityManager entityManager;
     public com.aspectj.rocks.Hello();
-    public static java.lang.String ajc$privFieldGet$com_aspectj_rocks_Hello_Roo_JavaBean$com_aspectj_rocks_Hello$comment(com.aspectj.rocks.Hello);
-    public static void ajc$privFieldSet$com_aspectj_rocks_Hello_Roo_JavaBean$com_aspectj_rocks_Hello$comment(com.aspectj.rocks.Hello, java.lang.String);
+    public static java.lang.String ajc$get$comment(com.aspectj.rocks.Hello);
+    public static void ajc$set$comment(com.aspectj.rocks.Hello, java.lang.String);
+    public static java.lang.Long ajc$get$id(com.aspectj.rocks.Hello);
+    public static void ajc$set$id(com.aspectj.rocks.Hello, java.lang.Long);
+    public static java.lang.Integer ajc$get$version(com.aspectj.rocks.Hello);
+    public static void ajc$set$version(com.aspectj.rocks.Hello, java.lang.Integer);
     static {};
     public static long countHelloes();
     public static final javax.persistence.EntityManager entityManager();
@@ -239,7 +241,7 @@ public class com.aspectj.rocks.Hello extends java.lang.Object implements org.spr
     public java.lang.String getComment();
     public java.lang.Long getId();
     public java.lang.Integer getVersion();
-    public void merge();
+    public com.aspectj.rocks.Hello merge();
     public void persist();
     public void remove();
     public void setComment(java.lang.String);
