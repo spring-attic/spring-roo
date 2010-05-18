@@ -60,15 +60,15 @@ public class JpaOperationsImpl implements JpaOperations {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
+		updateApplicationContext(ormProvider, database, jndi);
 		updatePersistenceXml(ormProvider, database);
 		updateGaeXml(ormProvider, database, applicationId);
 		if (jndi == null || jndi.length() == 0) {
 			updateDatabaseProperties(ormProvider, database);
 		}
-
-
-		updateApplicationContext(ormProvider, database, jndi);
 		
+		updateLog4j(ormProvider);
+
 		// Parse the configuration.xml file
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
@@ -80,17 +80,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		
 		// Remove unnecessary artifacts not specific to current database and JPA provider
 		cleanup(configuration, ormProvider, database);
-	}
-
-	private void updatePomProperties(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {	
-		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
-		for (Element property : databaseProperties) {
-			projectOperations.addProperty(new Property(property));
-		}
-		List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
-		for (Element property : providerProperties) {
-			projectOperations.addProperty(new Property(property));
-		}
 	}
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
@@ -188,92 +177,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		XmlUtils.removeTextNodes(root);
 
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
-	}
-
-	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database) {
-		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
-		boolean databaseExists = fileManager.exists(databasePath);
-
-		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
-			if (databaseExists) {
-				fileManager.delete(databasePath);
-				return;
-			}
-		} else {
-			MutableFile databaseMutableFile = null;
-			Properties props = new Properties();
-
-			try {
-				if (databaseExists) {
-					databaseMutableFile = fileManager.updateFile(databasePath);
-					props.load(databaseMutableFile.getInputStream());
-				} else {
-					databaseMutableFile = fileManager.createFile(databasePath);
-					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
-					Assert.notNull(templateInputStream, "Could not acquire database properties template");
-					props.load(templateInputStream);
-				}
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
-
-			props.put("database.driverClassName", database.getDriverClassName());
-
-			String connectionString = database.getConnectionString();
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-			props.put("database.url", connectionString);
-
-			String username = "";
-			switch (database) {
-				case HYPERSONIC_IN_MEMORY:
-				case HYPERSONIC_PERSISTENT:
-				case H2_IN_MEMORY:
-					username = "sa";
-					break;
-				case DERBY:
-					break;
-				default:
-					logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
-					break;
-			}
-
-			props.put("database.username", username);
-			props.put("database.password", "");
-
-			try {
-				props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
-		}
-	}
-
-	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
-		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
-		for (Element dependencyElement : databaseDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
-		}
-
-		List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
-		for (Element dependencyElement : ormDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
-		}
-
-		// Hard coded to JPA & Hibernate Validator for now
-		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/dependencies/dependency", configuration);
-		for (Element dependencyElement : jpaDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
-		}
-
-		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
-		for (Element dependencyElement : springDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
-		}
-
-		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
-			logger.warning("The " + database.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
-		}
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
@@ -380,7 +283,6 @@ public class JpaOperationsImpl implements JpaOperations {
 					}
 					properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", username, persistence));
 					properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
-
 					properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
 					properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
 					properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
@@ -441,6 +343,124 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 	
+	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database) {
+		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+		boolean databaseExists = fileManager.exists(databasePath);
+
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
+			if (databaseExists) {
+				fileManager.delete(databasePath);
+				return;
+			}
+		} else {
+			MutableFile databaseMutableFile = null;
+			Properties props = new Properties();
+
+			try {
+				if (databaseExists) {
+					databaseMutableFile = fileManager.updateFile(databasePath);
+					props.load(databaseMutableFile.getInputStream());
+				} else {
+					databaseMutableFile = fileManager.createFile(databasePath);
+					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
+					Assert.notNull(templateInputStream, "Could not acquire database properties template");
+					props.load(templateInputStream);
+				}
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
+
+			props.put("database.driverClassName", database.getDriverClassName());
+
+			String connectionString = database.getConnectionString();
+			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+			props.put("database.url", connectionString);
+
+			String username = "";
+			switch (database) {
+				case HYPERSONIC_IN_MEMORY:
+				case HYPERSONIC_PERSISTENT:
+				case H2_IN_MEMORY:
+					username = "sa";
+					break;
+				case DERBY:
+					break;
+				default:
+					logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+					break;
+			}
+
+			props.put("database.username", username);
+			props.put("database.password", "");
+
+			try {
+				props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
+		}
+	}
+
+	private void updateLog4j(OrmProvider ormProvider) {
+		try {
+			String log4jPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+			if (fileManager.exists(log4jPath)) {
+				MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
+				Properties props = new Properties();
+				props.load(log4jMutableFile.getInputStream());
+				final String dnKey = "log4j.category.DataNucleus";
+				if (ormProvider == OrmProvider.DATANUCLEUS && !props.containsKey(dnKey)) {
+					props.put(dnKey, "WARN");
+					props.store(log4jMutableFile.getOutputStream(), "Updated at " + new Date());
+				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
+					props.remove(dnKey);
+					props.store(log4jMutableFile.getOutputStream(), "Updated at " + new Date());
+				}
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+	}
+
+	private void updatePomProperties(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {	
+		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
+		for (Element property : databaseProperties) {
+			projectOperations.addProperty(new Property(property));
+		}
+		List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
+		for (Element property : providerProperties) {
+			projectOperations.addProperty(new Property(property));
+		}
+	}
+
+	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
+		for (Element dependencyElement : databaseDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+		}
+
+		List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
+		for (Element dependencyElement : ormDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+		}
+
+		// Hard coded to JPA & Hibernate Validator for now
+		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/dependencies/dependency", configuration);
+		for (Element dependencyElement : jpaDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+		}
+
+		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
+		for (Element dependencyElement : springDependencies) {
+			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+		}
+
+		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
+			logger.warning("The " + database.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+		}
+	}
+
 	private String getProjectName() {
 		return ((ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier())).getProjectName();
 	}
@@ -481,7 +501,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
 	}
-
+	
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey())) {
@@ -496,7 +516,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 		for (OrmProvider provider : OrmProvider.values()) {
-			if (provider != ormProvider) {
+			if (provider != ormProvider) {				
 				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
 				// for (Element propertyElement : pomProperties) {
 				// projectOperations.removeProperty(new Property(propertyElement));
