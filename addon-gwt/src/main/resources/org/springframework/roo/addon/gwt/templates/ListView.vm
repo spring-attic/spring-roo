@@ -9,9 +9,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.valuestore.ui.AbstractRecordListView;
 import com.google.gwt.valuestore.ui.PropertyColumn;
-import com.google.gwt.app.util.DateTimeFormatRenderer;
+import com.google.gwt.input.shared.DateTimeFormatRenderer;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.app.util.Renderer;
+import com.google.gwt.input.shared.Renderer;
 #declareImports()
 
 import java.util.ArrayList;
