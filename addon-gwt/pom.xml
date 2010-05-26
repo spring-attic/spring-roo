@@ -110,15 +110,15 @@
             <type>bundle</type>
         </dependency>
         <dependency>
-            <groupId>org.apache.velocity</groupId>
-            <artifactId>com.springsource.org.apache.velocity</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.web.controller</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>com.springsource.org.apache.velocity</artifactId>
+            <version>1.6.2</version>
         </dependency>
 	</dependencies>
 </project>

@@ -71,6 +71,4 @@ public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	public boolean isMerge() {
 		return merge;
 	}
-
-
 }

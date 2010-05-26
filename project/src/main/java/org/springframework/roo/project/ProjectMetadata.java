@@ -169,7 +169,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * @return an unmodifiable collection of the build plugins (never null, but
 	 * may be empty).
 	 */
-	public Set<Plugin> getBuildPlugin() {
+	public Set<Plugin> getBuildPlugins() {
 		return Collections.unmodifiableSet(buildPlugins);
 	}
 
@@ -209,6 +209,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Determines whether the Google App Engine maven plugin exists in the pom.
+	 * 
+	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isGaeEnabled() {
+		for (Plugin buildPlugin : buildPlugins) {
+			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId().getSymbolName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public final String toString() {

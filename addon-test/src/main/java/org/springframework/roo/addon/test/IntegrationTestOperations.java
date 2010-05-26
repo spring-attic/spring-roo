@@ -16,5 +16,4 @@ public interface IntegrationTestOperations {
 	 * @param entity to produce a mock test for (required)
 	 */
 	void newMockTest(JavaType entity);
-
 }

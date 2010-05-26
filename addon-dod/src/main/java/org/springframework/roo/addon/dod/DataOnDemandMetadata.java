@@ -33,6 +33,7 @@ import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -42,15 +43,15 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
+ * @author Alan Stewart
  * @since 1.0
- *
  */
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	private DataOnDemandAnnotationValues annotationValues;
+	private ProjectMetadata projectMetadata;
 	private BeanInfoMetadata beanInfoMetadata;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata findMethod;
@@ -74,10 +75,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MetadataService metadataService;
 	private MetadataDependencyRegistry metadataDependencyRegistry;
 	
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, ProjectMetadata projectMetadata, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
+		Assert.notNull(projectMetadata, "Project metadata required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(identifierAccessor, "Identifier accessor method required");
 		Assert.notNull(findMethod, "Find method required");
@@ -91,6 +93,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		this.annotationValues = annotationValues;
+		this.projectMetadata = projectMetadata;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.identifierAccessorMethod = identifierAccessor;
 		this.findMethod = findMethod;
@@ -367,7 +370,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
-		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size()-1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
+		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(index);");
 		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
@@ -390,13 +393,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return userMethod;
 		}
 
-		// Create a method
+		// Create the method
 		
 		// Create the annotations
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+		if (!projectMetadata.isGaeEnabled()) {
+			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+		}
 		
 		// Create the body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();

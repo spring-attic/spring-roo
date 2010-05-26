@@ -1,4 +1,3 @@
-
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
 import com.google.gwt.app.place.Activity;
@@ -16,7 +15,6 @@ import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ApplicationKeyNameRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -33,60 +31,53 @@ import java.util.List;
  */
 public class ScaffoldMobile implements EntryPoint {
 
-  public void onModuleLoad() {
+	public void onModuleLoad() {
+		/* App controllers and services */
 
-    /* App controllers and services */
+		final HandlerManager eventBus = new HandlerManager(null);
+		final ApplicationRequestFactory requestFactory = GWT.create(ApplicationRequestFactory.class);
+		requestFactory.init(eventBus);
+		final PlaceController<ApplicationPlace> placeController = new PlaceController<ApplicationPlace>(eventBus);
 
-    final HandlerManager eventBus = new HandlerManager(null);
-    final ApplicationRequestFactory requestFactory = GWT.create(ApplicationRequestFactory.class);
-    requestFactory.init(eventBus);
-    final PlaceController<ApplicationPlace> placeController = new PlaceController<ApplicationPlace>(
-        eventBus);
+		/* Top level UI */
 
-    /* Top level UI */
+		final ScaffoldMobileShell shell = new ScaffoldMobileShell();
 
-    final ScaffoldMobileShell shell = new ScaffoldMobileShell();
+		/* Left side lets us pick from all the types of entities */
 
-    /* Left side lets us pick from all the types of entities */
+		PlacePicker<ApplicationListPlace> placePicker = new PlacePicker<ApplicationListPlace>(shell.getPlacesBox(), placeController, new ListPlaceRenderer());
+		placePicker.setPlaces(getTopPlaces());
 
-    PlacePicker<ApplicationListPlace> placePicker = new PlacePicker<ApplicationListPlace>(
-        shell.getPlacesBox(), placeController, new ListPlaceRenderer());
-    placePicker.setPlaces(getTopPlaces());
+		/*
+		 * The body is run by an ActivitManager that listens for PlaceChange events and finds the corresponding Activity to run
+		 */
 
-    /*
-     * The body is run by an ActivitManager that listens for PlaceChange events
-     * and finds the corresponding Activity to run
-     */
+		final ActivityMapper<ApplicationPlace> mapper = new ScaffoldMobileActivities(new ListActivitiesMapper(eventBus, requestFactory, placeController), requestFactory, placeController);
+		final ActivityManager<ApplicationPlace> activityManager = new ActivityManager<ApplicationPlace>(mapper, eventBus);
 
-    final ActivityMapper<ApplicationPlace> mapper = new ScaffoldMobileActivities(
-        new ListActivitiesMapper(eventBus, requestFactory, placeController),
-        requestFactory, placeController);
-    final ActivityManager<ApplicationPlace> activityManager = new ActivityManager<ApplicationPlace>(
-        mapper, eventBus);
+		activityManager.setDisplay(new Activity.Display() {
+			public void showActivityWidget(IsWidget widget) {
+				shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+			}
+		});
 
-    activityManager.setDisplay(new Activity.Display() {
-      public void showActivityWidget(IsWidget widget) {
-        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
-      }
-    });
+		/* Hide the loading message */
 
-    /* Hide the loading message */
+		Element loading = Document.get().getElementById("loading");
+		loading.getParentElement().removeChild(loading);
 
-    Element loading = Document.get().getElementById("loading");
-    loading.getParentElement().removeChild(loading);
+		/* And show the user the shell */
 
-    /* And show the user the shell */
+		RootLayoutPanel.get().add(shell);
+	}
 
-    RootLayoutPanel.get().add(shell);
-  }
-
-  private List<ApplicationListPlace> getTopPlaces() {
-    final List<ApplicationListPlace> rtn = new ArrayList<ApplicationListPlace>();
-    ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.EntityTypesProcessor() {
-      public void processType(Class<? extends Record> recordType) {
-        rtn.add(new ApplicationListPlace(recordType));
-      }
-    });
-    return Collections.unmodifiableList(rtn);
-  }
+	private List<ApplicationListPlace> getTopPlaces() {
+		final List<ApplicationListPlace> rtn = new ArrayList<ApplicationListPlace>();
+		ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.EntityTypesProcessor() {
+			public void processType(Class<? extends Record> recordType) {
+				rtn.add(new ApplicationListPlace(recordType));
+			}
+		});
+		return Collections.unmodifiableList(rtn);
+	}
 }

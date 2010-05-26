@@ -5,17 +5,16 @@ import org.springframework.roo.project.ProjectMetadata;
 
 public enum GwtPath {
 	// TODO: Make this cleaner; should be passing into a GwtPath(String segmentName, String sourceAntPath) constructor instead of the glorified conditional statements
-	
-	GWT_ROOT,
-	GWT_PLACE,
-	GWT_REQUEST,
-	GWT_SCAFFOLD,
-	GWT_SCAFFOLD_GENERATED,
-	GWT_UI,
-	SERVER,
-	WEB,
-        STYLE, 
-        STYLE_CLIENT;
+	GWT_ROOT, 
+	GWT_PLACE, 
+	GWT_REQUEST, 
+	GWT_SCAFFOLD, 
+	GWT_SCAFFOLD_GENERATED, 
+	GWT_UI, 
+	SERVER, 
+	WEB, 
+	STYLE, 
+	STYLE_CLIENT;
 	
 	private String segmentName() {
 		if (GWT_ROOT.equals(this)) {
@@ -32,16 +31,15 @@ public enum GwtPath {
 			return "/gwt/ui";
 		} else if (SERVER.equals(this)) {
 			return "/server";
-		} else if(STYLE.equals(this)) {
-                     return "/gwt/style"; 
-                } 
-                else if(STYLE_CLIENT.equals(this)) {
-                     return "/gwt/style/client"; 
-                }else {
+		} else if (STYLE.equals(this)) {
+			return "/gwt/style";
+		} else if (STYLE_CLIENT.equals(this)) {
+			return "/gwt/style/client";
+		} else {
 			return "/";
 		}
 	}
-	
+
 	public String sourceAntPath() {
 		// Drop the "/gwt" prefix, and then add "*-template.*" as the suffix
 		String segmentName = segmentName();
@@ -51,30 +49,29 @@ public enum GwtPath {
 			segmentName = "server/";
 		} else if (segmentName.equals("/")) {
 			segmentName = "web/";
-		} else if(STYLE.equals(this)) {
-                  return "style-template/*";
-                } else if(STYLE_CLIENT.equals(this)) {
-                  return "style-template/client/*";
-                } else {
+		} else if (STYLE.equals(this)) {
+			return "style-template/*";
+		} else if (STYLE_CLIENT.equals(this)) {
+			return "style-template/client/*";
+		} else {
 			segmentName = segmentName.substring(5) + "/";
 		}
 		return segmentName + "*-template.*";
 	}
-	
+
 	public String canonicalFileSystemPath(ProjectMetadata projectMetadata) {
 		String packagePath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName().replace('.', '/') + segmentName();
 		if (WEB.equals(this)) {
 			return projectMetadata.getPathResolver().getRoot(Path.SRC_MAIN_WEBAPP);
-		}
-                else {
+		} else {
 			return projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath);
 		}
 	}
-	
+
 	public String canonicalFileSystemPath(ProjectMetadata projectMetadata, String filename) {
 		return canonicalFileSystemPath(projectMetadata) + "/" + filename;
 	}
-	
+
 	public String packageName(ProjectMetadata projectMetadata) {
 		return projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + segmentName().replace('/', '.');
 	}

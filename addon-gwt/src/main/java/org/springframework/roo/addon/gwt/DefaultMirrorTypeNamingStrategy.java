@@ -4,12 +4,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
+
 /**
  * Provides a basic implementation of {@link MirrorTypeNamingStrategy}.
  * 
  * @author Ben Alex
  * @since 1.1
- *
+ * 
  */
 @Component
 @Service

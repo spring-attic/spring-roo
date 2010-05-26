@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 
 /**
  * Provides GWT installation services.
- *
+ * 
  * @author Ben Alex
  * @author Alan Stewart
  * @author Stefan Schmidt
@@ -47,44 +47,47 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class GwtOperationsImpl implements GwtOperations {
-	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlRewriteOperations urlRewriteOperations;
 	@Reference private WebMvcOperations mvcOperations;
-	
+
 	private ComponentContext context;
+	boolean isGaeEnabled;
 
-        private boolean isGae;
-
-  protected void activate(ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		this.context = context;
 	}
-	
+
+	private ProjectMetadata getProjectMetadata() {
+		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+	}
+
 	public boolean isSetupGwtAvailable() {
-		ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (project == null) {
+		ProjectMetadata projectMetadata = getProjectMetadata();
+		if (projectMetadata == null) {
 			return false;
 		}
 		// Do not permit installation if they have a gwt package already in their project
-		String root = GwtPath.GWT_ROOT.canonicalFileSystemPath(project);
+		String root = GwtPath.GWT_ROOT.canonicalFileSystemPath(projectMetadata);
 		return !fileManager.exists(root);
 	}
 
 	public void setupGwt() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = getProjectMetadata();
 		Assert.notNull(projectMetadata, "Project could not be retrieved");
-		
+		isGaeEnabled = isGaeEnabled();
+
 		// Install web pieces if not already installed
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
-                // Add GWT natures and builder names to maven eclipse plugin
+		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
-          
+
 		Element configuration = getConfiguration();
 
 		// Add dependencies
@@ -93,38 +96,36 @@ public class GwtOperationsImpl implements GwtOperations {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 		
-                if(isGaeEnabled()) {
-                  // add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
-                  for (Element dependency : XmlUtils.findElements("/configuration/gaedependencies/dependency", configuration)) {
-                    projectOperations.dependencyUpdate(new Dependency(dependency));
-                  }
-                
-                }
-          
+		if (isGaeEnabled) {
+			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
+			for (Element dependency : XmlUtils.findElements("/configuration/gae-dependencies/dependency", configuration)) {
+				projectOperations.dependencyUpdate(new Dependency(dependency));
+			}
+		}
+
 		// Add POM plugin
-		List<Element> plugins = XmlUtils.findElements(isGaeEnabled() ? "/configuration/gaeplugins/plugin" : "/configuration/plugins/plugin", configuration);
+		List<Element> plugins = XmlUtils.findElements(isGaeEnabled ? "/configuration/gae-plugins/plugin" : "/configuration/plugins/plugin", configuration);
 		for (Element plugin : plugins) {
 			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
-		
-                updateRepositories();
-		
-		
+
+		updateRepositories();
+
 		// Update web.xml
 		updateWebXml(projectMetadata);
-		
+
 		// Update urlrewrite.xml
 		updateUrlRewriteXml();
-             
+
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
 			copyDirectoryContents(path, projectMetadata);
 		}
-		
+
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
-		for (FileDetails fd: fileManager.findMatchingAntPath(antPath)) {
+		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = srcRoot.getRelativeSegment(fd.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
 			JavaType javaType = new JavaType(fullPath);
@@ -132,7 +133,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			metadataService.get(id);
 		}
 	}
-  
+
 	private void copyDirectoryContents(GwtPath gwtPath, ProjectMetadata projectMetadata) {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
@@ -140,40 +141,39 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
-		
+
 		if (!fileManager.exists(targetDirectory)) {
 			fileManager.createDirectory(targetDirectory);
 		}
-		
+
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
 		Set<URL> urls = TemplateUtils.findMatchingClasspathResources(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
-		for (URL url: urls) {
-                  String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
-//                  System.err.println("Filename is "+fileName);
-                  fileName =  fileName.replace("-template", "");
-                        
+		for (URL url : urls) {
+			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
+			fileName = fileName.replace("-template", "");
+
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
 				try {
-                                        if(targetFilename.endsWith("png")) {
-                                          FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
-                                        } else {
-					  // Read template and insert the user's package
-					  String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
-					  input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-				          input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
-					  // Output the file for the user
-					  MutableFile mutableFile = fileManager.createFile(targetFilename);
-				      	  FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
-                                        }
+					if (targetFilename.endsWith("png")) {
+						FileCopyUtils.copy(url.openStream(), fileManager.createFile(targetFilename).getOutputStream());
+					} else {
+						// Read template and insert the user's package
+						String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
+						input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
+						// Output the file for the user
+						MutableFile mutableFile = fileManager.createFile(targetFilename);
+						FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
+					}
 				} catch (IOException ioe) {
 					throw new IllegalStateException("Unable to create '" + targetFilename + "'", ioe);
 				}
 			}
 		}
 	}
-	
+
 	private Element getConfiguration() {
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
 		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
@@ -185,11 +185,11 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 		return (Element) dependencyDoc.getFirstChild();
 	}
-	
+
 	private void updateMavenEclipsePlugin() {
 		String pom = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
-		
+
 		Document pomDoc;
 		InputStream is = null;
 		MutableFile mutablePom = null;
@@ -203,46 +203,43 @@ public class GwtOperationsImpl implements GwtOperations {
 			if (is != null) {
 				try {
 					is.close();
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					throw new IllegalStateException(e);
 				}
 			}
 		}
-		
+
 		Element pomRoot = (Element) pomDoc.getFirstChild();
-                isGae = XmlUtils.findElements("/project/build/plugins/plugin[artifactId = 'maven-gae-plugin']", pomRoot).size() > 0;
-          
+
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
 			if ("maven-eclipse-plugin".equals(plugin.getArtifactId().getSymbolName()) && "org.apache.maven.plugins".equals(plugin.getGroupId().getFullyQualifiedPackageName())) {
-				// add in the builder configuration
+				// Add in the builder configuration
 				Element newEntry = new XmlElementBuilder("buildCommand", pomDoc).addChild(new XmlElementBuilder("name", pomDoc).setText("com.google.gwt.eclipse.core.gwtProjectValidator").build()).build();
 				Element ctx = XmlUtils.findRequiredElement("configuration/additionalBuildcommands/buildCommand[last()]", pluginElement);
 				ctx.getParentNode().appendChild(newEntry);
 
-				// add in the additional nature
+				// Add in the additional nature
 				newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.gwt.eclipse.core.gwtNature").build();
 				ctx = XmlUtils.findRequiredElement("configuration/additionalProjectnatures/projectnature[last()]", pluginElement);
 				ctx.getParentNode().appendChild(newEntry);
-                                // if gae plugin configured, add gaeNature
-				if (isGaeEnabled()) {
-                                  newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.appengine.eclipse.core.gaeNature").build();
-                                  ctx.getParentNode().appendChild(newEntry);
-                                }
+				// If gae plugin configured, add gaeNature
+				if (isGaeEnabled) {
+					newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.appengine.eclipse.core.gaeNature").build();
+					ctx.getParentNode().appendChild(newEntry);
+				}
 				plugin = new Plugin(pluginElement);
 				projectOperations.removeBuildPlugin(plugin);
 				projectOperations.addBuildPlugin(plugin);
-			} 
- 		}
-		
+			}
+		}
+
 		// Fix output directory
 		Element outputDirectory = XmlUtils.findFirstElement("/project/build/outputDirectory", pomRoot);
 		if (outputDirectory != null) {
 			outputDirectory.setTextContent("${project.build.directory}/${project.build.finalName}/WEB-INF/classes");
-		}
-		else {
+		} else {
 			Element newEntry = new XmlElementBuilder("outputDirectory", pomDoc).setText("${project.build.directory}/${project.build.finalName}/WEB-INF/classes").build();
 			Element ctx = XmlUtils.findRequiredElement("/project/build", pomRoot);
 			ctx.appendChild(newEntry);
@@ -251,28 +248,30 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
-        private boolean isGaeEnabled() {
-                return isGae;
-        }
+	private boolean isGaeEnabled() {
+		ProjectMetadata projectMetadata = getProjectMetadata();
+		Assert.notNull(projectMetadata, "Project could not be retrieved");
+		return projectMetadata.isGaeEnabled();
+	}
 
-        private void updateRepositories() {
+	private void updateRepositories() {
 		Element configuration = getConfiguration();
 
-		List<Element> vegaRepositories = XmlUtils.findElements("/configuration/repositories/repository", configuration);
-		for (Element repositoryElement : vegaRepositories) {
+		List<Element> repositories = XmlUtils.findElements("/configuration/repositories/repository", configuration);
+		for (Element repositoryElement : repositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
-          
-                List<Element> vegaPluginRepositories = XmlUtils.findElements("/configuration/pluginRepositories/pluginRepository", configuration);
-		for (Element repositoryElement : vegaRepositories) {
+
+		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/pluginRepositories/pluginRepository", configuration);
+		for (Element repositoryElement : pluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(repositoryElement));
 		}
 	}
-  
+
 	private void updateWebXml(ProjectMetadata projectMetadata) {
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXml), "web.xml not found; cannot continue");
-		
+
 		MutableFile mutableWebXml = null;
 		Document webXmlDoc;
 		try {
@@ -281,37 +280,38 @@ public class GwtOperationsImpl implements GwtOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		
+
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
-		
+
 		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
 		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
-		
+
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
-	
+
 	private void updateUrlRewriteXml() {
 		Document urlRewriteDoc = urlRewriteOperations.getUrlRewriteDocument();
 		Element root = urlRewriteDoc.getDocumentElement();
 		Element firstRule = XmlUtils.findRequiredElement("/urlrewrite/rule", root);
+
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationScaffold/**").build())
+			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
+			.build(), firstRule);
 		
 		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-										.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationScaffold/**").build())
-										.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
-									.build(), firstRule);
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationScaffold.html").build())
-								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
-							.build(), firstRule);
+			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationScaffold.html").build())
+			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
+			.build(), firstRule);
 		
-                root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-								.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/gwtRequest").build())
-								.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/gwtRequest").build())
-							.build(), firstRule);
-                urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc).addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/gwtRequest").build())
+			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/gwtRequest").build())
+			.build(), firstRule);
+		
+		urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {

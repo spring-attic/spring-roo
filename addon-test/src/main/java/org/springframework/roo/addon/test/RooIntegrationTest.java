@@ -30,5 +30,4 @@ public @interface RooIntegrationTest {
 	boolean persist() default true; 
 	boolean remove() default true; 
 	boolean merge() default true; 
-
 }

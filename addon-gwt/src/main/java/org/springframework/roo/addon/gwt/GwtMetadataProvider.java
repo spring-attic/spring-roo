@@ -50,7 +50,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class GwtMetadataProvider implements MetadataNotificationListener, MetadataProvider {
 	

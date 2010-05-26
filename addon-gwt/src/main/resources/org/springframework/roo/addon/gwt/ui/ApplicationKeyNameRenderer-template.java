@@ -8,14 +8,14 @@ import com.google.gwt.valuestore.shared.Record;
  */
 // TODO i18n
 public class ApplicationKeyNameRenderer implements Renderer<Record> {
-  public String render(Record entity) {
-    String name = entity.getClass().getName();
-    if (name.lastIndexOf(".") > -1) {
-    	name = name.substring(name.lastIndexOf(".") + 1);
-    }
-    if (name.endsWith("Record")) {
-    	name = name.substring(0, name.length() - 6);
-    }
-    return name + "s";
-  }
+	public String render(Record entity) {
+		String name = entity.getClass().getName();
+		if (name.lastIndexOf(".") > -1) {
+			name = name.substring(name.lastIndexOf(".") + 1);
+		}
+		if (name.endsWith("Record")) {
+			name = name.substring(0, name.length() - 6);
+		}
+		return name + "s";
+	}
 }

@@ -36,7 +36,6 @@
 			<artifactId>json</artifactId>
 			<version>20090211</version>
 		</dependency>
-        
    	</dependencies>
 	<plugins>
 		<plugin>
@@ -66,7 +65,7 @@
 			</executions>
 		</plugin>
 	</plugins>
-    <gaedependencies>
+    <gae-dependencies>
         <!-- Needed for gwt:run with gae -->
         <dependency>
              <groupId>com.google.appengine</groupId>
@@ -75,7 +74,6 @@
              <scope>system</scope>
              <systemPath>${gae.home}/lib/impl/appengine-local-runtime.jar</systemPath>
         </dependency>
-
         <dependency>
              <groupId>com.google.appengine</groupId>
              <artifactId>appengine-tools-api</artifactId>
@@ -83,8 +81,8 @@
              <scope>system</scope>
              <systemPath>${gae.home}/lib/appengine-tools-api.jar</systemPath>
         </dependency>
-    </gaedependencies>
-    <gaeplugins>
+    </gae-dependencies>
+    <gae-plugins>
         <plugin>
 			<groupId>org.codehaus.mojo</groupId>
 			<artifactId>gwt-maven-plugin</artifactId>
@@ -113,5 +111,5 @@
 				</execution>
 			</executions>
 		</plugin>
-    </gaeplugins>
+    </gae-plugins>
 </configuration>

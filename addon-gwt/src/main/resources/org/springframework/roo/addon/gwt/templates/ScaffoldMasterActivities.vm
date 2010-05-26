@@ -11,31 +11,29 @@ import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
  * Finds the activity to run for a particular {@link ScaffoldPlace} in the top
  * half of the {@link ScaffoldShell}.
  */
-public final class $className implements
-    ActivityMapper<${shared.applicationPlace}> {
+public final class $className implements ActivityMapper<${shared.applicationPlace}> {
+	private final ${shared.listActivitiesMapper} listActivities;
 
-  private final ${shared.listActivitiesMapper} listActivities;
+	private AbstractRecordListActivity<?> last = null;
+	private Class<? extends Record> lastType = null;
 
-  private AbstractRecordListActivity<?> last = null;
-  private Class<? extends Record> lastType = null;
+	public $className(${shared.listActivitiesMapper} listActivities) {
+		this.listActivities = listActivities;
+	}
 
-  public $className(${shared.listActivitiesMapper} listActivities) {
-    this.listActivities = listActivities;
-  }
+	public Activity getActivity(${shared.applicationPlace} place) {
+		if (place instanceof ${shared.listPlace}) {
+			${shared.listPlace} listPlace = (${shared.listPlace}) place;
+			last = listActivities.getActivity(listPlace);
+			lastType = listPlace.getType();
+		}
 
-  public Activity getActivity(${shared.applicationPlace} place) {
-    if (place instanceof ${shared.listPlace}) {
-      ${shared.listPlace} listPlace = (${shared.listPlace}) place;
-      last = listActivities.getActivity(listPlace);
-      lastType = listPlace.getType();
-    }
-
-    if (last != null && place instanceof ${shared.applicationRecordPlace}) {
-      Class<? extends Record> thisType = place.acceptFilter(new ${shared.placeToRecordType}());
-      if (lastType.equals(thisType)) {
-        last.select(((${shared.applicationRecordPlace}) place).getId());
-      }
-    }
-    return last;
-  }
+		if (last != null && place instanceof ${shared.applicationRecordPlace}) {
+			Class<? extends Record> thisType = place.acceptFilter(new ${shared.placeToRecordType}());
+			if (lastType.equals(thisType)) {
+				last.select(((${shared.applicationRecordPlace}) place).getId());
+			}
+		}
+		return last;
+	}
 }

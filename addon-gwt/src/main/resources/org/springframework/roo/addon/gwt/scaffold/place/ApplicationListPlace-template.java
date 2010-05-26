@@ -1,62 +1,55 @@
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold.place;
 
 import com.google.gwt.valuestore.shared.Record;
-import com.google.gwt.app.place.Activity;
+
 /**
- * Place in an app that lists
- * {@link com.google.gwt.valuestore.shared.ValueStore ValueStore} records of a
- * particular type.
+ * Place in an app that lists {@link com.google.gwt.valuestore.shared.ValueStore ValueStore} records of a particular type.
  */
 public class ApplicationListPlace extends ApplicationPlace {
-  private final Class<? extends Record> type;
+	private final Class<? extends Record> type;
 
-  /**
-   * @param key the schema of the entities at this place
-   */
-  public ApplicationListPlace(Class<? extends Record> type) {
-    assert null != type;
-    this.type = type;
-  }
+	/**
+	 * @param key the schema of the entities at this place
+	 */
+	public ApplicationListPlace(Class<? extends Record> type) {
+		assert null != type;
+		this.type = type;
+	}
 
-  @Override
-  public void accept(ApplicationPlaceProcessor visitor) {
-    visitor.process(this);
-  }
+	@Override
+	public void accept(ApplicationPlaceProcessor visitor) {
+		visitor.process(this);
+	}
 
-  @Override
-  public <T> T acceptFilter(ApplicationPlaceFilter<T> filter) {
-    return filter.filter(this);
-  }
+	@Override
+	public <T> T acceptFilter(ApplicationPlaceFilter<T> filter) {
+		return filter.filter(this);
+	}
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ApplicationListPlace other = (ApplicationListPlace) obj;
+		if (!type.equals(other.type)) {
+			return false;
+		}
+		return true;
+	}
 
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    ApplicationListPlace other = (ApplicationListPlace) obj;
+	public Class<? extends Record> getType() {
+		return type;
+	}
 
-    if (!type.equals(other.type)) {
-      return false;
-    }
-    
-    return true;
-  }
-
-  public Class<? extends Record> getType() {
-    return type;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((type == null) ? 0 : type.hashCode());
-    return result;
-  }
-  
-  
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
 }

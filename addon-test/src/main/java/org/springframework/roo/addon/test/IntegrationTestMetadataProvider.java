@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides {@link IntegrationTestMetadata}.
@@ -22,10 +23,9 @@ import org.springframework.roo.project.Path;
  * @since 1.0
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class IntegrationTestMetadataProvider extends AbstractItdMetadataProvider {
-	
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 
 	protected void activate(ComponentContext context) {
@@ -41,6 +41,8 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
+		
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		
 		// We need to parse the annotation, which we expect to be present
 		IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
@@ -84,8 +86,7 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, dataOnDemandMetadata, 
-				identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethods, flushMethod, mergeMethod, persistMethod, removeMethod);
+		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethods, flushMethod, mergeMethod, persistMethod, removeMethod);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

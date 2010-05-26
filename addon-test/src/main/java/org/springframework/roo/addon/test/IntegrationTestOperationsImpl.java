@@ -46,7 +46,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 	 */
 	public void newMockTest(JavaType entity) {
 		Assert.notNull(entity, "Entity to produce a mock test for is required");
-		
+
 		JavaType name = new JavaType(entity + "Test");
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_TEST_JAVA);
 
@@ -56,7 +56,6 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		}
 
 		// Determine if the mocking infrastructure needs installing
-		
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.junit.runners.JUnit4")));
@@ -66,7 +65,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		List<AnnotationMetadata> methodAnnotations = new ArrayList<AnnotationMetadata>();
 		methodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-		
+
 		// Get the entity so we can hopefully make a demo method that will be usable
 		InvocableMemberBodyBuilder imbb = new InvocableMemberBodyBuilder();
 		EntityMetadata em = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
@@ -81,12 +80,11 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 				imbb.appendFormalLine("org.junit.Assert.assertEquals(expectedCount, " + countMethod + ");");
 			}
 		}
-		
+
 		MethodMetadata method = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMethod"), JavaType.VOID_PRIMITIVE, null, null, methodAnnotations, null, imbb.getOutput());
 		methods.add(method);
 
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 		classpathOperations.generateClassFile(details);
 	}
-	
 }

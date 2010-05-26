@@ -12,12 +12,10 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Component
 @Service
 public class GwtCommands implements CommandMarker {
-	
 	@Reference private GwtOperations gwtOperations;
 	
 	@CliAvailabilityIndicator("gwt setup")

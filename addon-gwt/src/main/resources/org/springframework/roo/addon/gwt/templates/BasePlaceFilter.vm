@@ -13,17 +13,17 @@ package $packageName;
  * @param <T> the type of the default value
  */
 public class $className<T> implements ${shared.placeFilter}<T> {
-  private final T defaultValue;
+	private final T defaultValue;
   
-  public $className(T defaultValue) {
-    this.defaultValue = defaultValue;
-  }
+	public $className(T defaultValue) {
+		this.defaultValue = defaultValue;
+	}
 #foreach ($ent in $entities)
-  public T filter(${ent.detailsPlace} place) {
-    return defaultValue;
-  }
+	public T filter(${ent.detailsPlace} place) {
+		return defaultValue;
+	}
 #end
-  public T filter(${shared.listPlace} place) {
-    return defaultValue;
-  }
+	public T filter(${shared.listPlace} place) {
+		return defaultValue;
+	}
 }

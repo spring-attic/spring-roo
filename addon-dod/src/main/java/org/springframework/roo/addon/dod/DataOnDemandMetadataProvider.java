@@ -14,18 +14,17 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides {@link DataOnDemandMetadata}.
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvider {
-	
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	
 	protected void activate(ComponentContext context) {
@@ -55,13 +54,13 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 		
 		// We need to lookup the metadata we depend on
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
  		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
-//			throw new IllegalStateException("Data on demand unable to locate details for persistent type '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 		
 		MethodMetadata findEntriesMethod = entityMetadata.getFindEntriesMethod();
@@ -82,7 +81,7 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata, identifierAccessor, findMethod, findEntriesMethod, persistMethod, metadataService, metadataDependencyRegistry);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, projectMetadata, beanInfoMetadata, identifierAccessor, findMethod, findEntriesMethod, persistMethod, metadataService, metadataDependencyRegistry);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

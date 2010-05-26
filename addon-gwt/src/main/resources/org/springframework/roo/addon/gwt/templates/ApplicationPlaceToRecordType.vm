@@ -5,19 +5,17 @@ import com.google.gwt.valuestore.shared.Record;
 #declareImports()
 
 /**
- * Filters an {@link ApplicationPlace} to the corresponding record
- * type.
+ * Filters an {@link ApplicationPlace} to the corresponding record type.
  */
-public final class $className implements
-    ${shared.placeFilter}<Class<? extends Record>> {
+public final class $className implements ${shared.placeFilter}<Class<? extends Record>> {
 
 #foreach ($ent in $entities) 
-  public Class<? extends Record> filter(${ent.detailsPlace} place) {
-    return ${ent.record}.class;
-  }
+	public Class<? extends Record> filter(${ent.detailsPlace} place) {
+		return ${ent.record}.class;
+	}
 #end
 
-  public Class<? extends Record> filter(${shared.listPlace} place) {
-    return place.getType();
-  }
+	public Class<? extends Record> filter(${shared.listPlace} place) {
+		return place.getType();
+	}
 }

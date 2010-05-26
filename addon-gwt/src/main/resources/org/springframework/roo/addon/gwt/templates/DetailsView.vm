@@ -20,65 +20,59 @@ import com.google.gwt.valuestore.ui.RecordDetailsView;
 /**
  * Details view for ${entity.name} records.
  */
-public class ${className} extends Composite implements
-    RecordDetailsView<${entity.record}> {
-  interface Binder extends UiBinder<HTMLPanel, $className> {
-  }
+public class ${className} extends Composite implements RecordDetailsView<${entity.record}> {
+	interface Binder extends UiBinder<HTMLPanel, $className> {
+	}
 
-  private static final Binder BINDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-  ${entity.record} record;
+	${entity.record} record;
 #foreach ($field in $entity.fields)
-  @UiField
-  SpanElement ${field};
+	@UiField SpanElement ${field};
 #end
-  @UiField
-  SpanElement idSpan;
-  @UiField
-  SpanElement versionSpan;
-  @UiField
-  HasClickHandlers edit;
-  @UiField
-  HasClickHandlers delete;
+	@UiField SpanElement idSpan;
+	@UiField SpanElement versionSpan;
+	@UiField HasClickHandlers edit;
+	@UiField HasClickHandlers delete;
 
-  private Delegate delegate;
+	private Delegate delegate;
 
-  public ${className}() {
-    initWidget(BINDER.createAndBindUi(this));
-  }
+	public ${className}() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-  public Widget asWidget() {
-    return this;
-  }
+  	public Widget asWidget() {
+		return this;
+	}
   
-  public boolean confirm(String msg) {
-    return Window.confirm(msg);
-  }
+	public boolean confirm(String msg) {
+		return Window.confirm(msg);
+	}
 
-  public ${entity.record} getValue() {
-    return record;
-  }
+	public ${entity.record} getValue() {
+		return record;
+	}
 
-  @UiHandler("delete")
-  public void onDeleteClicked(@SuppressWarnings("unused") ClickEvent e) {
-    delegate.deleteClicked();
-  }
+	@UiHandler("delete")
+	public void onDeleteClicked(@SuppressWarnings("unused") ClickEvent e) {
+		delegate.deleteClicked();
+	}
 
-  @UiHandler("edit")
-  public void onEditClicked(@SuppressWarnings("unused") ClickEvent e) {
-    delegate.editClicked();
-  }
+	@UiHandler("edit")
+	public void onEditClicked(@SuppressWarnings("unused") ClickEvent e) {
+		delegate.editClicked();
+	}
 
-  public void setDelegate(Delegate delegate) {
-    this.delegate = delegate;
-  }
+	public void setDelegate(Delegate delegate) {
+		this.delegate = delegate;
+	}
 
-  public void setValue(${entity.record} record) {
-    this.record = record;
+	public void setValue(${entity.record} record) {
+		this.record = record;
 #foreach ($prop in $entity.properties)
-    ${prop.name}.setInnerText(${prop.formatter}record.${prop.getter}()));
+		${prop.name}.setInnerText(${prop.formatter}record.${prop.getter}()));
 #end
-    idSpan.setInnerText(record.getId());
-    versionSpan.setInnerText(record.getVersion().toString());
-  }
+		idSpan.setInnerText(record.getId());
+		versionSpan.setInnerText(record.getVersion().toString());
+	}
 }

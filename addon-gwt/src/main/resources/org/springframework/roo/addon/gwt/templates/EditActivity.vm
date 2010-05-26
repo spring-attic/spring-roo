@@ -8,55 +8,48 @@ import com.google.gwt.valuestore.ui.AbstractRecordEditActivity;
 import com.google.gwt.valuestore.ui.RecordEditView;
 #declareImports()
 
-
 /**
  * An activity that requests all info on an ${entity.name}, allows the user to edit
  * it, and persists the results.
  */
-public class $className extends
-    AbstractRecordEditActivity<${entity.record}> {
-  private static RecordEditView<${entity.record}> defaultView;
+public class $className extends AbstractRecordEditActivity<${entity.record}> {
+	private static RecordEditView<${entity.record}> defaultView;
 
-  private static RecordEditView<${entity.record}> getDefaultView() {
-    if (defaultView == null) {
-      defaultView = new ${entity.editView}();
-    }
-    return defaultView;
-  }
+	private static RecordEditView<${entity.record}> getDefaultView() {
+		if (defaultView == null) {
+			defaultView = new ${entity.editView}();
+		}
+		return defaultView;
+	}
 
-  private final ApplicationRequestFactory requests;
-  private final PlaceController<ApplicationPlace> placeController;
+	private final ApplicationRequestFactory requests;
+	private final PlaceController<ApplicationPlace> placeController;
 
-  /**
-   * Creates an activity that uses the default singleton view instance.
-   */
-  public $className(String id, ApplicationRequestFactory requests,
-      PlaceController<ApplicationPlace> placeController) {
-    this(id, getDefaultView(), requests, placeController);
-  }
+	/**
+	 * Creates an activity that uses the default singleton view instance.
+	 */
+	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+		this(id, getDefaultView(), requests, placeController);
+	}
 
-  /**
-   * Creates an activity that uses its own view instance.
-   */
-  public $className(String id, RecordEditView<${entity.record}> view,
-      ApplicationRequestFactory requests,
-      PlaceController<ApplicationPlace> placeController) {
-    super(view, id, requests);
-    this.requests = requests;
-    this.placeController = placeController;
-  }
+	/**
+	 * Creates an activity that uses its own view instance.
+	 */
+	public $className(String id, RecordEditView<${entity.record}> view, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+		super(view, id, requests);
+		this.requests = requests;
+		this.placeController = placeController;
+	}
 
+	protected void exit() {
+		placeController.goTo(new ${entity.detailPlace}(getId(), Operation.DETAILS));
+	}
 
-  protected void exit() {
-    placeController.goTo(new ${entity.detailPlace}(getId(), Operation.DETAILS));
-  }
+	protected void fireFindRequest(Value<String> id, Receiver<${entity.record}> callback) {
+		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).to(callback).fire();
+	}
 
-  protected void fireFindRequest(Value<String> id,
-      Receiver<${entity.record}> callback) {
-    requests.${entity.nameUncapitalized}Request().find${entity.name}(id).to(callback).fire();
-  }
-
-  protected String getRecordToken() {
-    return ${entity.record}.TOKEN;
-  }
+	protected String getRecordToken() {
+		return ${entity.record}.TOKEN;
+	}
 }

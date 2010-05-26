@@ -16,72 +16,64 @@ import com.google.gwt.view.client.Range;
  * Activity that requests and displays all {${entity.record}}
  * records.
  */
-public class $className extends
-    AbstractRecordListActivity<${entity.record}> {
+public class $className extends AbstractRecordListActivity<${entity.record}> {
+	private static RecordListView<${entity.record}> defaultView;
 
-  private static RecordListView<${entity.record}> defaultView;
+	private static RecordListView<${entity.record}> getDefaultView() {
+		if (defaultView == null) {
+			defaultView = new ${entity.listView}();
+		}
+		return defaultView;
+	}
 
-  private static RecordListView<${entity.record}> getDefaultView() {
-    if (defaultView == null) {
-      defaultView = new ${entity.listView}();
-    }
-    return defaultView;
-  }
+	private final ${shared.requestFactory} requests;
+	private final PlaceController<${shared.applicationPlace}> placeController;
+	private final HandlerManager eventBus;
+	private HandlerRegistration registration;
 
-  private final ${shared.requestFactory} requests;
-  private final PlaceController<${shared.applicationPlace}> placeController;
-  private final HandlerManager eventBus;
-  private HandlerRegistration registration;
+	/**
+	 * Creates an activity that uses the default singleton view instance.
+ 	 */
+	public $className(HandlerManager eventBus, ${shared.requestFactory} requests, PlaceController<${shared.applicationPlace}> placeController) {
+		this(eventBus, requests, getDefaultView(), placeController);
+	}
 
-  /**
-   * Creates an activity that uses the default singleton view instance.
-   */
-  public $className(HandlerManager eventBus,
-      ${shared.requestFactory} requests,
-      PlaceController<${shared.applicationPlace}> placeController) {
-    this(eventBus, requests, getDefaultView(), placeController);
-  }
+	/**
+	 * Creates an activity that uses its own view instance.
+	 */
+	public $className(HandlerManager eventBus, ${shared.requestFactory} requests, RecordListView<${entity.record}> view, PlaceController<${shared.applicationPlace}> placeController) {
+		super(view);
+		this.eventBus = eventBus;
+		this.requests = requests;
+		this.placeController = placeController;
+	}
 
-  /**
-   * Creates an activity that uses its own view instance.
-   */
-  public $className(HandlerManager eventBus,
-      ${shared.requestFactory} requests, RecordListView<${entity.record}> view,
-      PlaceController<${shared.applicationPlace}> placeController) {
-    super(view);
-    this.eventBus = eventBus;
-    this.requests = requests;
-    this.placeController = placeController;
-  }
+	public void createClicked() {
+		placeController.goTo(new ${entity.detailPlace}("", Operation.EDIT));
+	}
 
-  public void createClicked() {
-    placeController.goTo(new ${entity.detailPlace}("", Operation.EDIT));
-  }
+	public void onStop() {
+		registration.removeHandler();
+	}
 
-  public void onStop() {
-    registration.removeHandler();
-  }
+	public void showDetails(${entity.record} record) {
+		placeController.goTo(new ${entity.detailPlace}(record, Operation.DETAILS));
+	}
 
-  public void showDetails(${entity.record} record) {
-    placeController.goTo(new ${entity.detailPlace}(record, Operation.DETAILS));
-  }
+	public void start(Display display) {
+		this.registration = eventBus.addHandler(${entity.recordChanged}.TYPE, new ${entity.changeHandler}() {
+			public void on${entity.name}Changed(${entity.recordChanged} event) {
+				update(event.getWriteOperation(), event.getRecord());
+			}
+		});
+		super.start(display);
+	}
 
-  public void start(Display display) {
-    this.registration = eventBus.addHandler(${entity.recordChanged}.TYPE,
-        new ${entity.changeHandler}() {
-          public void on${entity.name}Changed(${entity.recordChanged} event) {
-            update(event.getWriteOperation(), event.getRecord());
-          }
-        });
-    super.start(display);
-  }
+	protected RecordListRequest<${entity.record}> createRangeRequest(Range range) {
+		return requests.${entity.nameUncapitalized}Request().find${entity.name}Entries(range.getStart(), range.getLength());
+	}
 
-  protected RecordListRequest<${entity.record}> createRangeRequest(Range range) {
-    return requests.${entity.nameUncapitalized}Request().find${entity.name}Entries(range.getStart(),
-        range.getLength());
-  }
-
-  protected void fireCountRequest(Receiver<Long> callback) {
-    requests.${entity.nameUncapitalized}Request().count${entity.pluralName}().to(callback).fire();
-  }
+	protected void fireCountRequest(Receiver<Long> callback) {
+		requests.${entity.nameUncapitalized}Request().count${entity.pluralName}().to(callback).fire();
+	}
 }

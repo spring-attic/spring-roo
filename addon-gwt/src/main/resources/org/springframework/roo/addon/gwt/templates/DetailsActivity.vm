@@ -16,86 +16,79 @@ import java.util.Set;
  * An {@link com.google.gwt.app.place.Activity Activity} that requests and
  * displays detailed information on a given ${entity.name}.
  */
-public class $className extends AbstractActivity implements
-    RecordDetailsView.Delegate {
-  private static RecordDetailsView<${entity.record}> defaultView;
+public class $className extends AbstractActivity implements RecordDetailsView.Delegate {
+	private static RecordDetailsView<${entity.record}> defaultView;
+	
+	private static RecordDetailsView<${entity.record}> getDefaultView() {
+		if (defaultView == null) {
+			defaultView = new ${entity.detailsView}();
+		}
+		return defaultView;
+	}
 
-  private static RecordDetailsView<${entity.record}> getDefaultView() {
-    if (defaultView == null) {
-      defaultView = new ${entity.detailsView}();
-    }
-    return defaultView;
-  }
+	private final ApplicationRequestFactory requests;
+	private final PlaceController<ApplicationPlace> placeController;
+	private final RecordDetailsView<${entity.record}> view;
+	private String id;
+	private Display display;
 
-  private final ApplicationRequestFactory requests;
-  private final PlaceController<ApplicationPlace> placeController;
-  private final RecordDetailsView<${entity.record}> view;
-  private String id;
-  private Display display;
+	/**
+	 * Creates an activity that uses the default singleton view instance.
+	 */
+	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+		this(id, requests, placeController, getDefaultView());
+	}
 
-  /**
-   * Creates an activity that uses the default singleton view instance.
-   */
-  public $className(String id, ApplicationRequestFactory requests,
-      PlaceController<ApplicationPlace> placeController) {
-    this(id, requests, placeController, getDefaultView());
-  }
+	/**
+	 * Creates an activity that uses its own view instance.
+ 	 */
+	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController, RecordDetailsView<${entity.record}> view) {
+		this.placeController = placeController;
+		this.id = id;
+		this.requests = requests;
+		view.setDelegate(this);
+		this.view = view;
+	}
 
-  /**
-   * Creates an activity that uses its own view instance.
-   */
-  public $className(String id, ApplicationRequestFactory requests,
-      PlaceController<ApplicationPlace> placeController,
-      RecordDetailsView<${entity.record}> view) {
-    this.placeController = placeController;
-    this.id = id;
-    this.requests = requests;
-    view.setDelegate(this);
-    this.view = view;
-  }
-
-  public void deleteClicked() {
-    if (!view.confirm("Really delete this record? You cannot undo this change.")) {
-      return;
-    }
+	public void deleteClicked() {
+		if (!view.confirm("Really delete this record? You cannot undo this change.")) {
+			return;
+		}
     
-    DeltaValueStore deltas = requests.getValueStore().spawnDeltaView();
-    deltas.delete(view.getValue());
-    requests.syncRequest(deltas).to(new Receiver<Set<SyncResult>>() {
+		DeltaValueStore deltas = requests.getValueStore().spawnDeltaView();
+		deltas.delete(view.getValue());
+		requests.syncRequest(deltas).to(new Receiver<Set<SyncResult>>() {
+			public void onSuccess(Set<SyncResult> response) {
+				if (display == null) {
+					// This activity is dead
+					return;
+				}
+				display.showActivityWidget(null);
+			}
+		}).fire();
+	}
 
-      public void onSuccess(Set<SyncResult> response) {
-        if (display == null) {
-          // This activity is dead
-          return;
-        }
-        
-        display.showActivityWidget(null);
-      }
-    }).fire();
-  }
+	public void editClicked() {
+		placeController.goTo(new ${entity.detailPlace}(view.getValue(), Operation.EDIT));
+	}
 
-  public void editClicked() {
-    placeController.goTo(new ${entity.detailPlace}(view.getValue(),
-        Operation.EDIT));
-  }
+	public void onCancel() {
+		onStop();
+	}
 
-  public void onCancel() {
-    onStop();
-  }
+	public void onStop() {
+		display = null;
+	}
 
-  public void onStop() {
-    display = null;
-  }
+	public void start(final Display display) {
+    	this.display = display;
+    	Receiver<${entity.record}> callback = new Receiver<${entity.record}>() {
+			public void onSuccess(${entity.record} record) {
+				view.setValue(record);
+				display.showActivityWidget(view);
+			}
+		};
 
-  public void start(final Display display) {
-    this.display = display;
-    Receiver<${entity.record}> callback = new Receiver<${entity.record}>() {
-      public void onSuccess(${entity.record} record) {
-        view.setValue(record);
-        display.showActivityWidget(view);
-      }
-    };
-
-    requests.${entity.nameUncapitalized}Request().find${entity.name}(Value.of(id)).to(callback).fire();
-  }
+		requests.${entity.nameUncapitalized}Request().find${entity.name}(Value.of(id)).to(callback).fire();
+	}
 }

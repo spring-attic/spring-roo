@@ -15,53 +15,53 @@ import com.google.gwt.user.client.ui.Widget;
  * The outermost UI of the application.
  */
 public class ScaffoldShell extends Composite {
-  interface Binder extends UiBinder<Widget, ScaffoldShell> {
-  }
-  private static final Binder BINDER = GWT.create(Binder.class);
+	interface Binder extends UiBinder<Widget, ScaffoldShell> {
+	}
 
-  @UiField SimplePanel master;
-  @UiField SimplePanel details;
-  @UiField PlacePickerView<ApplicationListPlace> placesBox;
-  @UiField DivElement error;
-  @UiField NotificationMole mole;
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-  public ScaffoldShell() {
-    initWidget(BINDER.createAndBindUi(this));
-  }
+	@UiField SimplePanel master;
+	@UiField SimplePanel details;
+	@UiField PlacePickerView<ApplicationListPlace> placesBox;
+	@UiField DivElement error;
+	@UiField NotificationMole mole;
 
-  /**
-   * @return the panel to hold the details
-   */
-  public SimplePanel getDetailsPanel() {
-    return details;
-  }
+	public ScaffoldShell() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-  /**
-   * @return the panel to hold the master list
-   */
-  public SimplePanel getMasterPanel() {
-    return master;
-  }
+	/**
+	 * @return the panel to hold the details
+	 */
+	public SimplePanel getDetailsPanel() {
+		return details;
+	}
 
-  /**
-   * @return the notification mole for loading feedback
-   */
-  public NotificationMole getMole() {
-    return mole;
-  }
+	/**
+	 * @return the panel to hold the master list
+	 */
+	public SimplePanel getMasterPanel() {
+		return master;
+	}
 
-  /**
-   * @return the navigator
-   */
-  public PlacePickerView<ApplicationListPlace> getPlacesBox() {
-    return placesBox;
-  }
+	/**
+	 * @return the notification mole for loading feedback
+	 */
+	public NotificationMole getMole() {
+		return mole;
+	}
 
-  /**
-   * @param string
-   */
-  public void setError(String string) {
-    error.setInnerText(string);
-  }
+	/**
+	 * @return the navigator
+	 */
+	public PlacePickerView<ApplicationListPlace> getPlacesBox() {
+		return placesBox;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void setError(String string) {
+		error.setInnerText(string);
+	}
 }
-

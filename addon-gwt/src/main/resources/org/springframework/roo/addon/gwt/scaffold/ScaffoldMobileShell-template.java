@@ -14,33 +14,34 @@ import com.google.gwt.user.client.ui.Widget;
  * TODO
  */
 public class ScaffoldMobileShell extends Composite {
+	interface Binder extends UiBinder<Widget, ScaffoldMobileShell> {
+	}
 
-  interface Binder extends UiBinder<Widget, ScaffoldMobileShell> { }
-  private static final Binder BINDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-  @UiField SimplePanel body;
-  @UiField DivElement error;
-  @UiField PlacePickerView<ApplicationListPlace> placesBox;
+	@UiField SimplePanel body;
+	@UiField DivElement error;
+	@UiField PlacePickerView<ApplicationListPlace> placesBox;
 
-  public ScaffoldMobileShell() {
-    initWidget(BINDER.createAndBindUi(this));
-  }
+	public ScaffoldMobileShell() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-  /**
-   * @return the body
-   */
-  public SimplePanel getBody() {
-    return body;
-  }
+	/**
+	 * @return the body
+	 */
+	public SimplePanel getBody() {
+		return body;
+	}
 
-  public PlacePickerView<ApplicationListPlace> getPlacesBox() {
-    return placesBox;
-  }
+	public PlacePickerView<ApplicationListPlace> getPlacesBox() {
+		return placesBox;
+	}
 
-  /**
-   * @param string
-   */
-  public void setError(String string) {
-    error.setInnerText(string);
-  }
+	/**
+	 * @param string
+	 */
+	public void setError(String string) {
+		error.setInnerText(string);
+	}
 }
