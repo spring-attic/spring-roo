@@ -23,7 +23,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param dependency to add (required)
 	 */
-	public void addDependency(Dependency dependency);
+	void addDependency(Dependency dependency);
 	
 	/**
 	 * Attempts to remove the specified dependency. If the dependency does not exist according
@@ -36,7 +36,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param dependency to remove (required)
 	 */
-	public void removeDependency(Dependency dependency);
+	void removeDependency(Dependency dependency);
 	
 	/**
 	 * Attempts to add the specified build plugin. If the plugin already exists 
@@ -49,7 +49,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin to add (required)
 	 */
-	public void addBuildPlugin(Plugin plugin);
+	void addBuildPlugin(Plugin plugin);
 	
 	/**
 	 * Attempts to remove the specified build plugin dependency. If the dependency does not 
@@ -62,7 +62,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin to remove (required)
 	 */
-	public void removeBuildPlugin(Plugin plugin);
+	void removeBuildPlugin(Plugin plugin);
 	
 	/**
 	 * Attempts to add the specified repository. If the repository already exists according
@@ -75,7 +75,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param repository to add (required)
 	 */
-	public void addRepository(Repository repository);
+	void addRepository(Repository repository);
 	
 	/**
 	 * Attempts to remove the specified repository. If the repository does not 
@@ -88,7 +88,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param repository to remove (required)
 	 */
-	public void removeRepository(Repository repository);
+	void removeRepository(Repository repository);
 	
 	/**
 	 * Attempts to add the specified plugin repository. If the plugin repository already exists according
@@ -101,7 +101,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin repository to add (required)
 	 */
-	public void addPluginRepository(Repository repository);
+	void addPluginRepository(Repository repository);
 	
 	/**
 	 * Attempts to remove the specified plugin repository. If the plugin repository does not 
@@ -114,7 +114,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param plugin repository to remove (required)
 	 */
-	public void removePluginRepository(Repository repository);
+	void removePluginRepository(Repository repository);
 
 	/**
 	 * Attempts to add the specified property. If the property already exists 
@@ -127,7 +127,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param property to add (required)
 	 */
-	public void addProperty(Property property);
+	void addProperty(Property property);
 	
 	/**
 	 * Attempts to remove the specified property dependency. If the dependency does not 
@@ -140,7 +140,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param property to remove (required)
 	 */
-	public void removeProperty(Property property);
+	void removeProperty(Property property);
 
 	/**
 	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the 
@@ -152,5 +152,5 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * 
 	 * @param ProjectType to update (required)
 	 */
-	public void updateProjectType(ProjectType projectType);
+	void updateProjectType(ProjectType projectType);
 }

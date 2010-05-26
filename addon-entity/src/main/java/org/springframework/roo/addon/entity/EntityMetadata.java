@@ -29,7 +29,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -46,10 +45,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
- *
  */
 public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
@@ -60,7 +57,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private EntityMetadata parent;
 	private boolean noArgConstructor;
 	private String plural;
-	private ProjectMetadata projectMetadata;
+	private boolean isGaeEnabled;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
@@ -90,7 +87,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.parent = parent;
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
-		this.projectMetadata = projectMetadata;
+		this.isGaeEnabled = projectMetadata.isGaeEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -200,7 +197,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Compute the column name, as required
 		if (!hasIdClass) {
 			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			String generationType = isGaeDetected() ? "IDENTITY" : "AUTO";
+			String generationType = isGaeEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
@@ -235,8 +232,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			annotations.add(columnAnnotation);
 		}
 		
-		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
-		return field;
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
 	}
 	
 	/**
@@ -271,6 +267,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
+		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
@@ -301,6 +298,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We declared the field in this ITD, so produce a public mutator for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
+		
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
@@ -367,8 +365,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 		
-		FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, versionType, null, annotations);
-		return field;
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, versionType, null, annotations);
 	}
 
 	/**
@@ -557,6 +554,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create the constructor
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
+		
 		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 	
@@ -635,10 +633,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create the method
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(annotation);
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>(); 
+		addTransactionalAnnotation(annotations);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
@@ -672,7 +668,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Persist
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations) {
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		if (isGaeEnabled) {
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
+		}
+		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes);
+		annotations.add(annotation);
 	}
 	
 	/**
@@ -731,9 +737,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		bodyBuilder.appendFormalLine("if (em == null) throw new IllegalStateException(\"Entity manager has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return em;");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		modifier = modifier |= Modifier.FINAL;
+		int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+		
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), null, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
@@ -755,11 +760,16 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult()).longValue();");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	/**
@@ -786,14 +796,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+		
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
@@ -820,6 +833,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
@@ -827,9 +845,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("if (id == null) return null;");
 		}
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		
+		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	/**
@@ -861,12 +879,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+		if (isGaeEnabled) {
+			addTransactionalAnnotation(annotations);
+		}
+		
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
@@ -889,15 +910,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public String getPlural() {
 		return plural;
-	}
-
-	private boolean isGaeDetected() {
-		for (Dependency dependency : projectMetadata.getDependencies()) {
-			if ("com.google.appengine".equals(dependency.getGroupId().getFullyQualifiedPackageName()) && "appengine-api-1.0-sdk".equals(dependency.getArtifactId().getSymbolName())) {
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	public String toString() {

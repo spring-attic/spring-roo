@@ -24,7 +24,6 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider implements IdentifierMetadataProvider {
-
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	
