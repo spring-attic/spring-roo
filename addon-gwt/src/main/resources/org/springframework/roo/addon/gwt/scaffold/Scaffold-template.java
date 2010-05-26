@@ -23,6 +23,7 @@ import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.gwt.ui.ApplicationKeyNameRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
 

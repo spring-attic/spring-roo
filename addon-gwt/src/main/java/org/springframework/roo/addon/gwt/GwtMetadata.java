@@ -187,12 +187,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL, new JavaSymbolName("TYPE"), fieldType, fieldInitializer, null);
 		fields.add(fieldMetadata);
 
-		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record, com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation writeOperation) {
+		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record, com.google.gwt.valuestore.shared.WriteOperation) {
 		// super(record, writeOperation);
 		// }
 		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
 		constructorParameterTypes.add(getDestinationJavaType(MirrorType.RECORD));
-		constructorParameterTypes.add(new JavaType("com.google.gwt.requestfactory.shared.RequestFactory.WriteOperation"));
+		constructorParameterTypes.add(new JavaType("com.google.gwt.valuestore.shared.WriteOperation"));
 		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
 		constructorParameterNames.add(new JavaSymbolName("record"));
 		constructorParameterNames.add(new JavaSymbolName("writeOperation"));
