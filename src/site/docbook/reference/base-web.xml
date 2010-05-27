@@ -289,13 +289,13 @@ public class PersonController {}</programlisting>If you don't define a custom
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">controller class</emphasis> --class com.foo.web.CarController --preferredMapping /pubic/car
+        <para><programlisting>roo&gt; <emphasis role="bold">controller class</emphasis> --class com.foo.web.CarController --preferredMapping /public/car
 Created SRC_MAIN_JAVA/com/foo/web/CarController.java
-Created SRC_MAIN_WEBAPP/WEB-INF/views/pubic/car
-Created SRC_MAIN_WEBAPP/WEB-INF/views/pubic/car/index.jspx
+Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car
+Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car/index.jspx
 Managed SRC_MAIN_WEBAPP/WEB-INF/i18n/application.properties
 Managed SRC_MAIN_WEBAPP/WEB-INF/views/menu.jspx
-Created SRC_MAIN_WEBAPP/WEB-INF/views/pubic/car/views.xml
+Created SRC_MAIN_WEBAPP/WEB-INF/views/public/car/views.xml
 </programlisting>The controller class command is different from the other two
         controller commands shown above. It does <emphasis>not</emphasis>
         generate an ITD with update, create, delete and other methods to
@@ -305,7 +305,7 @@ Created SRC_MAIN_WEBAPP/WEB-INF/views/pubic/car/views.xml
         <emphasis>get</emphasis>(), <emphasis>post</emphasis>() and
         <emphasis>index</emphasis>() method inside the controller:</para>
 
-        <para><programlisting>@RequestMapping("/pubic/car/**")
+        <para><programlisting>@RequestMapping("/public/car/**")
 @Controller
 public class CarController {
 
@@ -321,7 +321,7 @@ public class CarController {
 
     @RequestMapping
     public String index() {
-        return "pubic/car/index";
+        return "public/car/index";
     }
 }
 </programlisting>In addition, this controller is registered in the Web MVC
