@@ -1,11 +1,11 @@
 #parse ("common.vm")
 package $packageName;
 
+import com.google.gwt.app.place.AbstractRecordListActivity;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.valuestore.ui.AbstractRecordListActivity;
 #declareImports()
 
 /**
