@@ -82,7 +82,19 @@
     <para>* The JDBC driver dependency for Oracle and DB2 are not available in
     public Maven repositories, so Roo installs a dummy dependency in your
     project pom.xml. You need to adjust it according to your specific version
-    of your database driver available in your private Maven repository.</para>
+    of your database driver available in your private Maven repository.
+    </para>
+
+    <para>Some useful hints to get started with Orcale Express: After
+    installing Oracle Express you need to find the jdbc driber under
+    ${oracle-xe}\app\oracle\product\10.2.0\server\jdbc\lib and run the
+    command: </para>
+
+    <programlisting>mvn install:install-file -Dfile=ojdbc14_g.jar -DgroupId=com.oracle -DartifactId=ojdbc14 -Dversion=10.2.0.2 -Dpackaging=jar -DgeneratePom=true </programlisting>
+
+    <para>Also, if you dont want Jetty (or Tomcat) to be conflicting with
+    oracle-xe web-server you should use: mvn jetty:run
+    -Djetty.port=8090.</para>
 
     <para>ORM Provider Options:</para>
 
