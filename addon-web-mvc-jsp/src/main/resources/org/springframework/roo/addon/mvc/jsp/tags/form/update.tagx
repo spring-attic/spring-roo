@@ -23,9 +23,8 @@
 		<c:if test="${empty versionField}">
 			<c:set value="version" var="versionField"/>
 		</c:if>
-	    <spring:message arguments="${label}" code="entity.update" var="title_msg"/>
+
 	    <page:page id="title" title="${title_msg}">
-	        <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_div', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
 	        <spring:url value="${path}" var="form_url"/>
 	        <form:form action="${form_url}" method="PUT" modelAttribute="${modelAttribute}">
 	            <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
