@@ -689,7 +689,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					}
 					if (typeEntityMetadata != null) {
 						if (accessor.getMethodName().equals(typeEntityMetadata.getIdentifierAccessor().getMethodName()) ||
-								accessor.getMethodName().equals(typeEntityMetadata.getVersionAccessor().getMethodName())) {
+								(typeEntityMetadata.getVersionAccessor() != null) && accessor.getMethodName().equals(typeEntityMetadata.getVersionAccessor().getMethodName())) {
 							continue;
 						}
 					}
