@@ -289,8 +289,8 @@
 			</plugin>
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>6.1.22</version>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>7.1.2.v20100523</version>
 			</plugin>
 		</plugins>
 	</build>
