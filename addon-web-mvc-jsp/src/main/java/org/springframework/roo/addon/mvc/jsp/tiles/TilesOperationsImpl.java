@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.mvc.jsp;
+package org.springframework.roo.addon.mvc.jsp.tiles;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -162,7 +162,7 @@ public class TilesOperationsImpl implements TilesOperations {
 	private class TilesDtdResolver implements EntityResolver {		
 		public InputSource resolveEntity (String publicId, String systemId) {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
-				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "layout/tiles-config_2_1.dtd"));
+				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			} else {
 				// use the default behaviour
 				return null;

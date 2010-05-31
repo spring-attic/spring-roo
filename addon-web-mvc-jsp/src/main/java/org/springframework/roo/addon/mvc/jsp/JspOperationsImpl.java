@@ -16,7 +16,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.menu.MenuOperations;
+import org.springframework.roo.addon.mvc.jsp.menu.MenuOperations;
+import org.springframework.roo.addon.mvc.jsp.tiles.TilesOperations;
+import org.springframework.roo.addon.mvc.jsp.tiles.TilesOperationsImpl;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -97,9 +99,9 @@ public class JspOperationsImpl implements JspOperations {
 		copyDirectoryContents("styles/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/classes"));
 
 		// Install layout
-		copyDirectoryContents("layout/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
-		copyDirectoryContents("layout/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
-		copyDirectoryContents("layout/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
+		copyDirectoryContents("tiles/default.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
+		copyDirectoryContents("tiles/layouts.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/"));
+		copyDirectoryContents("tiles/views.xml", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
 
 		// Install common view files
 		copyDirectoryContents("*.jspx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/"));
@@ -245,7 +247,7 @@ public class JspOperationsImpl implements JspOperations {
 	 */
 	private void updateConfiguration() {
 		// Add tiles dependencies to pom
-		Element configuration = XmlUtils.getConfiguration(getClass(), "layout/configuration.xml");
+		Element configuration = XmlUtils.getConfiguration(getClass(), "tiles/configuration.xml");
 
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
@@ -268,7 +270,7 @@ public class JspOperationsImpl implements JspOperations {
 			return; // Tiles is already configured, nothing to do
 		}
 
-		InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "layout/tiles-mvc-config-template.xml");
+		InputStream configTemplateInputStream = TemplateUtils.getTemplate(getClass(), "tiles/tiles-mvc-config-template.xml");
 		Assert.notNull(configTemplateInputStream, "Could not acquire dependencies.xml file");
 		Document configDoc;
 		try {

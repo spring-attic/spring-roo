@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.menu;
+package org.springframework.roo.addon.mvc.jsp.menu;
 
 import java.util.List;
 
@@ -7,7 +7,9 @@ import org.springframework.roo.model.JavaSymbolName;
 /**
  * Interface to {@link MenuOperations}.
  * 
+ * @author Stefan Schmidt
  * @author Ben Alex
+ * @since 1.1
  *
  */
 public interface MenuOperations {
@@ -28,22 +30,27 @@ public interface MenuOperations {
 	 * <i>addon-name_intention_menu_item</i>.
 	 *  
 	 * 
-	 * @param menuCategoryId the identifier for the menu category (required)
-	 * @param menuCategoryLabel the category label (required)
-	 * @param menuItemId the menu item identifier (required)
-	 * @param menuItemLabel the menu item label (required)
+	 * @param menuCategoryName the identifier for the menu category (required)
+	 * @param menuItemName the menu item identifier (required)
+	 * @param globalMessageCode message code for the menu item (required)
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
 	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link, String idPrefix);
 
+	/**
+	 * Attempts to locate a unused finder menu items and remove them. 
+	 * 
+	 * @param menuCategoryName the identifier for the menu category (required)
+	 * @param allowedFinderMenuIds Finder menu ids currently installed
+	 */
 	void cleanUpFinderMenuItems(JavaSymbolName menuCategoryName, List<String> allowedFinderMenuIds);
 
 	/**
 	 * Attempts to locate a menu item and remove it. 
 	 * 
-	 * @param menuCategoryId the identifier for the menu category (required)
-	 * @param menuItemId the menu item identifier (required)
+	 * @param menuCategoryName the identifier for the menu category (required)
+	 * @param menuItemName the menu item identifier (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
 	void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix);

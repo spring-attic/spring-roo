@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.web.menu</artifactId>
+            <artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>

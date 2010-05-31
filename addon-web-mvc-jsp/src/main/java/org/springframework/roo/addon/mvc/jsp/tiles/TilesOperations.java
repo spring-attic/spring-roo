@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.mvc.jsp;
+package org.springframework.roo.addon.mvc.jsp.tiles;
 
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 

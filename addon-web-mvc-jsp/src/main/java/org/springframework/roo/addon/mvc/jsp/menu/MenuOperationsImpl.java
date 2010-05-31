@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.menu;
+package org.springframework.roo.addon.mvc.jsp.menu;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
