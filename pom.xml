@@ -44,6 +44,7 @@
         <module>addon-test</module>
         <module>addon-backup</module>
         <module>addon-serializable</module>
+        <module>addon-web-menu</module>
         <module>addon-web-mvc-controller</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-security</module>
@@ -51,6 +52,7 @@
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
 	<module>addon-gwt</module>
+	<module>addon-dbre</module>
         <module>annotations</module>
     </modules>
 
