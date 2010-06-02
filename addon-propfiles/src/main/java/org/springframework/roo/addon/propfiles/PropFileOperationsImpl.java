@@ -2,7 +2,10 @@ package org.springframework.roo.addon.propfiles;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -146,4 +149,27 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		return result;
 	}
 
+	public Map<String, String> getProperties(Path propertyFilePath, String propertyFilename) {
+		Assert.notNull(propertyFilePath, "Property file path required");
+		Assert.hasText(propertyFilename, "Property filename required");
+		
+		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		Properties props = new Properties();
+		
+		try {
+			if (fileManager.exists(filePath)) {
+				props.load(new FileInputStream(filePath));
+			} else {
+				throw new IllegalStateException("Properties file not found");
+			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
+		
+		Map<String, String> result = new HashMap<String, String>();
+		for (Object key : props.keySet()) {
+			result.put(key.toString(), props.getProperty(key.toString()));
+		}
+		return Collections.unmodifiableMap(result);
+	}
 }
