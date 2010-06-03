@@ -56,19 +56,28 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		// Compute the plural form, if needed
 		if ("".equals(this.value)) {
-			value = pluralize(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
+			value = getInflectorPlural(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private String pluralize(String what, Locale locale) {
+	/**
+	 * This method returns the plural term as per inflector.
+	 * 
+	 * ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
+	 * 
+	 * @param term The term to be pluralized
+	 * @param locale Locale
+	 * @return pluralized term
+	 */
+	public String getInflectorPlural(String term, Locale locale) {
 		try {
-			return Noun.pluralOf(what, locale);
+			return Noun.pluralOf(term, locale);
 		} catch (RuntimeException re) {
 			// Inflector failed (see for example ROO-305), so don't pluralize it
-			return what;
+			return term;
 		}
 	}
 	
@@ -103,7 +112,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		if ("".equals(thePlural)) {
 			// Manually compute the plural, as the user did not provided one
-			thePlural = pluralize(symbolName, Locale.ENGLISH);
+			thePlural = getInflectorPlural(symbolName, Locale.ENGLISH);
 		}
 		if (cache == null) {
 			// Create the cache (we defer this in case there is no field plural retrieval ever required for this instance)

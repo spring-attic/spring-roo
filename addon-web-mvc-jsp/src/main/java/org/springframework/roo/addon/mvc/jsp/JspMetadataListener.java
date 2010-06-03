@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -202,6 +203,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				"global.menu.list",
 				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}",
 				MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+		
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
+		Assert.notNull(pluralMetadata, "Could not determine plural for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
+		
+		// fix for ROO-869
+		if (!getPlural(beanInfoMetadata.getJavaBean()).equals(pluralMetadata.getInflectorPlural(beanInfoMetadata.getJavaBean().getSimpleTypeName(), Locale.ENGLISH))) {
+			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName(pluralMetadata.getInflectorPlural(beanInfoMetadata.getJavaBean().getSimpleTypeName(), Locale.ENGLISH)), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+		}
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
