@@ -94,30 +94,28 @@ public class MenuOperationsImpl implements MenuOperations {
 		
 		//check for existence of menu category by looking for the indentifier provided
 		Element category = XmlUtils.findFirstElement("//*[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
-		
+			
 		//if not exists, create new one
 		if(category == null) {
 			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document)
 															.addAttribute("id", "c:" + menuCategoryName.getSymbolName().toLowerCase())
-															.addAttribute("name", menuCategoryName.getSymbolName())
 														.build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
 			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label", menuCategoryName.getReadableSymbolName());
-		} 
+		}
 		
 		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
 			menuItem = new XmlElementBuilder("menu:item", document)
-							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase())
-							.addAttribute("name", menuItemName.getSymbolName())
+							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase())
 							.addAttribute("messageCode", globalMessageCode)
 							.addAttribute("url", link)
 						.build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
-			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName());
+			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName());
 		}
 		writeToDiskIfNecessary(document);
 	}
@@ -169,7 +167,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		//find menu item under this category if exists 
-		Element element = XmlUtils.findFirstElement("//category[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
+		Element element = XmlUtils.findFirstElement("//category[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
 		if(element==null) {
 			return;
 		}
@@ -284,7 +282,6 @@ public class MenuOperationsImpl implements MenuOperations {
 	    Properties readProps = new Properties();
 	    try {
             if (fileManager.exists(filePath)) {
-            	
             	readProps.load(fileManager.getInputStream(filePath));
             } else {
             	throw new IllegalStateException("Properties file not found");
@@ -292,9 +289,11 @@ public class MenuOperationsImpl implements MenuOperations {
 	    } catch (IOException ioe) {
 	    	throw new IllegalStateException(ioe);
 	    }
-	    if (null == readProps.getProperty(key)) {
+	    if (null == readProps.getProperty(key) || !readProps.getProperty(key).equals(value)) {
 	    	MutableFile mutableFile = fileManager.updateFile(filePath);
 		    Properties props = new Properties() {
+				private static final long serialVersionUID = 1L;
+
 				//override the keys() method to order the keys alphabetically
 		        @Override 
 		        @SuppressWarnings("unchecked")
@@ -309,7 +308,10 @@ public class MenuOperationsImpl implements MenuOperations {
 		        	}
 		    	};
 		    try {
-		    	props.load(mutableFile.getInputStream());	
+		    	props.load(mutableFile.getInputStream());
+		    	if (props.getProperty(key) != null && !props.getProperty(key).equals(value)) {
+		    		props.remove(key);
+		    	}
 				props.setProperty(key, value);   
 		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
 		    } catch (IOException ioe) {

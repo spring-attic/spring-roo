@@ -158,6 +158,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
 		JavaSymbolName categoryName = getControllerPathSymbolName(controllerPath);
+		
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
@@ -360,7 +361,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	    Properties readProps = new Properties();
 	    try {
             if (fileManager.exists(filePath)) {
-            	
             	readProps.load(fileManager.getInputStream(filePath));
             } else {
             	throw new IllegalStateException("Properties file not found");
@@ -368,7 +368,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	    } catch (IOException ioe) {
 	    	throw new IllegalStateException(ioe);
 	    }
-	    if (null == readProps.getProperty(key)) {
+	    if (null == readProps.getProperty(key) || !readProps.getProperty(key).equals(value)) {
 	    	MutableFile mutableFile = fileManager.updateFile(filePath);
 		    Properties props = new Properties() {
 				private static final long serialVersionUID = 1L;
@@ -387,7 +387,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		        	}
 		    	};
 		    try {
-		    	props.load(mutableFile.getInputStream());	
+		    	props.load(mutableFile.getInputStream());
+		    	if (props.getProperty(key) != null && !props.getProperty(key).equals(value)) {
+		    		props.remove(key);
+		    	}
 				props.setProperty(key, value);   
 		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
 		    } catch (IOException ioe) {
@@ -411,11 +414,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	}
     
     private JavaSymbolName getControllerPathSymbolName(String controllerPath) {
-		String cleanControllerPath[] = controllerPath.split("/");
-		StringBuilder cleanControllerName = new StringBuilder();
-		for (String piece: cleanControllerPath) {
-			cleanControllerName.append(StringUtils.capitalize(piece));
-		}
-		return new JavaSymbolName(cleanControllerName.toString());
-    }
+    	String cleanControllerPath[] = controllerPath.split("/");
+    	StringBuilder cleanControllerName = new StringBuilder();
+    	for (String piece: cleanControllerPath) {
+    		cleanControllerName.append(StringUtils.capitalize(piece));
+    	}
+    	return new JavaSymbolName(cleanControllerName.toString());
+	}
 }

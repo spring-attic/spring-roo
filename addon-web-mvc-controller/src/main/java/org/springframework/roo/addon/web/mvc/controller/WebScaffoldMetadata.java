@@ -692,7 +692,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 							continue;
 						}
 					}
-					FieldMetadata field = typeBeanInfoMetadata.getFieldForPropertyName(typeBeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+					FieldMetadata field = typeBeanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
 					if (field != null // should not happen
 							&& !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() // exclude collections and arrays
 							&& !getSpecialDomainTypes(conversionType).contains(field.getFieldType()) // exclude references to other domain objects as they are too verbose
@@ -842,7 +842,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			// not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(bim.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
 				continue;
 			}
@@ -871,7 +871,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			// not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
 				continue;
 			}
@@ -911,7 +911,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
 		for (MethodMetadata mutator : bim.getPublicMutators()) {
-			if (fieldMetadata.equals(bim.getFieldForPropertyName(bim.getPropertyNameForJavaBeanMethod(mutator))))
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator))))
 				return true;
 		}
 		return false;
