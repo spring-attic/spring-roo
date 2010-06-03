@@ -189,7 +189,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName());
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName fieldName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
 			String fieldResourceId = resourceId + "." + fieldName.getSymbolName().toLowerCase();
 			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, fieldName.getReadableSymbolName());
 		}
@@ -275,7 +275,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	private List<FieldMetadata> getElegibleFields() {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			
 			if(field != null && hasMutator(field)) {
@@ -296,7 +296,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	
 	private boolean hasMutator(FieldMetadata fieldMetadata) {
 		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}

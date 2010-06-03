@@ -220,14 +220,23 @@ public class JspViewManager {
 										.addAttribute("path", "/${dependency[1]}").build();
 		fieldReference.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldReference));
 		
+		Element message = new XmlElementBuilder("spring:message", document).addAttribute("id", "ms:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()).addAttribute("code", "entity.dependency.required").build();
+		message.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(message));
+		
+		Element p = new XmlElementBuilder("p", document).addAttribute("id", "p:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()).addChild(fieldReference).build();
+		p.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(p));
+		
+		Element forEach = new XmlElementBuilder("c:forEach", document).addAttribute("id", "fe:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()).addAttribute("var", "dependency").addAttribute("items", "${dependencies}")
+								.addChild(p)
+							.build();
+		forEach.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(forEach));
+		
 		Element formPage = new XmlElementBuilder("form:page", document)
 									.addAttribute("id", "fs:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
 									.addAttribute("title", beanInfoMetadata.getJavaBean().getSimpleTypeName())
 									.addAttribute("render", "${not empty dependencies}")
-									.addChild(new XmlElementBuilder("spring:message", document).addAttribute("code", "entity.dependency.required").build())
-									.addChild(new XmlElementBuilder("c:forEach", document).addAttribute("var", "dependency").addAttribute("items", "${dependencies}")
-													.addChild(new XmlElementBuilder("p", document).addChild(fieldReference).build())
-												.build())
+									.addChild(message)
+									.addChild(forEach)
 								.build();
 		formPage.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formPage));
 
