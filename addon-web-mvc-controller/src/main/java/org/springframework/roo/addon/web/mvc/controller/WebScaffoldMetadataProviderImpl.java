@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -9,6 +12,7 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -64,24 +68,68 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		
 		// We also need to be informed if a referenced type is changed
-		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-					
-			//not interested in identifiers and version fields
-			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
-				continue;
-			}
-			JavaType type = accessor.getReturnType();
-
-			String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA);
-			//we are only interested if the type is part of our application and if no editor exists for it already
-			if (metadataService.get(physicalTypeIdentifier) != null) {
-				metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
-			}
+		for (JavaType type: getSpecialDomainTypes(beanInfoMetadata.getJavaBean())) {
+			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
+	}
+	
+	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType) {
+		SortedSet<JavaType> specialTypes = new TreeSet<JavaType>();
+		BeanInfoMetadata bim = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (bim == null) { 
+			//unable to get metadata so it is not a JavaType in our project anyway.
+			return specialTypes;
+		}
+		EntityMetadata em = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (em == null) { 
+			//unable to get entity metadata so it is not a Entity in our project anyway.
+			return specialTypes;
+		}
+		for (MethodMetadata accessor : bim.getPublicAccessors(false)) {
+			// not interested in identifiers and version fields
+			if (accessor.equals(em.getIdentifierAccessor()) || accessor.equals(em.getVersionAccessor())) {
+				continue;
+			}
+			// not interested in fields that are not exposed via a mutator
+			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
+				continue;
+			}
+			JavaType type = accessor.getReturnType();
+			if (type.isCommonCollectionType()) {
+				for (JavaType genericType : type.getParameters()) {
+					if (isSpecialType(genericType)) {
+						specialTypes.add(genericType);
+					}
+				}
+			} else {
+				if (isSpecialType(type)) {
+					
+					specialTypes.add(type);
+				}
+			}
+		}
+		return specialTypes;
+	}
+	
+	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
+		for (MethodMetadata mutator : bim.getPublicMutators()) {
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator))))
+				return true;
+		}
+		return false;
+	}
+
+	private boolean isSpecialType(JavaType javaType) {
+		// we are only interested if the type is part of our application 
+		if (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null) {
+			return true;
+		}
+		return false;
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
