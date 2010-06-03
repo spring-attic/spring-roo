@@ -213,8 +213,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 			
 			// Candidate not found, so let's create one
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.Random"), "new java.security.SecureRandom()", null);
-			return field;
+			return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.Random"), "new java.security.SecureRandom()", null);
 		}
 	}
 
@@ -258,8 +257,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			}
 			
 			// Candidate not found, so let's create one
-			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams), null, null);
-			return field;
+			return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams), null, null);
 		}
 	}
 
@@ -289,7 +287,26 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		for (MethodMetadata mutator : mandatoryMutators) {
 			String initializer = mutatorArguments.get(mutator);
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator);
-			bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
+
+			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
+			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
+			if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
+				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
+				AnnotationAttributeValue<?> maxAttributeValue;
+				if (sizeAnnotationMetadata != null && (maxAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"))) != null) {
+					bodyBuilder.appendFormalLine("String " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
+					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + (Integer) maxAttributeValue.getValue() + ") {");
+					bodyBuilder.indent();
+					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ".substring(0, " + (Integer) maxAttributeValue.getValue() + ");");
+					bodyBuilder.indentRemove();
+					bodyBuilder.appendFormalLine("}");
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
+				} else {
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
+				}
+			} else {
+				bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
+			}
 		}
 		
 		bodyBuilder.appendFormalLine("return obj;");
@@ -470,10 +487,22 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					initializer = "new java.util.Date()";
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || field.getAnnotations().size() == 0) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || field.getAnnotations().size() == 0) {
 				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
 				if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
-					initializer = "\"" + field.getFieldName().getSymbolName() + "_\" + index";
+					initializer = field.getFieldName().getSymbolName();
+					AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
+					if (sizeAnnotationMetadata != null) {
+						AnnotationAttributeValue<?> maxAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"));
+						if (maxAttributeValue != null && (initializer.length() + 2) > (Integer) maxAttributeValue.getValue()) {
+							initializer = initializer.substring(0, (Integer) maxAttributeValue.getValue() - 2); 
+						}
+						AnnotationAttributeValue<?> minAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("min"));
+						if (minAttributeValue != null && (initializer.length() + 2) < (Integer) minAttributeValue.getValue()) {
+							initializer = String.format("%1$-" + ((Integer) minAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
+						}
+					}
+					initializer = "\"" + initializer + "_\" + index";
 				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
 						initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH) - 1)";
