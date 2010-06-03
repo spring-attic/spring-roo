@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -25,6 +26,7 @@ import org.springframework.roo.support.util.Assert;
  * Provides property file configuration operations.
  *
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.0
  */
 @Component
@@ -40,6 +42,10 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	}
 	
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
+		changeProperty(propertyFilePath, propertyFilename, key, value, false);
+	}
+	
+	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -47,7 +53,30 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
-		Properties props = new Properties();
+		
+		Properties props;
+		if (sorted) {
+			props = new Properties() {
+				private static final long serialVersionUID = 1L;
+				
+				//override the keys() method to order the keys alphabetically
+				@SuppressWarnings("unchecked")
+				public synchronized Enumeration keys() {
+					final Object[] keys = keySet().toArray();
+					return new Enumeration() {
+						int i = 0;
+						public boolean hasMoreElements() { 
+							return i < keys.length; 
+						}
+						public Object nextElement() { 
+							return keys[i++];
+						}
+					};
+				}
+			};
+		} else {
+			props = new Properties();
+		}
 		
 		try {
 			if (fileManager.exists(filePath)) {
@@ -59,12 +88,15 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-		props.setProperty(key, value);
-		
-		try {
-			props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		String propValue = props.getProperty(key);
+		if (propValue == null || !propValue.equals(value)) {
+			props.setProperty(key, value);
+			
+			try {
+				props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
+			} catch (IOException ioe) {
+				throw new IllegalStateException(ioe);
+			}
 		}
 	}
 	

@@ -6,16 +6,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -42,6 +39,8 @@ public class MenuOperationsImpl implements MenuOperations {
 	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
+	@Reference private PropFileOperations propFileOperations;
+	
 	private String menuFile;
 	
 	protected void activate(ComponentContext context) {
@@ -101,7 +100,7 @@ public class MenuOperationsImpl implements MenuOperations {
 															.addAttribute("id", "c:" + menuCategoryName.getSymbolName().toLowerCase())
 														.build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
-			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label", menuCategoryName.getReadableSymbolName());
+			propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label", menuCategoryName.getReadableSymbolName(), true);
 		}
 		
 		//check for existence of menu item by looking for the indentifier provided
@@ -115,7 +114,7 @@ public class MenuOperationsImpl implements MenuOperations {
 						.build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
-			setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName());
+			propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName(), true);
 		}
 		writeToDiskIfNecessary(document);
 	}
@@ -262,62 +261,5 @@ public class MenuOperationsImpl implements MenuOperations {
 		// A file existed, but it contained the same content, so we return false
 		return false;
 	}
-	
-	 /**
-     * Changes the specified property, throwing an exception if the file does not exist.
-     * 
-     * @param propertyFilePath the location of the property file (required)
-     * @param propertyFilename the name of the property file within the specified path (required)
-     * @param key the property key to update (required)
-     * @param value the property value to set into the property key (required)
-     */
-    private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-	    Assert.notNull(propertyFilePath, "Property file path required");
-	    Assert.hasText(propertyFilename, "Property filename required");
-	    Assert.hasText(key, "Key required");
-	    Assert.hasText(value, "Value required");
-
-	    String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-
-	    Properties readProps = new Properties();
-	    try {
-            if (fileManager.exists(filePath)) {
-            	readProps.load(fileManager.getInputStream(filePath));
-            } else {
-            	throw new IllegalStateException("Properties file not found");
-            }
-	    } catch (IOException ioe) {
-	    	throw new IllegalStateException(ioe);
-	    }
-	    if (null == readProps.getProperty(key) || !readProps.getProperty(key).equals(value)) {
-	    	MutableFile mutableFile = fileManager.updateFile(filePath);
-		    Properties props = new Properties() {
-				private static final long serialVersionUID = 1L;
-
-				//override the keys() method to order the keys alphabetically
-		        @Override 
-		        @SuppressWarnings("unchecked")
-		        public synchronized Enumeration keys() {
-		        	final Object[] keys = keySet().toArray();
-		        	Arrays.sort(keys);
-		        	return new Enumeration() {
-			        	int i = 0;
-			        	public boolean hasMoreElements() { return i < keys.length; }
-			        		public Object nextElement() { return keys[i++]; }
-			        	};
-		        	}
-		    	};
-		    try {
-		    	props.load(mutableFile.getInputStream());
-		    	if (props.getProperty(key) != null && !props.getProperty(key).equals(value)) {
-		    		props.remove(key);
-		    	}
-				props.setProperty(key, value);   
-		    	props.store(mutableFile.getOutputStream() , "Updated " + new Date());
-		    } catch (IOException ioe) {
-		    	throw new IllegalStateException(ioe);
-		    }
-	    }
-    }
 }
 

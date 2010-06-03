@@ -5,11 +5,7 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -19,6 +15,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.addon.mvc.jsp.tiles.TilesOperationsImpl;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -71,6 +68,8 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private MenuOperations menuOperations;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
+	
 	private ComponentContext context;
 
 	protected void activate(ComponentContext context) {
@@ -118,9 +117,8 @@ public class JspOperationsImpl implements JspOperations {
 		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
-				// TODO
 				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
-				setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application.name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1));
+				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application.name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
@@ -234,7 +232,7 @@ public class JspOperationsImpl implements JspOperations {
 			new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 		}
 
-		setProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName());
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName(), true);
 
 		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName(controller.getSimpleTypeName()), "global.menu.new", "/" + folderName + "/index", null);
 
@@ -288,65 +286,6 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
-	}
-
-	/**
-	 * Changes the specified property, throwing an exception if the file does not exist.
-	 * 
-	 * @param propertyFilePath the location of the property file (required)
-	 * @param propertyFilename the name of the property file within the specified path (required)
-	 * @param key the property key to update (required)
-	 * @param value the property value to set into the property key (required)
-	 */
-	private void setProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-		Assert.notNull(propertyFilePath, "Property file path required");
-		Assert.hasText(propertyFilename, "Property filename required");
-		Assert.hasText(key, "Key required");
-		Assert.hasText(value, "Value required");
-
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
-
-		Properties readProps = new Properties();
-		try {
-			if (fileManager.exists(filePath)) {
-
-				readProps.load(fileManager.getInputStream(filePath));
-			} else {
-				throw new IllegalStateException("Properties file not found");
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-		if (null == readProps.getProperty(key)) {
-			MutableFile mutableFile = fileManager.updateFile(filePath);
-			Properties props = new Properties() {
-				private static final long serialVersionUID = 1L;
-
-				// Override the keys() method to order the keys alphabetically
-				@Override
-				@SuppressWarnings("unchecked")
-				public synchronized Enumeration keys() {
-					final Object[] keys = keySet().toArray();
-					Arrays.sort(keys);
-					return new Enumeration() {
-						int i = 0;
-						public boolean hasMoreElements() {
-							return i < keys.length;
-						}
-						public Object nextElement() {
-							return keys[i++];
-						}
-					};
-				}
-			};
-			try {
-				props.load(mutableFile.getInputStream());
-				props.setProperty(key, value);
-				props.store(mutableFile.getOutputStream(), "Updated " + new Date());
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
-		}
 	}
 
 	/**

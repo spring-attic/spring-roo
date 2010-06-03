@@ -398,7 +398,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		boolean listAdded = false;
 		for (MethodMetadata accessorMethod: beanInfoMetadata.getPublicAccessors()) {
 			if (specialDomainTypes.contains(accessorMethod.getReturnType())) {
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessorMethod));
+				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessorMethod));
 				if (null != field && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull"))) {
 					EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(accessorMethod.getReturnType(), Path.SRC_MAIN_JAVA));
 					if (entityMetadata != null) {
