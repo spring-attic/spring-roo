@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * JDBC index metadata.
  * 
@@ -19,6 +21,7 @@ public class Index {
 	private final List<Column> columns = new ArrayList<Column>();
 
 	Index(ResultSet rs) throws SQLException {
+		Assert.notNull(rs, "ResultSet must not be null");
 		name = rs.getString("INDEX_NAME");
 		columnName = rs.getString("COLUMN_NAME");
 		nonUnique = Boolean.valueOf(rs.getBoolean("NON_UNIQUE"));
@@ -53,6 +56,5 @@ public class Index {
 
 	public String toString() {
 		return "    INDEX_NAME " + name +  ", COLUMN_NAME " + columnName + ", NON_UNIQUE " + nonUnique + ", TYPE " + type;
-		
 	}
 }

@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * JDBC primary key metadata.
  * 
@@ -18,6 +20,7 @@ public class PrimaryKey {
 	private final List<Column> columns = new ArrayList<Column>();
 
 	PrimaryKey(ResultSet rs) throws SQLException {
+		Assert.notNull(rs, "ResultSet must not be null");
 		name = rs.getString("PK_NAME");
 		columnName = rs.getString("COLUMN_NAME");
 		keySeq = new Short(rs.getShort("KEY_SEQ"));

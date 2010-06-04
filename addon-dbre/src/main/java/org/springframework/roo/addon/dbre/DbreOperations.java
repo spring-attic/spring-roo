@@ -10,5 +10,7 @@ public interface DbreOperations {
 
 	boolean isDbreAvailable();
 	
-	void displayDatabaseMetadata(String table);
+	void displayMetadata(String table);
+	
+	void reverseEngineer();
 }

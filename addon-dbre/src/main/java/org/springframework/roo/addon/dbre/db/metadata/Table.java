@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -21,7 +22,9 @@ public class Table {
 	private final String tableType;
 	private final DatabaseMetaData databaseMetaData;
 
-	public Table(ResultSet rs, DatabaseMetaData databaseMetaData) throws SQLException {
+	Table(ResultSet rs, DatabaseMetaData databaseMetaData) throws SQLException {
+		Assert.notNull(rs, "ResultSet must not be null");
+		Assert.notNull(databaseMetaData, "Database metadata must not be null");
 		this.catalog = rs.getString("TABLE_CAT");
 		this.schema = rs.getString("TABLE_SCHEM");
 		this.table = rs.getString("TABLE_NAME");

@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.StringTokenizer;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * JDBC column metadata.
  * 
@@ -20,6 +22,7 @@ public class Column {
 	private final String typeName;
 
 	Column(ResultSet rs) throws SQLException {
+		Assert.notNull(rs, "ResultSet must not be null");
 		name = rs.getString("COLUMN_NAME");
 		dataType = rs.getInt("DATA_TYPE");
 		columnSize = rs.getInt("COLUMN_SIZE");

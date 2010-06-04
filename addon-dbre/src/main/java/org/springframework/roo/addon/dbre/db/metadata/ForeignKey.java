@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * JDBC foreign key metadata.
  * 
@@ -17,6 +19,7 @@ public class ForeignKey {
 	private final List<Column> columns = new ArrayList<Column>();
 
 	ForeignKey(ResultSet rs) throws SQLException {
+		Assert.notNull(rs, "ResultSet must not be null");
 		name = rs.getString("FK_NAME");
 		fkTable = rs.getString("FKTABLE_NAME");
 	}
@@ -35,7 +38,7 @@ public class ForeignKey {
 		}
 	}
 
-	public List<Column >getColumns() {
+	public List<Column> getColumns() {
 		return columns;
 	}
 
