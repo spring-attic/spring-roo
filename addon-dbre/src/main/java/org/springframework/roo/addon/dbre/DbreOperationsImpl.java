@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +14,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.db.connection.ConnectionProvider;
 import org.springframework.roo.addon.dbre.db.connection.ConnectionProviderImpl;
+import org.springframework.roo.addon.dbre.db.metadata.Column;
 import org.springframework.roo.addon.dbre.db.metadata.DbMetadata;
 import org.springframework.roo.addon.dbre.db.metadata.Table;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
@@ -29,6 +31,7 @@ import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Provides database reverse engineering configuration operations.
@@ -127,7 +130,31 @@ public class DbreOperationsImpl implements DbreOperations {
 			throw new IllegalStateException(e);
 		}
 		
+		Element databaseElement = dbre.getDocumentElement();
 		
+		for (Table table : dbMetadata.getTables(null, null)) {
+			String tableName = table.getTable();
+			String tableXPath = "/database/table[@name = '" + tableName + "']";
+			Element tableElement = XmlUtils.findFirstElement(tableXPath, databaseElement);
+			if (tableElement == null) {
+				tableElement = dbre.createElement("table");
+				tableElement.setAttribute("name", tableName);
+				tableElement.setAttribute("catalog", table.getCatalog());
+				tableElement.setAttribute("schema", table.getSchema());
+				tableElement.setAttribute("tableType", table.getTableType());
+			}
+			for (Column column : table.getColumns()) {
+				String columnName = column.getName();
+				Element columnElement = XmlUtils.findFirstElement(tableXPath + "/column[@name = '" + columnName + "']", databaseElement);
+				if (columnElement == null) {
+					columnElement = dbre.createElement("column");
+					columnElement.setAttribute("name", columnName);
+				}
+				tableElement.appendChild(columnElement);
+			}
+			dbre.appendChild(tableElement);
+		}
 		
+		XmlUtils.writeXml(dbreMutableFile.getOutputStream(), dbre);
 	}
 }
