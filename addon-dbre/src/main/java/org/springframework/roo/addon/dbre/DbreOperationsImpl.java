@@ -2,7 +2,6 @@ package org.springframework.roo.addon.dbre;
 
 import java.io.InputStream;
 import java.sql.Connection;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,7 +73,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 		provider.closeConnection(connection);
 	}
-	
+
 	public void reverseEngineer() {
 		Map<String, String> map = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 		ConnectionProvider provider = new ConnectionProviderImpl(map);
@@ -83,34 +82,34 @@ public class DbreOperationsImpl implements DbreOperations {
 		updateDbreXml(dbMetadata);
 		provider.closeConnection(connection);
 	}
-		// System.out.println("driver class = " + map.get("database.driverClassName"));
-		// ServiceReference[] refs = null;
-		// try {
-		// refs = bundleContext.getServiceReferences(DataSource.class.getName(), null);
-		// } catch (InvalidSyntaxException ignore) {}
-		// if (refs == null) {
-		// throw new IllegalStateException("No Datasource-providing bundles found");
-		// }
-		// for (ServiceReference ref : refs) {
-		// System.out.println("REference is " + ref);
-		// Object o = bundleContext.getService(ref);
-		// System.out.println("    > " + o);
-		// }
 
-		// DataSource ds = (DataSource)bundleContext.getService(reference);
-		// DataSource dataSource =
-		// ConnectionProvider provider = new ConnectionProviderImpl();
-		// provider.configure(props);
+	// System.out.println("driver class = " + map.get("database.driverClassName"));
+	// ServiceReference[] refs = null;
+	// try {
+	// refs = bundleContext.getServiceReferences(DataSource.class.getName(), null);
+	// } catch (InvalidSyntaxException ignore) {}
+	// if (refs == null) {
+	// throw new IllegalStateException("No Datasource-providing bundles found");
+	// }
+	// for (ServiceReference ref : refs) {
+	// System.out.println("REference is " + ref);
+	// Object o = bundleContext.getService(ref);
+	// System.out.println("    > " + o);
+	// }
 
-		// Connection connection = provider.getConnection();
-		// try {
-		// Connection connection = ds.getConnection();
+	// DataSource ds = (DataSource)bundleContext.getService(reference);
+	// DataSource dataSource =
+	// ConnectionProvider provider = new ConnectionProviderImpl();
+	// provider.configure(props);
 
-		// } catch (SQLException e) {
-		// throw new IllegalStateException(e);
-		// }
+	// Connection connection = provider.getConnection();
+	// try {
+	// Connection connection = ds.getConnection();
 
-	
+	// } catch (SQLException e) {
+	// throw new IllegalStateException(e);
+	// }
+
 	private void updateDbreXml(DbMetadata dbMetadata) {
 		String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/dbre.xml");
 		MutableFile dbreMutableFile = null;
@@ -129,9 +128,9 @@ public class DbreOperationsImpl implements DbreOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		
+
 		Element databaseElement = dbre.getDocumentElement();
-		
+
 		for (Table table : dbMetadata.getTables(null, null)) {
 			String tableName = table.getTable();
 			String tableXPath = "/database/table[@name = '" + tableName + "']";
@@ -142,17 +141,17 @@ public class DbreOperationsImpl implements DbreOperations {
 				tableElement.setAttribute("catalog", table.getCatalog());
 				tableElement.setAttribute("schema", table.getSchema());
 				tableElement.setAttribute("tableType", table.getTableType());
-			}
-			for (Column column : table.getColumns()) {
-				String columnName = column.getName();
-				Element columnElement = XmlUtils.findFirstElement(tableXPath + "/column[@name = '" + columnName + "']", databaseElement);
-				if (columnElement == null) {
-					columnElement = dbre.createElement("column");
-					columnElement.setAttribute("name", columnName);
+				for (Column column : table.getColumns()) {
+					String columnName = column.getName();
+					Element columnElement = XmlUtils.findFirstElement(tableXPath + "/column[@name = '" + columnName + "']", databaseElement);
+					if (columnElement == null) {
+						columnElement = dbre.createElement("column");
+						columnElement.setAttribute("name", columnName);
+					}
+					tableElement.appendChild(columnElement);
 				}
-				tableElement.appendChild(columnElement);
+				databaseElement.appendChild(tableElement);
 			}
-			dbre.appendChild(tableElement);
 		}
 		
 		XmlUtils.writeXml(dbreMutableFile.getOutputStream(), dbre);
