@@ -3,8 +3,8 @@ package org.springframework.roo.addon.dbre.db.metadata;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -30,6 +30,22 @@ public class Table {
 		this.table = rs.getString("TABLE_NAME");
 		this.tableType = rs.getString("TABLE_TYPE");
 		this.databaseMetaData = databaseMetaData;
+	}
+	
+	public String getId() {
+		StringBuilder builder = new StringBuilder();
+		builder.append(tableType);
+		builder.append(".");
+		if (catalog != null) {
+			builder.append(catalog);
+			builder.append(".");
+		}
+		if (schema != null) {
+			builder.append(schema);
+			builder.append(".");
+		}
+		builder.append(table);
+		return builder.toString();
 	}
 
 	public String getCatalog() {
@@ -69,8 +85,8 @@ public class Table {
 		return null;
 	}
 
-	public List<Column> getColumns() {
-		List<Column> columns = new LinkedList<Column>();
+	public Set<Column> getColumns() {
+		Set<Column> columns = new HashSet<Column>();
 		try {
 			ResultSet rs = null;
 			try {
@@ -110,8 +126,8 @@ public class Table {
 		return null;
 	}
 
-	public List<PrimaryKey> getPrimaryKeys() {
-		List<PrimaryKey> primaryKeys = new LinkedList<PrimaryKey>();
+	public Set<PrimaryKey> getPrimaryKeys() {
+		Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
 		try {
 			ResultSet rs = null;
 			try {
@@ -151,8 +167,8 @@ public class Table {
 		return null;
 	}
 
-	public List<ForeignKey> getForeignKeys() {
-		List<ForeignKey> foreignKeys = new LinkedList<ForeignKey>();
+	public Set<ForeignKey> getForeignKeys() {
+		Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
 		try {
 			ResultSet rs = null;
 			try {
@@ -192,8 +208,8 @@ public class Table {
 		return null;
 	}
 
-	public List<Index> getIndexes() {
-		List<Index> indexes = new LinkedList<Index>();
+	public Set<Index> getIndexes() {
+		Set<Index> indexes = new HashSet<Index>();
 		try {
 			ResultSet rs = null;
 			try {
@@ -263,6 +279,47 @@ public class Table {
 		return rs;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((catalog == null) ? 0 : catalog.hashCode());
+		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+		result = prime * result + ((table == null) ? 0 : table.hashCode());
+		result = prime * result + ((tableType == null) ? 0 : tableType.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Table other = (Table) obj;
+		if (catalog == null) {
+			if (other.catalog != null)
+				return false;
+		} else if (!catalog.equals(other.catalog))
+			return false;
+		if (schema == null) {
+			if (other.schema != null)
+				return false;
+		} else if (!schema.equals(other.schema))
+			return false;
+		if (table == null) {
+			if (other.table != null)
+				return false;
+		} else if (!table.equals(other.table))
+			return false;
+		if (tableType == null) {
+			if (other.tableType != null)
+				return false;
+		} else if (!tableType.equals(other.tableType))
+			return false;
+		return true;
+	}
+
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		final String lineSeparator = System.getProperty("line.separator");
@@ -270,7 +327,7 @@ public class Table {
 		builder.append(tableType + " " + table);
 		builder.append(lineSeparator);
 
-		List<Column> columns = getColumns();
+		Set<Column> columns = getColumns();
 		if (!columns.isEmpty()) {
 			builder.append("  COLUMNS ");
 			builder.append(lineSeparator);
@@ -280,7 +337,7 @@ public class Table {
 			}
 		}
 
-		List<PrimaryKey> primaryKeys = getPrimaryKeys();
+		Set<PrimaryKey> primaryKeys = getPrimaryKeys();
 		if (!primaryKeys.isEmpty()) {
 			builder.append("  PRIMARY KEYS ");
 			builder.append(lineSeparator);
@@ -290,7 +347,7 @@ public class Table {
 			}
 		}
 
-		List<ForeignKey> foreignKeys = getForeignKeys();
+		Set<ForeignKey> foreignKeys = getForeignKeys();
 		if (!foreignKeys.isEmpty()) {
 			builder.append("  FOREIGN KEYS ");
 			builder.append(lineSeparator);
@@ -300,7 +357,7 @@ public class Table {
 			}
 		}
 
-		List<Index> indexes = getIndexes();
+		Set<Index> indexes = getIndexes();
 		if (!indexes.isEmpty()) {
 			builder.append("  INDEXES ");
 			builder.append(lineSeparator);

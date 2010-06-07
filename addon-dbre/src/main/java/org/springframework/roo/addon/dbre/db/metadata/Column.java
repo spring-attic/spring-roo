@@ -31,7 +31,11 @@ public class Column {
 		remarks = rs.getString("REMARKS");
 		typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
 	}
-
+	
+	public String getId() {
+		return name;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -60,7 +64,54 @@ public class Column {
 		return typeName;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + columnSize;
+		result = prime * result + dataType;
+		result = prime * result + decimalDigits;
+		result = prime * result + (isNullable ? 1231 : 1237);
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((remarks == null) ? 0 : remarks.hashCode());
+		result = prime * result + ((typeName == null) ? 0 : typeName.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Column other = (Column) obj;
+		if (columnSize != other.columnSize)
+			return false;
+		if (dataType != other.dataType)
+			return false;
+		if (decimalDigits != other.decimalDigits)
+			return false;
+		if (isNullable != other.isNullable)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (remarks == null) {
+			if (other.remarks != null)
+				return false;
+		} else if (!remarks.equals(other.remarks))
+			return false;
+		if (typeName == null) {
+			if (other.typeName != null)
+				return false;
+		} else if (!typeName.equals(other.typeName))
+			return false;
+		return true;
+	}
+
 	public String toString() {
-		return "    COLUMN_NAME " + name + ", TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + isNullable + ", REMARKS " + remarks ;
+		return "    COLUMN_NAME " + name + ", TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + isNullable + ", REMARKS " + remarks;
 	}
 }

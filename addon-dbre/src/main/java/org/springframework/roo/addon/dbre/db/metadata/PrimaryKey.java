@@ -26,6 +26,10 @@ public class PrimaryKey {
 		keySeq = new Short(rs.getShort("KEY_SEQ"));
 	}
 
+	public String getId() {
+		return name + "." + columnName;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -48,7 +52,42 @@ public class PrimaryKey {
 		return columns;
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnName == null) ? 0 : columnName.hashCode());
+		result = prime * result + ((keySeq == null) ? 0 : keySeq.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PrimaryKey other = (PrimaryKey) obj;
+		if (columnName == null) {
+			if (other.columnName != null)
+				return false;
+		} else if (!columnName.equals(other.columnName))
+			return false;
+		if (keySeq == null) {
+			if (other.keySeq != null)
+				return false;
+		} else if (!keySeq.equals(other.keySeq))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+
 	public String toString() {
-		return "    PK_NAME " + name +  ", COLUMN_NAME " + columnName  + ", KEY_SEQ " + keySeq.toString();
+		return "    PK_NAME " + name + ", COLUMN_NAME " + columnName + ", KEY_SEQ " + keySeq.toString();
 	}
 }

@@ -2,8 +2,10 @@ package org.springframework.roo.addon.dbre;
 
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,7 +15,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.db.connection.ConnectionProvider;
 import org.springframework.roo.addon.dbre.db.connection.ConnectionProviderImpl;
 import org.springframework.roo.addon.dbre.db.metadata.Column;
-import org.springframework.roo.addon.dbre.db.metadata.DbMetadata;
+import org.springframework.roo.addon.dbre.db.metadata.DatabaseModel;
 import org.springframework.roo.addon.dbre.db.metadata.ForeignKey;
 import org.springframework.roo.addon.dbre.db.metadata.Index;
 import org.springframework.roo.addon.dbre.db.metadata.PrimaryKey;
@@ -58,12 +60,12 @@ public class DbreOperationsImpl implements DbreOperations {
 		Map<String, String> map = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 		ConnectionProvider provider = new ConnectionProviderImpl(map);
 		Connection connection = provider.getConnection();
-		DbMetadata dbMetadata = new DbMetadata(connection);
+		DatabaseModel databaseModel = new DatabaseModel(connection);
 		if (StringUtils.hasLength(table)) {
-			Table t = dbMetadata.getTable(null, null, table);
+			Table t = databaseModel.getTable(null, null, table);
 			logger.log(t != null ? Level.INFO : Level.WARNING, t != null ? t.toString() : "Table " + table + " does not exist");
 		} else {
-			String databaseMetaData = dbMetadata.toString();
+			String databaseMetaData = databaseModel.toString();
 			logger.log(StringUtils.hasText(databaseMetaData) ? Level.INFO : Level.WARNING, StringUtils.hasText(databaseMetaData) ? databaseMetaData : "Database metadata unavailable");
 		}
 		provider.closeConnection(connection);
@@ -73,12 +75,12 @@ public class DbreOperationsImpl implements DbreOperations {
 		Map<String, String> map = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 		ConnectionProvider provider = new ConnectionProviderImpl(map);
 		Connection connection = provider.getConnection();
-		DbMetadata dbMetadata = new DbMetadata(connection);
-		updateDbreXml(dbMetadata);
+		DatabaseModel databaseModel = new DatabaseModel(connection);
+		updateDbreXml(databaseModel);
 		provider.closeConnection(connection);
 	}
 
-	private void updateDbreXml(DbMetadata dbMetadata) {
+	private void updateDbreXml(DatabaseModel databaseModel) {
 		String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/dbre.xml");
 		MutableFile dbreMutableFile = null;
 
@@ -98,19 +100,13 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 
 		Element databaseElement = dbre.getDocumentElement();
-
-		// Reset isManaged attribute in tables and columns etc to false
-		List<Element> tables = XmlUtils.findElements("/database/table", databaseElement);
-		for (Element tableElement : tables) {
-			tableElement.setAttribute("isManaged", Boolean.FALSE.toString());
-			resetIsManagedAttribute(tableElement, "column");
-			resetIsManagedAttribute(tableElement, "primaryKey");
-			resetIsManagedAttribute(tableElement, "foreignKey");
-			resetIsManagedAttribute(tableElement, "index");
-		}
-
+		
+		Set<String> tableData = new HashSet<String>();
+		
 		// Add or update tables in xml file
-		for (Table table : dbMetadata.getTables(null, null)) {
+		for (Table table : databaseModel.getTables(null, null)) {
+			String tableId = table.getId();
+			tableData.add(tableId);
 			String tableName = table.getTable();
 			String tableXPath = getTableXPath(tableName);
 			Element tableElement = XmlUtils.findFirstElement(tableXPath, databaseElement);
@@ -118,14 +114,17 @@ public class DbreOperationsImpl implements DbreOperations {
 				// Create new table in xml
 				tableElement = dbre.createElement("table");
 			}
+			tableElement.setAttribute("id", tableId);
 			tableElement.setAttribute("name", tableName);
 			tableElement.setAttribute("catalog", table.getCatalog());
 			tableElement.setAttribute("schema", table.getSchema());
 			tableElement.setAttribute("tableType", table.getTableType());
-			tableElement.setAttribute("isManaged", Boolean.TRUE.toString());
 			
 			// Iterate through columns
-			for (Column column : table.getColumns()) {
+			for (Column column : table.getColumns()) {	
+				String columnId = table.getId() + "." + column.getId();
+				tableData.add(columnId);
+
 				String columnName = column.getName();
 				Element columnElement = XmlUtils.findFirstElement(tableXPath + "/column[@name = '" + columnName + "']", databaseElement);
 				if (columnElement == null) {
@@ -133,61 +132,70 @@ public class DbreOperationsImpl implements DbreOperations {
 					columnElement = dbre.createElement("column");
 				}
 
+				columnElement.setAttribute("id", columnId);
 				columnElement.setAttribute("name", columnName);
 				columnElement.setAttribute("typeName", column.getTypeName());
 				columnElement.setAttribute("dataType", String.valueOf(column.getDataType()));
 				columnElement.setAttribute("columnSize", String.valueOf(column.getColumnSize()));
 				columnElement.setAttribute("decimalDigits", String.valueOf(column.getDecimalDigits()));
 				columnElement.setAttribute("remarks", column.getRemarks());
-				columnElement.setAttribute("isManaged", Boolean.TRUE.toString());
 
 				tableElement.appendChild(columnElement);
 			}
 			
 			// Iterate through primary keys
 			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
+				String primaryKeyId = tableId + "." + primaryKey.getId();
+				tableData.add(primaryKeyId);
+
 				String primaryKeyName = primaryKey.getName();
 				Element primaryKeyElement = XmlUtils.findFirstElement(tableXPath + "/primaryKey[@name = '" + primaryKeyName + "']", databaseElement);
 				if (primaryKeyElement == null) {
 					// Create new primary key for table in xml
 					primaryKeyElement = dbre.createElement("primaryKey");
 				}
+				primaryKeyElement.setAttribute("id", primaryKeyId);
 				primaryKeyElement.setAttribute("name", primaryKeyName);
 				primaryKeyElement.setAttribute("columnName", primaryKey.getColumnName());
 				primaryKeyElement.setAttribute("keySeq", String.valueOf(primaryKey.getKeySeq()));
-				primaryKeyElement.setAttribute("isManaged", Boolean.TRUE.toString());
 				
 				tableElement.appendChild(primaryKeyElement);
 			}
 
 			// Iterate through foreign keys
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
+				String foreignKeyId = tableId + "." + foreignKey.getId();
+				tableData.add(foreignKeyId);
+
 				String foreignKeyName = foreignKey.getName();
 				Element foreignKeyElement = XmlUtils.findFirstElement(tableXPath + "/foreignKey[@name = '" + foreignKeyName + "']", databaseElement);
 				if (foreignKeyElement == null) {
 					// Create new foreign key for table in xml
 					foreignKeyElement = dbre.createElement("foreignKey");
 				}
+				foreignKeyElement.setAttribute("id", foreignKeyId);
 				foreignKeyElement.setAttribute("name", foreignKeyName);
 				foreignKeyElement.setAttribute("fkTable", foreignKey.getFkTable());
-				foreignKeyElement.setAttribute("isManaged", Boolean.TRUE.toString());
 				
 				tableElement.appendChild(foreignKeyElement);
 			}
 			
 			// Iterate through indexes
 			for (Index index : table.getIndexes()) {
+				String indexId = tableId + "." + index.getId();
+				tableData.add(indexId);
+
 				String indexName = index.getName();
 				Element indexElement = XmlUtils.findFirstElement(tableXPath + "/index[@name = '" + indexName + "']", databaseElement);
 				if (indexElement == null) {
 					// Create new primary key for table
 					indexElement = dbre.createElement("index");
 				}
+				indexElement.setAttribute("id", indexId);
 				indexElement.setAttribute("name", indexName);
 				indexElement.setAttribute("columnName", index.getColumnName());
 				indexElement.setAttribute("nonUnique", new Boolean(index.isNonUnique()).toString());
 				indexElement.setAttribute("type", String.valueOf(index.getType()));
-				indexElement.setAttribute("isManaged", Boolean.TRUE.toString());
 				
 				tableElement.appendChild(indexElement);
 			}
@@ -196,14 +204,15 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 		
 		// Check for deleted tables and columns etc in schema and remove from xml 
-		for (Element tableElement : tables) {
-			if (!Boolean.parseBoolean(tableElement.getAttribute("isManaged"))) {
+		List<Element> xmlTables = XmlUtils.findElements("/database/table", databaseElement);
+		for (Element tableElement : xmlTables) {
+			if (!tableData.contains(tableElement.getAttribute("id"))) {
 				databaseElement.removeChild(tableElement);
 			} else {
-				removeTableAttributes(tableElement, "column");
-				removeTableAttributes(tableElement, "primaryKey");
-				removeTableAttributes(tableElement, "foreignKey");
-				removeTableAttributes(tableElement, "index");
+				removeTableAttributes("column", tableData, tableElement);
+				removeTableAttributes("primaryKey", tableData, tableElement);
+				removeTableAttributes("foreignKey", tableData, tableElement);
+				removeTableAttributes("index", tableData, tableElement);
 			}
 		}
 		
@@ -211,24 +220,13 @@ public class DbreOperationsImpl implements DbreOperations {
 		XmlUtils.writeXml(dbreMutableFile.getOutputStream(), dbre);
 	}
 
-	private void resetIsManagedAttribute(Element tableElement, String tableAttribute) {
+	private void removeTableAttributes(String tableAttribute, Set<String> tableData, Element tableElement) {
 		NodeList nodeList = tableElement.getElementsByTagName(tableAttribute);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element element = (Element) node;
-				element.setAttribute("isManaged", Boolean.FALSE.toString());
-			}
-		}
-	}
-	
-	private void removeTableAttributes(Element tableElement, String tableAttribute) {
-		NodeList nodeList = tableElement.getElementsByTagName(tableAttribute);
-		for (int i = 0; i < nodeList.getLength(); i++) {
-			Node node = nodeList.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				Element element = (Element) node;
-				if (!Boolean.parseBoolean(element.getAttribute("isManaged"))) {
+				if (!tableData.contains(element.getAttribute("id"))) {
 					tableElement.removeChild(element);
 				}
 			}

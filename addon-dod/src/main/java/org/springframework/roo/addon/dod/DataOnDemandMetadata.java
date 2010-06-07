@@ -487,10 +487,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					initializer = "new java.util.Date()";
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || field.getAnnotations().size() == 0) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")) != null || field.getAnnotations().size() == 0) {
 				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
 				if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
 					initializer = field.getFieldName().getSymbolName();
+					
+					// Check for @Size
 					AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
 					if (sizeAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> maxAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"));
@@ -502,6 +504,25 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 							initializer = String.format("%1$-" + ((Integer) minAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
 						}
 					}
+					
+					// Check for @Max
+					AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
+					if (maxAnnotationMetadata != null) {
+						AnnotationAttributeValue<?> valueAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
+						if ((initializer.length() + 2) > (Integer) valueAttributeValue.getValue()) {
+							initializer = initializer.substring(0, (Integer) valueAttributeValue.getValue() - 2); 
+						}
+					}
+					
+					// Check for @Min
+					AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min"));
+					if (minAnnotationMetadata != null) {
+						AnnotationAttributeValue<?> valueAttributeValue =  minAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
+						if ((initializer.length() + 2) < (Integer) valueAttributeValue.getValue()) {
+							initializer = String.format("%1$-" + ((Integer) valueAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
+						}
+					}
+					
 					initializer = "\"" + initializer + "_\" + index";
 				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
