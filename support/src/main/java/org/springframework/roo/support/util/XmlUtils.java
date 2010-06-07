@@ -295,7 +295,7 @@ public final class XmlUtils {
 	/**
 	 * Removes empty text nodes from the specified element
 	 * 
-	 * @param element the element where empty etxt nodes will be removed
+	 * @param element the element where empty text nodes will be removed
 	 */
 	public static void removeTextNodes(Element element) {
 		if (element.hasChildNodes()) {
