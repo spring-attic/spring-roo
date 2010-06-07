@@ -291,13 +291,27 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
+				Integer maxValue = null;
+				
+				// Check for @Size
 				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
 				AnnotationAttributeValue<?> maxAttributeValue;
 				if (sizeAnnotationMetadata != null && (maxAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"))) != null) {
+					maxValue = (Integer) maxAttributeValue.getValue();
+				} 
+				
+				// Check for @Max
+				AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
+				if (maxAnnotationMetadata != null) {
+					AnnotationAttributeValue<?> valueAttributeValue = maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
+					maxValue = (Integer) valueAttributeValue.getValue();
+				}
+				
+				if (maxValue != null) {
 					bodyBuilder.appendFormalLine("String " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
-					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + (Integer) maxAttributeValue.getValue() + ") {");
+					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + maxValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ".substring(0, " + (Integer) maxAttributeValue.getValue() + ");");
+					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ".substring(0, " + maxValue + ");");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
@@ -508,7 +522,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// Check for @Max
 					AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
 					if (maxAnnotationMetadata != null) {
-						AnnotationAttributeValue<?> valueAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
+						AnnotationAttributeValue<?> valueAttributeValue =  maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
 						if ((initializer.length() + 2) > (Integer) valueAttributeValue.getValue()) {
 							initializer = initializer.substring(0, (Integer) valueAttributeValue.getValue() - 2); 
 						}
