@@ -16,7 +16,7 @@ import org.springframework.roo.support.util.Assert;
 public class Index {
 	private final String name;
 	private final String columnName;
-	private Boolean nonUnique;
+	private boolean nonUnique;
 	private Short type;
 	private final List<Column> columns = new ArrayList<Column>();
 
@@ -24,7 +24,7 @@ public class Index {
 		Assert.notNull(rs, "ResultSet must not be null");
 		name = rs.getString("INDEX_NAME");
 		columnName = rs.getString("COLUMN_NAME");
-		nonUnique = Boolean.valueOf(rs.getBoolean("NON_UNIQUE"));
+		nonUnique = rs.getBoolean("NON_UNIQUE");
 		type = new Short(rs.getShort("TYPE"));
 	}
 
@@ -36,7 +36,7 @@ public class Index {
 		return columnName;
 	}
 
-	public Boolean getNonUnique() {
+	public boolean isNonUnique() {
 		return nonUnique;
 	}
 
@@ -55,6 +55,6 @@ public class Index {
 	}
 
 	public String toString() {
-		return "    INDEX_NAME " + name +  ", COLUMN_NAME " + columnName + ", NON_UNIQUE " + nonUnique + ", TYPE " + type;
+		return "    INDEX_NAME " + name + ", COLUMN_NAME " + columnName + ", NON_UNIQUE " + nonUnique + ", TYPE " + type;
 	}
 }

@@ -17,7 +17,7 @@ public class Column {
 	private final int dataType;
 	private final int columnSize;
 	private final int decimalDigits;
-	private final String isNullable;
+	private boolean isNullable;
 	private final String remarks;
 	private final String typeName;
 
@@ -27,7 +27,7 @@ public class Column {
 		dataType = rs.getInt("DATA_TYPE");
 		columnSize = rs.getInt("COLUMN_SIZE");
 		decimalDigits = rs.getInt("DECIMAL_DIGITS");
-		isNullable = rs.getString("IS_NULLABLE");
+		isNullable = rs.getBoolean("IS_NULLABLE");
 		remarks = rs.getString("REMARKS");
 		typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
 	}
@@ -48,7 +48,7 @@ public class Column {
 		return decimalDigits;
 	}
 
-	public String getIsNullable() {
+	public boolean getIsNullable() {
 		return isNullable;
 	}
 
