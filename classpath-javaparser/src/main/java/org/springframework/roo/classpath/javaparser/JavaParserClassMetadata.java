@@ -88,7 +88,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 			
 			ProcessManager pm = ActiveProcessManager.getActiveProcessManager();
 			if (pm != null && pm.isDevelopmentMode()) {
-				ex.printStackTrace();
+				logger.log(Level.INFO, "Parsing failure (development mode diagnostics)", ex);
 			}
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.log(Level.FINEST, "Unable to parse '" + metadataIdentificationString + "'", ex);
