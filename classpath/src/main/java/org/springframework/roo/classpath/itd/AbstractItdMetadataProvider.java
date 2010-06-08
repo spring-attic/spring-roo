@@ -208,7 +208,7 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 		// Obtain the physical type
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(governorPhysicalTypeIdentifier);
 		
-		if (governorPhysicalTypeMetadata == null) {
+		if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid()) {
 			// We can't get even basic information about the physical type, so abort (the ITD will be deleted by ItdFileDeletionService)
 			return null;
 		}
