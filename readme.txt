@@ -69,7 +69,7 @@ uid                  Ben Alex <balex@vmware.com>
 ssb   4096g/2DB6833B 2009-03-28
 
 If you don't see the output, it means you first need to create a key.
-It's very easy to do this. Just use "gpg --key-gen". Then verify
+It's very easy to do this. Just use "gpg --gen-key". Then verify
 your newly-created key was indeed created: "gpg --list-secret-keys".
 
 Next you need to publish your key to a public keyserver. Take a note
