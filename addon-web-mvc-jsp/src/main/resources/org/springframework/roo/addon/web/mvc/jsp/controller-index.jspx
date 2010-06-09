@@ -1,0 +1,8 @@
+<div xmlns:spring="http://www.springframework.org/tags" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+	<jsp:output omit-xml-declaration="yes"/>	
+   	<spring:message var="app_name" code="application.name" />
+   	<spring:message var="title" code="welcome.titlepane" arguments="${app_name}" />
+   	<page:page id="title" title="${title}">
+  			<h3>Controller Index Page</h3>
+  	</page:page>
+</div>

@@ -1,0 +1,27 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:form="http://www.springframework.org/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:spring="http://www.springframework.org/tags" version="2.0">
+	<jsp:output omit-xml-declaration="yes"/>
+	
+	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
+	<jsp:directive.attribute name="object" type="java.lang.Object" required="true" description="The form backing object"/>
+	<jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied"/>
+	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
+	
+	<c:if test="${empty render or render}">
+	
+		<c:if test="${empty label}">
+			<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
+		</c:if>
+	    <spring:message arguments="${label}" code="entity.show" var="title_msg"/>
+	    <page:page id="title" title="${title_msg}">
+	        <c:choose>
+	        	<c:when test="${not empty object}">
+	        		<jsp:doBody />
+	        	</c:when>
+	        	<c:otherwise>
+	        		<spring:message arguments="${label}" code="entity.not.found.single"/>
+	        	</c:otherwise>
+	        </c:choose>
+		</page:page>
+	</c:if>
+</jsp:root>
