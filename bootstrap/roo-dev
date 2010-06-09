@@ -27,23 +27,11 @@ chmod +x $ROO_HOME/bootstrap/target/osgi/bin/*.sh
 cp $ROO_HOME/bootstrap/src/main/conf/* $ROO_HOME/bootstrap/target/osgi/conf
 
 # Most Roo bundles are not special and belong in "bundle"
-cp `find $ROO_HOME -name org.springframework.roo.*.jar | grep .*/target/org.springframework.roo..*.jar` $ROO_HOME/bootstrap/target/osgi/bundle
+cp $ROO_HOME/target/all/*.jar $ROO_HOME/bootstrap/target/osgi/bundle
 
-# Most Roo dependencies are not special and belong in "bundle"
-cp `find $ROO_HOME -name *.jar | grep .*/target/dependency/.*.jar` $ROO_HOME/bootstrap/target/osgi/bundle
-
-# Now add the replacement "Main" class for launching Roo (this is not a bundle, but rather a normal JAR)
-cp $ROO_HOME/bootstrap/target/org.springframework.roo.bootstrap-*.jar $ROO_HOME/bootstrap/target/osgi/bin
-rm $ROO_HOME/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar
-
-# Now add the Felix OSGi service platform JAR so we can launch it all
-cp $ROO_HOME/bootstrap/target/dependency/org.apache.felix.framework-*.jar $ROO_HOME/bootstrap/target/osgi/bin
-rm $ROO_HOME/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar
-
-# Get rid of those annoying source, test and annotation files
-rm `find $ROO_HOME/bootstrap/target/osgi -name *-sources.jar`
-rm `find $ROO_HOME/bootstrap/target/osgi -name *-tests.jar`
-rm `find $ROO_HOME/bootstrap/target/osgi -name org.springframework.roo.annotations-*.jar`
+# Move the startup-related JAR from the "bundle" directory to the "bin" directory
+mv $ROO_HOME/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar $ROO_HOME/bootstrap/target/osgi/bin
+mv $ROO_HOME/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar $ROO_HOME/bootstrap/target/osgi/bin
 
 # Build a classpath containing our two magical startup JARs
 ROO_CP=`echo $ROO_HOME/bootstrap/target/osgi/bin/*.jar | sed 's/ /:/g'`

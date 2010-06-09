@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.root</artifactId>
+		<version>1.1.0.M2</version>
+	</parent>
+    <artifactId>org.springframework.roo.parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Spring Roo - OSGi Module Parent</name>
+    <description>Provides POM configuration inheritence for standard Roo OSGi, SCR modules.</description>
+
+    <!-- No modules should be defined below;
+         the "parent" module provides POM configuration inheritence - not reactor builds -->
+    <modules/>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.1.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <_include>${project.build.directory}/build-number.mf</_include>
+                        <Export-Package>${pom.artifactId}.*;version=${pom.version}</Export-Package>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Vendor>${pom.organization.name}</Bundle-Vendor>
+                        <Bundle-Copyright>Copyright ${pom.organization.name}. All Rights Reserved.</Bundle-Copyright>
+                        <Bundle-DocURL>${pom.url}</Bundle-DocURL>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/../../target/all</outputDirectory>
+                    <silent>true</silent>
+                    <includeScope>compile</includeScope>
+                    <excludeArtifactIds>org.apache.felix.scr.annotations</excludeArtifactIds>
+                    <excludeGroupIds>org.osgi</excludeGroupIds>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <version>1.4.2</version>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <!--<phase>compile</phase>-->
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <parseJavaDoc>false</parseJavaDoc>
+                </configuration>
+            </plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.3</version>
+				<executions>
+					<execution>
+						<id>copy-jars-for-possible-assembly</id>
+						<phase>package</phase>
+						<configuration>
+							<tasks>
+                                <copy todir="${project.build.directory}/../../target/all" preservelastmodified="true">
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar"/>
+                                        <exclude name="*-tests.jar"/>
+                                        <exclude name="*-sources.jar"/>
+                                    </fileset>
+                                </copy>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+        </plugins>
+    </build>
+
+</project>

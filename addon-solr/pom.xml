@@ -6,6 +6,7 @@
 		<groupId>org.springframework.roo</groupId>
 		<artifactId>org.springframework.roo.parent</artifactId>
 		<version>1.1.0.M2</version>
+		<relativePath>../parent</relativePath>
 	</parent>
 	<artifactId>org.springframework.roo.addon.solr</artifactId>
 	<packaging>bundle</packaging>
