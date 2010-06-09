@@ -111,7 +111,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.web.controller</artifactId>
+            <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>
