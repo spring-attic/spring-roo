@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db.metadata;
+package org.springframework.roo.addon.dbre.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

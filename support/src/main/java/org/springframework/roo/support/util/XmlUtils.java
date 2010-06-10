@@ -298,13 +298,19 @@ public final class XmlUtils {
 	 * @param element the element where empty text nodes will be removed
 	 */
 	public static void removeTextNodes(Element element) {
-		if (element.hasChildNodes()) {
-			NodeList nodeList = element.getChildNodes();
-			for (int i = 0; i < nodeList.getLength(); i++) {
-				Node node = nodeList.item(i);
-				if (node != null && node.getNodeType() == Node.TEXT_NODE && !StringUtils.hasText(node.getNodeValue())) {
-					element.removeChild(node);
-				}
+		NodeList children = element.getChildNodes();
+		for (int i = children.getLength() - 1; i >= 0; i--) {
+			Node child = children.item(i);
+			switch (child.getNodeType()) {
+				case Node.ELEMENT_NODE:
+					removeTextNodes((Element) child);
+					break;
+				case Node.CDATA_SECTION_NODE:
+				case Node.TEXT_NODE:
+					if (!StringUtils.hasText(child.getNodeValue())) {
+						element.removeChild(child);
+					}
+					break;
 			}
 		}
 	}

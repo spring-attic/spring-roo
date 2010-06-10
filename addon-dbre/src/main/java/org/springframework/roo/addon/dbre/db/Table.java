@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db.metadata;
+package org.springframework.roo.addon.dbre.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

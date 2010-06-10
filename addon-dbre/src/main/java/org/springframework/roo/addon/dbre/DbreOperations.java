@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
+import org.springframework.roo.model.JavaPackage;
+
 /**
  * Interface to commands available in {@link DbreOperationsImpl}.
  * 
@@ -10,7 +12,7 @@ public interface DbreOperations {
 
 	boolean isDbreAvailable();
 	
-	void displayMetadata(String table);
+	void displayDbMetadata(String table, String file);
 	
-	void reverseEngineer();
+	void updateDbreXml(JavaPackage javaPackage);
 }

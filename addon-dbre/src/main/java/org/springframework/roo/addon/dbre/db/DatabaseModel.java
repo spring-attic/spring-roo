@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db.metadata;
+package org.springframework.roo.addon.dbre.db;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -32,13 +32,13 @@ public class DatabaseModel {
 		}
 	}
 
-	public Table getTable(String catalog, String schema, String table) {
+	public Table getTable(IdentifiableTable identifiableTable) {
 		try {
 			ResultSet rs = null;
 			try {
-				rs = getTablesRs(catalog, schema, table);
+				rs = getTablesRs(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
 				while (rs.next()) {
-					if (table != null && table.toLowerCase().equals(rs.getString("TABLE_NAME").toLowerCase())) {
+					if (identifiableTable.getTable() != null && identifiableTable.getTable().toLowerCase().equals(rs.getString("TABLE_NAME").toLowerCase())) {
 						return new Table(rs, databaseMetaData);
 					}
 				}
@@ -52,13 +52,17 @@ public class DatabaseModel {
 		}
 		return null;
 	}
+	
+	public Set<Table> getTables() {
+		return getTables(new IdentifiableTable(null, null, null));
+	}
 
-	public Set<Table> getTables(String catalog, String schema) {
+	public Set<Table> getTables(IdentifiableTable identifiableTable) {
 		Set<Table> tables = new HashSet<Table>();
 		try {
 			ResultSet rs = null;
 			try {
-				rs = getTablesRs(catalog, schema, null);
+				rs = getTablesRs(identifiableTable.getCatalog(), identifiableTable.getSchema(), null);
 				while (rs.next()) {
 					tables.add(new Table(rs, databaseMetaData));
 				}
@@ -117,8 +121,8 @@ public class DatabaseModel {
 	}
 
 	public String toString() {
-		Set<Table> tables = getTables(null, null);
 		StringBuilder builder = new StringBuilder();
+		Set<Table> tables = getTables();
 		if (!tables.isEmpty()) {
 			for (Table table : tables) {
 				builder.append(table.toString());

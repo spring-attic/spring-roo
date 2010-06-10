@@ -1129,4 +1129,25 @@ public abstract class StringUtils {
 	public static String toLowerCase(String str) {
 		return str == null ? null : str.toLowerCase();
 	}
+	
+	/**
+	 * <p>
+	 * Removes leading and trailing whitespace from both ends of this String returning <code>null</code> if the String is empty ("") after the trim or if it is <code>null</code>.
+	 *  
+	 * <pre>
+	 * StringUtils.trimToNull(null) = null
+	 * StringUtils.trimToNull("") = null
+	 * StringUtils.trimToNull(" ") = null
+	 * StringUtils.trimToNull("abc") = "abc"
+	 * StringUtils.trimToNull(" abc ") = "abc"
+	 * </pre>
+	 * 
+	 * @param str the String to be trimmed, may be null
+	 * @return the trimmed String, <code>null</code> if only chars &lt;= 32, empty or null String input
+	 * @since 1.1
+	 */
+	public static String trimToNull(String str) {
+		String ts = trimWhitespace(str);
+		return !hasText(ts) ? null : ts;
+	}
 }

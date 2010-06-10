@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db.connection;
+package org.springframework.roo.addon.dbre.jdbc;
 
 import java.sql.Connection;
 import java.util.Properties;

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db.metadata;
+package org.springframework.roo.addon.dbre.db;
 
 /**
  * Specifies methods to return database-specific artifacts such as sequences.
