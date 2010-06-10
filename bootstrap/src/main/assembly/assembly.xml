@@ -134,30 +134,24 @@
         </fileSet>
         <fileSet>
             <outputDirectory>/bin</outputDirectory>
-            <directory>bootstrap/target</directory>
+            <directory>${project.build.directory}/all</directory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <includes>
                 <include>org.springframework.roo.bootstrap-*.jar</include>
-            </includes>
-            <excludes>
-                <exclude>*-sources.jar</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <outputDirectory>/bin</outputDirectory>
-            <directory>bootstrap/target/dependency</directory>
-            <useDefaultExcludes>true</useDefaultExcludes>
-            <includes>
                 <include>org.apache.felix.framework-*.jar</include>
             </includes>
         </fileSet>
         <fileSet>
             <outputDirectory>/bundle</outputDirectory>
-            <directory>${project.build.directory}/bundle</directory>
+            <directory>${project.build.directory}/all</directory>
             <useDefaultExcludes>true</useDefaultExcludes>
             <includes>
                 <include>*.jar</include>
             </includes>
+            <excludes>
+                <exclude>org.springframework.roo.bootstrap-*.jar</exclude>
+                <exclude>org.apache.felix.framework-*.jar</exclude>
+            </excludes>
         </fileSet>
 	</fileSets>
 
