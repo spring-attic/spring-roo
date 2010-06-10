@@ -28,6 +28,7 @@
         <module>file-undo</module>
         <module>file-monitor</module>
         <module>file-monitor-polling</module>
+        <module>file-monitor-polling-roo</module>
         <module>project</module>
         <module>process-manager</module>
         <module>classpath</module>

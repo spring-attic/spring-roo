@@ -11,16 +11,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Logger;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.MonitoringRequest;
@@ -56,23 +48,24 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-@Component
-@Service
-@Reference(name="fileEventListener", strategy=ReferenceStrategy.LOOKUP, policy=ReferencePolicy.DYNAMIC, referenceInterface=FileEventListener.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	
-	private Set<MonitoringRequest> requests = new CopyOnWriteArraySet<MonitoringRequest>();
+	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
+	private Set<MonitoringRequest> requests = new HashSet<MonitoringRequest>();
 	private Map<MonitoringRequest,Map<File,Long>> priorExecution =new WeakHashMap<MonitoringRequest,Map<File,Long>>();
 	private Set<String> notifyChanged = new HashSet<String>();
 	private Set<String> notifyCreated = new HashSet<String>();
 	private Set<String> notifyDeleted = new HashSet<String>();
-	private Set<MonitoringRequest> notifiedFailingRequests = new CopyOnWriteArraySet<MonitoringRequest>();
-	private ComponentContext context;
+	private Set<MonitoringRequest> notifiedFailingRequests = new HashSet<MonitoringRequest>();
 	
-	protected void activate(ComponentContext context) {
-		this.context = context;
+	public final void add(FileEventListener e) {
+		fileEventListeners.add(e);
+	}
+
+	public final void remove(FileEventListener e) {
+		fileEventListeners.remove(e);
 	}
 
 	// Mutex
@@ -334,7 +327,10 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	}
 
 	/**
-	 * Publish the events, if needed
+	 * Publish the events, if needed.
+	 * 
+	 * <p>
+	 * This method assumes the caller has already acquired a synchronisation lock.
 	 * 
 	 * @param eventsToPublish to publish (not null, but can be empty)
 	 */
@@ -342,17 +338,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		if (eventsToPublish.size() == 0) {
 			return;
 		}
-		Object[] listeners = context.locateServices("fileEventListener");
-		if (listeners == null) {
-			// no listeners, so just return
+		if (fileEventListeners.size() == 0 || eventsToPublish.size() == 0) {
 			return;
 		}
-		if (eventsToPublish.size() > 0) {
-			for (FileEvent event : eventsToPublish) {
-				for (Object listener : listeners) {
-					FileEventListener l = (FileEventListener) listener;
-					l.onFileEvent(event);
-				}
+		for (FileEvent event : eventsToPublish) {
+			for (FileEventListener l : fileEventListeners) {
+				l.onFileEvent(event);
 			}
 		}
 	}
