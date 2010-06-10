@@ -18,9 +18,6 @@ import jline.ANSIBuffer;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
@@ -44,32 +41,16 @@ import org.springframework.roo.support.util.ClassUtils;
  * @since 1.0
  *
  */
-@Component(immediate=true)
-@Service
-public final class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
+public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
 
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
-	private ComponentContext context;
 	
     private ConsoleReader reader;
     private boolean developmentMode = false;
     private FileWriter fileLog;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private ShellStatusListener statusListener; // ROO-836
-	
-	protected void activate(ComponentContext context) {
-		this.context = context;
-        Thread thread = new Thread(this, "JLine Shell");
-        thread.start();
-	}
-	
-	protected void deactivate(ComponentContext context) {
-		this.context = null;
-		if (statusListener != null) {
-			removeShellStatusListener(statusListener);
-		}
-	}
+	protected ShellStatusListener statusListener; // ROO-836
 	
 	public void run() {
 		try {
@@ -257,10 +238,14 @@ public final class JLineShell extends AbstractShell implements CommandMarker, Sh
 		Assert.hasText(rooHome, "roo.home system property is not set");
 		return rooHome;
 	}
-
-	@Override
-	protected ComponentContext getContext() {
-		return context;
-	}
 	
+	/**
+	 * Should be called by a subclass before deactivating the shell.
+	 */
+	protected void closeShell() {
+		if (statusListener != null) {
+			removeShellStatusListener(statusListener);
+		}
+	}
+
 }

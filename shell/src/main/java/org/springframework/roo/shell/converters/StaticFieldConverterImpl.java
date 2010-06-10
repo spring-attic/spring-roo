@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.Assert;
@@ -20,8 +18,6 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @since 1.0
  */
-@Component
-@Service
 public class StaticFieldConverterImpl implements StaticFieldConverter {
 
 	private Map<Class<?>,Map<String,Field>> fields = new HashMap<Class<?>,Map<String,Field>>();

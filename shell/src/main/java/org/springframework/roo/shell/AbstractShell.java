@@ -17,13 +17,9 @@ import java.util.TreeSet;
 import java.util.jar.Manifest;
 import java.util.logging.Logger;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -32,11 +28,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  *
  */
-@Component(componentAbstract=true)
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
-
-    @Reference private ExecutionStrategy executionStrategy;
-    @Reference private Parser parser;
 
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment = false;
@@ -44,6 +36,11 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	public static String shellPrompt = "roo> ";
 	public static String completionKeys = "TAB";
 	
+	protected abstract Set<URL> findUrls(String resourceName);
+	protected abstract String getHomeAsString();
+	protected abstract ExecutionStrategy getExecutionStrategy();
+	protected abstract Parser getParser();
+
 	@CliCommand(value={"script"}, help="Parses the specified resource file and executes its commands")
 	public void script(@CliOption(key={"","file"}, help="The file to locate and execute", mandatory=true) File resource,
 						@CliOption(key="lineNumbers", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Display line numbers when executing the script") boolean lineNumbers) {
@@ -56,7 +53,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		
 		if (inputStream == null) {
 			// Try to find the resource via the classloader
-			Set<URL> urls = UrlFindingUtils.findUrls(getContext().getBundleContext(), "/" + resource.getName());
+			Set<URL> urls = findUrls(resource.getName());
 			// Handle search system failure
 			Assert.notNull(urls, "Unable to process classpath bundles to locate the script");
 			// Handle the file simply not being present, but the search being OK
@@ -109,6 +106,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
     	setShellStatus(ShellStatus.PARSING);
 
     	long lastWaitMessage = System.currentTimeMillis(); 
+    	ExecutionStrategy executionStrategy = getExecutionStrategy();
     	while (executionStrategy == null || !executionStrategy.isReadyForCommands()) {
     		// Wait
     		try {
@@ -150,7 +148,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		    	setShellStatus(ShellStatus.EXECUTION_COMPLETE);
 				return true;
 			}
-			ParseResult parseResult = parser.parse(line);
+			ParseResult parseResult = getParser().parse(line);
 			if (parseResult == null) {
 				return false;
 			} else {
@@ -390,11 +388,4 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return f;
 	}
 
-	protected abstract String getHomeAsString();
-
-	protected abstract ComponentContext getContext();
-	
-	protected final Parser getParser() {
-		return parser;
-	}
 }

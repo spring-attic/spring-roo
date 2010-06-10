@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -18,8 +16,6 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-@Component
-@Service
 public class DateConverter implements Converter {
 	
 	private DateFormat dateFormat;

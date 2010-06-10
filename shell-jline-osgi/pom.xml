@@ -3,14 +3,28 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.roo</groupId>
-        <artifactId>org.springframework.roo.osgi.bundle</artifactId>
+        <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
         <version>1.1.0.M2</version>
-		<relativePath>../osgi-bundle</relativePath>
+		<relativePath>../osgi-roo-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.shell.jline</artifactId>
+    <artifactId>org.springframework.roo.shell.jline.osgi</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Shell - JLine</name>
+    <name>Spring Roo - Shell - JLine (OSGi Launcher)</name>
     <dependencies>
+        <!-- OSGi -->
+         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
@@ -21,6 +35,12 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell.jline</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>

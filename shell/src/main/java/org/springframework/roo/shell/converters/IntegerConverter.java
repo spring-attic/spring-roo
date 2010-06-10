@@ -2,8 +2,6 @@ package org.springframework.roo.shell.converters;
 
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -14,8 +12,6 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-@Component
-@Service
 public class IntegerConverter implements Converter {
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {

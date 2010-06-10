@@ -21,7 +21,9 @@
         <module>support</module>
         <module>support-osgi</module>
         <module>shell</module>
+        <module>shell-osgi</module>
         <module>shell-jline</module>
+        <module>shell-jline-osgi</module>
         <module>felix</module>
         <module>model</module>
         <module>metadata</module>
