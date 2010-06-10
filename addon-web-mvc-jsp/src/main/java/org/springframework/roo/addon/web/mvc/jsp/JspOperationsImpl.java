@@ -41,6 +41,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -307,7 +308,7 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		String path = TemplateUtils.getTemplatePath(getClass(), sourceAntPath);
-		Set<URL> urls = TemplateUtils.findMatchingClasspathResources(context.getBundleContext(), path);
+		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), path);
 		Assert.notNull(urls, "Could not search bundles for resources for Ant Path '" + path + "'");
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);

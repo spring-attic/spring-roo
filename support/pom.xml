@@ -3,28 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.roo</groupId>
-		<artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+		<artifactId>org.springframework.roo.osgi.bundle</artifactId>
 		<version>1.1.0.M2</version>
 		<relativePath>../osgi-roo-bundle</relativePath>
 	</parent>
 	<artifactId>org.springframework.roo.support</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Support</name>
-	<description>Provides support services for Spring Roo's core and base add-ons.</description>
-    <dependencies>
-        <!-- OSGi -->
-         <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <!-- Apache Felix -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </dependency>
-    </dependencies>
+	<description>Provides support services for Spring Roo's core. Has no external dependencies (including
+		no dependency on OSGi).</description>
+    <dependencies/>
 </project>

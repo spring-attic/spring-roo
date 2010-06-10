@@ -112,6 +112,12 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support.osgi</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>

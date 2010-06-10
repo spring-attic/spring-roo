@@ -19,6 +19,7 @@
         <module>bootstrap</module>
         <module>startlevel</module>
         <module>support</module>
+        <module>support-osgi</module>
         <module>shell</module>
         <module>shell-jline</module>
         <module>felix</module>

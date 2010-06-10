@@ -23,8 +23,8 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
 
 /**
  * Provides a base {@link Shell} implementation.
@@ -56,7 +56,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		
 		if (inputStream == null) {
 			// Try to find the resource via the classloader
-			Set<URL> urls = TemplateUtils.findUrls(getContext().getBundleContext(), "/" + resource.getName());
+			Set<URL> urls = UrlFindingUtils.findUrls(getContext().getBundleContext(), "/" + resource.getName());
 			// Handle search system failure
 			Assert.notNull(urls, "Unable to process classpath bundles to locate the script");
 			// Handle the file simply not being present, but the search being OK
