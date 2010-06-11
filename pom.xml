@@ -21,6 +21,7 @@
         <module>support</module>
         <module>support-osgi</module>
         <module>shell</module>
+        <module>shell-json</module>
         <module>shell-osgi</module>
         <module>shell-jline</module>
         <module>shell-jline-osgi</module>
