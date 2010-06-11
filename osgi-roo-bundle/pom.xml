@@ -19,6 +19,20 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.springframework.roo</groupId>
+                <artifactId>org.springframework.roo.mojo.addon</artifactId>
+                <version>${roo.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-roo-info</id>
+                        <!--<phase>compile</phase>-->
+                        <goals>
+                            <goal>roo-addon</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
                 <version>1.4.2</version>

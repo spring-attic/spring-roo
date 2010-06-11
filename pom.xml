@@ -14,6 +14,7 @@
         <!-- Wrapping cannot be included in the reactor, as mvn eclipse:eclipse will fail - instead: cd wrapping; mvn install; cd ..
         <module>wrapping</module>
         -->
+        <module>mojo-addon</module>
         <module>osgi-bundle</module>
         <module>osgi-roo-bundle</module>
         <module>bootstrap</module>
