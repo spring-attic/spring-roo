@@ -15,7 +15,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.db.Column;
-import org.springframework.roo.addon.dbre.db.DatabaseModel;
+import org.springframework.roo.addon.dbre.db.DbModel;
 import org.springframework.roo.addon.dbre.db.ForeignKey;
 import org.springframework.roo.addon.dbre.db.IdentifiableTable;
 import org.springframework.roo.addon.dbre.db.Index;
@@ -66,14 +66,14 @@ public class DbreOperationsImpl implements DbreOperations {
 		ConnectionProvider provider = new ConnectionProviderImpl(map);
 		Connection connection = provider.getConnection();
 		try {
-			DatabaseModel databaseModel = new DatabaseModel(connection);
+			DbModel dbModel = new DbModel(connection);
 
 			String dbMetadata;
 			if (StringUtils.hasLength(table)) {
-				Table t = databaseModel.getTable(new IdentifiableTable(null, null, table));
+				Table t = dbModel.getTable(new IdentifiableTable(null, null, table));
 				dbMetadata = t != null ? t.toString() : null;
 			} else {
-				dbMetadata = databaseModel.toString();
+				dbMetadata = dbModel.toString();
 			}
 
 			if (StringUtils.hasText(dbMetadata)) {
@@ -100,13 +100,13 @@ public class DbreOperationsImpl implements DbreOperations {
 		ConnectionProvider provider = new ConnectionProviderImpl(map);
 		Connection connection = provider.getConnection();
 		try {
-			updateDbreXml(javaPackage, new DatabaseModel(connection));
+			updateDbreXml(javaPackage, new DbModel(connection));
 		} finally {
 			provider.closeConnection(connection);
 		}
 	}
 
-	private void updateDbreXml(JavaPackage javaPackage, DatabaseModel databaseModel) {
+	private void updateDbreXml(JavaPackage javaPackage, DbModel dbModel) {
 		String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		MutableFile dbreMutableFile = null;
 
@@ -127,13 +127,14 @@ public class DbreOperationsImpl implements DbreOperations {
 
 		Element dbMetadataElement = dbre.getDocumentElement();
 		
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+
 		// Calculate java package name to store new entities in
 		String packageName;
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		String packageAttribute = dbMetadataElement.getAttribute("package");
 		if (javaPackage != null ) {
 			packageName = javaPackage.getFullyQualifiedPackageName();
-		} else	if (packageAttribute != null) {
+		} else	if (StringUtils.hasText(packageAttribute)) {
 			packageName = packageAttribute;
 		} else {
 			packageName = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
@@ -143,7 +144,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		Set<String> tableData = new HashSet<String>();
 		
 		// Add or update tables in xml file
-		for (Table table : databaseModel.getTables()) {
+		for (Table table : dbModel.getTables()) {
 			String tableId = table.getId();
 			tableData.add(tableId);
 			String tableName = table.getTable();
@@ -173,6 +174,7 @@ public class DbreOperationsImpl implements DbreOperations {
 
 				columnElement.setAttribute("id", columnId);
 				columnElement.setAttribute("name", columnName);
+				columnElement.setAttribute("type", column.getType().getName());
 				columnElement.setAttribute("typeName", column.getTypeName());
 				columnElement.setAttribute("dataType", String.valueOf(column.getDataType()));
 				columnElement.setAttribute("columnSize", String.valueOf(column.getColumnSize()));

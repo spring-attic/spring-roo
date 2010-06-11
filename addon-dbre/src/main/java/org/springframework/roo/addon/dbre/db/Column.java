@@ -1,7 +1,11 @@
 package org.springframework.roo.addon.dbre.db;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.springframework.roo.support.util.Assert;
@@ -23,19 +27,19 @@ public class Column {
 
 	Column(ResultSet rs) throws SQLException {
 		Assert.notNull(rs, "ResultSet must not be null");
-		name = rs.getString("COLUMN_NAME");
-		dataType = rs.getInt("DATA_TYPE");
-		columnSize = rs.getInt("COLUMN_SIZE");
-		decimalDigits = rs.getInt("DECIMAL_DIGITS");
-		isNullable = rs.getBoolean("IS_NULLABLE");
-		remarks = rs.getString("REMARKS");
-		typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
+		this.name = rs.getString("COLUMN_NAME");
+		this.dataType = rs.getInt("DATA_TYPE");
+		this.columnSize = rs.getInt("COLUMN_SIZE");
+		this.decimalDigits = rs.getInt("DECIMAL_DIGITS");
+		this.isNullable = rs.getBoolean("IS_NULLABLE");
+		this.remarks = rs.getString("REMARKS");
+		this.typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
 	}
-	
+
 	public String getId() {
 		return name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -64,54 +68,46 @@ public class Column {
 		return typeName;
 	}
 
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + columnSize;
-		result = prime * result + dataType;
-		result = prime * result + decimalDigits;
-		result = prime * result + (isNullable ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((remarks == null) ? 0 : remarks.hashCode());
-		result = prime * result + ((typeName == null) ? 0 : typeName.hashCode());
-		return result;
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Column other = (Column) obj;
-		if (columnSize != other.columnSize)
-			return false;
-		if (dataType != other.dataType)
-			return false;
-		if (decimalDigits != other.decimalDigits)
-			return false;
-		if (isNullable != other.isNullable)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (remarks == null) {
-			if (other.remarks != null)
-				return false;
-		} else if (!remarks.equals(other.remarks))
-			return false;
-		if (typeName == null) {
-			if (other.typeName != null)
-				return false;
-		} else if (!typeName.equals(other.typeName))
-			return false;
-		return true;
+	public Class<?> getType() {
+		Class<?> type;
+		switch (dataType) {
+			case Types.INTEGER:
+				type = Integer.class;
+				break;
+			case Types.FLOAT:
+				type = Float.class;
+				break;
+			case Types.DOUBLE:
+			case Types.DECIMAL:
+				type = Double.class;
+				break;
+			case Types.NUMERIC:
+				type = BigDecimal.class;
+				break;
+			case Types.BIGINT:
+				type = BigInteger.class;
+				break;
+			case Types.BOOLEAN:
+			case Types.BIT:
+				type = Boolean.class;
+				break;
+			case Types.DATE:
+			case Types.TIME:
+			case Types.TIMESTAMP:
+				type = Date.class;
+				break;
+			case Types.VARCHAR:
+			case Types.CHAR:
+				type = String.class;
+				break;
+			default:
+				type = String.class;
+				break;
+		}
+		return type;
 	}
 
 	public String toString() {
-		return "    COLUMN_NAME " + name + ", TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + isNullable + ", REMARKS " + remarks;
+		return "    COLUMN_NAME " + name + " (" + getType().getName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + isNullable + ", REMARKS " + remarks;
 	}
 }

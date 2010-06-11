@@ -38,7 +38,9 @@ public class DefaultDbMetadataConverter implements DbMetadataConverter {
 		
 		String table = identifiableTable.getTable();
 		StringBuilder result = new StringBuilder(javaPackage.getFullyQualifiedPackageName());
-		result.append(".");
+		if (result.length() > 0) {
+			result.append(".");
+		}
 		
 		boolean isUnderscore = false;
 		for (int i = 0; i < table.length(); i++) {

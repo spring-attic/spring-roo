@@ -20,8 +20,8 @@ public class ForeignKey {
 
 	ForeignKey(ResultSet rs) throws SQLException {
 		Assert.notNull(rs, "ResultSet must not be null");
-		name = rs.getString("FK_NAME");
-		fkTable = rs.getString("FKTABLE_NAME");
+		this.name = rs.getString("FK_NAME");
+		this.fkTable = rs.getString("FKTABLE_NAME");
 	}
 
 	public String getId() {
@@ -44,35 +44,6 @@ public class ForeignKey {
 
 	public List<Column> getColumns() {
 		return columns;
-	}
-
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fkTable == null) ? 0 : fkTable.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ForeignKey other = (ForeignKey) obj;
-		if (fkTable == null) {
-			if (other.fkTable != null)
-				return false;
-		} else if (!fkTable.equals(other.fkTable))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
 	}
 
 	public String toString() {

@@ -12,17 +12,17 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Represents JDBC database metadata.
+ * Retrieves JDBC database metadata.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
-public class DatabaseModel {
+public class DbModel {
 	private static final String[] TYPES = { "TABLE", "VIEW" };
 	private DatabaseMetaData databaseMetaData;
 	private Connection connection;
 
-	public DatabaseModel(Connection connection) {
+	public DbModel(Connection connection) {
 		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
 		try {
@@ -33,6 +33,7 @@ public class DatabaseModel {
 	}
 
 	public Table getTable(IdentifiableTable identifiableTable) {
+		Assert.notNull(identifiableTable, "Table identity must not be null");
 		try {
 			ResultSet rs = null;
 			try {
@@ -58,6 +59,7 @@ public class DatabaseModel {
 	}
 
 	public Set<Table> getTables(IdentifiableTable identifiableTable) {
+		Assert.notNull(identifiableTable, "Table identity must not be null");
 		Set<Table> tables = new HashSet<Table>();
 		try {
 			ResultSet rs = null;

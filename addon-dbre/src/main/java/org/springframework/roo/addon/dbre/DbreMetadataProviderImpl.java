@@ -1,15 +1,27 @@
 package org.springframework.roo.addon.dbre;
 
+import java.io.File;
+
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
+import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.EntityMetadataProvider;
+import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
 
 /**
  * Provides {@link DbreMetadata}.
@@ -20,15 +32,28 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
+	@Reference private PathResolver pathResolver;
+	@Reference private EntityMetadataProvider entityMetadataProvider;
+	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
+	@Reference private PluralMetadataProvider pluralMetadataProvider;
+	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
+	@Reference private TableModelService tableModelService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), getProvidesType());
-//		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-//		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-//		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-//		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
+		entityMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+	}
+
+	protected void deactivate(ComponentContext context) {
+		entityMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
@@ -42,13 +67,31 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		// TODO Auto-generated method stub
-		// System.out.println("in DbreMetadataProviderImpl.getMetadata");
-		return null;
+		Document dbre;
+		try {
+			String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
+			dbre = XmlUtils.getDocumentBuilder().parse(new File(dbrePath));
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		// We need to lookup the metadata we depend on
+		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
+		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+ 		
+		// We need to abort if we couldn't find dependent metadata
+		if (entityMetadata == null || !entityMetadata.isValid()) {
+			return null;
+		}
+
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, entityMetadata, tableModelService, dbre);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
-		return "Dbre";
+		return "DbManaged";
 	}
 
 	public String getProvidesType() {
