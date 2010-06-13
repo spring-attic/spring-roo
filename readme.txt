@@ -35,7 +35,6 @@ If you already have a MAVEN_OPTS, just check it has the memory sizes
 shown below (or greater).  If you're following our checkout
 instructions above and are on a *nix machine, you can just type:
 
-  cd trunk
   echo export MAVEN_OPTS=\"-Xmx1024m -XX:MaxPermSize=512m\" >> ~/.bashrc
   source ~/.bashrc
   echo $MAVEN_OPTS
@@ -54,7 +53,10 @@ GPG (PGP) SETUP
 ======================================================================
 
 Roo now uses GPG to automatically sign build outputs. If you haven't
-installed GPG, download and install it: http://www.gnupg.org/download/
+installed GPG, download and install it:
+
+  * Main site: http://www.gnupg.org/download/
+  * Apple Mac option: http://macgpg.sourceforge.net/
 
 Ensure you have a valid signature. Use "gpg --list-secret-keys". You
 should see some output like this:
@@ -93,6 +95,28 @@ One final note if you're new to GPG: don't lose your private key!
 Backup the secring.gpg file, as you'll need it to ever revoke your key
 or sign a replacement key (the public key servers offer no way to
 revoke a key unless you can sign the recovation request).
+i
+======================================================================
+OSGI WRAPPING JARS
+======================================================================
+
+Some Roo modules require JARs that are not already in OSGi form. That
+is, they don't have an OSGi-aware manifest. Roo has a special project
+called "wrapper" that can convert normal JARs into OSGi JARs.
+
+You'll need to run the wrapper before trying to do anything with Roo.
+If you don't do this, you'll see errors which state Maven cannot find
+"org.springframework.roo.wrapping.some_module".
+
+To create the wrapped JARs, from the root Roo checkout location type:
+
+  cd wrapping
+  mvn clean install
+  cd ..
+
+You need not do this too often. If you get an error about a missing
+wrapper JAR (org.springframework.roo.wrapping.some_module), simply
+repeat the above commands and you should be fine.
 
 ======================================================================
 DEVELOPING WITHIN ECLIPSE
@@ -111,6 +135,8 @@ you need to instruct Maven to produce .classpath and .project files
 for Eclipse:
 
   mvn clean eclipse:clean eclipse:eclipse
+
+If this fails, please review the "OSGi Wrapping JARs" section above.
 
 You should now be able to import the projects into STS/Eclipse. Click
 File > Import > Existing Projects into Workspace, and select the
@@ -136,6 +162,8 @@ To try Roo out, you should type the following:
   mvn install   (from the root Roo checkout location)
   cd ~/some-directory
   roo-dev
+
+If this fails, please review the "OSGi Wrapping JARs" section above.
 
 Notice we used "mvn install" rather than "mvn package". This is simply
 for convenience, as it will allow you to change into any Roo module
