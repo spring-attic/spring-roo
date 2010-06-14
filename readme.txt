@@ -95,7 +95,7 @@ One final note if you're new to GPG: don't lose your private key!
 Backup the secring.gpg file, as you'll need it to ever revoke your key
 or sign a replacement key (the public key servers offer no way to
 revoke a key unless you can sign the recovation request).
-i
+
 ======================================================================
 OSGI WRAPPING JARS
 ======================================================================
