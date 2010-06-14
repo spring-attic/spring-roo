@@ -157,11 +157,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 */
 	public AnnotationMetadata getComponentAnnotation() {
 		JavaType javaType = new JavaType("org.springframework.stereotype.Component");
-		
 		if (isComponentAnnotationIntroduced()) {
 			return new DefaultAnnotationMetadata(javaType, new ArrayList<AnnotationAttributeValue<?>>());
 		}
-		
 		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
 	}
 	
@@ -174,7 +172,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public boolean isComponentAnnotationIntroduced() {
 		JavaType javaType = new JavaType("org.springframework.stereotype.Component");
 		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
-		
 		return result == null;
 	}
 
@@ -196,7 +193,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
-				
 				if (!Modifier.isPrivate(candidate.getModifier())) {
 					// Candidate is not private, so we might run into naming clashes if someone subclasses this (therefore go onto the next possible name)
 					continue;
@@ -239,7 +235,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
 				// Verify if candidate is suitable
-				
 				if (!Modifier.isPrivate(candidate.getModifier())) {
 					// Candidate is not private, so we might run into naming clashes if someone subclasses this (therefore go onto the next possible name)
 					continue;
@@ -404,6 +399,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(index);");
 		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
+
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
@@ -475,13 +471,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				continue;
 			}
 
-			// Never include id field (it shouldn't normally have a mutator anyway, but the user might have added one)
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
+			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
 				continue;
 			}
 
-			// Never include version field (generally you won't provide a mutator for version, although in some cases it might be present)
-			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
+			// Never include field annotated with @javax.persistence.Transient
+			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null) {
 				continue;
 			}
 
