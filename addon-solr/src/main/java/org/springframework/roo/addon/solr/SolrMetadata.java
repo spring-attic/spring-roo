@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.solr;
 
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +30,14 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooSolrSearchable}.
@@ -44,14 +54,19 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private BeanInfoMetadata beanInfoMetadata;
 	private SolrSearchAnnotationValues annotationValues;
 	private String beanPlural;
+	private MetadataService metadataService;
+	private PathResolver pathResolver;
+	private FileManager fileManager;
 
-	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, BeanInfoMetadata beanInfoMetadata, ToStringMetadata toStringMetadata, MetadataService metadataService) {
+	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, BeanInfoMetadata beanInfoMetadata, ToStringMetadata toStringMetadata, MetadataService metadataService, PathResolver pathResolver, FileManager fileManager) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Solr search annotation values required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(metadataService, "Metadata service required");
+		Assert.notNull(pathResolver, "PathResolver required");
+//		Assert.notNull(fileManager, "Filemanager requred");
 		
 		if (!isValid()) {
 			return;
@@ -59,6 +74,9 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		this.entityMetadata = entityMetadata;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.annotationValues = annotationValues;
+		this.metadataService = metadataService;
+		this.pathResolver = pathResolver;
+		this.fileManager = fileManager;
 		
 		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 		Assert.notNull(plural, "Could not obtain plural metadata for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
@@ -89,10 +107,47 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			}
 			
 			builder.addMethod(getSolrServerMethod());
+			
+//			managePointcuts();
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+	
+	private void managePointcuts() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(projectMetadata, "Could not obtain project metadata");
+		
+		String aspectLocation = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, StringUtils.replace(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName(), ".", "/") + "/SolrSearchAsyncTaskExecutor.aj");
+		if (fileManager.exists(aspectLocation)) {
+			try {
+				String contents = FileCopyUtils.copyToString(new FileReader(aspectLocation));
+				boolean writeNeeded = false;
+				if (annotationValues.getIndexMethod() != null || annotationValues.getIndexMethod().length() != 0) {
+					if (!contents.contains(annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName())) {
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(" + annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName() + ") ||");
+						writeNeeded = true;
+					}
+					if (!contents.contains(annotationValues.getIndexMethod() + beanPlural)) {
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(" + annotationValues.getIndexMethod() + beanPlural + ") ||");
+						writeNeeded = true;
+					}
+				}
+				
+				if (writeNeeded) {
+				    Writer output = new BufferedWriter(new FileWriter(aspectLocation));
+				    try {
+				      output.write(contents.toString());
+				    }
+				    finally {
+				      output.close();
+				    }
+				}
+			} catch (IOException e) {
+				new IllegalStateException("Could not copy SolrSearchAsyncTaskExecutor.aj into project", e);
+			}
+		}
 	}
 	
 	public SolrSearchAnnotationValues getAnnotationValues() {

@@ -12,7 +12,7 @@ public aspect SolrSearchAsyncTaskExecutor {
 
 	 @Autowired private ThreadPoolTaskExecutor taskExecutor;
 	  
-	 pointcut asyncMethods(): execution(void indexPets()) || execution(void preRemove());
+	 pointcut asyncMethods(): execution(void preRemove());
 
 	 void around(Object target): asyncMethods() && target(target) {
 		 final Object target1 = target;
