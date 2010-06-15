@@ -101,7 +101,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
-		menuOperations.addMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName(entityMetadata.getPlural()), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
+		menuOperations.addMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
 	}
 	
 	private Document getSearchDocument() {

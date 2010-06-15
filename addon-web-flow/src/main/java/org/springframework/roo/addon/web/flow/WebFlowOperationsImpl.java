@@ -123,9 +123,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		} catch (IOException e) {
 			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
+		
+		JavaSymbolName name = new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", ""));
 
 		// Add 'create new' menu item
-		menuOperations.addMenuItem(new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")), new JavaSymbolName(flowName.replaceAll("[^a-zA-Z_]", "")), "webflow.menu.enter", "/" + flowDirectoryId, null);
+		menuOperations.addMenuItem(name, name, name, "webflow.menu.enter", "/" + flowDirectoryId, null);
 
 		tilesOperations.addViewDefinition(flowDirectoryId, "view-state-1", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-1.jspx");
 		tilesOperations.addViewDefinition(flowDirectoryId, "view-state-2", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + flowDirectoryId + "/view-state-2.jspx");

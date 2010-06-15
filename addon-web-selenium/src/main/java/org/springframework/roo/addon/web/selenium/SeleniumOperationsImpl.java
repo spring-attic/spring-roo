@@ -185,9 +185,10 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		menuOperations.addMenuItem(
 				new JavaSymbolName("SeleniumTests"), 
 				new JavaSymbolName("Test"),
+				new JavaSymbolName("Test"),
 				"selenium.menu.test.suite",
 				"/static/" + relativeTestFilePath,
-				"si:");		
+				"si_");		
 	}
 	
 	private void installMavenPlugin(){

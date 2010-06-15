@@ -67,9 +67,9 @@ public class MenuOperationsImpl implements MenuOperations {
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link, String idPrefix) {
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuIteId, JavaSymbolName menuItemLabel, String globalMessageCode, String link, String idPrefix) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
-		Assert.notNull(menuItemName, "Menu item name required");
+		Assert.notNull(menuIteId, "Menu item name required");
 		Assert.hasText(link, "Link required");
 		
 		if (idPrefix == null || idPrefix.length() == 0) {
@@ -92,30 +92,30 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		//check for existence of menu category by looking for the indentifier provided
-		Element category = XmlUtils.findFirstElement("//*[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element category = XmlUtils.findFirstElement("//*[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']", rootElement);
 			
 		//if not exists, create new one
 		if(category == null) {
 			category = (Element) rootElement.appendChild(new XmlElementBuilder("menu:category", document)
-															.addAttribute("id", "c:" + menuCategoryName.getSymbolName().toLowerCase())
+															.addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase())
 														.build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
 			propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.category." + menuCategoryName.getSymbolName().toLowerCase() + ".label", menuCategoryName.getReadableSymbolName(), true);
 		}
 		
 		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
 			menuItem = new XmlElementBuilder("menu:item", document)
-							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase())
+							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase())
 							.addAttribute("messageCode", globalMessageCode)
 							.addAttribute("url", link)
 						.build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
-			propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + ".label", menuItemName.getReadableSymbolName(), true);
 		}
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu.item." + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + ".label", menuItemLabel.getReadableSymbolName(), true);
 		writeToDiskIfNecessary(document);
 	}
 	
@@ -131,7 +131,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		//find any menu items under this category which have an id that starts with the menuItemIdPrefix
-		List<Element> elements = XmlUtils.findElements("//category[@id='c:" +  menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
+		List<Element> elements = XmlUtils.findElements("//category[@id='c_" +  menuCategoryName.getSymbolName().toLowerCase() + "']//item[starts-with(@id, '" + FINDER_MENU_ITEM_PREFIX + "')]", document.getDocumentElement());
 		if(elements.size() == 0) {
 			return;
 		}
@@ -166,7 +166,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		//find menu item under this category if exists 
-		Element element = XmlUtils.findFirstElement("//category[@id='c:" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "." + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
+		Element element = XmlUtils.findFirstElement("//category[@id='c_" + menuCategoryName.getSymbolName().toLowerCase() + "']//item[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemName.getSymbolName().toLowerCase() + "']", document.getDocumentElement());
 		if(element==null) {
 			return;
 		}

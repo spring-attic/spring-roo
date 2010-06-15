@@ -14,8 +14,8 @@ import org.springframework.roo.model.JavaSymbolName;
  */
 public interface MenuOperations {
 
-	public static final String DEFAULT_MENU_ITEM_PREFIX = "i:";
-	public static final String FINDER_MENU_ITEM_PREFIX = "fi:";
+	public static final String DEFAULT_MENU_ITEM_PREFIX = "i_";
+	public static final String FINDER_MENU_ITEM_PREFIX = "fi_";
 
 	/**
 	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
@@ -31,12 +31,12 @@ public interface MenuOperations {
 	 *  
 	 * 
 	 * @param menuCategoryName the identifier for the menu category (required)
-	 * @param menuItemName the menu item identifier (required)
+	 * @param menuItemId the menu item identifier (required)
 	 * @param globalMessageCode message code for the menu item (required)
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String globalMessageCode, String link, String idPrefix);
+	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, JavaSymbolName menuItemLabel, String globalMessageCode, String link, String idPrefix);
 
 	/**
 	 * Attempts to locate a unused finder menu items and remove them. 

@@ -235,7 +235,7 @@ public class JspOperationsImpl implements JspOperations {
 
 		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName(), true);
 
-		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName(controller.getSimpleTypeName()), "global.menu.new", "/" + folderName + "/index", null);
+		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName("new"), new JavaSymbolName(controller.getSimpleTypeName()), "global.menu.new", "/" + folderName + "/index", null);
 
 		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
 	}

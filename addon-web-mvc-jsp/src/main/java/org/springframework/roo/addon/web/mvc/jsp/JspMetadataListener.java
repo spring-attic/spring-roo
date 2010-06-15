@@ -7,7 +7,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -146,7 +145,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			File file = new File(destinationDirectory);
 			Assert.isTrue(file.isDirectory(), destinationDirectory + " is a file, when a directory was expected");
 		}
-		
+	
 		// By now we have a directory to put the JSPs inside
 		String listPath1 = destinationDirectory + "/list.jspx";
 		writeToDiskIfNecessary(listPath1, viewManager.getListDocument());
@@ -156,22 +155,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
-		JavaSymbolName categoryName = getControllerPathSymbolName(controllerPath);
+		JavaSymbolName categoryName = new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
 		
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
 			writeToDiskIfNecessary(listPath, viewManager.getCreateDocument());
 			//add 'create new' menu item
-			menuOperations.addMenuItem( 
-					categoryName, 
-					new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()),
-					"global.menu.new",
-					"/" + controllerPath + "?form",
-					MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+			menuOperations.addMenuItem(categoryName, new JavaSymbolName("new"), new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), "global.menu.new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} 
 		else {
-			menuOperations.cleanUpMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "create", controllerPath);
 		}
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
@@ -195,20 +189,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 
 		//Add 'list all' menu item
-		menuOperations.addMenuItem(
-				categoryName, 
-				new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())),
-				"global.menu.list",
-				"/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}",
-				MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+		menuOperations.addMenuItem(categoryName, new JavaSymbolName("list"), new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())), "global.menu.list", "/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 		
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 		Assert.notNull(pluralMetadata, "Could not determine plural for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
-		
-		// fix for ROO-869
-		if (!getPlural(beanInfoMetadata.getJavaBean()).equals(pluralMetadata.getInflectorPlural(beanInfoMetadata.getJavaBean().getSimpleTypeName(), Locale.ENGLISH))) {
-			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName(pluralMetadata.getInflectorPlural(beanInfoMetadata.getJavaBean().getSimpleTypeName(), Locale.ENGLISH)), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-		}
 	
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
@@ -217,10 +201,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
 				//Add 'Find by' menu item
-				menuOperations.addMenuItem(
-						categoryName, 
-						finderLabel, 
-						"global.menu.find",
+				menuOperations.addMenuItem(categoryName, finderLabel, finderLabel, "global.menu.find",
 						"/" + controllerPath + "?find=" + finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()), "") + "&form",
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
