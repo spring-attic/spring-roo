@@ -2,8 +2,8 @@ package org.springframework.roo.addon.solr;
 
 import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -66,7 +67,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(pathResolver, "PathResolver required");
-//		Assert.notNull(fileManager, "Filemanager requred");
+		Assert.notNull(fileManager, "Filemanager required");
 		
 		if (!isValid()) {
 			return;
@@ -108,7 +109,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			
 			builder.addMethod(getSolrServerMethod());
 			
-//			managePointcuts();
+			managePointcuts();
 		}
 		
 		// Create a representation of the desired output ITD
@@ -126,17 +127,18 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				boolean writeNeeded = false;
 				if (annotationValues.getIndexMethod() != null || annotationValues.getIndexMethod().length() != 0) {
 					if (!contents.contains(annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName())) {
-						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(" + annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName() + ") ||");
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "()) ||");
 						writeNeeded = true;
 					}
 					if (!contents.contains(annotationValues.getIndexMethod() + beanPlural)) {
-						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(" + annotationValues.getIndexMethod() + beanPlural + ") ||");
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanPlural + "()) ||");
 						writeNeeded = true;
 					}
 				}
 				
 				if (writeNeeded) {
-				    Writer output = new BufferedWriter(new FileWriter(aspectLocation));
+					MutableFile file = fileManager.updateFile(aspectLocation);
+				    Writer output = new BufferedWriter(new OutputStreamWriter(file.getOutputStream()));
 				    try {
 				      output.write(contents.toString());
 				    }

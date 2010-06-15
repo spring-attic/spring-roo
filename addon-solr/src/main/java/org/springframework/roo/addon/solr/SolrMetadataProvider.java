@@ -13,10 +13,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link SolrMetadata}.
@@ -31,23 +29,17 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private PathResolver pathResolver;
-	@Reference private FileManager fileManager;
-	//private FileManager fileManagerS;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		entityMetadataProvider.addMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
 		addMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
-//		this.fileManagerS = fileManager;
-		System.out.println("activate: fm " + fileManager + " pr " + pathResolver);
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		entityMetadataProvider.removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
-		removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
-//		System.out.println("deactivate: " + fileManager + " equals " + fileManager.equals(fileManagerS));
-		
+		removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));	
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
