@@ -63,7 +63,7 @@
 	                   <spring:url value="/static/images/show.png" var="show_image_url"/>
 	                   <spring:message arguments="${typeName}" code="entity.show" var="show_label"/>
 	                   <a href="${show_form_url}" alt="${show_label}" title="${show_label}">
-	                       <input alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" type="image" value="${show_label}"/>
+	                   		<img alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" />
 	                   </a>
 	               </td>
 	               <c:if test="${update}">
@@ -74,8 +74,8 @@
 		                   <spring:url value="/static/images/update.png" var="update_image_url"/>
 						   <spring:message arguments="${typeName}" code="entity.update" var="update_label"/>
 		                   <a href="${update_form_url}" alt="${update_label}" title="${update_label}">
-	                       		<input alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" type="image" value="${update_label}"/>
-	                   	   </a>    
+		                   		<img alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" />
+		                   </a>    
 	               		</td>
 	               </c:if>
 	               <c:if test="${delete}">
