@@ -29,13 +29,12 @@ import org.w3c.dom.Element;
  * Provides Maven project operations. 
  * 
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
- *
  */
 @Component
 @Service
 public class MavenOperationsImpl extends AbstractProjectOperations implements MavenOperations {
-	
 	private static final Logger logger = HandlerUtils.getLogger(MavenOperationsImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -66,11 +65,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			String ver = System.getProperty("java.version");
 			if (ver.indexOf("1.7.") > -1) {
 				majorJavaVersion = 7;
-			}
-			else if (ver.indexOf("1.6.") > -1) {
+			} else if (ver.indexOf("1.6.") > -1) {
 				majorJavaVersion = 6;
-			}
-			else {
+			} else {
 				// To be running Roo they must be on Java 5 or above
 				majorJavaVersion = 5;
 			}
@@ -86,7 +83,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			if (lastIndex == -1) {
 				projectName = packageName;
 			} else {
-				projectName = packageName.substring(lastIndex+1);
+				projectName = packageName.substring(lastIndex + 1);
 			}
 			// Always discard the above and use the package name as the name if this is an add-on
 			if (template.isAddOn()) {
@@ -111,28 +108,29 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
 		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
-		
-		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement) ;
+
+		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement);
 		for (Element e : versionElements) {
 			e.setTextContent("1." + majorJavaVersion);
 		}
-		
+
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
-		
-		// Java 5 needs the javax.annotation library (it's included in Java 6 and above)
+
+		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
 		if (majorJavaVersion == 5 && !template.isAddOn()) {
 			dependencyUpdate(new Dependency("javax.annotation", "jsr250-api", "1.0"));
+			dependencyUpdate(new Dependency("javax.xml.bind", "jaxb-api", "2.1"));
 		}
 
 		if (template.isAddOn()) {
 			addOnJumpstartOperations.install(template);
 		}
-		
+
 		fileManager.scan();
-		
+
 		applicationContextOperations.createMiddleTierApplicationContext();
-	
+
 		try {
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "log4j.properties-template"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties")).getOutputStream());
 		} catch (IOException e1) {
