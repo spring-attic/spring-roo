@@ -170,7 +170,7 @@
 		</provider>
 		<provider id="OPENJPA">
 			<properties>
-				<openjpa.version>2.0.0-beta3</openjpa.version>
+				<openjpa.version>2.0.0</openjpa.version>
 			</properties>
 			<dependencies>
 				<dependency>
