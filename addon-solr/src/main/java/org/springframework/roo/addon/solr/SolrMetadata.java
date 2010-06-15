@@ -127,11 +127,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				boolean writeNeeded = false;
 				if (annotationValues.getIndexMethod() != null || annotationValues.getIndexMethod().length() != 0) {
 					if (!contents.contains(annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName())) {
-						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "()) ||");
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "(..)) ||");
 						writeNeeded = true;
 					}
 					if (!contents.contains(annotationValues.getIndexMethod() + beanPlural)) {
-						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanPlural + "()) ||");
+						contents = StringUtils.replace(contents, "asyncMethods():", "asyncMethods(): execution(void " + annotationValues.getIndexMethod() + beanPlural + "(..)) ||");
 						writeNeeded = true;
 					}
 				}
