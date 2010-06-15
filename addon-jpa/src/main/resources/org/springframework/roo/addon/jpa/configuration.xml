@@ -122,7 +122,7 @@
 				<dependency>
 					<groupId>org.hibernate</groupId>
 					<artifactId>hibernate-core</artifactId>
-					<version>3.5.0-Final</version>
+					<version>3.5.1-Final</version>
 					<exclusions>
 						<exclusion>
 							<groupId>cglib</groupId>
@@ -149,7 +149,7 @@
 				<dependency>
 					<groupId>org.hibernate</groupId>
 					<artifactId>hibernate-entitymanager</artifactId>
-					<version>3.5.0-Final</version>
+					<version>3.5.1-Final</version>
 					<exclusions>
 						<exclusion>
 							<groupId>cglib</groupId>
