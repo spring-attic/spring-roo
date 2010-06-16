@@ -14,11 +14,10 @@ public aspect SolrSearchAsyncTaskExecutor {
 	  
 	 pointcut asyncMethods(): execution(void deleteIndex(..));
 
-	 void around(Object target): asyncMethods() && target(target) {
-		 final Object target1 = target;
+	 void around(): asyncMethods() {
 		 taskExecutor.execute(new Thread() {
 			 public void run() {
-				 proceed(target1);
+				 proceed();
 			 }
 		 });
 	 }
