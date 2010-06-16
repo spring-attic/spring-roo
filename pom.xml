@@ -536,7 +536,7 @@
 
     <properties>
         <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
-        <spring.version>3.0.2.RELEASE</spring.version>
+        <spring.version>3.0.3.RELEASE</spring.version>
         <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
         <roo.version>1.1.0.M2</roo.version>
     </properties>
