@@ -222,27 +222,6 @@
         </extensions>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>                    
-                    </execution>
-                </executions>
-                <configuration>
-                    <executable>git</executable>
-                    <arguments>
-                        <argument>log</argument>
-                        <argument>--pretty=format:Git-Commit-Hash: %H</argument>
-                        <argument>-n1</argument>
-                    </arguments>
-                    <outputFile>${project.build.directory}/build-number.mf</outputFile>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.1</version>
