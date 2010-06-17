@@ -155,6 +155,10 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 		return dbMetadataConverter.convertTableIdentityToType(identifiableTable, javaPackage);
 	}
 
+	public JavaSymbolName suggestFieldNameForColumn(String columnName) {
+		return new JavaSymbolName(dbMetadataConverter.getFieldName(columnName));
+	}
+
 	public String dump() {
 		return tableNamesToTypes.toString();
 	}

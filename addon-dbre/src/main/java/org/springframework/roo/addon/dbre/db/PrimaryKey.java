@@ -1,14 +1,10 @@
 package org.springframework.roo.addon.dbre.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.support.util.Assert;
-
 /**
- * JDBC primary key metadata.
+ * Primary key metadata.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -19,11 +15,10 @@ public class PrimaryKey {
 	private final Short keySeq;
 	private final List<Column> columns = new ArrayList<Column>();
 
-	PrimaryKey(ResultSet rs) throws SQLException {
-		Assert.notNull(rs, "ResultSet must not be null");
-		this.name = rs.getString("PK_NAME");
-		this.columnName = rs.getString("COLUMN_NAME");
-		this.keySeq = new Short(rs.getShort("KEY_SEQ"));
+	PrimaryKey(String name, String columnName, Short keySeq) {
+		this.name = name;
+		this.columnName = columnName;
+		this.keySeq = keySeq;
 	}
 
 	public String getId() {

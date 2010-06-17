@@ -33,7 +33,7 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")
 	public void displayDatabaseMetadata(
-			@CliOption(key = "table", mandatory = false, help = "The table name") String table,  
+			@CliOption(key = "table", mandatory = false, help = "The case-sensitive table name") String table,  
 			@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") String file) { 
 				
 		dbreOperations.displayDbMetadata(table, file);

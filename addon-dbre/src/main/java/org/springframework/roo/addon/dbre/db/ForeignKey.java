@@ -1,14 +1,10 @@
 package org.springframework.roo.addon.dbre.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.support.util.Assert;
-
 /**
- * JDBC foreign key metadata.
+ * Foreign key metadata.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -18,10 +14,9 @@ public class ForeignKey {
 	private final String fkTable;
 	private final List<Column> columns = new ArrayList<Column>();
 
-	ForeignKey(ResultSet rs) throws SQLException {
-		Assert.notNull(rs, "ResultSet must not be null");
-		this.name = rs.getString("FK_NAME");
-		this.fkTable = rs.getString("FKTABLE_NAME");
+	ForeignKey(String name, String fkTable) {
+		this.name = name;
+		this.fkTable = fkTable;
 	}
 
 	public String getId() {

@@ -1,14 +1,10 @@
 package org.springframework.roo.addon.dbre.db;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.support.util.Assert;
-
 /**
- * JDBC index metadata.
+ * Table index metadata.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -20,12 +16,11 @@ public class Index {
 	private Short type;
 	private final List<Column> columns = new ArrayList<Column>();
 
-	Index(ResultSet rs) throws SQLException {
-		Assert.notNull(rs, "ResultSet must not be null");
-		this.name = rs.getString("INDEX_NAME");
-		this.columnName = rs.getString("COLUMN_NAME");
-		this.nonUnique = rs.getBoolean("NON_UNIQUE");
-		this.type = new Short(rs.getShort("TYPE"));
+	Index(String name, String columnName, boolean nonUnique, Short type) {
+		this.name = name;
+		this.columnName = columnName;
+		this.nonUnique = nonUnique;
+		this.type = type;
 	}
 
 	public String getId() {

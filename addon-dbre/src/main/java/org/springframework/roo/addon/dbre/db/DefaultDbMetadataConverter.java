@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Default implementation of {@link DbMetadataConverter).
@@ -41,12 +42,22 @@ public class DefaultDbMetadataConverter implements DbMetadataConverter {
 		if (result.length() > 0) {
 			result.append(".");
 		}
-		
+		result.append(getName(table, false));
+		return new JavaType(result.toString());
+	}
+
+	public String getFieldName(String columnName) {
+		Assert.isTrue(StringUtils.hasText(columnName), "Column name required");
+		return getName(columnName, true);
+	}
+	
+	private String getName(String str, boolean isField) {
+		StringBuilder result = new StringBuilder();
 		boolean isUnderscore = false;
-		for (int i = 0; i < table.length(); i++) {
-			Character c = table.charAt(i);
+		for (int i = 0; i < str.length(); i++) {
+			Character c = str.charAt(i);
 			if (i == 0) {
-				result.append(Character.toUpperCase(c));
+				result.append(isField ? Character.toLowerCase(c) : Character.toUpperCase(c));
 				continue;
 			} else if (i > 0 && c == '_') {
 				isUnderscore = true;
@@ -59,6 +70,6 @@ public class DefaultDbMetadataConverter implements DbMetadataConverter {
 				result.append(Character.toLowerCase(c));
 			}
 		}
-		return new JavaType(result.toString());
+		return result.toString();
 	}
 }

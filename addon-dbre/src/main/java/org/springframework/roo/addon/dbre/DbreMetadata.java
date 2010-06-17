@@ -32,6 +32,8 @@ import org.w3c.dom.Element;
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ID = new JavaType("javax.persistence.Id");
+	private static final JavaType EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
 
 	private ProjectMetadata projectMetadata;
 	private EntityMetadata entityMetadata;
@@ -62,11 +64,53 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 		List<Element> columns = XmlUtils.findElements(getSpecifiedTableXPath(identifiableTable.getTable()) + "/column", dbMetadataElement);
 		for (Element columnElement : columns) {
-			builder.addField(getField(columnElement, javaType));
+			// Check for existing declared fields in the governor or in the entity metadata
+			if (!hasField(columnElement, javaType)) {
+				builder.addField(getField(columnElement, javaType));
+			}
 		}
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+
+	private boolean hasField(Element columnElement, JavaType javaType) {
+		JavaSymbolName fieldName = tableModelService.suggestFieldNameForColumn(columnElement.getAttribute("name"));
+		System.out.println("column name = " + columnElement.getAttribute("name") + ", field name = " + fieldName.getSymbolName());
+		// Check governor for field
+		if (MemberFindingUtils.getField(governorTypeDetails, fieldName) != null) {
+		//	System.out.println("found on governor " + fieldName + " - not adding to ITD");
+			return true;
+		}
+		
+		// Check entity ITD for field
+		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
+		for (FieldMetadata field : itdFields) {
+			if (field.getFieldName().equals(fieldName)) {
+		//		System.out.println("found on entity " + fieldName + " - not adding to ITD");
+				return true;
+			}
+		}
+		
+		// Try to locate an existing field with @javax.persistence.Id
+//		List<FieldMetadata> foundId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
+//		if (foundId.size() > 0) {
+//			Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+//			return true;
+//		}
+//		foundId = MemberFindingUtils.getFieldsWithAnnotation(entityMetadata., ID);
+//		if (foundId.size() > 0) {
+//			Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+//			return true;
+//		}
+		
+		// Try to locate an existing field with @javax.persistence.EmbeddedId
+//		List<FieldMetadata> foundEmbeddedId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
+//		if (foundEmbeddedId.size() > 0) {
+//			Assert.isTrue(foundEmbeddedId.size() == 1, "More than one field was annotated with @javax.persistence.EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+//			return true;
+//		}
+		return false;
 	}
 
 	private FieldMetadata getField(Element columnElement, JavaType javaType) {

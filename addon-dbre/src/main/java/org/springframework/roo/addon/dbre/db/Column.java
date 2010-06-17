@@ -2,16 +2,11 @@ package org.springframework.roo.addon.dbre.db;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
-import java.util.StringTokenizer;
-
-import org.springframework.roo.support.util.Assert;
 
 /**
- * JDBC column metadata.
+ * Column metadata.
  * 
  * @author Alan Stewart.
  * @since 1.1
@@ -21,19 +16,18 @@ public class Column {
 	private final int dataType;
 	private final int columnSize;
 	private final int decimalDigits;
-	private boolean isNullable;
+	private boolean nullable;
 	private final String remarks;
 	private final String typeName;
 
-	Column(ResultSet rs) throws SQLException {
-		Assert.notNull(rs, "ResultSet must not be null");
-		this.name = rs.getString("COLUMN_NAME");
-		this.dataType = rs.getInt("DATA_TYPE");
-		this.columnSize = rs.getInt("COLUMN_SIZE");
-		this.decimalDigits = rs.getInt("DECIMAL_DIGITS");
-		this.isNullable = rs.getBoolean("IS_NULLABLE");
-		this.remarks = rs.getString("REMARKS");
-		this.typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
+	Column(String name, int dataType, int columnSize, int decimalDigits, boolean nullable, String remarks, String typeName) {
+		this.name = name;
+		this.dataType = dataType;
+		this.columnSize = columnSize;
+		this.decimalDigits = decimalDigits;
+		this.nullable = nullable;
+		this.remarks = remarks;
+		this.typeName = typeName;
 	}
 
 	public String getId() {
@@ -56,8 +50,8 @@ public class Column {
 		return decimalDigits;
 	}
 
-	public boolean getIsNullable() {
-		return isNullable;
+	public boolean isNullable() {
+		return nullable;
 	}
 
 	public String getRemarks() {
@@ -108,6 +102,6 @@ public class Column {
 	}
 
 	public String toString() {
-		return "    COLUMN_NAME " + name + " (" + getType().getName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + isNullable + ", REMARKS " + remarks;
+		return "    COLUMN_NAME " + name + " (" + getType().getName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + nullable + ", REMARKS " + remarks;
 	}
 }
