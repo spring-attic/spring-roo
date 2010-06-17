@@ -71,7 +71,6 @@ public class IdentifiableTable {
 	}
 
 	public boolean equals(Object obj) {
-		System.out.println("catalog " + catalog + " schema " + schema + " table " + table);
 		if (this == obj) {
 			return true;
 		}

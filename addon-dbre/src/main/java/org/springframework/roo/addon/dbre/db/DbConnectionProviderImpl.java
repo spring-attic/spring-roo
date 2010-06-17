@@ -53,6 +53,8 @@ public class DbConnectionProviderImpl implements DbConnectionProvider {
 			driver = new EmbeddedDriver();
 		} else if (driverClassName.startsWith("org.h2")) {
 			driver = new org.h2.Driver();
+		} else if (driverClassName.startsWith("org.postgresql")) {
+			driver = new org.postgresql.Driver();
 			// } else if (driverClassName.startsWith("oracle")) {
 			// driver = new OracleDriver();
 		} else {
