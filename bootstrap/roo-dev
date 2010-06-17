@@ -17,24 +17,24 @@ ROO_HOME=`dirname "$PRG"`
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 # echo "Resolved ROO_HOME: $ROO_HOME"
 
-mkdir -p $ROO_HOME/bootstrap/target/osgi/bin
-mkdir -p $ROO_HOME/bootstrap/target/osgi/bundle
-mkdir -p $ROO_HOME/bootstrap/target/osgi/conf
+mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bin
+mkdir -p "$ROO_HOME"/bootstrap/target/osgi/bundle
+mkdir -p "$ROO_HOME"/bootstrap/target/osgi/conf
 
-cp $ROO_HOME/bootstrap/src/main/bin/* $ROO_HOME/bootstrap/target/osgi/bin
-chmod +x $ROO_HOME/bootstrap/target/osgi/bin/*.sh
+cp "$ROO_HOME"/bootstrap/src/main/bin/* "$ROO_HOME"/bootstrap/target/osgi/bin
+chmod +x "$ROO_HOME"/bootstrap/target/osgi/bin/*.sh
 
-cp $ROO_HOME/bootstrap/src/main/conf/* $ROO_HOME/bootstrap/target/osgi/conf
+cp "$ROO_HOME"/bootstrap/src/main/conf/* "$ROO_HOME"/bootstrap/target/osgi/conf
 
 # Most Roo bundles are not special and belong in "bundle"
-cp $ROO_HOME/target/all/*.jar $ROO_HOME/bootstrap/target/osgi/bundle
+cp "$ROO_HOME"/target/all/*.jar "$ROO_HOME"/bootstrap/target/osgi/bundle
 
 # Move the startup-related JAR from the "bundle" directory to the "bin" directory
-mv $ROO_HOME/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar $ROO_HOME/bootstrap/target/osgi/bin
-mv $ROO_HOME/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar $ROO_HOME/bootstrap/target/osgi/bin
+mv "$ROO_HOME"/bootstrap/target/osgi/bundle/org.springframework.roo.bootstrap-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
+mv "$ROO_HOME"/bootstrap/target/osgi/bundle/org.apache.felix.framework-*.jar "$ROO_HOME"/bootstrap/target/osgi/bin
 
-# Build a classpath containing our two magical startup JARs
-ROO_CP=`echo $ROO_HOME/bootstrap/target/osgi/bin/*.jar | sed 's/ /:/g'`
+# Build a classpath containing our two magical startup JARs (we look for " /" as per ROO-905)
+ROO_CP=`echo "$ROO_HOME"/bootstrap/target/osgi/bin/*.jar | sed 's/ \//:\//g'`
 # echo ROO_CP: $ROO_CP
 
 # Store file locations in variables to facilitate Cygwin conversion if needed
@@ -69,6 +69,6 @@ if [ "$cygwin" = "true" ]; then
 fi
 
 # Hop, hop, hop...
-java -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp $ROO_CP org.springframework.roo.bootstrap.Main
+java -Dorg.osgi.framework.bootdelegation=org.netbeans.lib.profiler,org.netbeans.lib.profiler.\* -Droo.args="$*" -DdevelopmentMode=true -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 echo Roo exited with code $EXITED

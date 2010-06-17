@@ -26,8 +26,8 @@ case "`uname`" in
         ;;
 esac
 
-# Build a classpath containing our two magical startup JARs
-ROO_CP=`echo $ROO_HOME/bin/*.jar | sed 's/ /:/g'`
+# Build a classpath containing our two magical startup JARs (we look for " /" as per ROO-905)
+ROO_CP=`echo "$ROO_HOME"/bin/*.jar | sed 's/ \//:\//g'`
 # echo ROO_CP: $ROO_CP
 
 # Store file locations in variables to facilitate Cygwin conversion if needed
@@ -62,6 +62,6 @@ if [ "$cygwin" = "true" ]; then
 fi
 
 # Hop, hop, hop...
-java -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp $ROO_CP org.springframework.roo.bootstrap.Main
+java -Droo.args="$*" -DdevelopmentMode=false -Dorg.osgi.framework.storage="$ROO_OSGI_FRAMEWORK_STORAGE" -Dfelix.auto.deploy.dir="$ROO_AUTO_DEPLOY_DIRECTORY" -Dfelix.config.properties="file:$ROO_CONFIG_FILE_PROPERTIES" -cp "$ROO_CP" org.springframework.roo.bootstrap.Main
 EXITED=$?
 echo Roo exited with code $EXITED
