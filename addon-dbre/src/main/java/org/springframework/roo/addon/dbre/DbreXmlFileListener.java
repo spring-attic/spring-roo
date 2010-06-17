@@ -107,6 +107,9 @@ public class DbreXmlFileListener implements FileEventListener {
 	private void addIdentifierFromPrimaryKey(List<AnnotationAttributeValue<?>> entityAttrs, Table table) {
 		// Get primary keys 
 		Set<PrimaryKey> primaryKeys = table.getPrimaryKeys();
+		if (primaryKeys.size() == 1) {
+			
+		}
 		
 	}
 

@@ -6,9 +6,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.derby.jdbc.EmbeddedDriver;
-import org.hsqldb.jdbcDriver;
-
 public class DbConnectionProviderImpl implements DbConnectionProvider {
 	private Properties props;
 
@@ -46,11 +43,11 @@ public class DbConnectionProviderImpl implements DbConnectionProvider {
 		String driverClassName = props.getProperty("database.driverClassName");
 		Driver driver;
 		if (driverClassName.startsWith("org.hsqldb")) {
-			driver = new jdbcDriver();
+			driver = new org.hsqldb.jdbcDriver();
 		} else if (driverClassName.startsWith("com.mysql")) {
 			driver = new com.mysql.jdbc.Driver();
 		} else if (driverClassName.startsWith("org.apache.derby")) {
-			driver = new EmbeddedDriver();
+			driver = new org.apache.derby.jdbc.EmbeddedDriver();
 		} else if (driverClassName.startsWith("org.h2")) {
 			driver = new org.h2.Driver();
 		} else if (driverClassName.startsWith("org.postgresql")) {

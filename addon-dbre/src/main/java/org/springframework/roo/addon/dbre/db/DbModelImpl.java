@@ -47,7 +47,7 @@ public class DbModelImpl implements DbModel {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
-	private Set<Table> tables;
+	private Set<Table> tables = new HashSet<Table>();
 	private JavaPackage javaPackage;
 
 	public String getDbMetadata() {
@@ -55,7 +55,7 @@ public class DbModelImpl implements DbModel {
 	}
 
 	public String getDbMetadata(IdentifiableTable identifiableTable) {
-		populateTablesFromDb(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
+		populateTablesFromDb(identifiableTable);
 
 		StringBuilder builder = new StringBuilder();
 		if (!tables.isEmpty()) {
@@ -76,7 +76,7 @@ public class DbModelImpl implements DbModel {
 	}
 
 	public void serialize() {
-		populateTablesFromDb(null, null, null);
+		populateTablesFromDb(new IdentifiableTable());
 
 		String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		MutableFile dbreMutableFile = null;
@@ -110,12 +110,12 @@ public class DbModelImpl implements DbModel {
 		}
 		dbMetadataElement.setAttribute(PACKAGE, packageName);
 
-		Set<String> tableData = new HashSet<String>();
+		Set<String> dbModel = new HashSet<String>();
 
 		// Add or update tables in xml file
-		for (Table table : getTables()) {
+		for (Table table : tables) {
 			String tableId = table.getIdentifiableTable().getId();
-			tableData.add(tableId);
+			dbModel.add(tableId);
 			String tableName = table.getIdentifiableTable().getTable();
 			String tableXPath = getSpecifiedTableXPath(tableName);
 			Element tableElement = XmlUtils.findFirstElement(tableXPath, dbMetadataElement);
@@ -132,7 +132,7 @@ public class DbModelImpl implements DbModel {
 			// Iterate through columns
 			for (Column column : table.getColumns()) {
 				String columnId = tableId + "." + column.getId();
-				tableData.add(columnId);
+				dbModel.add(columnId);
 
 				String columnName = column.getName();
 				Element columnElement = XmlUtils.findFirstElement(tableXPath + "/column[@name = '" + columnName + "']", dbMetadataElement);
@@ -157,7 +157,7 @@ public class DbModelImpl implements DbModel {
 			// Iterate through primary keys
 			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
 				String primaryKeyId = tableId + "." + primaryKey.getId();
-				tableData.add(primaryKeyId);
+				dbModel.add(primaryKeyId);
 
 				String primaryKeyName = primaryKey.getName();
 				Element primaryKeyElement = XmlUtils.findFirstElement(tableXPath + "/primaryKey[@name = '" + primaryKeyName + "']", dbMetadataElement);
@@ -176,7 +176,7 @@ public class DbModelImpl implements DbModel {
 			// Iterate through foreign keys
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
 				String foreignKeyId = tableId + "." + foreignKey.getId();
-				tableData.add(foreignKeyId);
+				dbModel.add(foreignKeyId);
 
 				String foreignKeyName = foreignKey.getName();
 				Element foreignKeyElement = XmlUtils.findFirstElement(tableXPath + "/foreignKey[@name = '" + foreignKeyName + "']", dbMetadataElement);
@@ -194,7 +194,7 @@ public class DbModelImpl implements DbModel {
 			// Iterate through indexes
 			for (Index index : table.getIndexes()) {
 				String indexId = tableId + "." + index.getId();
-				tableData.add(indexId);
+				dbModel.add(indexId);
 
 				String indexName = index.getName();
 				Element indexElement = XmlUtils.findFirstElement(tableXPath + "/index[@name = '" + indexName + "']", dbMetadataElement);
@@ -217,13 +217,13 @@ public class DbModelImpl implements DbModel {
 		// Check for deleted tables and columns etc in schema and remove from xml
 		List<Element> xmlTables = XmlUtils.findElements(DbrePath.DBRE_TABLE_XPATH.getPath(), dbMetadataElement);
 		for (Element tableElement : xmlTables) {
-			if (!tableData.contains(tableElement.getAttribute("id"))) {
+			if (!dbModel.contains(tableElement.getAttribute("id"))) {
 				dbMetadataElement.removeChild(tableElement);
 			} else {
-				removeTableAttributes("column", tableData, tableElement);
-				removeTableAttributes("primaryKey", tableData, tableElement);
-				removeTableAttributes("foreignKey", tableData, tableElement);
-				removeTableAttributes("index", tableData, tableElement);
+				removeTableAttributes("column", dbModel, tableElement);
+				removeTableAttributes("primaryKey", dbModel, tableElement);
+				removeTableAttributes("foreignKey", dbModel, tableElement);
+				removeTableAttributes("index", dbModel, tableElement);
 			}
 		}
 
@@ -250,8 +250,8 @@ public class DbModelImpl implements DbModel {
 		return this.tables;
 	}
 
-	private void populateTablesFromDb(String catalog, String schema, String table) {
-		this.tables = new HashSet<Table>();
+	private void populateTablesFromDb(IdentifiableTable identifiableTable) {
+		tables.clear();
 
 		Map<String, String> map = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 		DbConnectionProvider connectionProvider = new DbConnectionProviderImpl(map);
@@ -264,9 +264,9 @@ public class DbModelImpl implements DbModel {
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 			ResultSet rs = null;
 			try {
-				rs = getTablesRs(catalog, schema, table, databaseMetaData);
+				rs = getTablesRs(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable(), databaseMetaData);
 				while (rs.next()) {
-					IdentifiableTable identifiableTable = new IdentifiableTable(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"), TableType.valueOf(rs.getString("TABLE_TYPE")));
+					identifiableTable = new IdentifiableTable(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"), TableType.valueOf(rs.getString("TABLE_TYPE")));
 					tables.add(new JdbcTableImpl(identifiableTable,  databaseMetaData));
 				}
 			} finally {
@@ -285,7 +285,7 @@ public class DbModelImpl implements DbModel {
 
 	private void populateTablesFromXml(Document dbre) {
 		Assert.notNull(dbre, "Document is null");
-		this.tables = new HashSet<Table>();
+		tables.clear();
 
 		Element dbMetadataElement = dbre.getDocumentElement();
 		setJavaPackage(new JavaPackage(dbMetadataElement.getAttribute("package")));

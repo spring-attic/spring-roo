@@ -40,7 +40,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void displayDbMetadata(String table, String file) {
-		String dbMetadata = dbModel.getDbMetadata(new IdentifiableTable(null, null, table));
+		String dbMetadata = dbModel.getDbMetadata(new IdentifiableTable(table));
 		if (StringUtils.hasText(dbMetadata)) {
 			if (StringUtils.hasText(file)) {
 				try {

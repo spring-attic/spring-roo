@@ -11,10 +11,6 @@ import java.util.Set;
  */
 public abstract class AbstractTable {
 	protected final IdentifiableTable identifiableTable;
-//	private final String catalog;
-//	private final String schema;
-//	private final String table;
-//	private final TableType tableType;
 	protected final Set<Column> columns = new HashSet<Column>();
 	protected final Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
 	protected final Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
@@ -44,7 +40,6 @@ public abstract class AbstractTable {
 		return this.indexes;
 	}
 
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -52,7 +47,6 @@ public abstract class AbstractTable {
 		return result;
 	}
 
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;

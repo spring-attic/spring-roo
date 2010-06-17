@@ -76,7 +76,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private boolean hasField(Element columnElement, JavaType javaType) {
 		JavaSymbolName fieldName = tableModelService.suggestFieldNameForColumn(columnElement.getAttribute("name"));
-		System.out.println("column name = " + columnElement.getAttribute("name") + ", field name = " + fieldName.getSymbolName());
+	//	System.out.println("column name = " + columnElement.getAttribute("name") + ", field name = " + fieldName.getSymbolName());
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, fieldName) != null) {
 		//	System.out.println("found on governor " + fieldName + " - not adding to ITD");

@@ -26,18 +26,18 @@
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 		</dependency>
 		<!-- Roo -->
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.entity</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.addon.entity</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.propfiles</artifactId>
@@ -119,9 +119,9 @@
 			<version>1.0.71</version>
 		</dependency>
 		<dependency>
-			<groupId>postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>8.4-701.jdbc3</version>
+			<groupId>org.postgresql</groupId>
+			<artifactId>com.springsource.org.postgresql.jdbc3</artifactId>
+			<version>8.3.603</version>
 		</dependency>
 		<!-- 
 		<dependency>

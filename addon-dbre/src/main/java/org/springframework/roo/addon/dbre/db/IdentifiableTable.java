@@ -28,6 +28,14 @@ public class IdentifiableTable {
 		this(catalog, schema, table, TableType.TABLE);
 	}
 
+	public IdentifiableTable(String table) {
+		this(null, null, table);
+	}
+
+	public IdentifiableTable() {
+		this(null);
+	}
+
 	public String getId() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(tableType == null ? TableType.TABLE.name() : tableType.name());
