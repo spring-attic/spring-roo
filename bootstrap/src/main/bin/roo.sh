@@ -16,7 +16,7 @@ ROO_HOME=`dirname "$PRG"`
 # Absolute path
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 
-echo Resolved ROO_HOME: $ROO_HOME
+# echo Resolved ROO_HOME: $ROO_HOME
 # echo "JAVA_HOME $JAVA_HOME"
 
 cygwin=false;
