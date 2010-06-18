@@ -9,7 +9,7 @@ package org.springframework.roo.addon.dbre;
 public enum DbrePath {
 	DBRE_XML_FILE("/META-INF/spring/dbre.xml"),
 	DBRE_XML_TEMPLATE("dbre-template.xml"),
-	DBRE_TABLE_XPATH("/dbMetadata/table");
+	DBRE_TABLE_XPATH("table");
 
 	private String path;
 

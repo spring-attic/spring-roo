@@ -51,7 +51,7 @@ public class DbModelImpl implements DbModel {
 	private JavaPackage javaPackage;
 
 	public String getDbMetadata() {
-		return getDbMetadata(new IdentifiableTable(null, null, null));
+		return getDbMetadata(new IdentifiableTable());
 	}
 
 	public String getDbMetadata(IdentifiableTable identifiableTable) {
@@ -98,7 +98,7 @@ public class DbModelImpl implements DbModel {
 
 		Element dbMetadataElement = dbre.getDocumentElement();
 
-		// Calculate java package name to store new entities in
+		// Determine the java package name to store new entities in
 		String packageName;
 		if (javaPackage != null) {
 			packageName = javaPackage.getFullyQualifiedPackageName();
@@ -155,20 +155,20 @@ public class DbModelImpl implements DbModel {
 			}
 
 			// Iterate through primary keys
-		//	System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+  " = " + table.getPrimaryKeys());
+	//		System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+  " = " + table.getPrimaryKeys());
 			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
 				String primaryKeyId = tableId + "." + primaryKey.getId();
 				dbModel.add(primaryKeyId);
 
-				String primaryKeyName = primaryKey.getName();
-				Element primaryKeyElement = XmlUtils.findFirstElement(tableXPath + "/primaryKey[@name = '" + primaryKeyName + "']", dbMetadataElement);
+				String primaryKeyName = primaryKey.getColumnName();
+				Element primaryKeyElement = XmlUtils.findFirstElement(tableXPath + "/primaryKey[@columnName = '" + primaryKeyName + "']", dbMetadataElement);
 				if (primaryKeyElement == null) {
 					// Create new primary key for table in xml
 					primaryKeyElement = dbre.createElement("primaryKey");
 				}
 				primaryKeyElement.setAttribute("id", primaryKeyId);
-				primaryKeyElement.setAttribute("name", primaryKeyName);
 				primaryKeyElement.setAttribute("columnName", primaryKey.getColumnName());
+				primaryKeyElement.setAttribute("name", primaryKeyName);
 				primaryKeyElement.setAttribute("keySeq", String.valueOf(primaryKey.getKeySeq()));
 
 				tableElement.appendChild(primaryKeyElement);

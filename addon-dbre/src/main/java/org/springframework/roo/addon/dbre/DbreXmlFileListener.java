@@ -69,6 +69,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	//		System.out.println(identifiableTable.toString());
 		//	JavaType javaType = tableModelService.findTypeForTableIdentity(identifiableTable);
 		//	System.out.println(identifiableTable.toString() + " : " + javaType.getFullyQualifiedTypeName());
+			
 			if (tableModelService.findTypeForTableIdentity(identifiableTable) == null) {
 				createEntityFromTable(table);
 			}
@@ -135,6 +136,8 @@ public class DbreXmlFileListener implements FileEventListener {
 			if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 				createIdentifierClass(declaredByMetadataId, identifierType, primaryKeys, table.getColumns());
 				entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
+			} else {
+				// TODO add or remove fields from identifier class
 			}
 		}
 	}
@@ -171,6 +174,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		// Produce identifier itself
 		List<AnnotationMetadata> identifierAnnotations = new ArrayList<AnnotationMetadata>();
 		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooIdentifier.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
+		// TODO need to comment out next line if entity metadata needs a trigger to @RooDbManaged, othewise and entity ITD will be created for identifier class - NOT REQUIRED
 		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooDbManaged.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
 		
 		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, identifierType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, declaredFields, null, null, null, null, identifierAnnotations, null);
