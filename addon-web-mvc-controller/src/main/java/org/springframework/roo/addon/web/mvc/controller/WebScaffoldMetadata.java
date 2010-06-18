@@ -854,8 +854,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					}
 				}
 			} else {
-				if (isSpecialType(type)) {
-					
+				if (isSpecialType(type) && !isEmbeddedFieldType(fieldMetadata)) {
 					specialTypes.add(type);
 				}
 			}
@@ -923,6 +922,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return true;
 		}
 		return false;
+	}
+	
+	private boolean isEmbeddedFieldType(FieldMetadata field) {
+		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
 	}
 	
 	private String getPlural(JavaType type) {
