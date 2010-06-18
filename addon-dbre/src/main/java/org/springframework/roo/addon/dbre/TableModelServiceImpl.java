@@ -28,6 +28,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Tracks all Roo entities currently on disk and their corresponding table names.
@@ -102,7 +103,7 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 			String table = getStringAttributeValueIfProvided(tableAnnotation, "name");
 			String catalog = getStringAttributeValueIfProvided(tableAnnotation, "catalog");
 			String schema = getStringAttributeValueIfProvided(tableAnnotation, "schema");
-			if (table != null && table.length() > 0) {
+			if (StringUtils.hasText(table)) {
 				computedTableIdentity = new IdentifiableTable(catalog, schema, table);
 			}
 		}

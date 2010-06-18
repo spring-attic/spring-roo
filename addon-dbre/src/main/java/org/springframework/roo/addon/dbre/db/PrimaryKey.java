@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.dbre.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Primary key metadata.
  * 
@@ -13,11 +10,10 @@ public class PrimaryKey {
 	private final String name;
 	private final String columnName;
 	private final Short keySeq;
-	private final List<Column> columns = new ArrayList<Column>();
 
-	PrimaryKey(String name, String columnName, Short keySeq) {
-		this.name = name;
+	PrimaryKey(String columnName, String name, Short keySeq) {
 		this.columnName = columnName;
+		this.name = name;
 		this.keySeq = keySeq;
 	}
 
@@ -37,17 +33,35 @@ public class PrimaryKey {
 		return keySeq;
 	}
 
-	void addColumn(Column column) {
-		if (column != null) {
-			columns.add(column);
-		}
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((columnName == null) ? 0 : columnName.hashCode());
+		return result;
 	}
 
-	public List<Column> getColumns() {
-		return columns;
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof PrimaryKey)) {
+			return false;
+		}
+		PrimaryKey other = (PrimaryKey) obj;
+		if (columnName == null) {
+			if (other.columnName != null) {
+				return false;
+			}
+		} else if (!columnName.equals(other.columnName)) {
+			return false;
+		}
+		return true;
 	}
 
 	public String toString() {
-		return "    PK_NAME " + name + ", COLUMN_NAME " + columnName + ", KEY_SEQ " + keySeq.toString();
+		return "    COLUMN_NAME " + columnName + ", PK_NAME " + name + ", KEY_SEQ " + keySeq.toString();
 	}
 }

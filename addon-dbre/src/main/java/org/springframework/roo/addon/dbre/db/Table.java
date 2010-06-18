@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre.db;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * An abstract table representation.
@@ -14,7 +15,7 @@ public interface Table {
 		
 	Set<Column> getColumns();
 	
-	Set<PrimaryKey> getPrimaryKeys();
+	SortedSet<PrimaryKey> getPrimaryKeys();
 	
 	Set<ForeignKey> getForeignKeys();
 	

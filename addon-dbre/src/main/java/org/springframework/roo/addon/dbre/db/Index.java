@@ -1,8 +1,5 @@
 package org.springframework.roo.addon.dbre.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Table index metadata.
  * 
@@ -14,7 +11,6 @@ public class Index {
 	private final String columnName;
 	private boolean nonUnique;
 	private Short type;
-	private final List<Column> columns = new ArrayList<Column>();
 
 	Index(String name, String columnName, boolean nonUnique, Short type) {
 		this.name = name;
@@ -43,14 +39,32 @@ public class Index {
 		return type;
 	}
 
-	void addColumn(Column column) {
-		if (column != null) {
-			columns.add(column);
-		}
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
 	}
 
-	public List<Column> getColumns() {
-		return columns;
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Index)) {
+			return false;
+		}
+		Index other = (Index) obj;
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		return true;
 	}
 
 	public String toString() {

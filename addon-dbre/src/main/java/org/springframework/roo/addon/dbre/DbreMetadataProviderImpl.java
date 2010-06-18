@@ -1,13 +1,12 @@
 package org.springframework.roo.addon.dbre;
 
-import java.io.File;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.dbre.db.DbModel;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
@@ -18,10 +17,7 @@ import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.XmlUtils;
-import org.w3c.dom.Document;
 
 /**
  * Provides {@link DbreMetadata}.
@@ -32,12 +28,13 @@ import org.w3c.dom.Document;
 @Component
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
-	@Reference private PathResolver pathResolver;
+	// @Reference private PathResolver pathResolver;
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
 	@Reference private TableModelService tableModelService;
+	@Reference private DbModel dbModel;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -67,13 +64,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		Document dbre;
-		try {
-			String dbrePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
-			dbre = XmlUtils.getDocumentBuilder().parse(new File(dbrePath));
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		dbModel.deserialize();
 		
 		// We need to lookup the metadata we depend on
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
@@ -87,7 +78,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, entityMetadata, tableModelService, dbre);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, entityMetadata, tableModelService, dbModel);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

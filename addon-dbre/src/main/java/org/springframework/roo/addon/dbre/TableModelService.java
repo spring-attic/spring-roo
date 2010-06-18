@@ -31,7 +31,7 @@ public interface TableModelService {
 	 * @return the type (if known) or null (if not found)
 	 */
 	JavaType findTypeForTableIdentity(IdentifiableTable identifiableTable);
-	
+
 	/**
 	 * Returns all entity types and their table names.
 	 * 
@@ -39,23 +39,20 @@ public interface TableModelService {
 	 */
 	Map<IdentifiableTable, JavaType> getAllDetectedEntities();
 
-	
 	/**
 	 * Returns a table identity given the JavaType.
 	 * 
 	 * <p>
-	 * Rules are applied in the conversion such as converting capital letters
-	 * into underscores. For example, a table name of abstract_person would
-	 * be returned as a type called AbstractPerson.
+	 * Rules are applied in the conversion such as converting capital letters into underscores. For example, a table name of abstract_person would be returned as a type called AbstractPerson.
 	 * 
 	 * @param type to convert to a table identity
 	 * @return a new IdentifiableTable
 	 */
 	IdentifiableTable suggestTableNameForNewType(JavaType type);
-	
+
 	/**
 	 * Returns a JavaType given a table identity.
-	 *  
+	 * 
 	 * @param identifiableTable to convert
 	 * @param javaPackage the Java package to use for the type.
 	 * @return a new JavaType
@@ -63,7 +60,7 @@ public interface TableModelService {
 	JavaType suggestTypeNameForNewTable(IdentifiableTable identifiableTable, JavaPackage javaPackage);
 
 	JavaSymbolName suggestFieldNameForColumn(String columnName);
-	
+
 	/**
 	 * Displays all entity types and their table names.
 	 * 

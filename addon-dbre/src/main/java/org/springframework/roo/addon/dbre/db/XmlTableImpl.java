@@ -24,7 +24,7 @@ public class XmlTableImpl extends AbstractTable implements Table {
 	private void setColumns(Element tableElement) {
 		columns.clear();
 		
-		List<Element> columnElements = XmlUtils.findElements("/column", tableElement);
+		List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 		for (Element columnElement : columnElements) {
 			String name = columnElement.getAttribute("name");
 			int dataType = Integer.parseInt(columnElement.getAttribute("dataType"));
@@ -41,16 +41,16 @@ public class XmlTableImpl extends AbstractTable implements Table {
 	private void setPrimaryKeys(Element tableElement) {
 		primaryKeys.clear();
 		
-		List<Element> primaryKeyElements = XmlUtils.findElements("/primaryKey", tableElement);
+		List<Element> primaryKeyElements = XmlUtils.findElements("primaryKey", tableElement);
 		for (Element primaryKeyElement : primaryKeyElements) {
-			primaryKeys.add(new PrimaryKey(primaryKeyElement.getAttribute("name"), primaryKeyElement.getAttribute("columnName"), new Short(primaryKeyElement.getAttribute("keySeq"))));
+			primaryKeys.add(new PrimaryKey(primaryKeyElement.getAttribute("columnName"), primaryKeyElement.getAttribute("name"), new Short(primaryKeyElement.getAttribute("keySeq"))));
 		}
 	}
 
 	private void setForeignKeys(Element tableElement) {
 		foreignKeys.clear();
 
-		List<Element> foreignKeyElements = XmlUtils.findElements("/foreignKey", tableElement);
+		List<Element> foreignKeyElements = XmlUtils.findElements("foreignKey", tableElement);
 		for (Element foreignKeyElement : foreignKeyElements) {
 			foreignKeys.add(new ForeignKey(foreignKeyElement.getAttribute("name"), foreignKeyElement.getAttribute("fkTable")));
 		}
@@ -59,7 +59,7 @@ public class XmlTableImpl extends AbstractTable implements Table {
 	private void setIndexes(Element tableElement) {
 		indexes.clear();
 
-		List<Element> indexElements = XmlUtils.findElements("/index", tableElement);
+		List<Element> indexElements = XmlUtils.findElements("index", tableElement);
 		for (Element indexElement : indexElements) {
 			String name = indexElement.getAttribute("name");
 			String columnName = indexElement.getAttribute("columnName");

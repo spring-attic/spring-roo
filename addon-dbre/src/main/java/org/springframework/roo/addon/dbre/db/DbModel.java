@@ -25,4 +25,6 @@ public interface DbModel {
 	void deserialize();
 
 	Set<Table> getTables();
+	
+	Table getTable(IdentifiableTable identifiableTable);
 }

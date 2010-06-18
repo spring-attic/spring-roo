@@ -2,6 +2,8 @@ package org.springframework.roo.addon.dbre.db;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Table metadata.
@@ -12,7 +14,7 @@ import java.util.Set;
 public abstract class AbstractTable {
 	protected final IdentifiableTable identifiableTable;
 	protected final Set<Column> columns = new HashSet<Column>();
-	protected final Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
+	protected final SortedSet<PrimaryKey> primaryKeys = new TreeSet<PrimaryKey>(new PrimaryKeyComparator());
 	protected final Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
 	protected final Set<Index> indexes = new HashSet<Index>();
 
@@ -28,7 +30,7 @@ public abstract class AbstractTable {
 		return this.columns;
 	}
 
-	public Set<PrimaryKey> getPrimaryKeys() {
+	public SortedSet<PrimaryKey> getPrimaryKeys() {
 		return this.primaryKeys;
 	}
 
@@ -54,7 +56,7 @@ public abstract class AbstractTable {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (!(obj instanceof AbstractTable)) {
 			return false;
 		}
 		AbstractTable other = (AbstractTable) obj;

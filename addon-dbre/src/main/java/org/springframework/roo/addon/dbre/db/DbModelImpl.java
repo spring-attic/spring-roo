@@ -155,6 +155,7 @@ public class DbModelImpl implements DbModel {
 			}
 
 			// Iterate through primary keys
+		//	System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+  " = " + table.getPrimaryKeys());
 			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
 				String primaryKeyId = tableId + "." + primaryKey.getId();
 				dbModel.add(primaryKeyId);
@@ -248,6 +249,16 @@ public class DbModelImpl implements DbModel {
 
 	public Set<Table> getTables() {
 		return this.tables;
+	}
+	
+
+	public Table getTable(IdentifiableTable identifiableTable) {
+		for (Table table : tables) {
+			if (table.getIdentifiableTable().equals(identifiableTable)) {
+				return table;
+			}
+		}
+		return null;
 	}
 
 	private void populateTablesFromDb(IdentifiableTable identifiableTable) {

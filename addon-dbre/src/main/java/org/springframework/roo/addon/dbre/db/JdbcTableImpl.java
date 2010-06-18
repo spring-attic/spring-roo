@@ -59,7 +59,7 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 			try {
 				rs = getPrimaryKeysRs(databaseMetaData);
 				while (rs.next()) {
-					primaryKeys.add(new PrimaryKey(rs.getString("PK_NAME"), rs.getString("COLUMN_NAME"), rs.getShort("KEY_SEQ")));
+					primaryKeys.add(new PrimaryKey(rs.getString("COLUMN_NAME"), rs.getString("PK_NAME"), rs.getShort("KEY_SEQ")));
 				}
 			} finally {
 				if (rs != null) {
