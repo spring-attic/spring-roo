@@ -16,7 +16,7 @@ ROO_HOME=`dirname "$PRG"`
 # Absolute path
 ROO_HOME=`cd "$ROO_HOME/.." ; pwd`
 
-# echo Resolved ROO_HOME: $ROO_HOME
+echo Resolved ROO_HOME: $ROO_HOME
 # echo "JAVA_HOME $JAVA_HOME"
 
 cygwin=false;
@@ -49,11 +49,11 @@ case "`uname`" in
 esac
 
 if [ "$cygwin" = "true" ]; then
-	export ROO_HOME="`cygpath -wp $ROO_HOME`"
-	export ROO_CP="`cygpath -wp $ROO_CP`"
-	export ROO_OSGI_FRAMEWORK_STORAGE="`cygpath -wp $ROO_OSGI_FRAMEWORK_STORAGE`"
-	export ROO_AUTO_DEPLOY_DIRECTORY="`cygpath -wp $ROO_AUTO_DEPLOY_DIRECTORY`"
-	export ROO_CONFIG_FILE_PROPERTIES="`cygpath -wp $ROO_CONFIG_FILE_PROPERTIES`"
+	export ROO_HOME=`cygpath -wp "$ROO_HOME"`
+	export ROO_CP=`cygpath -wp "$ROO_CP"`
+	export ROO_OSGI_FRAMEWORK_STORAGE=`cygpath -wp "$ROO_OSGI_FRAMEWORK_STORAGE"`
+	export ROO_AUTO_DEPLOY_DIRECTORY=`cygpath -wp "$ROO_AUTO_DEPLOY_DIRECTORY"`
+	export ROO_CONFIG_FILE_PROPERTIES=`cygpath -wp "$ROO_CONFIG_FILE_PROPERTIES"`
 	# echo "Modified ROO_HOME: $ROO_HOME"
 	# echo "Modified ROO_CP: $ROO_CP"
 	# echo "Modified ROO_OSGI_FRAMEWORK_STORAGE: $ROO_OSGI_FRAMEWORK_STORAGE"

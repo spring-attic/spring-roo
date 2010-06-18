@@ -12,19 +12,11 @@ copy "%ROO_HOME%\bootstrap\src\main\bin\*.*"  "%ROO_HOME%\bootstrap\target\osgi\
 copy "%ROO_HOME%\bootstrap\src\main\conf\*.*" "%ROO_HOME%\bootstrap\target\osgi\conf" > NUL
 
 rem Most Roo bundles are not special and belong in "bundle"
-for /d %%d in ("%ROO_HOME%\*") do copy "%%d\target\org.springframework.roo.*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > NUL 2>&1
+copy "%ROO_HOME%\target\all\*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > NUL
 
-rem Most Roo dependencies are not special and belong in "bundle"
-for /d %%d in ("%ROO_HOME%\*") do copy "%%d\target\dependency\*.jar" "%ROO_HOME%\bootstrap\target\osgi\bundle" > NUL 2>&1
-
-rem Now add the replacement "Main" class for launching Roo (this is not a bundle, but rather a normal JAR)
-move "%ROO_HOME%\bootstrap\target\org.springframework.roo.bootstrap-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
-
-rem Now add the Felix OSGi service platform JAR so we can launch it all
-move "%ROO_HOME%\bootstrap\target\dependency\org.apache.felix.framework-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
-
-rem Get rid of those annoying source, test and annotation files
-for /d %%d in ("%ROO_HOME%\bootstrap\target\osgi\*") do del /q "%%d\*-sources.jar" "%%d\*-tests.jar" "%%d\org.springframework.roo.annotations-*.jar" > NUL 2>&1
+rem Move the startup-related JAR from the "bundle" directory to the "bin" directory
+move "%ROO_HOME%\bootstrap\target\osgi\bundle\org.springframework.roo.bootstrap-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
+move "%ROO_HOME%\bootstrap\target\osgi\bundle\org.apache.felix.framework-*.jar" "%ROO_HOME%\bootstrap\target\osgi\bin" > NUL 2>&1
 
 rem Build a classpath containing our two magical startup JARs
 for %%a in ("%ROO_HOME%\bootstrap\target\osgi\bin\*.jar") do set ROO_CP=!ROO_CP!%%a;
