@@ -13,6 +13,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.process.manager.ActiveProcessManager;
+import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -27,6 +29,7 @@ public class MavenCommands implements CommandMarker {
 	
 	@Reference private MavenOperations mavenOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
+	@Reference private ProcessManager processManager;
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
 
 	protected void activate(ComponentContext context) {
@@ -114,8 +117,8 @@ public class MavenCommands implements CommandMarker {
 		Process p = Runtime.getRuntime().exec(cmd, null, root);
 	    
 		// Ensure separate threads are used for logging, as per ROO-652
-		LoggingInputStream input = new LoggingInputStream(p.getInputStream());
-		LoggingInputStream errors = new LoggingInputStream(p.getErrorStream());
+		LoggingInputStream input = new LoggingInputStream(p.getInputStream(), processManager);
+		LoggingInputStream errors = new LoggingInputStream(p.getErrorStream(), processManager);
 		
 		input.start();
 		errors.start();
@@ -131,13 +134,16 @@ public class MavenCommands implements CommandMarker {
 	private class LoggingInputStream extends Thread {
 
 		private BufferedReader inputStream;
+		private ProcessManager processManager;
 		
-		public LoggingInputStream(InputStream inputStream) {
+		public LoggingInputStream(InputStream inputStream, ProcessManager processManager) {
 			this.inputStream = new BufferedReader(new InputStreamReader(inputStream));
+			this.processManager = processManager;
 		}
 		
 		@Override
 		public void run() {
+			ActiveProcessManager.setActiveProcessManager(processManager);
 		    String line;
 		    try {
 			    while ((line = inputStream.readLine()) != null) {
@@ -161,6 +167,7 @@ public class MavenCommands implements CommandMarker {
 		    			inputStream.close();
 		    		} catch (IOException ignore) {}
 		    	}
+		    	ActiveProcessManager.clearActiveProcessManager();
 		    }
 
 		}
