@@ -10,16 +10,16 @@
 	<c:if test="${empty render or render}">
 	
 		<c:if test="${empty label}">
-			<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
+			<spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
 		</c:if>
-	    <spring:message arguments="${label}" code="entity.show" var="title_msg"/>
-	    <page:page id="title" title="${title_msg}">
+	    <spring:message arguments="${label}" code="entity_show" var="title_msg"/>
+	    <page:page id="${id}" title="${title_msg}">
 	        <c:choose>
 	        	<c:when test="${not empty object}">
 	        		<jsp:doBody />
 	        	</c:when>
 	        	<c:otherwise>
-	        		<spring:message arguments="${label}" code="entity.not.found.single"/>
+	        		<spring:message arguments="${label}" code="entity_not_found_single"/>
 	        	</c:otherwise>
 	        </c:choose>
 		</page:page>

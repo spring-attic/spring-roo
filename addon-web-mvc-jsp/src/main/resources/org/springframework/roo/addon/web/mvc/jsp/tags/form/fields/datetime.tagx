@@ -23,7 +23,7 @@
 		</c:if>
 		
 		<c:if test="${empty label}">
-			<spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}" var="label"/>
+			<spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
 		</c:if>
 		
 		<c:if test="${empty required}">
@@ -43,14 +43,14 @@
 		    		<form:errors cssClass="errors" id="_${field}_error_id" path="${field}"/>
 		    	</c:otherwise>
 		    </c:choose>
-		    <spring:message arguments="${label}" code="field.invalid" var="field_invalid"/>
+		    <spring:message arguments="${label}" code="field_invalid" var="field_invalid"/>
 		    <c:choose>
 				<c:when test="${required}">
-					<spring:message code="field.required" var="field_required"/>
-					<spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field.simple.validation" var="field_validation"/>
+					<spring:message code="field_required" var="field_required"/>
+					<spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field_simple_validation" var="field_validation"/>
 				</c:when>
 				<c:otherwise>
-					<spring:message argumentSeparator="," arguments="${label}, " code="field.simple.validation" var="field_validation"/>
+					<spring:message argumentSeparator="," arguments="${label}, " code="field_simple_validation" var="field_validation"/>
 				</c:otherwise>
 			</c:choose>
 			<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.form.DateTextBox', widgetAttrs : {promptMessage: '${field_validation}', invalidMessage: '${field_invalid}', required: ${required}, constraints: {datePattern : '${dateTimePattern}', required : ${required}}, datePattern : '${dateTimePattern}'}})); </script>

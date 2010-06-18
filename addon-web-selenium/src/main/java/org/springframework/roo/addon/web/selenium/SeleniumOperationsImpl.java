@@ -186,7 +186,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				new JavaSymbolName("SeleniumTests"), 
 				new JavaSymbolName("Test"),
 				new JavaSymbolName("Test"),
-				"selenium.menu.test.suite",
+				"selenium_menu_test_suite",
 				"/static/" + relativeTestFilePath,
 				"si_");		
 	}

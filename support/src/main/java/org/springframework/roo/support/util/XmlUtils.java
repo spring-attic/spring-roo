@@ -343,5 +343,16 @@ public final class XmlUtils {
 	public static Element getConfiguration(Class<?> clazz) {
 		return getConfiguration(clazz, "configuration.xml");
 	}
+	
+	/**
+	 * Converts a XHTML compliant id (used in jspx) to a CSS3 selector spec compliant id. In that
+	 * it will replace all '.,:,-' to '_'
+	 * 
+	 * @param proposed Id
+	 * @return cleaned up Id
+	 */
+	public static String convertId(String proposed) {
+		return proposed.replaceAll("[:\\.-]", "_");
+	}
 }
 

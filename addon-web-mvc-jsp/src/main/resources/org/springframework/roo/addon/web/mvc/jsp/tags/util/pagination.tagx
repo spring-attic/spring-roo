@@ -16,7 +16,7 @@
 			<c:set var="size" value="10" />
 		</c:if>
 		
-		<spring:message code="list.size" var="list_size"/>
+		<spring:message code="list_size" var="list_size"/>
 		<c:out value="${list_size} "/>
 	
 		<c:forEach var="i" begin="5" end="25" step="5">	
@@ -42,7 +42,7 @@
 				<spring:param name="size" value="${size}" />
 			</spring:url>
 			<spring:url value="/static/images/resultset_first.png" var="first_image_url" />
-			<spring:message code="list.first" var="first_label" />
+			<spring:message code="list_first" var="first_label" />
 			<a class="image" href="${first}" title="${first_label}">
 			<img alt="${first_label}" src="${first_image_url}" />
 			</a>
@@ -53,13 +53,13 @@
 				<spring:param name="size" value="${size}" />
 			</spring:url>
 			<spring:url value="/static/images/resultset_previous.png" var="previous_image_url" />
-			<spring:message code="list.previous" var="previous_label" />
+			<spring:message code="list_previous" var="previous_label" />
 			<a class="image" href="${previous}" title="${previous_label}">
 			<img alt="${previous_label}" src="${previous_image_url}" />
 			</a>
 		</c:if>
 		<c:out value=" "/>
-		<spring:message code="list.page" arguments="${page},${maxPages}" argumentSeparator=","/>
+		<spring:message code="list_page" arguments="${page},${maxPages}" argumentSeparator=","/>
 		<c:out value=" "/>
 		<c:if test="${page lt maxPages}">
 			<spring:url value="" var="next">
@@ -67,7 +67,7 @@
 				<spring:param name="size" value="${size}" />
 			</spring:url>
 			<spring:url value="/static/images/resultset_next.png" var="next_image_url" />
-			<spring:message code="list.next" var="next_label" />
+			<spring:message code="list_next" var="next_label" />
 			<a class="image" href="${next}" title="${next_label}">
 			<img alt="${next_label}" src="${next_image_url}" />
 			</a>
@@ -78,7 +78,7 @@
 				<spring:param name="size" value="${size}" />
 			</spring:url>
 			<spring:url value="/static/images/resultset_last.png" var="last_image_url" />
-			<spring:message code="list.last" var="last_label" />
+			<spring:message code="list_last" var="last_label" />
 			<a class="image" href="${last}" title="${last_label}">
 			<img alt="${last_label}" src="${last_image_url}" />
 			</a>

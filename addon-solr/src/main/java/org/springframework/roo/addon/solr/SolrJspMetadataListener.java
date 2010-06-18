@@ -123,13 +123,13 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		document.appendChild(div);		
 		
 		Element pageSearch = new XmlElementBuilder("page:search", document)
-									.addAttribute("id", "ps:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())
+									.addAttribute("id", XmlUtils.convertId("ps:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
 									.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
 								.build();
 		pageSearch.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageSearch));
 		
 		Element resultTable = new XmlElementBuilder("fields:table", document)
-									.addAttribute("id", "rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())
+									.addAttribute("id", XmlUtils.convertId("rt:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
 									.addAttribute("data", "${searchResults}")
 									.addAttribute("delete", "false")
 									.addAttribute("update", "false")
@@ -152,7 +152,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 				facetFields.append(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
 				
 				Element columnElement = new XmlElementBuilder("fields:column", document)
-											.addAttribute("id", "c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
+											.addAttribute("id", XmlUtils.convertId("c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
 											.addAttribute("property", beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType()))
 										.build();
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
@@ -161,14 +161,14 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		}
 		
 		Element searchFacet = new XmlElementBuilder("fields:search-facet", document)
-									.addAttribute("id", "sfacet:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())
+									.addAttribute("id", XmlUtils.convertId("sfacet:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
 									.addAttribute("facetFields", facetFields.toString())
 								.build();
 		searchFacet.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchFacet));
 		pageSearch.appendChild(searchFacet);
 		
 		Element searchField = new XmlElementBuilder("fields:search-field", document)
-				.addAttribute("id", "sfield:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName())
+				.addAttribute("id", XmlUtils.convertId("sfield:" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getFullyQualifiedTypeName()))
 			.build();
 		searchField.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(searchField));
 		

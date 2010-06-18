@@ -98,7 +98,7 @@ public class JspViewManager {
 		document.appendChild(div);
 		
 		Element fieldTable = new XmlElementBuilder("table:table", document)
-								.addAttribute("id", "l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+								.addAttribute("id", XmlUtils.convertId("l:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("data", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
 								.addAttribute("path", controllerPath)
 							.build();
@@ -115,7 +115,7 @@ public class JspViewManager {
 		for (FieldMetadata field : fields) {
 			if(++fieldCounter < 7) {
 				Element columnElement = new XmlElementBuilder("table:column", document)
-											.addAttribute("id", "c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
+											.addAttribute("id", XmlUtils.convertId("c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
 											.addAttribute("property", Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())))
 										.build();
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
@@ -125,7 +125,7 @@ public class JspViewManager {
 		
 		//create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
-								.addAttribute("id", "pl:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+								.addAttribute("id", XmlUtils.convertId("pl:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("items", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
 								.addChild(fieldTable)
 							.build();
@@ -151,7 +151,7 @@ public class JspViewManager {
 							.build());
 		
 		Element pageShow = new XmlElementBuilder("page:show", document)
-								.addAttribute("id", "ps:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+								.addAttribute("id", XmlUtils.convertId("ps:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
 							.build();
 		pageShow.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageShow));
@@ -164,7 +164,7 @@ public class JspViewManager {
 			}
 			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
 			Element fieldDisplay = new XmlElementBuilder("field:display", document)
-								.addAttribute("id", "s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName())
+								.addAttribute("id", XmlUtils.convertId("s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
 								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
 								.addAttribute("field", fieldName)
 							.build();
@@ -201,7 +201,7 @@ public class JspViewManager {
 
 		//add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
-						.addAttribute("id", "fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+						.addAttribute("id", XmlUtils.convertId("fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 						.addAttribute("modelAttribute", entityName)
 						.addAttribute("path", controllerPath)
 						.addAttribute("render", "${empty dependencies}")
@@ -215,7 +215,7 @@ public class JspViewManager {
 		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
 
 		Element dependency = new XmlElementBuilder("form:dependency", document)
-								.addAttribute("id", "d:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+								.addAttribute("id", XmlUtils.convertId("d:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("render", "${not empty dependencies}")
 								.addAttribute("dependencies", "${dependencies}").build();
 		dependency.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(dependency));
@@ -241,7 +241,7 @@ public class JspViewManager {
 
 		//add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
-						.addAttribute("id", "fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+						.addAttribute("id", XmlUtils.convertId("fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 						.addAttribute("modelAttribute", entityName)
 					.build();	
 		
@@ -280,7 +280,7 @@ public class JspViewManager {
 							.build());
 		
 		Element formFind = new XmlElementBuilder("form:find", document)
-								.addAttribute("id", "ff:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName())
+								.addAttribute("id", XmlUtils.convertId("ff:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("path", controllerPath)
 								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
 							.build();
@@ -351,7 +351,7 @@ public class JspViewManager {
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("disableFormBinding", "true");
 			fieldElement.setAttribute("field", paramName.getSymbolName());
-			fieldElement.setAttribute("id", "f:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + paramName);
+			fieldElement.setAttribute("id", XmlUtils.convertId("f:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + paramName));
 			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 
 			formFind.appendChild(fieldElement);
@@ -392,7 +392,7 @@ public class JspViewManager {
 						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
 						EntityMetadata typeEntityMetadata = getEntityMetadataForField(field);
 						if (typeEntityMetadata != null) {
-							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity.reference.not.managed").addAttribute("messageCodeAttribute", beanInfoMetadata.getJavaBean().getSimpleTypeName()).build();
+							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity_reference_not_managed").addAttribute("messageCodeAttribute", beanInfoMetadata.getJavaBean().getSimpleTypeName()).build();
 						}
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
@@ -448,7 +448,7 @@ public class JspViewManager {
 
 			addCommonAttributes(field, fieldElement); 
 			fieldElement.setAttribute("field", fieldName);
-			fieldElement.setAttribute("id", "c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName());
+			fieldElement.setAttribute("id", XmlUtils.convertId("c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()));
 			fieldElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldElement));
 			
 			root.appendChild(fieldElement);

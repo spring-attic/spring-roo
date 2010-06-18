@@ -215,7 +215,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("for (" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " " + simpleBeanName + " : " + beanPlural.toLowerCase() + ") {");	
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(sid + " sid = new " + sid + "();");
-		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + simpleBeanName + ".\" + " + simpleBeanName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + simpleBeanName + "_\" + " + simpleBeanName + "_" + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors()) {
@@ -241,7 +241,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + simpleBeanName + "." + method.getMethodName().getSymbolName() + "());");
 		}
 		bodyBuilder.appendFormalLine("//add summary field to allow searching documents for objects of this type");
-		bodyBuilder.appendFormalLine("sid.addField(\"" + simpleBeanName + ".solrsummary_t\", " + textField.toString() + ");");
+		bodyBuilder.appendFormalLine("sid.addField(\"" + simpleBeanName + "_solrsummary_t\", " + textField.toString() + ");");
 		bodyBuilder.appendFormalLine("documents.add(sid);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
@@ -280,7 +280,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine(getSimleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + ".\" + " + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_\" + " + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("solrServer.commit();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (Exception e) {");
@@ -327,7 +327,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();	
-		bodyBuilder.appendFormalLine("return search(new SolrQuery(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + ".solrsummary_t:\" + queryString.toLowerCase()));");
+		bodyBuilder.appendFormalLine("return search(new SolrQuery(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + queryString.toLowerCase()));");
 		int modifier = Modifier.PUBLIC;
 		modifier = modifier |= Modifier.STATIC;
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();

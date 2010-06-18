@@ -119,7 +119,7 @@ public class JspOperationsImpl implements JspOperations {
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
 				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
-				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application.name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
+				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
@@ -233,9 +233,9 @@ public class JspOperationsImpl implements JspOperations {
 			new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 		}
 
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label." + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName(), true);
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label_" + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName(), true);
 
-		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName("new"), new JavaSymbolName(controller.getSimpleTypeName()), "global.menu.new", "/" + folderName + "/index", null);
+		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName("new"), new JavaSymbolName(controller.getSimpleTypeName()), "global_menu_new", "/" + folderName + "/index", null);
 
 		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
 	}

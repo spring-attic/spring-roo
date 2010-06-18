@@ -7,7 +7,7 @@
 	
 	    <span>
 	    	<c:out value=" | "/>
-	    	<spring:message code="global.language" />
+	    	<spring:message code="global_language" />
 	    	<c:out value=": "/>
 	    	<spring:url var="url_en" value="">
 	    		<c:if test="${null ne param.form}">
@@ -26,7 +26,7 @@
 
 	    	</spring:url>	
 	    	<spring:url var="img_en" value="/static/images/gb.png" />    	
-	    	<spring:message code="global.language.switch" arguments="English" var="lang_en"/>
+	    	<spring:message code="global_language_switch" arguments="English" var="lang_en"/>
 	    	<a href="${url_en}" title="${lang_en}"><img class="flag" src="${img_en}" alt="${lang_en}"/></a>
 	    	<c:out value=" "/>
 	
@@ -46,7 +46,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>	    		
 	    	</spring:url>	
-	    	<spring:message code="global.language.switch" arguments="Deutsch" var="lang_de"/>			    	
+	    	<spring:message code="global_language_switch" arguments="Deutsch" var="lang_de"/>			    	
 	    	<a href="${url_de}" title="${lang_de}"><img class="flag" src="${img_de}" alt="${lang_de}"/></a>
 	    	<c:out value=" "/>
 	
@@ -66,7 +66,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>	    		
 	    	</spring:url>	
-	    	<spring:message code="global.language.switch" arguments="Svenska" var="lang_sv"/>			    	
+	    	<spring:message code="global_language_switch" arguments="Svenska" var="lang_sv"/>			    	
 	    	<a href="${url_sv}" title="${lang_sv}"><img class="flag" src="${img_sv}" alt="${lang_sv}"/></a>
 	    	<c:out value=" "/>
 	
@@ -86,7 +86,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>	    		
 	    	</spring:url>	
-	    	<spring:message code="global.language.switch" arguments="Espanol" var="lang_es"/>
+	    	<spring:message code="global_language_switch" arguments="Espanol" var="lang_es"/>
 	    	<a href="${url_es}" title="${lang_es}"><img class="flag" src="${img_es}" alt="${lang_es}"/></a>
 	    	<c:out value=" "/>
 	
@@ -106,7 +106,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>	    		
 	    	</spring:url>	
-	    	<spring:message code="global.language.switch" arguments="Italiano" var="lang_it"/>
+	    	<spring:message code="global_language_switch" arguments="Italiano" var="lang_it"/>
 	    	<a href="${url_it}" title="${lang_it}"><img class="flag" src="${img_it}" alt="${lang_it}"/></a>
 			<c:out value=" "/>
 			
@@ -126,7 +126,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>	    		
 	    	</spring:url>	
-	    	<spring:message code="global.language.switch" arguments="Nederlandse" var="lang_nl"/>
+	    	<spring:message code="global_language_switch" arguments="Nederlandse" var="lang_nl"/>
 	    	<a href="${url_nl}" title="${lang_nl}"><img class="flag" src="${img_nl}" alt="${lang_nl}"/></a>
 	    	
 	    </span>

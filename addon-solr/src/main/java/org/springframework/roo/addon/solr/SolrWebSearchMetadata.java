@@ -106,7 +106,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 	
 		bodyBuilder.appendFormalLine("if (q != null && q.length() != 0) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(solrQuerySimpleName + " solrQuery = new " + solrQuerySimpleName + "(\"" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getSimpleTypeName().toLowerCase() + ".solrsummary_t:\" + q.toLowerCase());");
+		bodyBuilder.appendFormalLine(solrQuerySimpleName + " solrQuery = new " + solrQuerySimpleName + "(\"" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + q.toLowerCase());");
 
 		bodyBuilder.appendFormalLine("if (page != null) solrQuery.setStart(page);");
 		bodyBuilder.appendFormalLine("if (size != null) solrQuery.setRows(size);");		

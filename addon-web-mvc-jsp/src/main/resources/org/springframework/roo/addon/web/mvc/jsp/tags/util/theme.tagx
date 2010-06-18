@@ -6,7 +6,7 @@
 	<c:if test="${empty render or render}">
 		<span>
 			<c:out value=" | "/>
-		    <spring:message code="global.theme" />
+		    <spring:message code="global_theme" />
 		    <c:out value=": "/>
 	    	<spring:url var="url_theme1" value="">
 	    		<spring:param name="theme" value="standard" />
@@ -17,7 +17,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>
 	    	</spring:url>
-	    	<spring:message code="global.theme.standard" var="theme_standard" />
+	    	<spring:message code="global_theme_standard" var="theme_standard" />
 	    	<a href="${url_theme1}" title="${theme_standard}">${theme_standard}</a>
 			<c:out value=" | "/>
 	    	<spring:url var="url_theme2" value="">
@@ -29,7 +29,7 @@
 	    			<spring:param name="size" value="${param.size}" />
 	    		</c:if>
 	    	</spring:url>
-	    	<spring:message code="global.theme.alt" var="theme_alt" />
+	    	<spring:message code="global_theme_alt" var="theme_alt" />
 	    	<a href="${url_theme2}" title="${theme_alt}">${theme_alt}</a>
 	    </span>
     </c:if>

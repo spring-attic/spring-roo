@@ -20,7 +20,7 @@
 		dojo.require('dijit.form.FilteringSelect');
 	</script>
 	
-    <label for="_query_${field}_id">Facet <spring:message code="label.${fn:toLowerCase(fn:substringAfter(id,':'))}"/>:</label>
+    <label for="_query_${field}_id">Facet <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}"/>:</label>
    	<input id="_query_${field}_id" name="q"/>
 
     <script type="text/javascript">
