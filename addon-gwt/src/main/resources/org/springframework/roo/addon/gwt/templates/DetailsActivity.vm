@@ -3,11 +3,11 @@ package ${packageName};
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.RecordDetailsView;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.valuestore.shared.DeltaValueStore;
 import com.google.gwt.valuestore.shared.SyncResult;
 import com.google.gwt.valuestore.shared.Value;
-import com.google.gwt.valuestore.ui.RecordDetailsView;
 #declareImports()
 
 import java.util.Set;

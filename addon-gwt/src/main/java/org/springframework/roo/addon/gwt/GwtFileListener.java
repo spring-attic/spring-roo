@@ -309,7 +309,7 @@ public class GwtFileListener implements FileEventListener {
 		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
 		bb.reset();
 		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import com.google.gwt.input.shared.Renderer;");
+		bb.appendFormalLine("import com.google.gwt.text.shared.Renderer;");
 		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
 		bb.appendFormalLine("import " + SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
 
