@@ -26,7 +26,7 @@
 	            <img alt="${add_message}" src="${create_img_url}" title="${add_message}"/>
 	        </a>        
 	        <c:out value=" " />
-			<spring:message arguments="${field}" code="entity_not_found" />
+			<spring:message arguments="${label}" code="entity_not_found" />
 			<c:if test="${not empty required and required eq 'true'}">
 					(<spring:message code="field_required" />)
 			</c:if>  

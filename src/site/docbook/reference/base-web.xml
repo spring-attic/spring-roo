@@ -379,13 +379,13 @@ public class CarController {
      xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0"&gt;
   &lt;jsp:output omit-xml-declaration="yes"/&gt;
     
-  &lt;<emphasis role="bold">form:update</emphasis> <emphasis role="bold">id</emphasis>="fu:com.foo.Person" modelAttribute="person" path="/people" 
+  &lt;<emphasis role="bold">form:update</emphasis> <emphasis role="bold">id</emphasis>="fu_com_foo_Person" modelAttribute="person" path="/people" 
 <emphasis role="bold">               z</emphasis>="3lX+WZW4CQVBb7OlvB0AvdgbGRQ="&gt;
       &lt;field:datetime dateTimePattern="${person_birthday_date_format}" field="birthDay" 
-                      id="c:com.foo.Person.birthDay" z="dXnEoWaz4rI4CKD9mlz+clbSUP4="/&gt;
-      &lt;field:select field="car" id="c:com.foo.Person.car" itemValue="id" items="${cars}" 
+                      id="c_com_foo_Person_birthDay" z="dXnEoWaz4rI4CKD9mlz+clbSUP4="/&gt;
+      &lt;field:select field="car" id="c_com_foo_Person_car" itemValue="id" items="${cars}" 
                     path="/cars" z="z2LA3LvNKRO9OISmZurGjEczHkc="/&gt;
-      &lt;field:select field="cars" id="c:com.foo.Person.cars" itemValue="id" items="${cars}" 
+      &lt;field:select field="cars" id="c_com_foo_Person_cars" itemValue="id" items="${cars}" 
                     multiple="true" path="/cars" z="c0rdAISxzHsNvJPFfAmEEGz2LU4="/&gt;
   &lt;/form:update&gt;
 &lt;/div&gt;</programlisting>You will notice that this file is fairly concise
@@ -475,14 +475,15 @@ public class CarController {
           <row>
             <entry></entry>
 
-            <entry>Any attribute whose name starts with '_'</entry>
+            <entry>Any attribute (and value) whose name starts with
+            '_'</entry>
           </row>
 
           <row>
             <entry></entry>
 
-            <entry>Sequence of attributes does not contribute to the value of
-            a hash key</entry>
+            <entry>The order of the attributes does not contribute to the
+            value of a hash key</entry>
           </row>
         </tbody>
       </tgroup>
@@ -520,5 +521,104 @@ public class CarController {
     dynamically through the Spring Expression Language (SpEL) or normal JSP
     expression language. The generated create.jspx in Roo application
     demonstrates this.</para>
+
+    <para></para>
+
+    <para><emphasis role="bold">Scaffolding of JPA reference
+    relationships</emphasis></para>
+
+    <para>The Roo JSP addon will read JSR 303 (bean validation API)
+    annotations found in a form-backing object. The following convention is
+    applied for the generation of create and update (and finder) forms:<table>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry align="center">Data type / JPA annotation</entry>
+
+              <entry align="center">Scaffolded HTML Element</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>String (sizeMax &lt; 30; @Size)</entry>
+
+              <entry>Input</entry>
+            </row>
+
+            <row>
+              <entry>String (sizeMax &gt;=30, @Size)</entry>
+
+              <entry>Textarea</entry>
+            </row>
+
+            <row>
+              <entry>Number (@Min, @Max, @DecimalMin &amp; @DecimalMax are
+              recognized) </entry>
+
+              <entry>Input</entry>
+            </row>
+
+            <row>
+              <entry>Boolean</entry>
+
+              <entry>Checkbox</entry>
+            </row>
+
+            <row>
+              <entry>Date / Calendar (@Future &amp; @Past are recognized)
+              (Spring's @DateTimeFormat in combination with the
+              <emphasis>style</emphasis> attribute is recognized)</entry>
+
+              <entry>Input (with JS Date chooser)</entry>
+            </row>
+
+            <row>
+              <entry>Enum / @Enumerated</entry>
+
+              <entry>Select</entry>
+            </row>
+
+            <row>
+              <entry>@OneToOne</entry>
+
+              <entry>Select</entry>
+            </row>
+
+            <row>
+              <entry>@ManyToMany</entry>
+
+              <entry>Select (multi-select)</entry>
+            </row>
+
+            <row>
+              <entry>@ManyToOne</entry>
+
+              <entry>Select</entry>
+            </row>
+
+            <row>
+              <entry>@OneToMany *</entry>
+
+              <entry>Nothing: A message is displayed explaining that this
+              relationship is managed from the many-side</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>* As mentioned above, Roo does not scaffold a HTML form element
+    for the 'one' side of a @OneToMany relationship. To make this relationship
+    work, you need to provide a @ManyToOne annotated field on the opposite
+    side:</para>
+
+    <para><programlisting>
+field set --fieldName students --element com.foo.domain.Person <emphasis
+          role="bold"><emphasis>--class com.foo.domain.School </emphasis>--cardinality ONE_TO_MANY</emphasis>
+
+field reference --fieldName school --type com.foo.domain.School --class com.foo.domain.Person <emphasis
+          role="bold">--cardinality MANY_TO_ONE</emphasis>
+
+</programlisting>In case a field is annotated with @Pattern, the regular
+    expression is passed on to the tag library where it may be applied through
+    the use of the JS framework of choice.</para>
   </section>
 </chapter>

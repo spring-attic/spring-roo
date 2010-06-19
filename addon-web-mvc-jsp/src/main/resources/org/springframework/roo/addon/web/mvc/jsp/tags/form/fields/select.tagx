@@ -78,7 +78,7 @@
 		            </c:choose>
 		       </c:when>
 		        <c:otherwise>
-		        	<field:reference field="${field}" id="${id}" path="${path}" required="${required}"/>
+		        	<field:reference field="${label}" id="${id}" path="${path}" required="${required}"/>
 		        </c:otherwise>
 	        </c:choose>
 	    </div>

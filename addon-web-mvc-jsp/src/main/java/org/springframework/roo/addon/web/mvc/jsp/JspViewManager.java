@@ -392,7 +392,7 @@ public class JspViewManager {
 						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
 						EntityMetadata typeEntityMetadata = getEntityMetadataForField(field);
 						if (typeEntityMetadata != null) {
-							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity_reference_not_managed").addAttribute("messageCodeAttribute", beanInfoMetadata.getJavaBean().getSimpleTypeName()).build();
+							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity_reference_not_managed").addAttribute("messageCodeAttribute", new JavaSymbolName(fieldType.getSimpleTypeName()).getReadableSymbolName()).build();
 						}
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToOne")
