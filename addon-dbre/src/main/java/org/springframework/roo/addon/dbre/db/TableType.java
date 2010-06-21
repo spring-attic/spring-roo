@@ -8,4 +8,12 @@ package org.springframework.roo.addon.dbre.db;
  */
 public enum TableType {
 	TABLE, VIEW;
+	
+	public static TableType getTableType(String typeName) {
+		try {
+			return TableType.valueOf(typeName);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
 }

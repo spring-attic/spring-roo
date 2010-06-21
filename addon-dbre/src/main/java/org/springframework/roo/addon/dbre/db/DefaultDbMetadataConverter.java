@@ -53,19 +53,19 @@ public class DefaultDbMetadataConverter implements DbMetadataConverter {
 	
 	private String getName(String str, boolean isField) {
 		StringBuilder result = new StringBuilder();
-		boolean isUnderscore = false;
+		boolean isDelimChar = false;
 		for (int i = 0; i < str.length(); i++) {
 			Character c = str.charAt(i);
 			if (i == 0) {
 				result.append(isField ? Character.toLowerCase(c) : Character.toUpperCase(c));
 				continue;
-			} else if (i > 0 && c == '_') {
-				isUnderscore = true;
+			} else if (i > 0 && (c == '_' || c == '-')) {
+				isDelimChar = true;
 				continue;
 			}
-			if (isUnderscore) {
+			if (isDelimChar) {
 				result.append(Character.toUpperCase(c));
-				isUnderscore = false;
+				isDelimChar = false;
 			} else {
 				result.append(Character.toLowerCase(c));
 			}

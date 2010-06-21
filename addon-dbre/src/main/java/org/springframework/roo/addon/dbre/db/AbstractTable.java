@@ -15,7 +15,7 @@ public abstract class AbstractTable {
 	protected final IdentifiableTable identifiableTable;
 	protected final Set<Column> columns = new HashSet<Column>();
 	protected final SortedSet<PrimaryKey> primaryKeys = new TreeSet<PrimaryKey>(new PrimaryKeyComparator());
-	protected final Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
+	protected final SortedSet<ForeignKey> foreignKeys = new TreeSet<ForeignKey>(new ForeignKeyComparator());
 	protected final Set<Index> indexes = new HashSet<Index>();
 
 	AbstractTable(IdentifiableTable identifiableTable) {
@@ -34,7 +34,7 @@ public abstract class AbstractTable {
 		return this.primaryKeys;
 	}
 
-	public Set<ForeignKey> getForeignKeys() {
+	public SortedSet<ForeignKey> getForeignKeys() {
 		return this.foreignKeys;
 	}
 

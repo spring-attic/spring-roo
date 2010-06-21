@@ -23,7 +23,7 @@ public class XmlTableImpl extends AbstractTable implements Table {
 
 	private void setColumns(Element tableElement) {
 		columns.clear();
-		
+
 		List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 		for (Element columnElement : columnElements) {
 			String name = columnElement.getAttribute("name");
@@ -40,7 +40,7 @@ public class XmlTableImpl extends AbstractTable implements Table {
 
 	private void setPrimaryKeys(Element tableElement) {
 		primaryKeys.clear();
-		
+
 		List<Element> primaryKeyElements = XmlUtils.findElements("primaryKey", tableElement);
 		for (Element primaryKeyElement : primaryKeyElements) {
 			primaryKeys.add(new PrimaryKey(primaryKeyElement.getAttribute("columnName"), primaryKeyElement.getAttribute("name"), new Short(primaryKeyElement.getAttribute("keySeq"))));
@@ -52,7 +52,14 @@ public class XmlTableImpl extends AbstractTable implements Table {
 
 		List<Element> foreignKeyElements = XmlUtils.findElements("foreignKey", tableElement);
 		for (Element foreignKeyElement : foreignKeyElements) {
-			foreignKeys.add(new ForeignKey(foreignKeyElement.getAttribute("name"), foreignKeyElement.getAttribute("fkTable")));
+			String name = foreignKeyElement.getAttribute("name");
+			String fkTable = foreignKeyElement.getAttribute("fkTable");
+			String fkColumn = foreignKeyElement.getAttribute("fkColumn");
+			String pkTable = foreignKeyElement.getAttribute("pkTable");
+			String pkColumn = foreignKeyElement.getAttribute("pkColumn");
+			Short keySeq = new Short(foreignKeyElement.getAttribute("keySeq"));
+
+			foreignKeys.add(new ForeignKey(name, fkTable, fkColumn, pkTable, pkColumn, keySeq));
 		}
 	}
 

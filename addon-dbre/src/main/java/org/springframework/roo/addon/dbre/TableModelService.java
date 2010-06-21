@@ -59,7 +59,13 @@ public interface TableModelService {
 	 */
 	JavaType suggestTypeNameForNewTable(IdentifiableTable identifiableTable, JavaPackage javaPackage);
 
-	JavaSymbolName suggestFieldNameForColumn(String columnName);
+	/**
+	 * Returns a field name for a given database column name;
+	 * 
+	 * @param columnName the name of the column.
+	 * @return a String representing the column.
+	 */
+	String suggestFieldNameForColumn(String columnName);
 
 	/**
 	 * Displays all entity types and their table names.

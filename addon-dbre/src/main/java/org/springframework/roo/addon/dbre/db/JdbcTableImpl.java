@@ -77,9 +77,16 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 		try {
 			ResultSet rs = null;
 			try {
-				rs = getForeignKeysRs(databaseMetaData);
+				rs = getExportedKeysRs(databaseMetaData);
 				while (rs.next()) {
-					foreignKeys.add(new ForeignKey(rs.getString("FK_NAME"), rs.getString("FKTABLE_NAME")));
+					String name = rs.getString("FK_NAME");
+					String fkTable = rs.getString("FKTABLE_NAME");
+					String fkColumn = rs.getString("FKCOLUMN_NAME");
+					String pkTable = rs.getString("PKTABLE_NAME");
+					String pkColumn = rs.getString("PKCOLUMN_NAME");
+					Short keySeq = rs.getShort("KEY_SEQ");
+	
+					foreignKeys.add(new ForeignKey(name, fkTable, fkColumn, pkTable, pkColumn, keySeq));
 				}
 			} finally {
 				if (rs != null) {
@@ -138,18 +145,30 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 		return rs;
 	}
 
-	private ResultSet getForeignKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getExportedKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
+			rs = databaseMetaData.getExportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
 		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
+			rs = databaseMetaData.getExportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
 		} else {
-			rs = databaseMetaData.getImportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
+			rs = databaseMetaData.getExportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
 		}
 		return rs;
 	}
 
+//	private ResultSet getImportedKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
+//		ResultSet rs = null;
+//		if (databaseMetaData.storesUpperCaseIdentifiers()) {
+//			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
+//		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
+//			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
+//		} else {
+//			rs = databaseMetaData.getImportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
+//		}
+//		return rs;
+//	}
+	
 	private ResultSet getIndexesRs(DatabaseMetaData databaseMetaData) throws SQLException {
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {

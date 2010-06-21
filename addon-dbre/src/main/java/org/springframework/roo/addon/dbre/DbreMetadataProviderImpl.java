@@ -47,7 +47,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected void deactivate(ComponentContext context) {
-		entityMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+	//	entityMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -24,6 +26,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
@@ -38,6 +41,8 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -49,6 +54,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class DbreXmlFileListener implements FileEventListener {
+	private static final Logger logger = HandlerUtils.getLogger(DbreXmlFileListener.class);
 	@Reference private TableModelService tableModelService;
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
@@ -57,21 +63,35 @@ public class DbreXmlFileListener implements FileEventListener {
 	public void onFileEvent(FileEvent fileEvent) {
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
 		if (eventPath.endsWith(DbrePath.DBRE_XML_FILE.getPath())) {
-			createEntities();
-			processDetectedEntities();
+			createManagedEntities();
+			deleteUnmanagedEntities();
+			processAllDetectedEntities();
 		}
 	}
 
-	private void createEntities() {
+	private void createManagedEntities() {
 		dbModel.deserialize();
 		for (Table table : dbModel.getTables()) {
 			IdentifiableTable identifiableTable = table.getIdentifiableTable();
-	//		System.out.println(identifiableTable.toString());
-		//	JavaType javaType = tableModelService.findTypeForTableIdentity(identifiableTable);
-		//	System.out.println(identifiableTable.toString() + " : " + javaType.getFullyQualifiedTypeName());
-			
-			if (tableModelService.findTypeForTableIdentity(identifiableTable) == null) {
+			JavaType javaType = tableModelService.findTypeForTableIdentity(identifiableTable);
+			if (javaType == null) {
+			//	System.out.println(identifiableTable.toString() + " is null - creating");
 				createEntityFromTable(table);
+			} 
+		}
+	}
+
+	private void deleteUnmanagedEntities() {
+		Map<IdentifiableTable, JavaType> allDetectedEntities =  tableModelService.getAllDetectedEntities();
+		for (Map.Entry<IdentifiableTable, JavaType> entry : allDetectedEntities.entrySet()) {
+			// Check for existence of entity from table model and delete if not in db model, providing the @RooDbManaged annotation is present
+			String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(entry.getValue(), Path.SRC_MAIN_JAVA);
+			PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+			ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+			AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName()));
+		//	System.out.println(governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath() + " dbModel contains: "+ isDetectedEntityInDbModel(entry.getKey()) + "  annotation is null: " + (annotation == null));
+			if (!isDetectedEntityInDbModel(entry.getKey()) && annotation != null) {
+				deleteUnmanagedEntity(governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath());
 			}
 		}
 	}
@@ -95,7 +115,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		
 		// Add @RooDbManaged
 		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.dbre.RooDbManaged"), new ArrayList<AnnotationAttributeValue<?>>()));
-
+ 
 		JavaType superclass = new JavaType("java.lang.Object");
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
@@ -122,7 +142,8 @@ public class DbreXmlFileListener implements FileEventListener {
 			Column column = getPrimaryKeyColumn(table.getColumns(), columnName);
 			if (column != null) {
 				entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), new JavaType(column.getType().getName())));
-				entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), column.getName()));
+				String fieldName = tableModelService.suggestFieldNameForColumn(column.getName());
+				entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
 			}
 		} else if (primaryKeys.size() > 1) {
 			// Table has a composite key so create the identifier class and add the fields
@@ -190,7 +211,22 @@ public class DbreXmlFileListener implements FileEventListener {
 		return null;
 	}
 	
-	private void processDetectedEntities() {
+	private boolean isDetectedEntityInDbModel(IdentifiableTable identifiableTable) {
+		for (Table table : dbModel.getTables()) {
+			if (table.getIdentifiableTable().equals(identifiableTable)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void deleteUnmanagedEntity(String filePath) {
+		if (!FileUtils.deleteRecursively(new File(filePath))) {
+			logger.warning("Unable to delete entity " + filePath);
+		}
+	}
+
+	private void processAllDetectedEntities() {
 		Map<IdentifiableTable, JavaType> allDetectedEntities = tableModelService.getAllDetectedEntities();
 		for (Map.Entry<IdentifiableTable, JavaType> entry : allDetectedEntities.entrySet()) {
 			metadataService.get(DbreMetadata.createIdentifier(entry.getValue(), Path.SRC_MAIN_JAVA));

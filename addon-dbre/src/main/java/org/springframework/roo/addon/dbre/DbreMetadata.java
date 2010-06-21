@@ -83,6 +83,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					builder.addMethod(getAccessor(field));
 				}
 
+				// Check for an existing mutator in the governor or in the entity metadata
+				if (field != null && !hasMutator(field)) {
+					builder.addMethod(getMutator(field));
+				}
 			}
 
 			// Create a representation of the desired output ITD
@@ -90,9 +94,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-
 	private boolean hasField(Column column, JavaType javaType) {
-		JavaSymbolName fieldName = tableModelService.suggestFieldNameForColumn(column.getName());
+		JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldNameForColumn(column.getName()));
 	//	System.out.println("column name = " + columnElement.getAttribute("name") + ", field name = " + fieldName.getSymbolName());
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, fieldName) != null) {
@@ -131,17 +134,30 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private FieldMetadata getField(Column column, JavaType javaType) {
-		JavaSymbolName fieldName = new JavaSymbolName(column.getName());
+		JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldNameForColumn(column.getName()));
 		JavaType fieldType = new JavaType(column.getType().getName());
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, null);
 	}
 
 	private boolean hasAccessor(FieldMetadata field) {
-		// TODO Need to check for existing accessor
+		String requiredAccessorName = getRequiredAccessorName(field);
+		
+		// Check governor for accessor method
+		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
+			//	System.out.println("found on governor " + fieldName + " - not adding to ITD");
+			return true;
+		}
+		
+		// Check entity ITD for accessor method
+		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
+		for (MethodMetadata method : itdMethods) {
+			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
+				return true;
+			}
+		}
 		return false;
 	}
 
-	
 	private MethodMetadata getAccessor(FieldMetadata field) {
 		String requiredAccessorName = getRequiredAccessorName(field);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -153,6 +169,42 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
 
+	private boolean hasMutator(FieldMetadata field) {
+		String requiredMutatorName = getRequiredMutatorName(field);
+		
+		// Check governor for mutator method
+		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), new ArrayList<JavaType>()) != null) {
+			//	System.out.println("found on governor " + fieldName + " - not adding to ITD");
+			return true;
+		}
+		
+		// Check entity ITD for mutator method
+		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
+		for (MethodMetadata method : itdMethods) {
+			if (method.getMethodName().equals(new JavaSymbolName(requiredMutatorName))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private MethodMetadata getMutator(FieldMetadata field) {
+		String requiredMutatorName = getRequiredMutatorName(field);
+	
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(field.getFieldType());
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(field.getFieldName());
+		
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	private String getRequiredMutatorName(FieldMetadata field) {
+		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+	}
+	
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}

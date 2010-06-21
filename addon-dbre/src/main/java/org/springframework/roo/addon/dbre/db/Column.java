@@ -73,7 +73,7 @@ public class Column {
 				break;
 			case Types.DOUBLE:
 			case Types.DECIMAL:
-				type = Double.class;
+				type = decimalDigits > 0 ? Double.class : Long.class;
 				break;
 			case Types.NUMERIC:
 				type = BigDecimal.class;

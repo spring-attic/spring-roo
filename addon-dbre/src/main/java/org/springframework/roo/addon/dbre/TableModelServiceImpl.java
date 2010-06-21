@@ -56,21 +56,6 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
 
-	public IdentifiableTable findTableIdentity(JavaType type) {
-		Assert.notNull(type, "Type to locate required");
-		for (IdentifiableTable identity : tableNamesToTypes.keySet()) {
-			if (tableNamesToTypes.get(identity).equals(type)) {
-				return identity;
-			}
-		}
-		return null;
-	}
-
-	public JavaType findTypeForTableIdentity(IdentifiableTable identifiableTable) {
-		Assert.notNull(identifiableTable, "Table identity to locate required");
-		return tableNamesToTypes.get(identifiableTable);
-	}
-
 	public final void notify(String upstreamDependency, String downstreamDependency) {
 		if (!MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType()))) {
 			return;
@@ -124,8 +109,24 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 			return;
 		}
 
+	//	System.out.println("Adding " + javaType.getFullyQualifiedTypeName() + " to model map");
 		// Put it in the map
 		tableNamesToTypes.put(computedTableIdentity, javaType);
+	}
+
+	public IdentifiableTable findTableIdentity(JavaType type) {
+		Assert.notNull(type, "Type to locate required");
+		for (IdentifiableTable identity : tableNamesToTypes.keySet()) {
+			if (tableNamesToTypes.get(identity).equals(type)) {
+				return identity;
+			}
+		}
+		return null;
+	}
+
+	public JavaType findTypeForTableIdentity(IdentifiableTable identifiableTable) {
+		Assert.notNull(identifiableTable, "Table identity to locate required");
+		return tableNamesToTypes.get(identifiableTable);
 	}
 
 	public Map<IdentifiableTable, JavaType> getAllDetectedEntities() {
@@ -156,8 +157,8 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 		return dbMetadataConverter.convertTableIdentityToType(identifiableTable, javaPackage);
 	}
 
-	public JavaSymbolName suggestFieldNameForColumn(String columnName) {
-		return new JavaSymbolName(dbMetadataConverter.getFieldName(columnName));
+	public String suggestFieldNameForColumn(String columnName) {
+		return dbMetadataConverter.getFieldName(columnName);
 	}
 
 	public String dump() {

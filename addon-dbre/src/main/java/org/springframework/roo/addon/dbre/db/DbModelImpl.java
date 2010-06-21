@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -155,7 +156,7 @@ public class DbModelImpl implements DbModel {
 			}
 
 			// Iterate through primary keys
-	//		System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+  " = " + table.getPrimaryKeys());
+			// System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+ " = " + table.getPrimaryKeys());
 			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
 				String primaryKeyId = tableId + "." + primaryKey.getId();
 				dbModel.add(primaryKeyId);
@@ -188,6 +189,10 @@ public class DbModelImpl implements DbModel {
 				foreignKeyElement.setAttribute("id", foreignKeyId);
 				foreignKeyElement.setAttribute("name", foreignKeyName);
 				foreignKeyElement.setAttribute("fkTable", foreignKey.getFkTable());
+				foreignKeyElement.setAttribute("fkColumn", foreignKey.getFkColumn());
+				foreignKeyElement.setAttribute("pkTable", foreignKey.getPkTable());
+				foreignKeyElement.setAttribute("pkColumn", foreignKey.getPkColumn());
+				foreignKeyElement.setAttribute("keySeq", String.valueOf(foreignKey.getKeySeq()));
 
 				tableElement.appendChild(foreignKeyElement);
 			}
@@ -243,14 +248,14 @@ public class DbModelImpl implements DbModel {
 				throw new IllegalStateException("Unable to parse " + dbrePath, e);
 			}
 		} else {
-			throw new IllegalStateException(dbrePath + " does not exist");
+			// File may have been deleted by user, so re-create.
+			serialize();
 		}
 	}
 
 	public Set<Table> getTables() {
-		return this.tables;
+		return Collections.unmodifiableSet(tables);
 	}
-	
 
 	public Table getTable(IdentifiableTable identifiableTable) {
 		for (Table table : tables) {
@@ -277,8 +282,8 @@ public class DbModelImpl implements DbModel {
 			try {
 				rs = getTablesRs(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable(), databaseMetaData);
 				while (rs.next()) {
-					identifiableTable = new IdentifiableTable(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"), TableType.valueOf(rs.getString("TABLE_TYPE")));
-					tables.add(new JdbcTableImpl(identifiableTable,  databaseMetaData));
+					identifiableTable = new IdentifiableTable(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"), rs.getString("TABLE_NAME"), TableType.getTableType(rs.getString("TABLE_TYPE")));
+					tables.add(new JdbcTableImpl(identifiableTable, databaseMetaData));
 				}
 			} finally {
 				if (rs != null) {
@@ -300,7 +305,7 @@ public class DbModelImpl implements DbModel {
 
 		Element dbMetadataElement = dbre.getDocumentElement();
 		setJavaPackage(new JavaPackage(dbMetadataElement.getAttribute("package")));
-		
+
 		List<Element> tableElements = XmlUtils.findElements(DbrePath.DBRE_TABLE_XPATH.getPath(), dbMetadataElement);
 		for (Element tableElement : tableElements) {
 			String catalog = tableElement.getAttribute("catalog");

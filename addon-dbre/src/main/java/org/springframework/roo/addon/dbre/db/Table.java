@@ -17,7 +17,7 @@ public interface Table {
 	
 	SortedSet<PrimaryKey> getPrimaryKeys();
 	
-	Set<ForeignKey> getForeignKeys();
+	SortedSet<ForeignKey> getForeignKeys();
 	
 	Set<Index> getIndexes();
 }

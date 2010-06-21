@@ -6,7 +6,7 @@ import java.util.Comparator;
  * {@link Comparator} for {@link PrimaryKey}.
  * 
  * <p>
- * Compares based on the key sequence of the primary key.
+ * Used to sort primary keys on the key sequence.
  * 
  * @author Alan Stewart
  * @since 1.1
