@@ -36,11 +36,13 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
+import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -61,21 +63,31 @@ public class DbreXmlFileListener implements FileEventListener {
 	@Reference private DbModel dbModel;
 	
 	public void onFileEvent(FileEvent fileEvent) {
-		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
-		if (eventPath.endsWith(DbrePath.DBRE_XML_FILE.getPath())) {
-			createManagedEntities();
-			deleteUnmanagedEntities();
-			processAllDetectedEntities();
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata == null) {
+			return;
 		}
+
+		String dbrePath = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
+		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
+		if (!eventPath.equals(dbrePath)) {
+			return;
+		}
+ 
+		if (!(fileEvent.getOperation() == FileOperation.CREATED || fileEvent.getOperation() == FileOperation.UPDATED)) {
+			return;
+		}
+		
+		createManagedEntities();
+		deleteUnmanagedEntities();
+		processAllDetectedEntities();
 	}
 
 	private void createManagedEntities() {
 		dbModel.deserialize();
 		for (Table table : dbModel.getTables()) {
 			IdentifiableTable identifiableTable = table.getIdentifiableTable();
-			JavaType javaType = tableModelService.findTypeForTableIdentity(identifiableTable);
-			if (javaType == null) {
-			//	System.out.println(identifiableTable.toString() + " is null - creating");
+			if (tableModelService.findTypeForTableIdentity(identifiableTable) == null) {
 				createEntityFromTable(table);
 			} 
 		}
@@ -89,7 +101,6 @@ public class DbreXmlFileListener implements FileEventListener {
 			PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 			ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 			AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName()));
-		//	System.out.println(governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath() + " dbModel contains: "+ isDetectedEntityInDbModel(entry.getKey()) + "  annotation is null: " + (annotation == null));
 			if (!isDetectedEntityInDbModel(entry.getKey()) && annotation != null) {
 				deleteUnmanagedEntity(governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath());
 			}
@@ -141,9 +152,17 @@ public class DbreXmlFileListener implements FileEventListener {
 			String columnName = primaryKeys.first().getColumnName();
 			Column column = getPrimaryKeyColumn(table.getColumns(), columnName);
 			if (column != null) {
-				entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), new JavaType(column.getType().getName())));
+				JavaType identifierType = new JavaType(column.getType().getName());
+				// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
+				if (!identifierType.equals(JavaType.LONG_OBJECT)) {
+					entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
+				}
+				
+				// Only add 'identifierField' attribute if it is different from the default, "id"
 				String fieldName = tableModelService.suggestFieldNameForColumn(column.getName());
-				entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
+				if (!"id".equals(fieldName)) {
+					entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
+				}
 			}
 		} else if (primaryKeys.size() > 1) {
 			// Table has a composite key so create the identifier class and add the fields
