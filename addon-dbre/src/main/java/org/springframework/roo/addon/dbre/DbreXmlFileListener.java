@@ -114,14 +114,23 @@ public class DbreXmlFileListener implements FileEventListener {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, annotationType);
-		if (annotation != null) {
-			mutableTypeDetails.removeTypeAnnotation(annotationType);
+		AnnotationMetadata found = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, annotationType);
+		if (found == null) {
+			logger.warning("Unable to find the @RooEntity annotation on '" + javaType.getFullyQualifiedTypeName() + "'");
+			return;
 		}
+	
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		for (JavaSymbolName attributeName : found.getAttributeNames()) {
+			AnnotationAttributeValue<?> attributeValue = found.getAttribute(attributeName);
+			if (!("identifierType".equals(attributeName.getSymbolName()) || "identifierField".equals(attributeName.getSymbolName()))) {
+				attributes.add(attributeValue);
+			}
+		}
+		attributes.addAll(getAttributes(javaType, table));
 		
-		List<AnnotationAttributeValue<?>> atttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		addIdentifierFromPrimaryKey(javaType, atttributes, table);
-		annotation = new DefaultAnnotationMetadata(annotationType, atttributes);
+		AnnotationMetadata annotation = new DefaultAnnotationMetadata(annotationType, attributes);
+		mutableTypeDetails.removeTypeAnnotation(annotationType);
 		mutableTypeDetails.addTypeAnnotation(annotation);
 	}
 	
@@ -137,8 +146,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
 
 		// Find primary key from db metadata and add identifier attributes to @RooEntity 
-		List<AnnotationAttributeValue<?>> atttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		addIdentifierFromPrimaryKey(javaType, atttributes, table);
+		List<AnnotationAttributeValue<?>> atttributes = getAttributes(javaType, table);
 		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), atttributes));
 		
 		// Add @RooDbManaged
@@ -163,7 +171,10 @@ public class DbreXmlFileListener implements FileEventListener {
 		classpathOperations.generateClassFile(details);
 	}
 
-	private void addIdentifierFromPrimaryKey(JavaType javaType, List<AnnotationAttributeValue<?>> attributes, Table table) {
+	private List<AnnotationAttributeValue<?>> getAttributes(JavaType javaType, Table table) {
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		
+		// Process primary keys and add 'identifierType' and 'identifierField' attribute
 		SortedSet<PrimaryKey> primaryKeys = table.getPrimaryKeys();
 		if (primaryKeys.size() == 1) {
 			// Table has one primary key column so add the column's type to the 'identifierType' attribute 
@@ -185,7 +196,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		} else if (primaryKeys.size() > 1) {
 			// Table has a composite key so create the identifier class and add the fields
 			
-			// Set the identifier's class name to the new entity's class name and append 'Pk'
+			// Set the identifier's class name to the new entity's class name appended with the string 'Pk'
 			JavaType identifierType = new JavaType(javaType.getFullyQualifiedTypeName() + "Pk");
 			
 			// Check if identifier class already exists and if not, create it
@@ -196,6 +207,8 @@ public class DbreXmlFileListener implements FileEventListener {
 			}
 			attributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
 		}
+		
+		return attributes;
 	}
 
 	private void createIdentifierClass(String declaredByMetadataId, JavaType identifierType, SortedSet<PrimaryKey> primaryKeys, Set<Column> columns) {
