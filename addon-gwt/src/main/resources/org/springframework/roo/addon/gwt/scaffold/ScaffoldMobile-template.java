@@ -3,6 +3,7 @@ package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
 import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.IsWidget;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlacePicker;
 import com.google.gwt.core.client.EntryPoint;
@@ -16,7 +17,6 @@ import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 

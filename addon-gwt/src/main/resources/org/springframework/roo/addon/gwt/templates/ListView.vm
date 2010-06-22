@@ -1,17 +1,17 @@
 #parse("common.vm")
 package ${packageName};
 
-import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.app.place.AbstractRecordListView;
+import com.google.gwt.app.place.PropertyColumn;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.valuestore.ui.AbstractRecordListView;
-import com.google.gwt.valuestore.ui.PropertyColumn;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormatRenderer;
-import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTMLPanel;
 #declareImports()
 
 import java.util.ArrayList;

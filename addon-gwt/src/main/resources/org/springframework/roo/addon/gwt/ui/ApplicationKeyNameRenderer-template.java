@@ -1,13 +1,13 @@
 package __TOP_LEVEL_PACKAGE__.gwt.ui;
 
-import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.valuestore.shared.Record;
 
 /**
  * Renders the name of an {@link Record}.
  */
 // TODO i18n
-public class ApplicationKeyNameRenderer implements Renderer<Record> {
+public class ApplicationKeyNameRenderer extends AbstractRenderer<Record> {
 	public String render(Record entity) {
 		String name = entity.getClass().getName();
 		if (name.lastIndexOf(".") > -1) {

@@ -546,11 +546,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		public String getBinder() {
 			if (type.equals(JavaType.DOUBLE_OBJECT))
-				return "g:DoubleBox";
+				return "app:DoubleBox";
 			if (type.equals(JavaType.LONG_OBJECT))
-				return "g:LongBox";
+				return "app:LongBox";
 			if (type.equals(JavaType.INT_OBJECT))
-				return "g:IntegerBox";
+				return "app:IntegerBox";
 			return isNonString() ? "d:DateBox" : "g:TextBox";
 		}
 
@@ -570,7 +570,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		public String getRenderer() {
-			return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : "new Renderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}";
+			return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}";
 		}
 
 		public String getReadableName() {

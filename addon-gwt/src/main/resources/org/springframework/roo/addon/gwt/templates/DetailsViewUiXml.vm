@@ -1,5 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+  xmlns:app='urn:import:com.google.gwt.app.client'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'>
  <ui:style>
     .fields {

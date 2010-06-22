@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
+import com.google.gwt.app.place.IsWidget;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlacePicker;
 import com.google.gwt.core.client.EntryPoint;
@@ -15,7 +16,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.requestfactory.shared.RequestEvent;
 import com.google.gwt.requestfactory.shared.RequestEvent.State;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 
