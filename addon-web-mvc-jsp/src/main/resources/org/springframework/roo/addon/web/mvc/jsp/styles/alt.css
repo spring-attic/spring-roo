@@ -8,10 +8,11 @@ body,div,td {
 
 body {
 	background-color: #fff;
-	background-image: url(../images/banner-graphic.png);
-	background-position: top center;
-	background-repeat: no-repeat;
 	text-align: center;
+}
+
+#header {
+	margin-bottom: 1em;
 }
 
 #wrapper {
@@ -20,12 +21,12 @@ body {
 	max-width: 800px;
 	margin-right: auto;
 	margin-left: auto;
+
 	/* fix max-width incompatibility in IE6 */
 	width:expression(document.body.clientWidth > 800? "800px": "auto" );
 	
 	overflow:hidden;
 	display:block;
-	margin-top: 90px;
 }
 
 /* header and footer elements */

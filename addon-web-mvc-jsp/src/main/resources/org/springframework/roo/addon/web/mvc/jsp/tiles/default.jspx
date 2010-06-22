@@ -42,30 +42,14 @@
 		<spring:message code="application_name" var="app_name"/>
 		<title><spring:message code="welcome_h3" arguments="${app_name}" /></title>
 	</head>
-   	<body class="tundra spring">		
+  	<body class="tundra spring">
    		<div id="wrapper">
+		    <tiles:insertAttribute name="header" ignore="true" />
 		    <tiles:insertAttribute name="menu" ignore="true" />   
-	    	<div id="main">
-	    		<tiles:insertAttribute name="body" />
-	    		<div id="footer">				
-				  	<spring:url var="home" value="/" />
-				    <span><a href="${home}"><spring:message code="button_home"/></a></span>				    
-				    <c:if test="${pageContext.request.userPrincipal != null}">	
-				    	<c:out value=" | "/>
-				    	<span>			    
-						    <spring:url var="logout" value="/static/j_spring_security_logout" />
-						    <a href="${logout}"><spring:message code="security_logout" /></a>
-					    </span>					    
-					</c:if>			    
-				    
-				    <util:language />
-				    <util:theme />
-				    				    
-				    <spring:url var="logo" value="/static/images/springsource-logo.png" />
-				    <spring:message code="global_sponsored" var="sponsored"/>
-				    <span><a href="http://springsource.com" title="${sponsored}"><img src="${logo}" alt="${sponsored}" align="right"/></a></span>
-				</div>
-			</div>
+		    <div id="main">
+	    		<tiles:insertAttribute name="body"/> 
+		    	<tiles:insertAttribute name="footer" ignore="true"/>
+		    </div>
 		</div>
 	</body>
 </html>
