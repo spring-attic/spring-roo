@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.springframework.roo.addon.dbre.db.IdentifiableTable;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**

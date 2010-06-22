@@ -144,7 +144,7 @@ public class DbModelImpl implements DbModel {
 
 				columnElement.setAttribute("id", columnId);
 				columnElement.setAttribute("name", columnName);
-				columnElement.setAttribute("type", column.getType().getName());
+				columnElement.setAttribute("type", column.getType().getFullyQualifiedTypeName());
 				columnElement.setAttribute("typeName", column.getTypeName());
 				columnElement.setAttribute("dataType", String.valueOf(column.getDataType()));
 				columnElement.setAttribute("columnSize", String.valueOf(column.getColumnSize()));

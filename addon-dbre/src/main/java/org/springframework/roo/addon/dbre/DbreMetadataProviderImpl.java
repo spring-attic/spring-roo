@@ -8,7 +8,6 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dbre.db.DbModel;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -28,8 +27,7 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
-	// @Reference private PathResolver pathResolver;
-	@Reference private EntityMetadataProvider entityMetadataProvider;
+	//@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
@@ -69,8 +67,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		// We need to lookup the metadata we depend on
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
  		
 		// We need to abort if we couldn't find dependent metadata
@@ -78,7 +74,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, entityMetadata, tableModelService, dbModel);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, tableModelService, dbModel);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import java.sql.Types;
 import java.util.Date;
 
+import org.springframework.roo.model.JavaType;
+
 /**
  * Column metadata.
  * 
@@ -62,40 +64,40 @@ public class Column {
 		return typeName;
 	}
 
-	public Class<?> getType() {
-		Class<?> type;
+	public JavaType getType() {
+		JavaType type;
 		switch (dataType) {
 			case Types.INTEGER:
-				type = Integer.class;
+				type = JavaType.INT_OBJECT;
 				break;
 			case Types.FLOAT:
-				type = Float.class;
+				type = JavaType.FLOAT_OBJECT;
 				break;
 			case Types.DOUBLE:
 			case Types.DECIMAL:
-				type = decimalDigits > 0 ? Double.class : Long.class;
+				type = decimalDigits > 0 ? JavaType.DOUBLE_OBJECT : JavaType.LONG_OBJECT;
 				break;
 			case Types.NUMERIC:
-				type = BigDecimal.class;
+				type = new JavaType(BigDecimal.class.getName());
 				break;
 			case Types.BIGINT:
-				type = BigInteger.class;
+				type = new JavaType(BigInteger.class.getName());
 				break;
 			case Types.BOOLEAN:
 			case Types.BIT:
-				type = Boolean.class;
+				type = JavaType.BOOLEAN_OBJECT;
 				break;
 			case Types.DATE:
 			case Types.TIME:
 			case Types.TIMESTAMP:
-				type = Date.class;
+				type = new JavaType(Date.class.getName());
 				break;
 			case Types.VARCHAR:
 			case Types.CHAR:
-				type = String.class;
+				type = JavaType.STRING_OBJECT;
 				break;
 			default:
-				type = String.class;
+				type = JavaType.STRING_OBJECT;
 				break;
 		}
 		return type;
@@ -130,6 +132,6 @@ public class Column {
 	}
 
 	public String toString() {
-		return "    COLUMN_NAME " + name + " (" + getType().getName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + nullable + ", REMARKS " + remarks;
+		return "    COLUMN_NAME " + name + " (" + getType().getFullyQualifiedTypeName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + nullable + ", REMARKS " + remarks;
 	}
 }
