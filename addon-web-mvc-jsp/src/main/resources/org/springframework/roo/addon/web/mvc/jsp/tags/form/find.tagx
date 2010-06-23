@@ -18,7 +18,7 @@
 	        <form:form action="${form_url}" method="GET">
 	            <input type="hidden" name="find" value="${finderName}" />
 	           	<jsp:doBody />
-	           	<div class="submit" id="${finderName}_submit">
+	           	<div class="submit" id="${id}_${finderName}_submit">
 	                <spring:message code="button_find" var="find_button"/>
 	                <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
 	                <input id="proceed" type="submit" value="${find_button}"/>

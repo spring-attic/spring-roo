@@ -32,7 +32,7 @@
 			<c:set value="false" var="multiple"/>
 		</c:if>
 	
-	    <div id="${field}_id">
+	    <div id="_${id}_id">
 			<c:choose>
 				<c:when test="${not empty items}">
 		            <label for="_${field}_id"><c:out value="${label}"/>:</label>
