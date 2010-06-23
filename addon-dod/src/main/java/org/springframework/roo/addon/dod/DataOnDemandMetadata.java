@@ -533,6 +533,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						}
 					}
 					
+					// Check for @Column
+					AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Column"));
+					if (columnAnnotationMetadata != null) {
+						AnnotationAttributeValue<?> lengthAttributeValue =  columnAnnotationMetadata.getAttribute(new JavaSymbolName("length"));
+						if (lengthAttributeValue != null && (initializer.length() + 2) > (Integer) lengthAttributeValue.getValue()) {
+							initializer = initializer.substring(0, (Integer) lengthAttributeValue.getValue() - 2); 
+						}
+					}
+
 					initializer = "\"" + initializer + "_\" + index";
 				} else if (field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 					if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Past")) != null) {
