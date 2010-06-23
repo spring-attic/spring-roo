@@ -21,7 +21,6 @@ public enum MirrorType {
 	RECORD_CHANGED(GwtPath.GWT_REQUEST, "RecordChanged", "recordChanged", "RecordChanged.vm"), 
 	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changeHandler", "ChangeHandler.vm"), 
 	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", "Request.vm"), 
-	REQUEST_SERVER_SIDE_OPERATIONS(GwtPath.GWT_REQUEST, "RequestServerSideOperations", "sso", "ServerSideOperations.vm"), 
 	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper.vm"), 
 	SCAFFOLD_PLACE(GwtPath.GWT_PLACE, "ScaffoldPlace", "detailPlace", "ScaffoldPlace.vm"), 
 	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity.vm"), 

@@ -43,6 +43,7 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @author Stefan Schmidt
  * @author Ray Cromwell
+ * @author Amit Manjhi
  * @since 1.1
  */
 @Component
@@ -284,7 +285,6 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
-		WebXmlUtils.addContextParam(new WebXmlUtils.WebXmlParam("servlet.serverOperation", GwtPath.GWT_REQUEST.packageName(projectMetadata) + ".ApplicationRequestServerSideOperations"), webXmlDoc, null);
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);

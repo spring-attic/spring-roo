@@ -49,7 +49,7 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).to(callback).fire();
 	}
 
-	protected String getRecordToken() {
-		return ${entity.record}.TOKEN;
+	protected Class getRecordClass() {
+		return ${entity.record}.class;
 	}
 }

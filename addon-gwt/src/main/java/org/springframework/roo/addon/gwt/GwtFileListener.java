@@ -32,6 +32,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
+ * @author Amit Manjhi
  */
 @Component
 @Service
@@ -117,7 +118,6 @@ public class GwtFileListener implements FileEventListener {
 		// We're going to do this crudely (no JavaParser) just to get it done in a sensible period of time...
 		updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
 		updateApplicationRequestFactory(fileManager, projectMetadata);
-		updateApplicationServerSideOperations(fileManager, projectMetadata);
 		updateListPlaceRendered(fileManager, projectMetadata);
 		updateListActivitiesMapper();
 
@@ -217,76 +217,6 @@ public class GwtFileListener implements FileEventListener {
 
 	public static String getQualifiedType(SharedType type, ProjectMetadata projectMetadata) {
 		return type.getFullyQualifiedTypeName(projectMetadata);
-	}
-
-	private void updateApplicationServerSideOperations(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.APP_REQUEST_SERVER_SIDE_OPERATIONS;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import java.util.Collections;");
-		bb.appendFormalLine("import java.util.HashMap;");
-		bb.appendFormalLine("import java.util.HashSet;");
-		bb.appendFormalLine("import java.util.Map;");
-		bb.appendFormalLine("import java.util.Set;");
-		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RequestFactory.Config;");
-		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RequestFactory.RequestDefinition;");
-		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
-		bb.appendFormalLine("public class " + destType.getFullName() + " implements Config {");
-		bb.indent();
-
-		bb.appendFormalLine("private final Map<String, RequestDefinition> map;");
-
-		bb.appendFormalLine("public Map<String, RequestDefinition> requestDefinitions() {");
-		bb.indent();
-		bb.appendFormalLine("return map;");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("private static void putAll(RequestDefinition[] values, Map<String, RequestDefinition> newMap) {");
-		bb.indent();
-		bb.appendFormalLine("for (RequestDefinition def : values) {");
-		bb.indent();
-		bb.appendFormalLine("newMap.put(def.name(), def);");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("public ApplicationRequestServerSideOperations() {");
-		bb.indent();
-		bb.appendFormalLine("Map<String, RequestDefinition> newMap = new HashMap<String, RequestDefinition>();");
-		MirrorType locate = MirrorType.REQUEST_SERVER_SIDE_OPERATIONS;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			if (!fullPath.equals(SharedType.APP_REQUEST_SERVER_SIDE_OPERATIONS.getFullName())) {
-				bb.appendFormalLine("putAll(" + javaType.getSimpleTypeName() + ".values(), newMap);");
-			}
-		}
-		bb.appendFormalLine("map = Collections.unmodifiableMap(newMap);");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("public Set<Class<? extends Record>> recordTypes() {");
-		bb.indent();
-		bb.appendFormalLine("Set<Class<? extends Record>> records = new HashSet<Class<? extends Record>>();");
-		locate = MirrorType.RECORD;
-		antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			bb.appendFormalLine("records.add(" + fullPath + ".class);");
-		}
-		bb.appendFormalLine("return records;");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		
-		write(destFile, bb.getOutput(), fileManager);
 	}
 
 	private void updatePlaceProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {

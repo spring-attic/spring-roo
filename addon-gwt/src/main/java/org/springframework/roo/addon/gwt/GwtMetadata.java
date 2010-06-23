@@ -54,6 +54,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
+ * @author Amit Manjhi
  * @since 1.1
  */
 public class GwtMetadata extends AbstractMetadataItem {
@@ -75,7 +76,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private ClassOrInterfaceTypeDetails recordChanged;
 	private ClassOrInterfaceTypeDetails changeHandler;
 	private ClassOrInterfaceTypeDetails request;
-	private ClassOrInterfaceTypeDetails requestServerSideOperations;
 
 	private ClassOrInterfaceTypeDetails record;
 	private JavaSymbolName idPropertyName;
@@ -121,7 +121,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildEditView();
 		buildEditViewUiXml();
 		buildRequest();
-		buildRequestServerSideOperations();
 		buildApplicationPlace();
 	}
 
@@ -134,7 +133,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		result.add(detailsViewBinder);
 		result.add(editViewBinder);
 		result.add(request);
-		result.add(requestServerSideOperations);
 		return result;
 	}
 
@@ -290,6 +288,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
 		List<AnnotationMetadata> typeAnnotations = createAnnotations();
+		// @DataTransferObject(Employee.class)
+    typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.DataTransferObject")));
 		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
@@ -722,6 +722,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
 		List<AnnotationMetadata> typeAnnotations = createAnnotations();
+    // @Service(Employee.class)
+    typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.Service")));
 		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
@@ -769,185 +771,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		methods.add(method1Metadata);
 	}
 
-	private void buildRequestServerSideOperations() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.REQUEST_SERVER_SIDE_OPERATIONS);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		implementsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.RequestFactory.RequestDefinition"));
-
-		// public String getDomainClassName()
-		JavaSymbolName method1Name = new JavaSymbolName("getDomainClassName");
-		JavaType method1ReturnType = JavaType.STRING_OBJECT;
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method1Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-		method1BodyBuilder.appendFormalLine("return \"" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "\";");
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, method1Annotations, null, method1BodyBuilder.getOutput());
-		methods.add(method1Metadata);
-
-		// To avoid needing to add extra features to our Java Parser integration just for complex enums, I'm avoiding calling constructors from an enum constant name.
-		// This means we have to locate what we want to export in advance, and then write out the file properly.
-
-		// Locate the methods we want to export
-		List<ExportedMethod> toExport = new ArrayList<ExportedMethod>();
-		toExport.add(exportMethod(findAllMethod));
-		toExport.add(exportMethod(findMethod));
-		toExport.add(exportMethod(countMethod));
-		toExport.add(exportMethod(findEntriesMethod));
-
-		// Add the enums themselves
-		for (ExportedMethod exported : toExport) {
-			enumConstants.add(exported.operationName);
-		}
-
-		// public String getDomainMethodName() method
-		JavaSymbolName method2Name = new JavaSymbolName("getDomainMethodName");
-		JavaType method2ReturnType = JavaType.STRING_OBJECT;
-		List<JavaType> method2ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method2ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method2Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method2BodyBuilder = new InvocableMemberBodyBuilder();
-		method2BodyBuilder.appendFormalLine("switch (this) {");
-		method2BodyBuilder.indent();
-		for (ExportedMethod exported : toExport) {
-			method2BodyBuilder.appendFormalLine("case " + exported.operationName + ": return \"" + exported.methodName + "\";");
-		}
-		method2BodyBuilder.appendFormalLine("default: throw new IllegalStateException();");
-		method2BodyBuilder.indentRemove();
-		method2BodyBuilder.appendFormalLine("}");
-		MethodMetadata method2Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method2Name, method2ReturnType, AnnotatedJavaType.convertFromJavaTypes(method2ParameterTypes), method2ParameterNames, method2Annotations, null, method2BodyBuilder.getOutput());
-		methods.add(method2Metadata);
-
-		// public boolean isReturnTypeList() method
-		JavaSymbolName method7Name = new JavaSymbolName("isReturnTypeList");
-		JavaType method7ReturnType = JavaType.BOOLEAN_PRIMITIVE;
-		List<JavaType> method7ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method7ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method7Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method7BodyBuilder = new InvocableMemberBodyBuilder();
-		method7BodyBuilder.appendFormalLine("switch (this) {");
-		method7BodyBuilder.indent();
-		for (ExportedMethod exported : toExport) {
-			method7BodyBuilder.appendFormalLine("case " + exported.operationName + ": return " + exported.isList + ";");
-		}
-		method7BodyBuilder.appendFormalLine("default: throw new IllegalStateException();");
-		method7BodyBuilder.indentRemove();
-		method7BodyBuilder.appendFormalLine("}");
-		MethodMetadata method7Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method7Name, method7ReturnType, AnnotatedJavaType.convertFromJavaTypes(method7ParameterTypes), method7ParameterNames, method7Annotations, null, method7BodyBuilder.getOutput());
-		methods.add(method7Metadata);
-
-		// public Class<? extends Record> getReturnType() method
-		JavaSymbolName method3Name = new JavaSymbolName("getReturnType");
-		List<JavaType> method3ReturnTypeParams = new ArrayList<JavaType>();
-		method3ReturnTypeParams.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-		JavaType method3ReturnType = new JavaType("java.lang.Class", 0, DataType.TYPE, null, method3ReturnTypeParams);
-		List<JavaType> method3ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method3ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method3Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method3BodyBuilder = new InvocableMemberBodyBuilder();
-		method3BodyBuilder.appendFormalLine("switch (this) {");
-		method3BodyBuilder.indent();
-		for (ExportedMethod exported : toExport) {
-			method3BodyBuilder.appendFormalLine("case " + exported.operationName + ": return " + exported.returns.getFullyQualifiedTypeName() + ".class;");
-		}
-		method3BodyBuilder.appendFormalLine("default: throw new IllegalStateException();");
-		method3BodyBuilder.indentRemove();
-		method3BodyBuilder.appendFormalLine("}");
-		MethodMetadata method3Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method3Name, method3ReturnType, AnnotatedJavaType.convertFromJavaTypes(method3ParameterTypes), method3ParameterNames, method3Annotations, null, method3BodyBuilder.getOutput());
-		methods.add(method3Metadata);
-
-		// public Class<?>[] getParameterTypes() method
-		JavaSymbolName method4Name = new JavaSymbolName("getParameterTypes");
-		List<JavaType> method4ReturnTypeParams = new ArrayList<JavaType>();
-		method4ReturnTypeParams.add(new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null));
-		JavaType method4ReturnType = new JavaType("java.lang.Class", 1, DataType.TYPE, null, method4ReturnTypeParams);
-		List<JavaType> method4ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method4ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method4Annotations = new ArrayList<AnnotationMetadata>();
-		InvocableMemberBodyBuilder method4BodyBuilder = new InvocableMemberBodyBuilder();
-		method4BodyBuilder.appendFormalLine("switch (this) {");
-		method4BodyBuilder.indent();
-		for (ExportedMethod exported : toExport) {
-			String text = "null";
-			if (exported.args.size() > 0) {
-				StringBuilder sb = new StringBuilder();
-				sb.append("new Class[] { ");
-				boolean firstElement = true;
-				for (AnnotatedJavaType arg : exported.args) {
-					if (!firstElement) {
-						sb.append(", ");
-					} else {
-						firstElement = false;
-					}
-					JavaType type = arg.getJavaType();
-					sb.append((type.isPrimitive() ? getPrimitiveTypeName(type) : arg.getJavaType().getFullyQualifiedTypeName()) + ".class");
-				}
-				sb.append(" }");
-				text = sb.toString();
-			}
-			method4BodyBuilder.appendFormalLine("case " + exported.operationName + ": return " + text + ";");
-		}
-		method4BodyBuilder.appendFormalLine("default: throw new IllegalStateException();");
-		method4BodyBuilder.indentRemove();
-		method4BodyBuilder.appendFormalLine("}");
-		MethodMetadata method4Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method4Name, method4ReturnType, AnnotatedJavaType.convertFromJavaTypes(method4ParameterTypes), method4ParameterNames, method4Annotations, null, method4BodyBuilder.getOutput());
-		methods.add(method4Metadata);
-
-		this.requestServerSideOperations = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.ENUMERATION, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, enumConstants);
-	}
-
-	private String getPrimitiveTypeName(JavaType type) {
-		if (type.getFullyQualifiedTypeName().equals("java.lang.Integer")) {
-			return "int";
-		}
-		if (type.getFullyQualifiedTypeName().equals("java.lang.Long")) {
-			return "long";
-		}
-		if (type.getFullyQualifiedTypeName().equals("java.lang.Float")) {
-			return "float";
-		}
-		if (type.getFullyQualifiedTypeName().equals("java.lang.Double")) {
-			return "double";
-		}
-		if (type.getFullyQualifiedTypeName().equals("java.lang.Short")) {
-			return "short";
-		}
-		return type.getFullyQualifiedTypeName();
-	}
-
-	private ExportedMethod exportMethod(MethodMetadata method) {
-		ExportedMethod e1 = new ExportedMethod();
-		e1.operationName = new JavaSymbolName(computeServerOperationName(method));
-		e1.methodName = method.getMethodName();
-		e1.returns = method.getMethodName().getSymbolName().startsWith("count") ? JavaType.LONG_OBJECT : getDestinationJavaType(MirrorType.RECORD);
-		e1.args = new ArrayList<AnnotatedJavaType>();
-		List<AnnotatedJavaType> paramTypes = method.getParameterTypes();
-		String methodName = method.getMethodName().getSymbolName();
-		for (int i = 0; i < paramTypes.size(); i++) {
-			List<JavaType> typeParams = new ArrayList<JavaType>();
-			JavaType jtype = paramTypes.get(i).getJavaType();
-			if (methodName.equals(findMethod.getMethodName().getSymbolName())) {
-				jtype = JavaType.LONG_OBJECT;
-				e1.args.add(new AnnotatedJavaType(jtype, new ArrayList<AnnotationMetadata>()));
-			} else {
-				typeParams.add(jtype);
-				JavaType propRef = new JavaType("com.google.gwt.valuestore.shared.PropertyReference", 0, DataType.TYPE, null, typeParams);
-				e1.args.add(new AnnotatedJavaType(jtype.isPrimitive() ? jtype : propRef, new ArrayList<AnnotationMetadata>()));
-			}
-		}
-		e1.isList = method.getReturnType().getFullyQualifiedTypeName().equals("java.util.List");
-		return e1;
-	}
-
 	class ExportedMethod {
 		JavaSymbolName operationName; // Mandatory
 		JavaSymbolName methodName; // Mandatory
@@ -962,10 +785,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	private String getOnChangeMethod() {
 		return "on" + governorTypeDetails.getName().getSimpleTypeName() + "Changed";
-	}
-
-	public MethodMetadata getFindAllMethodServerSide() {
-		return findAllMethod;
 	}
 
 	/**
@@ -998,6 +817,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		return new JavaType(packageName + "." + typeName);
 	}
 
+	private AnnotationMetadata createAdditionalAnnotation(JavaType serverType) {
+    List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+    serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
+    return new DefaultAnnotationMetadata(serverType, serverTypeAttributes);
+	}
+
 	/**
 	 * @return a newly-created type annotations list, complete with the @RooGwtMirroredFrom annotation properly setup
 	 */
@@ -1006,13 +831,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<AnnotationAttributeValue<?>> rooGwtMirroredFromConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		rooGwtMirroredFromConfig.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooGwtMirroredFrom.class.getName()), rooGwtMirroredFromConfig));
-
-		// @ServerType(type = Employee.class)
-		JavaType serverType = new JavaType("com.google.gwt.requestfactory.shared.ServerType");
-		List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("type"), governorTypeDetails.getName()));
-		annotations.add(new DefaultAnnotationMetadata(serverType, serverTypeAttributes));
-
 		return annotations;
 	}
 

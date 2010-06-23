@@ -19,7 +19,6 @@ public enum SharedType {
 	APP_ENTITY_TYPES_PROCESSOR(GwtPath.GWT_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor.vm"), 
 	APP_PLACE_TO_RECORD_TYPE(GwtPath.GWT_PLACE, "ApplicationPlaceToRecordType", "placeToRecordType", "ApplicationPlaceToRecordType.vm"), 
 	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory.vm"), 
-	APP_REQUEST_SERVER_SIDE_OPERATIONS(GwtPath.GWT_REQUEST, "ApplicationRequestServerSideOperations", "sso", "ApplicationRequestServerSideOperations.vm"), 
 	SCAFFOLD_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldActivities", "scaffoldActivities", "ScaffoldActivities.vm"), 
 	LIST_PLACE_RENDERER(GwtPath.GWT_UI, "ListPlaceRenderer", "listPlaceRenderer", "ListPlaceRenderer.vm"), 
 	LIST_ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ListActivitiesMapper", "listActivitiesMapper", "ListActivitiesMapper.vm"), 
