@@ -377,7 +377,7 @@
 				<repository>
 					<id>JBoss Repo</id>
 					<name>JBoss Repo</name>
-					<url>http://repository.jboss.com/maven2</url>
+					<url>https://repository.jboss.org/nexus/content/repositories/releases</url>
 				</repository>
 			</repositories>
 		</provider>
