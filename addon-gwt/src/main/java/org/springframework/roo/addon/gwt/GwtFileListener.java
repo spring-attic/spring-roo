@@ -40,6 +40,7 @@ public class GwtFileListener implements FileEventListener {
 	@Reference private MetadataService metadataService;
 
 	private ProjectMetadata projectMetadata;
+	private boolean processedApplicationFiles = false;
 
 	public void onFileEvent(FileEvent fileEvent) {
 		projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -47,62 +48,72 @@ public class GwtFileListener implements FileEventListener {
 			return;
 		}
 
-		String requestGwt = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata);
-		String generatedGwt = GwtPath.GWT_SCAFFOLD_GENERATED.canonicalFileSystemPath(projectMetadata);
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
 
 		if (!eventPath.endsWith(".java")) {
 			return;
 		}
-		if (!eventPath.startsWith(requestGwt) && !eventPath.startsWith(generatedGwt)) {
-			return;
-		}
+		boolean isMaintainedByRoo = eventPath.startsWith(GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata))
+        || eventPath.startsWith(GwtPath.GWT_SCAFFOLD_GENERATED.canonicalFileSystemPath(projectMetadata));
+		if (!isMaintainedByRoo
+        && (processedApplicationFiles || !eventPath.startsWith(GwtPath.GWT_SCAFFOLD.canonicalFileSystemPath(projectMetadata)))) {
+      return;
+    }
 
 		// Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
+    if (isMaintainedByRoo) {
+      // First thing is for us to figure out the record file (or what it used to
+      // be called, if it has gone away)
+      String recordFile = null;
+      if (eventPath.endsWith("Record.java")) {
+        recordFile = eventPath;
+      } else {
+        String name = fileEvent.getFileDetails().getFile().getName();
+        name = name.substring(0, name.length() - 5); // Drop .java
+        for (SharedType t : SharedType.values()) {
+          if (name.endsWith(t.getFullName())) {
+            // This is just a shared type; we don't care about changes to them
+            return;
+          }
+        }
+        for (MirrorType t : MirrorType.values()) {
+          if (name.endsWith(t.getSuffix())) {
+            // Drop the part of the filename with the suffix, as well as the
+            // extension
+            String entityName = name.substring(0,
+                name.lastIndexOf(t.getSuffix()));
+            recordFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(
+                projectMetadata, entityName + "Record.java");
+            break;
+          }
+        }
+      }
+      Assert.hasText(recordFile, "Record file not computed for input "
+          + eventPath);
 
-		// First thing is for us to figure out the record file (or what it used to be called, if it has gone away)
-		String recordFile = null;
-		if (eventPath.endsWith("Record.java")) {
-			recordFile = eventPath;
-		} else {
-			String name = fileEvent.getFileDetails().getFile().getName();
-			name = name.substring(0, name.length() - 5); // Drop .java
-			for (SharedType t : SharedType.values()) {
-				if (name.endsWith(t.getFullName())) {
-					// This is just a shared type; we don't care about changes to them
-					return;
-				}
-			}
-			for (MirrorType t : MirrorType.values()) {
-				if (name.endsWith(t.getSuffix())) {
-					// Drop the part of the filename with the suffix, as well as the extension
-					String entityName = name.substring(0, name.lastIndexOf(t.getSuffix()));
-					recordFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Record.java");
-					break;
-				}
-			}
-		}
-		Assert.hasText(recordFile, "Record file not computed for input " + eventPath);
+      // Calculate the name without the "Record.java" portion (simplifies
+      // working with it later)
+      String simpleName = new File(recordFile).getName();
+      simpleName = simpleName.substring(0, simpleName.length() - 11); // Drop Record.java
 
-		// Calculate the name without the "Record.java" portion (simplifies working with it later)
-		String simpleName = new File(recordFile).getName();
-		simpleName = simpleName.substring(0, simpleName.length() - 11); // Drop Record.java
+      Assert.hasText(simpleName, "Simple name not computed for input "
+          + eventPath);
 
-		Assert.hasText(simpleName, "Simple name not computed for input " + eventPath);
-
-		// Remove all the related files should the key no longer exist
-		if (!fileManager.exists(recordFile)) {
-			for (MirrorType t : MirrorType.values()) {
-				String filename = simpleName + t.getSuffix() + ".java";
-				String canonicalPath = t.getPath().canonicalFileSystemPath(projectMetadata, filename);
-				deleteIfExists(canonicalPath);
-			}
-		}
+      // Remove all the related files should the key no longer exist
+      if (!fileManager.exists(recordFile)) {
+        for (MirrorType t : MirrorType.values()) {
+          String filename = simpleName + t.getSuffix() + ".java";
+          String canonicalPath = t.getPath().canonicalFileSystemPath(
+              projectMetadata, filename);
+          deleteIfExists(canonicalPath);
+        }
+      }
+    }
 
 		// By this point the directory structure should correspond to files that should exist
 
 		// Now we need to refresh all the application-wide files
-
+		processedApplicationFiles = true;
 		// We're going to do this crudely (no JavaParser) just to get it done in a sensible period of time...
 		updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
 		updateApplicationRequestFactory(fileManager, projectMetadata);

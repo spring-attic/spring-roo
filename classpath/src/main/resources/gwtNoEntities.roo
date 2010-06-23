@@ -1,0 +1,3 @@
+project --topLevelPackage com.springsource.foo
+persistence setup --provider DATANUCLEUS --database HYPERSONIC_IN_MEMORY 
+gwt setup
