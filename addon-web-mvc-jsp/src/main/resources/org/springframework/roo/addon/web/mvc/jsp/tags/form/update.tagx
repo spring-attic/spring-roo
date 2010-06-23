@@ -8,6 +8,7 @@
 	<jsp:directive.attribute name="idField" type="java.lang.String" required="false" description="Specify the field name of the id field (default 'id')"/>
 	<jsp:directive.attribute name="versionField" type="java.lang.String" required="false" description="Specify the field name of the version field (default 'version'). If specified 'none' the version field will not be inlcuded (versionField='none')."/>
 	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+	<jsp:directive.attribute name="openPane" type="java.lang.Boolean" required="false" description="Control if the title pane is opened or closed by default (default: true)"/>
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:if test="${empty render or render}">
@@ -24,7 +25,7 @@
 			<c:set value="version" var="versionField"/>
 		</c:if>
 
-	    <page:page id="${id}" title="${title_msg}">
+	    <page:page id="${id}" title="${title_msg}" openPane="${openPane}">
 	        <spring:url value="${path}" var="form_url"/>
 	        <form:form action="${form_url}" method="PUT" modelAttribute="${modelAttribute}">
 	            <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
