@@ -192,9 +192,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (!entityMetadata.getIdentifierField().getFieldType().isPrimitive()) {
-			bodyBuilder.appendFormalLine("if (" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + " == null) throw new IllegalArgumentException(\"An Identifier is required\");");
-		}
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + entityMetadata.getRemoveMethod().getMethodName() + "();");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "?page=\" + ((page == null) ? \"1\" : page.toString()) + \"&size=\" + ((size == null) ? \"10\" : size.toString());");
 
@@ -301,9 +298,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (!entityMetadata.getIdentifierField().getFieldType().isPrimitive()) {
-			bodyBuilder.appendFormalLine("if (" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + " == null) throw new IllegalArgumentException(\"An Identifier is required\");");
-		}
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
 		}
@@ -348,7 +342,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName + " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
@@ -461,7 +454,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("if (" + entityName + " == null) throw new IllegalArgumentException(\"A " + entityName + " is required\");");
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
@@ -511,9 +503,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		if (!entityMetadata.getIdentifierField().getFieldType().isPrimitive()) {
-			bodyBuilder.appendFormalLine("if (" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + " == null) throw new IllegalArgumentException(\"An Identifier is required\");");
-		}
 		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		if (!dateTypes.isEmpty()) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
@@ -616,9 +605,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 			annotatedParamTypes.add(new AnnotatedJavaType(paramTypes.get(i), annotations));
 
-			if (!paramTypes.get(i).isPrimitive() && !paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
-				bodyBuilder.appendFormalLine("if (" + paramNames.get(i).getSymbolName() + " == null" + (paramTypes.get(i).equals(new JavaType(String.class.getName())) ? " || " + paramNames.get(i).getSymbolName() + ".length() == 0" : "") + ") throw new IllegalArgumentException(\"A " + paramNames.get(i).getSymbolNameCapitalisedFirstLetter() + " is required.\");");
-			}
 			if (paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
 				methodParams.append(paramNames.get(i) + " == null ? new Boolean(false) : " + paramNames.get(i) + ", ");
 			} else {
