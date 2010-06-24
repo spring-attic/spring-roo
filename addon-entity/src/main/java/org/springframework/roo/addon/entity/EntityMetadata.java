@@ -259,8 +259,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
-			Assert.notNull(method, "User provided @javax.persistence.Id field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.notNull(method, "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		
@@ -290,8 +290,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
-			Assert.notNull(method, "User provided @javax.persistence.Id field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.notNull(method, "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		

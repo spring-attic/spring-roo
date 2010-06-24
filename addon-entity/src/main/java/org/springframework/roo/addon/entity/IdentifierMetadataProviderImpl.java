@@ -8,7 +8,6 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.serializable.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -27,7 +26,7 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private SerializableMetadataProvider serializableMetadataProvider;
 	
-	private boolean noArgConstructor = false;
+	private boolean noArgConstructor = true;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -44,22 +43,7 @@ public class IdentifierMetadataProviderImpl extends AbstractItdMetadataProvider 
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
-
-		// Now we walk the inheritance hierarchy until we find some existing IdentifierMetadata
-		IdentifierMetadata parent = null;
-		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
-		while (superCid != null && parent == null) {
-			String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
-			Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);
-			String superCidLocalIdentifier = createLocalIdentifier(superCid.getName(), path);
-			parent = (IdentifierMetadata) metadataService.get(superCidLocalIdentifier);
-			superCid = superCid.getSuperclass();
-		}
-
-		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
-		// the governing java type
-
-		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor);
+		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, noArgConstructor);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
