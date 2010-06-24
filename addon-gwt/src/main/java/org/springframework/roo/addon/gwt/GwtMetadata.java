@@ -32,7 +32,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -739,7 +738,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	private void buildRequestMethod(String destinationMetadataId, List<MethodMetadata> methods, MethodMetadata methodMetaData) {
-		// @com.google.gwt.requestfactory.shared.ServerOperation("FIND_ALL_EMPLOYEES")
 		// com.google.gwt.requestfactory.shared.EntityListRequest<EmployeeKey> findAllEmployees();
 		JavaSymbolName method1Name = methodMetaData.getMethodName();
 		List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
@@ -748,11 +746,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.RequestFactory.RequestObject" : (isList ? "com.google.gwt.requestfactory.shared.RecordListRequest" : "com.google.gwt.requestfactory.shared.RecordRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
 		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		List<AnnotationMetadata> method1Annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> method1AnnotationAttrs = new ArrayList<AnnotationAttributeValue<?>>();
-		method1AnnotationAttrs.add(new StringAttributeValue(new JavaSymbolName("value"), computeServerOperationName(methodMetaData)));
-		method1Annotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.ServerOperation"), method1AnnotationAttrs));
-
 		method1ParameterNames.addAll(methodMetaData.getParameterNames());
 		List<AnnotatedJavaType> paramTypes = methodMetaData.getParameterTypes();
 
@@ -767,7 +760,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			method1ParameterTypes.add(jtype.isPrimitive() ? jtype : propRef);
 		}
 
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, method1Annotations, null, null);
+		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, null);
 		methods.add(method1Metadata);
 	}
 
@@ -777,10 +770,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		JavaType returns; // Mandatory
 		List<AnnotatedJavaType> args; // Mandatory, but can be empty
 		boolean isList;
-	}
-
-	private String computeServerOperationName(MethodMetadata serverMethod) {
-		return serverMethod.getMethodName().getReadableSymbolName().toUpperCase().replace(' ', '_');
 	}
 
 	private String getOnChangeMethod() {
