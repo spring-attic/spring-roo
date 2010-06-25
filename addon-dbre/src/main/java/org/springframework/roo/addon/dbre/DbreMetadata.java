@@ -9,8 +9,12 @@ import org.springframework.roo.addon.dbre.db.DbModel;
 import org.springframework.roo.addon.dbre.db.IdentifiableTable;
 import org.springframework.roo.addon.dbre.db.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.addon.entity.RooIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -19,6 +23,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -26,6 +31,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -43,14 +49,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	private EntityMetadata entityMetadata;
-	private TableModelService tableModelService;
+	private MetadataService metadataService;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, TableModelService tableModelService, DbModel dbModel) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, DbModel dbModel) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
 		this.entityMetadata = entityMetadata;
-		this.tableModelService = tableModelService;
+		this.metadataService = metadataService;
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooDbManaged.class.getName()));
@@ -60,31 +66,38 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		IdentifiableTable identifiableTable = tableModelService.findTableIdentity(javaType);
-//		if (identifiableTable == null) {
-//			identifiableTable = tableModelService.suggestTableNameForNewType(javaType);
-//		}
 		Table table = dbModel.getTable(identifiableTable);
-		// System.out.println("table is null " + (table == null));
 		if (table == null) {
 			return;
 		}
+		
 		// Add fields with their respective accessors and mutators
 		for (Column column : table.getColumns()) {
-			// Check for an existing declared field in the governor or in the entity metadata
+			JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldNameForColumn(column.getName()));
 			FieldMetadata field = null;
-			if (!hasField(column, javaType)) {
-				field = getField(column, javaType);
+			
+			boolean isCompositeKeyField = isCompositeKeyField(fieldName, javaType);
+			if ((isEmbeddedIdField(fieldName) && !isCompositeKeyField) || (isIdField(fieldName) && !column.isPrimaryKey())) {
+				fieldName = getUniqueFieldName(fieldName);
+				field = getField(fieldName, column, javaType);
+			} else if (getIdField() != null && column.isPrimaryKey()) {
+				field = null;
+			} else if (!hasField(fieldName, javaType) && !isCompositeKeyField) {
+				field = getField(fieldName, column, javaType);
+			}
+			
+			if (field != null) {
 				builder.addField(field);
-			}
-
-			// Check for an existing accessor in the governor or in the entity metadata
-			if (field != null && !hasAccessor(field)) {
-				builder.addMethod(getAccessor(field));
-			}
-
-			// Check for an existing mutator in the governor or in the entity metadata
-			if (field != null && !hasMutator(field)) {
-				builder.addMethod(getMutator(field));
+				
+				// Check for an existing accessor in the governor or in the entity metadata
+				if (!hasAccessor(field)) {
+					builder.addMethod(getAccessor(field));
+				}
+				
+				// Check for an existing mutator in the governor or in the entity metadata
+				if (!hasMutator(field)) {
+					builder.addMethod(getMutator(field));
+				}
 			}
 		}
 
@@ -92,12 +105,102 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		itdTypeDetails = builder.build();
 	}
 
-	public boolean hasField(Column column, JavaType javaType) {
-		JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldNameForColumn(column.getName()));
-		// System.out.println("column name = " + columnElement.getAttribute("name") + ", field name = " + fieldName.getSymbolName());
+	private JavaSymbolName getUniqueFieldName(JavaSymbolName fieldName) {
+		int index= -1;
+		JavaSymbolName uniqueField = null;
+		while (true) {
+			// Compute the required field name
+			index++;
+			String uniqueFieldName = "";
+			for (int i = 0; i < index; i++) {
+				uniqueFieldName = uniqueFieldName + "_";
+			}
+			uniqueFieldName = uniqueFieldName + fieldName;
+			uniqueField = new JavaSymbolName(uniqueFieldName);
+			if (MemberFindingUtils.getField(governorTypeDetails, uniqueField) == null) {
+				// Found a usable field name
+				break;
+			}
+		}
+		return uniqueField;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean isCompositeKeyField(JavaSymbolName fieldName, JavaType javaType) {
+		// Check for identifier class and exclude fields that are part of the composite primary key
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+		AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
+		if (identifierTypeAttribute != null) {
+			JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
+			if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+				String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+				PhysicalTypeMetadata identifierPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+				if (identifierPhysicalTypeMetadata != null) {
+					ClassOrInterfaceTypeDetails identifierTypeDetails = (ClassOrInterfaceTypeDetails) identifierPhysicalTypeMetadata.getPhysicalTypeDetails();
+					if (identifierTypeDetails != null) {
+						// Check governor for declared fields 
+						List<? extends FieldMetadata> identifierFields = identifierTypeDetails.getDeclaredFields();
+						for (FieldMetadata field : identifierFields) {
+							if (fieldName.equals(field.getFieldName())) {
+								return true;
+							}
+						}
+						
+						// Check @RooIdentifier annotation for idFields attribute
+						AnnotationMetadata identifierAnnotation = MemberFindingUtils.getAnnotationOfType(identifierTypeDetails.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
+						if (identifierAnnotation != null) {
+							ArrayAttributeValue<StringAttributeValue> idFieldsAttribute = (ArrayAttributeValue<StringAttributeValue>) identifierAnnotation.getAttribute(new JavaSymbolName("idFields"));
+							if (idFieldsAttribute != null) {
+								List<StringAttributeValue> idFields = idFieldsAttribute.getValue();
+								for (StringAttributeValue idField : idFields) {
+									if (fieldName.equals(new JavaSymbolName(idField.getValue()))) {
+										return true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	public boolean hasFieldOnGovenor(JavaSymbolName fieldName) {
+		return MemberFindingUtils.getField(governorTypeDetails, fieldName) != null;
+	}
+	
+	public boolean isIdField(JavaSymbolName fieldName) {
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
+		if (idFields.size() > 0) {
+			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			return idFields.get(0).getFieldName().equals(fieldName);
+		}
+		return false;
+	}
+	
+	public JavaSymbolName getIdField() {
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
+		if (idFields.size() > 0) {
+			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			return idFields.get(0).getFieldName();
+		}
+		return null;
+	}
+	
+	public boolean  isEmbeddedIdField(JavaSymbolName fieldName) {
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.EmbeddedId"));
+		if (embeddedIdFields.size() > 0) {
+			Assert.isTrue(embeddedIdFields.size() == 1, "More than one field was annotated with @javax.persistence.EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			return embeddedIdFields.get(0).getFieldName().equals(fieldName);
+		}
+		return false;
+	}
+	
+	public boolean hasField(JavaSymbolName fieldName, JavaType javaType) {	
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, fieldName) != null) {
-			// System.out.println("found on governor " + fieldName + " - not adding to ITD");
 			return true;
 		}
 
@@ -105,34 +208,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
 		for (FieldMetadata field : itdFields) {
 			if (field.getFieldName().equals(fieldName)) {
-				// System.out.println("found on entity " + fieldName + " - not adding to ITD");
 				return true;
 			}
 		}
 
-		// Try to locate an existing field with @javax.persistence.Id
-		// List<FieldMetadata> foundId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
-		// if (foundId.size() > 0) {
-		// Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-		// return true;
-		// }
-		// foundId = MemberFindingUtils.getFieldsWithAnnotation(entityMetadata., ID);
-		// if (foundId.size() > 0) {
-		// Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-		// return true;
-		// }
-
-		// Try to locate an existing field with @javax.persistence.EmbeddedId
-		// List<FieldMetadata> foundEmbeddedId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
-		// if (foundEmbeddedId.size() > 0) {
-		// Assert.isTrue(foundEmbeddedId.size() == 1, "More than one field was annotated with @javax.persistence.EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-		// return true;
-		// }
 		return false;
 	}
 
-	public FieldMetadata getField(Column column, JavaType javaType) {
-		JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldNameForColumn(column.getName()));
+	public FieldMetadata getField(JavaSymbolName fieldName, Column column, JavaType javaType) {
 		JavaType fieldType = column.getType();
 
 		// Add annotations to field

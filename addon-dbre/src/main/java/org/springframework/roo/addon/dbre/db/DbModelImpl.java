@@ -144,6 +144,11 @@ public class DbModelImpl implements DbModel {
 
 				columnElement.setAttribute("id", columnId);
 				columnElement.setAttribute("name", columnName);
+				boolean primaryKey = column.isPrimaryKey();
+				columnElement.setAttribute("isPk", String.valueOf(primaryKey));
+				if (primaryKey) {
+					columnElement.setAttribute("pkSeq", String.valueOf(column.getPrimaryKeySequence()));
+				}
 				columnElement.setAttribute("type", column.getType().getFullyQualifiedTypeName());
 				columnElement.setAttribute("typeName", column.getTypeName());
 				columnElement.setAttribute("dataType", String.valueOf(column.getDataType()));
@@ -151,28 +156,8 @@ public class DbModelImpl implements DbModel {
 				columnElement.setAttribute("decimalDigits", String.valueOf(column.getDecimalDigits()));
 				columnElement.setAttribute("nullable", String.valueOf(column.isNullable()));
 				columnElement.setAttribute("remarks", column.getRemarks());
-
+				
 				tableElement.appendChild(columnElement);
-			}
-
-			// Iterate through primary keys
-			// System.out.println("primary keys for " + table.getIdentifiableTable().getTable()+ " = " + table.getPrimaryKeys());
-			for (PrimaryKey primaryKey : table.getPrimaryKeys()) {
-				String primaryKeyId = tableId + "." + primaryKey.getId();
-				dbModel.add(primaryKeyId);
-
-				String primaryKeyName = primaryKey.getColumnName();
-				Element primaryKeyElement = XmlUtils.findFirstElement(tableXPath + "/primaryKey[@columnName = '" + primaryKeyName + "']", dbMetadataElement);
-				if (primaryKeyElement == null) {
-					// Create new primary key for table in xml
-					primaryKeyElement = dbre.createElement("primaryKey");
-				}
-				primaryKeyElement.setAttribute("id", primaryKeyId);
-				primaryKeyElement.setAttribute("columnName", primaryKey.getColumnName());
-				primaryKeyElement.setAttribute("name", primaryKeyName);
-				primaryKeyElement.setAttribute("keySeq", String.valueOf(primaryKey.getKeySeq()));
-
-				tableElement.appendChild(primaryKeyElement);
 			}
 
 			// Iterate through foreign keys
@@ -188,11 +173,11 @@ public class DbModelImpl implements DbModel {
 				}
 				foreignKeyElement.setAttribute("id", foreignKeyId);
 				foreignKeyElement.setAttribute("name", foreignKeyName);
-				foreignKeyElement.setAttribute("fkTable", foreignKey.getFkTable());
-				foreignKeyElement.setAttribute("fkColumn", foreignKey.getFkColumn());
-				foreignKeyElement.setAttribute("pkTable", foreignKey.getPkTable());
-				foreignKeyElement.setAttribute("pkColumn", foreignKey.getPkColumn());
-				foreignKeyElement.setAttribute("keySeq", String.valueOf(foreignKey.getKeySeq()));
+				foreignKeyElement.setAttribute("fkTable", foreignKey.getForeignKeyTable());
+				foreignKeyElement.setAttribute("fkColumn", foreignKey.getForeignKeyColumn());
+				foreignKeyElement.setAttribute("pkTable", foreignKey.getPrimaryKeyTable());
+				foreignKeyElement.setAttribute("pkColumn", foreignKey.getPrimaryKeyColumn());
+				foreignKeyElement.setAttribute("keySeq", String.valueOf(foreignKey.getKeySequence()));
 
 				tableElement.appendChild(foreignKeyElement);
 			}
@@ -227,7 +212,6 @@ public class DbModelImpl implements DbModel {
 				dbMetadataElement.removeChild(tableElement);
 			} else {
 				removeTableAttributes("column", dbModel, tableElement);
-				removeTableAttributes("primaryKey", dbModel, tableElement);
 				removeTableAttributes("foreignKey", dbModel, tableElement);
 				removeTableAttributes("index", dbModel, tableElement);
 			}

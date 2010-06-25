@@ -13,33 +13,33 @@ import java.util.TreeSet;
  */
 public abstract class AbstractTable {
 	protected final IdentifiableTable identifiableTable;
-	protected final Set<Column> columns = new HashSet<Column>();
-	protected final SortedSet<PrimaryKey> primaryKeys = new TreeSet<PrimaryKey>(new PrimaryKeyComparator());
-	protected final SortedSet<ForeignKey> foreignKeys = new TreeSet<ForeignKey>(new ForeignKeyComparator());
+	protected final SortedSet<Column> columns = new TreeSet<Column>();
+	protected final Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
 	protected final Set<Index> indexes = new HashSet<Index>();
+	final Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
 
 	AbstractTable(IdentifiableTable identifiableTable) {
 		this.identifiableTable = identifiableTable;
 	}
-	
+
 	public IdentifiableTable getIdentifiableTable() {
 		return identifiableTable;
 	}
 
-	public Set<Column> getColumns() {
+	public SortedSet<Column> getColumns() {
 		return this.columns;
 	}
 
-	public SortedSet<PrimaryKey> getPrimaryKeys() {
-		return this.primaryKeys;
-	}
-
-	public SortedSet<ForeignKey> getForeignKeys() {
+	public Set<ForeignKey> getForeignKeys() {
 		return this.foreignKeys;
 	}
 
 	public Set<Index> getIndexes() {
 		return this.indexes;
+	}
+
+	Set<PrimaryKey> getPrimaryKeys() {
+		return this.primaryKeys;
 	}
 
 	public int hashCode() {
@@ -82,15 +82,6 @@ public abstract class AbstractTable {
 			builder.append(lineSeparator);
 			for (Column column : columns) {
 				builder.append(column.toString());
-				builder.append(lineSeparator);
-			}
-		}
-
-		if (!primaryKeys.isEmpty()) {
-			builder.append("  PRIMARY KEYS ");
-			builder.append(lineSeparator);
-			for (PrimaryKey primaryKey : getPrimaryKeys()) {
-				builder.append(primaryKey.toString());
 				builder.append(lineSeparator);
 			}
 		}

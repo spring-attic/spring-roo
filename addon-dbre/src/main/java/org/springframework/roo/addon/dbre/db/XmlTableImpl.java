@@ -16,7 +16,6 @@ public class XmlTableImpl extends AbstractTable implements Table {
 	XmlTableImpl(IdentifiableTable identifiableTable, Element tableElement) {
 		super(identifiableTable);
 		setColumns(tableElement);
-		setPrimaryKeys(tableElement);
 		setForeignKeys(tableElement);
 		setIndexes(tableElement);
 	}
@@ -33,17 +32,13 @@ public class XmlTableImpl extends AbstractTable implements Table {
 			boolean nullable = Boolean.parseBoolean(columnElement.getAttribute("nullable"));
 			String remarks = columnElement.getAttribute("remarks");
 			String typeName = columnElement.getAttribute("typeName");
+			boolean primaryKey = Boolean.parseBoolean(columnElement.getAttribute("isPk"));
+			Short primaryKeySequence = null;
+			if (primaryKey) {
+				primaryKeySequence = new Short(columnElement.getAttribute("pkSeq"));
+			}
 
-			columns.add(new Column(name, dataType, columnSize, decimalDigits, nullable, remarks, typeName));
-		}
-	}
-
-	private void setPrimaryKeys(Element tableElement) {
-		primaryKeys.clear();
-
-		List<Element> primaryKeyElements = XmlUtils.findElements("primaryKey", tableElement);
-		for (Element primaryKeyElement : primaryKeyElements) {
-			primaryKeys.add(new PrimaryKey(primaryKeyElement.getAttribute("columnName"), primaryKeyElement.getAttribute("name"), new Short(primaryKeyElement.getAttribute("keySeq"))));
+			columns.add(new Column(name, dataType, columnSize, decimalDigits, nullable, remarks, typeName, primaryKey, primaryKeySequence));
 		}
 	}
 

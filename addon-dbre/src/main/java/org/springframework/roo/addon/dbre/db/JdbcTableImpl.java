@@ -17,38 +17,10 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 
 	JdbcTableImpl(IdentifiableTable identifiableTable, DatabaseMetaData databaseMetaData) {
 		super(identifiableTable);
-		setColumns(databaseMetaData);
 		setPrimaryKeys(databaseMetaData);
+		setColumns(databaseMetaData);
 		setForeignKeys(databaseMetaData);
 		setIndexes(databaseMetaData);
-	}
-
-	private void setColumns(DatabaseMetaData databaseMetaData) {
-		columns.clear();
-
-		try {
-			ResultSet rs = null;
-			try {
-				rs = getColumnsRs(null, databaseMetaData);
-				while (rs.next()) {
-					String name = rs.getString("COLUMN_NAME");
-					int dataType = rs.getInt("DATA_TYPE");
-					int columnSize = rs.getInt("COLUMN_SIZE");
-					int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-					boolean isNullable = rs.getBoolean("IS_NULLABLE");
-					String remarks = rs.getString("REMARKS");
-					String typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
-
-					columns.add(new Column(name, dataType, columnSize, decimalDigits, isNullable, remarks, typeName));
-				}
-			} finally {
-				if (rs != null) {
-					rs.close();
-				}
-			}
-		} catch (SQLException e) {
-			throw new IllegalStateException("Failed to get columns from database metadata", e);
-		}
 	}
 
 	private void setPrimaryKeys(DatabaseMetaData databaseMetaData) {
@@ -71,13 +43,56 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 		}
 	}
 
+	private void setColumns(DatabaseMetaData databaseMetaData) {
+		columns.clear();
+
+		try {
+			ResultSet rs = null;
+			try {
+				rs = getColumnsRs(null, databaseMetaData);
+				while (rs.next()) {
+					String name = rs.getString("COLUMN_NAME");
+					int dataType = rs.getInt("DATA_TYPE");
+					int columnSize = rs.getInt("COLUMN_SIZE");
+					int decimalDigits = rs.getInt("DECIMAL_DIGITS");
+					boolean isNullable = rs.getBoolean("IS_NULLABLE");
+					String remarks = rs.getString("REMARKS");
+					String typeName = new StringTokenizer(rs.getString("TYPE_NAME"), "() ").nextToken();
+					boolean isPrimaryKey = false;
+					Short primaryKeySequence = null;
+					PrimaryKey primaryKey = getPrimaryKey(name);
+					if (primaryKey != null) {
+						isPrimaryKey = true;
+						primaryKeySequence = primaryKey.getKeySeq();
+					}
+					columns.add(new Column(name, dataType, columnSize, decimalDigits, isNullable, remarks, typeName, isPrimaryKey, primaryKeySequence));
+				}
+			} finally {
+				if (rs != null) {
+					rs.close();
+				}
+			}
+		} catch (SQLException e) {
+			throw new IllegalStateException("Failed to get columns from database metadata", e);
+		}
+	}
+
+	private PrimaryKey getPrimaryKey(String name) {
+		for (PrimaryKey primaryKey : primaryKeys) {
+			if (name.equals(primaryKey.getColumnName())) {
+				return primaryKey;
+			}
+		}
+		return null;
+	}
+
 	private void setForeignKeys(DatabaseMetaData databaseMetaData) {
 		foreignKeys.clear();
 
 		try {
 			ResultSet rs = null;
 			try {
-				rs = getExportedKeysRs(databaseMetaData);
+				rs = getImportedKeysRs(databaseMetaData);
 				while (rs.next()) {
 					String name = rs.getString("FK_NAME");
 					String fkTable = rs.getString("FKTABLE_NAME");
@@ -85,7 +100,7 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 					String pkTable = rs.getString("PKTABLE_NAME");
 					String pkColumn = rs.getString("PKCOLUMN_NAME");
 					Short keySeq = rs.getShort("KEY_SEQ");
-	
+
 					foreignKeys.add(new ForeignKey(name, fkTable, fkColumn, pkTable, pkColumn, keySeq));
 				}
 			} finally {
@@ -145,30 +160,18 @@ public class JdbcTableImpl extends AbstractTable implements Table {
 		return rs;
 	}
 
-	private ResultSet getExportedKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getImportedKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getExportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
+			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
 		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getExportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
+			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
 		} else {
-			rs = databaseMetaData.getExportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
+			rs = databaseMetaData.getImportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
 		}
 		return rs;
 	}
 
-//	private ResultSet getImportedKeysRs(DatabaseMetaData databaseMetaData) throws SQLException {
-//		ResultSet rs = null;
-//		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-//			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(identifiableTable.getCatalog()), StringUtils.toUpperCase(identifiableTable.getSchema()), StringUtils.toUpperCase(identifiableTable.getTable()));
-//		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-//			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(identifiableTable.getCatalog()), StringUtils.toLowerCase(identifiableTable.getSchema()), StringUtils.toLowerCase(identifiableTable.getTable()));
-//		} else {
-//			rs = databaseMetaData.getImportedKeys(identifiableTable.getCatalog(), identifiableTable.getSchema(), identifiableTable.getTable());
-//		}
-//		return rs;
-//	}
-	
 	private ResultSet getIndexesRs(DatabaseMetaData databaseMetaData) throws SQLException {
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {

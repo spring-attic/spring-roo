@@ -109,7 +109,6 @@ public class TableModelServiceImpl implements MetadataNotificationListener, Tabl
 			return;
 		}
 
-	//	System.out.println("Adding " + javaType.getFullyQualifiedTypeName() + " to model map");
 		// Put it in the map
 		tableNamesToTypes.put(computedTableIdentity, javaType);
 	}

@@ -13,11 +13,9 @@ public interface Table {
 	
 	IdentifiableTable getIdentifiableTable();
 		
-	Set<Column> getColumns();
-	
-	SortedSet<PrimaryKey> getPrimaryKeys();
-	
-	SortedSet<ForeignKey> getForeignKeys();
+	SortedSet<Column> getColumns();
+		
+	Set<ForeignKey> getForeignKeys();
 	
 	Set<Index> getIndexes();
 }

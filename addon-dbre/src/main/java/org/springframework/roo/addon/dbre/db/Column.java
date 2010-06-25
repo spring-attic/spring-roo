@@ -6,6 +6,7 @@ import java.sql.Types;
 import java.util.Date;
 
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Column metadata.
@@ -13,7 +14,7 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart.
  * @since 1.1
  */
-public class Column {
+public class Column implements Comparable<Column> {
 	private final String name;
 	private final int dataType;
 	private final int columnSize;
@@ -21,8 +22,10 @@ public class Column {
 	private boolean nullable;
 	private final String remarks;
 	private final String typeName;
-
-	Column(String name, int dataType, int columnSize, int decimalDigits, boolean nullable, String remarks, String typeName) {
+	private final boolean primaryKey; 
+	private final Short primaryKeySequence;
+	
+	Column(String name, int dataType, int columnSize, int decimalDigits, boolean nullable, String remarks, String typeName, boolean primaryKey, Short primaryKeySequence) {
 		this.name = name;
 		this.dataType = dataType;
 		this.columnSize = columnSize;
@@ -30,6 +33,8 @@ public class Column {
 		this.nullable = nullable;
 		this.remarks = remarks;
 		this.typeName = typeName;
+		this.primaryKey = primaryKey;
+		this.primaryKeySequence = primaryKeySequence;
 	}
 
 	public String getId() {
@@ -64,6 +69,14 @@ public class Column {
 		return typeName;
 	}
 
+	public boolean isPrimaryKey() {
+		return primaryKey;
+	}
+
+	public Short getPrimaryKeySequence() {
+		return primaryKeySequence;
+	}
+
 	public JavaType getType() {
 		JavaType type;
 		switch (dataType) {
@@ -96,6 +109,10 @@ public class Column {
 			case Types.CHAR:
 				type = JavaType.STRING_OBJECT;
 				break;
+			case Types.BLOB:
+				// TODO byte arrays
+				type = JavaType.BYTE_PRIMITIVE;
+				break;
 			default:
 				type = JavaType.STRING_OBJECT;
 				break;
@@ -111,27 +128,41 @@ public class Column {
 	}
 
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (obj == null)
 			return false;
-		}
-		if (!(obj instanceof Column)) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
 		Column other = (Column) obj;
 		if (name == null) {
-			if (other.name != null) {
+			if (other.name != null)
 				return false;
-			}
-		} else if (!name.equals(other.name)) {
+		} else if (!name.equals(other.name))
 			return false;
-		}
 		return true;
 	}
 
+	public int compareTo(Column o) {
+		if (primaryKeySequence == null && o.getPrimaryKeySequence() == null) return 1;
+		if (primaryKeySequence != null && o.getPrimaryKeySequence() == null) return -1;
+		if (primaryKeySequence == null && o.getPrimaryKeySequence() != null) return 1;
+		return primaryKeySequence.compareTo(o.getPrimaryKeySequence());
+	}
+
 	public String toString() {
-		return "    COLUMN_NAME " + name + " (" + getType().getFullyQualifiedTypeName() + "), TYPE_NAME " + typeName + ", DATA_TYPE " + dataType + ", COLUMN_SIZE " + columnSize + ", DECIMAL_DIGITS " + decimalDigits + ", IS_NULLABLE " + nullable + ", REMARKS " + remarks;
+		StringBuilder builder = new StringBuilder();
+		builder.append(primaryKey ?  "    PK " : "       ");
+		builder.append(name).append(" (").append(getType().getFullyQualifiedTypeName()).append(")");
+		builder.append(", TYPE_NAME").append(typeName);
+		builder.append(", DATA_TYPE ").append(dataType);
+		builder.append(", COLUMN_SIZE ").append(columnSize);
+		builder.append(", DECIMAL_DIGITS ").append(decimalDigits);
+		builder.append(", IS_NULLABLE ").append(nullable);
+		if (StringUtils.hasText(remarks)) {
+			builder.append(", REMARKS ").append(remarks);
+		}
+		
+		return builder.toString();
 	}
 }

@@ -6,49 +6,49 @@ package org.springframework.roo.addon.dbre.db;
  * @author Alan Stewart
  * @since 1.1
  */
-public class ForeignKey {
+public class ForeignKey /*implements Comparable<ForeignKey>*/{
 	private final String name;
-	private final String fkTable;
-	private final String fkColumn;
-	private final String pkTable;
-	private final String pkColumn;
-	private final Short keySeq;
+	private final String foreignKeyTable;
+	private final String foreignKeyColumn;
+	private final String primaryKeyTable;
+	private final String primaryKeyColumn;
+	private final Short keySequence;
 
-	ForeignKey(String name, String fkTable, String fkColumn, String pkTable, String pkColumn, Short keySeq) {
+	ForeignKey(String name, String foreignKeyTable, String foreignKeyColumn, String primaryKeyTable, String primaryKeyColumn, Short keySequence) {
 		this.name = name;
-		this.fkTable = fkTable;
-		this.fkColumn = fkColumn;
-		this.pkTable = pkTable;
-		this.pkColumn = pkColumn;
-		this.keySeq = keySeq;
+		this.foreignKeyTable = foreignKeyTable;
+		this.foreignKeyColumn = foreignKeyColumn;
+		this.primaryKeyTable = primaryKeyTable;
+		this.primaryKeyColumn = primaryKeyColumn;
+		this.keySequence = keySequence;
 	}
 
 	public String getId() {
-		return name + "." + fkTable;
+		return name + "." + foreignKeyTable;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public String getFkTable() {
-		return fkTable;
+	public String getForeignKeyTable() {
+		return foreignKeyTable;
 	}
 
-	public String getFkColumn() {
-		return fkColumn;
+	public String getForeignKeyColumn() {
+		return foreignKeyColumn;
 	}
 
-	protected String getPkTable() {
-		return pkTable;
+	protected String getPrimaryKeyTable() {
+		return primaryKeyTable;
 	}
 
-	protected String getPkColumn() {
-		return pkColumn;
+	protected String getPrimaryKeyColumn() {
+		return primaryKeyColumn;
 	}
 
-	protected Short getKeySeq() {
-		return keySeq;
+	protected Short getKeySequence() {
+		return keySequence;
 	}
 
 	public int hashCode() {
@@ -79,7 +79,14 @@ public class ForeignKey {
 		return true;
 	}
 
+	public int compareTo(ForeignKey o) {
+		if (keySequence == null && o.getKeySequence() == null) return 1;
+		if (keySequence != null && o.getKeySequence() == null) return -1;
+		if (keySequence == null && o.getKeySequence() != null) return 1;
+		return keySequence.compareTo(o.getKeySequence());
+	}
+
 	public String toString() {
-		return "    FK_NAME " + name + ", FKTABLE_NAME " + fkTable + ", FKCOLUMN_NAME " + fkColumn + ", PKTABLE_NAME " + pkTable + ", PKCOLUMN_NAME " + pkColumn + ", KEY_SEQ " + keySeq.toString();
+		return "    FK_NAME " + name + ", FKTABLE_NAME " + foreignKeyTable + ", FKCOLUMN_NAME " + foreignKeyColumn + ", PKTABLE_NAME " + primaryKeyTable + ", PKCOLUMN_NAME " + primaryKeyColumn + ", KEY_SEQ " + keySequence.toString();
 	}
 }

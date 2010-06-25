@@ -27,7 +27,6 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
-	//@Reference private EntityMetadataProvider entityMetadataProvider;
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
@@ -37,7 +36,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), getProvidesType());
-	//	entityMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
@@ -45,7 +43,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected void deactivate(ComponentContext context) {
-	//	entityMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
@@ -68,13 +65,13 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
- 		
+	 		
 		// We need to abort if we couldn't find dependent metadata
 		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, tableModelService, dbModel);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, tableModelService, dbModel);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
