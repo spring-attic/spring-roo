@@ -63,6 +63,7 @@
         <module>addon-web-selenium</module>
 	<module>addon-gwt</module>
 	<module>addon-dbre</module>
+	<module>addon-creator</module>
         <module>annotations</module>
     </modules>
 

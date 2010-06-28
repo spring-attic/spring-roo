@@ -9,15 +9,15 @@ import org.springframework.roo.support.util.Assert;
  * a unique key (which also ensures the equals and hashCode methods remain correct).
  * 
  */
-public class PropertyName implements Comparable<PropertyName> {
+public class __APP_NAME__PropertyName implements Comparable<__APP_NAME__PropertyName> {
 
 	/** You can change this field name, but ensure getKey() returns a unique value */
 	private String propertyName;
 
-	public static final PropertyName USERNAME = new PropertyName("Username");
-	public static final PropertyName HOME_DIRECTORY = new PropertyName("Home Directory");
+	public static final __APP_NAME__PropertyName USERNAME = new __APP_NAME__PropertyName("Username");
+	public static final __APP_NAME__PropertyName HOME_DIRECTORY = new __APP_NAME__PropertyName("Home Directory");
 	
-	private PropertyName(String propertyName) {
+	private __APP_NAME__PropertyName(String propertyName) {
 		Assert.hasText(propertyName, "Property name required");
 		this.propertyName = propertyName;
 	}
@@ -27,10 +27,10 @@ public class PropertyName implements Comparable<PropertyName> {
 	}
 
 	public final boolean equals(Object obj) {
-		return obj != null && obj instanceof PropertyName && this.compareTo((PropertyName) obj) == 0;
+		return obj != null && obj instanceof __APP_NAME__PropertyName && this.compareTo((__APP_NAME__PropertyName) obj) == 0;
 	}
 
-	public final int compareTo(PropertyName o) {
+	public final int compareTo(__APP_NAME__PropertyName o) {
 		if (o == null)
 			return -1;
 		int result = this.propertyName.compareTo(o.propertyName);

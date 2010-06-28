@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+	<batch>
+		<dependencies>
+			<!-- Ivy-style dependency definition -->
+			<dependency org="org.springframework.batch" name="spring-batch-core" rev="2.1.1.RELEASE" />
+			
+			<!-- Maven-style dependency definition (should be used if exclusions need to be defined) -->
+			<dependency>
+			        <groupId>org.springframework.batch</groupId>
+			        <artifactId>spring-batch-admin-manager</artifactId>
+			        <version>1.0.0.RELEASE</version>
+			</dependency>
+		</dependencies>
+	</batch>
+</configuration>

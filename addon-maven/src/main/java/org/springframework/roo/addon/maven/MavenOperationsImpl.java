@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.maven;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -39,7 +38,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ApplicationContextOperations applicationContextOperations;
-	@Reference private AddOnJumpstartOperations addOnJumpstartOperations;
 
 	protected void activate(ComponentContext context) {
 	}
@@ -52,13 +50,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		return pathResolver.getRoot(Path.ROOT);
 	}
 	
-	public void createProject(Template template, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
+	public void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion) {
 		Assert.isTrue(isCreateProjectAvailable(), "Project creation is unavailable at this time");
-		Assert.notNull(template, "Template required");
 		Assert.notNull(topLevelPackage, "Top level package required");
-		
-		// Note the Template.getKey() provides the Maven POM template filename to read
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), template.getKey());
 
 		if (majorJavaVersion == null || (majorJavaVersion < 5 || majorJavaVersion > 7)) {
 			// We need to detect the major Java version to use
@@ -71,10 +65,6 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 				// To be running Roo they must be on Java 5 or above
 				majorJavaVersion = 5;
 			}
-			// Always discard the above and use Java 5 if this is an add-on
-			if (template.isAddOn()) {
-				majorJavaVersion = 5;
-			}
 		}
 
 		if (projectName == null) {
@@ -85,21 +75,11 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 			} else {
 				projectName = packageName.substring(lastIndex + 1);
 			}
-			// Always discard the above and use the package name as the name if this is an add-on
-			if (template.isAddOn()) {
-				projectName = topLevelPackage.getFullyQualifiedPackageName();
-			}
-		}
-
-		// Apply special add-on convention rules
-		if (Template.ROO_ADDON_SIMPLE.equals(template)) {
-			Assert.isTrue(majorJavaVersion == 5, "Roo add-ons must be Java 5 only");
-			Assert.isTrue(topLevelPackage.getFullyQualifiedPackageName().equals(projectName), "Roo add-ons must have the same project name as the top-level-package name");
 		}
 
 		Document pom;
 		try {
-			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
+			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "standard-project-template.xml"));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -118,13 +98,9 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
-		if (majorJavaVersion == 5 && !template.isAddOn()) {
+		if (majorJavaVersion == 5) {
 			dependencyUpdate(new Dependency("javax.annotation", "jsr250-api", "1.0"));
 			dependencyUpdate(new Dependency("javax.xml.bind", "jaxb-api", "2.1"));
-		}
-
-		if (template.isAddOn()) {
-			addOnJumpstartOperations.install(template);
 		}
 
 		fileManager.scan();

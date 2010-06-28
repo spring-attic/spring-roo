@@ -16,5 +16,5 @@ public interface MavenOperations extends ProjectOperations {
 
 	String getProjectRoot();
 
-	void createProject(Template template, JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion);
+	void createProject(JavaPackage topLevelPackage, String projectName, Integer majorJavaVersion);
 }

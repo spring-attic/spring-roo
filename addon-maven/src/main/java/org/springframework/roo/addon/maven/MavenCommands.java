@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.ActiveProcessManager;
@@ -19,7 +18,6 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
-import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -28,17 +26,8 @@ import org.springframework.roo.support.util.Assert;
 public class MavenCommands implements CommandMarker {
 	
 	@Reference private MavenOperations mavenOperations;
-	@Reference private StaticFieldConverter staticFieldConverter;
 	@Reference private ProcessManager processManager;
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
-
-	protected void activate(ComponentContext context) {
-		staticFieldConverter.add(Template.class);
-	}
-
-	protected void deactivate(ComponentContext context) {
-		staticFieldConverter.remove(Template.class);
-	}
 
 	@CliAvailabilityIndicator("project")
 	public boolean isCreateProjectAvailable() {
@@ -49,9 +38,8 @@ public class MavenCommands implements CommandMarker {
 	public void createProject(
 			@CliOption(key={"", "topLevelPackage"}, mandatory=true, help="The uppermost package name (this becomes the <groupId> in Maven and also the '~' value when using Roo's shell)") JavaPackage topLevelPackage,
 			@CliOption(key="projectName", mandatory=false, help="The name of the project (last segment of package name used as default)") String projectName,
-			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion,
-			@CliOption(key="template", mandatory=false, specifiedDefaultValue="STANDARD_PROJECT", unspecifiedDefaultValue="STANDARD_PROJECT", help="The type of project to create (defaults to STANDARD_PROJECT)") Template template) {
-		mavenOperations.createProject(template, topLevelPackage, projectName, majorJavaVersion);
+			@CliOption(key="java", mandatory=false, help="Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
+		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion);
 	}
 	
 	@CliAvailabilityIndicator({"dependency add", "dependency remove"})

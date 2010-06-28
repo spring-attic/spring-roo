@@ -3,10 +3,9 @@ package __TOP_LEVEL_PACKAGE__;
 /**
  * Interface of commands that are available via the Roo shell.
  *
- * @author Ben Alex
  * @since 1.1.0-M1
  */
-public interface Operations {
+public interface __APP_NAME__Operations {
 
 	boolean isProjectAvailable();
 
@@ -14,7 +13,7 @@ public interface Operations {
 	 * @param propertyName to obtain (required)
 	 * @return a message that will ultimately be displayed on the shell
 	 */
-	String getProperty(PropertyName propertyName);
+	String getProperty(__APP_NAME__PropertyName propertyName);
 
 	/**
 	 * @return true if the user's project has a /[name].txt file

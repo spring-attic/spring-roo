@@ -24,19 +24,19 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component
 @Service
-public class Commands implements CommandMarker {
+public class __APP_NAME__Commands implements CommandMarker {
 	
-	private static Logger logger = Logger.getLogger(Commands.class.getName());
+	private static Logger logger = Logger.getLogger(__APP_NAME__Commands.class.getName());
 
-	@Reference private Operations operations;
+	@Reference private __APP_NAME__Operations operations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 
 	protected void activate(ComponentContext context) {
-	    staticFieldConverter.add(PropertyName.class);
+	    staticFieldConverter.add(__APP_NAME__PropertyName.class);
     }
 
 	protected void deactivate(ComponentContext context) {
-		staticFieldConverter.remove(PropertyName.class);
+		staticFieldConverter.remove(__APP_NAME__PropertyName.class);
 	}
 	
 	@CliAvailabilityIndicator("welcome property")
@@ -45,7 +45,7 @@ public class Commands implements CommandMarker {
 	}
 	
 	@CliCommand(value="welcome property", help="Obtains a pre-defined system property")
-	public String property(@CliOption(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") PropertyName propertyName) {
+	public String property(@CliOption(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") __APP_NAME__PropertyName propertyName) {
 		return operations.getProperty(propertyName);
 	}
 	
