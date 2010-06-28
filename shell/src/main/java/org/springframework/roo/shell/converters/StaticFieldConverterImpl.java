@@ -51,7 +51,17 @@ public class StaticFieldConverterImpl implements StaticFieldConverter {
 		}
 		Field f = ffields.get(value);
 		if (f == null) {
-			return null;
+			// Fallback to case insensitive search
+			for (Field candidate : ffields.values()) {
+				if (candidate.getName().toLowerCase().equals(value.toLowerCase())) {
+					f = candidate;
+					break;
+				}
+			}
+			if (f == null) {
+				// Still not found, despite a case-insensitive search
+				return null;
+			}
 		}
 		try {
 			return f.get(null);
