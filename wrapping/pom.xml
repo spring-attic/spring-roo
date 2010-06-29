@@ -13,6 +13,7 @@
 
     <modules>
         <module>json-simple</module>
+        <module>protobuf</module>
     </modules>
 
     <build>
