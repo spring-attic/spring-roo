@@ -554,7 +554,7 @@ public class CarController {
 
             <row>
               <entry>Number (@Min, @Max, @DecimalMin &amp; @DecimalMax are
-              recognized) </entry>
+              recognized)</entry>
 
               <entry>Input</entry>
             </row>
@@ -620,5 +620,28 @@ field reference --fieldName school --type com.foo.domain.School --class com.foo.
 </programlisting>In case a field is annotated with @Pattern, the regular
     expression is passed on to the tag library where it may be applied through
     the use of the JS framework of choice.</para>
+
+    <para></para>
+
+    <para><emphasis role="bold">Automatic Scaffolding of dynamic
+    finders</emphasis></para>
+
+    <para>Roo will attempt to scaffold Spring MVC JSP views for all dynamic
+    finders registered in the form backing object. This is done automatically
+    when the 'controller all' or 'controller scaffold' commands are used. To
+    prevent the automatic scaffolding of dynamic finders for the Web frontend,
+    the @RooWebScaffold annotation offers a attribute called 'exposeFinders'
+    which can be set to false. This will disable automatic scaffolding of
+    controller methods for dynamic finders as well as the generation of the
+    relevant jsp artifacts.</para>
+
+    <para>Due to file name length restrictions by many file systems (see <link
+    xlink:href="http://en.wikipedia.org/wiki/Comparison_of_file_systems">http://en.wikipedia.org/wiki/Comparison_of_file_systems</link>)
+    Roo can only generate JSP views for finders which have 244 characters or
+    less (including folders). If the finder name is longer than 244 characters
+    Roo will silently skip the generation of jsp view artifacts for the
+    dynamic finder in question). More detail can be found in <link
+    xlink:href="https://jira.springsource.org/browse/ROO-1027">this Roo Jira
+    ticket</link>.</para>
   </section>
 </chapter>

@@ -197,6 +197,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
 			for (String finderName : entityMetadata.getDynamicFinders()) {
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
+				// finders only get scaffolded if the finder name is not too long (see ROO-1027)
+				if (listPath.length() > 244) {
+					continue;
+				}
 				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
 				//Add 'Find by' menu item
