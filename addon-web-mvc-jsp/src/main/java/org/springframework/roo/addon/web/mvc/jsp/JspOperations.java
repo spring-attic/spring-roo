@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -26,5 +27,9 @@ public interface JspOperations {
 	 * @param preferredMapping the mapping this controller should adopt (optional; if unspecified it will be based on the controller name)
 	 */
 	void createManualController(JavaType controller, String preferredMapping);
+	
+	public boolean isInstallLanguageCommandAvailable();
+	
+	void installI18n(I18n language);
 
 }

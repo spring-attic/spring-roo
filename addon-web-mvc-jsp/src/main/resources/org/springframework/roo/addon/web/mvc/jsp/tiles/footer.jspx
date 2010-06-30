@@ -11,7 +11,11 @@
 	    </span>					    
 	</c:if>			    
     
-    <util:language /> 
+    <span id="language">
+	    <c:out value=" | "/>
+		<spring:message code="global_language" />
+		<c:out value=": "/>
+    </span>
     <util:theme /> 
     				    
     <spring:url var="logo" value="/resources/images/springsource-logo.png" /> 

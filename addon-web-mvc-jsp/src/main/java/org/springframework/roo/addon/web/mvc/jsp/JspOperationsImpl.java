@@ -6,7 +6,9 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,6 +16,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
+import org.springframework.roo.addon.web.mvc.jsp.i18n.I18n;
+import org.springframework.roo.addon.web.mvc.jsp.i18n.I18nSupport;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperationsImpl;
@@ -45,6 +49,7 @@ import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,6 +66,9 @@ import org.w3c.dom.Node;
 @Component
 @Service
 public class JspOperationsImpl implements JspOperations {
+	
+	private Logger log = Logger.getLogger(JspOperationsImpl.class.getName());
+	
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ClasspathOperations classpathOperations;
@@ -70,6 +78,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private TilesOperations tilesOperations;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private I18nSupport i18nSupport;
 	
 	private ComponentContext context;
 
@@ -79,6 +88,10 @@ public class JspOperationsImpl implements JspOperations {
 
 	public boolean isControllerCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+	}
+	
+	public boolean isInstallLanguageCommandAvailable() {
+		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/footer.jspx"));
 	}
 
 	public void installCommonViewArtefacts() {
@@ -113,9 +126,9 @@ public class JspOperationsImpl implements JspOperations {
 		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"));
 		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"));
 		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"));
-
-		// Install message resources
-		copyDirectoryContents("i18n/*.properties", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/"));
+		
+		// Install default language 'en'
+		installI18n(i18nSupport.getLanguage(Locale.ENGLISH));
 
 		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
@@ -322,5 +335,61 @@ public class JspOperationsImpl implements JspOperations {
 				}
 			}
 		}
+	}
+
+	public void installI18n(I18n language) {
+		Assert.notNull(language, "Language choice required");
+		 
+		if (language.getLocale() == null) {
+			log.warning("could not parse language choice");
+			return;
+		}
+		
+		String targetDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "");
+		
+		//install message bundle
+		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + language.getLocale() + ".properties";
+		//special case for english locale (default)
+		if (language.getLocale().equals(Locale.ENGLISH)) {
+			messageBundle  = targetDirectory + "/WEB-INF/i18n/messages.properties";
+		}
+		if (!fileManager.exists(messageBundle)) {
+			try {
+				FileCopyUtils.copy(language.getMessageBundle(), fileManager.createFile(messageBundle).getOutputStream());
+			} catch (IOException e) {
+				new IllegalStateException("Encountered an error during copying of message bundle MVC JSP addon.", e);
+			}
+		}
+		
+		//install flag
+		String flagGraphic = targetDirectory + "/images/" + language.getLocale() + ".png";
+		if (!fileManager.exists(flagGraphic)) {
+			try {
+				FileCopyUtils.copy(language.getFlagGraphic(), fileManager.createFile(flagGraphic).getOutputStream());
+			} catch (IOException e) {
+				new IllegalStateException("Encountered an error during copying of flag graphic for MVC JSP addon.", e);
+			}
+		}
+		
+		//setup language definition in languages.jspx
+		String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
+		MutableFile footerFile = null;
+
+		Document footer = null;
+		try {
+			if (fileManager.exists(footerFileLocation)) {
+				footerFile = fileManager.updateFile(footerFileLocation);
+				footer = XmlUtils.getDocumentBuilder().parse(footerFile.getInputStream());
+			} else {
+				new IllegalStateException("Could not aquire the footer.jspx file");
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		
+		Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
+		span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", language.getLocale().getLanguage()).addAttribute("label", language.getLanguage()).build());
+		
+		XmlUtils.writeXml(footerFile.getOutputStream(), footer);
 	}
 }
