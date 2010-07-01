@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.creator;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.springframework.roo.model.JavaPackage;
 
@@ -13,9 +14,9 @@ public interface CreatorOperations {
 	
 	boolean isCommandAvailable();
 
-	void createI18nAddon(JavaPackage topLevelPackage, String language, String locale, File messageBundle, File flagGraphic);
+	void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description);
 	
-	void createSimpleAddon(JavaPackage topLevelPackage);
+	void createSimpleAddon(JavaPackage topLevelPackage, String description);
 	
-	void createAdvancedAddon(JavaPackage topLevelPackage);
+	void createAdvancedAddon(JavaPackage topLevelPackage, String description);
 }

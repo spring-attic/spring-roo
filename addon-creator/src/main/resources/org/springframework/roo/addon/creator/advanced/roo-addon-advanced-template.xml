@@ -21,7 +21,7 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <description>An add-on created by Spring Roo's ROO_ADDON_SIMPLE feature.</description>
+    <description>An add-on created by Spring Roo's addon creator feature.</description>
     <url>http://www.some.company</url>
 	<properties>
 		<roo.version>1.1.0.M2</roo.version>

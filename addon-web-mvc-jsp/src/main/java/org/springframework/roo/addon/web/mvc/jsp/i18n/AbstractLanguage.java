@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /**
  * Convenience class for I18n implementations. Offers equals and hashCode method
- * implementations based on Locale (only!). Offers also toString
+ * implementations based on Locale (only!). Offers also toString().
  *
  * @author Stefan Schmidt
  * @since 1.1
@@ -43,7 +43,7 @@ public abstract class AbstractLanguage implements I18n {
 			return false;
 		return true;
 	}
-	
+
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Locale: ").append(getLocale());

@@ -36,49 +36,19 @@
               <groupId>org.osgi</groupId>
               <artifactId>org.osgi.compendium</artifactId>
           </dependency>
-          <!-- Apache Felix -->
+          <!-- Spring Roo -->
           <dependency>
-              <groupId>org.apache.felix</groupId>
-              <artifactId>org.apache.felix.scr.annotations</artifactId>
+              <groupId>org.springframework.roo</groupId>
+              <artifactId>org.springframework.roo.support</artifactId>
+              <version>${roo.version}</version>
+              <type>bundle</type>
           </dependency>
-		  <!-- Spring Roo modules -->
-           <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.metadata</artifactId>
-                <version>${roo.version}</version>
-                <type>bundle</type>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.process.manager</artifactId>
-                <version>${roo.version}</version>
-                <type>bundle</type>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.project</artifactId>
-                <version>${roo.version}</version>
-                <type>bundle</type>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.support</artifactId>
-                <version>${roo.version}</version>
-                <type>bundle</type>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.roo</groupId>
-                <artifactId>org.springframework.roo.shell</artifactId>
-                <version>${roo.version}</version>
-                <type>bundle</type>
-            </dependency>
-            <dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.bootstrap</artifactId>
-			<version>${roo.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- External modules (if any) -->
+          <dependency>
+              <groupId>org.springframework.roo</groupId>
+              <artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
+              <version>${roo.version}</version>
+              <type>bundle</type>
+          </dependency>
 	</dependencies>
 	<build>
 		<plugins>

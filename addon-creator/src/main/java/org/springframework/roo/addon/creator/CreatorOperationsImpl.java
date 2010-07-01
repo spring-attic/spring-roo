@@ -1,10 +1,11 @@
 package org.springframework.roo.addon.creator;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.util.Locale;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -47,50 +48,82 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	
 	private enum Type {SIMPLE, ADVANCED, I18N};
 	
-	public void createI18nAddon(JavaPackage topLevelPackage, String language, String locale, File messageBundle, File flagGraphic) {
+	public void createAdvancedAddon(JavaPackage topLevelPackage, String description) {
+		Assert.notNull(topLevelPackage, "Top Level Package required");
+		
+		createProject(topLevelPackage, Type.ADVANCED, description);
+		
+		installIfNeeded("Commands.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("Operations.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("Metadata.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("MetadataProvider.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("RooAnnotation.java", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("assembly.xml", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("configuration.xml", topLevelPackage, Type.ADVANCED);
+	}
+	
+	public void createSimpleAddon(JavaPackage topLevelPackage, String description) {
+		Assert.notNull(topLevelPackage, "Top Level Package required");
+		
+		createProject(topLevelPackage, Type.SIMPLE, description);
+		
+		installIfNeeded("Commands.java", topLevelPackage, Type.SIMPLE);
+		installIfNeeded("Operations.java", topLevelPackage, Type.SIMPLE);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Type.SIMPLE);
+		installIfNeeded("PropertyName.java", topLevelPackage, Type.SIMPLE);
+		installIfNeeded("assembly.xml", topLevelPackage, Type.SIMPLE);
+	}
+	
+	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		Assert.hasLength(language, "Language specification required");
-		Assert.hasLength(locale, "Locale required");
+		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
 		Assert.notNull(flagGraphic, "Flag graphic required");
 		
-		createProject(topLevelPackage, Type.I18N);
+		String languageName = StringUtils.capitalize(language.replaceAll("\\s+", ""));
+		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', '/');
+		
+		if (description == null || description.length() == 0) {
+			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
+		}
+		
+		createProject(topLevelPackage, Type.I18N, description);
+
+		installIfNeeded("assembly.xml", topLevelPackage, Type.I18N);
+		
+		try {
+			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + messageBundle.getName())).getOutputStream());
+			FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + flagGraphic.getName())).getOutputStream());
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not copy addon resources into project");
+		}
+		
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/" + languageName + "Language.java");
+		
+		if (!fileManager.exists(destinationFile)) {
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() + "/Language.java-template");
+			try {
+				// Read template and insert the user's package
+				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
+				input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
+				input = input.replace("__APP_NAME__", languageName);
+				input = input.replace("__LOCALE__", locale.toString());
+				input = input.replace("__LANGUAGE__", StringUtils.capitalize(language));
+				input = input.replace("__FLAG_FILE__", flagGraphic.getName());
+				input = input.replace("__MESSAGE_BUNDLE__", messageBundle.getName());
+				
+				// Output the file for the user
+				MutableFile mutableFile = fileManager.createFile(destinationFile);
+				FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Unable to create '" + languageName + "Language.java'", ioe);
+			}
+		}		
 	}
 	
-	public void createAdvancedAddon(JavaPackage topLevelPackage) {
-		Assert.notNull(topLevelPackage, "Top Level Package required");
-		
-		createProject(topLevelPackage, Type.ADVANCED);
-		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
-	
-		installIfNeeded("Commands.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("Operations.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("OperationsImpl.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("Metadata.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("MetadataProvider.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("RooAnnotation.java", projectMetadata, Type.ADVANCED);
-		installIfNeeded("assembly.xml", projectMetadata, Type.ADVANCED);
-		installIfNeeded("configuration.xml", projectMetadata, Type.ADVANCED);
-	}
-	
-	public void createSimpleAddon(JavaPackage topLevelPackage) {
-		Assert.notNull(topLevelPackage, "Top Level Package required");
-		
-		createProject(topLevelPackage, Type.SIMPLE);
-		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
-	
-		installIfNeeded("Commands.java", projectMetadata, Type.SIMPLE);
-		installIfNeeded("Operations.java", projectMetadata, Type.SIMPLE);
-		installIfNeeded("OperationsImpl.java", projectMetadata, Type.SIMPLE);
-		installIfNeeded("PropertyName.java", projectMetadata, Type.SIMPLE);
-		installIfNeeded("assembly.xml", projectMetadata, Type.SIMPLE);
-	}
-	
-	private void createProject(JavaPackage topLevelPackage, Type type) {
+	private void createProject(JavaPackage topLevelPackage, Type type, String description) {
 		String packageName = topLevelPackage.getFullyQualifiedPackageName();
 		String projectName = null;
 		int lastIndex = packageName.lastIndexOf(".");
@@ -111,10 +144,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
 		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
-
-		List<Element> versionElements = XmlUtils.findElements("//*[.='JAVA_VERSION']", rootElement);
-		for (Element e : versionElements) {
-			e.setTextContent("1.5");
+		if (description != null && description.length() != 0) {
+			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);
 		}
 
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
@@ -131,25 +162,25 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		fileManager.scan();
 	}
 	
-	private void installIfNeeded(String targetFilename, ProjectMetadata projectMetadata, Type type) {
-		String tlp = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Type type) {
+		String tlp = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = tlp.replace('.', '/');
 		String fileName = StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + targetFilename;
-		String destinationFile = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/" + fileName);
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/" + fileName);
 		
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = projectMetadata.getPathResolver().getIdentifier(Path.ROOT, "src/main/assembly/" + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src/main/assembly/" + targetFilename);
 		}
 		
 		// Different destination for configuration.xml
 		else if ("configuration.xml".equals(targetFilename)) {
-			destinationFile = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + targetFilename);
 		}
 		
 		// Adjust name for Roo Annotation
 		else if (targetFilename.startsWith("RooAnnotation")) {
-			destinationFile = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
 		}
 		
 		if (!fileManager.exists(destinationFile)) {
@@ -157,7 +188,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
-				input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+				input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
 				input = input.replace("__APP_NAME__", StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)));
 				
 				// Output the file for the user

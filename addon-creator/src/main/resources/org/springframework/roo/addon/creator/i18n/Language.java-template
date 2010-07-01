@@ -1,0 +1,35 @@
+package __TOP_LEVEL_PACKAGE__;
+
+import java.io.InputStream;
+import java.util.Locale;
+
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.web.mvc.jsp.i18n.AbstractLanguage;
+import org.springframework.roo.support.util.TemplateUtils;
+
+/** 
+ * __APP_NAME__ language support.
+ *
+ *
+ */
+@Component(immediate=true)
+@Service
+public class __APP_NAME__Language extends AbstractLanguage {
+
+	public Locale getLocale() {
+		return new Locale("__LOCALE__");
+	}
+	
+	public String getLanguage() {
+		return "__LANGUAGE__";
+	}
+
+	public InputStream getFlagGraphic() {
+		return TemplateUtils.getTemplate(getClass(), "__FLAG_FILE__");
+	}
+
+	public InputStream getMessageBundle() {
+		return TemplateUtils.getTemplate(getClass(), "__MESSAGE_BUNDLE__");
+	}
+}
