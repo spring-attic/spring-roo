@@ -215,7 +215,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("for (" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " " + simpleBeanName + " : " + beanPlural.toLowerCase() + ") {");	
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(sid + " sid = new " + sid + "();");
-		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + simpleBeanName + "_\" + " + simpleBeanName + "_" + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + simpleBeanName + "_\" + " + simpleBeanName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors()) {
