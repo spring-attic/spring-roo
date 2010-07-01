@@ -337,10 +337,10 @@ public class JspOperationsImpl implements JspOperations {
 		}
 	}
 
-	public void installI18n(I18n language) {
-		Assert.notNull(language, "Language choice required");
+	public void installI18n(I18n i18n) {
+		Assert.notNull(i18n, "Language choice required");
 		 
-		if (language.getLocale() == null) {
+		if (i18n.getLocale() == null) {
 			log.warning("could not parse language choice");
 			return;
 		}
@@ -348,24 +348,24 @@ public class JspOperationsImpl implements JspOperations {
 		String targetDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "");
 		
 		//install message bundle
-		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + language.getLocale() + ".properties";
+		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale() + ".properties";
 		//special case for english locale (default)
-		if (language.getLocale().equals(Locale.ENGLISH)) {
+		if (i18n.getLocale().equals(Locale.ENGLISH)) {
 			messageBundle  = targetDirectory + "/WEB-INF/i18n/messages.properties";
 		}
 		if (!fileManager.exists(messageBundle)) {
 			try {
-				FileCopyUtils.copy(language.getMessageBundle(), fileManager.createFile(messageBundle).getOutputStream());
+				FileCopyUtils.copy(i18n.getMessageBundle(), fileManager.createFile(messageBundle).getOutputStream());
 			} catch (IOException e) {
 				new IllegalStateException("Encountered an error during copying of message bundle MVC JSP addon.", e);
 			}
 		}
 		
 		//install flag
-		String flagGraphic = targetDirectory + "/images/" + language.getLocale() + ".png";
+		String flagGraphic = targetDirectory + "/images/" + i18n.getLocale() + ".png";
 		if (!fileManager.exists(flagGraphic)) {
 			try {
-				FileCopyUtils.copy(language.getFlagGraphic(), fileManager.createFile(flagGraphic).getOutputStream());
+				FileCopyUtils.copy(i18n.getFlagGraphic(), fileManager.createFile(flagGraphic).getOutputStream());
 			} catch (IOException e) {
 				new IllegalStateException("Encountered an error during copying of flag graphic for MVC JSP addon.", e);
 			}
@@ -387,9 +387,10 @@ public class JspOperationsImpl implements JspOperations {
 			throw new IllegalStateException(e);
 		}
 		
-		Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
-		span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", language.getLocale().getLanguage()).addAttribute("label", language.getLanguage()).build());
-		
-		XmlUtils.writeXml(footerFile.getOutputStream(), footer);
+		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().toString() + "']", footer.getDocumentElement())) {
+			Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
+			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
+			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
+		}
 	}
 }
