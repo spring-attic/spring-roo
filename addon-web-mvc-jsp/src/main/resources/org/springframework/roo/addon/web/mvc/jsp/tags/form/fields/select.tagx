@@ -48,6 +48,8 @@
 		            			</c:when>
 		            			<c:otherwise>
 		            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}"/>
+		            				<br/>
+		    						<form:errors cssClass="errors" id="_${field}_error_id" path="${field}"/>
 		            			</c:otherwise>
 		            		</c:choose>
 		            	</c:when>
@@ -62,6 +64,8 @@
 		            			</c:when>
 		            			<c:otherwise>
 		            				<form:select id="_${field}_id" items="${items}" path="${field}" disabled="${disabled}" multiple="${multiple}" itemValue="${itemValue}"/>
+		            				<br/>
+		    						<form:errors cssClass="errors" id="_${field}_error_id" path="${field}"/>
 		            			</c:otherwise>
 		            		</c:choose>
 						</c:otherwise>
