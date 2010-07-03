@@ -4,18 +4,16 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.db.Column;
-import org.springframework.roo.addon.dbre.db.DbModel;
-import org.springframework.roo.addon.dbre.db.IdentifiableTable;
-import org.springframework.roo.addon.dbre.db.Table;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DatabaseModelService;
+import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -42,11 +40,12 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileUtils;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Listens for changes to the dbre xml file and creates entities for new tables.
+ * Listens for changes to the DBRE XML file and creates and manages entities based on the database metadata.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -55,54 +54,56 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class DbreXmlFileListener implements FileEventListener {
 	private static final Logger logger = HandlerUtils.getLogger(DbreXmlFileListener.class);
-	@Reference private TableModelService tableModelService;
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
-	@Reference private DbModel dbModel;
+	@Reference private DatabaseModelService databaseModelService;
+	@Reference private TableModelService tableModelService;
 
 	public void onFileEvent(FileEvent fileEvent) {
+		Assert.notNull(fileEvent, "File event required");
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata == null) {
 			return;
 		}
 
-		String dbrePath = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
+		String dbreXmlPath = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
-		if (!eventPath.equals(dbrePath) || !(fileEvent.getOperation() == FileOperation.CREATED || fileEvent.getOperation() == FileOperation.UPDATED)) {
+		if (!(eventPath.equals(dbreXmlPath) || fileEvent.getOperation() == FileOperation.CREATED || fileEvent.getOperation() == FileOperation.UPDATED)) {
 			return;
 		}
 
-		createOrUpdateManagedEntities();
-		deleteManagedEntities();
-		processAllDetectedEntities();
+		reverseEngineer(databaseModelService.deserializeDatabaseMetadata());
 	}
 
-	private void createOrUpdateManagedEntities() {
-		dbModel.deserialize();
-		for (Table table : dbModel.getTables()) {
-			IdentifiableTable identifiableTable = table.getIdentifiableTable();
-			JavaType javaType = tableModelService.findTypeForTableIdentity(identifiableTable);
+	public void reverseEngineer(Database database) {
+		for (Table table : database.getTables()) {
+			JavaPackage javaPackage = database.getJavaPackage();
+			JavaType javaType = tableModelService.findTypeForTableName(table.getName(), javaPackage);
 			if (javaType == null) {
-				createEntityFromTable(table);
+				createNewManagedEntityFromTable(table, javaPackage);
 			} else {
-				updateEntity(javaType, table);
+				updateExistingManagedEntity(javaType, table);
 			}
 		}
+
+		deleteManagedEntitiesNotInModel(database.getTables());
 	}
 
-	private void deleteManagedEntities() {
-		Map<IdentifiableTable, JavaType> allDetectedEntities = tableModelService.getAllDetectedEntities();
-		for (Map.Entry<IdentifiableTable, JavaType> entry : allDetectedEntities.entrySet()) {
+	private void deleteManagedEntitiesNotInModel(Set<Table> tables) {
+		for (JavaType javaType : tableModelService.getDatabaseManagedEntities()) {
 			// Check for existence of entity from table model and delete if not in db model
-			if (!isDetectedEntityInDbModel(entry.getKey())) {
-				deleteManagedType(entry.getValue());
+			if (!isDetectedEntityInModel(javaType, tables)) {
+				deleteManagedType(javaType);
+
+				// Delete managed identifier as well
+				JavaType identifierType = getIdentifierType(javaType);
+				deleteManagedType(identifierType);
 			}
 		}
 	}
 
-	private void createEntityFromTable(Table table) {
-		JavaPackage javaPackage = dbModel.getJavaPackage();
-		JavaType javaType = tableModelService.suggestTypeNameForNewTable(table.getIdentifiableTable(), javaPackage);
+	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
+		JavaType javaType = tableModelService.suggestTypeNameForNewTable(table.getName(), javaPackage);
 
 		// Create type annotations for new entity
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -124,12 +125,12 @@ public class DbreXmlFileListener implements FileEventListener {
 		extendsTypes.add(superclass);
 
 		List<AnnotationAttributeValue<?>> tableAttrs = new ArrayList<AnnotationAttributeValue<?>>();
-		tableAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), table.getIdentifiableTable().getTable()));
-		if (StringUtils.hasText(table.getIdentifiableTable().getCatalog())) {
-			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("catalog"), table.getIdentifiableTable().getCatalog()));
+		tableAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), table.getName()));
+		if (StringUtils.hasText(table.getCatalog())) {
+			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("catalog"), table.getCatalog()));
 		}
-		if (StringUtils.hasText(table.getIdentifiableTable().getSchema())) {
-			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("schema"), table.getIdentifiableTable().getSchema()));
+		if (StringUtils.hasText(table.getSchema().getName())) {
+			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("schema"), table.getSchema().getName()));
 		}
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Table"), tableAttrs));
 
@@ -139,7 +140,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		classpathOperations.generateClassFile(details);
 	}
 
-	private void updateEntity(JavaType javaType, Table table) {
+	private void updateExistingManagedEntity(JavaType javaType, Table table) {
 		// Update changes to @RooEntity attributes
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
@@ -171,14 +172,14 @@ public class DbreXmlFileListener implements FileEventListener {
 		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 
 		// Process primary keys and add 'identifierType' and 'identifierField' attribute
-		SortedSet<Column> columns = table.getColumns();
-		int pkCount = getPkCount(columns);
+		Set<Column> primaryKeys = table.getPrimaryKeys();
+		int pkCount = primaryKeys.size();
 		if (pkCount == 1) {
 			// Table has one primary key column so add the column's type to the 'identifierType' attribute
-			Column column = columns.first();
-			if (column != null) {
-				String columnName = column.getName();
-				JavaType primaryKeyType = column.getType();
+			Column primaryKey = primaryKeys.iterator().next();
+			if (primaryKey != null) {
+				String columnName = primaryKey.getName();
+				JavaType primaryKeyType = primaryKey.getJavaType();
 				// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
 				if (!primaryKeyType.equals(JavaType.LONG_OBJECT)) {
 					entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), primaryKeyType));
@@ -200,22 +201,12 @@ public class DbreXmlFileListener implements FileEventListener {
 		} else if (pkCount > 1) { // Table has a composite key
 			// Check if identifier class already exists and if not, create it
 			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
-				createIdentifierClass(identifierType, columns);
+				createIdentifierClass(identifierType, primaryKeys);
 			} else {
-				updateIdentifier(identifierType, columns);
+				updateIdentifier(identifierType, primaryKeys);
 			}
 			entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
 		}
-	}
-
-	private int getPkCount(SortedSet<Column> columns) {
-		int pkCount = 0;
-		for (Column column : columns) {
-			if (column.isPrimaryKey()) {
-				pkCount++;
-			}
-		}
-		return pkCount;
 	}
 
 	private void createIdentifierClass(JavaType identifierType, Set<Column> columns) {
@@ -240,7 +231,7 @@ public class DbreXmlFileListener implements FileEventListener {
 			if (column.isPrimaryKey()) {
 				String columnName = column.getName();
 				idFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), columnName));
-				idTypes.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getType().getFullyQualifiedTypeName()));
+				idTypes.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getJavaType().getFullyQualifiedTypeName()));
 				idColumns.add(new StringAttributeValue(new JavaSymbolName("ignored"), columnName));
 			}
 		}
@@ -279,7 +270,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	}
 
 	private JavaType getIdentifierType(JavaType javaType) {
-		return new JavaType(javaType.getFullyQualifiedTypeName() + "Pk");
+		return new JavaType(javaType.getFullyQualifiedTypeName() + "PK");
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
@@ -287,9 +278,10 @@ public class DbreXmlFileListener implements FileEventListener {
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 	}
 
-	private boolean isDetectedEntityInDbModel(IdentifiableTable identifiableTable) {
-		for (Table table : dbModel.getTables()) {
-			if (table.getIdentifiableTable().equals(identifiableTable)) {
+	private boolean isDetectedEntityInModel(JavaType javaType, Set<Table> tables) {
+		String tableNamePattern = tableModelService.suggestTableNameForNewType(javaType);
+		for (Table table : tables) {
+			if (table.getName().equalsIgnoreCase(tableNamePattern)) {
 				return true;
 			}
 		}
@@ -305,13 +297,6 @@ public class DbreXmlFileListener implements FileEventListener {
 			if (!FileUtils.deleteRecursively(new File(filePath))) {
 				logger.warning("Unable to delete database-managed class " + filePath);
 			}
-		}
-	}
-
-	private void processAllDetectedEntities() {
-		Map<IdentifiableTable, JavaType> allDetectedEntities = tableModelService.getAllDetectedEntities();
-		for (Map.Entry<IdentifiableTable, JavaType> entry : allDetectedEntities.entrySet()) {
-			metadataService.get(DbreMetadata.createIdentifier(entry.getValue(), Path.SRC_MAIN_JAVA));
 		}
 	}
 }

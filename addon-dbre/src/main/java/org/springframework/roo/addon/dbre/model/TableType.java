@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db;
+package org.springframework.roo.addon.dbre.model;
 
 /**
  * SQL table types.
@@ -7,13 +7,13 @@ package org.springframework.roo.addon.dbre.db;
  * @since 1.1
  */
 public enum TableType {
-	TABLE, VIEW;
+	TABLE, VIEW, ALIAS, SYNONYM, UNKNOWN;
 	
 	public static TableType getTableType(String typeName) {
 		try {
 			return TableType.valueOf(typeName);
 		} catch (IllegalArgumentException e) {
-			return null;
+			return UNKNOWN;
 		}
 	}
 }

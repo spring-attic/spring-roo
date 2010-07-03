@@ -6,7 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates the lifecycle of the entity is managed by the database reverse engineering process.
+ * Indicates the lifecycle of the entity or the entity's identifier is managed by the 
+ * database reverse engineering process.
  *  
  * @author Alan Stewart
  * @since 1.1

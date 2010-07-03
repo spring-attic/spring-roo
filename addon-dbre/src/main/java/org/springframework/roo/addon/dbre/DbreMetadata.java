@@ -4,10 +4,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.dbre.db.Column;
-import org.springframework.roo.addon.dbre.db.DbModel;
-import org.springframework.roo.addon.dbre.db.IdentifiableTable;
-import org.springframework.roo.addon.dbre.db.Table;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DatabaseModelService;
+import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
@@ -47,11 +47,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, DbModel dbModel) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, DatabaseModelService databaseModelService) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -65,8 +64,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
-		IdentifiableTable identifiableTable = tableModelService.findTableIdentity(javaType);
-		Table table = dbModel.getTable(identifiableTable);
+		String tableNamePattern = tableModelService.suggestTableNameForNewType(javaType);
+		Database database = databaseModelService.deserializeDatabaseMetadata();
+		Table table = database.findTable(tableNamePattern);
 		if (table == null) {
 			return;
 		}
@@ -216,7 +216,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	public FieldMetadata getField(JavaSymbolName fieldName, Column column, JavaType javaType) {
-		JavaType fieldType = column.getType();
+		JavaType fieldType = column.getJavaType();
 
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -227,13 +227,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add length attribute for Strings
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
-			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getColumnSize()));
+			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
 		}
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
 
 		// Add @NotNull if applicable
-		if (!column.isNullable()) {
+		if (!column.isRequired()) {
 			AnnotationMetadata notNullAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.NotNull"), new ArrayList<AnnotationAttributeValue<?>>());
 			annotations.add(notNullAnnotation);
 		}
@@ -262,6 +262,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	public MethodMetadata getAccessor(FieldMetadata field) {
+		Assert.notNull(field, "Field required");
+		
+		// Compute the accessor method name
 		String requiredAccessorName = getRequiredAccessorName(field);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
@@ -269,7 +272,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private String getRequiredAccessorName(FieldMetadata field) {
-		return "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+		String methodName;
+		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+			methodName = "is" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+		} else {
+			methodName = "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+		}
+		return methodName;
 	}
 
 	public boolean hasMutator(FieldMetadata field) {

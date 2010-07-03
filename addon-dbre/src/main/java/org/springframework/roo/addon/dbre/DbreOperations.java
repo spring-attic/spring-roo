@@ -1,5 +1,8 @@
 package org.springframework.roo.addon.dbre;
 
+import java.io.File;
+
+import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 
 /**
@@ -12,7 +15,7 @@ public interface DbreOperations {
 
 	boolean isDbreAvailable();
 	
-	void displayDbMetadata(String table, String file);
+	void displayDatabaseMetadata(String catalog, Schema schema, File file);
 	
-	void updateDbreXml(JavaPackage javaPackage);
+	void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
 }

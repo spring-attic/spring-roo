@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.db;
+package org.springframework.roo.addon.dbre.jdbc;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -6,23 +6,30 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
-public class DbConnectionProviderImpl implements DbConnectionProvider {
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
+
+/**
+ * Implementation of {@link ConnectionProvider).
+ * 
+ * @author Alan Stewart
+ * @since 1.1
+ */
+@Component
+@Service
+public class ConnectionProviderImpl implements ConnectionProvider {
 	private Properties props;
-
-	public DbConnectionProviderImpl(Properties props) {
-		configure(props);
-	}
-
-	public DbConnectionProviderImpl(Map<String, String> map) {
-		Properties props = new Properties();
-		props.putAll(map);
-		configure(props);
-	}
 
 	public void configure(Properties props) {
 		props.put("user", props.get("database.username"));
 		props.put("password", props.get("database.password"));
 		this.props = props;
+	}
+
+	public void configure(Map<String, String> map) {
+		Properties props = new Properties();
+		props.putAll(map);
+		configure(props);
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -52,8 +59,8 @@ public class DbConnectionProviderImpl implements DbConnectionProvider {
 			driver = new org.h2.Driver();
 		} else if (driverClassName.startsWith("org.postgresql")) {
 			driver = new org.postgresql.Driver();
-			// } else if (driverClassName.startsWith("oracle")) {
-			// driver = new OracleDriver();
+		} else if (driverClassName.startsWith("oracle")) {
+			driver = new oracle.jdbc.OracleDriver();
 		} else {
 			throw new IllegalStateException("Failed to get jdbc driver for " + driverClassName);
 		}
