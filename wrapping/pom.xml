@@ -14,7 +14,21 @@
     <modules>
         <module>json-simple</module>
         <module>protobuf</module>
+        <module>jansi</module>
+        <module>jline</module>
+        <module>jna</module>
+        <module>inflector</module>
+        <module>javaparser</module>
+        <module>velocity</module>
     </modules>
+
+    <repositories>
+        <repository>
+            <id>maven.springframework.org.external</id>
+            <name>SpringSource Maven Repository - External Releases</name>
+            <url>http://maven.springframework.org/external</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>wrapping</artifactId>
+		<version>1.1.0.M2</version>
+	</parent>
+    <groupId>org.springframework.roo.wrapping</groupId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+    <version>${osgiVersion}</version>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+
+    <properties>
+        <pkgArtifactId>velocity</pkgArtifactId>
+        <pkgVersion>1.6.4</pkgVersion>
+        <osgiVersion>${pkgVersion}.0001</osgiVersion>
+        <pkgVendor>Apache Software Foundation</pkgVendor>
+        <pkgDocUrl>http://velocity.apache.org/</pkgDocUrl>
+        <pkgLicense>http://www.apache.org/licenses/LICENSE-2.0</pkgLicense>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>${pkgArtifactId}</artifactId>
+            <version>${pkgVersion}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.4</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>org.apache.velocity.*;version=${pom.version}</Export-Package>
+                        <Import-Package>org.apache.commons.lang;version=2.4,org.apache.commons.collections;version=3.2.1, *;resolution:=optional</Import-Package>
+                        <Bundle-Vendor>${pkgVendor} (wrapped into an OSGi bundle by the Spring Roo project build system)</Bundle-Vendor>
+                        <Bundle-DocURL>${pkgDocUrl}</Bundle-DocURL>
+                        <Bundle-License>${pkgLicense}</Bundle-License>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

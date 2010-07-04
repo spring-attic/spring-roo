@@ -41,22 +41,12 @@
     but also provides access to all historically released versions plus SHA1
     hash codes of those files.</para>
 
-    <para>The current and historical Spring Roo annotation JAR files are
-    always available from the <link
-    xlink:href="http://www.springsource.com/repository/">SpringSource
-    Enterprise Bundle Repository</link>. The associated Maven locations are
-    automatically included in all project POMs created by Roo. Please note
-    that only the annotation JARs are presently included in the Enterprise
-    Bundle Repository, as this is all that end user projects require.</para>
-
-    <para>We also publish all Roo modules to an additional Maven repository at
+    <para>We publish all Roo modules to a Maven repository at
     <link
-    xlink:href="http://maven.springframework.org/milestone">http://maven.springframework.org/milestone</link>.
-    It is rare for end user projects to require these modules, with them
-    mostly being necessary for those people writing <link
-    linkend="third-party">third-party add-ons</link>. When using Roo to create
-    an add-on project, this Maven repository is automatically included in the
-    resultant POM.</para>
+    xlink:href="http://spring-roo-repository.springsource.org/release">http://spring-roo-repository.springsource.org/release</link>.
+    This Maven repository is automatically included in user project so that the
+    annotation library can be downloaded. It is also automatically included in
+    the POM for <link linkend="third-party">third-party add-ons</link>.</para>
   </section>
 
   <section xml:id="resources-forums">

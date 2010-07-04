@@ -81,10 +81,10 @@
             <type>bundle</type>
         </dependency>
 		<!-- External modules -->
-		<dependency>
-			<groupId>com.google.javaparser</groupId>
-			<artifactId>com.springsource.japa.parser</artifactId>
-			<version>1.0.7</version>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
+            <version>1.0.7.0001</version>
+        </dependency>
 	</dependencies>
 </project>

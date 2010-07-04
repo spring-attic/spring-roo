@@ -7,27 +7,26 @@
 		<version>1.1.0.M2</version>
 	</parent>
     <groupId>org.springframework.roo.wrapping</groupId>
-	<artifactId>${pom.groupId}.${pkgArtifactId}-lite</artifactId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
     <version>${osgiVersion}</version>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Wrapping - ${pkgArtifactId}-lite</name>
-    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}-lite.</description>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
 
     <properties>
-        <pkgArtifactId>protobuf-java</pkgArtifactId>
-        <pkgVersion>2.3.0</pkgVersion>
+        <pkgArtifactId>inflector</pkgArtifactId>
+        <pkgVersion>0.7.0</pkgVersion>
         <osgiVersion>${pkgVersion}.0001</osgiVersion>
-        <pkgVendor>Google Inc</pkgVendor>
-        <pkgDocUrl>http://code.google.com/p/protobuf</pkgDocUrl>
-        <pkgLicense>http://www.opensource.org/licenses/bsd-license.php</pkgLicense>
+        <pkgVendor>Inflector Project</pkgVendor>
+        <pkgDocUrl>https://inflector.dev.java.net/</pkgDocUrl>
+        <pkgLicense>http://www.apache.org/licenses/LICENSE-2.0</pkgLicense>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>com.google.protobuf</groupId>
+            <groupId>net.java.dev.inflector</groupId>
             <artifactId>${pkgArtifactId}</artifactId>
             <version>${pkgVersion}</version>
-            <classifier>lite</classifier>
             <optional>true</optional>
         </dependency>
     </dependencies>

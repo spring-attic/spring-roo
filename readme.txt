@@ -364,9 +364,21 @@ RELEASING
 
 Roo is released on a regular basis by the Roo project team.
 
+To release you should edit your ~/.m2/settings.xml so it includes:
+
+<settings>
+  <servers>
+    <server>
+      <id>spring-roo-repository</id>
+      <username>the_amazon_s3_main_account_access_id</username>
+      <passphrase>the_amazon_s3_main_account_secret_key</passphrase>
+    </server>
+  </servers>
+</settings>
+
 The following command is used from the root checkout location:
 
-  mvn clean install site assembly:assembly deploy site:deploy
+  mvn clean package site assembly:assembly deploy site:deploy
 
 This will create a ZIP in the "target" directory.
 

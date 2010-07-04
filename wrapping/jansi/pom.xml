@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>wrapping</artifactId>
+		<version>1.1.0.M2</version>
+	</parent>
+    <groupId>org.springframework.roo.wrapping</groupId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+    <version>${osgiVersion}</version>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+
+    <repositories>
+      <repository>
+        <id>jansi.release.m2</id>
+        <name>jansi Release Repository</name>
+        <url>http://jansi.fusesource.org/repo/release</url>
+      </repository>
+    </repositories>
+
+    <properties>
+        <pkgArtifactId>jansi</pkgArtifactId>
+        <pkgVersion>1.1</pkgVersion>
+        <osgiVersion>${pkgVersion}.0.0001</osgiVersion>
+        <pkgVendor>JANSI Project</pkgVendor>
+        <pkgDocUrl>http://jansi.fusesource.org/</pkgDocUrl>
+        <!-- http://jansi.fusesource.org/maven/1.3/license.html -->
+        <pkgLicense>http://www.apache.org/licenses/LICENSE-2.0.html</pkgLicense>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>${pkgArtifactId}</artifactId>
+            <version>${pkgVersion}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>*;version=${pom.version}</Export-Package>
+                        <Import-Package>com.sun.jna;version="[3.2.3, 4.0.0)";resolution:="optional",com.sun.jna.ptr;version="[3.2.3, 4.0.0)";resolution:="optional",com.sun.jna.win32;version="[3.2.3, 4.0.0)";resolution:="optional"</Import-Package>
+                        <Bundle-Vendor>${pkgVendor} (wrapped into an OSGi bundle by the Spring Roo project build system)</Bundle-Vendor>
+                        <Bundle-DocURL>${pkgDocUrl}</Bundle-DocURL>
+                        <Bundle-License>${pkgLicense}</Bundle-License>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

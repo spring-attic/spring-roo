@@ -81,10 +81,10 @@
             <type>bundle</type>
         </dependency>
 		<!-- External modules -->
-		<dependency>
-			<groupId>org.jvnet.inflector</groupId>
-			<artifactId>com.springsource.org.jvnet.inflector</artifactId>
-			<version>0.7.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
+            <version>0.7.0.0001</version>
+        </dependency>
 	</dependencies>
 </project>
