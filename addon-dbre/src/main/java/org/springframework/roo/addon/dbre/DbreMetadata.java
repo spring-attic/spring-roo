@@ -246,7 +246,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Check governor for accessor method
 		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
-			// System.out.println("found on governor " + fieldName + " - not adding to ITD");
 			return true;
 		}
 
@@ -286,7 +285,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Check governor for mutator method
 		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), new ArrayList<JavaType>()) != null) {
-			// System.out.println("found on governor " + fieldName + " - not adding to ITD");
 			return true;
 		}
 

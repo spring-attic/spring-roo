@@ -68,7 +68,7 @@ public class DbreXmlFileListener implements FileEventListener {
 
 		String dbreXmlPath = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
-		if (!(eventPath.equals(dbreXmlPath) || fileEvent.getOperation() == FileOperation.CREATED || fileEvent.getOperation() == FileOperation.UPDATED)) {
+		if (!eventPath.equals(dbreXmlPath) || !(fileEvent.getOperation() == FileOperation.CREATED || fileEvent.getOperation() == FileOperation.UPDATED)) {
 			return;
 		}
 
@@ -76,7 +76,8 @@ public class DbreXmlFileListener implements FileEventListener {
 	}
 
 	public void reverseEngineer(Database database) {
-		for (Table table : database.getTables()) {
+		Set<Table> tables = database.getTables();
+		for (Table table : tables) {
 			JavaPackage javaPackage = database.getJavaPackage();
 			JavaType javaType = tableModelService.findTypeForTableName(table.getName(), javaPackage);
 			if (javaType == null) {
@@ -86,7 +87,7 @@ public class DbreXmlFileListener implements FileEventListener {
 			}
 		}
 
-		deleteManagedEntitiesNotInModel(database.getTables());
+		deleteManagedEntitiesNotInModel(tables);
 	}
 
 	private void deleteManagedEntitiesNotInModel(Set<Table> tables) {
@@ -129,7 +130,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		if (StringUtils.hasText(table.getCatalog())) {
 			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("catalog"), table.getCatalog()));
 		}
-		if (StringUtils.hasText(table.getSchema().getName())) {
+		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
 			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("schema"), table.getSchema().getName()));
 		}
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Table"), tableAttrs));
@@ -177,22 +178,20 @@ public class DbreXmlFileListener implements FileEventListener {
 		if (pkCount == 1) {
 			// Table has one primary key column so add the column's type to the 'identifierType' attribute
 			Column primaryKey = primaryKeys.iterator().next();
-			if (primaryKey != null) {
-				String columnName = primaryKey.getName();
-				JavaType primaryKeyType = primaryKey.getJavaType();
-				// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
-				if (!primaryKeyType.equals(JavaType.LONG_OBJECT)) {
-					entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), primaryKeyType));
-				}
-
-				// Only add 'identifierField' attribute if it is different from the default, "id"
-				String fieldName = tableModelService.suggestFieldNameForColumn(columnName);
-				if (!"id".equals(fieldName)) {
-					entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
-				}
-
-				entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), columnName));
+			String columnName = primaryKey.getName();
+			JavaType primaryKeyType = primaryKey.getJavaType();
+			// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
+			if (!primaryKeyType.equals(JavaType.LONG_OBJECT)) {
+				entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), primaryKeyType));
 			}
+
+			// Only add 'identifierField' attribute if it is different from the default, "id"
+			String fieldName = tableModelService.suggestFieldNameForColumn(columnName);
+			if (!"id".equals(fieldName)) {
+				entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
+			}
+
+			entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), columnName));
 
 			// Check for managed identifier class and delete if found
 			if (identifierPhysicalTypeMetadata != null && identifierPhysicalTypeMetadata.isValid() && (identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {

@@ -56,8 +56,8 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 	}
 
-	public void displayDatabaseMetadata(String catalog, Schema schema) {
-		Database database = getDatabase(catalog, schema, null);
+	public void displayDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
+		Database database = getDatabase(catalog, schema, javaPackage);
 		OutputStream outputStream = new ByteArrayOutputStream();
 		XmlUtils.writeXml(outputStream, getDocument(database));
 		logger.info(outputStream.toString());
@@ -68,13 +68,13 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			Database database = getDatabase(catalog, schema, javaPackage);
 			Document document = getDocument(database);
 
-			if (file == null) {
+			if (file != null) {
+				XmlUtils.writeXml(new FileOutputStream(file), document);
+				logger.info("Database metadata written to file " + file.getAbsolutePath());
+			} else {
 				String dbreXmlPath = getDbreXmlPath();
 				MutableFile mutableFile = fileManager.exists(dbreXmlPath) ? fileManager.updateFile(dbreXmlPath) : fileManager.createFile(dbreXmlPath);
 				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
-			} else {
-				XmlUtils.writeXml(new FileOutputStream(file), document);
-				logger.info("Database metadata written to file " + file.getAbsolutePath());
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException("Failed to write database metadata to file: " + e.getMessage());
@@ -118,6 +118,8 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
 				column.setJavaType(new JavaType(columnElement.getAttribute("javaType")));
 				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
+				column.setSize(Integer.parseInt(columnElement.getAttribute("size")));
+				column.setType(columnElement.getAttribute("type"));
 				table.addColumn(column);
 			}
 						

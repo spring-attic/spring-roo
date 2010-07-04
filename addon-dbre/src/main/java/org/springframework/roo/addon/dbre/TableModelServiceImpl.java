@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
@@ -30,6 +32,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1 
  */
+@Service
+@Component
 public class TableModelServiceImpl implements TableModelService {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;

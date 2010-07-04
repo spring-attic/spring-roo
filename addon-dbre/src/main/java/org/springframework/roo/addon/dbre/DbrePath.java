@@ -1,7 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 /**
- * Path artifacts for dbre classes.
+ * Path artifacts for DBRE classes.
  * 
  * @author Alan Stewart
  * @since 1.1

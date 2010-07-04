@@ -33,15 +33,23 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void displayDatabaseMetadata(String catalog, Schema schema, File file) {
+		JavaPackage javaPackage = getTopLevelpackage();
 		if (file != null) {
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			databaseModelService.serializeDatabaseMetadata(catalog, schema, projectMetadata.getTopLevelPackage(), file);
+			databaseModelService.serializeDatabaseMetadata(catalog, schema, javaPackage, file);
 		} else {
-			databaseModelService.displayDatabaseMetadata(catalog, schema);
+			databaseModelService.displayDatabaseMetadata(catalog, schema, javaPackage);
 		}
 	}
 
 	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
+		if (javaPackage == null) {
+			javaPackage = getTopLevelpackage();
+		}
 		databaseModelService.serializeDatabaseMetadata(catalog, schema, javaPackage, null);
+	}
+	
+	private JavaPackage getTopLevelpackage() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		return projectMetadata.getTopLevelPackage();
 	}
 }

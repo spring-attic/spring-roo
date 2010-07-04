@@ -25,8 +25,9 @@ public interface DatabaseModelService {
 	 * 
 	 * @param catalog the name of the database catalog (may be null).
 	 * @param schema the {@link Schema schema) object representing the database schema.
+	 * @param javaPackage the package where entities are placed.
 	 */
-	void displayDatabaseMetadata(String catalog, Schema schema);
+	void displayDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
 
 	/**
 	 * Writes the database metadata in DOM format to an XML file.
