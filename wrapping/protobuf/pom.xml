@@ -7,11 +7,19 @@
 		<version>1.1.0.M2</version>
 	</parent>
     <groupId>org.springframework.roo.wrapping</groupId>
-	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}-lite</artifactId>
     <version>${osgiVersion}</version>
 	<packaging>bundle</packaging>
-	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
-    <description>This bundle wraps the standard Maven Central artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}-lite</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}-lite.</description>
+
+    <repositories>
+        <repository>
+            <id>maven.springframework.org.external</id>
+            <name>SpringSource Maven Repository - External Releases</name>
+            <url>http://maven.springframework.org/external</url>
+        </repository>
+    </repositories>
 
     <properties>
         <pkgArtifactId>protobuf-java</pkgArtifactId>
@@ -27,6 +35,7 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>${pkgArtifactId}</artifactId>
             <version>${pkgVersion}</version>
+            <classifier>lite</classifier>
             <optional>true</optional>
         </dependency>
     </dependencies>
