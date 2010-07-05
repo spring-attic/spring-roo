@@ -13,7 +13,6 @@ import org.springframework.roo.shell.MethodTarget;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
@@ -23,7 +22,7 @@ public class JavaSymbolNameConverter implements Converter {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
-		
+
 		return new JavaSymbolName(value);
 	}
 
@@ -34,5 +33,4 @@ public class JavaSymbolNameConverter implements Converter {
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
 		return false;
 	}
-
 }

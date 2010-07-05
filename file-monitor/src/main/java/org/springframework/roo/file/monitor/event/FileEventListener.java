@@ -15,5 +15,4 @@ public interface FileEventListener {
 	 * @param fileEvent the file event (never null)
 	 */
 	void onFileEvent(FileEvent fileEvent);
-	
 }

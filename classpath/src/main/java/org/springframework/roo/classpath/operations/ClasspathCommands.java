@@ -67,12 +67,12 @@ public class ClasspathCommands implements CommandMarker {
 	
 	@CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
 	public void createClass(
-			@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
-			@CliOption(key = "rooAnnotations", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should have common Roo annotations") boolean rooAnnotations, 
-			@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the class in") Path path,
-			@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") JavaType superclass, 
-			@CliOption(key = "abstract", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
+		@CliOption(key = "rooAnnotations", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should have common Roo annotations") boolean rooAnnotations, 
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the class in") Path path,
+		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") JavaType superclass, 
+		@CliOption(key = "abstract", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
@@ -100,9 +100,9 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
 	public void createInterface(
-			@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the interface to create") JavaType name, 
-			@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the interface in") Path path, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the interface to create") JavaType name, 
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the interface in") Path path, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
@@ -116,9 +116,9 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
 	public void createEnum(
-			@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the enum to create") JavaType name, 
-			@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the enum in") Path path, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the enum to create") JavaType name, 
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the enum in") Path path, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(name);
@@ -132,9 +132,9 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
 	public void enumConstant(
-			@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the enum class to receive this field") JavaType name, 
-			@CliOption(key = "name", mandatory = true, help = "The name of the constant") JavaSymbolName fieldName, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the enum class to receive this field") JavaType name, 
+		@CliOption(key = "name", mandatory = true, help = "The name of the constant") JavaSymbolName fieldName, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		if (!permitReservedWords) {
 			// No need to check the "name" as if the class exists it is assumed it is a legal name
@@ -147,9 +147,9 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "dod", help = "Creates a new data on demand for the specified entity")
 	public void newDod(
-			@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The entity which this data on demand class will create and modify as required") JavaType entity, 
-			@CliOption(key = "class", mandatory = false, help = "The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')") JavaType clazz, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The entity which this data on demand class will create and modify as required") JavaType entity, 
+		@CliOption(key = "class", mandatory = false, help = "The class which will be created to hold this data on demand provider (defaults to the entity name + 'DataOnDemand')") JavaType clazz, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
@@ -170,8 +170,8 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "test integration", help = "Creates a new integration test for the specified entity")
 	public void newIntegrationTest(
-			@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the entity to create an integration test for") JavaType entity, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the entity to create an integration test for") JavaType entity, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		if (!permitReservedWords) {
 			ReservedWords.verifyReservedWordsNotPresent(entity);
@@ -184,18 +184,18 @@ public class ClasspathCommands implements CommandMarker {
 
 	@CliCommand(value = "entity", help = "Creates a new JPA persistent entity in SRC_MAIN_JAVA")
 	public void newPersistenceClassJpa(
-			@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") JavaType name, 
-			@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") JavaType superclass, 
-			@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
-			@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") boolean testAutomatically, 
-			@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") String table, 
-			@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
-			@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
-			@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
-			@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
-			@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
-			@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "Name of the entity to create") JavaType name, 
+		@CliOption(key = "extends", mandatory = false, unspecifiedDefaultValue = "java.lang.Object", help = "The superclass (defaults to java.lang.Object)") JavaType superclass, 
+		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
+		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") boolean testAutomatically, 
+		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") String table, 
+		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
+		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
+		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
+		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
+		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 

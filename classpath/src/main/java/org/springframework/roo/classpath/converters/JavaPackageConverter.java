@@ -22,12 +22,10 @@ import org.springframework.roo.shell.MethodTarget;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class JavaPackageConverter implements Converter {
-
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
@@ -56,7 +54,7 @@ public class JavaPackageConverter implements Converter {
 			} catch (RuntimeException ignored) {}
 		}
 		if (newValue.endsWith(".")) {
-			newValue = newValue.substring(0, newValue.length()-1);
+			newValue = newValue.substring(0, newValue.length() - 1);
 		}
 		JavaPackage result = new JavaPackage(newValue);
 		lastUsed.setPackage(result);
@@ -78,7 +76,7 @@ public class JavaPackageConverter implements Converter {
 		if (projectMetadata == null) {
 			return false;
 		}
-		
+
 		topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
 
 		String newValue = existingData;
@@ -93,38 +91,37 @@ public class JavaPackageConverter implements Converter {
 				newValue = topLevelPath + File.separator;
 			}
 		}
-		
+
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator).toLowerCase() + "*";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
-		
+
 		for (FileDetails fileIdentifier : entries) {
-			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // drop the leading "/"
+			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // Drop the leading "/"
 			boolean include = false;
 			// Do not include directories that start with ., as this is used for purposes like SVN (see ROO-125)
 			if (fileIdentifier.getFile().isDirectory() && !fileIdentifier.getFile().getName().startsWith(".")) {
 				include = true;
 			}
-			
+
 			if (include) {
 				// Convert this path back into something the user would type
 				if (existingData.startsWith("~")) {
 					if (existingData.length() > 1) {
 						if (existingData.charAt(1) == '.') {
-							candidate = "~." + candidate.substring(topLevelPath.length()+1);
+							candidate = "~." + candidate.substring(topLevelPath.length() + 1);
 						} else {
-							candidate = "~" + candidate.substring(topLevelPath.length()+1);
+							candidate = "~" + candidate.substring(topLevelPath.length() + 1);
 						}
 					} else {
-						candidate = "~" + candidate.substring(topLevelPath.length()+1);
+						candidate = "~" + candidate.substring(topLevelPath.length() + 1);
 					}
 				}
 				candidate = candidate.replace(File.separator, ".");
 				completions.add(candidate);
 			}
 		}
-		
+
 		return false;
 	}
-	
 }
