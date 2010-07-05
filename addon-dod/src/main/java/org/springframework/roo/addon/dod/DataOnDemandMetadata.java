@@ -433,7 +433,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create the body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
-		bodyBuilder.appendFormalLine("if (" + dataField + " != null) {");
+		bodyBuilder.appendFormalLine("if (" + dataField + " != null && !" + dataField + ".isEmpty()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return;");
 		bodyBuilder.indentRemove();
@@ -442,7 +442,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine(dataField + " = " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
 		bodyBuilder.appendFormalLine("if (data == null) throw new IllegalStateException(\"Find entries implementation for '" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "' illegally returned null\");");
-		bodyBuilder.appendFormalLine("if (" + dataField + ".size() > 0) {");
+		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("return;");
 		bodyBuilder.indentRemove();
