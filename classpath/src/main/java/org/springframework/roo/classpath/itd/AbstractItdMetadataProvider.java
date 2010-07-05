@@ -88,7 +88,12 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 				for (FileDetails fileDetails : fileManager.findMatchingAntPath(antPath)) {
 					String fullPath = srcRoot.getRelativeSegment(fileDetails.getCanonicalPath());
 					fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
-					JavaType javaType = new JavaType(fullPath);
+					JavaType javaType;
+					try {
+						javaType = new JavaType(fullPath);
+					} catch (RuntimeException loopToNextFile) { // ROO-1022
+						continue;
+					}
 					String mid = createLocalIdentifier(javaType, path);
 					allMids.add(mid);
 				}
