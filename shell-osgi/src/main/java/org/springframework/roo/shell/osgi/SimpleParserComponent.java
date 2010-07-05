@@ -7,6 +7,9 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.shell.CliCommand;
+import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.SimpleParser;
@@ -23,7 +26,7 @@ import org.springframework.roo.shell.SimpleParser;
 		@Reference(name="converter", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=Converter.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE),
 		@Reference(name="command", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=CommandMarker.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
 		})
-public class SimpleParserComponent extends SimpleParser {
+public class SimpleParserComponent extends SimpleParser implements CommandMarker {
 
 	protected void bindConverter(Converter c) {
 		add(c);
@@ -39,6 +42,24 @@ public class SimpleParserComponent extends SimpleParser {
 	
 	protected void unbindCommand(CommandMarker c) {
 		remove(c);
+	}
+	
+	protected void activate(ComponentContext context) {
+		bindCommand(this);
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		unbindCommand(this);
+	}
+	
+	@CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
+	public void helpReferenceGuide() {
+		super.helpReferenceGuide();
+	}
+	
+	@CliCommand(value = "help", help = "Shows system help")
+	public void obtainHelp(@CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") String buffer) {
+		super.obtainHelp(buffer);
 	}
 	
 }
