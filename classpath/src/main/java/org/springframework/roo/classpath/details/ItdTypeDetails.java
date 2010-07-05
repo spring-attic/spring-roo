@@ -58,4 +58,11 @@ public interface ItdTypeDetails extends MemberHoldingTypeDetails {
 	 * @return an unmodifiable representation of the method and the annotations declared on this method (may be empty, but never null)
 	 */
 	List<DeclaredMethodAnnotationDetails> getMethodAnnotations();
+	
+	/**
+	 * Lists the inner types.
+	 * 
+	 * @return an unmodifiable representation of the inner types (may be empty but never null)
+	 */
+	List<ClassOrInterfaceTypeDetails> getInnerTypes();
 }

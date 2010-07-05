@@ -36,6 +36,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	private Set<JavaType> registeredImports = new HashSet<JavaType>();
 	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
 	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
+	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	
 	public DefaultItdTypeDetails(ClassOrInterfaceTypeDetails governor, JavaType aspect,
 			boolean privilegedAspect, Set<JavaType> registeredImports,
@@ -46,7 +47,8 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			List<JavaType> implementsTypes,
 			List<AnnotationMetadata> typeAnnotations,
 			List<DeclaredFieldAnnotationDetails> fieldAnnotations,
-			List<DeclaredMethodAnnotationDetails> methodAnnotations) {
+			List<DeclaredMethodAnnotationDetails> methodAnnotations,
+			List<ClassOrInterfaceTypeDetails> innerTypes) {
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
 		
@@ -88,6 +90,10 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		
 		if (methodAnnotations != null) {
 			this.methodAnnotations = methodAnnotations;
+		}
+		
+		if (innerTypes != null) {
+			this.innerTypes = innerTypes;
 		}
 	}
 	
@@ -151,6 +157,10 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		return Collections.unmodifiableList(methodAnnotations);
 	}
 	
+	public List<ClassOrInterfaceTypeDetails> getInnerTypes() {
+		return Collections.unmodifiableList(innerTypes);
+	}
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", governor);
@@ -165,6 +175,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		tsc.append("fieldAnnotations", fieldAnnotations);
 		tsc.append("methodAnnotations", methodAnnotations);
 		tsc.append("typeAnnotations", typeAnnotations);
+		tsc.append("innerTypes", innerTypes);
 		return tsc.toString();
 	}
 }

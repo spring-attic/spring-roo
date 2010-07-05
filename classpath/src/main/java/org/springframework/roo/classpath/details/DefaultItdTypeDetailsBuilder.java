@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.details;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +42,7 @@ public final class DefaultItdTypeDetailsBuilder {
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
@@ -63,7 +65,7 @@ public final class DefaultItdTypeDetailsBuilder {
 	 * @return an immutable {@link DefaultItdTypeDetails} representing the current state of the builder (never null)
 	 */
 	public DefaultItdTypeDetails build() {
-		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations, fieldAnnotations, methodAnnotations);
+		return new DefaultItdTypeDetails(governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), declaredConstructors, declaredFields, declaredMethods, extendsTypes, implementsTypes, typeAnnotations, fieldAnnotations, methodAnnotations, innerTypes);
 	}
 
 	public ImportRegistrationResolver getImportRegistrationResolver() {
@@ -140,5 +142,13 @@ public final class DefaultItdTypeDetailsBuilder {
 		}
 		Assert.isTrue(!declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations().contains(declaredMethodAnnotationDetails.getMethodAnnotation()), "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName()+ "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		methodAnnotations.add(declaredMethodAnnotationDetails);
+	}
+	
+	public void addInnerType(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		if (classOrInterfaceTypeDetails == null) {
+			return;
+		}
+		Assert.isTrue(Modifier.isStatic(classOrInterfaceTypeDetails.getModifier()), "Currently only static inner types are supported by AspectJ");
+		innerTypes.add(classOrInterfaceTypeDetails);
 	}
 }
