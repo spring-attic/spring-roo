@@ -134,7 +134,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		if (encoding != null && encoding.length() > 0) {
 			Element pElement = appCtx.createElement("property");
-			pElement.setAttribute("name", "encoding");
+			pElement.setAttribute("name", "defaultEncoding");
 			pElement.setAttribute("value", "${email.encoding}");
 			mailBean.appendChild(pElement);
 			props.put("email.encoding", encoding);

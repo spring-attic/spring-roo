@@ -693,40 +693,42 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
 					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
 					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
-					bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
-					
-					//register the converter method
-					InvocableMemberBodyBuilder converterBodyBuilder = new InvocableMemberBodyBuilder();
-					converterBodyBuilder.appendFormalLine("return new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
-					converterBodyBuilder.indent();
-					converterBodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
-					converterBodyBuilder.indent();
-					
-					StringBuilder sb = new StringBuilder();
-					sb.append("return new StringBuilder().append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
-					if (isEnumType(elegibleMethods.get(0).getReturnType())) {
-						sb.append(".name()");
-					}
-					sb.append(")");
-					for (int i = 1; i < elegibleMethods.size(); i++) {
-						sb.append(".append(\" \").append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
-						if (isEnumType(elegibleMethods.get(i).getReturnType())) {
+					if (null == methodExists(converterMethodName)) {
+						bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
+						
+						//register the converter method
+						InvocableMemberBodyBuilder converterBodyBuilder = new InvocableMemberBodyBuilder();
+						converterBodyBuilder.appendFormalLine("return new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
+						converterBodyBuilder.indent();
+						converterBodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
+						converterBodyBuilder.indent();
+						
+						StringBuilder sb = new StringBuilder();
+						sb.append("return new StringBuilder().append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
+						if (isEnumType(elegibleMethods.get(0).getReturnType())) {
 							sb.append(".name()");
 						}
 						sb.append(")");
+						for (int i = 1; i < elegibleMethods.size(); i++) {
+							sb.append(".append(\" \").append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
+							if (isEnumType(elegibleMethods.get(i).getReturnType())) {
+								sb.append(".name()");
+							}
+							sb.append(")");
+						}
+						sb.append(".toString();");
+						
+						converterBodyBuilder.appendFormalLine(sb.toString());
+						converterBodyBuilder.indentRemove();
+						converterBodyBuilder.appendFormalLine("}");
+						converterBodyBuilder.indentRemove();
+						converterBodyBuilder.appendFormalLine("};");
+						List<JavaType> params = new ArrayList<JavaType>();
+						params.add(conversionType);
+						params.add(new JavaType(String.class.getName()));
+						JavaType parameterizedConverter = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
+						builder.addMethod(new DefaultMethodMetadata(getId(), 0, converterMethodName, parameterizedConverter, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), converterBodyBuilder.getOutput()));
 					}
-					sb.append(".toString();");
-					
-					converterBodyBuilder.appendFormalLine(sb.toString());
-					converterBodyBuilder.indentRemove();
-					converterBodyBuilder.appendFormalLine("}");
-					converterBodyBuilder.indentRemove();
-					converterBodyBuilder.appendFormalLine("};");
-					List<JavaType> params = new ArrayList<JavaType>();
-					params.add(conversionType);
-					params.add(new JavaType(String.class.getName()));
-					JavaType parameterizedConverter = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
-					builder.addMethod(new DefaultMethodMetadata(getId(), 0, converterMethodName, parameterizedConverter, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), converterBodyBuilder.getOutput()));
 				}
 			}
 		}

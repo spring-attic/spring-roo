@@ -79,7 +79,15 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	}
 
 	protected void deactivate(ComponentContext context) {
-		t.cancel();
+		// We have lost a required component (eg UndoManager; ROO-1037)
+		synchronized (processManagerStatus) {
+			// Do the check again, now this thread has a lock on processManagerStatus
+			if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
+				// We have the lock on processManagerStatus, yet it's not available; this would be odd
+				logger.warning("Unexpected status " + getProcessManagerStatus() + " without lock");
+			}
+			t.cancel();
+		}
 	}
 
 	public void completeStartup() {

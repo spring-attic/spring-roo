@@ -6,6 +6,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.springframework.roo.classpath.details.AnnotationMetadataUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
 import org.springframework.roo.classpath.details.DeclaredMethodAnnotationDetails;
@@ -73,6 +74,7 @@ public class ItdSourceFileComposer {
 		appendFields();
 		appendConstructors();
 		appendMethods();
+		appendInnerTypes();
 		appendTerminator();
 		
 		// Now prepend the package declaration and any imports
@@ -420,6 +422,53 @@ public class ItdSourceFileComposer {
 			this.append(";");
 			this.newLine(false);
 			this.newLine();
+		}
+	}
+	
+	/**
+	 * supports static inner types with static field definitions only at this point
+	 */
+	private void appendInnerTypes() {
+		List<ClassOrInterfaceTypeDetails> innerTypes = itdTypeDetails.getInnerTypes();
+		
+		for (ClassOrInterfaceTypeDetails innerType: innerTypes) {
+			this.appendIndent();
+			if (innerType.getModifier() != 0) {
+				this.append(Modifier.toString(innerType.getModifier()));
+				this.append(" ");
+			}
+			this.append("class ");
+			this.append(introductionTo.getSimpleTypeName());
+			this.append(".");
+			this.append(innerType.getName().getSimpleTypeName());
+			this.append(" {");
+			this.newLine(false);
+			
+			for (FieldMetadata field: innerType.getDeclaredFields()) {
+				this.newLine(false);
+				this.appendIndent();
+				this.appendIndent();
+				if (field.getModifier() != 0) {
+					this.append(Modifier.toString(field.getModifier()));
+					this.append(" ");
+				}
+				this.append(field.getFieldType().getNameIncludingTypeParameters(false, resolver));
+				this.append(" ");
+				this.append(field.getFieldName().getSymbolName());
+
+				// Append initializer, if present
+				if (field.getFieldInitializer() != null) {
+					this.append(" = ");
+					this.append(field.getFieldInitializer());
+				}
+				
+				// Complete the field declaration
+				this.append(";");
+				this.newLine(false);
+			}
+			this.appendIndent();
+			this.append("}");
+			this.newLine(false);
 		}
 	}
 

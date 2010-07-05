@@ -721,7 +721,6 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	@CliCommand(value = "reference guide", help = "Writes the reference guide XML fragments (in DocBook format) into the current working directory")
 	public void helpReferenceGuide() {
 		synchronized (mutex) {
 			File f = new File(".");
@@ -898,7 +897,6 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	@CliCommand(value = "help", help = "Shows system help")
 	public void obtainHelp(@CliOption(key = { "", "command" }, optionContext = "availableCommands", help = "Command name to provide help for") String buffer) {
 		synchronized (mutex) {
 			if (buffer == null) {

@@ -69,7 +69,12 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		for (FileDetails file : entries) {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
-			JavaType javaType = new JavaType(fullPath);
+			JavaType javaType;
+			try {
+				javaType = new JavaType(fullPath);
+			} catch (RuntimeException loopToNextFile) { // ROO-1022
+				continue;
+			}
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 			if (id != null) {
 				PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);

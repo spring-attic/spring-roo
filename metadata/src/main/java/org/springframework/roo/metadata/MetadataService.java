@@ -72,6 +72,10 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
 	 * Obtains all the registered {@link MetadataProvider}s. Returned as an unmodifiable
 	 * {@link Set}.
 	 * 
+	 * <p>
+	 * Due to the dynamic nature of the OSGi environment, elements in this list might be
+	 * deactivated by the time the list is iterated.
+	 * 
 	 * @return an unmodifiable {@link Set} of {@link MetadataProvider}s (may be empty, but not null)
 	 */
 	SortedSet<MetadataProvider> getRegisteredProviders();
