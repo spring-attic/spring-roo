@@ -60,17 +60,21 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private Set<String> notifyDeleted = new HashSet<String>();
 	private Set<MonitoringRequest> notifiedFailingRequests = new HashSet<MonitoringRequest>();
 	
-	public final void add(FileEventListener e) {
-		fileEventListeners.add(e);
-	}
-
-	public final void remove(FileEventListener e) {
-		fileEventListeners.remove(e);
-	}
-
 	// Mutex
 	private Boolean lock = new Boolean(true);
 	
+	public final void add(FileEventListener e) {
+		synchronized (lock) {
+			fileEventListeners.add(e);
+		}
+	}
+
+	public final void remove(FileEventListener e) {
+		synchronized (lock) {
+			fileEventListeners.remove(e);
+		}
+	}
+
 	public List<FileDetails> getMonitored() {
 		synchronized (lock) {
 			List<FileDetails> monitored = new ArrayList<FileDetails>();
