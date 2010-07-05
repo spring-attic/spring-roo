@@ -529,7 +529,8 @@ public class CarController {
 
     <para>The Roo JSP addon will read JSR 303 (bean validation API)
     annotations found in a form-backing object. The following convention is
-    applied for the generation of create and update (and finder) forms:<table>
+    applied for the generation of create and update (and finder)
+    forms:<informaltable>
         <tgroup cols="2">
           <thead>
             <row>
@@ -605,10 +606,10 @@ public class CarController {
             </row>
           </tbody>
         </tgroup>
-      </table>* As mentioned above, Roo does not scaffold a HTML form element
-    for the 'one' side of a @OneToMany relationship. To make this relationship
-    work, you need to provide a @ManyToOne annotated field on the opposite
-    side:</para>
+      </informaltable>* As mentioned above, Roo does not scaffold a HTML form
+    element for the 'one' side of a @OneToMany relationship. To make this
+    relationship work, you need to provide a @ManyToOne annotated field on the
+    opposite side:</para>
 
     <para><programlisting>
 field set --fieldName students --element com.foo.domain.Person <emphasis
