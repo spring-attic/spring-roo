@@ -1,0 +1,16 @@
+addon create advanced --topLevelPackage com.mycompany.roo.addon.batch
+perform eclipse
+perform package
+
+; Install using this command: felix shell start file:///somewhere/target/com.mycompany.myproject.roo.addon.batch-0.1.0.BUILD-SNAPSHOT.jar
+
+; Verify success via "osgi ps" and look for an entry at the bottom such as:
+;  [  70] [Active     ] [    1] com.mycompany.myproject.roo.addon.batch (0.1.0.BUILD-SNAPSHOT)
+
+; You'll also have the new add-on's commands available (type 'Batch' and hit TAB)
+
+; Now you're ready to import the project into Eclipse and start fine-tuning the add-on
+
+; You can uninstall via: osgi uninstall --bundleSymbolicName com.mycompany.myproject.roo.addon.batch
+
+; After uninstalling, you'll see the "Batch" commands have disappeared

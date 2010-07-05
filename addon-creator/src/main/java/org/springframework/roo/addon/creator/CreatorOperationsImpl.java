@@ -14,11 +14,9 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.project.ProjectMetadataProvider;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -40,7 +38,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
-	@Reference private ProjectMetadataProvider projectMetadataProvider;
 		
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
@@ -124,14 +121,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	}
 	
 	private void createProject(JavaPackage topLevelPackage, Type type, String description) {
-		String packageName = topLevelPackage.getFullyQualifiedPackageName();
-		String projectName = null;
-		int lastIndex = packageName.lastIndexOf(".");
-		if (lastIndex == -1) {
-			projectName = packageName;
-		} else {
-			projectName = packageName.substring(lastIndex + 1);
-		}
+		String projectName = topLevelPackage.getFullyQualifiedPackageName();
 		
 		Document pom;
 		try {
@@ -142,7 +132,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		Element rootElement = pom.getDocumentElement();
 		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(projectName);
 		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
 		if (description != null && description.length() != 0) {
 			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);
@@ -151,8 +141,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 		
-		projectMetadataProvider.addDependency(new Dependency("javax.annotation", "jsr250-api", "1.0"));
-
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 
