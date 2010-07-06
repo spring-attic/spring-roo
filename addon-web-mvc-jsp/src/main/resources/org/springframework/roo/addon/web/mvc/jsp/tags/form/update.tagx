@@ -24,7 +24,7 @@
 		<c:if test="${empty versionField}">
 			<c:set value="version" var="versionField"/>
 		</c:if>
-
+		<spring:message arguments="${label}" code="entity_update" var="title_msg"/>
 	    <page:page id="${id}" title="${title_msg}" openPane="${openPane}">
 	        <spring:url value="${path}" var="form_url"/>
 	        <form:form action="${form_url}" method="PUT" modelAttribute="${modelAttribute}">
