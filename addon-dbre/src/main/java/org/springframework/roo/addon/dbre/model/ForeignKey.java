@@ -22,10 +22,10 @@ public class ForeignKey {
 	private String foreignTableName;
 
 	/** The action to perform when the value of the referenced column changes. */
-	private Short onUpdate = 5;
+	private CascadeAction onUpdate = CascadeAction.NONE;
 
 	/** The action to perform when the referenced row is deleted. */
-	private Short onDelete = 5;
+	private CascadeAction onDelete = CascadeAction.NONE;
 
 	/** The references between local and remote columns. */
 	private SortedSet<Reference> references = new TreeSet<Reference>();
@@ -62,19 +62,19 @@ public class ForeignKey {
 		this.foreignTableName = foreignTableName;
 	}
 
-	public Short getOnUpdate() {
+	public CascadeAction getOnUpdate() {
 		return onUpdate;
 	}
 
-	public void setOnUpdate(Short onUpdate) {
+	public void setOnUpdate(CascadeAction onUpdate) {
 		this.onUpdate = onUpdate;
 	}
 
-	public Short getOnDelete() {
+	public CascadeAction getOnDelete() {
 		return onDelete;
 	}
 
-	public void setOnDelete(Short onDelete) {
+	public void setOnDelete(CascadeAction onDelete) {
 		this.onDelete = onDelete;
 	}
 

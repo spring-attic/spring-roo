@@ -168,8 +168,8 @@ public class DatabaseModelReader {
 				while (rs.next()) {
 					ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
 					foreignKey.setForeignTableName(rs.getString("PKTABLE_NAME"));
-					foreignKey.setOnUpdate(rs.getShort("UPDATE_RULE"));
-					foreignKey.setOnDelete(rs.getShort("DELETE_RULE"));
+					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
 					Reference reference = new Reference();
 					reference.setSequenceValue(rs.getShort("KEY_SEQ"));
@@ -187,10 +187,41 @@ public class DatabaseModelReader {
 		return foreignKeys;
 	}
 
+	private CascadeAction getCascadeAction(Short actionValue) {
+		CascadeAction cascadeAction;
+		switch (actionValue.intValue()) {
+		case DatabaseMetaData.importedKeyCascade:
+			cascadeAction = CascadeAction.CASCADE;
+			break;
+		case DatabaseMetaData.importedKeySetNull:
+			cascadeAction = CascadeAction.SET_NULL;
+			break;
+		case DatabaseMetaData.importedKeySetDefault:
+			cascadeAction = CascadeAction.SET_DEFAULT;
+			break;
+		case DatabaseMetaData.importedKeyRestrict:
+			cascadeAction = CascadeAction.RESTRICT;
+			break;
+		case DatabaseMetaData.importedKeyNoAction:
+			cascadeAction = CascadeAction.NONE;
+			break;
+		default:
+			cascadeAction = CascadeAction.NONE;
+		}
+		return cascadeAction;
+	}
+
 	private Set<Index> readIndices(DatabaseMetaData databaseMetaData) throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 
-		ResultSet rs = getIndices(databaseMetaData);
+		ResultSet rs;
+		try {
+			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
+			rs = getIndices(databaseMetaData);
+		} catch (SQLException e) {
+			return indices;
+		}
+
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -199,11 +230,20 @@ public class DatabaseModelReader {
 						continue;
 					}
 
-					Index index = new Index();
-					index.setName(rs.getString("INDEX_NAME"));
-					index.setColumnName(rs.getString("COLUMN_NAME"));
-					index.setUnique(rs.getBoolean("NON_UNIQUE"));
-					index.setType(type);
+					String indexName = rs.getString("INDEX_NAME");
+					Index index = findIndex(indexName, indices);
+					if (index == null) {
+						index = new Index(indexName);
+					} else {
+						indices.remove(index);
+					}
+					index.setUnique(!rs.getBoolean("NON_UNIQUE"));
+
+					IndexColumn indexColumn = new IndexColumn();
+					indexColumn.setName(rs.getString("COLUMN_NAME"));
+					indexColumn.setOrdinalPosition(rs.getShort("ORDINAL_POSITION"));
+
+					index.addColumn(indexColumn);
 
 					indices.add(index);
 				}
@@ -213,6 +253,15 @@ public class DatabaseModelReader {
 		}
 
 		return indices;
+	}
+
+	private Index findIndex(String name, Set<Index> indices) {
+		for (Index index : indices) {
+			if (index.getName().equalsIgnoreCase(name)) {
+				return index;
+			}
+		}
+		return null;
 	}
 
 	private Set<String> readPrimaryKeyNames(DatabaseMetaData databaseMetaData) throws SQLException {
@@ -288,11 +337,11 @@ public class DatabaseModelReader {
 		String schemaPattern = schema.getName();
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getIndexInfo(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), false, true);
+			rs = databaseMetaData.getIndexInfo(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), false, false);
 		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getIndexInfo(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), false, true);
+			rs = databaseMetaData.getIndexInfo(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), false, false);
 		} else {
-			rs = databaseMetaData.getIndexInfo(catalog, schemaPattern, tableNamePattern, false, true);
+			rs = databaseMetaData.getIndexInfo(catalog, schemaPattern, tableNamePattern, false, false);
 		}
 		return rs;
 	}

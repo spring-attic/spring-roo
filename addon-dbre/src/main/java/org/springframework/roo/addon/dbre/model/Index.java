@@ -1,5 +1,10 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.springframework.roo.support.util.Assert;
+
 /**
  * Represents an index definition for a table which may be either unique or non-unique.
  * 
@@ -8,9 +13,12 @@ package org.springframework.roo.addon.dbre.model;
  */
 public class Index {
 	private String name;
-	private String columnName;
 	private boolean unique;
-	private Short type;
+	private List<IndexColumn> columns = new LinkedList<IndexColumn>();
+
+	public Index(String name) {
+		this.name = name;
+	}
 
 	Index() {
 	}
@@ -23,14 +31,6 @@ public class Index {
 		this.name = name;
 	}
 
-	public String getColumnName() {
-		return columnName;
-	}
-
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
-
 	public boolean isUnique() {
 		return unique;
 	}
@@ -39,15 +39,54 @@ public class Index {
 		this.unique = unique;
 	}
 
-	public Short getType() {
-		return type;
+	public List<IndexColumn> getColumns() {
+		return columns;
 	}
 
-	public void setType(Short type) {
-		this.type = type;
+	public boolean addColumn(IndexColumn indexColumn) {
+		Assert.notNull(indexColumn, "Column required");
+		return columns.add(indexColumn);
+	}
+
+	public boolean addColumns(List<IndexColumn> indexColumns) {
+		Assert.notNull(indexColumns, "Columns required");
+		return columns.addAll(indexColumns);
+	}
+
+	public boolean removeColumn(IndexColumn indexColumn) {
+		Assert.notNull(indexColumn, "Column required");
+		return columns.remove(indexColumn);
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Index)) {
+			return false;
+		}
+		Index other = (Index) obj;
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		return true;
 	}
 
 	public String toString() {
-		return String.format("Index [name=%s, columnName=%s, unique=%s, type=%s]", name, columnName, unique, type);
+		return String.format("Index [name=%s, unique=%s, columns=%s]", name, unique, columns);
 	}
 }

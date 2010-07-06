@@ -16,7 +16,7 @@ public class Database {
 
 	/** The name of the database model. */
 	private String name;
-	
+
 	/** The package where entities are placed */
 	private JavaPackage javaPackage;
 
@@ -95,31 +95,14 @@ public class Database {
 				}
 			}
 
-			// for (Index index : table.getIndices()) {
-			// String indexName = (index.getName() == null ? "" : index.getName());
-			// String indexDesc = (indexName.length() == 0 ? "nr. " + idx : indexName);
-			//
-			// if (indexName.length() > 0) {
-			// if (namesOfProcessedIndices.contains(indexName)) {
-			// // throw new ModelException("There are multiple indices in table " + curTable.getName() + " with the name " + indexName);
-			// }
-			// namesOfProcessedIndices.add(indexName);
-			// }
-			// if (index.getColumnCount() == 0) {
-			// // throw new ModelException("The index " + indexDesc + " in table " + curTable.getName() + " does not have any columns");
-			// }
-			//
-			// for (int indexColumnIdx = 0; indexColumnIdx < index.getColumnCount(); indexColumnIdx++) {
-			// IndexColumn indexColumn = index.getColumn(indexColumnIdx);
-			// Column column = curTable.findColumn(indexColumn.getName(), true);
-			//
-			// if (column == null) {
-			// // throw new ModelException("The index " + indexDesc + " in table " + curTable.getName() + " references the undefined column " + indexColumn.getName());
-			// } else {
-			// indexColumn.setColumn(column);
-			// }
-			// }
-			// }
+			for (Index index : table.getIndices()) {
+				for (IndexColumn indexColumn : index.getColumns()) {
+					Column column = table.findColumn(indexColumn.getName());
+					if (column != null) {
+						indexColumn.setColumn(column);
+					}
+				}
+			}
 		}
 	}
 

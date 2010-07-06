@@ -199,6 +199,6 @@ public class Column {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, javaType=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s]", name, getJavaType(), description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue);
+		return String.format("Column [name=%s, javaType=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s]", name, getJavaTypeFromTypeCode(), description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue);
 	}
 }

@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,27 +46,43 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	@Reference private ConnectionProvider connectionProvider;
 
 	public Set<Schema> getDatabaseSchemas() {
-		Connection connection = getConnection();
+		Connection connection = null;
 		try {
+			connection = getConnection();
 			DatabaseModelReader modelReader = new DatabaseModelReader(connection);
 			return modelReader.getSchemas();
-		} catch (SQLException e) {
-			throw new IllegalStateException("Failed to get database schemas: " + e.getMessage());
+		} catch (Exception e) {
+			return Collections.emptySet();
 		} finally {
 			connectionProvider.closeConnection(connection);
 		}
 	}
 
 	public void displayDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
-		Database database = getDatabase(catalog, schema, javaPackage);
-		OutputStream outputStream = new ByteArrayOutputStream();
-		XmlUtils.writeXml(outputStream, getDocument(database));
-		logger.info(outputStream.toString());
+		try {
+			Database database = getDatabase(catalog, schema, javaPackage);
+			if (database == null || database.getTables().isEmpty()) {
+				logger.warning("Schema " + schema.getName() + " does not contain any tables");
+				return;
+			}
+
+			OutputStream outputStream = new ByteArrayOutputStream();
+			Document document = getDocument(database);
+			XmlUtils.writeXml(outputStream, document);
+			logger.info(outputStream.toString());
+		} catch (Exception e) {
+			logger.warning("Failed to retrieve database metadata: " + e.getMessage());
+		}
 	}
 
 	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage, File file) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
+			if (database == null || database.getTables().isEmpty()) {
+				logger.warning("Schema " + schema.getName() + " does not contain any tables");
+				return;
+			}
+
 			Document document = getDocument(database);
 
 			if (file != null) {
@@ -77,19 +94,14 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 			}
 		} catch (Exception e) {
-			throw new IllegalStateException("Failed to write database metadata to file: " + e.getMessage());
+			logger.warning("Failed to write database metadata to file: " + e.getMessage());
 		}
 	}
 
 	public Database deserializeDatabaseMetadata() {
-		Document document = null;
-
 		String dbreXmlPath = getDbreXmlPath();
-		if (!fileManager.exists(dbreXmlPath)) {
-			throw new IllegalStateException(dbreXmlPath + " does not exist");
-		}
-		
 		MutableFile mutableFile = fileManager.updateFile(dbreXmlPath);
+		Document document = null;
 		try {
 			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
 		} catch (Exception e) {
@@ -103,14 +115,14 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 
 		Database database = new Database();
 		database.setName(databaseElement.getAttribute("name"));
-		database.setJavaPackage(new JavaPackage(databaseElement.getAttribute("package")));	
-		
+		database.setJavaPackage(new JavaPackage(databaseElement.getAttribute("package")));
+
 		Set<Table> tables = new LinkedHashSet<Table>();
 		List<Element> tableElements = XmlUtils.findElements("table", databaseElement);
 		for (Element tableElement : tableElements) {
 			Table table = new Table();
 			table.setName(tableElement.getAttribute("name"));
-			
+
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
 				Column column = new Column(columnElement.getAttribute("name"));
@@ -122,14 +134,14 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				column.setType(columnElement.getAttribute("type"));
 				table.addColumn(column);
 			}
-						
+
 			List<Element> foreignKeyElements = XmlUtils.findElements("foreignKey", tableElement);
 			for (Element foreignKeyElement : foreignKeyElements) {
 				ForeignKey foreignKey = new ForeignKey(foreignKeyElement.getAttribute("name"));
 				foreignKey.setForeignTableName(foreignKeyElement.getAttribute("foreignTable"));
-				foreignKey.setOnDelete(new Short(foreignKeyElement.getAttribute("onDelete")));
-				foreignKey.setOnUpdate(new Short(foreignKeyElement.getAttribute("onUpdate")));
-				
+				foreignKey.setOnDelete(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute("onDelete")));
+				foreignKey.setOnUpdate(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute("onUpdate")));
+
 				List<Element> referenceElements = XmlUtils.findElements("reference", foreignKeyElement);
 				for (Element referenceElement : referenceElements) {
 					org.springframework.roo.addon.dbre.model.Reference reference = new org.springframework.roo.addon.dbre.model.Reference();
@@ -139,19 +151,32 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				}
 				table.addForeignKey(foreignKey);
 			}
-			
+
+			addIndices(table, tableElement, "index");
+			addIndices(table, tableElement, "unique");
+
 			tables.add(table);
 		}
-		
+
 		database.addTables(tables);
+
 		return database;
 	}
 
-	private Document getDocument(Database database) {
-		if (database == null || database.getTables().isEmpty()) {
-			throw new IllegalStateException("Schema does not exist or the database does not contain any tables");
+	private void addIndices(Table table, Element tableElement, String indexType) {
+		List<Element> elements = XmlUtils.findElements(indexType, tableElement);
+		for (Element element : elements) {
+			Index index = new Index(element.getAttribute("name"));
+			List<Element> indexColumnElements = XmlUtils.findElements(indexType + "-column", element);
+			for (Element indexColumnElement : indexColumnElements) {
+				IndexColumn indexColumn = new IndexColumn(indexColumnElement.getAttribute("name"));
+				index.addColumn(indexColumn);
+			}
+			table.addIndex(index);
 		}
-		
+	}
+
+	private Document getDocument(Database database) {
 		Document document = XmlUtils.getDocumentBuilder().newDocument();
 
 		Element databaseElement = document.createElement("database");
@@ -168,7 +193,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			if (StringUtils.hasText(table.getDescription())) {
 				tableElement.setAttribute("description", table.getDescription());
 			}
-			
+
 			for (Column column : table.getColumns()) {
 				Element columnElement = document.createElement("column");
 				columnElement.setAttribute("name", column.getName());
@@ -187,8 +212,8 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				Element foreignKeyElement = document.createElement("foreignKey");
 				foreignKeyElement.setAttribute("name", foreignKey.getName());
 				foreignKeyElement.setAttribute("foreignTable", foreignKey.getForeignTableName());
-				foreignKeyElement.setAttribute("onDelete", String.valueOf(foreignKey.getOnDelete()));
-				foreignKeyElement.setAttribute("onUpdate", String.valueOf(foreignKey.getOnUpdate()));
+				foreignKeyElement.setAttribute("onDelete", foreignKey.getOnDelete().getCode());
+				foreignKeyElement.setAttribute("onUpdate", foreignKey.getOnUpdate().getCode());
 				for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
 					Element referenceElement = document.createElement("reference");
 					referenceElement.setAttribute("foreign", reference.getForeignColumnName());
@@ -198,37 +223,43 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				tableElement.appendChild(foreignKeyElement);
 			}
 
+			for (Index index : table.getIndices()) {
+				Element indexElement = document.createElement(index.isUnique() ? "unique" : "index");
+				indexElement.setAttribute("name", index.getName());
+				for (IndexColumn indexColumn : index.getColumns()) {
+					Element indexColumnElement = document.createElement(index.isUnique() ? "unique-column" : "index-column");
+					indexColumnElement.setAttribute("name", indexColumn.getName());
+					indexElement.appendChild(indexColumnElement);
+				}
+				tableElement.appendChild(indexElement);
+			}
+
 			databaseElement.appendChild(tableElement);
 		}
 
 		document.appendChild(databaseElement);
-		
-		return document;		
+
+		return document;
 	}
-	
-	private Database getDatabase(String catalog, Schema schema, JavaPackage javaPackage) {
-		Connection connection = getConnection();
+
+	private Database getDatabase(String catalog, Schema schema, JavaPackage javaPackage) throws SQLException {
+		Connection connection = null;
 		try {
+			connection = getConnection();
 			DatabaseModelReader modelReader = new DatabaseModelReader(connection);
 			modelReader.setCatalog(StringUtils.hasText(catalog) ? catalog : modelReader.getConnection().getCatalog());
 			modelReader.setSchema(schema);
 			return modelReader.getDatabase(javaPackage);
-		} catch (SQLException e) {
-			throw new IllegalStateException("Failed to get database model: " + e.getMessage());
 		} finally {
 			connectionProvider.closeConnection(connection);
 		}
 	}
-	
-	private Connection getConnection() {
+
+	private Connection getConnection() throws SQLException {
 		connectionProvider.configure(propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties"));
-		try {
-			return connectionProvider.getConnection();
-		} catch (SQLException e) {
-			throw new IllegalStateException("Failed to get database connection: " + e.getMessage());
-		}		
+		return connectionProvider.getConnection();
 	}
-	
+
 	private String getDbreXmlPath() {
 		return pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 	}

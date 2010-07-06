@@ -20,9 +20,9 @@ public class Table {
 	private Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
 
-	Table() {	
+	Table() {
 	}
-	
+
 	public String getCatalog() {
 		return catalog;
 	}
@@ -104,6 +104,11 @@ public class Table {
 
 	public Set<Index> getIndices() {
 		return indices;
+	}
+
+	public boolean addIndex(Index index) {
+		Assert.notNull(index, "Indexrequired");
+		return indices.add(index);
 	}
 
 	public boolean addIndices(Set<Index> indices) {
