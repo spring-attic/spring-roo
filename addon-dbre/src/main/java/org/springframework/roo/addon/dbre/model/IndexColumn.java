@@ -1,12 +1,15 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a column of an index in the database model.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
-public class IndexColumn {
+public class IndexColumn implements Serializable {
+	private static final long serialVersionUID = 4206711649555220093L;
 	private String name;
 	private int ordinalPosition;
 	private Column column;

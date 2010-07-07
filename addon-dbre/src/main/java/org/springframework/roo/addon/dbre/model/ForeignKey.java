@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -10,7 +11,8 @@ import java.util.TreeSet;
  * @author Alan Stewart
  * @since 1.1
  */
-public class ForeignKey {
+public class ForeignKey implements Serializable {
+	private static final long serialVersionUID = -7679438879219261466L;
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;
@@ -31,7 +33,6 @@ public class ForeignKey {
 	private SortedSet<Reference> references = new TreeSet<Reference>();
 
 	ForeignKey() {
-		this(null);
 	}
 
 	ForeignKey(String name) {

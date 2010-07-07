@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -12,7 +13,8 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Database {
+public class Database implements Serializable {
+	private static final long serialVersionUID = -7534586433203368378L;
 
 	/** The name of the database model. */
 	private String name;

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Types;
@@ -14,7 +15,8 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart.
  * @since 1.1
  */
-public class Column {
+public class Column implements Serializable {
+	private static final long serialVersionUID = -4826133462002775388L;
 	private String name;
 	private String description;
 	private boolean primaryKey;

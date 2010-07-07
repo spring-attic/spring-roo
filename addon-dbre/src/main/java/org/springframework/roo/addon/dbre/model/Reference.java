@@ -1,12 +1,15 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a reference between a column in the local table and a column in another table.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
-public class Reference implements Comparable<Reference> {
+public class Reference implements Comparable<Reference>, Serializable {
+	private static final long serialVersionUID = 7930959797342530749L;
 
 	/** The sequence value within the key. */
 	private Short sequenceValue;

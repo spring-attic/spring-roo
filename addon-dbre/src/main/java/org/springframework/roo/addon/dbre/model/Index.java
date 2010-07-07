@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -11,7 +12,8 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Index {
+public class Index implements Serializable {
+	private static final long serialVersionUID = 3248243308098445623L;
 	private String name;
 	private boolean unique;
 	private List<IndexColumn> columns = new LinkedList<IndexColumn>();

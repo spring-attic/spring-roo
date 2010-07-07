@@ -228,10 +228,10 @@ public class DbreXmlFileListener implements FileEventListener {
 		List<StringAttributeValue> idColumns = new ArrayList<StringAttributeValue>();
 		for (Column column : columns) {
 			if (column.isPrimaryKey()) {
-				String columnName = column.getName();
+				String columnName = tableModelService.suggestFieldNameForColumn(column.getName());
 				idFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), columnName));
 				idTypes.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getJavaType().getFullyQualifiedTypeName()));
-				idColumns.add(new StringAttributeValue(new JavaSymbolName("ignored"), columnName));
+				idColumns.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getName()));
 			}
 		}
 
