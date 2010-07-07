@@ -3,12 +3,12 @@
 	<databases>
 		<database id="H2">
 			<dependencies>
-				<dependency org="com.h2database" name="h2" rev="1.2.131" />
+				<dependency org="com.h2database" name="h2" rev="1.2.138" />
 			</dependencies>
 		</database>
 		<database id="HYPERSONIC">
 			<dependencies>
-				<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
+				<dependency org="org.hsqldb" name="hsqldb" rev="2.0.0" />
 			</dependencies>
 		</database>
 		<database id="POSTGRES">
@@ -18,7 +18,7 @@
 		</database>
 		<database id="MYSQL">
 			<dependencies>
-				<dependency org="mysql" name="mysql-connector-java" rev="5.1.12" />
+				<dependency org="mysql" name="mysql-connector-java" rev="5.1.13" />
 			</dependencies>
 		</database>
 		<database id="MSSQL">
