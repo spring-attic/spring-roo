@@ -486,6 +486,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				continue;
 			}
 
+			// Check for @ManyToOne annotation with 'optional = false' attribute (ROO-1075)
+			boolean hasManyToOne = false;
+			AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
+			if (manyToOneAnnotation != null) {
+				AnnotationAttributeValue<?> optionalAttribute = manyToOneAnnotation.getAttribute(new JavaSymbolName("optional"));
+				hasManyToOne = optionalAttribute != null && !((Boolean) optionalAttribute.getValue());
+			}
+			
 			String initializer = "null";
 
 			// Date fields included for DataNucleus (
@@ -497,7 +505,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					initializer = "new java.util.Date()";
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")) != null || field.getAnnotations().size() == 0) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")) != null || hasManyToOne || field.getAnnotations().size() == 0) {
 				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
 				if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
 					initializer = field.getFieldName().getSymbolName();
@@ -575,7 +583,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "new Integer(index).shortValue()"; // Auto-boxed
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 					initializer = "new Integer(index).shortValue()";
-				} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
+				} else if (manyToOneAnnotation != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
 					if (field.getFieldType().equals(this.getAnnotationValues().getEntity())) {
 						// Avoid circular references (ROO-562)
 						initializer = "obj";
