@@ -25,7 +25,7 @@ public class JspCommands implements CommandMarker {
 	
 	@CliAvailabilityIndicator({"controller class"})
 	public boolean isControllerClassAvailable() {
-		return jspOperations.isControllerCommandAvailable();
+		return jspOperations.isProjectAvailable();
 	}
 	
 	@CliCommand(value="controller class", help="Create a new manual Controller (ie where you write the methods)")
@@ -44,5 +44,18 @@ public class JspCommands implements CommandMarker {
 	public void lang(
 			@CliOption(key={"", "code"}, mandatory=true, help="The path and name of the controller object to be created") I18n i18n) {
 		jspOperations.installI18n(i18n);
+	}
+	
+	@CliAvailabilityIndicator({"web mvc install view"})
+	public boolean isInstallViewAvailable() {
+		return jspOperations.isProjectAvailable();
+	}
+	
+	@CliCommand(value="web mvc install view", help="Create a new static view.")
+	public void installView(
+			@CliOption(key="path", mandatory=true, help="The path the static view to create in (required, ie '/foo/blah')") String path,
+			@CliOption(key="viewName", mandatory=true, help="The view name the mapping this view should adopt (required, ie 'index')") String viewName,
+			@CliOption(key="title", mandatory=true, help="The title of the view") String title) {
+		jspOperations.installView(path, viewName, title, "Controller");
 	}
 }

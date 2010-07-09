@@ -86,14 +86,14 @@ public class JspOperationsImpl implements JspOperations {
 		this.context = context;
 	}
 
-	public boolean isControllerCommandAvailable() {
+	public boolean isProjectAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 	
 	public boolean isInstallLanguageCommandAvailable() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/footer.jspx"));
 	}
-
+	
 	public void installCommonViewArtefacts() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
@@ -137,6 +137,65 @@ public class JspOperationsImpl implements JspOperations {
 				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
+			}
+		}
+	}
+	
+	public void installView(String path, String viewName, String title, String category) {
+		installView(path, viewName, title, category, null);
+	}
+	
+	public void installView(String path, String viewName, String title, String category, Document document) {
+		Assert.hasText(path, "Path required");
+		Assert.hasText(viewName, "View name required");
+		Assert.hasText(title, "Title required");
+		path = cleanPath(path);
+		viewName = cleanPath(viewName);
+		if (document != null) {
+			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), document);
+		} else {
+			try {
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/index.jspx")).getOutputStream());
+			} catch (IOException e) {
+				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
+			}
+		}
+		installView(new JavaSymbolName(viewName), path, title, category);
+	}
+
+	/**
+	 * Creates a new Spring MVC static view.
+	 * 
+	 * @param path the static view to create in (required, ie '/foo/blah')
+	 * @param viewName the mapping this view should adopt (required, ie 'index')
+	 */
+	private void installView(JavaSymbolName viewName, String folderName, String title, String category) {
+		webMvcOperations.installAllWebMvcArtifacts();
+		installCommonViewArtefacts();
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label_" + folderName, viewName.getReadableSymbolName(), true);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(viewName + "_id"), viewName, "global_menu_new", "/" + folderName + "/" + viewName, null);
+		tilesOperations.addViewDefinition(folderName, folderName + "/" + viewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/" + viewName + ".jspx");
+		
+		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
+		
+		if (fileManager.exists(mvcConfig)) {
+			MutableFile mvcConfigFile = fileManager.updateFile(mvcConfig);
+			Document doc;
+			try {
+				doc = XmlUtils.getDocumentBuilder().parse(mvcConfigFile.getInputStream());
+			} catch (Exception e) {
+				throw new IllegalStateException("Could not parse " + mvcConfig, e);
+			}
+			 
+			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='/" + folderName + "/" + viewName + "']", doc.getDocumentElement())) {
+				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", doc.getDocumentElement());
+				Element view = new XmlElementBuilder("mvc:view-controller", doc).addAttribute("path", "/" + folderName + "/" + viewName).build();
+				if (sibling != null) {
+					sibling.getParentNode().insertBefore(view, sibling);
+				} else {
+					doc.getDocumentElement().appendChild(view);
+				}
+				XmlUtils.writeXml(mvcConfigFile.getOutputStream(), doc);
 			}
 		}
 	}
@@ -237,22 +296,10 @@ public class JspOperationsImpl implements JspOperations {
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 
 		classpathOperations.generateClassFile(details);
+		
+		JavaSymbolName controllerName = new JavaSymbolName(controller.getSimpleTypeName());
 
-		webMvcOperations.installAllWebMvcArtifacts();
-
-		installCommonViewArtefacts();
-
-		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + folderName + "/index.jspx")).getOutputStream());
-		} catch (IOException e) {
-			new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
-		}
-
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label_" + folderName, new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName(), true);
-
-		menuOperations.addMenuItem(new JavaSymbolName("Controller"), new JavaSymbolName("new"), new JavaSymbolName(controller.getSimpleTypeName()), "global_menu_new", "/" + folderName + "/index", null);
-
-		tilesOperations.addViewDefinition(folderName, folderName + "/index", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/index.jspx");
+		installView(controllerName, folderName, controllerName.getReadableSymbolName() + " view", "Controller");
 	}
 
 	/**
@@ -392,5 +439,15 @@ public class JspOperationsImpl implements JspOperations {
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
 			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
 		}
+	}
+	
+	private String cleanPath(String path) {
+		if (path.startsWith("/")) {
+			path = path.substring(1, path.length());
+		} 
+		if (path.contains(".")) {
+			path = path.substring(0, path.indexOf(".") - 1);
+		}
+		return path.toLowerCase();
 	}
 }
