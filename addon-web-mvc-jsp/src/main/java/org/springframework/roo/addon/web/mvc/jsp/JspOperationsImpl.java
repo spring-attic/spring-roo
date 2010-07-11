@@ -155,8 +155,11 @@ public class JspOperationsImpl implements JspOperations {
 			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), document);
 		} else {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream());
-			} catch (IOException e) {
+				Document doc = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
+				Element page = XmlUtils.findRequiredElement("/div/page", doc.getDocumentElement());
+				page.setAttribute("title", title);
+				XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), doc);
+			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
 		}
