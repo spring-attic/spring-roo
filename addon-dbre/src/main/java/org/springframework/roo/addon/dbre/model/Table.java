@@ -94,14 +94,25 @@ public class Table implements Serializable {
 		return foreignKeys;
 	}
 
+	public boolean addForeignKeys(Set<ForeignKey> foreignKeys) {
+		Assert.notNull(foreignKeys, "Foreign keys required");
+		return this.foreignKeys.addAll(foreignKeys);
+	}
+
 	public boolean addForeignKey(ForeignKey foreignKey) {
 		Assert.notNull(foreignKey, "Foreign key required");
 		return foreignKeys.add(foreignKey);
 	}
 
-	public boolean addForeignKeys(Set<ForeignKey> foreignKeys) {
-		Assert.notNull(foreignKeys, "Foreign keys required");
-		return this.foreignKeys.addAll(foreignKeys);
+	public ForeignKey findForeignKeyByLocalColumnName(String localColumnName) {
+		for (ForeignKey foreignKey : foreignKeys) {
+			for (Reference reference : foreignKey.getReferences()) {
+				if (reference.getLocalColumnName().equalsIgnoreCase(localColumnName)) {
+					return foreignKey;
+				}
+			}
+		}
+		return null;
 	}
 
 	public Set<Index> getIndices() {
