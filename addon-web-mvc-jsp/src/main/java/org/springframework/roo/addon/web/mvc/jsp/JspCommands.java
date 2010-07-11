@@ -56,6 +56,6 @@ public class JspCommands implements CommandMarker {
 			@CliOption(key="path", mandatory=true, help="The path the static view to create in (required, ie '/foo/blah')") String path,
 			@CliOption(key="viewName", mandatory=true, help="The view name the mapping this view should adopt (required, ie 'index')") String viewName,
 			@CliOption(key="title", mandatory=true, help="The title of the view") String title) {
-		jspOperations.installView(path, viewName, title, "Controller");
+		jspOperations.installView(path, viewName, title, "View");
 	}
 }

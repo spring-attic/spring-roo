@@ -155,7 +155,7 @@ public class JspOperationsImpl implements JspOperations {
 			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), document);
 		} else {
 			try {
-				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/index.jspx")).getOutputStream());
+				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "controller-index.jspx"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream());
 			} catch (IOException e) {
 				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
@@ -173,7 +173,7 @@ public class JspOperationsImpl implements JspOperations {
 		webMvcOperations.installAllWebMvcArtifacts();
 		installCommonViewArtefacts();
 		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label_" + folderName, viewName.getReadableSymbolName(), true);
-		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(viewName + "_id"), viewName, "global_menu_new", "/" + folderName + "/" + viewName, null);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "") + viewName + "_id"), viewName, "global_menu_new", "/" + folderName + "/" + viewName, null);
 		tilesOperations.addViewDefinition(folderName, folderName + "/" + viewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/" + viewName + ".jspx");
 		
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
@@ -296,10 +296,8 @@ public class JspOperationsImpl implements JspOperations {
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
 
 		classpathOperations.generateClassFile(details);
-		
-		JavaSymbolName controllerName = new JavaSymbolName(controller.getSimpleTypeName());
 
-		installView(controllerName, folderName, controllerName.getReadableSymbolName() + " view", "Controller");
+		installView(folderName, "index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " view", "Controller");
 	}
 
 	/**
