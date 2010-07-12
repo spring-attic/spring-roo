@@ -12,7 +12,7 @@
 
     <productname>Spring Roo</productname>
 
-    <releaseinfo>1.1.0.M2</releaseinfo>
+    <releaseinfo>1.1.0.M3</releaseinfo>
 
     <authorgroup>
       <author>
@@ -81,11 +81,11 @@
 
     <xi:include href="base-overview.xml" />
 
-	<xi:include href="base-persistence.xml" />
-	
-	<xi:include href="base-web.xml" />
+    <xi:include href="base-persistence.xml" />
 
-	<xi:include href="base-solr.xml" />
+    <xi:include href="base-web.xml" />
+
+    <xi:include href="base-solr.xml" />
   </part>
 
   <part xml:id="internals">
