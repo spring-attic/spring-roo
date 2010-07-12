@@ -63,9 +63,32 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support.osgi</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.url.stream</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
+        </dependency>
+        <!-- GPG Management (PGP) via Bouncy Castle -->
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.bcpg-jdk15</artifactId>
+            <version>1.45.0.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
+            <version>1.45.0.0001</version>
         </dependency>
     </dependencies>
 </project>

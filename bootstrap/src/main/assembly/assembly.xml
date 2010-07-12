@@ -56,6 +56,15 @@
 		</fileSet>
 		<fileSet>
 			<outputDirectory>/legal</outputDirectory>
+			<directory>felix</directory>
+			<lineEnding>unix</lineEnding>
+			<useDefaultExcludes>true</useDefaultExcludes>
+			<includes>
+				<include>legal-*.txt</include>
+			</includes>
+		</fileSet>
+		<fileSet>
+			<outputDirectory>/legal</outputDirectory>
 			<lineEnding>unix</lineEnding>
 			<useDefaultExcludes>true</useDefaultExcludes>
 			<includes>
