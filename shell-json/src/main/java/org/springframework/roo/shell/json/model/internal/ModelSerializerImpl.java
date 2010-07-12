@@ -3,6 +3,8 @@ package org.springframework.roo.shell.json.model.internal;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Service;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -19,6 +21,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  *
  */
+@Component
+@Service
 public class ModelSerializerImpl implements ModelSerializer {
 
 	public CommandInfo deserialize(String json) {

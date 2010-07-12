@@ -11,6 +11,11 @@
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Shell - JSON Support</name>
 	<dependencies>
+        <!-- Apache Felix -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
         <!-- JSON parsing -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
@@ -40,6 +45,23 @@
 	</dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <version>1.4.2</version>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <!--<phase>compile</phase>-->
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <parseJavaDoc>false</parseJavaDoc>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

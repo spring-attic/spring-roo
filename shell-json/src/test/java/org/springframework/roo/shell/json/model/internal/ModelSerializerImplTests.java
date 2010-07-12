@@ -37,6 +37,14 @@ public class ModelSerializerImplTests {
 		Assert.assertEquals(commandInfo, deserialized);
 	}
 
+	@Test
+	public void testFromJsonString() throws Exception {
+		String json = "[{\"help\":\"Obtains a pre-defined system property\",\"commandOptions\":[{\"specifiedDefaultValue\":\"USERNAME\",\"help\":\"The property name you`d like to display\",\"optionNames\":[\"name\"],\"unspecifiedDefaultValue\":\"USERNAME\",\"mandatory\":false}],\"commandNames\":[\"welcome property\"]},{\"help\":\"Writes hello.txt in the project root directory\",\"commandOptions\":[],\"commandNames\":[\"welcome write hello\"]},{\"help\":\"Writes hej.txt in the project root directory\",\"commandOptions\":[],\"commandNames\":[\"welcome write hej\"]}]";
+		List<CommandInfo> deserialized = serializer.deserializeList(json);
+		System.out.println(deserialized);
+		Assert.assertTrue(deserialized != null && deserialized.size() > 1);
+	}
+
 	private CommandInfo getData(String commandName) {
 		CommandOption option1 = new CommandOption(true, "true", "false", "the confirmation", "doIt", "iAmSure");
 		CommandOption option2 = new CommandOption(false, "C:\\", "/home", "where to format", "drive", "mountPoint");
