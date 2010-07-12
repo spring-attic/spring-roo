@@ -142,28 +142,33 @@ public class JspOperationsImpl implements JspOperations {
 	}
 	
 	public void installView(String path, String viewName, String title, String category) {
-		installView(path, viewName, title, category, null);
+		installView(path, viewName, title, category, null, true);
 	}
 	
 	public void installView(String path, String viewName, String title, String category, Document document) {
+		installView(path, viewName, title, category, document, true);
+	}
+	
+	private void installView(String path, String viewName, String title, String category, Document document, boolean registerStaticController) {
 		Assert.hasText(path, "Path required");
 		Assert.hasText(viewName, "View name required");
 		Assert.hasText(title, "Title required");
 		path = cleanPath(path);
-		viewName = cleanPath(viewName);
+		viewName = cleanViewName(viewName);
+		String lcViewName = viewName.toLowerCase();
 		if (document != null) {
-			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), document);
+			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
 		} else {
 			try {
 				Document doc = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
-				Element page = XmlUtils.findRequiredElement("/div/page", doc.getDocumentElement());
-				page.setAttribute("title", title);
-				XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/" + path + "/" + viewName + ".jspx")).getOutputStream(), doc);
+				XmlUtils.findRequiredElement("/div/message", doc.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
+				XmlUtils.findRequiredElement("/div/page", doc.getDocumentElement()).setAttribute("id", path.replace("/", "_") + "_" + lcViewName);
+				XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), doc);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
 		}
-		installView(new JavaSymbolName(viewName), path, title, category);
+		installView(new JavaSymbolName(viewName), path, title, category, registerStaticController);
 	}
 
 	/**
@@ -172,16 +177,17 @@ public class JspOperationsImpl implements JspOperations {
 	 * @param path the static view to create in (required, ie '/foo/blah')
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 */
-	private void installView(JavaSymbolName viewName, String folderName, String title, String category) {
+	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
 		webMvcOperations.installAllWebMvcArtifacts();
 		installCommonViewArtefacts();
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label_" + folderName, viewName.getReadableSymbolName(), true);
-		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "") + viewName + "_id"), viewName, "global_menu_new", "/" + folderName + "/" + viewName, null);
-		tilesOperations.addViewDefinition(folderName, folderName + "/" + viewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + folderName + "/" + viewName + ".jspx");
+		String lcViewName = viewName.getSymbolName().toLowerCase();
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), viewName, "global_menu_new", folderName + "/" + lcViewName, null);
+		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
 		
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
 		
-		if (fileManager.exists(mvcConfig)) {
+		if (registerStaticController && fileManager.exists(mvcConfig)) {
 			MutableFile mvcConfigFile = fileManager.updateFile(mvcConfig);
 			Document doc;
 			try {
@@ -190,9 +196,9 @@ public class JspOperationsImpl implements JspOperations {
 				throw new IllegalStateException("Could not parse " + mvcConfig, e);
 			}
 			 
-			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='/" + folderName + "/" + viewName + "']", doc.getDocumentElement())) {
+			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", doc.getDocumentElement())) {
 				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", doc.getDocumentElement());
-				Element view = new XmlElementBuilder("mvc:view-controller", doc).addAttribute("path", "/" + folderName + "/" + viewName).build();
+				Element view = new XmlElementBuilder("mvc:view-controller", doc).addAttribute("path", folderName + "/" + lcViewName).build();
 				if (sibling != null) {
 					sibling.getParentNode().insertBefore(view, sibling);
 				} else {
@@ -300,7 +306,7 @@ public class JspOperationsImpl implements JspOperations {
 
 		classpathOperations.generateClassFile(details);
 
-		installView(folderName, "index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " view", "Controller");
+		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
 	}
 
 	/**
@@ -443,12 +449,25 @@ public class JspOperationsImpl implements JspOperations {
 	}
 	
 	private String cleanPath(String path) {
-		if (path.startsWith("/")) {
-			path = path.substring(1, path.length());
+		if (path.equals("/")) {
+			return "";
+		}
+		if (!path.startsWith("/")) {
+			path = "/".concat(path);
 		} 
 		if (path.contains(".")) {
 			path = path.substring(0, path.indexOf(".") - 1);
 		}
 		return path.toLowerCase();
+	}
+	
+	private String cleanViewName(String viewName) {
+		if (viewName.startsWith("/")) {
+			viewName = viewName.substring(1);
+		} 
+		if (viewName.contains(".")) {
+			viewName = viewName.substring(0, viewName.indexOf(".") - 1);
+		}
+		return viewName;
 	}
 }
