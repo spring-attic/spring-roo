@@ -233,7 +233,22 @@
     forum</link> for assistance.</para>
   </section>
 
-  <section>
+  <section xml:id="upgrade-1.1.0.M2">
+    <title>Upgrading to 1.1.0.M2</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.0.M1 to Spring Roo 1.1.0.M2 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="upgrade-1.1.0.M1">
     <title>Upgrading to 1.1.0.M1</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
