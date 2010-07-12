@@ -79,7 +79,7 @@ public class SimpleParser implements Parser {
 				// by seeing the command is simply unavailable at this point in time
 				matchingTargets = locateTargets(buffer, true, false);
 				if (matchingTargets.size() == 0) {
-					logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
+					commandNotFound(logger, buffer);
 				} else {
 					logger.warning("Command '" + buffer + "' was found but is not currently available (type 'help' then ENTER to learn about this command)");
 				}
@@ -222,6 +222,10 @@ public class SimpleParser implements Parser {
 
 			return new ParseResult(methodTarget.method, methodTarget.target, arguments.toArray());
 		}
+	}
+
+	protected void commandNotFound(Logger logger, String buffer) {
+		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
 	}
 
 	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching, boolean checkAvailabilityIndicators) {
