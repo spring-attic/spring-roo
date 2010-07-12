@@ -20,6 +20,8 @@
         <module>inflector</module>
         <module>javaparser</module>
         <module>velocity</module>
+        <module>bcprov-jdk15</module>
+        <module>bcpg-jdk15</module>
     </modules>
 
     <repositories>
