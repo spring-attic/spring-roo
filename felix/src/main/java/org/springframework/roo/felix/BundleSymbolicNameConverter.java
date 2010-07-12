@@ -24,6 +24,8 @@ import org.springframework.roo.shell.MethodTarget;
 @Service
 public class BundleSymbolicNameConverter implements Converter {
 
+	// handler service field is solely to ensure it starts before BundleSymbolicNameConverter
+	@Reference protected HttpPgpUrlStreamHandlerService handlerService;
 	@Reference private RepositoryAdmin repositoryAdmin;
 	private ComponentContext context;
 	
@@ -32,7 +34,9 @@ public class BundleSymbolicNameConverter implements Converter {
 		// Do a quick background query so we have the results cached and ready to roll
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				repositoryAdmin.listRepositories();
+				try {
+					repositoryAdmin.listRepositories();
+				} catch (RuntimeException ignore) {}
 			}
 		}, "OBR Eager Download");
 		t.start();
