@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.0.M1 [rev 9a9d46d].</para>
+    <para>This appendix was automatically built from Roo 1.1.0.M2 [rev 765cb2a].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-backup-commands">
         <title>Backup Commands</title>
@@ -314,6 +314,91 @@
                     <term>--disallowedOperations</term>
                     <listitem>
                         <para>A comma separated list of operations (only create, update, delete allowed) that should not be generated in the controller; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-creator-commands">
+        <title>Creator Commands</title>
+        <para>Creator Commands are contained in org.springframework.roo.addon.creator.CreatorCommands.</para>
+        <section xml:id="command-index-addon-create-advanced">
+            <title>addon create advanced</title>
+            <para>Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + depedencies</para>
+            <programlisting><![CDATA[addon create advanced --topLevelPackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--description</term>
+                    <listitem>
+                        <para>Description of your addon (surround text with double quotes); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-create-i18n">
+            <title>addon create i18n</title>
+            <para>Create a new Internationalization add-on for Spring Roo</para>
+            <programlisting><![CDATA[addon create i18n --topLevelPackage --language --locale --messageBundle --flagGraphic]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--language</term>
+                    <listitem>
+                        <para>The full name of the language (used as a label for the UI); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--locale</term>
+                    <listitem>
+                        <para>The locale abbreviation (ie: en, or more specific like en_AU, or de_DE); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--messageBundle</term>
+                    <listitem>
+                        <para>Fully qualified path to the messages_xx.properties file; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--flagGraphic</term>
+                    <listitem>
+                        <para>Fully qualified path to flag xx.png file; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--description</term>
+                    <listitem>
+                        <para>Description of your addon (surround text with double quotes); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-create-simple">
+            <title>addon create simple</title>
+            <para>Create a new simple add-on for Spring Roo (commands + operations)</para>
+            <programlisting><![CDATA[addon create simple --topLevelPackage]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The top level package of the new addon; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--description</term>
+                    <listitem>
+                        <para>Description of your addon (surround text with double quotes); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1347,9 +1432,9 @@
             </variablelist>
         </section>
     </section>
-    <section xml:id="command-index-j-line-shell">
-        <title>J Line Shell</title>
-        <para>J Line Shell are contained in org.springframework.roo.shell.jline.JLineShell.</para>
+    <section xml:id="command-index-j-line-shell-component">
+        <title>J Line Shell Component</title>
+        <para>J Line Shell Component are contained in org.springframework.roo.shell.jline.osgi.JLineShellComponent.</para>
         <section xml:id="command-index-asxfwd">
             <title>*/</title>
             <para>End of block comment</para>
@@ -1579,7 +1664,7 @@
     </section>
     <section xml:id="command-index-jsp-commands">
         <title>Jsp Commands</title>
-        <para>Jsp Commands are contained in org.springframework.roo.addon.mvc.jsp.JspCommands.</para>
+        <para>Jsp Commands are contained in org.springframework.roo.addon.web.mvc.jsp.JspCommands.</para>
         <section xml:id="command-index-controller-class">
             <title>controller class</title>
             <para>Create a new manual Controller (ie where you write the methods)</para>
@@ -1595,6 +1680,44 @@
                     <term>--preferredMapping</term>
                     <listitem>
                         <para>Indicates a specific request mapping path for this controller (eg /foo/); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-install-language">
+            <title>web mvc install language</title>
+            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <programlisting><![CDATA[web mvc install language --code]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--code</term>
+                    <listitem>
+                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-install-view">
+            <title>web mvc install view</title>
+            <para>Create a new static view.</para>
+            <programlisting><![CDATA[web mvc install view --path --viewName --title]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--path</term>
+                    <listitem>
+                        <para>The path the static view to create in (required, ie '/foo/blah'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The view name the mapping this view should adopt (required, ie 'index'); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--title</term>
+                    <listitem>
+                        <para>The title of the view; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1827,12 +1950,6 @@
                         <para>Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only); no default value</para>
                     </listitem>
                 </varlistentry>
-                <varlistentry>
-                    <term>--template</term>
-                    <listitem>
-                        <para>The type of project to create (defaults to STANDARD_PROJECT); default: 'STANDARD_PROJECT'</para>
-                    </listitem>
-                </varlistentry>
             </variablelist>
         </section>
     </section>
@@ -1880,6 +1997,73 @@
                     <term>--level</term>
                     <listitem>
                         <para>The verbosity of notifications (0=none, 1=some, 2=all); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-pgp-commands">
+        <title>Pgp Commands</title>
+        <para>Pgp Commands are contained in org.springframework.roo.felix.pgp.PgpCommands.</para>
+        <section xml:id="command-index-pgp-automatic-trust">
+            <title>pgp automatic trust</title>
+            <para>Indicates to automatically trust all keys encountered until the command is invoked again</para>
+            <programlisting><![CDATA[pgp automatic trust]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-pgp-key-view">
+            <title>pgp key view</title>
+            <para>Downloads a remote key and displays it to the user (does not change any trusts)</para>
+            <programlisting><![CDATA[pgp key view --keyId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--keyId</term>
+                    <listitem>
+                        <para>The key ID to view (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-pgp-list-trusted-keys">
+            <title>pgp list trusted keys</title>
+            <para>Lists the keys you currently trust and have not been revoked at the time last downloaded from a public key server</para>
+            <programlisting><![CDATA[pgp list trusted keys]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-pgp-refresh-all">
+            <title>pgp refresh all</title>
+            <para>Refreshes all keys from public key servers</para>
+            <programlisting><![CDATA[pgp refresh all]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-pgp-status">
+            <title>pgp status</title>
+            <para>Displays the status of the PGP environment</para>
+            <programlisting><![CDATA[pgp status]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-pgp-trust">
+            <title>pgp trust</title>
+            <para>Grants trust to a particular key ID</para>
+            <programlisting><![CDATA[pgp trust --keyId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--keyId</term>
+                    <listitem>
+                        <para>The key ID to trust (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-pgp-untrust">
+            <title>pgp untrust</title>
+            <para>Revokes your trust for a particular key ID</para>
+            <programlisting><![CDATA[pgp untrust --keyId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--keyId</term>
+                    <listitem>
+                        <para>The key ID to remove trust from (eg 00B5050F or 0x00B5050F); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2006,6 +2190,16 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-proxy-configuration-commands">
+        <title>Proxy Configuration Commands</title>
+        <para>Proxy Configuration Commands are contained in org.springframework.roo.url.stream.jdk.ProxyConfigurationCommands.</para>
+        <section xml:id="command-index-proxy-configuration">
+            <title>proxy configuration</title>
+            <para>Shows the proxy server configuration</para>
+            <programlisting><![CDATA[proxy configuration]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
     <section xml:id="command-index-security-commands">
         <title>Security Commands</title>
         <para>Security Commands are contained in org.springframework.roo.addon.security.SecurityCommands.</para>
@@ -2045,9 +2239,9 @@
             </variablelist>
         </section>
     </section>
-    <section xml:id="command-index-simple-parser">
-        <title>Simple Parser</title>
-        <para>Simple Parser are contained in org.springframework.roo.shell.SimpleParser.</para>
+    <section xml:id="command-index-simple-parser-component">
+        <title>Simple Parser Component</title>
+        <para>Simple Parser Component are contained in org.springframework.roo.shell.osgi.SimpleParserComponent.</para>
         <section xml:id="command-index-help">
             <title>help</title>
             <para>Shows system help</para>
