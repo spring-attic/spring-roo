@@ -32,6 +32,7 @@ import org.bouncycastle.openpgp.PGPPublicKeyRingCollection;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureList;
 import org.bouncycastle.openpgp.PGPUtil;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
@@ -58,7 +59,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 public class PgpServiceImpl implements PgpService {
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private boolean automaticTrust = false;
-	private ComponentContext context;
+	private BundleContext context;
 	private static final File ROO_PGP_FILE = new File(System.getProperty("user.home") + File.separatorChar + ".spring_roo_pgp.bpg");
 //	private static final String DEFAULT_KEYSERVER_URL = "http://pgpkeys.pca.dfn.de/pks/lookup?op=get&search=";
 	private static final String DEFAULT_KEYSERVER_URL = "http://pgp.mit.edu:11371/pks/lookup?op=get&search=";
@@ -70,7 +71,11 @@ public class PgpServiceImpl implements PgpService {
     }
     
     protected void activate(ComponentContext context) {
-    	this.context = context;
+    	this.context = context.getBundleContext();
+    	trustDefaultKeysIfRequired();
+    }
+    
+    protected void trustDefaultKeysIfRequired() {
     	// Setup default keys we trust automatically if the user doesn't have a PGP file already
     	if (!ROO_PGP_FILE.exists()) {
     		trustDefaultKeys();
@@ -78,7 +83,7 @@ public class PgpServiceImpl implements PgpService {
     }
     
     private void trustDefaultKeys() {
-		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context.getBundleContext(), "/org/springframework/roo/felix/pgp/*.asc");
+		Set<URL> urls = UrlFindingUtils.findMatchingClasspathResources(context, "/org/springframework/roo/felix/pgp/*.asc");
 		
 		SortedSet<URL> sortedUrls = new TreeSet<URL>(new Comparator<URL>() {
 			public int compare(URL o1, URL o2) {
