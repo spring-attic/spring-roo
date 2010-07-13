@@ -33,7 +33,7 @@ import org.springframework.roo.shell.model.ModelSerializer;
  * @author Ben Alex
  * @since 1.1
  */
-@Component
+@Component(immediate=true) // we want the background download to start ASAP
 @Service
 @References(value={
 		@Reference(name="converter", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=Converter.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE),
@@ -43,6 +43,7 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 
 	@Reference private RepositoryAdmin repositoryAdmin;
 	@Reference private ModelSerializer modelSerializer;
+	private boolean obrRepositoriesDownloaded = false;
 	
 	private SortedMap<String,String> findBundlesOfferingCommand(String command) {
 		SortedMap<String,String> result = new TreeMap<String,String>();
@@ -74,9 +75,20 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 
 	@Override
 	protected void commandNotFound(Logger logger, String buffer) {
-		SortedMap<String,String> result = findBundlesOfferingCommand(buffer);
 		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
-		if (result.size() == 1) {
+		if (!obrRepositoriesDownloaded) {
+			logger.warning("No remote OBR repositories have been downloaded; no search of available commands performed");
+			return;
+		}
+		SortedMap<String,String> result = findBundlesOfferingCommand(buffer);
+		if (result.size() == 0) {
+			if (repositoryAdmin.listRepositories().length == 0) {
+				logger.warning("No remote OBR repositories registered; no search of available commands performed");
+			} else {
+				logger.warning("No Spring Roo add-ons were found that offer a similar command");
+			}
+		}
+		else if (result.size() == 1) {
 			logger.warning("The following Spring Roo add-on offers a similar command (to install use 'osgi obr start'):");
 		} else if (result.size() > 1) {
 			logger.warning("The following Spring Roo add-ons offer a similar command (to install use 'osgi obr start'):");
@@ -104,6 +116,17 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 	
 	protected void activate(ComponentContext context) {
 		bindCommand(this);
+
+		// Do a quick background query so we have the results cached
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					repositoryAdmin.listRepositories();
+					obrRepositoriesDownloaded = true;
+				} catch (RuntimeException ignore) {}
+			}
+		}, "OBR Eager Download");
+		t.start();
 	}
 	
 	protected void deactivate(ComponentContext context) {

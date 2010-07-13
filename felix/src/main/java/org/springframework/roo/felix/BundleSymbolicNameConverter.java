@@ -20,7 +20,7 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-@Component(immediate=true) // immediate true so the download starts before the first user command
+@Component
 @Service
 public class BundleSymbolicNameConverter implements Converter {
 
@@ -31,15 +31,6 @@ public class BundleSymbolicNameConverter implements Converter {
 	
 	protected void activate(ComponentContext context) {
 		this.context = context;
-		// Do a quick background query so we have the results cached and ready to roll
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				try {
-					repositoryAdmin.listRepositories();
-				} catch (RuntimeException ignore) {}
-			}
-		}, "OBR Eager Download");
-		t.start();
 	}
 	
 	protected void deactivate(ComponentContext context) {

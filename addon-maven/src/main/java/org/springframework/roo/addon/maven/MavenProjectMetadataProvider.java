@@ -49,7 +49,7 @@ import org.w3c.dom.Node;
  * @author Alan Stewart
  * @since 1.0
  */
-@Component
+@Component(immediate=true)
 @Service
 public class MavenProjectMetadataProvider implements ProjectMetadataProvider, FileEventListener {
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(ProjectMetadata.getProjectIdentifier()));
