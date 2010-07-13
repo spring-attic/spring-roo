@@ -14,18 +14,12 @@
     </scm>
 
     <distributionManagement>
+        <!-- Effective Roo 1.1.0.M2, spring-roo-repository is the only repository in which Roo JARs are published. -->
         <repository>
-            <id>spring-milestone</id>
-            <name>Spring Milestone Repository</name>
-            <url>s3://maven.springframework.org/milestone</url>
+            <id>spring-roo-repository</id>
+            <name>Spring Roo Repository</name>
+            <url>s3://spring-roo-repository.springsource.org/release</url>
         </repository>
-
-        <snapshotRepository>
-            <id>spring-snapshot</id>
-            <name>Spring Snapshot Repository</name>
-            <url>s3://maven.springframework.org/snapshot</url>
-        </snapshotRepository>
-
         <site>
             <id>static.springframework.org</id>
             <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo/org.springframework.roo.annotations</url>
