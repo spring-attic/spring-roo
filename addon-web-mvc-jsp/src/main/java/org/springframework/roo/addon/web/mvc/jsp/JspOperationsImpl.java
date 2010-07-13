@@ -178,8 +178,11 @@ public class JspOperationsImpl implements JspOperations {
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 */
 	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
-		webMvcOperations.installAllWebMvcArtifacts();
-		installCommonViewArtefacts();
+		//probe if common we artifacts exist, and install them if needed
+		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx"))) {
+			webMvcOperations.installAllWebMvcArtifacts();
+			installCommonViewArtefacts();
+		}
 		String lcViewName = viewName.getSymbolName().toLowerCase();
 		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
 		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), viewName, "global_menu_new", folderName + "/" + lcViewName, null);
