@@ -3,6 +3,7 @@ package org.springframework.roo.felix.pgp;
 import java.io.InputStream;
 
 import org.bouncycastle.openpgp.PGPSignature;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents the result of a signature verification via {@link PgpService#isSignatureAcceptable(InputStream)}.
@@ -13,10 +14,12 @@ import org.bouncycastle.openpgp.PGPSignature;
  */
 public class SignatureDecision {
 	private PGPSignature pgpSignature;
-	private String signatureAsHex;
+	private PgpKeyId signatureAsHex;
 	private boolean signatureAcceptable;
 	
-	public SignatureDecision(PGPSignature pgpSignature, String signatureAsHex, boolean signatureAcceptable) {
+	public SignatureDecision(PGPSignature pgpSignature, PgpKeyId signatureAsHex, boolean signatureAcceptable) {
+		Assert.notNull(pgpSignature, "PGP Signature required");
+		Assert.notNull(signatureAsHex, "PGP Key ID required");
 		this.pgpSignature = pgpSignature;
 		this.signatureAsHex = signatureAsHex;
 		this.signatureAcceptable = signatureAcceptable;
@@ -26,7 +29,7 @@ public class SignatureDecision {
 		return pgpSignature;
 	}
 
-	public String getSignatureAsHex() {
+	public PgpKeyId getSignatureAsHex() {
 		return signatureAsHex;
 	}
 

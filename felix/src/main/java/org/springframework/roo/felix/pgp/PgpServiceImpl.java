@@ -10,11 +10,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Security;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -63,8 +64,8 @@ public class PgpServiceImpl implements PgpService {
 	private static final File ROO_PGP_FILE = new File(System.getProperty("user.home") + File.separatorChar + ".spring_roo_pgp.bpg");
 //	private static final String DEFAULT_KEYSERVER_URL = "http://pgpkeys.pca.dfn.de/pks/lookup?op=get&search=";
 	private static final String DEFAULT_KEYSERVER_URL = "http://pgp.mit.edu:11371/pks/lookup?op=get&search=";
-	private static final long MASK = 0xFFFFFFFFL;
     private static final int BUFFER_SIZE = 1024;
+    private SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();
     
     static {
 		Security.addProvider(new BouncyCastleProvider());
@@ -73,6 +74,8 @@ public class PgpServiceImpl implements PgpService {
     protected void activate(ComponentContext context) {
     	this.context = context.getBundleContext();
     	trustDefaultKeysIfRequired();
+    	// Seed the discovered keys database
+    	getTrustedKeys();
     }
     
     protected void trustDefaultKeysIfRequired() {
@@ -128,6 +131,7 @@ public class PgpServiceImpl implements PgpService {
 	        Iterator<PGPPublicKeyRing> rIt = pubRings.getKeyRings();
 	        while (rIt.hasNext()) {
 	            PGPPublicKeyRing pgpPub = rIt.next();
+	            rememberKey(pgpPub);
 	            result.add(pgpPub);
 	        }
 		} catch (Exception e) {
@@ -141,33 +145,21 @@ public class PgpServiceImpl implements PgpService {
 		return result;
 	}
 
-	private String prepareKeyId(String keyId) {
-		Assert.hasText(keyId, "Key ID is required");
-		if (keyId.length() == 10) {
-			Assert.isTrue(keyId.toLowerCase().startsWith("0x"), "10 character key IDs must start with 0x");
-			keyId = keyId.toUpperCase(); // NB: the 0x will become uppercase, which it shouldn't
-			return "0x" + keyId.substring(2);
-		}
-		if (keyId.length() == 8) {
-			Assert.isTrue(!keyId.toLowerCase().startsWith("0x"), "8 character key IDs must not start with 0x");
-			keyId = keyId.toUpperCase();
-			return "0x" + keyId;
-		}
-		throw new IllegalStateException("A key ID is required (eg 00B5050F or 0x00B5050F)");
-	}
-
-	public PGPPublicKeyRing trust(String keyId) {
+	public PGPPublicKeyRing trust(PgpKeyId keyId) {
+		Assert.notNull(keyId, "Key ID required");
 		PGPPublicKeyRing keyRing = getPublicKey(keyId);
 		return trust(keyRing);
 	}
 	
 	private PGPPublicKeyRing trust(PGPPublicKeyRing keyRing) {
+		rememberKey(keyRing);
+		
 		// get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 		
 	    // Do not store if the first key is revoked
 	    if (keyRing.getPublicKey().isRevoked()) {
-	    	throw new IllegalStateException("The public key ID '" + getKeyId(keyRing.getPublicKey().getKeyID()) + "' has been revoked and cannot be trusted");
+	    	throw new IllegalStateException("The public key ID '" + new PgpKeyId(keyRing.getPublicKey()) + "' has been revoked and cannot be trusted");
 	    }
 
 		// trust it and write back to disk
@@ -190,8 +182,8 @@ public class PgpServiceImpl implements PgpService {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public PGPPublicKeyRing untrust(String keyId) {
-		keyId = prepareKeyId(keyId);
+	public PGPPublicKeyRing untrust(PgpKeyId keyId) {
+		Assert.notNull(keyId, "Key ID required");
 		// get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 		
@@ -205,7 +197,7 @@ public class PgpServiceImpl implements PgpService {
 			Iterator<PGPPublicKey> it = candidate.getPublicKeys();
 			while (it.hasNext()) {
 			    PGPPublicKey pgpKey = (PGPPublicKey) it.next();
-			    String candidateKeyId = getKeyId(pgpKey.getKeyID());
+			    PgpKeyId candidateKeyId = new PgpKeyId(pgpKey);
 			    if (removed == null && candidateKeyId.equals(keyId)) {
 			    	stillTrust = false;
 			    	removed = candidate;
@@ -237,8 +229,8 @@ public class PgpServiceImpl implements PgpService {
 		return removed;
 	}
 
-	public Map<String,String> refresh() {
-		Map<String,String> result = new TreeMap<String,String>();
+	public SortedMap<PgpKeyId,String> refresh() {
+		SortedMap<PgpKeyId,String> result = new TreeMap<PgpKeyId,String>();
 		// get the keys we currently trust
 		List<PGPPublicKeyRing> trusted = getTrustedKeys();
 		
@@ -248,7 +240,7 @@ public class PgpServiceImpl implements PgpService {
 		// Locate the element to remove (we need to record it so the method can return it)
 		for (PGPPublicKeyRing candidate : trusted) {
 			PGPPublicKey firstKey = candidate.getPublicKey();
-		    String candidateKeyId = getKeyId(firstKey.getKeyID());
+		    PgpKeyId candidateKeyId = new PgpKeyId(firstKey);
 			// Try to refresh
 		    PGPPublicKeyRing newKeyRing;
 		    try {
@@ -287,8 +279,8 @@ public class PgpServiceImpl implements PgpService {
 		return result;
 	}
 
-	public PGPPublicKeyRing getPublicKey(String keyId) {
-		keyId = prepareKeyId(keyId);
+	public PGPPublicKeyRing getPublicKey(PgpKeyId keyId) {
+		Assert.notNull(keyId, "Key ID required");
 		try {
 			URL lookup = getKeyServerUrlToRetrieveKeyId(keyId);
 			InputStream in = urlInputStreamService.openConnection(lookup);
@@ -309,13 +301,23 @@ public class PgpServiceImpl implements PgpService {
 		
 		if (obj != null && obj instanceof PGPPublicKeyRing) {
 			PGPPublicKeyRing keyRing = (PGPPublicKeyRing) obj;
+			rememberKey(keyRing);
 			return keyRing;
 		}
 
 		throw new IllegalStateException("Pblic key not available");
 	}
 
-	public URL getKeyServerUrlToRetrieveKeyId(String keyId) {
+	/**
+	 * Obtains a URL that should allow the download of the specified public key.
+	 * 
+	 * <p>
+	 * The key server may not contain the specified public key if it has never been uploaded.
+	 * 
+	 * @param keyId hex-encoded key ID to download (required)
+	 * @return the URL (never null)
+	 */
+	private URL getKeyServerUrlToRetrieveKeyId(PgpKeyId keyId) {
 		try {
 			return new URL(DEFAULT_KEYSERVER_URL + keyId);
 		} catch (MalformedURLException e) {
@@ -323,7 +325,8 @@ public class PgpServiceImpl implements PgpService {
 		}
 	}
 
-    public URL getKeyServerUrlToRetrieveKeyInformation(String keyId) {
+    public URL getKeyServerUrlToRetrieveKeyInformation(PgpKeyId keyId) {
+    	Assert.notNull(keyId, "Key ID required");
 	    URL keyUrl = getKeyServerUrlToRetrieveKeyId(keyId);
 		try {
 	    	URL keyIndexUrl = new URL(keyUrl.getProtocol() + "://" + keyUrl.getAuthority() + keyUrl.getPath() + "?fingerprint=on&op=index&search=");
@@ -333,10 +336,6 @@ public class PgpServiceImpl implements PgpService {
 		}
     }
     
-    public String getKeyId(long keyId) {
-		return "0x" + String.format("%08X", (MASK & keyId));
-	}
-
 	public SignatureDecision isSignatureAcceptable(InputStream signature) throws IOException {
 
 		PGPObjectFactory factory = new PGPObjectFactory(PGPUtil.getDecoderStream(signature));
@@ -358,12 +357,16 @@ public class PgpServiceImpl implements PgpService {
 		
 		Assert.notNull(pgpSignature, "Unable to retrieve signature from stream");
 
-		String keyIdInHex = getKeyId(pgpSignature.getKeyID());
+		PgpKeyId keyIdInHex = new PgpKeyId(pgpSignature);
+		
+		// Special case where we directly store the key ID, as we know it's valid
+		discoveredKeyIds.add(keyIdInHex);
+		
 		boolean signatureAcceptable = false;
 		
 		// Loop to see if the user trusts this key
 		for (PGPPublicKeyRing keyRing : getTrustedKeys()) {
-			String candidate = getKeyId(keyRing.getPublicKey().getKeyID());
+			PgpKeyId candidate = new PgpKeyId(keyRing.getPublicKey());
 			if (candidate.equals(keyIdInHex)) {
 				signatureAcceptable = true;
 				break;
@@ -389,10 +392,11 @@ public class PgpServiceImpl implements PgpService {
     		}
 
     		pgpSignature = isSignatureAcceptable(signature).getPgpSignature();
-            PGPPublicKeyRing keyRing = getPublicKey(getKeyId(pgpSignature.getKeyID()));
+            PGPPublicKeyRing keyRing = getPublicKey(new PgpKeyId(pgpSignature));
+            rememberKey(keyRing);
             publicKey = keyRing.getPublicKey();
             
-            Assert.notNull(publicKey, "Could not obtain public key for signer key ID '" + getKeyId(pgpSignature.getKeyID()) + "'");
+            Assert.notNull(publicKey, "Could not obtain public key for signer key ID '" + pgpSignature + "'");
             
             pgpSignature.initVerify(publicKey, "BC");
 
@@ -411,6 +415,40 @@ public class PgpServiceImpl implements PgpService {
         catch (Exception e) {
             throw new IllegalStateException(e);
         }
+	}
+
+	public SortedSet<PgpKeyId> getDiscoveredKeyIds() {
+		return Collections.unmodifiableSortedSet(discoveredKeyIds);
+	}
+
+	/**
+	 * Simply stores the key ID in {@link #discoveredKeyIds} for future reference of all Key IDs
+	 * we've come across. This method uses a {@link PGPPublicKeyRing} to ensure the input is actually
+	 * a valid key, plus locating any key IDs that have signed the key. 
+	 * 
+	 * <p>
+	 * Please note {@link #discoveredKeyIds} is not used for any key functions of this class. It is simply
+	 * for user interface convenience.
+	 * 
+	 * @param keyRing the key ID to store (required)
+	 */
+	@SuppressWarnings("unchecked")
+	private void rememberKey(PGPPublicKeyRing keyRing) {
+		PGPPublicKey key = keyRing.getPublicKey();
+		if (key != null) {
+			PgpKeyId keyId = new PgpKeyId(key);
+			discoveredKeyIds.add(keyId);
+		    Iterator<String> userIdIterator = key.getUserIDs();
+		    while (userIdIterator.hasNext()) {
+		    	String userId = userIdIterator.next();
+			    Iterator<PGPSignature> signatureIterator = key.getSignaturesForID(userId);
+			    while (signatureIterator.hasNext()) {
+			    	PGPSignature signature = signatureIterator.next();
+			    	PgpKeyId signatureKeyId = new PgpKeyId(signature);
+			    	discoveredKeyIds.add(signatureKeyId);
+			    }
+		    }
+		}
 	}
 
 }

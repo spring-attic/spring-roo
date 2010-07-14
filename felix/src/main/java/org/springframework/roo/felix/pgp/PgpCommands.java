@@ -3,7 +3,7 @@ package org.springframework.roo.felix.pgp;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedMap;
 import java.util.TimeZone;
 
 import org.apache.felix.scr.annotations.Component;
@@ -59,8 +59,8 @@ public class PgpCommands implements CommandMarker {
 	@CliCommand(value="pgp refresh all", help="Refreshes all keys from public key servers")
 	public String refreshKeysFromServer() {
 		StringBuilder sb = new StringBuilder();
-		Map<String,String> refreshOutcome = pgpService.refresh();
-		for (String key : refreshOutcome.keySet()) {
+		SortedMap<PgpKeyId,String> refreshOutcome = pgpService.refresh();
+		for (PgpKeyId key : refreshOutcome.keySet()) {
 			String outcome = refreshOutcome.get(key);
 			appendLine(sb, key + " : " + outcome);
 		}
@@ -79,7 +79,7 @@ public class PgpCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="pgp untrust", help="Revokes your trust for a particular key ID")
-	public String untrust(@CliOption(key="keyId", mandatory=true, help="The key ID to remove trust from (eg 00B5050F or 0x00B5050F)") String keyId) {
+	public String untrust(@CliOption(key="keyId", mandatory=true, help="The key ID to remove trust from (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.untrust(keyId);
 		StringBuilder sb = new StringBuilder();
         appendLine(sb, "Revoked trust from key:");
@@ -88,7 +88,7 @@ public class PgpCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="pgp key view", help="Downloads a remote key and displays it to the user (does not change any trusts)")
-	public String keyView(@CliOption(key="keyId", mandatory=true, help="The key ID to view (eg 00B5050F or 0x00B5050F)") String keyId) {
+	public String keyView(@CliOption(key="keyId", mandatory=true, help="The key ID to view (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.getPublicKey(keyId);
 		StringBuilder sb = new StringBuilder();
 		formatKeyRing(sb, keyRing);
@@ -96,7 +96,7 @@ public class PgpCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="pgp trust", help="Grants trust to a particular key ID")
-	public String trust(@CliOption(key="keyId", mandatory=true, help="The key ID to trust (eg 00B5050F or 0x00B5050F)") String keyId) {
+	public String trust(@CliOption(key="keyId", mandatory=true, help="The key ID to trust (eg 00B5050F or 0x00B5050F)") PgpKeyId keyId) {
 		PGPPublicKeyRing keyRing = pgpService.trust(keyId);
 		StringBuilder sb = new StringBuilder();
         appendLine(sb, "Added trust for key:");
@@ -105,14 +105,14 @@ public class PgpCommands implements CommandMarker {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String getKeySummaryIfPossible(String keyId) {
+	private String getKeySummaryIfPossible(PgpKeyId keyId) {
 		List<PGPPublicKeyRing> keyRings = pgpService.getTrustedKeys();
 		
 		for (PGPPublicKeyRing keyRing : keyRings) {
 			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
 			while (it.hasNext()) {
 			    PGPPublicKey pgpKey = (PGPPublicKey)it.next();
-		        if (pgpService.getKeyId(pgpKey.getKeyID()).equals(keyId)) {
+		        if (new PgpKeyId(pgpKey.getKeyID()).equals(keyId)) {
 		        	// We know about this key, so return a one-liner
 		        	StringBuilder sb = new StringBuilder();
 		        	sb.append("Key ").append(keyId).append(" (");
@@ -142,8 +142,8 @@ public class PgpCommands implements CommandMarker {
 		while (it.hasNext()) {
 		    PGPPublicKey pgpKey = (PGPPublicKey)it.next();
 		    if (first) {
-		        appendLine(sb, ">>>> KEY ID: " + pgpService.getKeyId(pgpKey.getKeyID()) + " <<<<");
-			    appendLine(sb, "     More Info: " + pgpService.getKeyServerUrlToRetrieveKeyInformation(pgpService.getKeyId(pgpKey.getKeyID())));
+		        appendLine(sb, ">>>> KEY ID: " + new PgpKeyId(pgpKey) + " <<<<");
+			    appendLine(sb, "     More Info: " + pgpService.getKeyServerUrlToRetrieveKeyInformation(new PgpKeyId(pgpKey)));
 			    appendLine(sb, "     Created: " + sdf.format(pgpKey.getCreationTime()));
 			    appendLine(sb, "     Fingerprint: " + new String(Hex.encode(pgpKey.getFingerprint())));
 			    appendLine(sb, "     Algorithm: " + getAlgorithm(pgpKey.getAlgorithm()));
@@ -154,13 +154,13 @@ public class PgpCommands implements CommandMarker {
 				    Iterator<PGPSignature> signatureIterator = pgpKey.getSignaturesForID(userId);
 				    while (signatureIterator.hasNext()) {
 				    	PGPSignature signature = signatureIterator.next();
-					    appendLine(sb, "          Signed By: " + getKeySummaryIfPossible(pgpService.getKeyId(signature.getKeyID())));
+					    appendLine(sb, "          Signed By: " + getKeySummaryIfPossible(new PgpKeyId(signature)));
 				    }
 			    }
 			    
 		        first = false;
 		    } else {
-		        appendLine(sb, "     Subkey ID: " + pgpService.getKeyId(pgpKey.getKeyID()) + " [" + getAlgorithm(pgpKey.getAlgorithm()) + "]");
+		        appendLine(sb, "     Subkey ID: " + new PgpKeyId(pgpKey) + " [" + getAlgorithm(pgpKey.getAlgorithm()) + "]");
 		    }
 		}
 	}

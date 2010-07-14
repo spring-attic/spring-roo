@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
 
-import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
 
 /**
@@ -48,17 +48,6 @@ public interface PgpService {
 	List<PGPPublicKeyRing> getTrustedKeys();
 	
 	/**
-	 * Obtains a URL that should allow the download of the specified public key.
-	 * 
-	 * <p>
-	 * The key server may not contain the specified public key if it has never been uploaded.
-	 * 
-	 * @param keyId hex-encoded key ID to download (required)
-	 * @return the URL (never null)
-	 */
-	URL getKeyServerUrlToRetrieveKeyId(String keyId);
-
-	/**
 	 * Obtains a URL that should allow a human-friendly display of key properties.
 	 * 
 	 * <p>
@@ -67,17 +56,8 @@ public interface PgpService {
 	 * @param keyId hex-encoded key ID to display (required)
 	 * @return the URL (never null)
 	 */
-	URL getKeyServerUrlToRetrieveKeyInformation(String keyId);
+	URL getKeyServerUrlToRetrieveKeyInformation(PgpKeyId keyId);
 	
-	/**
-	 * Converts a long key ID into a valid hexadecimal string representation of the key ID.
-	 * The long key ID is as presented via {@link PGPPublicKey#getKeyID()}.
-	 * 
-	 * @param keyId numerical representation (required)
-	 * @return the hexadecimal representation (never null)
-	 */
-	String getKeyId(long keyId);
-
 	/**
 	 * Trusts a new key ID (refreshing the existing key ID if it is already trusted).
 	 * 
@@ -87,7 +67,7 @@ public interface PgpService {
 	 * @param keyId hex-encoded key ID to trust (required)
 	 * @return the key information now trusted (as refreshed from the server)
 	 */
-	PGPPublicKeyRing trust(String keyId);
+	PGPPublicKeyRing trust(PgpKeyId keyId);
 
 	/**
 	 * Untrusts an existing key ID (method will throw an exception if the key isn't currently trusted).
@@ -98,7 +78,7 @@ public interface PgpService {
 	 * @param keyId hex-encoded key ID to untrust (required)
 	 * @return the key information that is no longer trusted (as last cached; never returns null)
 	 */
-	PGPPublicKeyRing untrust(String keyId);
+	PGPPublicKeyRing untrust(PgpKeyId keyId);
 
 	/**
 	 * Instructs the implementation to refresh all keys it current trusts. This is to identify keys
@@ -111,7 +91,7 @@ public interface PgpService {
 	 * @return a map where the keys are the hexadecimal key IDs and the values are the status of the update
 	 * (never returns null)
 	 */
-	Map<String,String> refresh();
+	SortedMap<PgpKeyId,String> refresh();
 
 	/**
 	 * Attempts to download the specified key ID.
@@ -122,12 +102,12 @@ public interface PgpService {
 	 * @param keyId hex-encoded key ID to download (required)
 	 * @return the key (never null, but an exception is thrown if the key is unavailable)
 	 */
-	PGPPublicKeyRing getPublicKey(String keyId);
+	PGPPublicKeyRing getPublicKey(PgpKeyId keyId);
 	
 	/**
 	 * Indicates if the signature is acceptable or not based on the presentation of an ASC file. This will
 	 * determine if the ASC is valid and the key used to produce it is trusted. It does not verify a resource
-	 * was actually signed using the ASC (use {@link #isResourceSignedBySignature(InputStream, InputStream)
+	 * was actually signed using the ASC (use {@link #isResourceSignedBySignature(InputStream, InputStream)}
 	 * for this instead). In practical terms this method will throw an exception if something is wrong with
 	 * the signature (eg it is corrupted). If the method returns an object, it means the ASC signature was
 	 * valid (although the key which signed it may not be trusted).
@@ -154,4 +134,13 @@ public interface PgpService {
 	 * @return true if this signature file verified this resource, false otherwise
 	 */
 	boolean isResourceSignedBySignature(InputStream resource, InputStream signature) throws IOException;
+	
+	/**
+	 * Provides a way of discovered all Key IDs that have been encountered by the service since it started.
+	 * This is mostly useful for the user interface building tab completion commands etc.
+	 * 
+	 * @return an unmodifiable list of the Key IDs (never null, but may be empty)
+	 */
+	SortedSet<PgpKeyId> getDiscoveredKeyIds();
+
 }
