@@ -277,6 +277,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
 	}
 
+	@CliCommand(value={"flash"}, help="Flashes a message onto the screen")
+	public void flashCustom(@CliOption(key="", mandatory=true, help="Message to display") String msg) {
+		flash(msg);
+		flash("");
+	}
+	
 	@CliCommand(value={"version"}, help="Displays shell version")
 	public String version(@CliOption(key="", help="Special version flags") String extra) {
     	StringBuilder sb = new StringBuilder();
@@ -386,6 +392,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		}
 		Assert.isTrue(f.exists() && f.isDirectory(), "Path '" + f.getAbsolutePath() + "' is not a directory; please specify roo.home system property correctly");
 		return f;
+	}
+
+	/**
+	 * Simple implementation of {@link #flash(String)} that simply displays the message via the logger. It is
+	 * strongly recommended shell implementations override this method with a more effective approach.
+	 */
+	public void flash(String message) {
+		if (message != null && !("".equals(message))) {
+			logger.fine(message);
+		}
 	}
 
 }

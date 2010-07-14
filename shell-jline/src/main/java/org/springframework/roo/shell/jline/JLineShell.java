@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import jline.ANSIBuffer;
 import jline.ConsoleReader;
 import jline.WindowsTerminal;
+import jline.ANSIBuffer.ANSICodes;
 
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CommandMarker;
@@ -51,6 +52,8 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
     private FileWriter fileLog;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected ShellStatusListener statusListener; // ROO-836
+	private String flashMessage = ""; // the message the renderer should ensure is drawn until the indicated time
+	private long flashMessageUntil = Long.MAX_VALUE; // time after which the message can be cleared
 	
 	public void run() {
 		try {
@@ -85,6 +88,8 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// reader.setDebug(new PrintWriter(new FileWriter("writer.debug", true)));
 		
 		openFileLogIfPossible();
+		
+		flashMessageRenderer();
 		
         logger.info(version(null));
         logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
@@ -165,6 +170,76 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		);
 	}
 	
+	private void flashMessageRenderer() {
+		if (!reader.getTerminal().isANSISupported()) {
+			return;
+		}
+		// Setup a thread to ensure flash messages are displayed and cleared correctly
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				while (shellStatus != ShellStatus.SHUTTING_DOWN) {
+					long now = System.currentTimeMillis();
+					if (flashMessageUntil < now) {
+						// Message has expired, so clear it
+						flashMessageUntil = Long.MAX_VALUE;
+						flashMessage = "";
+						doAnsiFlash(flashMessage);
+					} else {
+						// The expiration time for this message has not been reached, so preserve it
+						doAnsiFlash(flashMessage);
+					}
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException ignore) {}
+				}
+			}
+		}, "Flash message manager");
+		t.start();
+	}
+	
+	public void flash(String message) {
+		if (!reader.getTerminal().isANSISupported()) {
+			super.flash(message);
+			return;
+		}
+		if (message == null) {
+			message = "";
+		}
+		if ("".equals(message)) {
+			// Request to clear the message, but give the user some time to read it first
+    		flashMessageUntil = System.currentTimeMillis() + 1500;
+		} else {
+    		// Keep this message displayed until further notice
+			flashMessageUntil = Long.MAX_VALUE;
+			flashMessage = message;
+    		doAnsiFlash(message);
+		}
+	}
+	
+	private void doAnsiFlash(String message) {
+		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
+		buff.append(ANSICodes.save());
+		buff.append(ANSICodes.gotoxy(1, 1));
+
+		buff.append(ANSICodes.clreol()); // clear to end of line
+		
+		if (!("".equals(message))) {
+			int startFrom = reader.getTermwidth() - message.length() + 1;
+			if (startFrom < 1) {
+				startFrom = 1;
+			}
+			buff.append(ANSICodes.gotoxy(1, startFrom));
+			buff.append(message);
+		}
+		
+		buff.append(ANSICodes.restore());
+		String stg = buff.toString();
+		try {
+			reader.printString(stg);
+			reader.flushConsole();
+		} catch (IOException ignore) {}
+	}
+	
     public void promptLoop() {
     	setShellStatus(ShellStatus.USER_INPUT);
     	String line;
@@ -173,11 +248,11 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
             while (exitShellRequest == null && ( (line = reader.readLine() ) != null) ) {
             	JLineLogHandler.resetMessageTracking();
             	setShellStatus(ShellStatus.USER_INPUT);
-
+            	
             	if ("".equals(line)) {
                 	continue;
                 }
-                
+            	
                 executeCommand(line);
             }
         } catch (IOException ioe) {

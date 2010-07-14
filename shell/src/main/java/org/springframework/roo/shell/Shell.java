@@ -47,6 +47,15 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 */
 	void setDevelopmentMode(boolean developmentMode);
 
+	/**
+	 * Displays a progress notification to the user. This notification will ideally be displayed in a
+	 * consistent screen location by the shell implementation. A subsequent flash notification will
+	 * replace the prior notification. A blank message will clear the flash message area.
+	 * 
+	 * @param message to display (can be an empty string or null)
+	 */
+	void flash(String message);
+	
 	boolean isDevelopmentMode();
 	
 	/**
