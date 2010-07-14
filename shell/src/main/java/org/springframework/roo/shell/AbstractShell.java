@@ -343,7 +343,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			sb.append(bundleVersion);
 		}
 		
-		if (gitCommitHash != null) {
+		if (gitCommitHash != null && gitCommitHash.length() > 7) {
 			if (sb.length() > 0) {
 				sb.append(" "); // to separate from version
 			}
