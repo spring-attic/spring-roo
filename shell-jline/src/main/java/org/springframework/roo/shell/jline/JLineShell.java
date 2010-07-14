@@ -228,7 +228,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			if (startFrom < 1) {
 				startFrom = 1;
 			}
-			buff.append(ANSICodes.gotoxy(1, startFrom));
+			buff.append(ANSICodes.gotoxy(startFrom, 1));
 			buff.append(message);
 		}
 		
