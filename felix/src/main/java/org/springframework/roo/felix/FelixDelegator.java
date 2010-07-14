@@ -1,5 +1,8 @@
 package org.springframework.roo.felix;
 
+import java.io.PrintStream;
+import java.util.logging.Level;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -13,6 +16,7 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.shell.event.ShellStatus;
 import org.springframework.roo.shell.event.ShellStatusListener;
+import org.springframework.roo.support.logging.LoggingOutputStream;
 
 /**
  * Delegates to commands provided via Felix's Shell API.
@@ -198,7 +202,18 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 	}
 
 	private void perform(String commandLine) throws Exception {
-		shellService.executeCommand(commandLine, System.out, System.err);
+		LoggingOutputStream sysOut = new LoggingOutputStream(Level.INFO);
+		LoggingOutputStream sysErr = new LoggingOutputStream(Level.SEVERE);
+		sysOut.setSourceClassName(FelixDelegator.class.getName());
+		sysErr.setSourceClassName(FelixDelegator.class.getName());
+		PrintStream printStreamOut = new PrintStream(sysOut);
+		PrintStream printErrOut = new PrintStream(sysErr);
+		try {
+			shellService.executeCommand(commandLine, printStreamOut, printErrOut);
+		} finally {
+			printStreamOut.close();
+			printErrOut.close();
+		}
 	}
 	
 	@CliCommand(value={"exit", "quit"}, help="Exits the shell")
