@@ -14,6 +14,7 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.ManyToManyAssociation;
+import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
@@ -110,11 +111,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(javaPackage, database, table);
 
-		// Add fields for many-valued associations with one-to-many multiplicity and
+		// Add source fields for many-valued associations with one-to-many multiplicity and
 		// single-valued associations to other entities that have one-to-one multiplicity
 		addOneToXXXFields(javaPackage, database, table);
 
-		// Add remaining fields from columns with their respective accessors and mutators
+		// Add remaining fields, including target one-to-many and one-to-one fields derived
+		// from columns and foreign keys with their respective accessors and mutators
 		addFields(javaType, javaPackage, table);
 
 		// Create a representation of the desired output ITD
@@ -136,11 +138,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			if (manyToManyAssociation.getInverseSideTable().equals(table)) {
 				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getOwningSideTable().getName()));
+				String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getInverseSideTable().getName()));
+
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
+					mappedByFieldNameStr += String.valueOf(manyToManyCount);
 				}
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
-				FieldMetadata field = getManyToManyInverseSideField(fieldName, manyToManyCount, manyToManyAssociation, javaPackage);
+				JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
+
+				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, manyToManyAssociation, javaPackage);
 				addToBuilder(field);
 			}
 
@@ -188,7 +195,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, int manyToManyCount, ManyToManyAssociation association, JavaPackage javaPackage) {
+	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = tableModelService.findTypeForTableName(association.getOwningSideTable().getName(), javaPackage);
 		params.add(element);
@@ -197,14 +204,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(association.getInverseSideTable().getName()));
-		if (manyToManyCount > 0) {
-			mappedByFieldNameStr += String.valueOf(manyToManyCount);
-		}
-		JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
-
 		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
 		AnnotationMetadata annotation = new DefaultAnnotationMetadata(MANY_TO_MANY, attributes);
 		annotations.add(annotation);
@@ -225,17 +225,26 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 
 					JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, javaPackage);
-					JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()));
 					FieldMetadata field;
 					if (isOneToOne) {
 						JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName));
+						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()));
 						field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
+						addToBuilder(field);
 					} else {
-						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(foreignTableName)));
-						field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, javaPackage);
+						for (int i = 0; i < exportedKey.getReferenceCount(); i++) {
+							String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(foreignTableName));
+							String mappedByFieldNameStr = tableModelService.suggestFieldName(table.getName());
+							if (i > 0) {
+								fieldNameStr += String.valueOf(i);
+								mappedByFieldNameStr += String.valueOf(i);
+							}
+							JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
+							JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
+							field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, javaPackage);
+							addToBuilder(field);
+						}
 					}
-
-					addToBuilder(field);
 				}
 			}
 		}
@@ -332,17 +341,26 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			} else if (getIdField() != null && column.isPrimaryKey()) {
 				field = null;
 			} else if ((foreignKey = table.findForeignKeyByLocalColumnName(columnName)) != null) {
-				fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignKey.getForeignTableName()));
 				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), javaPackage);
 
 				// Check for one-to-one multiplicity
 				if (isOneToOne(table, foreignKey)) {
+					fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignKey.getForeignTableName()));
 					field = getOneToOneField(fieldName, fieldType, foreignKey, column);
 					uniqueFields.put(fieldName, field);
 				} else {
 					// Assume many-to-one multiplicity
-					field = getManyToOneField(fieldName, fieldType, column);
-					uniqueFields.put(fieldName, field);
+					int manyToOneCount = 0;
+					for (Reference reference : foreignKey.getReferences()) {
+						String fieldNameStr = tableModelService.suggestFieldName(foreignKey.getForeignTableName());
+						if (manyToOneCount > 0) {
+							fieldNameStr += String.valueOf(manyToOneCount);
+						}
+						fieldName = new JavaSymbolName(fieldNameStr);
+						field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn());
+						uniqueFields.put(fieldName, field);
+						manyToOneCount++;
+					}
 				}
 			} else if (!isCompositeKeyField) {
 				field = getField(fieldName, column);
