@@ -11,7 +11,12 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import jline.ANSIBuffer;
@@ -52,8 +57,10 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
     private FileWriter fileLog;
 	private DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	protected ShellStatusListener statusListener; // ROO-836
-	private String flashMessage = ""; // the message the renderer should ensure is drawn until the indicated time
-	private long flashMessageUntil = Long.MAX_VALUE; // time after which the message can be cleared
+	/** key: slot name, value: flashInfo instance */
+	private Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
+	/** key: row number, value: eraseLineFromPosition */
+	private Map<Integer,Integer> rowErasureMap = new HashMap<Integer,Integer>();
 	
 	public void run() {
 		try {
@@ -178,15 +185,26 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				while (shellStatus != ShellStatus.SHUTTING_DOWN) {
-					long now = System.currentTimeMillis();
-					if (flashMessageUntil < now) {
-						// Message has expired, so clear it
-						flashMessageUntil = Long.MAX_VALUE;
-						flashMessage = "";
-						doAnsiFlash(flashMessage);
-					} else {
-						// The expiration time for this message has not been reached, so preserve it
-						doAnsiFlash(flashMessage);
+					synchronized (flashInfoMap) {
+						
+						long now = System.currentTimeMillis();
+						
+						Set<String> toRemove = new HashSet<String>();
+						for (String slot : flashInfoMap.keySet()) {
+							FlashInfo flashInfo = flashInfoMap.get(slot);
+							
+							if (flashInfo.flashMessageUntil < now) {
+								// Message has expired, so clear it
+								toRemove.add(slot);
+								doAnsiFlash(flashInfo.rowNumber, Level.ALL, "");
+							} else {
+								// The expiration time for this message has not been reached, so preserve it
+								doAnsiFlash(flashInfo.rowNumber, flashInfo.flashLevel, flashInfo.flashMessage);
+							}
+						}
+						for (String slot : toRemove) {
+							flashInfoMap.remove(slot);
+						}
 					}
 					try {
 						Thread.sleep(200);
@@ -197,39 +215,101 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		t.start();
 	}
 	
-	public void flash(String message) {
+	public void flash(Level level, String message, String slot) {
+		Assert.notNull(level, "Level is required for a flash message");
+		Assert.notNull(message, "Message is required for a flash message");
+		Assert.hasText(slot, "Slot name must be specified for a flash message");
 		if (!reader.getTerminal().isANSISupported()) {
-			super.flash(message);
+			super.flash(level, message, slot);
 			return;
 		}
-		if (message == null) {
-			message = "";
-		}
-		if ("".equals(message)) {
-			// Request to clear the message, but give the user some time to read it first
-    		flashMessageUntil = System.currentTimeMillis() + 1500;
-		} else {
-    		// Keep this message displayed until further notice
-			flashMessageUntil = Long.MAX_VALUE;
-			flashMessage = message;
-    		doAnsiFlash(message);
+		synchronized (flashInfoMap) {
+			FlashInfo flashInfo = flashInfoMap.get(slot);
+			
+			if ("".equals(message)) {
+				// Request to clear the message, but give the user some time to read it first
+				if (flashInfo == null) {
+					// We didn't have a record of displaying it in the first place, so just quit
+					return;
+				}
+	    		flashInfo.flashMessageUntil = System.currentTimeMillis() + 1500;
+			} else {
+	    		// Display this message displayed until further notice
+				if (flashInfo == null) {
+					// Find a row for this new slot; we basically take the first line number we discover
+					flashInfo = new FlashInfo();
+					flashInfo.rowNumber = Integer.MAX_VALUE;
+					outer:
+					for (int i = 1; i < Integer.MAX_VALUE; i++) {
+						for (FlashInfo existingFlashInfo : flashInfoMap.values()) {
+							if (existingFlashInfo.rowNumber == i) {
+								// Veto, let's try the new candidate row number
+								continue outer;
+							}
+						}
+						// If we got to here, nobody owns this row number, so use it
+						flashInfo.rowNumber = i;
+						break outer;
+					}
+					
+					// Store it
+					flashInfoMap.put(slot, flashInfo);
+				}
+				// Populate the instance with the latest data
+				flashInfo.flashMessageUntil = Long.MAX_VALUE;
+				flashInfo.flashLevel = level;
+				flashInfo.flashMessage = message;
+
+				// Display right now
+				doAnsiFlash(flashInfo.rowNumber, flashInfo.flashLevel, flashInfo.flashMessage);
+			}
 		}
 	}
-	
-	private void doAnsiFlash(String message) {
+
+	// Externally synchronized via the two calling methods having a mutex on flashInfoMap
+	private void doAnsiFlash(int row, Level level, String message) {
 		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
 		buff.append(ANSICodes.save());
-		buff.append(ANSICodes.gotoxy(1, 1));
-
-		buff.append(ANSICodes.clreol()); // clear to end of line
 		
-		if (!("".equals(message))) {
+		// Figure out the longest line we're presently displaying (or were) and erase the line from that position
+		int mostFurtherLeftRowNumber = Integer.MAX_VALUE;
+		for (Integer candidate : rowErasureMap.values()) {
+			if (candidate < mostFurtherLeftRowNumber) {
+				mostFurtherLeftRowNumber = candidate;
+			}
+		}
+		
+		if (mostFurtherLeftRowNumber == Integer.MAX_VALUE) {
+			// There is nothing to erase
+		} else {
+			// NB: See http://jline.sourceforge.net/apidocs/jline/ANSIBuffer.ANSICodes.html#gotoxy%28int,%20int%29
+			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
+				buff.append(ANSICodes.gotoxy(mostFurtherLeftRowNumber, row)); // incorrect, seems to be JANSI needs this
+			} else {
+				buff.append(ANSICodes.gotoxy(row, mostFurtherLeftRowNumber)); // row, column (correct, as per API docs)
+			}
+			buff.append(ANSICodes.clreol()); // clear what was present on the line
+		}
+		
+		if (("".equals(message))) {
+			// They want the line blank; we've already achieved this if needed via the erasing above
+			// Just need to record we no longer care about this line the next time doAnsiFlash is invoked
+			rowErasureMap.remove(row);
+		} else {
+			// They want some message displayed
 			int startFrom = reader.getTermwidth() - message.length() + 1;
 			if (startFrom < 1) {
 				startFrom = 1;
 			}
-			buff.append(ANSICodes.gotoxy(startFrom, 1));
-			buff.append(message);
+			// NB: See http://jline.sourceforge.net/apidocs/jline/ANSIBuffer.ANSICodes.html#gotoxy%28int,%20int%29
+			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
+				buff.append(ANSICodes.gotoxy(startFrom, row)); // incorrect, seems to be JANSI needs this
+			} else {
+				buff.append(ANSICodes.gotoxy(row, startFrom)); // row, column (correct, as per API docs)
+			}
+			buff.reverse(message);
+			// Record we want to erase from this positioning next time (so we clean up after ourselves)
+			rowErasureMap.put(row, startFrom);
 		}
 		
 		buff.append(ANSICodes.restore());
@@ -321,6 +401,13 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		if (statusListener != null) {
 			removeShellStatusListener(statusListener);
 		}
+	}
+
+	private class FlashInfo {
+		String flashMessage;
+		long flashMessageUntil;
+		Level flashLevel;
+		int rowNumber;
 	}
 
 }

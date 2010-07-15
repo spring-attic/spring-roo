@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.jar.Manifest;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
@@ -277,10 +278,29 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
 	}
 
-	@CliCommand(value={"flash"}, help="Flashes a message onto the screen")
-	public void flashCustom(@CliOption(key="", mandatory=true, help="Message to display") String msg) {
-		flash(msg);
-		flash("");
+	@CliCommand(value={"flash test"}, help="Tests message flashing")
+	public void flashCustom() throws Exception {
+		flash(Level.FINE, "Hello world", "a");
+		Thread.sleep(150);
+		flash(Level.FINE, "Short world", "a");
+		Thread.sleep(150);
+		flash(Level.FINE, "Small", "a");
+		Thread.sleep(150);
+		flash(Level.FINE, "Downloading xyz", "b");
+		Thread.sleep(150);
+		flash(Level.FINE, "", "a");
+		Thread.sleep(150);
+		flash(Level.FINE, "Downloaded xyz", "b");
+		Thread.sleep(150);
+		flash(Level.FINE, "System online", "c");
+		Thread.sleep(150);
+		flash(Level.FINE, "System ready", "c");
+		Thread.sleep(150);
+		flash(Level.FINE, "System farewell", "c");
+		Thread.sleep(150);
+		flash(Level.FINE, "", "c");
+		Thread.sleep(150);
+		flash(Level.FINE, "", "b");
 	}
 	
 	@CliCommand(value={"version"}, help="Displays shell version")
@@ -398,9 +418,12 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	 * Simple implementation of {@link #flash(String)} that simply displays the message via the logger. It is
 	 * strongly recommended shell implementations override this method with a more effective approach.
 	 */
-	public void flash(String message) {
-		if (message != null && !("".equals(message))) {
-			logger.fine(message);
+	public void flash(Level level, String message, String slot) {
+		Assert.notNull(level, "Level is required for a flash message");
+		Assert.notNull(message, "Message is required for a flash message");
+		Assert.hasText(slot, "Slot name must be specified for a flash message");
+		if (!("".equals(message))) {
+			logger.log(level, message);
 		}
 	}
 

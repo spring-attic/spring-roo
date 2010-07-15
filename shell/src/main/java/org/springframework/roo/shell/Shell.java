@@ -1,6 +1,7 @@
 package org.springframework.roo.shell;
 
 import java.io.File;
+import java.util.logging.Level;
 
 import org.springframework.roo.shell.event.ShellStatusProvider;
 
@@ -49,12 +50,26 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 
 	/**
 	 * Displays a progress notification to the user. This notification will ideally be displayed in a
-	 * consistent screen location by the shell implementation. A subsequent flash notification will
-	 * replace the prior notification. A blank message will clear the flash message area.
+	 * consistent screen location by the shell implementation.
 	 * 
-	 * @param message to display (can be an empty string or null)
+	 * <p>
+	 * An implementation may allow multiple messages to be displayed concurrently. So an implementation can
+	 * determine when a flash message replaces a previous flash message, callers should allocate a unique
+	 * "slot" name for their messages. It is suggested the class name of the caller be used. This way a
+	 * slot will be updated without conflicting with flash message sequences from other slots.
+	 * 
+	 * <p>
+	 * Passing null or an empty string in as the "message" indicates the slot should be cleared.
+	 * 
+	 * <p>
+	 * An implementation need not necessarily use the level or slot concepts. They are expected to be
+	 * used in most cases, though.
+	 * 
+	 * @param level the importance of the message (cannot be null)
+	 * @param message to display (cannot be null, but may be empty)
+	 * @param slot the identification slot for the message (cannot be null or empty)
 	 */
-	void flash(String message);
+	void flash(Level level, String message, String slot);
 	
 	boolean isDevelopmentMode();
 	
