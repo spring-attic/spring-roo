@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
@@ -91,16 +93,11 @@ public class DatabaseModelReader {
 	}
 
 	public Database getDatabase(JavaPackage javaPackage) throws SQLException {
-		Database database = new Database();
-		database.addTables(readTables(connection.getMetaData()));
-		database.setName(catalog);
-		database.setJavaPackage(javaPackage);
-		return database;
+		return new Database(catalog, javaPackage, readTables(connection.getMetaData()));
 	}
 
 	private Set<Table> readTables(DatabaseMetaData databaseMetaData) throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-
 		ResultSet rs = getTables(databaseMetaData);
 		if (rs != null) {
 			try {
@@ -115,8 +112,25 @@ public class DatabaseModelReader {
 					table.setSchema(schema);
 					table.setDescription(rs.getString("REMARKS"));
 
+					try {
+						// Catching SQLException here as getSuperTables() is not supported by every driver
+						ResultSet superRs = getSuperTables(databaseMetaData);
+						if (superRs != null) {
+							try {
+								while (superRs.next()) {
+									table.setSuperTableName(superRs.getString("SUPERTABLE_NAME"));
+									break;
+								}
+							} finally {
+								superRs.close();
+							}
+						}
+					} catch (SQLException ignorred) {
+					}
+
 					table.addColumns(readColumns(databaseMetaData));
 					table.addForeignKeys(readForeignKeys(databaseMetaData));
+					table.addExportedKeys(readExportedKeys(databaseMetaData));
 					table.addIndices(readIndices(databaseMetaData));
 
 					for (String columnName : readPrimaryKeyNames(databaseMetaData)) {
@@ -145,8 +159,8 @@ public class DatabaseModelReader {
 					column.setDefaultValue(rs.getString("COLUMN_DEF"));
 					column.setSize(rs.getInt("COLUMN_SIZE"));
 					column.setScale(rs.getInt("DECIMAL_DIGITS"));
-					column.setType(rs.getString("TYPE_NAME"));
 					column.setTypeCode(rs.getInt("DATA_TYPE"));
+					column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME" ;
 					column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 
 					columns.add(column);
@@ -160,14 +174,15 @@ public class DatabaseModelReader {
 	}
 
 	private Set<ForeignKey> readForeignKeys(DatabaseMetaData databaseMetaData) throws SQLException {
-		Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
+		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs = getForeignKeys(databaseMetaData);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
+					String foreignTableName = rs.getString("PKTABLE_NAME");
 					ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
-					foreignKey.setForeignTableName(rs.getString("PKTABLE_NAME"));
+					foreignKey.setForeignTableName(foreignTableName);
 					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
@@ -175,16 +190,20 @@ public class DatabaseModelReader {
 					reference.setSequenceValue(rs.getShort("KEY_SEQ"));
 					reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
 					reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
-					foreignKey.addReference(reference);
-
-					foreignKeys.add(foreignKey);
+					
+					if (foreignKeys.containsKey(foreignTableName)) {
+						foreignKeys.get(foreignTableName).addReference(reference);
+					} else {
+						foreignKey.addReference(reference);
+						foreignKeys.put(foreignTableName, foreignKey); 
+					}
 				}
 			} finally {
 				rs.close();
 			}
 		}
 
-		return foreignKeys;
+		return new LinkedHashSet<ForeignKey>(foreignKeys.values());
 	}
 
 	private CascadeAction getCascadeAction(Short actionValue) {
@@ -209,6 +228,39 @@ public class DatabaseModelReader {
 			cascadeAction = CascadeAction.NONE;
 		}
 		return cascadeAction;
+	}
+
+	private Set<ForeignKey> readExportedKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
+
+		ResultSet rs = getExportedKeys(databaseMetaData);
+		if (rs != null) {
+			try {
+				while (rs.next()) {
+					String foreignTableName = rs.getString("FKTABLE_NAME");
+					ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
+					foreignKey.setForeignTableName(foreignTableName);
+					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+
+					Reference reference = new Reference();
+					reference.setSequenceValue(rs.getShort("KEY_SEQ"));
+					reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
+					reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
+
+					if (exportedKeys.containsKey(foreignTableName)) {
+						exportedKeys.get(foreignTableName).addReference(reference);
+					} else {
+						foreignKey.addReference(reference);
+						exportedKeys.put(foreignTableName, foreignKey); 
+					}
+				}
+			} finally {
+				rs.close();
+			}
+		}
+
+		return new LinkedHashSet<ForeignKey>(exportedKeys.values());
 	}
 
 	private Set<Index> readIndices(DatabaseMetaData databaseMetaData) throws SQLException {
@@ -294,13 +346,26 @@ public class DatabaseModelReader {
 		return rs;
 	}
 
+	private ResultSet getSuperTables(DatabaseMetaData databaseMetaData) throws SQLException {
+		String schemaPattern = schema.getName();
+		ResultSet rs = null;
+		if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			rs = databaseMetaData.getSuperTables(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
+		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			rs = databaseMetaData.getSuperTables(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
+		} else {
+			rs = databaseMetaData.getSuperTables(catalog, schemaPattern, tableNamePattern);
+		}
+		return rs;
+	}
+
 	private ResultSet getColumns(DatabaseMetaData databaseMetaData) throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getColumns(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), StringUtils.toUpperCase(columnNamePattern));
 		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getColumns(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), StringUtils.toUpperCase(columnNamePattern));
+			rs = databaseMetaData.getColumns(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), StringUtils.toLowerCase(columnNamePattern));
 		} else {
 			rs = databaseMetaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 		}
@@ -329,6 +394,19 @@ public class DatabaseModelReader {
 			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
 		} else {
 			rs = databaseMetaData.getImportedKeys(catalog, schemaPattern, tableNamePattern);
+		}
+		return rs;
+	}
+
+	private ResultSet getExportedKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+		String schemaPattern = schema.getName();
+		ResultSet rs;
+		if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			rs = databaseMetaData.getExportedKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
+		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			rs = databaseMetaData.getExportedKeys(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
+		} else {
+			rs = databaseMetaData.getExportedKeys(catalog, schemaPattern, tableNamePattern);
 		}
 		return rs;
 	}

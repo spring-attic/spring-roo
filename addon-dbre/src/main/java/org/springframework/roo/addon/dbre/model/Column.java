@@ -1,13 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Types;
-import java.util.Date;
-
-import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.JavaType;
 
 /**
  * Represents a column in the database model.
@@ -19,15 +12,16 @@ public class Column implements Serializable {
 	private static final long serialVersionUID = -4826133462002775388L;
 	private String name;
 	private String description;
+	private Table table;
 	private boolean primaryKey;
 	private boolean required;
 	private boolean autoIncrement;
 	private int typeCode;
-	private String type;
+	private ColumnType type;
 	private int size;
 	private int scale;
 	private String defaultValue;
-	private JavaType javaType;
+	private String javaType;
 
 	Column(String name) {
 		this.name = name;
@@ -47,6 +41,14 @@ public class Column implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
 	}
 
 	public boolean isPrimaryKey() {
@@ -81,11 +83,11 @@ public class Column implements Serializable {
 		this.typeCode = typeCode;
 	}
 
-	public String getType() {
+	public ColumnType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(ColumnType type) {
 		this.type = type;
 	}
 
@@ -113,63 +115,12 @@ public class Column implements Serializable {
 		this.defaultValue = defaultValue;
 	}
 
-	public JavaType getJavaType() {
+	public String getJavaType() {
 		return javaType;
 	}
 
-	public void setJavaType(JavaType javaType) {
+	public void setJavaType(String javaType) {
 		this.javaType = javaType;
-	}
-
-	public JavaType getJavaTypeFromTypeCode() {
-		JavaType javaType;
-		switch (typeCode) {
-		case Types.INTEGER:
-			javaType = JavaType.INT_OBJECT;
-			break;
-		case Types.FLOAT:
-		case Types.REAL:
-			javaType = JavaType.FLOAT_OBJECT;
-			break;
-		case Types.DOUBLE:
-		case Types.DECIMAL:
-			javaType = scale > 0 ? JavaType.DOUBLE_OBJECT : JavaType.LONG_OBJECT;
-			break;
-		case Types.NUMERIC:
-			javaType = scale > 0 ? new JavaType(BigDecimal.class.getName()) : JavaType.LONG_OBJECT;
-			break;
-		case Types.BIGINT:
-			javaType = new JavaType(BigInteger.class.getName());
-			break;
-		case Types.BOOLEAN:
-		case Types.BIT:
-			javaType = JavaType.BOOLEAN_PRIMITIVE;
-			break;
-		case Types.DATE:
-		case Types.TIME:
-		case Types.TIMESTAMP:
-			javaType = new JavaType(Date.class.getName());
-			break;
-		case Types.CHAR:
-			javaType = JavaType.CHAR_OBJECT;
-			break;
-		case Types.VARCHAR:
-			javaType = JavaType.STRING_OBJECT;
-			break;
-		case Types.BLOB:
-		case Types.BINARY:
-		case Types.VARBINARY:
-		case Types.LONGVARBINARY:
-			javaType = new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null);
-			break;
-		case Types.OTHER:
-			javaType = JavaType.STRING_OBJECT;
-			break;
-		default:
-			javaType = JavaType.STRING_OBJECT;
-			break;
-		}
-		return javaType;
 	}
 
 	public int hashCode() {
@@ -201,6 +152,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, javaType=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s]", name, getJavaTypeFromTypeCode(), description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue);
+		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType);
 	}
 }

@@ -54,7 +54,7 @@ public class TableModelServiceImpl implements TableModelService {
 		return convertTableNameToType(tableNamePattern, javaPackage);
 	}
 
-	public String suggestFieldNameForColumn(String columnName) {
+	public String suggestFieldName(String columnName) {
 		return getFieldName(columnName);
 	}
 

@@ -19,7 +19,6 @@ import org.springframework.roo.addon.dbre.DbrePath;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
@@ -113,25 +112,24 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 
 		Element databaseElement = document.getDocumentElement();
 
-		Database database = new Database();
-		database.setName(databaseElement.getAttribute("name"));
-		database.setJavaPackage(new JavaPackage(databaseElement.getAttribute("package")));
-
 		Set<Table> tables = new LinkedHashSet<Table>();
 		List<Element> tableElements = XmlUtils.findElements("table", databaseElement);
 		for (Element tableElement : tableElements) {
 			Table table = new Table();
 			table.setName(tableElement.getAttribute("name"));
-
+			if (StringUtils.hasText(tableElement.getAttribute("description"))) {
+				table.setDescription(tableElement.getAttribute("description"));
+			}
+			
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
 				Column column = new Column(columnElement.getAttribute("name"));
 				column.setDescription(columnElement.getAttribute("description"));
 				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
-				column.setJavaType(new JavaType(columnElement.getAttribute("javaType")));
+				column.setJavaType(columnElement.getAttribute("javaType"));
 				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
 				column.setSize(Integer.parseInt(columnElement.getAttribute("size")));
-				column.setType(columnElement.getAttribute("type"));
+				column.setType(ColumnType.valueOf(columnElement.getAttribute("type")));
 				table.addColumn(column);
 			}
 
@@ -152,15 +150,30 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				table.addForeignKey(foreignKey);
 			}
 
+			List<Element> exportedKeyElements = XmlUtils.findElements("exportedKey", tableElement);
+			for (Element exportedKeyElement : exportedKeyElements) {
+				ForeignKey exportedKey = new ForeignKey(exportedKeyElement.getAttribute("name"));
+				exportedKey.setForeignTableName(exportedKeyElement.getAttribute("foreignTable"));
+				exportedKey.setOnDelete(CascadeAction.getCascadeAction(exportedKeyElement.getAttribute("onDelete")));
+				exportedKey.setOnUpdate(CascadeAction.getCascadeAction(exportedKeyElement.getAttribute("onUpdate")));
+
+				List<Element> referenceElements = XmlUtils.findElements("reference", exportedKeyElement);
+				for (Element referenceElement : referenceElements) {
+					org.springframework.roo.addon.dbre.model.Reference reference = new org.springframework.roo.addon.dbre.model.Reference();
+					reference.setForeignColumnName(referenceElement.getAttribute("foreign"));
+					reference.setLocalColumnName(referenceElement.getAttribute("local"));
+					exportedKey.addReference(reference);
+				}
+				table.addExportedKey(exportedKey);
+			}
+
 			addIndices(table, tableElement, "index");
 			addIndices(table, tableElement, "unique");
 
 			tables.add(table);
 		}
 
-		database.addTables(tables);
-
-		return database;
+		return new Database(databaseElement.getAttribute("name"), new JavaPackage(databaseElement.getAttribute("package")), tables);
 	}
 
 	private void addIndices(Table table, Element tableElement, String indexType) {
@@ -193,7 +206,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			if (StringUtils.hasText(table.getDescription())) {
 				tableElement.setAttribute("description", table.getDescription());
 			}
-
+			
 			for (Column column : table.getColumns()) {
 				Element columnElement = document.createElement("column");
 				columnElement.setAttribute("name", column.getName());
@@ -201,10 +214,9 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 					columnElement.setAttribute("description", column.getDescription());
 				}
 				columnElement.setAttribute("primaryKey", String.valueOf(column.isPrimaryKey()));
-				columnElement.setAttribute("javaType", column.getJavaTypeFromTypeCode().getFullyQualifiedTypeName());
 				columnElement.setAttribute("required", String.valueOf(column.isRequired()));
 				columnElement.setAttribute("size", String.valueOf(column.getSize()));
-				columnElement.setAttribute("type", column.getType());
+				columnElement.setAttribute("type", column.getType().name());
 				tableElement.appendChild(columnElement);
 			}
 
@@ -232,6 +244,21 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 					indexElement.appendChild(indexColumnElement);
 				}
 				tableElement.appendChild(indexElement);
+			}
+
+			for (ForeignKey exportedKey : table.getExportedKeys()) {
+				Element exportedKeyElement = document.createElement("exportedKey");
+				exportedKeyElement.setAttribute("name", exportedKey.getName());
+				exportedKeyElement.setAttribute("foreignTable", exportedKey.getForeignTableName());
+				exportedKeyElement.setAttribute("onDelete", exportedKey.getOnDelete().getCode());
+				exportedKeyElement.setAttribute("onUpdate", exportedKey.getOnUpdate().getCode());
+				for (org.springframework.roo.addon.dbre.model.Reference reference : exportedKey.getReferences()) {
+					Element referenceElement = document.createElement("reference");
+					referenceElement.setAttribute("foreign", reference.getForeignColumnName());
+					referenceElement.setAttribute("local", reference.getLocalColumnName());
+					exportedKeyElement.appendChild(referenceElement);
+				}
+				tableElement.appendChild(exportedKeyElement);
 			}
 
 			databaseElement.appendChild(tableElement);

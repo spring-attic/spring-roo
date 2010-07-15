@@ -1,12 +1,15 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * Represents a database foreign key.
+ * 
+ * <p>
+ * A foreign key can be modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} 
+ * or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -16,11 +19,14 @@ public class ForeignKey implements Serializable {
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;
+	
+	/** The owning table. */
+	private Table table;
 
 	/** The target table. */
 	private Table foreignTable;
 
-	/** The name of the foreign table. */
+	/** The name of the foreign (target) table. */
 	private String foreignTableName;
 
 	/** The action to perform when the value of the referenced column changes. */
@@ -30,7 +36,7 @@ public class ForeignKey implements Serializable {
 	private CascadeAction onDelete = CascadeAction.NONE;
 
 	/** The references between local and remote columns. */
-	private SortedSet<Reference> references = new TreeSet<Reference>();
+	private Set<Reference> references = new LinkedHashSet<Reference>();
 
 	ForeignKey() {
 	}
@@ -45,6 +51,14 @@ public class ForeignKey implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
 	}
 
 	public Table getForeignTable() {
@@ -83,6 +97,10 @@ public class ForeignKey implements Serializable {
 		return references;
 	}
 
+	public int getReferenceCount() {
+		return references.size();
+	}
+	
 	public void addReference(Reference reference) {
 		if (reference != null) {
 			references.add(reference);
@@ -98,16 +116,35 @@ public class ForeignKey implements Serializable {
 		return false;
 	}
 
-	public boolean hasForeignColumn(Column column) {
-		for (Reference reference : references) {
-			if (reference.getForeignColumn().equals(column)) {
-				return true;
-			}
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((foreignTableName == null) ? 0 : foreignTableName.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
 		}
-		return false;
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ForeignKey)) {
+			return false;
+		}
+		ForeignKey other = (ForeignKey) obj;
+		if (foreignTableName == null) {
+			if (other.foreignTableName != null) {
+				return false;
+			}
+		} else if (!foreignTableName.equals(other.foreignTableName)) {
+			return false;
+		}
+		return true;
 	}
 
 	public String toString() {
-		return String.format("ForeignKey [name=%s, foreignTableName=%s, onUpdate=%s, onDelete=%s, references=%s]", name, foreignTableName, onUpdate, onDelete, references);
+		return String.format("ForeignKey [name=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, references=%s]", name, foreignTableName, onUpdate, onDelete, references);
 	}
 }

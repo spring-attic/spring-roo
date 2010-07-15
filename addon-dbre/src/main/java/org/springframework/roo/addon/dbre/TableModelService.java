@@ -44,12 +44,12 @@ public interface TableModelService {
 	JavaType suggestTypeNameForNewTable(String tableNamePattern, JavaPackage javaPackage);
 
 	/**
-	 * Returns a field name for a given database column name;
+	 * Returns a field name for a given database table or column name;
 	 * 
-	 * @param columnName the name of the column.
-	 * @return a String representing the column.
+	 * @param name the name of the table or column.
+	 * @return a String representing the table or column.
 	 */
-	String suggestFieldNameForColumn(String columnName);
+	String suggestFieldName(String name);
 
 	/**
 	 * Returns all {@link RooDbManaged} entities.

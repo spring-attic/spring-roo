@@ -78,12 +78,15 @@ public class DbreXmlFileListener implements FileEventListener {
 	public void reverseEngineer(Database database) {
 		Set<Table> tables = database.getTables();
 		for (Table table : tables) {
-			JavaPackage javaPackage = database.getJavaPackage();
-			JavaType javaType = tableModelService.findTypeForTableName(table.getName(), javaPackage);
-			if (javaType == null) {
-				createNewManagedEntityFromTable(table, javaPackage);
-			} else {
-				updateExistingManagedEntity(javaType, table);
+			// Don't create types from join tables in many-to-many associations
+			if (!database.isManyToManyJoinTable(table)) {
+				JavaPackage javaPackage = database.getJavaPackage();
+				JavaType javaType = tableModelService.findTypeForTableName(table.getName(), javaPackage);
+				if (javaType == null) {
+					createNewManagedEntityFromTable(table, javaPackage);
+				} else {
+					updateExistingManagedEntity(javaType, table);
+				}
 			}
 		}
 
@@ -173,20 +176,20 @@ public class DbreXmlFileListener implements FileEventListener {
 		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 
 		// Process primary keys and add 'identifierType' and 'identifierField' attribute
-		Set<Column> primaryKeys = table.getPrimaryKeys();
-		int pkCount = primaryKeys.size();
+		int pkCount = table.getPrimaryKeyCount();
 		if (pkCount == 1) {
 			// Table has one primary key column so add the column's type to the 'identifierType' attribute
+			Set<Column> primaryKeys = table.getPrimaryKeys();
 			Column primaryKey = primaryKeys.iterator().next();
 			String columnName = primaryKey.getName();
-			JavaType primaryKeyType = primaryKey.getJavaType();
+			JavaType primaryKeyType = primaryKey.getType().getJavaType();
 			// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
 			if (!primaryKeyType.equals(JavaType.LONG_OBJECT)) {
 				entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), primaryKeyType));
 			}
 
 			// Only add 'identifierField' attribute if it is different from the default, "id"
-			String fieldName = tableModelService.suggestFieldNameForColumn(columnName);
+			String fieldName = tableModelService.suggestFieldName(columnName);
 			if (!"id".equals(fieldName)) {
 				entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
 			}
@@ -198,6 +201,8 @@ public class DbreXmlFileListener implements FileEventListener {
 				deleteManagedType(identifierType);
 			}
 		} else if (pkCount > 1) { // Table has a composite key
+			Set<Column> primaryKeys = table.getPrimaryKeys();
+
 			// Check if identifier class already exists and if not, create it
 			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 				createIdentifierClass(identifierType, primaryKeys);
@@ -228,10 +233,10 @@ public class DbreXmlFileListener implements FileEventListener {
 		List<StringAttributeValue> idColumns = new ArrayList<StringAttributeValue>();
 		for (Column column : columns) {
 			if (column.isPrimaryKey()) {
-				String columnName = tableModelService.suggestFieldNameForColumn(column.getName());
-				idFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), columnName));
-				idTypes.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getJavaType().getFullyQualifiedTypeName()));
-				idColumns.add(new StringAttributeValue(new JavaSymbolName("ignored"), column.getName()));
+				String columnName = tableModelService.suggestFieldName(column.getName());
+				idFields.add(new StringAttributeValue(new JavaSymbolName("value"), columnName));
+				idTypes.add(new StringAttributeValue(new JavaSymbolName("value"), column.getType().getJavaType().getFullyQualifiedTypeName()));
+				idColumns.add(new StringAttributeValue(new JavaSymbolName("value"), column.getName()));
 			}
 		}
 

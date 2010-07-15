@@ -15,6 +15,7 @@ import org.springframework.roo.support.util.Assert;
 public class Index implements Serializable {
 	private static final long serialVersionUID = 3248243308098445623L;
 	private String name;
+	private Table table;
 	private boolean unique;
 	private List<IndexColumn> columns = new LinkedList<IndexColumn>();
 
@@ -31,6 +32,14 @@ public class Index implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
 	}
 
 	public boolean isUnique() {
