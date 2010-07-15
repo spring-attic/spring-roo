@@ -14,9 +14,7 @@
     <modules>
         <module>json-simple</module>
         <module>protobuf</module>
-        <module>jansi</module>
         <module>jline</module>
-        <module>jna</module>
         <module>inflector</module>
         <module>javaparser</module>
         <module>velocity</module>
