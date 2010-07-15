@@ -272,22 +272,17 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		buff.append(ANSICodes.save());
 		
 		// Figure out the longest line we're presently displaying (or were) and erase the line from that position
-		int mostFurtherLeftRowNumber = Integer.MAX_VALUE;
+		int mostFurtherLeftColNumber = Integer.MAX_VALUE;
 		for (Integer candidate : rowErasureMap.values()) {
-			if (candidate < mostFurtherLeftRowNumber) {
-				mostFurtherLeftRowNumber = candidate;
+			if (candidate < mostFurtherLeftColNumber) {
+				mostFurtherLeftColNumber = candidate;
 			}
 		}
 		
-		if (mostFurtherLeftRowNumber == Integer.MAX_VALUE) {
+		if (mostFurtherLeftColNumber == Integer.MAX_VALUE) {
 			// There is nothing to erase
 		} else {
-			// NB: See http://jline.sourceforge.net/apidocs/jline/ANSIBuffer.ANSICodes.html#gotoxy%28int,%20int%29
-			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
-				buff.append(ANSICodes.gotoxy(mostFurtherLeftRowNumber, row)); // incorrect, seems to be JANSI needs this
-			} else {
-				buff.append(ANSICodes.gotoxy(row, mostFurtherLeftRowNumber)); // row, column (correct, as per API docs)
-			}
+			buff.append(ANSICodes.gotoxy(row, mostFurtherLeftColNumber));
 			buff.append(ANSICodes.clreol()); // clear what was present on the line
 		}
 		
@@ -301,12 +296,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			if (startFrom < 1) {
 				startFrom = 1;
 			}
-			// NB: See http://jline.sourceforge.net/apidocs/jline/ANSIBuffer.ANSICodes.html#gotoxy%28int,%20int%29
-			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
-				buff.append(ANSICodes.gotoxy(startFrom, row)); // incorrect, seems to be JANSI needs this
-			} else {
-				buff.append(ANSICodes.gotoxy(row, startFrom)); // row, column (correct, as per API docs)
-			}
+			buff.append(ANSICodes.gotoxy(row, startFrom));
 			buff.reverse(message);
 			// Record we want to erase from this positioning next time (so we clean up after ourselves)
 			rowErasureMap.put(row, startFrom);
