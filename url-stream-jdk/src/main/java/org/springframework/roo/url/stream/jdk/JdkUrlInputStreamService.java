@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -64,7 +65,7 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 				int percentageDownloaded = Math.round((readSoFar / totalSize) * 100);
 				if (System.currentTimeMillis() > (lastNotified + 1000)) {
 					if (lastPercentageIndicated != percentageDownloaded) {
-						shell.flash("Downloaded " + percentageDownloaded + "% of " + text);
+						shell.flash(Level.FINE, "Downloaded " + percentageDownloaded + "% of " + text, JdkUrlInputStreamService.class.getName());
 						lastPercentageIndicated = percentageDownloaded;
 						lastNotified = System.currentTimeMillis();
 					}
@@ -72,7 +73,7 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 			} else {
 				// Total size is not known, rely on time-based updates instead
 				if (System.currentTimeMillis() > (lastNotified + 1000)) {
-					shell.flash("Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text);
+					shell.flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, JdkUrlInputStreamService.class.getName());
 					lastNotified = System.currentTimeMillis();
 				}
 			}
@@ -81,11 +82,11 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 			
 			if (result == -1) {
 				if (totalSize > 0) {
-					shell.flash("Downloaded 100% of " + text);
+					shell.flash(Level.FINE, "Downloaded 100% of " + text, JdkUrlInputStreamService.class.getName());
 				} else {
-					shell.flash("Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text);
+					shell.flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, JdkUrlInputStreamService.class.getName());
 				}
-				shell.flash("");
+				shell.flash(Level.FINE, "", JdkUrlInputStreamService.class.getName());
 			}
 			
 			return result;
@@ -93,7 +94,7 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 
 		@Override
 		public void close() throws IOException {
-			shell.flash("");
+			shell.flash(Level.FINE, "", JdkUrlInputStreamService.class.getName());
 			delegate.close();
 		}
 	}
