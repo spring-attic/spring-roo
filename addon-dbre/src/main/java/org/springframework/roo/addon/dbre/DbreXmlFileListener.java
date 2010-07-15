@@ -295,11 +295,13 @@ public class DbreXmlFileListener implements FileEventListener {
 	private void deleteManagedType(JavaType javaType) {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
-		ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName())) != null) {
-			String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
-			if (!FileUtils.deleteRecursively(new File(filePath))) {
-				logger.warning("Unable to delete database-managed class " + filePath);
+		if (governorPhysicalTypeMetadata != null) {
+			ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+			if (MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName())) != null) {
+				String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
+				if (!FileUtils.deleteRecursively(new File(filePath))) {
+					logger.warning("Unable to delete database-managed class " + filePath);
+				}
 			}
 		}
 	}
