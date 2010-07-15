@@ -53,6 +53,20 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * Metadata for {@link RooDbManaged}.
  * 
+ * <p>
+ * Creates and manages entity relationships, such as many-valued and single-valued associations.
+ * 
+ * <p>
+ * One-to-many and one-to-one associations are created based on the following laws:
+ * <ul>
+ * <li>Primary Key (PK) - Foreign Key (FK) LAW #1: If the foreign key column is part of the primary key (or part of an index) then the relationship between the tables will be one to many (1:M).
+ * <li>Primary Key (PK) - Foreign Key (FK) LAW #2: If the foreign key column represents the entire primary key (or the entire index) then the relationship between the tables will be one to one (1:1).
+ * </ul>
+ * 
+ * <p>
+ * Many-to-many associations are created if a join table is detected. To be identified as a many-to-many join table, the table must have have exactly two primary keys and have exactly two foreign-keys
+ * pointing to other entity tables and have no other columns.
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
@@ -64,6 +78,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
 	private static final JavaType MANY_TO_MANY = new JavaType("javax.persistence.ManyToMany");
 	private static final JavaType JOIN_COLUMN = new JavaType("javax.persistence.JoinColumn");
+	private static final JavaSymbolName NAME = new JavaSymbolName("name");
+	private static final JavaSymbolName MAPPED_BY = new JavaSymbolName("mappedBy");
 
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
@@ -91,39 +107,112 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return;
 		}
 
-		// Add field for a many-valued association with many-to-many multiplicity
-		addManyToManyField(javaType, javaPackage, database, table);
+		// Add fields for many-valued associations with many-to-many multiplicity
+		addManyToManyFields(javaPackage, database, table);
 
 		// Add fields for many-valued associations with one-to-many multiplicity and
 		// single-valued associations to other entities that have one-to-one multiplicity
-		addOneToXXXFields(javaType, javaPackage, database, table);
+		addOneToXXXFields(javaPackage, database, table);
 
-		// Add fields from columns with their respective accessors and mutators
+		// Add remaining fields from columns with their respective accessors and mutators
 		addFields(javaType, javaPackage, table);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 
-	private void addManyToManyField(JavaType javaType, JavaPackage javaPackage, Database database, Table table) {
-		ManyToManyAssociation association = null;
+	private void addManyToManyFields(JavaPackage javaPackage, Database database, Table table) {
+		int manyToManyCount = 0;
+		for (ManyToManyAssociation manyToManyAssociation : database.getManyToManyAssociations()) {
+			if (manyToManyAssociation.getOwningSideTable().equals(table)) {
+				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getInverseSideTable().getName()));
+				if (manyToManyCount > 0) {
+					fieldNameStr += String.valueOf(manyToManyCount);
+				}
+				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
+				FieldMetadata field = getManyToManyOwningSideField(fieldName, manyToManyAssociation, javaPackage);
+				addToBuilder(field);
+			}
 
-		association = database.getOwningSideOfManyToManyAssociation(table);
-		if (association != null) {
-			JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(association.getInverseSideTable().getName())));
-			FieldMetadata field = getManyToManyOwningSideField(fieldName, association, javaPackage);
-			addToBuilder(field);
-		}
+			if (manyToManyAssociation.getInverseSideTable().equals(table)) {
+				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getOwningSideTable().getName()));
+				if (manyToManyCount > 0) {
+					fieldNameStr += String.valueOf(manyToManyCount);
+				}
+				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
+				FieldMetadata field = getManyToManyInverseSideField(fieldName, manyToManyCount, manyToManyAssociation, javaPackage);
+				addToBuilder(field);
+			}
 
-		association = database.getInverseSideOfManyToManyAssociation(table);
-		if (association != null) {
-			JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(association.getOwningSideTable().getName())));
-			FieldMetadata field = getManyToManyInverseSideField(fieldName, association, javaPackage);
-			addToBuilder(field);
+			manyToManyCount++;
 		}
 	}
 
-	private void addOneToXXXFields(JavaType javaType, JavaPackage javaPackage, Database database, Table table) {
+	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
+		List<JavaType> params = new ArrayList<JavaType>();
+		JavaType element = tableModelService.findTypeForTableName(association.getInverseSideTable().getName(), javaPackage);
+		params.add(element);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+
+		// Add annotations to field
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+
+		// Add @ManyToMany annotation
+		AnnotationMetadata manyToManyAnnotation = new DefaultAnnotationMetadata(MANY_TO_MANY, new ArrayList<AnnotationAttributeValue<?>>());
+		annotations.add(manyToManyAnnotation);
+
+		// Add @JoinTable annotation
+		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		joinTableAnnotationAttributes.add(new StringAttributeValue(NAME, association.getJoinTable().getName()));
+
+		// Add joinColumns attribute containing nested @JoinColumn annotation
+		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
+		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		joinColumnAttributes.add(new StringAttributeValue(NAME, association.getPrimaryKeyOfOwningSideTable()));
+		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
+		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
+		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
+
+		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
+		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
+		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		inverseJoinColumnAttributes.add(new StringAttributeValue(NAME, association.getPrimaryKeyOfInverseSideTable()));
+		AnnotationMetadata inverseJoinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, inverseJoinColumnAttributes);
+		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), inverseJoinColumnAnnotation));
+		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
+
+		AnnotationMetadata joinTableAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinTable"), joinTableAnnotationAttributes);
+		annotations.add(joinTableAnnotation);
+
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
+	}
+
+	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, int manyToManyCount, ManyToManyAssociation association, JavaPackage javaPackage) {
+		List<JavaType> params = new ArrayList<JavaType>();
+		JavaType element = tableModelService.findTypeForTableName(association.getOwningSideTable().getName(), javaPackage);
+		params.add(element);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
+
+		// Add annotations to field
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(association.getInverseSideTable().getName()));
+		if (manyToManyCount > 0) {
+			mappedByFieldNameStr += String.valueOf(manyToManyCount);
+		}
+		JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
+
+		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
+		AnnotationMetadata annotation = new DefaultAnnotationMetadata(MANY_TO_MANY, attributes);
+		annotations.add(annotation);
+
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
+	}
+
+	private void addOneToXXXFields(JavaPackage javaPackage, Database database, Table table) {
 		if (!database.isManyToManyJoinTable(table)) {
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
 				String foreignTableName = exportedKey.getForeignTableName();
@@ -145,10 +234,85 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(foreignTableName)));
 						field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, javaPackage);
 					}
+
 					addToBuilder(field);
 				}
 			}
 		}
+	}
+
+	public boolean isOneToOne(Table table, ForeignKey foreignKey) {
+		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
+		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
+		while (equals && primaryKeyIterator.hasNext()) {
+			equals &= foreignKey.hasLocalColumn(primaryKeyIterator.next());
+		}
+		return equals;
+	}
+
+	public FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, ForeignKey foreignKey, Column column) {
+		// Add annotations to field
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+
+		// Add @OneToOne annotation
+		AnnotationMetadata oneToOneAnnotation = new DefaultAnnotationMetadata(ONE_TO_ONE, new ArrayList<AnnotationAttributeValue<?>>());
+		annotations.add(oneToOneAnnotation);
+
+		if (foreignKey.getReferenceCount() == 1) {
+			// Add @JoinColumn annotation
+			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			joinColumnAttributes.add(new StringAttributeValue(NAME, column.getName()));
+			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
+			annotations.add(joinColumnAnnotation);
+		} else {
+			// Add @JoinColumns annotations
+			List<NestedAnnotationAttributeValue> joinColumnsArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
+
+			for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
+				List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+				joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
+				joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), reference.getForeignColumnName()));
+				AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
+				joinColumnsArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
+			}
+
+			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+			attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("value"), joinColumnsArrayValues));
+
+			AnnotationMetadata joinColumnsAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumns"), attributes);
+			annotations.add(joinColumnsAnnotation);
+		}
+
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
+	}
+
+	private FieldMetadata getOneToOneMappedByField(JavaSymbolName fieldName, JavaType fieldType, JavaSymbolName mappedByFieldName) {
+		// Add @OneToOne annotation
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
+		AnnotationMetadata oneToOneAnnotation = new DefaultAnnotationMetadata(ONE_TO_ONE, attributes);
+		annotations.add(oneToOneAnnotation);
+
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
+	}
+
+	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, JavaPackage javaPackage) {
+		List<JavaType> params = new ArrayList<JavaType>();
+
+		JavaType element = tableModelService.findTypeForTableName(foreignTableName, javaPackage);
+		params.add(element);
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
+
+		// Add @OneToMany annotation
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
+		AnnotationMetadata annotation = new DefaultAnnotationMetadata(ONE_TO_MANY, attributes);
+		annotations.add(annotation);
+
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
 	private void addFields(JavaType javaType, JavaPackage javaPackage, Table table) {
@@ -260,95 +424,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
-		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = tableModelService.findTypeForTableName(association.getInverseSideTable().getName(), javaPackage);
-		params.add(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
-
-		// Add annotations to field
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-
-		// Add @ManyToMany annotation
-		AnnotationMetadata manyToManyAnnotation = new DefaultAnnotationMetadata(MANY_TO_MANY, new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(manyToManyAnnotation);
-
-		// Add @JoinTable annotation
-		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinTableAnnotationAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), association.getJoinTable().getName()));
-
-		// Add joinColumns attribute containing nested @JoinColumn annotation
-		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), association.getPrimaryKeyOfOwningSideTable()));
-		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
-		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
-
-		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
-		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		inverseJoinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), association.getPrimaryKeyOfInverseSideTable()));
-		AnnotationMetadata inverseJoinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, inverseJoinColumnAttributes);
-		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), inverseJoinColumnAnnotation));
-		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
-
-		AnnotationMetadata joinTableAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinTable"), joinTableAnnotationAttributes);
-		annotations.add(joinTableAnnotation);
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
-	}
-
-	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
-		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = tableModelService.findTypeForTableName(association.getOwningSideTable().getName(), javaPackage);
-		params.add(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
-
-		// Add annotations to field
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(association.getInverseSideTable().getName())));
-
-		attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedByFieldName.getSymbolName()));
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(MANY_TO_MANY, attributes);
-		annotations.add(annotation);
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
-	}
-
-	private FieldMetadata getOneToOneMappedByField(JavaSymbolName fieldName, JavaType fieldType, JavaSymbolName mappedByFieldName) {
-		// Add @OneToOne annotation
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedByFieldName.getSymbolName()));
-		AnnotationMetadata oneToOneAnnotation = new DefaultAnnotationMetadata(ONE_TO_ONE, attributes);
-		annotations.add(oneToOneAnnotation);
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
-	}
-
-	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, JavaPackage javaPackage) {
-		List<JavaType> params = new ArrayList<JavaType>();
-
-		JavaType element = tableModelService.findTypeForTableName(foreignTableName, javaPackage);
-		params.add(element);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
-
-		// Add @OneToMany annotation
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedByFieldName.getSymbolName()));
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(ONE_TO_MANY, attributes);
-		annotations.add(annotation);
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
-	}
-
 	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, Column column) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -359,54 +434,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @JoinColumn annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("name"), column.getName()));
+		attributes.add(new StringAttributeValue(NAME, column.getName()));
 		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, attributes);
 		annotations.add(joinColumnAnnotation);
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
-	}
-
-	public boolean isOneToOne(Table table, ForeignKey foreignKey) {
-		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
-		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
-		while (equals && primaryKeyIterator.hasNext()) {
-			equals &= foreignKey.hasLocalColumn(primaryKeyIterator.next());
-		}
-		return equals;
-	}
-
-	public FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, ForeignKey foreignKey, Column column) {
-		// Add annotations to field
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-
-		// Add @OneToOne annotation
-		AnnotationMetadata oneToOneAnnotation = new DefaultAnnotationMetadata(ONE_TO_ONE, new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(oneToOneAnnotation);
-
-		if (foreignKey.getReferenceCount() == 1) {
-			// Add @JoinColumn annotation
-			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), column.getName()));
-			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-			annotations.add(joinColumnAnnotation);
-		} else {
-			// Add @JoinColumns annotations
-			List<NestedAnnotationAttributeValue> joinColumnsArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-
-			for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
-				List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-				joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), reference.getLocalColumnName()));
-				joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), reference.getForeignColumnName()));
-				AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-				joinColumnsArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
-			}
-
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("value"), joinColumnsArrayValues));
-
-			AnnotationMetadata joinColumnsAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumns"), attributes);
-			annotations.add(joinColumnsAnnotation);
-		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
 	}
@@ -425,7 +455,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @Column annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("name"), column.getName()));
+		attributes.add(new StringAttributeValue(NAME, column.getName()));
 
 		// Add length attribute for Strings
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
