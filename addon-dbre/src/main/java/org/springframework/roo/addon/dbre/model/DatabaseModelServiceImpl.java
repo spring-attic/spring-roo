@@ -3,6 +3,8 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,7 +12,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -23,11 +26,11 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of {@link DatabaseModelService).
@@ -38,7 +41,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class DatabaseModelServiceImpl implements DatabaseModelService {
-	private static final Logger logger = HandlerUtils.getLogger(DatabaseModelServiceImpl.class);
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private FileManager fileManager;
@@ -57,20 +59,19 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 	}
 
-	public void displayDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
+	public String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
 			if (database == null || database.getTables().isEmpty()) {
-				logger.warning("Schema " + schema.getName() + " does not contain any tables");
-				return;
+				throw new IllegalStateException("Schema " + schema.getName() + " either does not exist or contain any tables");
 			}
 
 			OutputStream outputStream = new ByteArrayOutputStream();
 			Document document = getDocument(database);
 			XmlUtils.writeXml(outputStream, document);
-			logger.info(outputStream.toString());
+			return outputStream.toString();
 		} catch (Exception e) {
-			logger.warning("Failed to retrieve database metadata: " + e.getMessage());
+			throw new IllegalStateException("Failed to retrieve database metadata", e);
 		}
 	}
 
@@ -78,36 +79,35 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
 			if (database == null || database.getTables().isEmpty()) {
-				logger.warning("Schema " + schema.getName() + " does not contain any tables");
-				return;
+				throw new IllegalStateException("Schema " + schema.getName() + " either does not exist or contain any tables");
 			}
 
 			Document document = getDocument(database);
 
 			if (file != null) {
 				XmlUtils.writeXml(new FileOutputStream(file), document);
-				logger.info("Database metadata written to file " + file.getAbsolutePath());
 			} else {
 				String dbreXmlPath = getDbreXmlPath();
 				MutableFile mutableFile = fileManager.exists(dbreXmlPath) ? fileManager.updateFile(dbreXmlPath) : fileManager.createFile(dbreXmlPath);
 				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 			}
 		} catch (Exception e) {
-			logger.warning("Failed to write database metadata to file: " + e.getMessage());
+			throw new IllegalStateException("Failed to write database metadata to file", e);
 		}
 	}
 
 	public Database deserializeDatabaseMetadata() {
-		String dbreXmlPath = getDbreXmlPath();
-		MutableFile mutableFile = fileManager.updateFile(dbreXmlPath);
 		Document document = null;
 		try {
-			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+			document = getDocument();
+			if (document == null || !document.hasChildNodes()) {
+				return null;
+			}
 		} catch (Exception e) {
-			throw new IllegalStateException("Unable to parse " + dbreXmlPath, e);
-		}
-		if (document == null || !document.hasChildNodes()) {
-			throw new IllegalStateException(dbreXmlPath + " is empty");
+		//	if (document == null) {
+		//	logger.warning("Failed to retrieve database metadata: " + e.getMessage());
+		//	logger.warning("Failed to retrieve database metadata");
+			throw new IllegalStateException();
 		}
 
 		Element databaseElement = document.getDocumentElement();
@@ -174,6 +174,18 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 
 		return new Database(databaseElement.getAttribute("name"), new JavaPackage(databaseElement.getAttribute("package")), tables);
+	}
+
+	private Document getDocument() throws SAXException, IOException  {
+		String dbreXmlPath = getDbreXmlPath();
+		MutableFile mutableFile = fileManager.updateFile(dbreXmlPath);
+		InputStream is = mutableFile.getInputStream();
+		if (is.available() == 0) {
+			throw new IllegalStateException(dbreXmlPath + " is empty");
+		}
+		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+		builder.setErrorHandler(null);
+		return builder.parse(is);
 	}
 
 	private void addIndices(Table table, Element tableElement, String indexType) {

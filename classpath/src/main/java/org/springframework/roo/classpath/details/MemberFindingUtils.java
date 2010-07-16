@@ -37,19 +37,6 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
-	 * Returns all declared fields
-	 * 
-	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)
-	 * @return a List of declared fields, never null
-	 */
-	public static final List<FieldMetadata> getDeclaredFields(MemberHoldingTypeDetails memberHoldingTypeDetails) {
-		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
-		declaredFields.addAll(memberHoldingTypeDetails.getDeclaredFields());
-		return declaredFields;
-	}
-	
-	/**
 	 * Locates the specified method.
 	 * 
 	 * @param memberHoldingTypeDetails the {@link MemberHoldingTypeDetails} to search (required)

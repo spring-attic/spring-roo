@@ -131,7 +131,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 */
 	public List<FieldMetadata> getFields() {
 		// Locate all declared fields 
-		List<FieldMetadata> declaredFields = MemberFindingUtils.getDeclaredFields(governorTypeDetails);
+		List<? extends FieldMetadata> declaredFields = governorTypeDetails.getDeclaredFields();
 
 		// Add fields to ITD from annotation
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
@@ -188,7 +188,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return fields;
 	}
 	
-	private boolean hasField(List<FieldMetadata> declaredFields, FieldMetadata idField) {
+	private boolean hasField(List<? extends FieldMetadata> declaredFields, FieldMetadata idField) {
 		for (FieldMetadata declaredField : declaredFields) {
 			if (declaredField.getFieldName().equals(idField.getFieldName())) {
 				return true;

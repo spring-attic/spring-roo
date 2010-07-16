@@ -1,28 +1,27 @@
 package org.springframework.roo.addon.dbre;
 
 import java.io.File;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -37,9 +36,9 @@ import org.springframework.roo.support.util.StringUtils;
 public class TableModelServiceImpl implements TableModelService {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private ItdMetadataScanner itdMetadataScanner;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
+	@Reference private Shell shell;
 
 	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
 		JavaType javaType = suggestTypeNameForNewTable(tableNamePattern, javaPackage);
@@ -125,26 +124,51 @@ public class TableModelServiceImpl implements TableModelService {
 			JavaType javaType = new JavaType(fullPath);
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 			if (id != null) {
-				PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
-				if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
-					continue;
+				// Now I've found it, let's work out the Path it is from
+				Path path = PhysicalTypeIdentifier.getPath(id);
+				String dbreMid = DbreMetadata.createIdentifier(javaType, path);
+				DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(dbreMid);
+				if (dbreMetadata != null) {
+					shell.flash(Level.FINE, "Found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
+					managedEntities.add(javaType);
+				} else {
+					shell.flash(Level.FINE, "Not found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
 				}
-
-				ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
-				if (Modifier.isAbstract(cid.getModifier())) {
-					continue;
-				}
-
-				Set<MetadataItem> metadata = itdMetadataScanner.getMetadata(id);
-				for (MetadataItem item : metadata) {
-					if (item instanceof DbreMetadata) {
-						managedEntities.add(javaType);
-					}
-				}
+				shell.flash(Level.FINE, "", TableModelServiceImpl.class.getName());
 			}
 		}
 
 		return Collections.unmodifiableSet(managedEntities);
+	}
+
+	
+	public Set<JavaType> getDatabaseManagedIdentifiers() {
+		Set<JavaType> managedIdentifiers = new HashSet<JavaType>();
+		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
+		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
+		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
+
+		for (FileDetails file : entries) {
+			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
+			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
+			JavaType javaType = new JavaType(fullPath);
+			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
+			if (id != null) {
+				// Now I've found it, let's work out the Path it is from
+				Path path = PhysicalTypeIdentifier.getPath(id);
+				String identifierMid = IdentifierMetadata.createIdentifier(javaType, path);
+				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMid);
+				if (identifierMetadata != null) {
+					shell.flash(Level.FINE, "Found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
+					managedIdentifiers.add(javaType);
+				} else {
+					shell.flash(Level.FINE, "Not found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
+				}
+				shell.flash(Level.FINE, "", TableModelServiceImpl.class.getName());
+			}
+		}
+
+		return Collections.unmodifiableSet(managedIdentifiers);
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {

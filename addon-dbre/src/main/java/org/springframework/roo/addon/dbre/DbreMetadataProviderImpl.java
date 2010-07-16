@@ -6,6 +6,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
+import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
@@ -65,11 +66,17 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 
 		// We need to abort if we couldn't find dependent metadata
-		if (entityMetadata == null || !entityMetadata.isValid()) {
+		if (entityMetadata == null || !entityMetadata.isValid() ) {
+			return null;
+		}
+		
+		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
+		Database database = databaseModelService.deserializeDatabaseMetadata();
+		if (database == null) {
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, tableModelService, databaseModelService);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, tableModelService, database);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

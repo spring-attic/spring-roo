@@ -26,8 +26,9 @@ public interface DatabaseModelService {
 	 * @param catalog the name of the database catalog (may be null).
 	 * @param schema the {@link Schema schema) object representing the database schema.
 	 * @param javaPackage the package where entities are placed.
+	 * @return the database metadata as an XML string.
 	 */
-	void displayDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
+	String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
 
 	/**
 	 * Writes the database metadata in DOM format to an XML file.
@@ -41,7 +42,7 @@ public interface DatabaseModelService {
 	/**
 	 * Reads and converts the database XML file into a {@link Database} object.
 	 * 
-	 * @return the database model.
+	 * @return the database model. May return null if the XML file does not exist or is empty.
 	 */
 	Database deserializeDatabaseMetadata();
 }

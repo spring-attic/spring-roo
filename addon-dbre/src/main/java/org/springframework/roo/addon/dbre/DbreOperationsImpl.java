@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -13,6 +14,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Provides database reverse engineering operations.
@@ -23,6 +25,7 @@ import org.springframework.roo.project.ProjectMetadata;
 @Component
 @Service
 public class DbreOperationsImpl implements DbreOperations {
+	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
@@ -36,8 +39,9 @@ public class DbreOperationsImpl implements DbreOperations {
 		JavaPackage javaPackage = getTopLevelpackage();
 		if (file != null) {
 			databaseModelService.serializeDatabaseMetadata(catalog, schema, javaPackage, file);
+			logger.info("Database metadata written to file " + file.getAbsolutePath());
 		} else {
-			databaseModelService.displayDatabaseMetadata(catalog, schema, javaPackage);
+			logger.info(databaseModelService.getDatabaseMetadata(catalog, schema, javaPackage));
 		}
 	}
 

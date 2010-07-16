@@ -52,9 +52,16 @@ public interface TableModelService {
 	String suggestFieldName(String name);
 
 	/**
-	 * Returns all {@link RooDbManaged} entities.
+	 * Returns all {@link RooDbManaged} {@link RooEntity entities}.
 	 * 
-	 * @return An unmodifiable {@link Set} of all database-managed entities
+	 * @return An unmodifiable {@link Set} of all database-managed entities.
 	 */
 	Set<JavaType> getDatabaseManagedEntities();
+	
+	/**
+	 * Returns all {@link RooDbManaged} {@link RooIdentifier identifiers}.
+	 * 
+	 * @return An unmodifiable {@link Set} of all database-managed identifiers.
+	 */
+	Set<JavaType> getDatabaseManagedIdentifiers();
 }

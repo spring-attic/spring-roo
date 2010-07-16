@@ -11,7 +11,6 @@ import java.util.Map;
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.ManyToManyAssociation;
 import org.springframework.roo.addon.dbre.model.Reference;
@@ -36,6 +35,7 @@ import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMe
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -86,7 +86,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MetadataService metadataService;
 	private TableModelService tableModelService;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, DatabaseModelService databaseModelService) {
+	// From annotation
+	@AutoPopulate private boolean automaticallyDelete = true;
+
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -99,10 +102,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
 		}
-
+		
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		JavaPackage javaPackage = javaType.getPackage();
-		Database database = databaseModelService.deserializeDatabaseMetadata();
+	
 		Table table = database.findTable(tableModelService.suggestTableNameForNewType(javaType));
 		if (table == null) {
 			return;
