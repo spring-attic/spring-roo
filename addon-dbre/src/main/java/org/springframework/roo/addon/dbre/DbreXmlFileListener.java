@@ -88,7 +88,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		Set<Table> tables = database.getTables();
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
-			if (!database.isManyToManyJoinTable(table)) {
+			if (!database.isJoinTable(table)) {
 				JavaPackage javaPackage = database.getJavaPackage();
 				JavaType javaType = tableModelService.findTypeForTableName(table.getName(), javaPackage);
 				if (javaType == null) {

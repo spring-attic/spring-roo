@@ -26,7 +26,7 @@ public class Database implements Serializable {
 	private Set<Table> tables = new LinkedHashSet<Table>();
 
 	/** Many-to-many join tables. */
-	private Set<ManyToManyAssociation> manyToManyAssociations = new LinkedHashSet<ManyToManyAssociation>();
+	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
 	Database(String name, JavaPackage javaPackage, Set<Table> tables) {
 		this.name = name;
@@ -64,44 +64,17 @@ public class Database implements Serializable {
 		return null;
 	}
 
-	public Set<ManyToManyAssociation> getManyToManyAssociations() {
-		return manyToManyAssociations;
+	public Set<JoinTable> getJoinTables() {
+		return joinTables;
 	}
 
-	public boolean isManyToManyJoinTable(Table table) {
-		for (ManyToManyAssociation manyToManyAssociation : manyToManyAssociations) {
-			if (manyToManyAssociation.getJoinTable().equals(table)) {
+	public boolean isJoinTable(Table table) {
+		for (JoinTable joinTable : joinTables) {
+			if (joinTable.getTable().equals(table)) {
 				return true;
 			}
 		}
 		return false;
-	}
-
-	public boolean isManyToManyJoinTable(String tableNamePattern) {
-		for (ManyToManyAssociation manyToManyAssociation : manyToManyAssociations) {
-			if (manyToManyAssociation.getJoinTable().getName().equals(tableNamePattern)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public ManyToManyAssociation getOwningSideOfManyToManyAssociation(Table table) {
-		for (ManyToManyAssociation manyToManyAssociation : manyToManyAssociations) {
-			if (manyToManyAssociation.getOwningSideTable().equals(table)) {
-				return manyToManyAssociation;
-			}
-		}
-		return null;
-	}
-
-	public ManyToManyAssociation getInverseSideOfManyToManyAssociation(Table table) {
-		for (ManyToManyAssociation manyToManyAssociation : manyToManyAssociations) {
-			if (manyToManyAssociation.getInverseSideTable().equals(table)) {
-				return manyToManyAssociation;
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -112,10 +85,10 @@ public class Database implements Serializable {
 			for (Column column : table.getColumns()) {
 				column.setTable(table);
 			}
-			
+
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
 				foreignKey.setTable(table);
-				
+
 				if (foreignKey.getForeignTable() == null) {
 					Table targetTable = findTable(foreignKey.getForeignTableName());
 					if (targetTable != null) {
@@ -139,9 +112,35 @@ public class Database implements Serializable {
 				}
 			}
 
+			for (ForeignKey exportedKey : table.getExportedKeys()) {
+				exportedKey.setTable(table);
+
+				if (exportedKey.getForeignTable() == null) {
+					Table targetTable = findTable(exportedKey.getForeignTableName());
+					if (targetTable != null) {
+						exportedKey.setForeignTable(targetTable);
+					}
+				}
+
+				for (Reference reference : exportedKey.getReferences()) {
+					if (reference.getLocalColumn() == null) {
+						Column localColumn = table.findColumn(reference.getLocalColumnName());
+						if (localColumn != null) {
+							reference.setLocalColumn(localColumn);
+						}
+					}
+					if (reference.getForeignColumn() == null && exportedKey.getForeignTable() != null) {
+						Column foreignColumn = exportedKey.getForeignTable().findColumn(reference.getForeignColumnName());
+						if (foreignColumn != null) {
+							reference.setForeignColumn(foreignColumn);
+						}
+					}
+				}
+			}
+
 			for (Index index : table.getIndices()) {
 				index.setTable(table);
-				
+
 				for (IndexColumn indexColumn : index.getColumns()) {
 					Column column = table.findColumn(indexColumn.getName());
 					if (column != null) {
@@ -150,20 +149,17 @@ public class Database implements Serializable {
 				}
 			}
 
-			createManyToManyAssociations(table);
+			addJoinTables(table);
 		}
 	}
 
 	/**
-	 * Determines if a table is a many-to-many join table and if so, creates and stores a 
-	 * new many-to-many association.
+	 * Determines if a table is a many-to-many join table.
 	 * 
 	 * <p>
-	 * To be identified as a many-to-many join table, the table must have have 
-	 * exactly two primary keys and have exactly two foreign-keys pointing to 
-	 * other entity tables and have no other columns.
+	 * To be identified as a many-to-many join table, the table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns.
 	 */
-	private void createManyToManyAssociations(Table table) {
+	private void addJoinTables(Table table) {
 		boolean equals = table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getForeignKeyCount() == 2 && table.getPrimaryKeyCount() == table.getForeignKeyCount();
 		Iterator<Column> iter = table.getColumns().iterator();
 		while (equals && iter.hasNext()) {
@@ -171,7 +167,7 @@ public class Database implements Serializable {
 			equals &= table.findForeignKeyByLocalColumnName(column.getName()) != null;
 		}
 		if (equals) {
-			manyToManyAssociations.add(new ManyToManyAssociation(table));
+			joinTables.add(new JoinTable(table));
 		}
 	}
 

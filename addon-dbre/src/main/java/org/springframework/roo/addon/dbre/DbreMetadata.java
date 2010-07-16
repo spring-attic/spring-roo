@@ -12,7 +12,7 @@ import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
-import org.springframework.roo.addon.dbre.model.ManyToManyAssociation;
+import org.springframework.roo.addon.dbre.model.JoinTable;
 import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
@@ -124,20 +124,20 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private void addManyToManyFields(JavaPackage javaPackage, Database database, Table table) {
 		int manyToManyCount = 0;
-		for (ManyToManyAssociation manyToManyAssociation : database.getManyToManyAssociations()) {
-			if (manyToManyAssociation.getOwningSideTable().equals(table)) {
-				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getInverseSideTable().getName()));
+		for (JoinTable joinTable : database.getJoinTables()) {
+			if (joinTable.getOwningSideTable().equals(table)) {
+				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName()));
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
 				}
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
-				FieldMetadata field = getManyToManyOwningSideField(fieldName, manyToManyAssociation, javaPackage);
-				addToBuilder(field);
+				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, javaPackage);
+				addToBuilder(field);				
 			}
-
-			if (manyToManyAssociation.getInverseSideTable().equals(table)) {
-				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getOwningSideTable().getName()));
-				String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(manyToManyAssociation.getInverseSideTable().getName()));
+			
+			if (joinTable.getInverseSideTable().equals(table)) {
+				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getOwningSideTable().getName()));
+				String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName()));
 
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
@@ -146,17 +146,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
 
-				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, manyToManyAssociation, javaPackage);
-				addToBuilder(field);
+				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, javaPackage);
+				addToBuilder(field);			
 			}
-
 			manyToManyCount++;
 		}
 	}
-
-	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
+	
+	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = tableModelService.findTypeForTableName(association.getInverseSideTable().getName(), javaPackage);
+		JavaType element = tableModelService.findTypeForTableName(joinTable.getInverseSideTable().getName(), javaPackage);
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -170,12 +169,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @JoinTable annotation
 		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinTableAnnotationAttributes.add(new StringAttributeValue(NAME, association.getJoinTable().getName()));
+		joinTableAnnotationAttributes.add(new StringAttributeValue(NAME, joinTable.getTable().getName()));
 
 		// Add joinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(NAME, association.getPrimaryKeyOfOwningSideTable()));
+		joinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfOwningSideTable()));
 		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
@@ -183,7 +182,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		inverseJoinColumnAttributes.add(new StringAttributeValue(NAME, association.getPrimaryKeyOfInverseSideTable()));
+		inverseJoinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfInverseSideTable()));
 		AnnotationMetadata inverseJoinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, inverseJoinColumnAttributes);
 		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), inverseJoinColumnAnnotation));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
@@ -194,9 +193,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, ManyToManyAssociation association, JavaPackage javaPackage) {
+	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = tableModelService.findTypeForTableName(association.getOwningSideTable().getName(), javaPackage);
+		JavaType element = tableModelService.findTypeForTableName(joinTable.getOwningSideTable().getName(), javaPackage);
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -212,10 +211,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addOneToXXXFields(JavaPackage javaPackage, Database database, Table table) {
-		if (!database.isManyToManyJoinTable(table)) {
+		if (!database.isJoinTable(table)) {
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
-				String foreignTableName = exportedKey.getForeignTableName();
-				if (!database.isManyToManyJoinTable(foreignTableName)) {
+				if (!database.isJoinTable(exportedKey.getForeignTable())) {
+					String foreignTableName = exportedKey.getForeignTableName();
 					Table foreignTable = database.findTable(foreignTableName);
 					Assert.notNull(foreignTable, "Related table " + foreignTableName + " could not be found but was referenced by " + table.getName());
 					boolean isOneToOne = true;
