@@ -51,8 +51,8 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseModelReader modelReader = new DatabaseModelReader(connection);
-			return modelReader.getSchemas();
+			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection);
+			return introspector.getSchemas();
 		} catch (Exception e) {
 			return Collections.emptySet();
 		} finally {
@@ -269,10 +269,10 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseModelReader modelReader = new DatabaseModelReader(connection);
-			modelReader.setCatalog(StringUtils.hasText(catalog) ? catalog : modelReader.getConnection().getCatalog());
-			modelReader.setSchema(schema);
-			return modelReader.getDatabase(javaPackage);
+			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection);
+			introspector.setCatalog(StringUtils.hasText(catalog) ? catalog : introspector.getConnection().getCatalog());
+			introspector.setSchema(schema);
+			return introspector.getDatabase(javaPackage);
 		} finally {
 			connectionProvider.closeConnection(connection);
 		}

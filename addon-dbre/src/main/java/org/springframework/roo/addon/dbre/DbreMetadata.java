@@ -35,7 +35,6 @@ import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMe
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -85,9 +84,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
 	private TableModelService tableModelService;
-
-	// From annotation
-	@AutoPopulate private boolean automaticallyDelete = true;
 
 	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, TableModelService tableModelService, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -383,22 +379,26 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
 		if (identifierTypeAttribute != null) {
+			// Attribute identifierType exists so get the value
 			JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
 			if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+				// The identifierType is not a simple type, ie not of type 'java.lang', so find the type
 				String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 				PhysicalTypeMetadata identifierPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 				if (identifierPhysicalTypeMetadata != null) {
+					// The identifierType exists 
 					ClassOrInterfaceTypeDetails identifierTypeDetails = (ClassOrInterfaceTypeDetails) identifierPhysicalTypeMetadata.getPhysicalTypeDetails();
 					if (identifierTypeDetails != null) {
 						// Check governor for declared fields
 						List<? extends FieldMetadata> identifierFields = identifierTypeDetails.getDeclaredFields();
+						// Loop through declared fields to check the supplied field exists on the governor
 						for (FieldMetadata field : identifierFields) {
 							if (fieldName.equals(field.getFieldName())) {
 								return true;
 							}
 						}
 
-						// Check @RooIdentifier annotation for idFields attribute
+						// Field doesn't exists so then check @RooIdentifier annotation for idFields attribute
 						AnnotationMetadata identifierAnnotation = MemberFindingUtils.getAnnotationOfType(identifierTypeDetails.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
 						if (identifierAnnotation != null) {
 							ArrayAttributeValue<StringAttributeValue> idFieldsAttribute = (ArrayAttributeValue<StringAttributeValue>) identifierAnnotation.getAttribute(new JavaSymbolName("idFields"));
@@ -406,6 +406,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 								List<StringAttributeValue> idFields = idFieldsAttribute.getValue();
 								for (StringAttributeValue idField : idFields) {
 									if (fieldName.equals(new JavaSymbolName(idField.getValue()))) {
+										// Attribute idFields contains the field 
 										return true;
 									}
 								}

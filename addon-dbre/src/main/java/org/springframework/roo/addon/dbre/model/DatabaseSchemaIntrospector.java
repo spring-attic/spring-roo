@@ -18,7 +18,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-public class DatabaseModelReader {
+public class DatabaseSchemaIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
 	private Connection connection;
 	private String catalog;
@@ -27,7 +27,7 @@ public class DatabaseModelReader {
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	DatabaseModelReader(Connection connection) {
+	DatabaseSchemaIntrospector(Connection connection) {
 		this.connection = connection;
 	}
 

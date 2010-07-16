@@ -71,12 +71,12 @@ public class DbreXmlFileListener implements FileEventListener {
 		}
 
 		Database database = null;
-		
+
 		if (fileEvent.getFileDetails().getFile().exists()) {
 			// The XML is still around, so try to parse it
 			database = databaseModelService.deserializeDatabaseMetadata();
 		}
-		
+
 		if (database != null && database.getTables().size() > 0) {
 			reverseEngineer(database);
 		} else {
@@ -162,10 +162,7 @@ public class DbreXmlFileListener implements FileEventListener {
 			}
 			manageEntityIdentifier(javaType, entityAttributes, table);
 
-			AnnotationMetadata annotation = new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes);
-			// TODO mutableTypeDetails.updateTypeAnnotation(entityAnnotationType) - should compare values before
-			mutableTypeDetails.removeTypeAnnotation(entityAnnotationType);
-			mutableTypeDetails.addTypeAnnotation(annotation);
+			mutableTypeDetails.updateTypeAnnotation(new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes));
 		}
 	}
 
@@ -195,7 +192,7 @@ public class DbreXmlFileListener implements FileEventListener {
 			entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), columnName));
 
 			// Check for managed identifier class and delete if found
-			if (identifierPhysicalTypeMetadata != null && identifierPhysicalTypeMetadata.isValid() && (identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+			if (isIdentifierDeletable(identifierType)) {
 				deleteManagedType(identifierType);
 			}
 		} else if (pkCount > 1) { // Table has a composite key
@@ -268,12 +265,10 @@ public class DbreXmlFileListener implements FileEventListener {
 			}
 			attributes.addAll(getIdentifierAttributes(columns));
 
-			AnnotationMetadata annotation = new DefaultAnnotationMetadata(identifierAnnotationType, attributes);
-			mutableTypeDetails.removeTypeAnnotation(identifierAnnotationType);
-			mutableTypeDetails.addTypeAnnotation(annotation);
+			mutableTypeDetails.updateTypeAnnotation(new DefaultAnnotationMetadata(identifierAnnotationType, attributes));
 		}
 	}
-	
+
 	private void deleteManagedTypes() {
 		Set<JavaType> managedIdentifierTypes = tableModelService.getDatabaseManagedIdentifiers();
 		for (JavaType javaType : tableModelService.getDatabaseManagedEntities()) {
@@ -294,7 +289,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	private void deleteManagedTypes(JavaType javaType, Set<JavaType> managedIdentifierTypes) {
 		if (isEntityDeletable(javaType)) {
 			deleteManagedType(javaType);
-			
+
 			JavaType identifierType = getIdentifierType(javaType);
 			if (managedIdentifierTypes.contains(identifierType) && isIdentifierDeletable(identifierType)) {
 				deleteManagedType(identifierType);
@@ -313,8 +308,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	}
 
 	private boolean isEntityDeletable(JavaType javaType) {
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata == null) {
 			return false;
 		}
@@ -328,29 +322,24 @@ public class DbreXmlFileListener implements FileEventListener {
 
 		// Check type annotations
 		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getTypeAnnotations();
-		if (typeAnnotations.size() != 6) {
-			return false;
-		}
-		
-		// Check for required type annotations
+
 		boolean hasRequiredAnnotations = true;
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
 		while (hasRequiredAnnotations && typeAnnotationIterator.hasNext()) {
 			JavaType annotationType = typeAnnotationIterator.next().getAnnotationType();
 			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("javax.persistence.Entity") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.getFullyQualifiedTypeName().equals("javax.persistence.Table") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity"));
 		}
-		
-		if (!hasRequiredAnnotations) {
+
+		if (!hasRequiredAnnotations || typeAnnotations.size() != 6) {
 			return false;
 		}
 
 		// Finally, check for added constructors, fields and methods
 		return typeDetails.getDeclaredConstructors().isEmpty() && typeDetails.getDeclaredFields().isEmpty() && typeDetails.getDeclaredMethods().isEmpty();
 	}
-	
-	private boolean isIdentifierDeletable(JavaType javaType) {
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+
+	private boolean isIdentifierDeletable(JavaType identifierType) {
+		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 		if (governorPhysicalTypeMetadata == null) {
 			return false;
 		}
@@ -362,21 +351,17 @@ public class DbreXmlFileListener implements FileEventListener {
 			return false;
 		}
 
-		// Check type annotations
-		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getTypeAnnotations();
-		if (typeAnnotations.size() != 2) {
-			return false;
-		}
-		
 		// Check for required type annotations
+		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getTypeAnnotations();
+
 		boolean hasRequiredAnnotations = true;
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
 		while (hasRequiredAnnotations && typeAnnotationIterator.hasNext()) {
 			JavaType annotationType = typeAnnotationIterator.next().getAnnotationType();
 			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooIdentifier"));
 		}
-		
-		if (!hasRequiredAnnotations) {
+
+		if (!hasRequiredAnnotations || typeAnnotations.size() != 2) {
 			return false;
 		}
 
@@ -385,8 +370,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	}
 
 	private void deleteManagedType(JavaType javaType) {
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 			if (MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName())) != null) {
@@ -395,8 +379,25 @@ public class DbreXmlFileListener implements FileEventListener {
 			}
 		}
 	}
-	
+
 	private JavaType getIdentifierType(JavaType javaType) {
+		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+		if (governorPhysicalTypeMetadata != null) {
+			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+			AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+			if (entityAnnotation != null) {
+				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
+				if (identifierTypeAttribute != null) {
+					// Attribute identifierType exists so get the value
+					JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
+					if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+						return identifierType;
+					}
+				}
+			}
+		}
+
+		// @RooEntity identifierType attribute does not exist or is not a simple type, so return a default
 		return new JavaType(javaType.getFullyQualifiedTypeName() + "PK");
 	}
 
