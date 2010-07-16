@@ -29,6 +29,13 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	void addTypeAnnotation(AnnotationMetadata annotation);
 	
 	/**
+	 * Updates the type-level annotation indicated. This annotation must already exist.
+	 * 
+	 * @param annotation to update (required)
+	 */
+	void updateTypeAnnotation(AnnotationMetadata annotation);
+
+	/**
 	 * Removes the type-level annotation of the {@link JavaType} indicated. This annotation must
 	 * already exist.
 	 * 
