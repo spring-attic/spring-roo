@@ -70,7 +70,13 @@ public class DbreXmlFileListener implements FileEventListener {
 			return;
 		}
 
-		Database database = databaseModelService.deserializeDatabaseMetadata();
+		Database database = null;
+		
+		if (fileEvent.getFileDetails().getFile().exists()) {
+			// The XML is still around, so try to parse it
+			database = databaseModelService.deserializeDatabaseMetadata();
+		}
+		
 		if (database != null && database.getTables().size() > 0) {
 			reverseEngineer(database);
 		} else {

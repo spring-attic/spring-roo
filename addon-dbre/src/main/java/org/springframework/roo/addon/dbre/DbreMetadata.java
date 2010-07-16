@@ -221,6 +221,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String foreignTableName = exportedKey.getForeignTableName();
 				if (!database.isManyToManyJoinTable(foreignTableName)) {
 					Table foreignTable = database.findTable(foreignTableName);
+					Assert.notNull(foreignTable, "Related table " + foreignTableName + " could not be found but was referenced by " + table.getName());
 					boolean isOneToOne = true;
 					Iterator<ForeignKey> foreignKeyIterator = foreignTable.getForeignKeys().iterator();
 					while (isOneToOne && foreignKeyIterator.hasNext()) {

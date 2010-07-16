@@ -2,8 +2,8 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
@@ -21,16 +21,17 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.DbrePath;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
  * Implementation of {@link DatabaseModelService).
@@ -62,10 +63,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	public String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
-			if (database == null || database.getTables().isEmpty()) {
-				throw new IllegalStateException("Schema " + schema.getName() + " either does not exist or contain any tables");
-			}
-
+			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or contain any tables");
 			OutputStream outputStream = new ByteArrayOutputStream();
 			Document document = getDocument(database);
 			XmlUtils.writeXml(outputStream, document);
@@ -78,10 +76,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage, File file) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
-			if (database == null || database.getTables().isEmpty()) {
-				throw new IllegalStateException("Schema " + schema.getName() + " either does not exist or contain any tables");
-			}
-
+			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or contain any tables");
 			Document document = getDocument(database);
 
 			if (file != null) {
@@ -97,19 +92,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	}
 
 	public Database deserializeDatabaseMetadata() {
-		Document document = null;
-		try {
-			document = getDocument();
-			if (document == null || !document.hasChildNodes()) {
-				return null;
-			}
-		} catch (Exception e) {
-		//	if (document == null) {
-		//	logger.warning("Failed to retrieve database metadata: " + e.getMessage());
-		//	logger.warning("Failed to retrieve database metadata");
-			throw new IllegalStateException();
-		}
-
+		Document document = getDocument();
 		Element databaseElement = document.getDocumentElement();
 
 		Set<Table> tables = new LinkedHashSet<Table>();
@@ -176,16 +159,17 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		return new Database(databaseElement.getAttribute("name"), new JavaPackage(databaseElement.getAttribute("package")), tables);
 	}
 
-	private Document getDocument() throws SAXException, IOException  {
+	private Document getDocument() {
 		String dbreXmlPath = getDbreXmlPath();
-		MutableFile mutableFile = fileManager.updateFile(dbreXmlPath);
-		InputStream is = mutableFile.getInputStream();
-		if (is.available() == 0) {
-			throw new IllegalStateException(dbreXmlPath + " is empty");
+		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
+		try {
+			InputStream is = new FileInputStream(fileDetails.getFile());
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setErrorHandler(null);
+			return builder.parse(is);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
-		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
-		builder.setErrorHandler(null);
-		return builder.parse(is);
 	}
 
 	private void addIndices(Table table, Element tableElement, String indexType) {
