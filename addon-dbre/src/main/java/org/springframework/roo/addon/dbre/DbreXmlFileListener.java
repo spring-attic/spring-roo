@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,6 +40,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -56,6 +58,7 @@ public class DbreXmlFileListener implements FileEventListener {
 	@Reference private FileManager fileManager;
 	@Reference private DatabaseModelService databaseModelService;
 	@Reference private TableModelService tableModelService;
+	@Reference private Shell shell;
 
 	public void onFileEvent(FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");
@@ -64,9 +67,9 @@ public class DbreXmlFileListener implements FileEventListener {
 			return;
 		}
 
-		String dbreXmlPath = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
+		String path = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
-		if (!eventPath.equals(dbreXmlPath)) {
+		if (!eventPath.equals(path)) {
 			return;
 		}
 
@@ -140,6 +143,8 @@ public class DbreXmlFileListener implements FileEventListener {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, javaType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, annotations, null);
 		classpathOperations.generateClassFile(details);
+		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
 
 	private void updateExistingManagedEntity(JavaType javaType, Table table) {
@@ -163,6 +168,8 @@ public class DbreXmlFileListener implements FileEventListener {
 			manageEntityIdentifier(javaType, entityAttributes, table);
 
 			mutableTypeDetails.updateTypeAnnotation(new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes));
+			shell.flash(Level.FINE, "Updated " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+			shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 		}
 	}
 
@@ -222,6 +229,8 @@ public class DbreXmlFileListener implements FileEventListener {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, identifierType, Modifier.PUBLIC | Modifier.FINAL, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, identifierAnnotations, null);
 		classpathOperations.generateClassFile(idClassDetails);
+		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
 
 	private List<AnnotationAttributeValue<?>> getIdentifierAttributes(Set<Column> columns) {
@@ -376,8 +385,10 @@ public class DbreXmlFileListener implements FileEventListener {
 			if (MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName())) != null) {
 				String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
 				fileManager.delete(filePath);
+				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
 			}
 		}
+		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
 
 	private JavaType getIdentifierType(JavaType javaType) {

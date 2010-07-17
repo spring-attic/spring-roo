@@ -79,13 +79,15 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or contain any tables");
 			Document document = getDocument(database);
 
-			if (file != null) {
-				XmlUtils.writeXml(new FileOutputStream(file), document);
+			OutputStream outputStream;
+			if (file == null) {
+				String path = getDbreXmlPath();
+				MutableFile mutableFile = fileManager.exists(path) ? fileManager.updateFile(path) : fileManager.createFile(path);
+				outputStream = mutableFile.getOutputStream();
 			} else {
-				String dbreXmlPath = getDbreXmlPath();
-				MutableFile mutableFile = fileManager.exists(dbreXmlPath) ? fileManager.updateFile(dbreXmlPath) : fileManager.createFile(dbreXmlPath);
-				XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+				outputStream = new FileOutputStream(file);
 			}
+			XmlUtils.writeXml(outputStream, document);
 		} catch (Exception e) {
 			throw new IllegalStateException("Failed to write database metadata to file", e);
 		}

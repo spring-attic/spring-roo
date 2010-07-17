@@ -46,7 +46,6 @@ public class JoinTable {
 		return iter.next().getReferences().iterator().next().getForeignColumnName();
 	}
 
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -21,7 +20,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -38,7 +36,6 @@ public class TableModelServiceImpl implements TableModelService {
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
-	@Reference private Shell shell;
 
 	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
 		JavaType javaType = suggestTypeNameForNewTable(tableNamePattern, javaPackage);
@@ -129,12 +126,8 @@ public class TableModelServiceImpl implements TableModelService {
 				String dbreMid = DbreMetadata.createIdentifier(javaType, path);
 				DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(dbreMid);
 				if (dbreMetadata != null) {
-					shell.flash(Level.FINE, "Found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
 					managedEntities.add(javaType);
-				} else {
-					shell.flash(Level.FINE, "Not found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
 				}
-				shell.flash(Level.FINE, "", TableModelServiceImpl.class.getName());
 			}
 		}
 
@@ -159,12 +152,8 @@ public class TableModelServiceImpl implements TableModelService {
 				String identifierMid = IdentifierMetadata.createIdentifier(javaType, path);
 				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMid);
 				if (identifierMetadata != null) {
-					shell.flash(Level.FINE, "Found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
 					managedIdentifiers.add(javaType);
-				} else {
-					shell.flash(Level.FINE, "Not found " + javaType.getFullyQualifiedTypeName(), TableModelServiceImpl.class.getName());
 				}
-				shell.flash(Level.FINE, "", TableModelServiceImpl.class.getName());
 			}
 		}
 
