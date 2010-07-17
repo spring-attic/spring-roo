@@ -100,7 +100,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
-		JavaPackage javaPackage = javaType.getPackage();
 
 		Table table = database.findTable(tableModelService.suggestTableNameForNewType(javaType));
 		if (table == null) {
@@ -108,16 +107,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add fields for many-valued associations with many-to-many multiplicity
-		addManyToManyFields(javaPackage, database, table);
+		addManyToManyFields(database, table);
 
 		// Add fields for many-valued associations with one-to-many multiplicity
-		addOneToManyFields(javaPackage, database, table);
+		addOneToManyFields(database, table);
 
 		// Add fields for single-valued associations to other entities that have many-to-one multiplicity
-		addManyToOneFields(javaPackage, database, table);
+		addManyToOneFields(database, table);
 
 		// Add fields for single-valued associations to other entities that have one-to-one multiplicity
-		addOneToOneFields(javaPackage, database, table);
+		addOneToOneFields(database, table);
 
 		// Add remaining fields from columns
 		addOtherFields(javaType, table);
@@ -126,7 +125,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		itdTypeDetails = builder.build();
 	}
 
-	private void addManyToManyFields(JavaPackage javaPackage, Database database, Table table) {
+	private void addManyToManyFields(Database database, Table table) {
 		int manyToManyCount = 0;
 		for (JoinTable joinTable : database.getJoinTables()) {
 			if (joinTable.getOwningSideTable().equals(table)) {
@@ -135,7 +134,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					fieldNameStr += String.valueOf(manyToManyCount);
 				}
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
-				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, javaPackage);
+				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
 			}
 
@@ -150,14 +149,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
 
-				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, javaPackage);
+				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
 			}
 			manyToManyCount++;
 		}
 	}
 
-	private void addOneToManyFields(JavaPackage javaPackage, Database database, Table table) {
+	private void addOneToManyFields(Database database, Table table) {
 		if (!database.isJoinTable(table)) {
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
 				if (!database.isJoinTable(exportedKey.getForeignTable())) {
@@ -180,7 +179,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 							}
 							JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 							JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
-							FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, javaPackage);
+							FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, database.getJavaPackage());
 							addToBuilder(field);
 						}
 					}
@@ -189,7 +188,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private void addManyToOneFields(JavaPackage javaPackage, Database database, Table table) {
+	private void addManyToOneFields(Database database, Table table) {
 		// Add unique many-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
@@ -205,7 +204,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						fieldNameStr += String.valueOf(manyToOneCount);
 					}
 					JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
-					JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), javaPackage);
+					JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), database.getJavaPackage());
 					FieldMetadata field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn());
 					uniqueFields.put(fieldName, field);
 					manyToOneCount++;
@@ -218,7 +217,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	private void addOneToOneFields(JavaPackage javaPackage, Database database, Table table) {
+	private void addOneToOneFields(Database database, Table table) {
 		// Add unique one-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
@@ -226,7 +225,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ForeignKey foreignKey = table.findForeignKeyByLocalColumnName(column.getName());
 			if (foreignKey != null && isOneToOne(table, foreignKey)) {
 				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignKey.getForeignTableName()));
-				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), javaPackage);
+				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), database.getJavaPackage());
 				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey, column);
 				uniqueFields.put(fieldName, field);
 			}
@@ -251,7 +250,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 					if (isOneToOne) {
 						JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName));
-						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, javaPackage);
+						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, database.getJavaPackage());
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()));
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
 						addToBuilder(field);
