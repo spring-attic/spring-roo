@@ -120,7 +120,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		addOneToOneFields(javaPackage, database, table);
 
 		// Add remaining fields from columns
-		addOtherFields(javaType, javaPackage, table);
+		addOtherFields(javaType, table);
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -409,7 +409,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
 	}
 
-	private void addOtherFields(JavaType javaType, JavaPackage javaPackage, Table table) {
+	private void addOtherFields(JavaType javaType, Table table) {
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
 		for (Column column : table.getColumns()) {
