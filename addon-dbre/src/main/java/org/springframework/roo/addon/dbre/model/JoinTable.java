@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Represents a many-valued association with many-to-many multiplicity.
+ * Represents a join table for a many-valued association with many-to-many multiplicity.
  * 
  * @author Alan Stewart
  * @since 1.1

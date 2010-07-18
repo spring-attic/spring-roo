@@ -133,6 +133,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
 				}
+				
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
@@ -141,17 +142,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (joinTable.getInverseSideTable().equals(table)) {
 				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getOwningSideTable().getName()));
 				String mappedByFieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName()));
-
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
 					mappedByFieldNameStr += String.valueOf(manyToManyCount);
 				}
+				
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
-
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
 			}
+			
 			manyToManyCount++;
 		}
 	}

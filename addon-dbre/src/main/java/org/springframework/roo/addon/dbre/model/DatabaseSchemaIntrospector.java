@@ -20,19 +20,19 @@ import org.springframework.roo.support.util.StringUtils;
  */
 public class DatabaseSchemaIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
-	private Connection connection;
+	private DatabaseMetaData databaseMetaData;
 	private String catalog;
 	private Schema schema;
 	private String tableNamePattern;
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	DatabaseSchemaIntrospector(Connection connection) {
-		this.connection = connection;
+	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+		databaseMetaData = connection.getMetaData();
 	}
 
-	public Connection getConnection() {
-		return connection;
+	public Connection getConnection() throws SQLException {
+		return databaseMetaData.getConnection();
 	}
 
 	public String getCatalog() {
@@ -78,7 +78,7 @@ public class DatabaseSchemaIntrospector {
 	public Set<Schema> getSchemas() throws SQLException {
 		Set<Schema> schemas = new LinkedHashSet<Schema>();
 
-		ResultSet rs = connection.getMetaData().getSchemas();
+		ResultSet rs = databaseMetaData.getSchemas();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -93,18 +93,23 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	public Database getDatabase(JavaPackage javaPackage) throws SQLException {
-		return new Database(catalog, javaPackage, readTables(connection.getMetaData()));
+		return new Database(catalog, javaPackage, readTables());
 	}
 
-	private Set<Table> readTables(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-		ResultSet rs = getTables(databaseMetaData);
+		ResultSet rs = getTables();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
 					setTableNamePattern(rs.getString("TABLE_NAME"));
 					setCatalog(rs.getString("TABLE_CAT"));
 					setSchema(new Schema(rs.getString("TABLE_SCHEM")));
+					
+					// Skip Oracle recycle bin tables
+					if (tableNamePattern.startsWith("BIN$")) {
+						continue;
+					}
 
 					Table table = new Table();
 					table.setName(tableNamePattern);
@@ -114,7 +119,7 @@ public class DatabaseSchemaIntrospector {
 
 					try {
 						// Catching SQLException here as getSuperTables() is not supported by every driver
-						ResultSet superRs = getSuperTables(databaseMetaData);
+						ResultSet superRs = getSuperTables();
 						if (superRs != null) {
 							try {
 								while (superRs.next()) {
@@ -125,15 +130,15 @@ public class DatabaseSchemaIntrospector {
 								superRs.close();
 							}
 						}
-					} catch (SQLException ignorred) {
+					} catch (SQLException ignored) {
 					}
 
-					table.addColumns(readColumns(databaseMetaData));
-					table.addForeignKeys(readForeignKeys(databaseMetaData));
-					table.addExportedKeys(readExportedKeys(databaseMetaData));
-					table.addIndices(readIndices(databaseMetaData));
+					table.addColumns(readColumns());
+					table.addForeignKeys(readForeignKeys());
+					table.addExportedKeys(readExportedKeys());
+					table.addIndices(readIndices());
 
-					for (String columnName : readPrimaryKeyNames(databaseMetaData)) {
+					for (String columnName : readPrimaryKeyNames()) {
 						table.findColumn(columnName).setPrimaryKey(true);
 					}
 
@@ -147,10 +152,10 @@ public class DatabaseSchemaIntrospector {
 		return tables;
 	}
 
-	private Set<Column> readColumns(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<Column> readColumns() throws SQLException {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
-		ResultSet rs = getColumns(databaseMetaData);
+		ResultSet rs = getColumns();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -160,7 +165,7 @@ public class DatabaseSchemaIntrospector {
 					column.setSize(rs.getInt("COLUMN_SIZE"));
 					column.setScale(rs.getInt("DECIMAL_DIGITS"));
 					column.setTypeCode(rs.getInt("DATA_TYPE"));
-					column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME" ;
+					column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
 					column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 
 					columns.add(column);
@@ -173,10 +178,10 @@ public class DatabaseSchemaIntrospector {
 		return columns;
 	}
 
-	private Set<ForeignKey> readForeignKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<ForeignKey> readForeignKeys() throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = getForeignKeys(databaseMetaData);
+		ResultSet rs = getForeignKeys();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -230,10 +235,10 @@ public class DatabaseSchemaIntrospector {
 		return cascadeAction;
 	}
 
-	private Set<ForeignKey> readExportedKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<ForeignKey> readExportedKeys() throws SQLException {
 		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = getExportedKeys(databaseMetaData);
+		ResultSet rs = getExportedKeys();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -263,13 +268,13 @@ public class DatabaseSchemaIntrospector {
 		return new LinkedHashSet<ForeignKey>(exportedKeys.values());
 	}
 
-	private Set<Index> readIndices(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<Index> readIndices() throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 
 		ResultSet rs;
 		try {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
-			rs = getIndices(databaseMetaData);
+			rs = getIndices();
 		} catch (SQLException e) {
 			return indices;
 		}
@@ -316,10 +321,10 @@ public class DatabaseSchemaIntrospector {
 		return null;
 	}
 
-	private Set<String> readPrimaryKeyNames(DatabaseMetaData databaseMetaData) throws SQLException {
+	private Set<String> readPrimaryKeyNames() throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
-		ResultSet rs = getPrimaryKeys(databaseMetaData);
+		ResultSet rs = getPrimaryKeys();
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -333,7 +338,7 @@ public class DatabaseSchemaIntrospector {
 		return columnNames;
 	}
 
-	private ResultSet getTables(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getTables() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -346,7 +351,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getSuperTables(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getSuperTables() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -359,7 +364,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getColumns(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getColumns() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -372,7 +377,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getPrimaryKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getPrimaryKeys() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -385,7 +390,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getForeignKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getForeignKeys() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -398,7 +403,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getExportedKeys(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getExportedKeys() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
@@ -411,7 +416,7 @@ public class DatabaseSchemaIntrospector {
 		return rs;
 	}
 
-	private ResultSet getIndices(DatabaseMetaData databaseMetaData) throws SQLException {
+	private ResultSet getIndices() throws SQLException {
 		String schemaPattern = schema.getName();
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
