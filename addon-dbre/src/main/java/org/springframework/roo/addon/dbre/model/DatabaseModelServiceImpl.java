@@ -64,7 +64,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	public String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
-			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or contain any tables");
+			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			OutputStream outputStream = new ByteArrayOutputStream();
 			Document document = getDocument(database);
 			XmlUtils.writeXml(outputStream, document);
@@ -77,7 +77,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage, File file) {
 		try {
 			Database database = getDatabase(catalog, schema, javaPackage);
-			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or contain any tables");
+			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			Document document = getDocument(database);
 
 			OutputStream outputStream;

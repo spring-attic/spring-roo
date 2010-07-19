@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
@@ -53,6 +52,10 @@ public class DatabaseSchemaIntrospector {
 
 	public Schema getSchema() {
 		return schema;
+	}
+
+	private String getSchemaPattern() {
+		return schema != null ? schema.getName() : null;
 	}
 
 	public void setSchema(Schema schema) {
@@ -106,7 +109,8 @@ public class DatabaseSchemaIntrospector {
 
 	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-		ResultSet rs = getTables();
+		
+		ResultSet rs = databaseMetaData.getTables(catalog, getSchemaPattern(), tableNamePattern, types);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -147,7 +151,7 @@ public class DatabaseSchemaIntrospector {
 	private Set<Column> readColumns() throws SQLException {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
-		ResultSet rs = getColumns();
+		ResultSet rs = databaseMetaData.getColumns(catalog, getSchemaPattern(), tableNamePattern, columnNamePattern);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -173,7 +177,7 @@ public class DatabaseSchemaIntrospector {
 	private Set<ForeignKey> readForeignKeys() throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = getForeignKeys();
+		ResultSet rs = databaseMetaData.getImportedKeys(catalog, getSchemaPattern(), tableNamePattern);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -230,7 +234,7 @@ public class DatabaseSchemaIntrospector {
 	private Set<ForeignKey> readExportedKeys() throws SQLException {
 		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = getExportedKeys();
+		ResultSet rs = databaseMetaData.getExportedKeys(catalog, getSchemaPattern(), tableNamePattern);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -266,7 +270,7 @@ public class DatabaseSchemaIntrospector {
 		ResultSet rs;
 		try {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
-			rs = getIndices();
+			rs = databaseMetaData.getIndexInfo(catalog, getSchemaPattern(), tableNamePattern, false, false);
 		} catch (SQLException e) {
 			return indices;
 		}
@@ -316,7 +320,7 @@ public class DatabaseSchemaIntrospector {
 	private Set<String> readPrimaryKeyNames() throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
-		ResultSet rs = getPrimaryKeys();
+		ResultSet rs = databaseMetaData.getPrimaryKeys(catalog, getSchemaPattern(), tableNamePattern);
 		if (rs != null) {
 			try {
 				while (rs.next()) {
@@ -328,83 +332,5 @@ public class DatabaseSchemaIntrospector {
 		}
 
 		return columnNames;
-	}
-
-	private ResultSet getTables() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getTables(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), types);
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getTables(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), types);
-		} else {
-			rs = databaseMetaData.getTables(catalog, schemaPattern, tableNamePattern, types);
-		}
-		return rs;
-	}
-
-	private ResultSet getColumns() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getColumns(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), StringUtils.toUpperCase(columnNamePattern));
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getColumns(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), StringUtils.toLowerCase(columnNamePattern));
-		} else {
-			rs = databaseMetaData.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
-		}
-		return rs;
-	}
-
-	private ResultSet getPrimaryKeys() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getPrimaryKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getPrimaryKeys(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
-		} else {
-			rs = databaseMetaData.getPrimaryKeys(catalog, schemaPattern, tableNamePattern);
-		}
-		return rs;
-	}
-
-	private ResultSet getForeignKeys() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getImportedKeys(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
-		} else {
-			rs = databaseMetaData.getImportedKeys(catalog, schemaPattern, tableNamePattern);
-		}
-		return rs;
-	}
-
-	private ResultSet getExportedKeys() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getExportedKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getExportedKeys(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
-		} else {
-			rs = databaseMetaData.getExportedKeys(catalog, schemaPattern, tableNamePattern);
-		}
-		return rs;
-	}
-
-	private ResultSet getIndices() throws SQLException {
-		String schemaPattern = schema != null ? schema.getName() : null;
-		ResultSet rs = null;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getIndexInfo(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), false, false);
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getIndexInfo(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), false, false);
-		} else {
-			rs = databaseMetaData.getIndexInfo(catalog, schemaPattern, tableNamePattern, false, false);
-		}
-		return rs;
 	}
 }
