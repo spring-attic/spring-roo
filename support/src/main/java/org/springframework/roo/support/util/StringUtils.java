@@ -1150,4 +1150,25 @@ public abstract class StringUtils {
 		String ts = trimWhitespace(str);
 		return !hasText(ts) ? null : ts;
 	}
+	
+	/**
+	 * <p>
+	 * Removes leading and trailing whitespace from both ends of this String returning an empty String ("") if the String is empty after the trim or if it is <code>null</code>.
+	 *  
+	 * <pre>
+	 * StringUtils.trimToNull(null) = ""
+	 * StringUtils.trimToNull("") = ""
+	 * StringUtils.trimToNull(" ") = ""
+	 * StringUtils.trimToNull("abc") = "abc"
+	 * StringUtils.trimToNull(" abc ") = "abc"
+	 * </pre>
+	 * 
+	 * @param str the String to be trimmed, may be null
+	 * @return the trimmed String, an empty String("") if only chars &lt;= 32, empty or null String input
+	 * @since 1.1
+	 */
+	public static String trimToEmpty(String str) {
+		String ts = trimWhitespace(str);
+		return !hasText(ts) ? "" : ts;
+	}
 }
