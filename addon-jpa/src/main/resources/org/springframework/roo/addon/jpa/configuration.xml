@@ -38,7 +38,7 @@
 		</database>
 		<database id="DB2">
 			<dependencies>
-				<dependency org="com.ibm" name="db2jcc" rev="3.50.152" />
+				<dependency org="com.ibm" name="db2jcc" rev="3.59.81" />
 			</dependencies>
 		</database>
 		<database id="DERBY">
