@@ -32,7 +32,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	@Reference private DatabaseModelService databaseModelService;
 
 	public boolean isDbreAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"));
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
 	public void displayDatabaseMetadata(String catalog, Schema schema, File file) {

@@ -1,15 +1,22 @@
 package org.springframework.roo.addon.jpa;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -47,6 +54,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 
 	public boolean isJpaInstallationPossible() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && !fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -55,18 +63,34 @@ public class JpaOperationsImpl implements JpaOperations {
 	public boolean isJpaInstalled() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
-	
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId) {
+
+	public boolean hasDatabaseProperties() {
+		return fileManager.exists(getDatabasePropertiesPath());
+	}
+
+	public SortedSet<String> getDatabaseProperties() {
+		if (fileManager.exists(getDatabasePropertiesPath())) {
+			return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
+		} else {
+			return getPropertiesFromDataNucleusConfiguration();
+		}
+	}
+
+	private String getDatabasePropertiesPath() {
+		return pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+	}
+
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
 		updateApplicationContext(ormProvider, database, jndi);
-		updatePersistenceXml(ormProvider, database);
+		updatePersistenceXml(ormProvider, database, databaseName, userName, password);
 		updateGaeXml(ormProvider, database, applicationId);
-		if (jndi == null || jndi.length() == 0) {
-			updateDatabaseProperties(ormProvider, database);
+		if (!StringUtils.hasText(jndi)) {
+			updateDatabaseProperties(ormProvider, database, databaseName, userName, password);
 		}
-		
+
 		updateLog4j(ormProvider);
 
 		// Parse the configuration.xml file
@@ -77,7 +101,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateRepositories(configuration, ormProvider, database);
 		updatePluginRepositories(configuration, ormProvider, database);
 		updateBuildPlugins(configuration, ormProvider, database);
-		
+
 		// Remove unnecessary artifacts not specific to current database and JPA provider
 		cleanup(configuration, ormProvider, database);
 	}
@@ -111,7 +135,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if (dataSourceJndi != null) {
 				root.removeChild(dataSourceJndi);
 			}
-		} else if ((jndi == null || jndi.length() == 0) && dataSource == null) {
+		} else if (!StringUtils.hasText(jndi) && dataSource == null) {
 			dataSource = appCtx.createElement("bean");
 			dataSource.setAttribute("class", "org.apache.commons.dbcp.BasicDataSource");
 			dataSource.setAttribute("destroy-method", "close");
@@ -124,7 +148,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			if (dataSourceJndi != null) {
 				dataSourceJndi.getParentNode().removeChild(dataSourceJndi);
 			}
-		} else if (jndi != null && jndi.length() > 0) {
+		} else if (StringUtils.hasText(jndi)) {
 			if (dataSourceJndi == null) {
 				dataSourceJndi = appCtx.createElement("jee:jndi-lookup");
 				dataSourceJndi.setAttribute("id", "dataSource");
@@ -160,7 +184,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		entityManagerFactory = appCtx.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
-		
+
 		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
 			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
@@ -172,14 +196,14 @@ public class JpaOperationsImpl implements JpaOperations {
 				entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
 			}
 		}
-		
+
 		root.appendChild(entityManagerFactory);
 		XmlUtils.removeTextNodes(root);
 
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
 
-	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database) {
+	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password) {
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
 
@@ -227,7 +251,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
 			persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
 		}
-		
+
 		// Add provider element
 		Element provider = persistence.createElement("provider");
 		provider.setTextContent(database == JdbcDatabase.GOOGLE_APP_ENGINE ? ormProvider.getAlternateAdapter() : ormProvider.getAdapter());
@@ -236,60 +260,58 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Add properties
 		Element properties = persistence.createElement("properties");
 		switch (ormProvider) {
-			case HIBERNATE:
-				properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
-				properties.appendChild(persistence.createComment("value='create' to build a new database on each run; value='update' to modify an existing database; value='create-drop' means the same as 'create' but also drops tables when Hibernate closes; value='validate' makes no changes to the database")); // ROO-627
-				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", "create", persistence));
-				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
-				break;
-			case OPENJPA:
-				properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
-				properties.appendChild(persistence.createComment("value='buildSchema' to runtime forward map the DDL SQL; value='validate' makes no changes to the database")); // ROO-627
-				properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
-				break;
-			case ECLIPSELINK:
-				properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
-				properties.appendChild(persistence.createComment("value='drop-and-create-tables' to build a new database on each run; value='create-tables' creates new tables if needed; value='none' makes no changes to the database")); // ROO-627
-				properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
-				properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
-				properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
-				break;
-			case DATANUCLEUS:
-				if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
-					properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
-					properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
-					properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", database.getConnectionString(), persistence));
-				} else {
-					properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", database.getDriverClassName(), persistence));
-					
-					String connectionString = database.getConnectionString();
-					ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-					connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-					properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
-					
-					String username = "";
-					String password = "";
-					switch (database) {
-						case HYPERSONIC_IN_MEMORY:
-						case HYPERSONIC_PERSISTENT:
-						case H2_IN_MEMORY:
-							username = "sa";
-							break;
-						case DERBY:
-							break;
-						default:
-							logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
-							break;
-					}
-					properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", username, persistence));
-					properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
-					properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
-					properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
-					properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
-					properties.appendChild(createPropertyElement("datanucleus.jpa.addClassTransformer", "false", persistence));
+		case HIBERNATE:
+			properties.appendChild(createPropertyElement("hibernate.dialect", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
+			properties.appendChild(persistence.createComment("value='create' to build a new database on each run; value='update' to modify an existing database; value='create-drop' means the same as 'create' but also drops tables when Hibernate closes; value='validate' makes no changes to the database")); // ROO-627
+			properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", "create", persistence));
+			properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
+			break;
+		case OPENJPA:
+			properties.appendChild(createPropertyElement("openjpa.jdbc.DBDictionary", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
+			properties.appendChild(persistence.createComment("value='buildSchema' to runtime forward map the DDL SQL; value='validate' makes no changes to the database")); // ROO-627
+			properties.appendChild(createPropertyElement("openjpa.jdbc.SynchronizeMappings", "buildSchema", persistence));
+			break;
+		case ECLIPSELINK:
+			properties.appendChild(createPropertyElement("eclipselink.target-database", dialects.getProperty(ormProvider.name() + "." + database.name()), persistence));
+			properties.appendChild(persistence.createComment("value='drop-and-create-tables' to build a new database on each run; value='create-tables' creates new tables if needed; value='none' makes no changes to the database")); // ROO-627
+			properties.appendChild(createPropertyElement("eclipselink.ddl-generation", "drop-and-create-tables", persistence));
+			properties.appendChild(createPropertyElement("eclipselink.ddl-generation.output-mode", "database", persistence));
+			properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
+			break;
+		case DATANUCLEUS:
+			if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+				properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", database.getConnectionString(), persistence));
+			} else {
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", database.getDriverClassName(), persistence));
+
+				String connectionString = database.getConnectionString();
+				ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+				connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
+
+				switch (database) {
+				case HYPERSONIC_IN_MEMORY:
+				case HYPERSONIC_PERSISTENT:
+				case H2_IN_MEMORY:
+					userName = StringUtils.hasText(userName) ? userName : "sa";
+					break;
+				case DERBY:
+					break;
+				default:
+					logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
+					break;
 				}
-				break;
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
+				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
+				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.jpa.addClassTransformer", "false", persistence));
 			}
+			break;
+		}
 
 		persistenceUnit.appendChild(properties);
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
@@ -342,63 +364,65 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 	}
-	
-	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database) {
-		String databasePath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+
+	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password) {
+		String databasePath = getDatabasePropertiesPath();
 		boolean databaseExists = fileManager.exists(databasePath);
 
 		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
 			if (databaseExists) {
 				fileManager.delete(databasePath);
-				return;
 			}
-		} else {
-			MutableFile databaseMutableFile = null;
-			Properties props = new Properties();
+			return;
+		}
 
-			try {
-				if (databaseExists) {
-					databaseMutableFile = fileManager.updateFile(databasePath);
-					props.load(databaseMutableFile.getInputStream());
-				} else {
-					databaseMutableFile = fileManager.createFile(databasePath);
-					InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
-					Assert.notNull(templateInputStream, "Could not acquire database properties template");
-					props.load(templateInputStream);
-				}
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
+		MutableFile databaseMutableFile = null;
+		Properties props = new Properties();
+
+		try {
+			if (databaseExists) {
+				databaseMutableFile = fileManager.updateFile(databasePath);
+				props.load(databaseMutableFile.getInputStream());
+			} else {
+				databaseMutableFile = fileManager.createFile(databasePath);
+				InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "database-template.properties");
+				Assert.notNull(templateInputStream, "Could not acquire database properties template");
+				props.load(templateInputStream);
 			}
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 
-			props.put("database.driverClassName", database.getDriverClassName());
+		props.put("database.driverClassName", database.getDriverClassName());
 
-			String connectionString = database.getConnectionString();
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-			props.put("database.url", connectionString);
+		String connectionString = database.getConnectionString();
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+		if (StringUtils.hasText(databaseName)) {
+			connectionString += databaseName.startsWith("/") ? databaseName : "/" + databaseName;
+		}
+		props.put("database.url", connectionString);
 
-			String username = "";
-			switch (database) {
-				case HYPERSONIC_IN_MEMORY:
-				case HYPERSONIC_PERSISTENT:
-				case H2_IN_MEMORY:
-					username = "sa";
-					break;
-				case DERBY:
-					break;
-				default:
-					logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
-					break;
-			}
+		switch (database) {
+		case HYPERSONIC_IN_MEMORY:
+		case HYPERSONIC_PERSISTENT:
+		case H2_IN_MEMORY:
+			userName = StringUtils.hasText(userName) ? userName : "sa";
+			break;
+		case DERBY:
+			break;
+		default:
+			logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+			break;
+		}
 
-			props.put("database.username", username);
-			props.put("database.password", "");
+		props.put("database.username", StringUtils.trimToEmpty(userName));
+		props.put("database.password", StringUtils.trimToEmpty(password));
 
-			try {
-				props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
+		try {
+			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
 		}
 	}
 
@@ -423,7 +447,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updatePomProperties(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {	
+	private void updatePomProperties(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databaseProperties = XmlUtils.findElements(getDbXPath(database) + "/properties/*", configuration);
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
@@ -501,7 +525,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
 	}
-	
+
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey())) {
@@ -516,7 +540,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 		for (OrmProvider provider : OrmProvider.values()) {
-			if (provider != ormProvider) {				
+			if (provider != ormProvider) {
 				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
 				// for (Element propertyElement : pomProperties) {
 				// projectOperations.removeProperty(new Property(propertyElement));
@@ -553,5 +577,44 @@ public class JpaOperationsImpl implements JpaOperations {
 		property.setAttribute("name", name);
 		property.setAttribute("ref", value);
 		return property;
+	}
+
+	private SortedSet<String> getPropertiesFromDataNucleusConfiguration() {
+		String persistenceXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		if (!fileManager.exists(persistenceXmlPath)) {
+			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
+		}
+		FileDetails fileDetails = fileManager.readFile(persistenceXmlPath);
+		Document document = null;
+		try {
+			InputStream is = new FileInputStream(fileDetails.getFile());
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setErrorHandler(null);
+			document = builder.parse(is);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		List<Element> propertyElements = XmlUtils.findElements("/persistence/persistence-unit/properties/property", document.getDocumentElement());
+		Assert.notEmpty(propertyElements, "Failed to find property elements in " + persistenceXmlPath);
+		SortedSet<String> properties = new TreeSet<String>();
+
+		for (Element propertyElement : propertyElements) {
+			String key = propertyElement.getAttribute("name");
+			String value = propertyElement.getAttribute("value");
+			if ("datanucleus.ConnectionDriverName".equals(key)) {
+				properties.add("datanucleus.ConnectionDriverName = " + value);
+			}
+			if ("datanucleus.ConnectionURL".equals(key)) {
+				properties.add("datanucleus.ConnectionURL = " + value);
+			}
+			if ("datanucleus.ConnectionUserName".equals(key)) {
+				properties.add("datanucleus.ConnectionUserName = " + value);
+			}
+			if ("datanucleus.ConnectionPassword".equals(key)) {
+				properties.add("datanucleus.ConnectionPassword = " + value);
+			}
+		}
+		return properties;
 	}
 }

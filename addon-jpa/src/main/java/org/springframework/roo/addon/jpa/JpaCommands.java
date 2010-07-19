@@ -15,13 +15,13 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.logging.HandlerUtils;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Commands for the JPA add-on to be used by the ROO shell.
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
  */
 @Component
@@ -46,7 +46,7 @@ public class JpaCommands implements CommandMarker {
 	public boolean isInstallJpaAvailable() {
 		return jpaOperations.isJpaInstallationPossible() || jpaOperations.isJpaInstalled();
 	}
-
+	
 	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project")
 	public void installJpa(
 		@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
@@ -62,24 +62,12 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId);
-
-		if (!StringUtils.hasText(jndi)) {
-			if (StringUtils.hasText(databaseName)) {
-				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.url", jdbcDatabase.getConnectionString() + (databaseName.startsWith("/") ? databaseName : "/" + databaseName));
-			}
-			if (StringUtils.hasText(userName)) {
-				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.username", userName);
-			}
-			if (StringUtils.hasText(password)) {
-				propFileOperations.changeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", "database.password", password);
-			}
-		}
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, databaseName, userName, password);
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")
 	public SortedSet<String> databaseProperties() {
-		return propFileOperations.getPropertyKeys(Path.SPRING_CONFIG_ROOT, "database.properties", true);
+		return jpaOperations.getDatabaseProperties();
 	}
 
 	@CliCommand(value = "database properties set", help = "Changes a particular database property")
@@ -97,8 +85,13 @@ public class JpaCommands implements CommandMarker {
 		propFileOperations.removeProperty(Path.SPRING_CONFIG_ROOT, "database.properties", key);
 	}
 
-	@CliAvailabilityIndicator( { "database properties remove", "database properties set", "database properties list" })
+	@CliAvailabilityIndicator("database properties list")
 	public boolean isJpaInstalled() {
 		return jpaOperations.isJpaInstalled();
+	}
+
+	@CliAvailabilityIndicator({ "database properties remove", "database properties set" })
+	public boolean hasDatabaseProperties() {
+		return isJpaInstalled() && jpaOperations.hasDatabaseProperties();
 	}
 }

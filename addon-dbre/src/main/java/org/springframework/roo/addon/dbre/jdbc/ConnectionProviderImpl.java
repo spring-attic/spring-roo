@@ -8,6 +8,7 @@ import java.util.Properties;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link ConnectionProvider).
@@ -18,22 +19,28 @@ import org.apache.felix.scr.annotations.Service;
 @Component
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
+	private static final String DATABASE_DRIVER = "database.driverClassName";
+	private static final String DATABASE_URL = "database.url";
+	private static final String DATABASE_USERNAME = "database.username";
+	private static final String DATABASE_PASSWORD = "database.password";
 	private Properties props;
 
 	public void configure(Properties props) {
-		props.put("user", props.get("database.username"));
-		props.put("password", props.get("database.password"));
+		Assert.notNull(props, "Connection properties must not be null");
+		props.put("user", props.get(DATABASE_USERNAME));
+		props.put("password", props.get(DATABASE_PASSWORD));
 		this.props = props;
 	}
 
 	public void configure(Map<String, String> map) {
+		Assert.notNull(map, "Connection properties map must not be null");
 		Properties props = new Properties();
 		props.putAll(map);
 		configure(props);
 	}
 
 	public Connection getConnection() throws SQLException {
-		return getDriver().connect(props.getProperty("database.url"), props);
+		return getDriver().connect(props.getProperty(DATABASE_URL), props);
 	}
 
 	public void closeConnection(Connection connection) {
@@ -47,7 +54,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	private Driver getDriver() throws SQLException {
-		String driverClassName = props.getProperty("database.driverClassName");
+		String driverClassName = props.getProperty(DATABASE_DRIVER);
 		Driver driver;
 		if (driverClassName.startsWith("org.hsqldb")) {
 			driver = new org.hsqldb.jdbcDriver();

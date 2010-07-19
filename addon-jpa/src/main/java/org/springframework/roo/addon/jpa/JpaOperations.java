@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.jpa;
 
+import java.util.SortedSet;
+
 /**
  * Interface to commands available in {@link JpaOperationsImpl}.
  * 
@@ -12,6 +14,8 @@ public interface JpaOperations {
 
 	boolean isJpaInstalled();
 	
+	boolean hasDatabaseProperties();
+	
 	/**
 	 * This method is responsible for managing all JPA related artifacts (META-INF/persistence.xml, applicationContext.xml, database.properties and the project pom.xml)
 	 * 
@@ -19,6 +23,11 @@ public interface JpaOperations {
 	 * @param database the database (HSQL, H2, MySql, etc)
 	 * @param jndi the JNDI datasource
 	 * @param applicationId the Google App Engine application identifier. Defaults to the project's name if not specified.
+	 * @param databaseName the name of the database
+	 * @param userName the username to connect to the database
+	 * @param password the password to connect to the database
 	 */
-	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId);
+	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password);
+	
+	SortedSet<String> getDatabaseProperties();
 }

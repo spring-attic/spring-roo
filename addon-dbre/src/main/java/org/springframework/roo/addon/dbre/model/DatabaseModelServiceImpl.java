@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -105,7 +106,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			if (StringUtils.hasText(tableElement.getAttribute("description"))) {
 				table.setDescription(tableElement.getAttribute("description"));
 			}
-			
+
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
 				Column column = new Column(columnElement.getAttribute("name"));
@@ -204,7 +205,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			if (StringUtils.hasText(table.getDescription())) {
 				tableElement.setAttribute("description", table.getDescription());
 			}
-			
+
 			for (Column column : table.getColumns()) {
 				Element columnElement = document.createElement("column");
 				columnElement.setAttribute("name", column.getName());
@@ -281,8 +282,52 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	}
 
 	private Connection getConnection() throws SQLException {
-		connectionProvider.configure(propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties"));
+		if (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
+			connectionProvider.configure(propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties"));
+		} else {
+			connectionProvider.configure(getConnectionPropertiesFromDataNucleusConfiguration());
+		}
 		return connectionProvider.getConnection();
+	}
+
+	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
+		String persistenceXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		if (!fileManager.exists(persistenceXmlPath)) {
+			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
+		}
+
+		FileDetails fileDetails = fileManager.readFile(persistenceXmlPath);
+		Document document = null;
+		try {
+			InputStream is = new FileInputStream(fileDetails.getFile());
+			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
+			builder.setErrorHandler(null);
+			document = builder.parse(is);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		List<Element> propertyElements = XmlUtils.findElements("/persistence/persistence-unit/properties/property", document.getDocumentElement());
+		Assert.notEmpty(propertyElements, "Failed to find property elements in " + persistenceXmlPath);
+		Properties properties = new Properties();
+
+		for (Element propertyElement : propertyElements) {
+			String key = propertyElement.getAttribute("name");
+			String value = propertyElement.getAttribute("value");
+			if ("datanucleus.ConnectionDriverName".equals(key)) {
+				properties.put("database.driverClassName", value);
+			}
+			if ("datanucleus.ConnectionURL".equals(key)) {
+				properties.put("database.url", value);
+			}
+			if ("datanucleus.ConnectionUserName".equals(key)) {
+				properties.put("database.username", value);
+			}
+			if ("datanucleus.ConnectionPassword".equals(key)) {
+				properties.put("database.password", value);
+			}
+		}
+		return properties;
 	}
 
 	private String getDbreXmlPath() {
