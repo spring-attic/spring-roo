@@ -306,7 +306,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.appendFormalLine("String " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + maxValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ".substring(0, " + maxValue + ");");
+					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ".substring(" + field.getFieldName().getSymbolName() + ".length() - " + maxValue + ", " + field.getFieldName().getSymbolName() + ".lastIndexOf('_') - 2);");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
@@ -513,22 +513,22 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// Check for @Size
 					AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
 					if (sizeAnnotationMetadata != null) {
-						AnnotationAttributeValue<?> maxAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"));
-						if (maxAttributeValue != null && (initializer.length() + 2) > (Integer) maxAttributeValue.getValue()) {
-							initializer = initializer.substring(0, (Integer) maxAttributeValue.getValue() - 2); 
-						}
-						AnnotationAttributeValue<?> minAttributeValue =  sizeAnnotationMetadata.getAttribute(new JavaSymbolName("min"));
+						AnnotationAttributeValue<?> maxAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"));
+						if (maxAttributeValue != null && (Integer) maxAttributeValue.getValue() > 1 && (initializer.length() + 2) > (Integer) maxAttributeValue.getValue()) {
+							initializer = initializer.substring(0, (Integer) maxAttributeValue.getValue() - 2);
+						} 
+						AnnotationAttributeValue<?> minAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("min"));
 						if (minAttributeValue != null && (initializer.length() + 2) < (Integer) minAttributeValue.getValue()) {
-							initializer = String.format("%1$-" + ((Integer) minAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
+							initializer = String.format("%-1$" + ((Integer) minAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x');
 						}
 					}
 					
 					// Check for @Max
 					AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
 					if (maxAnnotationMetadata != null) {
-						AnnotationAttributeValue<?> valueAttributeValue =  maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
-						if ((initializer.length() + 2) > (Integer) valueAttributeValue.getValue()) {
-							initializer = initializer.substring(0, (Integer) valueAttributeValue.getValue() - 2); 
+						AnnotationAttributeValue<?> valueAttributeValue = maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
+						if ((Integer) valueAttributeValue.getValue() > 1 && (initializer.length() + 2) > (Integer) valueAttributeValue.getValue()) {
+							initializer = initializer.substring(0, (Integer) valueAttributeValue.getValue() - 2);
 						}
 					}
 					
@@ -537,7 +537,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					if (minAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> valueAttributeValue =  minAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
 						if ((initializer.length() + 2) < (Integer) valueAttributeValue.getValue()) {
-							initializer = String.format("%1$-" + ((Integer) valueAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
+							initializer = String.format("%-1$" + ((Integer) valueAttributeValue.getValue() - 2) + "s", initializer).replace(' ', 'x'); 
 						}
 					}
 					
