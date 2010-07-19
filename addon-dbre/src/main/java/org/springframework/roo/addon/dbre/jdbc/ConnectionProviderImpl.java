@@ -19,16 +19,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
-	private static final String DATABASE_DRIVER = "database.driverClassName";
-	private static final String DATABASE_URL = "database.url";
-	private static final String DATABASE_USERNAME = "database.username";
-	private static final String DATABASE_PASSWORD = "database.password";
 	private Properties props;
 
 	public void configure(Properties props) {
 		Assert.notNull(props, "Connection properties must not be null");
-		props.put("user", props.get(DATABASE_USERNAME));
-		props.put("password", props.get(DATABASE_PASSWORD));
+		props.put("user", props.get("database.username"));
+		props.put("password", props.get("database.password"));
 		this.props = props;
 	}
 
@@ -40,7 +36,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	public Connection getConnection() throws SQLException {
-		return getDriver().connect(props.getProperty(DATABASE_URL), props);
+		return getDriver().connect(props.getProperty("database.url"), props);
 	}
 
 	public void closeConnection(Connection connection) {
@@ -54,7 +50,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	private Driver getDriver() throws SQLException {
-		String driverClassName = props.getProperty(DATABASE_DRIVER);
+		String driverClassName = props.getProperty("database.driverClassName");
 		Driver driver;
 		if (driverClassName.startsWith("org.hsqldb")) {
 			driver = new org.hsqldb.jdbcDriver();
