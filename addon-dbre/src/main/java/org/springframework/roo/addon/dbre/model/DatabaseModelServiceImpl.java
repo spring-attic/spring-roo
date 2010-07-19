@@ -272,9 +272,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection);
-			introspector.setCatalog(StringUtils.hasText(catalog) ? catalog : introspector.getConnection().getCatalog());
-			introspector.setSchema(schema);
+			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection, schema);
 			return introspector.getDatabase(javaPackage);
 		} finally {
 			connectionProvider.closeConnection(connection);

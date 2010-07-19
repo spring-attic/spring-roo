@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -27,8 +28,15 @@ public class DatabaseSchemaIntrospector {
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+	DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
+		Assert.notNull(connection, "Connection must not be null");
 		databaseMetaData = connection.getMetaData();
+		catalog = databaseMetaData.getConnection().getCatalog();
+		this.schema = schema;
+	}
+
+	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+		this(connection, null);
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -102,9 +110,9 @@ public class DatabaseSchemaIntrospector {
 		if (rs != null) {
 			try {
 				while (rs.next()) {
-					setTableNamePattern(rs.getString("TABLE_NAME"));
-					setCatalog(rs.getString("TABLE_CAT"));
-					setSchema(new Schema(rs.getString("TABLE_SCHEM")));
+					tableNamePattern = rs.getString("TABLE_NAME");
+					catalog = rs.getString("TABLE_CAT");
+					schema = new Schema(rs.getString("TABLE_SCHEM"));
 					
 					// Skip Oracle recycle bin tables
 					if (tableNamePattern.startsWith("BIN$")) {
@@ -323,7 +331,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getTables() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getTables(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), types);
@@ -336,7 +344,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getColumns() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getColumns(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), StringUtils.toUpperCase(columnNamePattern));
@@ -349,7 +357,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getPrimaryKeys() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getPrimaryKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
@@ -362,7 +370,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getForeignKeys() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getImportedKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
@@ -375,7 +383,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getExportedKeys() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getExportedKeys(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
@@ -388,7 +396,7 @@ public class DatabaseSchemaIntrospector {
 	}
 
 	private ResultSet getIndices() throws SQLException {
-		String schemaPattern = schema.getName();
+		String schemaPattern = schema != null ? schema.getName() : null;
 		ResultSet rs = null;
 		if (databaseMetaData.storesUpperCaseIdentifiers()) {
 			rs = databaseMetaData.getIndexInfo(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern), false, false);

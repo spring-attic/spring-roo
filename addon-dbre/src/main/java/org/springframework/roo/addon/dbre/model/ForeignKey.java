@@ -8,8 +8,8 @@ import java.util.Set;
  * Represents a database foreign key.
  * 
  * <p>
- * A foreign key can be modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} 
- * or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods
+ * A foreign key is modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} 
+ * or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
  * 
  * @author Alan Stewart
  * @since 1.1
