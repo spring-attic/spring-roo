@@ -106,10 +106,6 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				table.setDescription(tableElement.getAttribute("description"));
 			}
 			
-			if (StringUtils.hasText(tableElement.getAttribute("baseClass"))) {
-				table.setSuperTableName(tableElement.getAttribute("baseClass"));
-			}
-
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
 				Column column = new Column(columnElement.getAttribute("name"));
@@ -209,10 +205,6 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				tableElement.setAttribute("description", table.getDescription());
 			}
 			
-			if (StringUtils.hasText(table.getSuperTableName())) {
-				tableElement.setAttribute("baseClass", table.getSuperTableName());
-			}
-
 			for (Column column : table.getColumns()) {
 				Element columnElement = document.createElement("column");
 				columnElement.setAttribute("name", column.getName());

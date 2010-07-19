@@ -381,14 +381,11 @@ public class DbreXmlFileListener implements FileEventListener {
 	private void deleteManagedType(JavaType javaType) {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails typeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-			if (MemberFindingUtils.getDeclaredTypeAnnotation(typeDetails, new JavaType(RooDbManaged.class.getName())) != null) {
-				String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
-				fileManager.delete(filePath);
-				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
-			}
+			String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
+			fileManager.delete(filePath);
+			shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+			shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 		}
-		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
 
 	private JavaType getIdentifierType(JavaType javaType) {

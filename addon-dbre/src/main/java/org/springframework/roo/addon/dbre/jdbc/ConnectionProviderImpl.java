@@ -61,6 +61,10 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 			driver = new org.postgresql.Driver();
 		} else if (driverClassName.startsWith("oracle")) {
 			driver = new oracle.jdbc.OracleDriver();
+		/*
+		} else if (driverClassName.startsWith("com.ibm.db2")) {
+			driver = new com.ibm.db2.jcc.DB2Driver();
+		*/
 		} else {
 			throw new IllegalStateException("Failed to get jdbc driver for " + driverClassName);
 		}

@@ -117,22 +117,6 @@ public class DatabaseSchemaIntrospector {
 					table.setSchema(schema);
 					table.setDescription(rs.getString("REMARKS"));
 
-					try {
-						// Catching SQLException here as getSuperTables() is not supported by every driver
-						ResultSet superRs = getSuperTables();
-						if (superRs != null) {
-							try {
-								while (superRs.next()) {
-									table.setSuperTableName(superRs.getString("SUPERTABLE_NAME"));
-									break;
-								}
-							} finally {
-								superRs.close();
-							}
-						}
-					} catch (SQLException ignored) {
-					}
-
 					table.addColumns(readColumns());
 					table.addForeignKeys(readForeignKeys());
 					table.addExportedKeys(readExportedKeys());
@@ -347,19 +331,6 @@ public class DatabaseSchemaIntrospector {
 			rs = databaseMetaData.getTables(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern), types);
 		} else {
 			rs = databaseMetaData.getTables(catalog, schemaPattern, tableNamePattern, types);
-		}
-		return rs;
-	}
-
-	private ResultSet getSuperTables() throws SQLException {
-		String schemaPattern = schema.getName();
-		ResultSet rs = null;
-		if (databaseMetaData.storesUpperCaseIdentifiers()) {
-			rs = databaseMetaData.getSuperTables(StringUtils.toUpperCase(catalog), StringUtils.toUpperCase(schemaPattern), StringUtils.toUpperCase(tableNamePattern));
-		} else if (databaseMetaData.storesLowerCaseIdentifiers()) {
-			rs = databaseMetaData.getSuperTables(StringUtils.toLowerCase(catalog), StringUtils.toLowerCase(schemaPattern), StringUtils.toLowerCase(tableNamePattern));
-		} else {
-			rs = databaseMetaData.getSuperTables(catalog, schemaPattern, tableNamePattern);
 		}
 		return rs;
 	}

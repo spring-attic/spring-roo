@@ -18,7 +18,6 @@ public class Table implements Serializable {
 	private Schema schema;
 	private String name;
 	private String description;
-	private String superTableName;
 	private Set<Column> columns = new LinkedHashSet<Column>();
 	private Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
@@ -57,14 +56,6 @@ public class Table implements Serializable {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public String getSuperTableName() {
-		return superTableName;
-	}
-
-	public void setSuperTableName(String superTableName) {
-		this.superTableName = superTableName;
 	}
 
 	public Set<Column> getColumns() {
@@ -226,6 +217,6 @@ public class Table implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Table [name=%s, catalog=%s, schema=%s, description=%s, superTableName=%s, columns=%s, foreignKeys=%s, exportedKeys=%s, indices=%s]", name, catalog, schema.getName(), description, superTableName, columns, foreignKeys, exportedKeys, indices);
+		return String.format("Table [name=%s, catalog=%s, schema=%s, description=%s, columns=%s, foreignKeys=%s, exportedKeys=%s, indices=%s]", name, catalog, schema.getName(), description, columns, foreignKeys, exportedKeys, indices);
 	}
 }
