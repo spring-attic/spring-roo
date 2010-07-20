@@ -60,6 +60,10 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	@Reference private MetadataService metadataService;
 	@Reference private ConnectionProvider connectionProvider;
 
+	private enum IndexType {
+		INDEX, UNIQUE
+	};
+
 	public Set<Schema> getDatabaseSchemas() {
 		Connection connection = null;
 		try {
@@ -83,7 +87,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			}
 
 			Database database = getDatabase(schema, javaPackage);
-			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
+			Assert.isTrue(database != null && database.hasTables(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			OutputStream outputStream = new ByteArrayOutputStream();
 			Document document = getDocument(database);
 			XmlUtils.writeXml(outputStream, document);
@@ -103,7 +107,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			}
 
 			Database database = getDatabase(schema, javaPackage);
-			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
+			Assert.isTrue(database != null && database.hasTables(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			Document document = getDocument(database);
 
 			OutputStream outputStream;
@@ -179,8 +183,8 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				table.addExportedKey(exportedKey);
 			}
 
-			addIndices(table, tableElement, "index");
-			addIndices(table, tableElement, "unique");
+			addIndices(table, tableElement, IndexType.INDEX);
+			addIndices(table, tableElement, IndexType.UNIQUE);
 
 			tables.add(table);
 		}
@@ -235,11 +239,13 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 	}
 
-	private void addIndices(Table table, Element tableElement, String indexType) {
-		List<Element> elements = XmlUtils.findElements(indexType, tableElement);
+	private void addIndices(Table table, Element tableElement, IndexType indexType) {
+		List<Element> elements = XmlUtils.findElements(indexType.name().toLowerCase(), tableElement);
 		for (Element element : elements) {
 			Index index = new Index(element.getAttribute("name"));
-			List<Element> indexColumnElements = XmlUtils.findElements(indexType + "-column", element);
+			index.setUnique(indexType == IndexType.UNIQUE);
+			index.setTable(table);
+			List<Element> indexColumnElements = XmlUtils.findElements(indexType.name().toLowerCase() + "-column", element);
 			for (Element indexColumnElement : indexColumnElements) {
 				IndexColumn indexColumn = new IndexColumn(indexColumnElement.getAttribute("name"));
 				index.addColumn(indexColumn);

@@ -66,6 +66,10 @@ public class Database implements Serializable {
 	public Set<Table> getTables() {
 		return tables;
 	}
+	
+	public boolean hasTables() {
+		return !tables.isEmpty();
+	}
 
 	public Table findTable(String name) {
 		for (Table table : tables) {

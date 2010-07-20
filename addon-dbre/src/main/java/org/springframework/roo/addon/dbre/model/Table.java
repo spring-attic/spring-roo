@@ -127,7 +127,7 @@ public class Table implements Serializable {
 		}
 		return null;
 	}
-
+	
 	public Set<ForeignKey> getExportedKeys() {
 		return exportedKeys;
 	}
@@ -167,11 +167,11 @@ public class Table implements Serializable {
 		return this.indices.addAll(indices);
 	}
 
-	public Index findUniqueReference(String localColumnName) {
-		for (Index index : indices) {
+	public Index findUniqueReference(String uniqueColumnName) {
+		for (Index index : indices) {			
 			if (index.isUnique()) {
 				for (IndexColumn column : index.getColumns()) {
-					if (column.getName().equals(localColumnName)) {
+					if (column.getName().equalsIgnoreCase(uniqueColumnName)) {
 						return index;
 					}
 				}

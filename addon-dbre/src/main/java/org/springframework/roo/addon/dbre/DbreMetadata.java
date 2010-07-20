@@ -32,6 +32,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -43,6 +44,7 @@ import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -81,6 +83,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final JavaSymbolName NAME = new JavaSymbolName("name");
 	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final JavaSymbolName MAPPED_BY = new JavaSymbolName("mappedBy");
+	private static final JavaSymbolName REFERENCED_COLUMN = new JavaSymbolName("referencedColumnName");
 
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
@@ -208,7 +211,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 					JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), database.getJavaPackage());
 					Assert.notNull(fieldType, getErrorMsg(foreignKey.getForeignTableName()));
-					FieldMetadata field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn());
+					FieldMetadata field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn(), reference.getForeignColumn());
 					uniqueFields.put(fieldName, field);
 					manyToOneCount++;
 				}
@@ -343,7 +346,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, Column column) {
+	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, Column localColumn, Column foreignColumn) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -353,7 +356,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @JoinColumn annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(NAME, column.getName()));
+		attributes.add(new StringAttributeValue(NAME, localColumn.getName()));
+		attributes.add(new StringAttributeValue(REFERENCED_COLUMN, foreignColumn.getName()));
 		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, attributes);
 		annotations.add(joinColumnAnnotation);
 
@@ -390,7 +394,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
 				List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 				joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
-				joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), reference.getForeignColumnName()));
+				joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumnName()));
 				AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 				joinColumnsArrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation));
 			}
@@ -429,8 +433,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = getUniqueFieldName(fieldName);
 				field = getField(fieldName, column);
 				uniqueFields.put(fieldName, field);
-			} else if ((getIdField() != null && column.isPrimaryKey()) || table.findForeignKeyByLocalColumnName(columnName) != null) {
-				field = null;
+			} else if ((getIdField() != null && column.isPrimaryKey()) || table.findForeignKeyByLocalColumnName(columnName) != null || (table.findExportedKeyByLocalColumnName(columnName) != null && table.findUniqueReference(columnName) != null)) {
+				field = null;	
 			} else if (!isCompositeKeyField) {
 				field = getField(fieldName, column);
 				uniqueFields.put(fieldName, field);
@@ -516,6 +520,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
+	private boolean isUniqueField(String columnName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	public FieldMetadata getField(JavaSymbolName fieldName, Column column) {
 		JavaType fieldType = column.getType().getJavaType();
 
@@ -532,9 +541,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(NAME, column.getName()));
 
-		// Add length attribute for Strings
+		// Add length attribute for Strings and JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
 			attributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
+		} else if (fieldType.equals(new JavaType("java.util.Date"))) {
+			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
+			AnnotationMetadata temporalAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs);
+			annotations.add(temporalAnnotation);
 		}
 
 		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attributes);
