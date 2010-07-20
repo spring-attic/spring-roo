@@ -130,7 +130,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addManyToManyFields(Database database, Table table) {
-		int manyToManyCount = 0;
+		int manyToManyCount = database.getJoinTables().size() > 1 ? 1 : 0;
 		for (JoinTable joinTable : database.getJoinTables()) {
 			if (joinTable.getOwningSideTable().equals(table)) {
 				String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName()));
@@ -175,13 +175,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 
 					if (!isOneToOne) {
-						for (int i = 0; i < exportedKey.getReferenceCount(); i++) {
-							String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(foreignTableName));
-							String mappedByFieldNameStr = tableModelService.suggestFieldName(table.getName());
-							if (i > 0) {
-								fieldNameStr += String.valueOf(i);
-								mappedByFieldNameStr += String.valueOf(i);
-							}
+						int oneToManyCount = exportedKey.getReferenceCount();
+						for (int i = 1; i <= oneToManyCount; i++) {
+							String fieldSuffix = oneToManyCount > 1 ? String.valueOf(i) : "";
+							String fieldNameStr = getInflectorPlural(tableModelService.suggestFieldName(foreignTableName)) + fieldSuffix;
+							String mappedByFieldNameStr = tableModelService.suggestFieldName(table.getName()) + fieldSuffix;
 							JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 							JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
 							FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, database.getJavaPackage());
@@ -202,7 +200,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ForeignKey foreignKey = table.findForeignKeyByLocalColumnName(columnName);
 			if (foreignKey != null && !isOneToOne(table, foreignKey)) {
 				// Assume many-to-one multiplicity
-				int manyToOneCount = 0;
+				int manyToOneCount = foreignKey.getReferenceCount() > 1 ? 1 : 0;
 				for (Reference reference : foreignKey.getReferences()) {
 					String fieldNameStr = tableModelService.suggestFieldName(foreignKey.getForeignTableName());
 					if (manyToOneCount > 0) {
@@ -520,11 +518,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private boolean isUniqueField(String columnName) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public FieldMetadata getField(JavaSymbolName fieldName, Column column) {
 		JavaType fieldType = column.getType().getJavaType();
 
@@ -541,18 +534,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(NAME, column.getName()));
 
-		// Add length attribute for Strings and JSR 220 @Temporal annotation to date fields
+		// Add length attribute for Strings
 		if (fieldType.equals(JavaType.STRING_OBJECT)) {
 			attributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
-		} else if (fieldType.equals(new JavaType("java.util.Date"))) {
+		} 
+		
+		// Add JSR 220 @Temporal annotation to date fields
+		if (fieldType.equals(new JavaType("java.util.Date"))) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
 			AnnotationMetadata temporalAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs);
 			annotations.add(temporalAnnotation);
 		}
 
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attributes);
-		annotations.add(annotation);
+		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attributes);
+		annotations.add(columnAnnotation);
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
 	}
