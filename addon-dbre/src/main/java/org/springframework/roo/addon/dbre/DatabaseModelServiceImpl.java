@@ -188,6 +188,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		String name = databaseElement.getAttribute("name");
 		Schema schema = new Schema(databaseElement.getAttribute("schema"));
 		JavaPackage javaPackage = new JavaPackage(databaseElement.getAttribute("package"));
+		
 		return new Database(name, schema, javaPackage, tables);
 	}
 
@@ -199,7 +200,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			if (!StringUtils.hasText(schemaAttribute)) {
 				throw new IllegalStateException("Must specify a database schema name. Use --schema option");
 			}
-			return new Schema(databaseElement.getAttribute("schema"));
+			return new Schema(schemaAttribute);
 		} catch (Exception e) {
 			throw new IllegalStateException("Must specify a database schema name. Use --schema option", e);
 		}

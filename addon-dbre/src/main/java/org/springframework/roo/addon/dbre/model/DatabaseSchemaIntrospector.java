@@ -116,7 +116,7 @@ public class DatabaseSchemaIntrospector {
 				schema = new Schema(rs.getString("TABLE_SCHEM"));
 
 				// Skip Oracle recycle bin tables
-				if (tableNamePattern.startsWith("BIN$")) {
+				if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableNamePattern.startsWith("BIN$")) {
 					continue;
 				}
 

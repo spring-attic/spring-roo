@@ -79,6 +79,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final JavaType MANY_TO_MANY = new JavaType("javax.persistence.ManyToMany");
 	private static final JavaType JOIN_COLUMN = new JavaType("javax.persistence.JoinColumn");
 	private static final JavaSymbolName NAME = new JavaSymbolName("name");
+	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
 	private static final JavaSymbolName MAPPED_BY = new JavaSymbolName("mappedBy");
 
 	private EntityMetadata entityMetadata;
@@ -288,7 +289,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		joinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfOwningSideTable()));
 		AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
+		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
 
 		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
@@ -296,7 +297,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		inverseJoinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfInverseSideTable()));
 		AnnotationMetadata inverseJoinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, inverseJoinColumnAttributes);
-		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), inverseJoinColumnAnnotation));
+		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(VALUE, inverseJoinColumnAnnotation));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
 
 		AnnotationMetadata joinTableAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinTable"), joinTableAnnotationAttributes);
@@ -391,11 +392,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
 				joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), reference.getForeignColumnName()));
 				AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-				joinColumnsArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName("value"), joinColumnAnnotation));
+				joinColumnsArrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation));
 			}
 
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("value"), joinColumnsArrayValues));
+			attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(VALUE, joinColumnsArrayValues));
 
 			AnnotationMetadata joinColumnsAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumns"), attributes);
 			annotations.add(joinColumnsAnnotation);
