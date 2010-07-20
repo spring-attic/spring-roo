@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,15 +19,26 @@ import javax.xml.parsers.DocumentBuilder;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.DbrePath;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
+import org.springframework.roo.addon.dbre.model.CascadeAction;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.ColumnType;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DatabaseSchemaIntrospector;
+import org.springframework.roo.addon.dbre.model.ForeignKey;
+import org.springframework.roo.addon.dbre.model.Index;
+import org.springframework.roo.addon.dbre.model.IndexColumn;
+import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -46,6 +57,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
 	@Reference private ConnectionProvider connectionProvider;
 
 	public Set<Schema> getDatabaseSchemas() {
@@ -61,9 +73,16 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 	}
 
-	public String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
+	public String getDatabaseMetadata(Schema schema, JavaPackage javaPackage) {
 		try {
-			Database database = getDatabase(catalog, schema, javaPackage);
+			if (schema == null) {
+				schema = getLastKnownSchema();
+			}
+			if (javaPackage == null) {
+				javaPackage = getLastKnownJavaPackage();
+			}
+
+			Database database = getDatabase(schema, javaPackage);
 			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			OutputStream outputStream = new ByteArrayOutputStream();
 			Document document = getDocument(database);
@@ -74,9 +93,16 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		}
 	}
 
-	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage, File file) {
+	public void serializeDatabaseMetadata(Schema schema, JavaPackage javaPackage, File file) {
 		try {
-			Database database = getDatabase(catalog, schema, javaPackage);
+			if (schema == null) {
+				schema = getLastKnownSchema();
+			}
+			if (javaPackage == null) {
+				javaPackage = getLastKnownJavaPackage();
+			}
+
+			Database database = getDatabase(schema, javaPackage);
 			Assert.isTrue(database != null && !database.getTables().isEmpty(), "Schema " + schema.getName() + " either does not exist or does not contain any tables");
 			Document document = getDocument(database);
 
@@ -159,7 +185,40 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			tables.add(table);
 		}
 
-		return new Database(databaseElement.getAttribute("name"), new JavaPackage(databaseElement.getAttribute("package")), tables);
+		String name = databaseElement.getAttribute("name");
+		Schema schema = new Schema(databaseElement.getAttribute("schema"));
+		JavaPackage javaPackage = new JavaPackage(databaseElement.getAttribute("package"));
+		return new Database(name, schema, javaPackage, tables);
+	}
+
+	private Schema getLastKnownSchema() {
+		try {
+			Document document = getDocument();
+			Element databaseElement = document.getDocumentElement();
+			String schemaAttribute = databaseElement.getAttribute("schema");
+			if (!StringUtils.hasText(schemaAttribute)) {
+				throw new IllegalStateException("Must specify a database schema name. Use --schema option");
+			}
+			return new Schema(databaseElement.getAttribute("schema"));
+		} catch (Exception e) {
+			throw new IllegalStateException("Must specify a database schema name. Use --schema option", e);
+		}
+	}
+
+	private JavaPackage getLastKnownJavaPackage() {
+		try {
+			Document document = getDocument();
+			Element databaseElement = document.getDocumentElement();
+			String packageAttribute = databaseElement.getAttribute("package");
+			return StringUtils.hasText(packageAttribute) ? new JavaPackage(packageAttribute) : getTopLevelPackage();
+		} catch (Exception e) {
+			return getTopLevelPackage();
+		}
+	}
+
+	private JavaPackage getTopLevelPackage() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		return projectMetadata.getTopLevelPackage();
 	}
 
 	private Document getDocument() {
@@ -192,8 +251,9 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		Document document = XmlUtils.getDocumentBuilder().newDocument();
 
 		Element databaseElement = document.createElement("database");
-		if (database.getName() != null) {
-			databaseElement.setAttribute("name", database.getName());
+		databaseElement.setAttribute("name", database.getName());
+		if (database.getSchema() != null) {
+			databaseElement.setAttribute("schema", database.getSchema().getName());
 		}
 		if (database.getJavaPackage() != null) {
 			databaseElement.setAttribute("package", database.getJavaPackage().getFullyQualifiedPackageName());
@@ -268,7 +328,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		return document;
 	}
 
-	private Database getDatabase(String catalog, Schema schema, JavaPackage javaPackage) throws SQLException {
+	private Database getDatabase(Schema schema, JavaPackage javaPackage) throws SQLException {
 		Connection connection = null;
 		try {
 			connection = getConnection();

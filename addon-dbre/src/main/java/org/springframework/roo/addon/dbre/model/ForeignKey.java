@@ -8,8 +8,7 @@ import java.util.Set;
  * Represents a database foreign key.
  * 
  * <p>
- * A foreign key is modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} 
- * or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
+ * A foreign key is modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -19,7 +18,7 @@ public class ForeignKey implements Serializable {
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;
-	
+
 	/** The owning table. */
 	private Table table;
 
@@ -38,10 +37,10 @@ public class ForeignKey implements Serializable {
 	/** The references between local and remote columns. */
 	private Set<Reference> references = new LinkedHashSet<Reference>();
 
-	ForeignKey() {
+	public ForeignKey() {
 	}
 
-	ForeignKey(String name) {
+	public ForeignKey(String name) {
 		this.name = name;
 	}
 
@@ -100,7 +99,7 @@ public class ForeignKey implements Serializable {
 	public int getReferenceCount() {
 		return references.size();
 	}
-	
+
 	public void addReference(Reference reference) {
 		if (reference != null) {
 			references.add(reference);

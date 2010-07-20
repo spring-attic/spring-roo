@@ -14,8 +14,8 @@ import org.springframework.roo.model.JavaPackage;
 public interface DbreOperations {
 
 	boolean isDbreAvailable();
-	
-	void displayDatabaseMetadata(String catalog, Schema schema, File file);
-	
-	void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
+
+	void displayDatabaseMetadata(Schema schema, File file);
+
+	void serializeDatabaseMetadata(Schema schema, JavaPackage javaPackage);
 }

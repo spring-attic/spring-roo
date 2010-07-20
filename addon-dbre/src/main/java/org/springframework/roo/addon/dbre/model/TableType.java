@@ -8,7 +8,7 @@ package org.springframework.roo.addon.dbre.model;
  */
 public enum TableType {
 	TABLE, VIEW, ALIAS, SYNONYM, UNKNOWN;
-	
+
 	public static TableType getTableType(String typeName) {
 		try {
 			return TableType.valueOf(typeName);

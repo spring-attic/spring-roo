@@ -133,7 +133,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				if (manyToManyCount > 0) {
 					fieldNameStr += String.valueOf(manyToManyCount);
 				}
-				
+
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
@@ -146,13 +146,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					fieldNameStr += String.valueOf(manyToManyCount);
 					mappedByFieldNameStr += String.valueOf(manyToManyCount);
 				}
-				
+
 				JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 				JavaSymbolName mappedByFieldName = new JavaSymbolName(mappedByFieldNameStr);
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, database.getJavaPackage());
 				addToBuilder(field);
 			}
-			
+
 			manyToManyCount++;
 		}
 	}
@@ -163,7 +163,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				if (!database.isJoinTable(exportedKey.getForeignTable())) {
 					String foreignTableName = exportedKey.getForeignTableName();
 					Table foreignTable = database.findTable(foreignTableName);
-					Assert.notNull(foreignTable, "Related table " + foreignTableName + " could not be found but was referenced by " + table.getName());
+					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 					boolean isOneToOne = true;
 					Iterator<ForeignKey> foreignKeyIterator = foreignTable.getForeignKeys().iterator();
 					while (isOneToOne && foreignKeyIterator.hasNext()) {
@@ -206,6 +206,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 					JavaSymbolName fieldName = new JavaSymbolName(fieldNameStr);
 					JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), database.getJavaPackage());
+					Assert.notNull(fieldType, getErrorMsg(foreignKey.getForeignTableName()));
 					FieldMetadata field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn());
 					uniqueFields.put(fieldName, field);
 					manyToOneCount++;
@@ -227,6 +228,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (foreignKey != null && isOneToOne(table, foreignKey)) {
 				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignKey.getForeignTableName()));
 				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignKey.getForeignTableName(), database.getJavaPackage());
+				Assert.notNull(fieldType, getErrorMsg(foreignKey.getForeignTableName()));
 				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey, column);
 				uniqueFields.put(fieldName, field);
 			}
@@ -242,7 +244,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				if (!database.isJoinTable(exportedKey.getForeignTable())) {
 					String foreignTableName = exportedKey.getForeignTableName();
 					Table foreignTable = database.findTable(foreignTableName);
-					Assert.notNull(foreignTable, "Related table " + foreignTableName + " could not be found but was referenced by " + table.getName());
+					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 					boolean isOneToOne = true;
 					Iterator<ForeignKey> foreignKeyIterator = foreignTable.getForeignKeys().iterator();
 					while (isOneToOne && foreignKeyIterator.hasNext()) {
@@ -252,6 +254,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					if (isOneToOne) {
 						JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName));
 						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, database.getJavaPackage());
+						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()));
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
 						addToBuilder(field);
@@ -264,6 +267,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = tableModelService.findTypeForTableName(joinTable.getInverseSideTable().getName(), javaPackage);
+		Assert.notNull(element, getErrorMsg(joinTable.getInverseSideTable().getName()));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -304,6 +308,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		JavaType element = tableModelService.findTypeForTableName(joinTable.getOwningSideTable().getName(), javaPackage);
+		Assert.notNull(element, getErrorMsg(joinTable.getOwningSideTable().getName()));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.MANY_TO_MANY);
@@ -322,6 +327,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> params = new ArrayList<JavaType>();
 
 		JavaType element = tableModelService.findTypeForTableName(foreignTableName, javaPackage);
+		Assert.notNull(element, getErrorMsg(foreignTableName));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
 		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, Cardinality.ONE_TO_MANY);
@@ -675,6 +681,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			// Inflector failed (see for example ROO-305), so don't pluralize it
 			return term;
 		}
+	}
+
+	private String getErrorMsg(String tableName) {
+		return "Type for table '" + tableName + "' could not be found";
 	}
 
 	public static final String getMetadataIdentiferType() {

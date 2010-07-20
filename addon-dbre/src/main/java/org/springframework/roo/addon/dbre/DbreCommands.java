@@ -21,8 +21,9 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class DbreCommands implements CommandMarker {
-	@Reference private DbreOperations dbreOperations;
-	
+	@Reference
+	private DbreOperations dbreOperations;
+
 	@CliAvailabilityIndicator({ "database introspect", "database reverse engineer" })
 	public boolean isDbreAvailable() {
 		return dbreOperations.isDbreAvailable();
@@ -30,19 +31,17 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")
 	public void displayDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema,  
-		@CliOption(key = "catalog", mandatory = false, help = "The database catalog name") String catalog,  
-		@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") File file) { 
-				
-		dbreOperations.displayDatabaseMetadata(catalog, schema, file);
+		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
+		@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") File file) {
+
+		dbreOperations.displayDatabaseMetadata(schema, file);
 	}
-	
+
 	@CliCommand(value = "database reverse engineer", help = "Create and updates entities based on the database metadata")
 	public void serializeDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema,  
-		@CliOption(key = "catalog", mandatory = false, help = "The database catalog name") String catalog,  
-		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage javaPackage) { 
+		@CliOption(key = "schema", mandatory = false, help = "The database schema name") Schema schema, 
+		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage javaPackage) {
 
-		dbreOperations.serializeDatabaseMetadata(catalog, schema, javaPackage);
+		dbreOperations.serializeDatabaseMetadata(schema, javaPackage);
 	}
 }

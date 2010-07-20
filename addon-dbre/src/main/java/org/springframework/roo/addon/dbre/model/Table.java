@@ -23,7 +23,7 @@ public class Table implements Serializable {
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
 
-	Table() {
+	public Table() {
 	}
 
 	public String getCatalog() {
@@ -61,7 +61,7 @@ public class Table implements Serializable {
 	public Set<Column> getColumns() {
 		return columns;
 	}
-	
+
 	public int getColumnCount() {
 		return columns.size();
 	}
@@ -94,7 +94,7 @@ public class Table implements Serializable {
 		}
 		return primaryKeys;
 	}
-	 
+
 	public int getPrimaryKeyCount() {
 		return getPrimaryKeys().size();
 	}
@@ -102,7 +102,7 @@ public class Table implements Serializable {
 	public Set<ForeignKey> getForeignKeys() {
 		return foreignKeys;
 	}
-	
+
 	public int getForeignKeyCount() {
 		return getForeignKeys().size();
 	}
@@ -179,7 +179,7 @@ public class Table implements Serializable {
 		}
 		return null;
 	}
-	
+
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

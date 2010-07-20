@@ -29,7 +29,7 @@ public class Reference implements Serializable {
 	/**
 	 * Creates a new, empty reference.
 	 */
-	Reference() {
+	public Reference() {
 	}
 
 	/**

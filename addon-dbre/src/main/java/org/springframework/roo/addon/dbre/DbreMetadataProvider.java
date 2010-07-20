@@ -8,4 +8,5 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface DbreMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface DbreMetadataProvider extends ItdRoleAwareMetadataProvider {
+}

@@ -23,7 +23,7 @@ public class Column implements Serializable {
 	private String defaultValue;
 	private String javaType;
 
-	Column(String name) {
+	public Column(String name) {
 		this.name = name;
 	}
 

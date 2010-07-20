@@ -23,7 +23,7 @@ public class Index implements Serializable {
 		this.name = name;
 	}
 
-	Index() {
+	public Index() {
 	}
 
 	public String getName() {

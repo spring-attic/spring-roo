@@ -17,7 +17,7 @@ public enum CascadeAction {
 	public String getCode() {
 		return code;
 	}
-	
+
 	public static CascadeAction getCascadeAction(String code) {
 		for (CascadeAction cascadeAction : CascadeAction.values()) {
 			if (cascadeAction.getCode().equals(code)) {

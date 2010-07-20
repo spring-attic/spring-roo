@@ -8,7 +8,7 @@ package org.springframework.roo.addon.dbre;
  */
 public enum DbrePath {
 	DBRE_XML_FILE("/META-INF/spring/dbre.xml");
-	
+
 	private String path;
 
 	private DbrePath(String path) {

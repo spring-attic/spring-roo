@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -35,25 +34,16 @@ public class DbreOperationsImpl implements DbreOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
-	public void displayDatabaseMetadata(String catalog, Schema schema, File file) {
-		JavaPackage javaPackage = getTopLevelpackage();
+	public void displayDatabaseMetadata(Schema schema, File file) {
 		if (file != null) {
-			databaseModelService.serializeDatabaseMetadata(catalog, schema, javaPackage, file);
+			databaseModelService.serializeDatabaseMetadata(schema, null, file);
 			logger.info("Database metadata written to file " + file.getAbsolutePath());
 		} else {
-			logger.info(databaseModelService.getDatabaseMetadata(catalog, schema, javaPackage));
+			logger.info(databaseModelService.getDatabaseMetadata(schema, null));
 		}
 	}
 
-	public void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage) {
-		if (javaPackage == null) {
-			javaPackage = getTopLevelpackage();
-		}
-		databaseModelService.serializeDatabaseMetadata(catalog, schema, javaPackage, null);
-	}
-	
-	private JavaPackage getTopLevelpackage() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		return projectMetadata.getTopLevelPackage();
+	public void serializeDatabaseMetadata(Schema schema, JavaPackage javaPackage) {
+		databaseModelService.serializeDatabaseMetadata(schema, javaPackage, null);
 	}
 }

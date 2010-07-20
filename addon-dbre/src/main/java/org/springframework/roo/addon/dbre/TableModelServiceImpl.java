@@ -27,7 +27,7 @@ import org.springframework.roo.support.util.StringUtils;
  * Implementation of {@link TableModelService}.
  * 
  * @author Alan Stewart
- * @since 1.1 
+ * @since 1.1
  */
 @Service
 @Component
@@ -134,7 +134,6 @@ public class TableModelServiceImpl implements TableModelService {
 		return Collections.unmodifiableSet(managedEntities);
 	}
 
-	
 	public Set<JavaType> getDatabaseManagedIdentifiers() {
 		Set<JavaType> managedIdentifiers = new HashSet<JavaType>();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);

@@ -1,8 +1,10 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.io.File;
 import java.util.Set;
 
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 
 /**
@@ -23,21 +25,20 @@ public interface DatabaseModelService {
 	/**
 	 * Connects to a live database and displays database metadata.
 	 * 
-	 * @param catalog the name of the database catalog (may be null).
 	 * @param schema the {@link Schema schema) object representing the database schema.
 	 * @param javaPackage the package where entities are placed.
 	 * @return the database metadata as an XML string.
 	 */
-	String getDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage);
+	String getDatabaseMetadata(Schema schema, JavaPackage javaPackage);
 
 	/**
 	 * Writes the database metadata in DOM format to an XML file.
 	 * 
-	 * @param catalog the name of the database catalog (may be null).
 	 * @param schema the {@link Schema schema) object representing the database schema.
 	 * @param javaPackage the package where entities are placed.
+	 * @param file the {@link File file} to write the database metadata to.
 	 */
-	void serializeDatabaseMetadata(String catalog, Schema schema, JavaPackage javaPackage, File file);
+	void serializeDatabaseMetadata(Schema schema, JavaPackage javaPackage, File file);
 
 	/**
 	 * Reads and converts the database XML file into a {@link Database} object.

@@ -14,12 +14,15 @@ import org.springframework.roo.model.JavaPackage;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = -7534586433203368378L;
+	private static final long serialVersionUID = 4051253195181886730L;
 
 	/** The name of the database model. */
 	private String name;
 
-	/** The package where entities are placed */
+	/** The database {@link Schema schema}. */
+	private Schema schema;
+	
+	/** The package where entities are placed. */
 	private JavaPackage javaPackage;
 
 	/** All tables. */
@@ -28,8 +31,9 @@ public class Database implements Serializable {
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
-	Database(String name, JavaPackage javaPackage, Set<Table> tables) {
+	public Database(String name, Schema schema, JavaPackage javaPackage, Set<Table> tables) {
 		this.name = name;
+		this.schema = schema;
 		this.javaPackage = javaPackage;
 		this.tables = tables;
 		initialize();
@@ -41,6 +45,14 @@ public class Database implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Schema getSchema() {
+		return schema;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
 	}
 
 	public JavaPackage getJavaPackage() {
@@ -172,6 +184,6 @@ public class Database implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Database [name=%s, javaPackage=%s, tables=%s]", name, javaPackage, tables);
+		return String.format("Database [name=%s, schema=%s, javaPackage=%s, tables=%s]", name, schema, javaPackage, tables);
 	}
 }

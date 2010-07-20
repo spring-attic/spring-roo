@@ -19,7 +19,7 @@ public class IndexColumn implements Serializable {
 		this.name = name;
 	}
 
-	IndexColumn() {
+	public IndexColumn() {
 	}
 
 	public String getName() {

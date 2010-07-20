@@ -59,7 +59,7 @@ public interface TableModelService {
 	 * @return An unmodifiable {@link Set} of all database-managed entities.
 	 */
 	Set<JavaType> getDatabaseManagedEntities();
-	
+
 	/**
 	 * Returns all {@link RooDbManaged} {@link RooIdentifier identifiers}.
 	 * 

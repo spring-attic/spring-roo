@@ -8,6 +8,12 @@ import java.util.HashMap;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaType;
 
+/**
+ * Maps column types to Java types. 
+ * 
+ * @author Alan Stewart
+ * @since 1.1
+ */
 public enum ColumnType {
 	BIT(Types.BIT, JavaType.BOOLEAN_PRIMITIVE), 
 	TINYINT(Types.TINYINT, JavaType.SHORT_OBJECT), 
@@ -27,8 +33,7 @@ public enum ColumnType {
 	BINARY(Types.BINARY, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
 	VARBINARY(Types.VARBINARY, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
 	LONGVARBINARY(Types.LONGVARBINARY, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
-	NULL(Types.NULL, null), 
-	OTHER(Types.OTHER, JavaType.STRING_OBJECT), 
+	NULL(Types.NULL, null), OTHER(Types.OTHER, JavaType.STRING_OBJECT), 
 	JAVA_OBJECT(Types.JAVA_OBJECT, new JavaType("java.lang.Object")), 
 	DISTINCT(Types.DISTINCT, new JavaType(HashMap.class.getName())), 
 	STRUCT(Types.STRUCT, new JavaType(HashMap.class.getName())), 
@@ -37,7 +42,7 @@ public enum ColumnType {
 	CLOB(Types.CLOB, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
 	REF(Types.REF, new JavaType("java.sql.Ref")), 
 	DOUBLE(Types.DOUBLE, JavaType.DOUBLE_PRIMITIVE);
-	
+
 	private int typeCode;
 	private JavaType javaType;
 

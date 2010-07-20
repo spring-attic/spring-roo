@@ -7,7 +7,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -66,10 +65,10 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 
 		// We need to abort if we couldn't find dependent metadata
-		if (entityMetadata == null || !entityMetadata.isValid() ) {
+		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
-		
+
 		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
 		Database database = null;
 		try {

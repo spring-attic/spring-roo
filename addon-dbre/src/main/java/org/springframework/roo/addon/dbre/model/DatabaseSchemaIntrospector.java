@@ -27,14 +27,14 @@ public class DatabaseSchemaIntrospector {
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
+	public DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		databaseMetaData = connection.getMetaData();
 		catalog = databaseMetaData.getConnection().getCatalog();
 		this.schema = schema;
 	}
 
-	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+	public DatabaseSchemaIntrospector(Connection connection) throws SQLException {
 		this(connection, null);
 	}
 
@@ -54,7 +54,7 @@ public class DatabaseSchemaIntrospector {
 		return schema;
 	}
 
-	private String getSchemaPattern() {
+	public String getSchemaPattern() {
 		return schema != null ? schema.getName() : null;
 	}
 
@@ -90,59 +90,55 @@ public class DatabaseSchemaIntrospector {
 		Set<Schema> schemas = new LinkedHashSet<Schema>();
 
 		ResultSet rs = databaseMetaData.getSchemas();
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					schemas.add(new Schema(rs.getString("TABLE_SCHEM")));
-				}
-			} finally {
-				rs.close();
+		try {
+			while (rs.next()) {
+				schemas.add(new Schema(rs.getString("TABLE_SCHEM")));
 			}
+		} finally {
+			rs.close();
 		}
 
 		return schemas;
 	}
 
 	public Database getDatabase(JavaPackage javaPackage) throws SQLException {
-		return new Database(catalog, javaPackage, readTables());
+		return new Database(catalog, schema, javaPackage, readTables());
 	}
 
 	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-		
+
 		ResultSet rs = databaseMetaData.getTables(catalog, getSchemaPattern(), tableNamePattern, types);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					tableNamePattern = rs.getString("TABLE_NAME");
-					catalog = rs.getString("TABLE_CAT");
-					schema = new Schema(rs.getString("TABLE_SCHEM"));
-					
-					// Skip Oracle recycle bin tables
-					if (tableNamePattern.startsWith("BIN$")) {
-						continue;
-					}
+		try {
+			while (rs.next()) {
+				tableNamePattern = rs.getString("TABLE_NAME");
+				catalog = rs.getString("TABLE_CAT");
+				schema = new Schema(rs.getString("TABLE_SCHEM"));
 
-					Table table = new Table();
-					table.setName(tableNamePattern);
-					table.setCatalog(catalog);
-					table.setSchema(schema);
-					table.setDescription(rs.getString("REMARKS"));
-
-					table.addColumns(readColumns());
-					table.addForeignKeys(readForeignKeys());
-					table.addExportedKeys(readExportedKeys());
-					table.addIndices(readIndices());
-
-					for (String columnName : readPrimaryKeyNames()) {
-						table.findColumn(columnName).setPrimaryKey(true);
-					}
-
-					tables.add(table);
+				// Skip Oracle recycle bin tables
+				if (tableNamePattern.startsWith("BIN$")) {
+					continue;
 				}
-			} finally {
-				rs.close();
+
+				Table table = new Table();
+				table.setName(tableNamePattern);
+				table.setCatalog(catalog);
+				table.setSchema(schema);
+				table.setDescription(rs.getString("REMARKS"));
+
+				table.addColumns(readColumns());
+				table.addForeignKeys(readForeignKeys());
+				table.addExportedKeys(readExportedKeys());
+				table.addIndices(readIndices());
+
+				for (String columnName : readPrimaryKeyNames()) {
+					table.findColumn(columnName).setPrimaryKey(true);
+				}
+
+				tables.add(table);
 			}
+		} finally {
+			rs.close();
 		}
 
 		return tables;
@@ -152,23 +148,21 @@ public class DatabaseSchemaIntrospector {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
 		ResultSet rs = databaseMetaData.getColumns(catalog, getSchemaPattern(), tableNamePattern, columnNamePattern);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					Column column = new Column(rs.getString("COLUMN_NAME"));
-					column.setDescription(rs.getString("REMARKS"));
-					column.setDefaultValue(rs.getString("COLUMN_DEF"));
-					column.setSize(rs.getInt("COLUMN_SIZE"));
-					column.setScale(rs.getInt("DECIMAL_DIGITS"));
-					column.setTypeCode(rs.getInt("DATA_TYPE"));
-					column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
-					column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
+		try {
+			while (rs.next()) {
+				Column column = new Column(rs.getString("COLUMN_NAME"));
+				column.setDescription(rs.getString("REMARKS"));
+				column.setDefaultValue(rs.getString("COLUMN_DEF"));
+				column.setSize(rs.getInt("COLUMN_SIZE"));
+				column.setScale(rs.getInt("DECIMAL_DIGITS"));
+				column.setTypeCode(rs.getInt("DATA_TYPE"));
+				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
+				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 
-					columns.add(column);
-				}
-			} finally {
-				rs.close();
+				columns.add(column);
 			}
+		} finally {
+			rs.close();
 		}
 
 		return columns;
@@ -178,30 +172,28 @@ public class DatabaseSchemaIntrospector {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs = databaseMetaData.getImportedKeys(catalog, getSchemaPattern(), tableNamePattern);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					String foreignTableName = rs.getString("PKTABLE_NAME");
-					ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
-					foreignKey.setForeignTableName(foreignTableName);
-					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
-					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+		try {
+			while (rs.next()) {
+				String foreignTableName = rs.getString("PKTABLE_NAME");
+				ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
+				foreignKey.setForeignTableName(foreignTableName);
+				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
-					Reference reference = new Reference();
-					reference.setSequenceValue(rs.getShort("KEY_SEQ"));
-					reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
-					reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
-					
-					if (foreignKeys.containsKey(foreignTableName)) {
-						foreignKeys.get(foreignTableName).addReference(reference);
-					} else {
-						foreignKey.addReference(reference);
-						foreignKeys.put(foreignTableName, foreignKey); 
-					}
+				Reference reference = new Reference();
+				reference.setSequenceValue(rs.getShort("KEY_SEQ"));
+				reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
+				reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
+
+				if (foreignKeys.containsKey(foreignTableName)) {
+					foreignKeys.get(foreignTableName).addReference(reference);
+				} else {
+					foreignKey.addReference(reference);
+					foreignKeys.put(foreignTableName, foreignKey);
 				}
-			} finally {
-				rs.close();
 			}
+		} finally {
+			rs.close();
 		}
 
 		return new LinkedHashSet<ForeignKey>(foreignKeys.values());
@@ -235,30 +227,28 @@ public class DatabaseSchemaIntrospector {
 		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs = databaseMetaData.getExportedKeys(catalog, getSchemaPattern(), tableNamePattern);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					String foreignTableName = rs.getString("FKTABLE_NAME");
-					ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
-					foreignKey.setForeignTableName(foreignTableName);
-					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
-					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+		try {
+			while (rs.next()) {
+				String foreignTableName = rs.getString("FKTABLE_NAME");
+				ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
+				foreignKey.setForeignTableName(foreignTableName);
+				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
-					Reference reference = new Reference();
-					reference.setSequenceValue(rs.getShort("KEY_SEQ"));
-					reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
-					reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
+				Reference reference = new Reference();
+				reference.setSequenceValue(rs.getShort("KEY_SEQ"));
+				reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
+				reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
 
-					if (exportedKeys.containsKey(foreignTableName)) {
-						exportedKeys.get(foreignTableName).addReference(reference);
-					} else {
-						foreignKey.addReference(reference);
-						exportedKeys.put(foreignTableName, foreignKey); 
-					}
+				if (exportedKeys.containsKey(foreignTableName)) {
+					exportedKeys.get(foreignTableName).addReference(reference);
+				} else {
+					foreignKey.addReference(reference);
+					exportedKeys.put(foreignTableName, foreignKey);
 				}
-			} finally {
-				rs.close();
 			}
+		} finally {
+			rs.close();
 		}
 
 		return new LinkedHashSet<ForeignKey>(exportedKeys.values());
@@ -321,14 +311,12 @@ public class DatabaseSchemaIntrospector {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
 		ResultSet rs = databaseMetaData.getPrimaryKeys(catalog, getSchemaPattern(), tableNamePattern);
-		if (rs != null) {
-			try {
-				while (rs.next()) {
-					columnNames.add(rs.getString("COLUMN_NAME"));
-				}
-			} finally {
-				rs.close();
+		try {
+			while (rs.next()) {
+				columnNames.add(rs.getString("COLUMN_NAME"));
 			}
+		} finally {
+			rs.close();
 		}
 
 		return columnNames;
