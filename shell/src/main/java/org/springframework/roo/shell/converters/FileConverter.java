@@ -40,7 +40,10 @@ public class FileConverter implements Converter {
 
 	protected void populate(List<String> completions, String adjustedUserInput, String originalUserInput, String directoryData) {
 		File directory = new File(directoryData.length() > 0 ? directoryData : ".");
-		Assert.isTrue(directory.isDirectory(), "Directory '" + directory.toString() + "' is not a valid directory name");
+		
+		if (!directory.isDirectory()) {
+			return;
+		}
 
 		for (File file : directory.listFiles()) {
 			if (adjustedUserInput == null || adjustedUserInput.length() == 0 || 
