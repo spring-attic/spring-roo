@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Alan Stewart.
  * @since 1.1
  */
-public class Column implements Serializable {
+public class Column implements Serializable, Comparable<Column> {
 	private static final long serialVersionUID = -4826133462002775388L;
 	private String name;
 	private String description;
@@ -23,6 +23,7 @@ public class Column implements Serializable {
 	private String defaultValue;
 	private String javaType;
 	private String javaName;
+	private int ordinalPosition;
 
 	public Column(String name) {
 		this.name = name;
@@ -132,6 +133,18 @@ public class Column implements Serializable {
 		this.javaName = javaName;
 	}
 
+	public int getOrdinalPosition() {
+		return ordinalPosition;
+	}
+
+	public void setOrdinalPosition(int ordinalPosition) {
+		this.ordinalPosition = ordinalPosition;
+	}
+
+	public int compareTo(Column o) {
+		return new Integer(ordinalPosition).compareTo(new Integer(o.getOrdinalPosition()));
+	}
+
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -161,6 +174,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, javaName=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, javaName);
+		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, javaName=%s, ordinalPosition=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, javaName, ordinalPosition);
 	}
 }

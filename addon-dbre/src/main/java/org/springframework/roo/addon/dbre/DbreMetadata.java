@@ -159,12 +159,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ForeignKey foreignKey = table.findForeignKeyByLocalColumnName(column.getName());
 			if (foreignKey != null && isOneToOne(table, foreignKey)) {
 				String foreignTableName = foreignKey.getForeignTableName();
-				Short sequenceValue = foreignKey.getSequenceValue();
-				String fieldSuffix = sequenceValue > 0 ? String.valueOf(sequenceValue) : "";
+				Short keySequence = foreignKey.getKeySequence();
+				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
 				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, database.getJavaPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
+				// Fields are stored in a field-keyed map first before adding them to the builder. 
+				// This ensures the fields from foreign keys with multiple columns will only get created once. 
 				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey, column);
 				uniqueFields.put(fieldName, field);
 			}
@@ -183,8 +185,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 
 					if (isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
-						Short sequenceValue = exportedKey.getSequenceValue();
-						String fieldSuffix = sequenceValue > 0 ? String.valueOf(sequenceValue) : "";
+						Short keySequence = exportedKey.getKeySequence();
+						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
 						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, database.getJavaPackage());
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
@@ -207,8 +209,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 
 					if (!isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
-						Short sequenceValue = exportedKey.getSequenceValue();
-						String fieldSuffix = sequenceValue > 0 ? String.valueOf(sequenceValue) : "";
+						Short keySequence = exportedKey.getKeySequence();
+						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(foreignTableName)) + fieldSuffix);
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()) + fieldSuffix);
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, database.getJavaPackage());
@@ -228,14 +230,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			ForeignKey foreignKey = table.findForeignKeyByLocalColumnName(columnName);
 			if (foreignKey != null && !isOneToOne(table, foreignKey)) {
 				// Assume many-to-one multiplicity
+				Short keySequence = foreignKey.getKeySequence();
+				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
+				String foreignTableName = foreignKey.getForeignTableName();
+				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
+				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, database.getJavaPackage());
+				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 				for (Reference reference : foreignKey.getReferences()) {
-					Short sequenceValue = foreignKey.getSequenceValue();
-					String fieldSuffix = sequenceValue > 0 ? String.valueOf(sequenceValue) : "";
-					String foreignTableName = foreignKey.getForeignTableName();
-					JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
-					JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, database.getJavaPackage());
-					Assert.notNull(fieldType, getErrorMsg(foreignTableName));
-
+					// Fields are stored in a field-keyed map first before adding them to the builder. 
+					// This ensures the fields from foreign keys with multiple columns will only get created once. 
 					FieldMetadata field = getManyToOneField(fieldName, fieldType, reference.getLocalColumn(), reference.getForeignColumn());
 					uniqueFields.put(fieldName, field);
 				}

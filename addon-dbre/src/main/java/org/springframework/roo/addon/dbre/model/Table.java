@@ -3,6 +3,8 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -18,7 +20,7 @@ public class Table implements Serializable {
 	private Schema schema;
 	private String name;
 	private String description;
-	private Set<Column> columns = new LinkedHashSet<Column>();
+	private SortedSet<Column> columns = new TreeSet<Column>();
 	private Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();

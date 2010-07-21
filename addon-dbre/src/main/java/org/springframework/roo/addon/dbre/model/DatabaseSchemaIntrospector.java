@@ -158,6 +158,7 @@ public class DatabaseSchemaIntrospector {
 				column.setTypeCode(rs.getInt("DATA_TYPE"));
 				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
+				column.setOrdinalPosition(rs.getInt("ORDINAL_POSITION"));
 
 				columns.add(column);
 			}
@@ -183,7 +184,7 @@ public class DatabaseSchemaIntrospector {
 				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
 				Reference reference = new Reference();
-				reference.setSequenceValue(rs.getShort("KEY_SEQ"));
+				reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
 				reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
 				reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
 
@@ -240,7 +241,7 @@ public class DatabaseSchemaIntrospector {
 				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
 				Reference reference = new Reference();
-				reference.setSequenceValue(rs.getShort("KEY_SEQ"));
+				reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
 				reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
 				reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
 

@@ -12,7 +12,7 @@ public class Reference implements Serializable, Comparable<Reference> {
 	private static final long serialVersionUID = 7930959797342530749L;
 
 	/** The sequence value within the key. */
-	private Short sequenceValue;
+	private Short sequenceNumber;
 
 	/** The local column. */
 	private Column localColumn;
@@ -43,12 +43,12 @@ public class Reference implements Serializable, Comparable<Reference> {
 		setForeignColumn(foreignColumn);
 	}
 
-	public Short getSequenceValue() {
-		return sequenceValue;
+	public Short getSequenceNumber() {
+		return sequenceNumber;
 	}
 
-	public void setSequenceValue(Short sequenceValue) {
-		this.sequenceValue = sequenceValue;
+	public void setSequenceNumber(Short sequenceNumber) {
+		this.sequenceNumber = sequenceNumber;
 	}
 
 	public Column getLocalColumn() {
@@ -86,7 +86,7 @@ public class Reference implements Serializable, Comparable<Reference> {
 	}
 
 	public int compareTo(Reference o) {
-		return sequenceValue.compareTo(o.getSequenceValue());
+		return sequenceNumber.compareTo(o.getSequenceNumber());
 	}
 
 	public int hashCode() {
@@ -126,6 +126,6 @@ public class Reference implements Serializable, Comparable<Reference> {
 	}
 
 	public String toString() {
-		return String.format("Reference [sequenceValue=%s, localColumnName=%s, foreignColumnName=%s]", sequenceValue, localColumnName, foreignColumnName);
+		return String.format("Reference [sequenceNumber=%s, localColumnName=%s, foreignColumnName=%s]", sequenceNumber, localColumnName, foreignColumnName);
 	}
 }

@@ -35,8 +35,8 @@ public class ForeignKey implements Serializable {
 	/** The action to perform when the referenced row is deleted. */
 	private CascadeAction onDelete = CascadeAction.NONE;
 
-	/** The sequence value of the key within the table for a given foreign table. */
-	private Short sequenceValue;
+	/** The sequence number of the key within the table for a given foreign table. */
+	private Short keySequence;
 
 	/** The references between local and remote columns. */
 	private SortedSet<Reference> references = new TreeSet<Reference>();
@@ -97,12 +97,12 @@ public class ForeignKey implements Serializable {
 		this.onDelete = onDelete;
 	}
 
-	public Short getSequenceValue() {
-		return sequenceValue;
+	public Short getKeySequence() {
+		return keySequence;
 	}
 
-	public void setSequenceValue(Short sequenceValue) {
-		this.sequenceValue = sequenceValue;
+	public void setKeySequence(Short keySequence) {
+		this.keySequence = keySequence;
 	}
 
 	public Set<Reference> getReferences() {
