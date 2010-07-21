@@ -26,6 +26,20 @@
 	<properties>
 		<roo.version>1.1.0.M3</roo.version>
 	</properties>
+	<repositories>
+		<repository>
+	  		<id>spring-roo-repository</id>
+	  		<name>Spring Roo Repository</name>
+	  		<url>http://spring-roo-repository.springsource.org/release</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+	        <pluginRepository>
+            <id>spring-roo-repository</id>
+            <name>Spring Roo Repository</name>
+            <url>http://spring-roo-repository.springsource.org/release</url>
+        </pluginRepository>
+    </pluginRepositories>
 	<dependencies>
 	      <!-- OSGi -->
           <dependency>
