@@ -59,6 +59,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ConnectionProvider connectionProvider;
+	@Reference private TableModelService tableModelService;
 
 	private enum IndexType {
 		INDEX, UNIQUE
@@ -139,45 +140,50 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
-				Column column = new Column(columnElement.getAttribute("name"));
+				String name = columnElement.getAttribute("name");
+				Column column = new Column(name);
 				column.setDescription(columnElement.getAttribute("description"));
 				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
 				column.setJavaType(columnElement.getAttribute("javaType"));
 				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
 				column.setSize(Integer.parseInt(columnElement.getAttribute("size")));
 				column.setType(ColumnType.valueOf(columnElement.getAttribute("type")));
+				column.setJavaName(columnElement.getAttribute("javaName"));
 				table.addColumn(column);
 			}
 
 			List<Element> foreignKeyElements = XmlUtils.findElements("foreignKey", tableElement);
 			for (Element foreignKeyElement : foreignKeyElements) {
-				ForeignKey foreignKey = new ForeignKey(foreignKeyElement.getAttribute("name"));
-				foreignKey.setForeignTableName(foreignKeyElement.getAttribute("foreignTable"));
+				ForeignKey foreignKey = new ForeignKey(foreignKeyElement.getAttribute("name"), foreignKeyElement.getAttribute("foreignTable"));
 				foreignKey.setOnDelete(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute("onDelete")));
 				foreignKey.setOnUpdate(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute("onUpdate")));
+				foreignKey.setSequenceValue(new Short(foreignKeyElement.getAttribute("sequenceValue")));
 
 				List<Element> referenceElements = XmlUtils.findElements("reference", foreignKeyElement);
 				for (Element referenceElement : referenceElements) {
 					org.springframework.roo.addon.dbre.model.Reference reference = new org.springframework.roo.addon.dbre.model.Reference();
 					reference.setForeignColumnName(referenceElement.getAttribute("foreign"));
 					reference.setLocalColumnName(referenceElement.getAttribute("local"));
+					reference.setSequenceValue(new Short(referenceElement.getAttribute("sequenceValue")));
 					foreignKey.addReference(reference);
 				}
 				table.addForeignKey(foreignKey);
 			}
+			
 
 			List<Element> exportedKeyElements = XmlUtils.findElements("exportedKey", tableElement);
 			for (Element exportedKeyElement : exportedKeyElements) {
-				ForeignKey exportedKey = new ForeignKey(exportedKeyElement.getAttribute("name"));
-				exportedKey.setForeignTableName(exportedKeyElement.getAttribute("foreignTable"));
+				ForeignKey exportedKey = new ForeignKey(exportedKeyElement.getAttribute("name"), exportedKeyElement.getAttribute("foreignTable"));
 				exportedKey.setOnDelete(CascadeAction.getCascadeAction(exportedKeyElement.getAttribute("onDelete")));
 				exportedKey.setOnUpdate(CascadeAction.getCascadeAction(exportedKeyElement.getAttribute("onUpdate")));
+				exportedKey.setSequenceValue(new Short(exportedKeyElement.getAttribute("sequenceValue")));
 
 				List<Element> referenceElements = XmlUtils.findElements("reference", exportedKeyElement);
 				for (Element referenceElement : referenceElements) {
 					org.springframework.roo.addon.dbre.model.Reference reference = new org.springframework.roo.addon.dbre.model.Reference();
 					reference.setForeignColumnName(referenceElement.getAttribute("foreign"));
 					reference.setLocalColumnName(referenceElement.getAttribute("local"));
+					reference.setSequenceValue(new Short(referenceElement.getAttribute("sequenceValue")));
 					exportedKey.addReference(reference);
 				}
 				table.addExportedKey(exportedKey);
@@ -248,6 +254,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 			List<Element> indexColumnElements = XmlUtils.findElements(indexType.name().toLowerCase() + "-column", element);
 			for (Element indexColumnElement : indexColumnElements) {
 				IndexColumn indexColumn = new IndexColumn(indexColumnElement.getAttribute("name"));
+				indexColumn.setOrdinalPosition(new Short(indexColumnElement.getAttribute("sequenceValue")));
 				index.addColumn(indexColumn);
 			}
 			table.addIndex(index);
@@ -283,19 +290,29 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				columnElement.setAttribute("required", String.valueOf(column.isRequired()));
 				columnElement.setAttribute("size", String.valueOf(column.getSize()));
 				columnElement.setAttribute("type", column.getType().name());
+				columnElement.setAttribute("javaName", tableModelService.suggestFieldName(column.getName()));
 				tableElement.appendChild(columnElement);
 			}
 
+			short sequenceValue = 0;
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
 				Element foreignKeyElement = document.createElement("foreignKey");
+				String foreignTableName = foreignKey.getForeignTableName();
 				foreignKeyElement.setAttribute("name", foreignKey.getName());
-				foreignKeyElement.setAttribute("foreignTable", foreignKey.getForeignTableName());
+				foreignKeyElement.setAttribute("foreignTable", foreignTableName);
 				foreignKeyElement.setAttribute("onDelete", foreignKey.getOnDelete().getCode());
 				foreignKeyElement.setAttribute("onUpdate", foreignKey.getOnUpdate().getCode());
+				
+				if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
+					sequenceValue++;					
+				}
+				foreignKeyElement.setAttribute("sequenceValue", String.valueOf(sequenceValue));
+
 				for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
 					Element referenceElement = document.createElement("reference");
 					referenceElement.setAttribute("foreign", reference.getForeignColumnName());
 					referenceElement.setAttribute("local", reference.getLocalColumnName());
+					referenceElement.setAttribute("sequenceValue", reference.getSequenceValue().toString());
 					foreignKeyElement.appendChild(referenceElement);
 				}
 				tableElement.appendChild(foreignKeyElement);
@@ -307,21 +324,31 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				for (IndexColumn indexColumn : index.getColumns()) {
 					Element indexColumnElement = document.createElement(index.isUnique() ? "unique-column" : "index-column");
 					indexColumnElement.setAttribute("name", indexColumn.getName());
+					indexColumnElement.setAttribute("sequenceValue", String.valueOf(indexColumn.getOrdinalPosition()));
 					indexElement.appendChild(indexColumnElement);
 				}
 				tableElement.appendChild(indexElement);
 			}
 
+			sequenceValue = 0;
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
 				Element exportedKeyElement = document.createElement("exportedKey");
+				String foreignTableName = exportedKey.getForeignTableName();
 				exportedKeyElement.setAttribute("name", exportedKey.getName());
-				exportedKeyElement.setAttribute("foreignTable", exportedKey.getForeignTableName());
+				exportedKeyElement.setAttribute("foreignTable", foreignTableName);
 				exportedKeyElement.setAttribute("onDelete", exportedKey.getOnDelete().getCode());
 				exportedKeyElement.setAttribute("onUpdate", exportedKey.getOnUpdate().getCode());
+
+				if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
+					sequenceValue++;					
+				}
+				exportedKeyElement.setAttribute("sequenceValue", String.valueOf(sequenceValue));
+				
 				for (org.springframework.roo.addon.dbre.model.Reference reference : exportedKey.getReferences()) {
 					Element referenceElement = document.createElement("reference");
 					referenceElement.setAttribute("foreign", reference.getForeignColumnName());
 					referenceElement.setAttribute("local", reference.getLocalColumnName());
+					referenceElement.setAttribute("sequenceValue", reference.getSequenceValue().toString());
 					exportedKeyElement.appendChild(referenceElement);
 				}
 				tableElement.appendChild(exportedKeyElement);

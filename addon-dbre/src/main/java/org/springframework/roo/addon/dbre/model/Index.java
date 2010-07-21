@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -17,7 +18,7 @@ public class Index implements Serializable {
 	private String name;
 	private Table table;
 	private boolean unique;
-	private List<IndexColumn> columns = new LinkedList<IndexColumn>();
+	private SortedSet<IndexColumn> columns = new TreeSet<IndexColumn>();
 
 	public Index(String name) {
 		this.name = name;
@@ -50,7 +51,7 @@ public class Index implements Serializable {
 		this.unique = unique;
 	}
 
-	public List<IndexColumn> getColumns() {
+	public SortedSet<IndexColumn> getColumns() {
 		return columns;
 	}
 

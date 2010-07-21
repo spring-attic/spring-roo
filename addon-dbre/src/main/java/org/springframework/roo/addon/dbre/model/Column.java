@@ -22,6 +22,7 @@ public class Column implements Serializable {
 	private int scale;
 	private String defaultValue;
 	private String javaType;
+	private String javaName;
 
 	public Column(String name) {
 		this.name = name;
@@ -123,6 +124,14 @@ public class Column implements Serializable {
 		this.javaType = javaType;
 	}
 
+	public String getJavaName() {
+		return javaName;
+	}
+
+	public void setJavaName(String javaName) {
+		this.javaName = javaName;
+	}
+
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -152,6 +161,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType);
+		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, javaName=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, javaName);
 	}
 }

@@ -8,10 +8,10 @@ import java.io.Serializable;
  * @author Alan Stewart
  * @since 1.1
  */
-public class IndexColumn implements Serializable {
+public class IndexColumn implements Serializable, Comparable<IndexColumn> {
 	private static final long serialVersionUID = 4206711649555220093L;
 	private String name;
-	private int ordinalPosition;
+	private Short ordinalPosition;
 	private Column column;
 	private int size;
 
@@ -30,11 +30,11 @@ public class IndexColumn implements Serializable {
 		this.name = name;
 	}
 
-	public int getOrdinalPosition() {
+	public Short getOrdinalPosition() {
 		return ordinalPosition;
 	}
 
-	public void setOrdinalPosition(int ordinalPosition) {
+	public void setOrdinalPosition(Short ordinalPosition) {
 		this.ordinalPosition = ordinalPosition;
 	}
 
@@ -52,6 +52,38 @@ public class IndexColumn implements Serializable {
 
 	public void setSize(int size) {
 		this.size = size;
+	}
+
+	public int compareTo(IndexColumn o) {
+		return ordinalPosition.compareTo(o.getOrdinalPosition());
+	}
+
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof IndexColumn)) {
+			return false;
+		}
+		IndexColumn other = (IndexColumn) obj;
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		return true;
 	}
 
 	public String toString() {

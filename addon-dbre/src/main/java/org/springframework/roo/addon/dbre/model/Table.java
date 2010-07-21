@@ -103,8 +103,27 @@ public class Table implements Serializable {
 		return foreignKeys;
 	}
 
+	public ForeignKey getForeignKey(String name) {
+		for (ForeignKey foreignKey : foreignKeys) {
+			if (foreignKey.getName().equalsIgnoreCase(name)) {
+				return foreignKey;
+			}
+		}
+		return null;
+
+	}
 	public int getForeignKeyCount() {
-		return getForeignKeys().size();
+		return foreignKeys.size();
+	}
+
+	public int getForeignKeyCountByForeignTableName(String foreignTableName) {
+		int count = 0;
+		for (ForeignKey foreignKey : foreignKeys) {
+			if (foreignKey.getForeignTableName().equalsIgnoreCase(foreignTableName)) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	public boolean addForeignKeys(Set<ForeignKey> foreignKeys) {
@@ -130,6 +149,16 @@ public class Table implements Serializable {
 	
 	public Set<ForeignKey> getExportedKeys() {
 		return exportedKeys;
+	}
+
+	public int getExportedKeyCountByForeignTableName(String foreignTableName) {
+		int count = 0;
+		for (ForeignKey exportedKey : exportedKeys) {
+			if (exportedKey.getForeignTableName().equalsIgnoreCase(foreignTableName)) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	public boolean addExportedKeys(Set<ForeignKey> exportedKeys) {

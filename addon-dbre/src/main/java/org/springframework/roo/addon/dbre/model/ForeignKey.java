@@ -1,8 +1,9 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Represents a database foreign key.
@@ -34,14 +35,18 @@ public class ForeignKey implements Serializable {
 	/** The action to perform when the referenced row is deleted. */
 	private CascadeAction onDelete = CascadeAction.NONE;
 
+	/** The sequence value of the key within the table for a given foreign table. */
+	private Short sequenceValue;
+
 	/** The references between local and remote columns. */
-	private Set<Reference> references = new LinkedHashSet<Reference>();
+	private SortedSet<Reference> references = new TreeSet<Reference>();
 
 	public ForeignKey() {
 	}
 
-	public ForeignKey(String name) {
+	public ForeignKey(String name, String foreignTableName) {
 		this.name = name;
+		this.foreignTableName = foreignTableName;
 	}
 
 	public String getName() {
@@ -92,6 +97,14 @@ public class ForeignKey implements Serializable {
 		this.onDelete = onDelete;
 	}
 
+	public Short getSequenceValue() {
+		return sequenceValue;
+	}
+
+	public void setSequenceValue(Short sequenceValue) {
+		this.sequenceValue = sequenceValue;
+	}
+
 	public Set<Reference> getReferences() {
 		return references;
 	}
@@ -119,6 +132,7 @@ public class ForeignKey implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((foreignTableName == null) ? 0 : foreignTableName.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -138,6 +152,13 @@ public class ForeignKey implements Serializable {
 				return false;
 			}
 		} else if (!foreignTableName.equals(other.foreignTableName)) {
+			return false;
+		}
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
 		}
 		return true;

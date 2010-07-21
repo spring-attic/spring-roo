@@ -174,9 +174,11 @@ public class DatabaseSchemaIntrospector {
 		ResultSet rs = databaseMetaData.getImportedKeys(catalog, getSchemaPattern(), tableNamePattern);
 		try {
 			while (rs.next()) {
+				String name = rs.getString("FK_NAME");
 				String foreignTableName = rs.getString("PKTABLE_NAME");
-				ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
-				foreignKey.setForeignTableName(foreignTableName);
+				String key = name + "_" + foreignTableName;
+				
+				ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
@@ -185,11 +187,11 @@ public class DatabaseSchemaIntrospector {
 				reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
 				reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
 
-				if (foreignKeys.containsKey(foreignTableName)) {
-					foreignKeys.get(foreignTableName).addReference(reference);
+				if (foreignKeys.containsKey(key)) {
+					foreignKeys.get(key).addReference(reference);
 				} else {
 					foreignKey.addReference(reference);
-					foreignKeys.put(foreignTableName, foreignKey);
+					foreignKeys.put(key, foreignKey);
 				}
 			}
 		} finally {
@@ -229,9 +231,11 @@ public class DatabaseSchemaIntrospector {
 		ResultSet rs = databaseMetaData.getExportedKeys(catalog, getSchemaPattern(), tableNamePattern);
 		try {
 			while (rs.next()) {
+				String name = rs.getString("FK_NAME");
 				String foreignTableName = rs.getString("FKTABLE_NAME");
-				ForeignKey foreignKey = new ForeignKey(rs.getString("FK_NAME"));
-				foreignKey.setForeignTableName(foreignTableName);
+				String key = name + "_" + foreignTableName;
+
+				ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
@@ -240,11 +244,11 @@ public class DatabaseSchemaIntrospector {
 				reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
 				reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
 
-				if (exportedKeys.containsKey(foreignTableName)) {
-					exportedKeys.get(foreignTableName).addReference(reference);
+				if (exportedKeys.containsKey(key)) {
+					exportedKeys.get(key).addReference(reference);
 				} else {
 					foreignKey.addReference(reference);
-					exportedKeys.put(foreignTableName, foreignKey);
+					exportedKeys.put(key, foreignKey);
 				}
 			}
 		} finally {
