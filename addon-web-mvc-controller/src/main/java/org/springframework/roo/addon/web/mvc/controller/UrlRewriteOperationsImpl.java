@@ -61,8 +61,8 @@ public class UrlRewriteOperationsImpl implements UrlRewriteOperations {
 
 	private class UrlRewriteDtdResolver implements EntityResolver {		
 		public InputSource resolveEntity (String publicId, String systemId) {
-			if (systemId.equals("http://tuckey.org/res/dtds/urlrewrite3.0.dtd")) {				
-				return new InputSource(TemplateUtils.getTemplate(UrlRewriteOperationsImpl.class, "urlrewrite3.0.dtd"));
+			if (systemId.equals("http://tuckey.org/res/dtds/urlrewrite3.1.dtd")) {				
+				return new InputSource(TemplateUtils.getTemplate(UrlRewriteOperationsImpl.class, "urlrewrite3.1.dtd"));
 			} else {
 				// use the default behaviour
 				return null;

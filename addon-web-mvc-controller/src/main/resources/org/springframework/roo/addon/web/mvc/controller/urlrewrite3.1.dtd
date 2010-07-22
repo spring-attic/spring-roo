@@ -11,7 +11,7 @@ decode-using CDATA  #IMPLIED
 default-match-type (regex|wildcard) #IMPLIED
 >
 
-<!ELEMENT rule (name?, note?, condition*, from, set*, run*, to?)>
+<!ELEMENT rule (name?, note?, condition*, from?, set*, run*, to?)>
 <!ATTLIST rule
 enabled  (true|false) "true"
 match-type  (regex|wildcard) #IMPLIED
@@ -50,14 +50,14 @@ casesensitive (true|false) "false"
 
 <!ELEMENT set (#PCDATA)>
 <!ATTLIST set
-type (request|session|response-header|cookie|content-type|charset|locale|status) "request"
+type (request|session|response-header|cookie|content-type|charset|locale|status|expires) "request"
 name CDATA  #IMPLIED
 >
 
 <!ELEMENT to (#PCDATA)>
 <!ATTLIST to
 type (redirect|temporary-redirect|permanent-redirect|pre-include|post-include|forward|passthrough) "forward"
-last (true|false) "true"
+last (true|false) "false"
 encode (true|false) #IMPLIED
 >
 
