@@ -14,6 +14,7 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.JoinTable;
+import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
@@ -167,7 +168,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
-				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey, column);
+				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey.getReferences(), column);
 				uniqueFields.put(fieldName, field);
 			}
 		}
@@ -239,7 +240,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
-				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey);
+				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences());
 				uniqueFields.put(fieldName, field);
 			}
 		}
@@ -308,7 +309,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	public FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, ForeignKey foreignKey, Column column) {
+	public FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -316,7 +317,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		AnnotationMetadata oneToOneAnnotation = new DefaultAnnotationMetadata(ONE_TO_ONE, new ArrayList<AnnotationAttributeValue<?>>());
 		annotations.add(oneToOneAnnotation);
 
-		if (foreignKey.getReferenceCount() == 1) {
+		if (references.size() == 1) {
 			// Add @JoinColumn annotation
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttributes.add(new StringAttributeValue(NAME, column.getName()));
@@ -324,7 +325,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			annotations.add(joinColumnAnnotation);
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(foreignKey.getReferences()));
+			annotations.add(getJoinColumnsAnnotation(references));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
@@ -359,7 +360,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, ForeignKey foreignKey) {
+	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -367,7 +368,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		AnnotationMetadata manyToOneAnnotation = new DefaultAnnotationMetadata(MANY_TO_ONE, new ArrayList<AnnotationAttributeValue<?>>());
 		annotations.add(manyToOneAnnotation);
 
-		SortedSet<org.springframework.roo.addon.dbre.model.Reference> references = foreignKey.getReferences();
 		if (references.size() == 1) {
 			// Add @JoinColumn annotation
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -383,10 +383,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
 	}
 
-	private AnnotationMetadata getJoinColumnsAnnotation(SortedSet<org.springframework.roo.addon.dbre.model.Reference> references) {
+	private AnnotationMetadata getJoinColumnsAnnotation(SortedSet<Reference> references) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 
-		for (org.springframework.roo.addon.dbre.model.Reference reference : references) {
+		for (Reference reference : references) {
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 			attributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
 			attributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumnName()));
