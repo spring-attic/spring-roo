@@ -43,24 +43,12 @@ public class Database implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public Schema getSchema() {
 		return schema;
 	}
 
-	public void setSchema(Schema schema) {
-		this.schema = schema;
-	}
-
 	public JavaPackage getJavaPackage() {
 		return javaPackage;
-	}
-
-	public void setJavaPackage(JavaPackage javaPackage) {
-		this.javaPackage = javaPackage;
 	}
 
 	public Set<Table> getTables() {

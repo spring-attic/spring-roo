@@ -1,7 +1,6 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -105,7 +104,7 @@ public class ForeignKey implements Serializable {
 		this.keySequence = keySequence;
 	}
 
-	public Set<Reference> getReferences() {
+	public SortedSet<Reference> getReferences() {
 		return references;
 	}
 

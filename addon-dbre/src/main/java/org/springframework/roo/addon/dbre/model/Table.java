@@ -60,7 +60,7 @@ public class Table implements Serializable {
 		this.description = description;
 	}
 
-	public Set<Column> getColumns() {
+	public SortedSet<Column> getColumns() {
 		return columns;
 	}
 
