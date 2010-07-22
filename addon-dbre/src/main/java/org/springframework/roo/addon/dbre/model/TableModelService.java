@@ -1,7 +1,8 @@
-package org.springframework.roo.addon.dbre;
+package org.springframework.roo.addon.dbre.model;
 
 import java.util.Set;
 
+import org.springframework.roo.addon.dbre.RooDbManaged;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.model.JavaPackage;

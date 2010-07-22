@@ -20,11 +20,8 @@ public class Index implements Serializable {
 	private boolean unique;
 	private SortedSet<IndexColumn> columns = new TreeSet<IndexColumn>();
 
-	public Index(String name) {
+	Index(String name) {
 		this.name = name;
-	}
-
-	public Index() {
 	}
 
 	public String getName() {

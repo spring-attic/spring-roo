@@ -287,8 +287,7 @@ public class DatabaseSchemaIntrospector {
 					}
 					index.setUnique(!rs.getBoolean("NON_UNIQUE"));
 
-					IndexColumn indexColumn = new IndexColumn();
-					indexColumn.setName(rs.getString("COLUMN_NAME"));
+					IndexColumn indexColumn = new IndexColumn(rs.getString("COLUMN_NAME"));
 					indexColumn.setOrdinalPosition(rs.getShort("ORDINAL_POSITION"));
 
 					index.addColumn(indexColumn);

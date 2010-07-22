@@ -25,7 +25,7 @@ public class Column implements Serializable, Comparable<Column> {
 	private String javaName;
 	private int ordinalPosition;
 
-	public Column(String name) {
+	Column(String name) {
 		this.name = name;
 	}
 

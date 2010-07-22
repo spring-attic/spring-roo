@@ -29,7 +29,7 @@ public class Reference implements Serializable, Comparable<Reference> {
 	/**
 	 * Creates a new, empty reference.
 	 */
-	public Reference() {
+	Reference() {
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class Reference implements Serializable, Comparable<Reference> {
 	 * @param localColumn The local column
 	 * @param foreignColumn The remote column
 	 */
-	public Reference(Column localColumn, Column foreignColumn) {
+	Reference(Column localColumn, Column foreignColumn) {
 		setLocalColumn(localColumn);
 		setForeignColumn(foreignColumn);
 	}

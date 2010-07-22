@@ -31,7 +31,7 @@ public class Database implements Serializable {
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
-	public Database(String name, Schema schema, JavaPackage javaPackage, Set<Table> tables) {
+	Database(String name, Schema schema, JavaPackage javaPackage, Set<Table> tables) {
 		this.name = name;
 		this.schema = schema;
 		this.javaPackage = javaPackage;

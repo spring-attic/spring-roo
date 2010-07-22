@@ -15,7 +15,7 @@ public class JoinTable {
 	private Table owningSideTable;
 	private Table inverseSideTable;
 
-	public JoinTable(Table table) {
+	JoinTable(Table table) {
 		Assert.isTrue(table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getForeignKeyCount() == 2 && table.getPrimaryKeyCount() == table.getForeignKeyCount(), "Table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns");
 		this.table = table;
 

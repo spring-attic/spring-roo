@@ -15,11 +15,8 @@ public class IndexColumn implements Serializable, Comparable<IndexColumn> {
 	private Column column;
 	private int size;
 
-	public IndexColumn(String name) {
+	IndexColumn(String name) {
 		this.name = name;
-	}
-
-	public IndexColumn() {
 	}
 
 	public String getName() {

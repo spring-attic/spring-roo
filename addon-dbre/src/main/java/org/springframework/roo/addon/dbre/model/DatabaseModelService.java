@@ -1,10 +1,8 @@
-package org.springframework.roo.addon.dbre;
+package org.springframework.roo.addon.dbre.model;
 
 import java.io.File;
 import java.util.Set;
 
-import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 
 /**

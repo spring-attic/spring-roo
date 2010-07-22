@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre;
+package org.springframework.roo.addon.dbre.model;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -19,17 +19,8 @@ import javax.xml.parsers.DocumentBuilder;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.dbre.DbrePath;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
-import org.springframework.roo.addon.dbre.model.CascadeAction;
-import org.springframework.roo.addon.dbre.model.Column;
-import org.springframework.roo.addon.dbre.model.ColumnType;
-import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseSchemaIntrospector;
-import org.springframework.roo.addon.dbre.model.ForeignKey;
-import org.springframework.roo.addon.dbre.model.Index;
-import org.springframework.roo.addon.dbre.model.IndexColumn;
-import org.springframework.roo.addon.dbre.model.Schema;
-import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;

@@ -25,7 +25,7 @@ public class Table implements Serializable {
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
 
-	public Table() {
+	Table() {
 	}
 
 	public String getCatalog() {

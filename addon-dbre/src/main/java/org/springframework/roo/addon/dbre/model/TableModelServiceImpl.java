@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre;
+package org.springframework.roo.addon.dbre.model;
 
 import java.io.File;
 import java.util.Collections;
@@ -9,6 +9,7 @@ import java.util.SortedSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.dbre.DbreMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
