@@ -3,7 +3,7 @@
  
     <spring:url var="home" value="/" /> 
     <span><a href="${home}"><spring:message code="button_home"/></a></span>				    
-    <c:if test="${pageContext.request.userPrincipal != null}">	
+    <c:if test="${pageContext['request'].userPrincipal != null}">	
     	<c:out value=" | "/> 
     	<span>			    
 		    <spring:url var="logout" value="/static/j_spring_security_logout" /> 
