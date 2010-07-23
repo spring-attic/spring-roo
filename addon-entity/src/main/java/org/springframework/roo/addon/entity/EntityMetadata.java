@@ -53,6 +53,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
+	private static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
+	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	private EntityMetadata parent;
 	private boolean noArgConstructor;
@@ -137,7 +139,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * <p>
 	 * If no parent is defined, one will be located or created. Any declared or inherited field which has the 
-	 * @javax.persistence.Id or @javax.persistence.EmbeddedId annotation will be taken as the identifier and returned. If no such field is located,
+	 * {@link javax.persistence.Id @Id} or {@link javax.persistence.EmbeddedId @EmbeddedId} annotation will be taken as the identifier and returned. If no such field is located,
 	 * a private field will be created as per the details contained in {@link RooEntity}.
 	 * 
 	 * @return the identifier (never returns null)
@@ -150,7 +152,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Try to locate an existing field with @javax.persistence.Id
 		List<FieldMetadata> foundId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
 		if (foundId.size() > 0) {
-			Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @javax.persistence.Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = foundId.get(0);
 			return field;
 		}
@@ -158,7 +160,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
 		List<FieldMetadata> foundEmbeddedId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
 		if (foundEmbeddedId.size() > 0) {
-			Assert.isTrue(foundEmbeddedId.size() == 1, "More than one field was annotated with @javax.persistence.EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(foundEmbeddedId.size() == 1, "More than one field was annotated with @EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = foundEmbeddedId.get(0);
 			return field;
 		}
@@ -228,7 +230,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
-			AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
+			AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
 			annotations.add(columnAnnotation);
 		}
 		
@@ -259,8 +261,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
-			Assert.notNull(method, "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(method != null && Modifier.isPublic(method.getModifier()), "User provided @Id or @EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		
@@ -290,8 +291,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
-			Assert.notNull(method, "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Id or @javax.persistence.EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(method != null && Modifier.isPublic(method.getModifier()), "User provided @Id or @EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		
@@ -362,7 +362,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionField.getSymbolName()));
-		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
+		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
 		annotations.add(columnAnnotation);
 		
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, versionType, null, annotations);
@@ -497,7 +497,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					continue;
 				}
 				
-				if (MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), new JavaType("javax.persistence.PersistenceContext")) == null) {
+				if (MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), PERSISTENCE_CONTEXT) == null) {
 					// Candidate doesn't have a PersistenceContext annotation, so give up
 					continue;
 				}
@@ -508,7 +508,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			
 			// Candidate not found, so let's create one
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.PersistenceContext"), new ArrayList<AnnotationAttributeValue<?>>());
+			AnnotationMetadata annotation = new DefaultAnnotationMetadata(PERSISTENCE_CONTEXT, new ArrayList<AnnotationAttributeValue<?>>());
 			annotations.add(annotation);
 			
 			return new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);

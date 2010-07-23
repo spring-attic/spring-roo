@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import org.springframework.roo.addon.serializable.RooSerializable;
 
 /**
- * Provides services related to JPA.
+ * Provides identifier services related to JPA.
  * 
  * <p>
  * Using this annotation also triggers {@link RooSerializable}.
@@ -28,20 +28,5 @@ public @interface RooIdentifier {
 	/**
 	 * @return whether to generate setters for each non-transient field declared in this class (defaults to true)
 	 */
-	boolean settersByDefault() default true;
-	
-	/**
-	 * @return an array of strings, with each string being the name of a composite primary key field
-	 */
-	String[] idFields() default "";
-	
-	/**
-	 * @return an array of classes, with each member being the class of a composite primary key field
-	 */
-	String[] idTypes() default "";
-	
-	/**
-	 * @return an array of strings, with each string being the column name representing the composite primary key field
-	 */
-	String[] idColumns() default "";
+	boolean settersByDefault() default false;
 }

@@ -89,8 +89,7 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
 		Path path = EntityMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
