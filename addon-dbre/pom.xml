@@ -121,11 +121,13 @@
 			<artifactId>com.springsource.com.mysql.jdbc</artifactId>
 			<version>5.1.6</version>
 		</dependency>
+		<!-- 
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>com.springsource.org.apache.derby</artifactId>
 			<version>10.5.1000001.764942</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>com.springsource.org.h2</artifactId>
