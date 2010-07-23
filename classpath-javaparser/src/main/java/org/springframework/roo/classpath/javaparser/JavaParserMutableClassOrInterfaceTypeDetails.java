@@ -26,8 +26,10 @@ import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -36,8 +38,10 @@ import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserAnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserConstructorMetadata;
@@ -326,7 +330,21 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	}
 
 	public void updateTypeAnnotation(AnnotationMetadata annotation) {
-		// TODO Ben - change to do a real update
+		/*
+		boolean writeChangesToDisk = false;
+		
+		AnnotationMetadata existing = MemberFindingUtils.getTypeAnnotation(this, annotation.getAnnotationType());
+		if (existing == null) {
+			// Not already present, user should have used the addTypeAnnotation method instead
+			addTypeAnnotation(annotation);
+			return;
+		}
+		
+		List<JavaSymbolName> replacementAttributeNames = new ArrayList<JavaSymbolName>();
+		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+		
+		*/
+		
 		removeTypeAnnotation(annotation.getAnnotationType());
 		addTypeAnnotation(annotation);
 	}
