@@ -57,6 +57,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		} else if (driverClassName.startsWith("com.mysql")) {
 			driver = new com.mysql.jdbc.Driver();
 		} else if (driverClassName.startsWith("org.apache.derby")) {
+			System.out.println("derby called");
 			driver = new org.apache.derby.jdbc.EmbeddedDriver();
 		} else if (driverClassName.startsWith("org.h2")) {
 			driver = new org.h2.Driver();

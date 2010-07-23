@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Alan Stewart
  * @since 1.1
  */
-public class Reference implements Serializable, Comparable<Reference> {
+public class Reference implements Serializable {
 	private static final long serialVersionUID = 7930959797342530749L;
 
 	/** The sequence value within the key. */
@@ -83,10 +83,6 @@ public class Reference implements Serializable, Comparable<Reference> {
 
 	public void setForeignColumnName(String foreignColumnName) {
 		this.foreignColumnName = foreignColumnName;
-	}
-
-	public int compareTo(Reference o) {
-		return sequenceNumber.compareTo(o.getSequenceNumber());
 	}
 
 	public int hashCode() {

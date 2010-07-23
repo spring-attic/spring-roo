@@ -20,7 +20,7 @@ public class Table implements Serializable {
 	private Schema schema;
 	private String name;
 	private String description;
-	private SortedSet<Column> columns = new TreeSet<Column>();
+	private SortedSet<Column> columns = new TreeSet<Column>(new ColumnComparator());
 	private Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();

@@ -167,7 +167,6 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				}
 				table.addForeignKey(foreignKey);
 			}
-			
 
 			List<Element> exportedKeyElements = XmlUtils.findElements("exportedKey", tableElement);
 			for (Element exportedKeyElement : exportedKeyElements) {
@@ -196,7 +195,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 		String name = databaseElement.getAttribute(NAME);
 		Schema schema = new Schema(databaseElement.getAttribute("schema"));
 		JavaPackage javaPackage = new JavaPackage(databaseElement.getAttribute("package"));
-		
+
 		return new Database(name, schema, javaPackage, tables);
 	}
 
@@ -301,9 +300,9 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				foreignKeyElement.setAttribute("foreignTable", foreignTableName);
 				foreignKeyElement.setAttribute("onDelete", foreignKey.getOnDelete().getCode());
 				foreignKeyElement.setAttribute("onUpdate", foreignKey.getOnUpdate().getCode());
-				
+
 				if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
-					keySequence++;					
+					keySequence++;
 				}
 				foreignKeyElement.setAttribute(KEY_SEQUENCE, String.valueOf(keySequence));
 
@@ -339,10 +338,10 @@ public class DatabaseModelServiceImpl implements DatabaseModelService {
 				exportedKeyElement.setAttribute("onUpdate", exportedKey.getOnUpdate().getCode());
 
 				if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
-					keySequence++;					
+					keySequence++;
 				}
 				exportedKeyElement.setAttribute(KEY_SEQUENCE, String.valueOf(keySequence));
-				
+
 				for (org.springframework.roo.addon.dbre.model.Reference reference : exportedKey.getReferences()) {
 					Element referenceElement = document.createElement("reference");
 					referenceElement.setAttribute(FOREIGN, reference.getForeignColumnName());

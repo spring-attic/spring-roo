@@ -27,14 +27,14 @@ public class DatabaseSchemaIntrospector {
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	public DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
+	DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		databaseMetaData = connection.getMetaData();
 		catalog = databaseMetaData.getConnection().getCatalog();
 		this.schema = schema;
 	}
 
-	public DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
 		this(connection, null);
 	}
 

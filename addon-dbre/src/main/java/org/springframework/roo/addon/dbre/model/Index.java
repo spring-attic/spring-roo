@@ -18,7 +18,7 @@ public class Index implements Serializable {
 	private String name;
 	private Table table;
 	private boolean unique;
-	private SortedSet<IndexColumn> columns = new TreeSet<IndexColumn>();
+	private SortedSet<IndexColumn> columns = new TreeSet<IndexColumn>(new IndexColumnComparator());
 
 	Index(String name) {
 		this.name = name;

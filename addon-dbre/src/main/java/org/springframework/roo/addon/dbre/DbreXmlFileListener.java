@@ -1,9 +1,12 @@
 package org.springframework.roo.addon.dbre;
 
+import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -15,6 +18,8 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.dbre.model.TableModelService;
+import org.springframework.roo.addon.entity.Identifier;
+import org.springframework.roo.addon.entity.IdentifierService;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -26,7 +31,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
@@ -53,39 +57,58 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-public class DbreXmlFileListener implements FileEventListener {
+public class DbreXmlFileListener implements FileEventListener, IdentifierService {
+	private static final JavaSymbolName IDENTIFIER_FIELD = new JavaSymbolName("identifierField");
+	private static final JavaSymbolName IDENTIFIER_TYPE = new JavaSymbolName("identifierType");
+	private static final JavaSymbolName IDENTIFIER_COLUMN = new JavaSymbolName("identifierColumn");
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
 	@Reference private DatabaseModelService databaseModelService;
 	@Reference private TableModelService tableModelService;
 	@Reference private Shell shell;
+	private Map<JavaType, List<Identifier>> identifierResults = null;
 
 	public void onFileEvent(FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
+
+		String dbreXmlFilePath = getDbreXmlFilePath();
+		if (dbreXmlFilePath == null) {
 			return;
 		}
 
-		String path = projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
-		if (!eventPath.equals(path)) {
+		if (!eventPath.equals(dbreXmlFilePath)) {
 			return;
 		}
 
+		processDbreXmlFile();
+	}
+
+	private void processDbreXmlFile() {
 		Database database = null;
 
-		if (fileEvent.getFileDetails().getFile().exists()) {
+		if (new File(getDbreXmlFilePath()).exists()) {
 			// The XML is still around, so try to parse it
 			database = databaseModelService.deserializeDatabaseMetadata();
 		}
 
-		if (database != null && database.getTables().size() > 0) {
+		if (database != null && database.hasTables()) {
+			identifierResults = new HashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);
 		} else {
+			identifierResults = null;
 			deleteManagedTypes();
 		}
+	}
+
+	private String getDbreXmlFilePath() {
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata == null) {
+			return null;
+		}
+
+		return projectMetadata.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, DbrePath.DBRE_XML_FILE.getPath());
 	}
 
 	public void reverseEngineer(Database database) {
@@ -144,6 +167,7 @@ public class DbreXmlFileListener implements FileEventListener {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, javaType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, annotations, null);
 		classpathOperations.generateClassFile(details);
+
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
 		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
@@ -158,20 +182,52 @@ public class DbreXmlFileListener implements FileEventListener {
 
 		JavaType entityAnnotationType = new JavaType(RooEntity.class.getName());
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, entityAnnotationType);
-		if (entityAnnotation != null) {
-			List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		Assert.notNull(entityAnnotation, "@RooEntity annotation not found on " + javaType.getFullyQualifiedTypeName());
+		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+
+		// Get new @RooEntity attributes
+		manageEntityIdentifier(javaType, entityAttributes, table);
+
+		// Check if certain @RooEntity attributes have changed
+		if (hasEntityAnnotationChanged(entityAnnotation, entityAttributes)) {
 			for (JavaSymbolName attributeName : entityAnnotation.getAttributeNames()) {
 				AnnotationAttributeValue<?> attributeValue = entityAnnotation.getAttribute(attributeName);
-				if (!("identifierType".equals(attributeName.getSymbolName()) || "identifierField".equals(attributeName.getSymbolName()) || "identifierColumn".equals(attributeName.getSymbolName()))) {
+				if (!(IDENTIFIER_TYPE.equals(attributeName) || IDENTIFIER_FIELD.equals(attributeName) || IDENTIFIER_COLUMN.equals(attributeName))) {
+					// Copy existing attributes to new list
 					entityAttributes.add(attributeValue);
 				}
 			}
-			manageEntityIdentifier(javaType, entityAttributes, table);
-
-			mutableTypeDetails.updateTypeAnnotation(new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes));
-			shell.flash(Level.FINE, "Updated " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
-			shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
+			AnnotationMetadata annotation = new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes);
+			mutableTypeDetails.updateTypeAnnotation(annotation);
+		} else {
+			// Although @RooEntity annotation has not changed, other columns may have been added or
+			// deleted from the table so we still need to trigger the metadata.
+			String dbreMetadataMid = DbreMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+			metadataService.get(dbreMetadataMid, true);
 		}
+	}
+
+	private boolean hasEntityAnnotationChanged(AnnotationMetadata entityAnnotation, List<AnnotationAttributeValue<?>> entityAttributes) {
+		Map<JavaSymbolName, Object> attributeMap = new HashMap<JavaSymbolName, Object>();
+		for (AnnotationAttributeValue<?> value : entityAttributes) {
+			attributeMap.put(value.getName(), value.getValue());
+		}
+
+		return hasAttributeValueChanged(IDENTIFIER_FIELD, entityAnnotation, attributeMap) && hasAttributeValueChanged(IDENTIFIER_TYPE, entityAnnotation, attributeMap) && hasAttributeValueChanged(IDENTIFIER_COLUMN, entityAnnotation, attributeMap);
+	}
+
+	private boolean hasAttributeValueChanged(JavaSymbolName attribute, AnnotationMetadata entityAnnotation, Map<JavaSymbolName, Object> attributeMap) {
+		List<JavaSymbolName> attributeNames = entityAnnotation.getAttributeNames();
+		if ((attributeNames.contains(attribute) && attributeMap.get(attribute) == null) || (!attributeNames.contains(attribute) && attributeMap.get(attribute) != null)) {
+			return true;
+		}
+		if (attributeNames.contains(attribute) && attributeMap.get(attribute) != null) {
+			AnnotationAttributeValue<?> attributeValue = entityAnnotation.getAttribute(attribute);
+			if (!attributeValue.getValue().equals(attributeMap.get(attribute))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Table table) {
@@ -186,97 +242,88 @@ public class DbreXmlFileListener implements FileEventListener {
 			Column primaryKey = primaryKeys.iterator().next();
 			String columnName = primaryKey.getName();
 			JavaType primaryKeyType = primaryKey.getType().getJavaType();
-			// Only add 'identifierType' attribute if it is different from the default, java.lang.Long
+
+			// Only add 'identifierType' attribute if it is different from the default, i.e. java.lang.Long
 			if (!primaryKeyType.equals(JavaType.LONG_OBJECT)) {
-				entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), primaryKeyType));
+				entityAttributes.add(new ClassAttributeValue(IDENTIFIER_TYPE, primaryKeyType));
 			}
 
 			// Only add 'identifierField' attribute if it is different from the default, "id"
 			String fieldName = tableModelService.suggestFieldName(columnName);
 			if (!"id".equals(fieldName)) {
-				entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierField"), fieldName));
+				entityAttributes.add(new StringAttributeValue(IDENTIFIER_FIELD, fieldName));
 			}
 
-			entityAttributes.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), columnName));
+			// Only add 'identifierColumn' attribute if it is different from the default, "id"
+			if (!"id".equals(columnName)) {
+				entityAttributes.add(new StringAttributeValue(IDENTIFIER_COLUMN, columnName));
+			}
 
-			// Check for managed identifier class and delete if found
+			// Check for redundant, managed identifier class and delete if found
 			if (isIdentifierDeletable(identifierType)) {
 				deleteManagedType(identifierType);
 			}
-		} else if (pkCount > 1) { // Table has a composite key
+		} else if (pkCount > 1) {
+			// Table has a composite key
 			Set<Column> primaryKeys = table.getPrimaryKeys();
 
 			// Check if identifier class already exists and if not, create it
 			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
-				createIdentifierClass(identifierType, primaryKeys);
-			} else {
-				updateIdentifier(identifierType, primaryKeys);
+				createIdentifierClass(identifierType);
 			}
-			entityAttributes.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
+
+			// Maintain the cache of which identifiers this composite PK needs (as required by out IdentifierService implementation method)
+			List<Identifier> identifiers = getIdentifiersFromColumns(primaryKeys);
+			identifierResults.put(identifierType, identifiers);
+
+			entityAttributes.add(new ClassAttributeValue(IDENTIFIER_TYPE, identifierType));
 		}
 	}
 
-	private void createIdentifierClass(JavaType identifierType, Set<Column> columns) {
+	public List<Identifier> getIdentifiers(JavaType pkType) {
+		if (identifierResults == null) {
+			// Need to populate the identifier results before returning from this method
+			processDbreXmlFile();
+		}
+		if (identifierResults == null) {
+			// It's still null, so maybe the DBRE XML file isn't available at this time or similar
+			return null;
+		}
+		return identifierResults.get(pkType);
+	}
+
+	private void createIdentifierClass(JavaType identifierType) {
 		List<AnnotationMetadata> identifierAnnotations = new ArrayList<AnnotationMetadata>();
 
 		List<AnnotationAttributeValue<?>> dbManagedAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		dbManagedAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyDelete"), true));
 		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
 
-		List<AnnotationAttributeValue<?>> identifierAttributes = getIdentifierAttributes(columns);
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooIdentifier.class.getName()), identifierAttributes));
+		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooIdentifier.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
 
 		// Produce identifier itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, identifierType, Modifier.PUBLIC | Modifier.FINAL, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, identifierAnnotations, null);
 		classpathOperations.generateClassFile(idClassDetails);
+
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
 		shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 	}
 
-	private List<AnnotationAttributeValue<?>> getIdentifierAttributes(Set<Column> columns) {
+	private List<Identifier> getIdentifiersFromColumns(Set<Column> columns) {
+		List<Identifier> result = new ArrayList<Identifier>();
+
 		// Add primary key fields to the identifier class
-		List<StringAttributeValue> idFields = new ArrayList<StringAttributeValue>();
-		List<StringAttributeValue> idTypes = new ArrayList<StringAttributeValue>();
-		List<StringAttributeValue> idColumns = new ArrayList<StringAttributeValue>();
 		for (Column column : columns) {
 			if (column.isPrimaryKey()) {
-				String columnName = tableModelService.suggestFieldName(column.getName());
-				idFields.add(new StringAttributeValue(new JavaSymbolName("value"), columnName));
-				idTypes.add(new StringAttributeValue(new JavaSymbolName("value"), column.getType().getJavaType().getFullyQualifiedTypeName()));
-				idColumns.add(new StringAttributeValue(new JavaSymbolName("value"), column.getName()));
+				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(column.getName()));
+				JavaType fieldType = column.getType().getJavaType();
+				String columnName = column.getName();
+				result.add(new Identifier(fieldName, fieldType, columnName));
 			}
 		}
 
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("idFields"), idFields));
-		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("idTypes"), idTypes));
-		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("idColumns"), idColumns));
-		return attributes;
-	}
-
-	private void updateIdentifier(JavaType identifierType, Set<Column> columns) {
-		// Update changes to @RooIdentifier attributes
-		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
-		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, new JavaType(RooDbManaged.class.getName())) == null) {
-			return;
-		}
-
-		JavaType identifierAnnotationType = new JavaType(RooIdentifier.class.getName());
-		AnnotationMetadata identifierAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, identifierAnnotationType);
-		if (identifierAnnotation != null) {
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			for (JavaSymbolName attributeName : identifierAnnotation.getAttributeNames()) {
-				AnnotationAttributeValue<?> attributeValue = identifierAnnotation.getAttribute(attributeName);
-				if (!("idFields".equals(attributeName.getSymbolName()) || "idTypes".equals(attributeName.getSymbolName()) || "idColumns".equals(attributeName.getSymbolName()))) {
-					attributes.add(attributeValue);
-				}
-			}
-			attributes.addAll(getIdentifierAttributes(columns));
-
-			mutableTypeDetails.updateTypeAnnotation(new DefaultAnnotationMetadata(identifierAnnotationType, attributes));
-		}
+		return result;
 	}
 
 	private void deleteManagedTypes() {
@@ -383,8 +430,10 @@ public class DbreXmlFileListener implements FileEventListener {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
 			String filePath = governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath();
-			fileManager.delete(filePath);
-			shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+			if (fileManager.exists(filePath)) {
+				fileManager.delete(filePath);
+				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreXmlFileListener.class.getName());
+			}
 			shell.flash(Level.FINE, "", DbreXmlFileListener.class.getName());
 		}
 	}
@@ -395,7 +444,7 @@ public class DbreXmlFileListener implements FileEventListener {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 			AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 			if (entityAnnotation != null) {
-				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
+				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(IDENTIFIER_TYPE);
 				if (identifierTypeAttribute != null) {
 					// Attribute identifierType exists so get the value
 					JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();

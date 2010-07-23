@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Alan Stewart
  * @since 1.1
  */
-public class IndexColumn implements Serializable, Comparable<IndexColumn> {
+public class IndexColumn implements Serializable {
 	private static final long serialVersionUID = 4206711649555220093L;
 	private String name;
 	private Short ordinalPosition;
@@ -49,10 +49,6 @@ public class IndexColumn implements Serializable, Comparable<IndexColumn> {
 
 	public void setSize(int size) {
 		this.size = size;
-	}
-
-	public int compareTo(IndexColumn o) {
-		return ordinalPosition.compareTo(o.getOrdinalPosition());
 	}
 
 	public int hashCode() {

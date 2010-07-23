@@ -310,7 +310,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	public FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column) {
+	private FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -361,7 +361,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	public FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references) {
+	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -401,7 +401,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumns"), attributes);
 	}
 
-	public boolean isOneToOne(Table table, ForeignKey foreignKey) {
+	private boolean isOneToOne(Table table, ForeignKey foreignKey) {
 		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
 		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
 		while (equals && primaryKeyIterator.hasNext()) {
@@ -437,7 +437,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean isCompositeKeyField(JavaSymbolName fieldName, JavaType javaType) {
+	private boolean isCompositeKeyField(JavaSymbolName fieldName, JavaType javaType) {
 		// Check for identifier class and exclude fields that are part of the composite primary key
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
@@ -483,7 +483,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public boolean isIdField(JavaSymbolName fieldName) {
+	private boolean isIdField(JavaSymbolName fieldName) {
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
 		if (idFields.size() > 0) {
 			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
@@ -492,7 +492,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public JavaSymbolName getIdField() {
+	private JavaSymbolName getIdField() {
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
 		if (idFields.size() > 0) {
 			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
@@ -501,7 +501,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return null;
 	}
 
-	public boolean isEmbeddedIdField(JavaSymbolName fieldName) {
+	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {
 		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.EmbeddedId"));
 		if (embeddedIdFields.size() > 0) {
 			Assert.isTrue(embeddedIdFields.size() == 1, "More than one field was annotated with @EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
@@ -510,7 +510,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public FieldMetadata getField(JavaSymbolName fieldName, Column column) {
+	private FieldMetadata getField(JavaSymbolName fieldName, Column column) {
 		JavaType fieldType = column.getType().getJavaType();
 
 		// Add annotations to field
@@ -581,7 +581,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return uniqueField;
 	}
 
-	public boolean hasAccessor(FieldMetadata field) {
+	private boolean hasAccessor(FieldMetadata field) {
 		String requiredAccessorName = getRequiredAccessorName(field);
 
 		// Check governor for accessor method
@@ -600,7 +600,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public boolean hasField(FieldMetadata field) {
+	private boolean hasField(FieldMetadata field) {
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, field.getFieldName()) != null) {
 			return true;
@@ -617,7 +617,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public MethodMetadata getAccessor(FieldMetadata field) {
+	private MethodMetadata getAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
 
 		// Compute the accessor method name
@@ -637,7 +637,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return methodName;
 	}
 
-	public boolean hasMutator(FieldMetadata field) {
+	private boolean hasMutator(FieldMetadata field) {
 		String requiredMutatorName = getRequiredMutatorName(field);
 
 		// Check governor for mutator method
@@ -656,7 +656,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	public MethodMetadata getMutator(FieldMetadata field) {
+	private MethodMetadata getMutator(FieldMetadata field) {
 		String requiredMutatorName = getRequiredMutatorName(field);
 
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -673,7 +673,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return "set" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
 
-	public String getInflectorPlural(String term) {
+	private String getInflectorPlural(String term) {
 		try {
 			return Noun.pluralOf(term, Locale.ENGLISH);
 		} catch (RuntimeException re) {

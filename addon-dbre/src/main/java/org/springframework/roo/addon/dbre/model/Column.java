@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @author Alan Stewart.
  * @since 1.1
  */
-public class Column implements Serializable, Comparable<Column> {
+public class Column implements Serializable {
 	private static final long serialVersionUID = -4826133462002775388L;
 	private String name;
 	private String description;
@@ -139,10 +139,6 @@ public class Column implements Serializable, Comparable<Column> {
 
 	public void setOrdinalPosition(int ordinalPosition) {
 		this.ordinalPosition = ordinalPosition;
-	}
-
-	public int compareTo(Column o) {
-		return new Integer(ordinalPosition).compareTo(new Integer(o.getOrdinalPosition()));
 	}
 
 	public int hashCode() {
