@@ -69,6 +69,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			AutoPopulationUtils.populate(this, annotation);
 		}
 		
+		// Add @Embeddable annotation
+		builder.addTypeAnnotation(getEmbeddableAnnotation());
+		
 		// Add declared fields and accessors and mutators
 		List<FieldMetadata> fields = getFields();
 		for (FieldMetadata field : fields) {
@@ -103,10 +106,10 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	}
 
 	public AnnotationMetadata getEmbeddableAnnotation() {
-		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, EMBEDDABLE) == null) {
-			return new DefaultAnnotationMetadata(EMBEDDABLE, new ArrayList<AnnotationAttributeValue<?>>());
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, EMBEDDABLE) != null) {
+			return null;
 		}
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, EMBEDDABLE);
+		return new DefaultAnnotationMetadata(EMBEDDABLE, new ArrayList<AnnotationAttributeValue<?>>());
 	}
 
 	/**
@@ -190,11 +193,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * 
 	 * <p>
 	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
-	 * @param fields2 
+	 * @param fields
 	 * 
 	 * @return the accessors (never returns null)
 	 */
 	public List<MethodMetadata> getAccessors(List<FieldMetadata> fields) {
+		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> accessors = new LinkedList<MethodMetadata>();
 
 		// Compute the names of the accessors that will be produced
@@ -233,6 +237,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * @return the mutators (never returns null)
 	 */
 	public List<MethodMetadata> getMutators(List<FieldMetadata> fields) {
+		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> mutators = new LinkedList<MethodMetadata>();
 
 		// Compute the names of the mutators that will be produced
@@ -277,6 +282,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * @return the constructor, never null.
 	 */
 	public ConstructorMetadata getParameterizedConstructor(List<FieldMetadata> fields) {
+		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		for (FieldMetadata field : fields) {
@@ -336,6 +342,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	}
 
 	public MethodMetadata getEqualsMethod(List<FieldMetadata> fields) {
+		Assert.notNull(fields, "Fields required");
 		// See if the user provided the equals method
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(new JavaType("java.lang.Object"));
@@ -382,6 +389,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	}
 
 	public MethodMetadata getHashCodeMethod(List<FieldMetadata> fields) {
+		Assert.notNull(fields, "Fields required");
 		// See if the user provided the hashCode method
 		MethodMetadata hashCodeMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
 		if (hashCodeMethod != null) {
