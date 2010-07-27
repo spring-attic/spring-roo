@@ -29,11 +29,27 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	void addTypeAnnotation(AnnotationMetadata annotation);
 	
 	/**
-	 * Updates the type-level annotation indicated. This annotation must already exist.
+	 * Creates or updates the type-level annotation indicated. If the annotation does not exist,
+	 * it is created automatically. If the annotation already exists, the attributes of that
+	 * annotation will be preserved unless the same attribute is presented in the metadata passed
+	 * to this method. If an attribute is present in the passed metadata, that attribute will
+	 * entirely replace the existing attribute.
+	 * 
+	 * <p>
+	 * For example, if an annotation of @RooFoo(a=1, b=2, c=3) is currently present, and the
+	 * annotation metadata passed to this method is for @RooFoo(c=12, d=4), the final annotation
+	 * after this method completes will be @RooFoo(a=1, b=2, c=12, d=4_).
+	 * 
+	 * <p>
+	 * This method avoids changing the disk if there is no net change to the annotation already
+	 * present. For example, if the existing annotation is @RooFoo(a=1, b=2, c=3), and the new
+	 * annotation metadata is @RooFoo(b=2), there is no net change and thus the java source on disk
+	 * remains unchanged.
 	 * 
 	 * @param annotation to update (required)
+	 * @return true if the disk was changed, false otherwise
 	 */
-	void updateTypeAnnotation(AnnotationMetadata annotation);
+	boolean updateTypeAnnotation(AnnotationMetadata annotation);
 
 	/**
 	 * Removes the type-level annotation of the {@link JavaType} indicated. This annotation must

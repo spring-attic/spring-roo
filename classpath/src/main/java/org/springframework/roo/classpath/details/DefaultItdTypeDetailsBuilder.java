@@ -87,7 +87,7 @@ public final class DefaultItdTypeDetailsBuilder {
 			return;
 		}
 		Assert.isNull(MemberFindingUtils.getDeclaredField(governor, md.getFieldName()), "Field '" + md.getFieldName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredField(build(), md.getFieldName()), "Field '" + md.getFieldName() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
+		Assert.isNull(MemberFindingUtils.getDeclaredField(build(), md.getFieldName()), "Field '" + md.getFieldName() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + ")'");
 		declaredFields.add(md);
 	}
 

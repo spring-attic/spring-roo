@@ -26,8 +26,8 @@ import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +43,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserAnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserConstructorMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserFieldMetadata;
@@ -329,24 +330,58 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		JavaParserAnnotationMetadata.addAnnotationToList(this, annotations, annotation, true);
 	}
 
-	public void updateTypeAnnotation(AnnotationMetadata annotation) {
-		/*
+	public boolean updateTypeAnnotation(AnnotationMetadata annotation) {
 		boolean writeChangesToDisk = false;
 		
 		AnnotationMetadata existing = MemberFindingUtils.getTypeAnnotation(this, annotation.getAnnotationType());
 		if (existing == null) {
-			// Not already present, user should have used the addTypeAnnotation method instead
+			// Not already present, so just go and add it
 			addTypeAnnotation(annotation);
-			return;
+			return true;
 		}
 		
-		List<JavaSymbolName> replacementAttributeNames = new ArrayList<JavaSymbolName>();
-		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+		// We are going to build a replacement AnnotationMetadata by the time this method ends.
+		// This variable tracks the new attribute values the replacement will hold.
+		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
 		
-		*/
+		// Copy the existing attributes into the new attributes
+		for (JavaSymbolName existingAttributeName : existing.getAttributeNames()) {
+			AnnotationAttributeValue<?> existingValue = existing.getAttribute(existingAttributeName);
+			replacementAttributeValues.put(existingAttributeName, existingValue);
+		}
+
+		// Now we ensure every incoming attribute replaces the existing
+		for (JavaSymbolName incomingAttributeName : annotation.getAttributeNames()) {
+			AnnotationAttributeValue<?> incomingValue = annotation.getAttribute(incomingAttributeName);
+			
+			// Add this attribute to the end of the list if the attribute is not already present
+			if (replacementAttributeValues.keySet().contains(incomingAttributeName)) {
+				// There was already an attribute. Need to determine if this new attribute value is materially different
+				AnnotationAttributeValue<?> existingValue = replacementAttributeValues.get(incomingAttributeName);
+				Assert.notNull(existingValue, "Existing value should have been provided by earlier loop");
+				if (!existingValue.equals(incomingValue)) {
+					replacementAttributeValues.put(incomingAttributeName, incomingValue);
+					writeChangesToDisk = true;
+				}
+			} else {
+				// This is a new attribute that does not already exist, so add it to the end of the replacement attributes
+				replacementAttributeValues.put(incomingAttributeName, incomingValue);
+				writeChangesToDisk = true;
+			}
+			
+		}
 		
-		removeTypeAnnotation(annotation.getAnnotationType());
-		addTypeAnnotation(annotation);
+		// Were there any material changes?
+		if (!writeChangesToDisk) {
+			return false;
+		}
+		
+		// Make a new AnnotationMetadata representing the replacement
+		AnnotationMetadata replacement = new DefaultAnnotationMetadata(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
+		removeTypeAnnotation(replacement.getAnnotationType());
+		addTypeAnnotation(replacement);
+		
+		return true;
 	}
 
 	public void removeTypeAnnotation(JavaType annotationType) {
