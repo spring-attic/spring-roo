@@ -14,31 +14,19 @@
     <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
 
     <properties>
-        <pkgArtifactId>velocity</pkgArtifactId>
-        <pkgVersion>1.6.4</pkgVersion>
-        <osgiVersion>${pkgVersion}.0002</osgiVersion>
-        <pkgVendor>Apache Software Foundation</pkgVendor>
-        <pkgDocUrl>http://velocity.apache.org/</pkgDocUrl>
-        <pkgLicense>http://www.apache.org/licenses/LICENSE-2.0</pkgLicense>
+        <pkgArtifactId>hsqldb</pkgArtifactId>
+        <pkgVersion>2.0.0</pkgVersion>
+        <osgiVersion>${pkgVersion}.0001</osgiVersion>
+        <pkgVendor>The HSQL Development Group</pkgVendor>
+        <pkgDocUrl>http://hsqldb.org/</pkgDocUrl>
+        <pkgLicense>http://hsqldb.org/web/hsqlLicense.html</pkgLicense> <!-- Based on BSD license -->
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.velocity</groupId>
+            <groupId>org.hsqldb</groupId>
             <artifactId>${pkgArtifactId}</artifactId>
             <version>${pkgVersion}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.4</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
             <optional>true</optional>
         </dependency>
     </dependencies>
@@ -51,8 +39,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.apache.velocity.*;version=${pom.version}</Export-Package>
-                        <Import-Package>org.apache.commons.lang;version=2.4,org.apache.commons.collections;version=3.2.1, *;resolution:=optional</Import-Package>
+                        <Import-Package>javax.servlet.*;resolution:=optional,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

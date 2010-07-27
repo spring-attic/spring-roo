@@ -126,7 +126,7 @@
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.velocity</artifactId>
-            <version>1.6.4.0001</version>
+            <version>1.6.4.0002</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

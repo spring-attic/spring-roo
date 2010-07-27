@@ -10,7 +10,7 @@
 	<artifactId>org.springframework.roo.addon.jdbc</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JDBC Driver Acquisition</name>
-	<!-- TEMPORARY EBR USAGE RETAINED ONLY UNTIL A CHANCE TO REPACKAGE JARS VIA WRAPPING (BPA 4/Jul/10) -->
+	<!-- TEMPORARY EBR USAGE RETAINED ONLY FOR ORACLE JDBC DRIVER BELOW (BPA 27/Jul/10) -->
 	<repositories>
 		<repository>
 			<id>com.springsource.repository.bundles.release</id>
@@ -75,34 +75,41 @@
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
-		<!-- JDBC Drivers Available From Maven -->
+		<!-- JDBC Drivers Available From Maven Central -->
 		<dependency>
-			<groupId>org.hsqldb</groupId>
-			<artifactId>com.springsource.org.hsqldb</artifactId>
-			<version>1.8.0.10</version>
-		</dependency>
-		<dependency>
-			<groupId>com.mysql.jdbc</groupId>
-			<artifactId>com.springsource.com.mysql.jdbc</artifactId>
-			<version>5.1.6</version>
-		</dependency>
-		<!-- disabled due to the untidiness of Derby insisting on creating derby.log when we don't want it to
-		<dependency>
+			<!-- Derby is not included in the user distribution due to an exclusion in assembly.xml -->
 			<groupId>org.apache.derby</groupId>
-			<artifactId>com.springsource.org.apache.derby</artifactId>
-			<version>10.5.1000001.764942</version>
-		</dependency> -->
+			<artifactId>derby</artifactId>
+			<version>10.6.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.13</version>
+		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
-			<artifactId>com.springsource.org.h2</artifactId>
-			<version>1.0.71</version>
+			<artifactId>h2</artifactId>
+			<version>1.2.140</version>
+		</dependency>
+		<!-- JDBC Drivers Available From Spring Roo's Wrapping Facility -->
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.postgresql-jdbc3</artifactId>
+			<version>8.4.701.0001</version>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>com.springsource.org.postgresql.jdbc3</artifactId>
-			<version>8.3.603</version>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.hsqldb</artifactId>
+			<version>2.0.0.0001</version>
 		</dependency>
-		<!-- Oracle -->
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.jtds</artifactId>
+			<version>1.2.4.0001</version>
+		</dependency>
+		<!-- Oracle; this comes from SpringSource EBR until we make a decision on final release packaging for it -->
+		<!-- No JARs from SpringSource EBR are included in user distribution due to an exclusion in assembly.xml -->
 		<dependency>
 			<groupId>com.oracle.jdbc</groupId>
 			<artifactId>com.springsource.oracle.jdbc</artifactId>
@@ -130,7 +137,7 @@
           <artifactId>maven-bundle-plugin</artifactId>
           <configuration>
             <instructions>
-               <Import-Package>*,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
+               <Import-Package>*,net.sourceforge.jtds;resolution:=optional,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
             </instructions>
           </configuration>
         </plugin>
