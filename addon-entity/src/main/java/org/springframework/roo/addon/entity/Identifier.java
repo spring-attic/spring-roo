@@ -36,7 +36,6 @@ public class Identifier {
 		return columnName;
 	}
 
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -46,7 +45,6 @@ public class Identifier {
 		return result;
 	}
 
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -81,5 +79,8 @@ public class Identifier {
 		}
 		return true;
 	}
-	
+
+	public String toString() {
+		return String.format("Identifier [fieldName=%s, fieldType=%s, columnName=%s]", fieldName, fieldType, columnName);
+	}
 }

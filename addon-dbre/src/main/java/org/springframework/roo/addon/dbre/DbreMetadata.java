@@ -19,7 +19,6 @@ import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.dbre.model.TableModelService;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
-import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -138,14 +137,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			if (joinTable.getOwningSideTable().equals(table)) {
 				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
-				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, database.getJavaPackage());
+				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
 
 			if (joinTable.getInverseSideTable().equals(table)) {
 				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(joinTable.getOwningSideTable().getName())) + fieldSuffix);
 				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
-				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, database.getJavaPackage());
+				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
 
@@ -164,7 +163,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				Short keySequence = foreignKey.getKeySequence();
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
-				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, database.getJavaPackage());
+				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
@@ -190,7 +189,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
-						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, database.getJavaPackage());
+						JavaType fieldType = tableModelService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()) + fieldSuffix);
@@ -215,7 +214,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(tableModelService.suggestFieldName(foreignTableName)) + fieldSuffix);
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(tableModelService.suggestFieldName(table.getName()) + fieldSuffix);
-						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, database.getJavaPackage());
+						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
 						addToBuilder(field);
 					}
 				}
@@ -236,7 +235,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				String foreignTableName = foreignKey.getForeignTableName();
 				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(foreignTableName) + fieldSuffix);
-				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, database.getJavaPackage());
+				JavaType fieldType = tableModelService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
@@ -415,7 +414,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		for (Column column : table.getColumns()) {
 			String columnName = column.getName();
-			JavaSymbolName fieldName = new JavaSymbolName(column.getJavaName());
+			JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(column.getName()));
 			boolean isCompositeKeyField = isCompositeKeyField(fieldName, javaType);
 			FieldMetadata field = null;
 
@@ -436,7 +435,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean isCompositeKeyField(JavaSymbolName fieldName, JavaType javaType) {
 		// Check for identifier class and exclude fields that are part of the composite primary key
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -458,21 +456,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						for (FieldMetadata field : identifierFields) {
 							if (fieldName.equals(field.getFieldName())) {
 								return true;
-							}
-						}
-
-						// Field doesn't exists so then check @RooIdentifier annotation for idFields attribute
-						AnnotationMetadata identifierAnnotation = MemberFindingUtils.getAnnotationOfType(identifierTypeDetails.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
-						if (identifierAnnotation != null) {
-							ArrayAttributeValue<StringAttributeValue> idFieldsAttribute = (ArrayAttributeValue<StringAttributeValue>) identifierAnnotation.getAttribute(new JavaSymbolName("idFields"));
-							if (idFieldsAttribute != null) {
-								List<StringAttributeValue> idFields = idFieldsAttribute.getValue();
-								for (StringAttributeValue idField : idFields) {
-									if (fieldName.equals(new JavaSymbolName(idField.getValue()))) {
-										// Attribute idFields contains the field
-										return true;
-									}
-								}
 							}
 						}
 					}

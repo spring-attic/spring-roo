@@ -1,12 +1,16 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.File;
 import java.util.Set;
 
-import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.addon.dbre.DatabaseListener;
 
 /**
  * Specifies methods to retrieve database metadata.
+ * 
+ * <p>
+ * An implementation must also guarantee to discover all {@link DatabaseListener} instances 
+ * registered in the OSGi container and automatically notify them when a database is refreshed
+ * or loaded for the first time.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -19,29 +23,39 @@ public interface DatabaseModelService {
 	 * @return a Set of schemas.
 	 */
 	Set<Schema> getDatabaseSchemas();
+	
+	/**
+	 * Returns the last known schema.
+	 * 
+	 * @return schema the last schema introspected, or null if not introspected.
+	 */
+	Schema getLastSchema();
 
 	/**
-	 * Connects to a live database and displays database metadata.
+	 * Gets the latest representation of the database, potentially from a cache. Will connect to the
+	 * database to obtain this information if it has not been cached.
 	 * 
-	 * @param schema the {@link Schema schema) object representing the database schema.
-	 * @param javaPackage the package where entities are placed.
-	 * @return the database metadata as an XML string.
+	 * @param schema to load (if not provided, the implementation will use the last known schema)
+	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
-	String getDatabaseMetadata(Schema schema, JavaPackage javaPackage);
-
+	Database getDatabase(Schema schema);
+	
 	/**
-	 * Writes the database metadata in DOM format to an XML file.
+	 * Forces the cache to be refreshed for the indicated schema. Useful if you know a database connection is
+	 * available.
 	 * 
-	 * @param schema the {@link Schema schema) object representing the database schema.
-	 * @param javaPackage the package where entities are placed.
-	 * @param file the {@link File file} to write the database metadata to.
+	 * @param schema to refresh (required)
+	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
-	void serializeDatabaseMetadata(Schema schema, JavaPackage javaPackage, File file);
-
+	Database refreshDatabase(Schema schema);
+	
 	/**
-	 * Reads and converts the database XML file into a {@link Database} object.
+	 * Like {@link #refreshDatabase(Schema)}, except it will not change the last known schema and nor will it
+	 * notify any listeners of the update nor change any caches (on-disk or otherwise). This method is ideal
+	 * if you just want to view a database schema but not impact any existing DBRE status.
 	 * 
-	 * @return the database model. May return null if the XML file does not exist or is empty.
+	 * @param schema to refresh (required)
+	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
-	Database deserializeDatabaseMetadata();
+	Database refreshDatabaseSafely(Schema schema);
 }

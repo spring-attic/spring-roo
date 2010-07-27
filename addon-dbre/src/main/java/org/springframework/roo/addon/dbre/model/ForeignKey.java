@@ -161,6 +161,6 @@ public class ForeignKey implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("ForeignKey [name=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, references=%s]", name, foreignTableName, onUpdate, onDelete, references);
+		return String.format("ForeignKey [name=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, keySequence=%s, references=%s]", name, foreignTableName, onUpdate, onDelete, keySequence, references);
 	}
 }

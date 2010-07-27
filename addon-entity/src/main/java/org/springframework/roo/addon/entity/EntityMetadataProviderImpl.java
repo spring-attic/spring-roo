@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.entity;
 
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,7 +13,6 @@ import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
@@ -26,7 +27,7 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 @Component(immediate = true)
 @Service
-public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvider implements EntityMetadataProvider {
+public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements EntityMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
@@ -79,7 +80,9 @@ public final class EntityMetadataProviderImpl extends AbstractItdMetadataProvide
 		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 
-		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural(), projectMetadata);
+		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
+		
+		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural(), projectMetadata, identifierServiceResult);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

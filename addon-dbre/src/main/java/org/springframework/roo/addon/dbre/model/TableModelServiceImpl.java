@@ -2,18 +2,19 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.File;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.DbreMetadata;
-import org.springframework.roo.addon.entity.IdentifierMetadata;
+import org.springframework.roo.addon.dbre.RooDbManaged;
+import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -30,8 +31,8 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-@Service
 @Component
+@Service
 public class TableModelServiceImpl implements TableModelService {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
@@ -110,8 +111,8 @@ public class TableModelServiceImpl implements TableModelService {
 		return result.toString();
 	}
 
-	public Set<JavaType> getDatabaseManagedEntities() {
-		Set<JavaType> managedEntities = new HashSet<JavaType>();
+	public SortedSet<JavaType> getDatabaseManagedEntities() {
+		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new DatabaseManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
@@ -120,23 +121,22 @@ public class TableModelServiceImpl implements TableModelService {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
 			JavaType javaType = new JavaType(fullPath);
+
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 			if (id != null) {
 				// Now I've found it, let's work out the Path it is from
 				Path path = PhysicalTypeIdentifier.getPath(id);
-				String dbreMid = DbreMetadata.createIdentifier(javaType, path);
-				DbreMetadata dbreMetadata = (DbreMetadata) metadataService.get(dbreMid);
-				if (dbreMetadata != null) {
+				if (isAnnotationPresentOnClassOrInterface(javaType, path, new JavaType(RooDbManaged.class.getName()))) {
 					managedEntities.add(javaType);
 				}
 			}
 		}
 
-		return Collections.unmodifiableSet(managedEntities);
+		return Collections.unmodifiableSortedSet(managedEntities);
 	}
 
-	public Set<JavaType> getDatabaseManagedIdentifiers() {
-		Set<JavaType> managedIdentifiers = new HashSet<JavaType>();
+	public SortedSet<JavaType> getDatabaseManagedIdentifiers() {
+		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new DatabaseManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
@@ -149,15 +149,25 @@ public class TableModelServiceImpl implements TableModelService {
 			if (id != null) {
 				// Now I've found it, let's work out the Path it is from
 				Path path = PhysicalTypeIdentifier.getPath(id);
-				String identifierMid = IdentifierMetadata.createIdentifier(javaType, path);
-				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMid);
-				if (identifierMetadata != null) {
+				if (isAnnotationPresentOnClassOrInterface(javaType, path, new JavaType(RooIdentifier.class.getName()))) {
 					managedIdentifiers.add(javaType);
 				}
 			}
 		}
 
-		return Collections.unmodifiableSet(managedIdentifiers);
+		return Collections.unmodifiableSortedSet(managedIdentifiers);
+	}
+
+	private boolean isAnnotationPresentOnClassOrInterface(JavaType javaType, Path path, JavaType annotation) {
+		String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, path);
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
+		if (physicalTypeMetadata != null && physicalTypeMetadata.getPhysicalTypeDetails() != null && physicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+			// We have a class or an interface
+			// It's important not to ask for metadata here that depends on the identifier service being populated, as to populate it this method is required
+			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+			return (MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, annotation) != null);
+		}
+		return false;
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {

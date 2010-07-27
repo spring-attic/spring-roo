@@ -74,7 +74,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
 		Database database = null;
 		try {
-			database = databaseModelService.deserializeDatabaseMetadata();
+			database = databaseModelService.getDatabase(null);
 		} catch (Exception e) {
 			return null;
 		}

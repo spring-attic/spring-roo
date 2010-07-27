@@ -22,7 +22,6 @@ public class Column implements Serializable {
 	private int scale;
 	private String defaultValue;
 	private String javaType;
-	private String javaName;
 	private int ordinalPosition;
 
 	Column(String name) {
@@ -125,14 +124,6 @@ public class Column implements Serializable {
 		this.javaType = javaType;
 	}
 
-	public String getJavaName() {
-		return javaName;
-	}
-
-	public void setJavaName(String javaName) {
-		this.javaName = javaName;
-	}
-
 	public int getOrdinalPosition() {
 		return ordinalPosition;
 	}
@@ -170,6 +161,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, javaName=%s, ordinalPosition=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, javaName, ordinalPosition);
+		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, ordinalPosition);
 	}
 }

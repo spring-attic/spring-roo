@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import org.springframework.roo.model.JavaPackage;
 
 /**
  * Represents the database model, ie. the tables in the database.
@@ -21,9 +21,6 @@ public class Database implements Serializable {
 
 	/** The database {@link Schema schema}. */
 	private Schema schema;
-	
-	/** The package where entities are placed. */
-	private JavaPackage javaPackage;
 
 	/** All tables. */
 	private Set<Table> tables = new LinkedHashSet<Table>();
@@ -31,10 +28,9 @@ public class Database implements Serializable {
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
-	Database(String name, Schema schema, JavaPackage javaPackage, Set<Table> tables) {
+	Database(String name, Schema schema, Set<Table> tables) {
 		this.name = name;
 		this.schema = schema;
-		this.javaPackage = javaPackage;
 		this.tables = tables;
 		initialize();
 	}
@@ -47,14 +43,10 @@ public class Database implements Serializable {
 		return schema;
 	}
 
-	public JavaPackage getJavaPackage() {
-		return javaPackage;
-	}
-
 	public Set<Table> getTables() {
 		return tables;
 	}
-	
+
 	public boolean hasTables() {
 		return !tables.isEmpty();
 	}
@@ -90,13 +82,19 @@ public class Database implements Serializable {
 				column.setTable(table);
 			}
 
+			short keySequence = 0;
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
 				foreignKey.setTable(table);
 
 				if (foreignKey.getForeignTable() == null) {
-					Table targetTable = findTable(foreignKey.getForeignTableName());
+					String foreignTableName = foreignKey.getForeignTableName();
+					Table targetTable = findTable(foreignTableName);
 					if (targetTable != null) {
 						foreignKey.setForeignTable(targetTable);
+						if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
+							keySequence++;
+						}
+						foreignKey.setKeySequence(keySequence);
 					}
 				}
 
@@ -116,13 +114,19 @@ public class Database implements Serializable {
 				}
 			}
 
+			keySequence = 0;
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
 				exportedKey.setTable(table);
 
 				if (exportedKey.getForeignTable() == null) {
-					Table targetTable = findTable(exportedKey.getForeignTableName());
+					String foreignTableName = exportedKey.getForeignTableName();
+					Table targetTable = findTable(foreignTableName);
 					if (targetTable != null) {
 						exportedKey.setForeignTable(targetTable);
+						if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
+							keySequence++;
+						}
+						exportedKey.setKeySequence(keySequence);
 					}
 				}
 
@@ -176,6 +180,8 @@ public class Database implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Database [name=%s, schema=%s, javaPackage=%s, tables=%s]", name, schema, javaPackage, tables);
+		OutputStream outputStream = new ByteArrayOutputStream();
+		DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
+		return outputStream.toString();
 	}
 }

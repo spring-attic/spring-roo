@@ -21,8 +21,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class DbreCommands implements CommandMarker {
-	@Reference
-	private DbreOperations dbreOperations;
+	@Reference private DbreOperations dbreOperations;
 
 	@CliAvailabilityIndicator({ "database introspect", "database reverse engineer" })
 	public boolean isDbreAvailable() {
@@ -40,8 +39,8 @@ public class DbreCommands implements CommandMarker {
 	@CliCommand(value = "database reverse engineer", help = "Create and updates entities based on the database metadata")
 	public void serializeDatabaseMetadata(
 		@CliOption(key = "schema", mandatory = false, help = "The database schema name") Schema schema, 
-		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage javaPackage) {
+		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage) {
 
-		dbreOperations.serializeDatabaseMetadata(schema, javaPackage);
+		dbreOperations.reverseEngineerDatabase(schema, destinationPackage);
 	}
 }

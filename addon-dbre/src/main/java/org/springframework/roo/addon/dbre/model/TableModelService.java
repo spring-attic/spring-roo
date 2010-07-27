@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.springframework.roo.addon.dbre.RooDbManaged;
 import org.springframework.roo.addon.entity.RooEntity;
@@ -59,12 +60,12 @@ public interface TableModelService {
 	 * 
 	 * @return An unmodifiable {@link Set} of all database-managed entities.
 	 */
-	Set<JavaType> getDatabaseManagedEntities();
+	SortedSet<JavaType> getDatabaseManagedEntities();
 
 	/**
 	 * Returns all {@link RooDbManaged} {@link RooIdentifier identifiers}.
 	 * 
 	 * @return An unmodifiable {@link Set} of all database-managed identifiers.
 	 */
-	Set<JavaType> getDatabaseManagedIdentifiers();
+	SortedSet<JavaType> getDatabaseManagedIdentifiers();
 }

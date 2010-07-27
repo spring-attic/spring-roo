@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -101,8 +100,8 @@ public class DatabaseSchemaIntrospector {
 		return schemas;
 	}
 
-	public Database getDatabase(JavaPackage javaPackage) throws SQLException {
-		return new Database(catalog, schema, javaPackage, readTables());
+	public Database getDatabase() throws SQLException {
+		return new Database(catalog, schema, readTables());
 	}
 
 	private Set<Table> readTables() throws SQLException {
@@ -115,8 +114,8 @@ public class DatabaseSchemaIntrospector {
 				catalog = rs.getString("TABLE_CAT");
 				schema = new Schema(rs.getString("TABLE_SCHEM"));
 
-				// Skip Oracle recycle bin tables
-				if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableNamePattern.startsWith("BIN$")) {
+				// Check for certain tables such as Oracle recycle bin tables, and ignore
+				if (ignoreTables()) {
 					continue;
 				}
 
@@ -142,6 +141,16 @@ public class DatabaseSchemaIntrospector {
 		}
 
 		return tables;
+	}
+	
+	private boolean ignoreTables() {
+		boolean ignore = false;
+		try {
+			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableNamePattern.startsWith("BIN$")) {
+				ignore = true;
+			}
+		} catch (SQLException ignored) {}
+		return ignore;
 	}
 
 	private Set<Column> readColumns() throws SQLException {
@@ -178,7 +187,7 @@ public class DatabaseSchemaIntrospector {
 				String name = rs.getString("FK_NAME");
 				String foreignTableName = rs.getString("PKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
-				
+
 				ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));

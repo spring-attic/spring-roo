@@ -77,7 +77,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
 
-	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata) {
+	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.hasText(plural, "Plural required for '" + identifier + "'");
@@ -95,6 +95,20 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		if (annotation != null) {
 			AutoPopulationUtils.populate(this, annotation);
+			
+			if (identifierServiceResult != null) {
+				// We have potential identifier information from an IdentifierService.
+				// We only use this identifier information if the user did NOT provide ANY identifier-related attributes on @RooEntity....
+				List<JavaSymbolName> attributeNames = annotation.getAttributeNames();
+				if (!attributeNames.contains(new JavaSymbolName("identifierType")) && !attributeNames.contains(new JavaSymbolName("identifierField")) && !attributeNames.contains(new JavaSymbolName("identifierColumn"))) {
+					// User has not specified any identifier information, so let's use what IdentifierService offered
+					Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity " + governorTypeDetails.getName() + " (should only be 1 identifier field given this is an entity, not an Identifier class)");
+					Identifier id = identifierServiceResult.iterator().next();
+					this.identifierColumn = id.getColumnName();
+					this.identifierField = id.getFieldName().getSymbolName();
+					this.identifierType = id.getFieldType();
+				}
+			}			
 		}
 
 		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.

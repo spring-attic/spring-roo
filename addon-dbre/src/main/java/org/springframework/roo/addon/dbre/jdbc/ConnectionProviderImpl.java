@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -19,6 +21,7 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
+	@Reference private JdbcDriverManager jdbcDriverManager;
 	private Properties props;
 
 	public void configure(Properties props) {
@@ -36,40 +39,17 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	}
 
 	public Connection getConnection() throws SQLException {
-		return getDriver().connect(props.getProperty("database.url"), props);
+		String driverClassName = props.getProperty("database.driverClassName");
+		Driver driver = jdbcDriverManager.loadDriver(driverClassName);
+		Assert.notNull(driver, "JDBC driver not available for '" + driverClassName + "'");
+		return driver.connect(props.getProperty("database.url"), props);
 	}
 
 	public void closeConnection(Connection connection) {
 		if (connection != null) {
 			try {
 				connection.close();
-			} catch (SQLException ignored) {
-				// Ignore
-			}
+			} catch (SQLException ignored) {}
 		}
-	}
-
-	private Driver getDriver() throws SQLException {
-		String driverClassName = props.getProperty("database.driverClassName");
-		Driver driver;
-		if (driverClassName.startsWith("org.hsqldb")) {
-			driver = new org.hsqldb.jdbcDriver();
-		} else if (driverClassName.startsWith("com.mysql")) {
-			driver = new com.mysql.jdbc.Driver();
-			// } else if (driverClassName.startsWith("org.apache.derby")) {
-			// driver = new org.apache.derby.jdbc.EmbeddedDriver();
-		} else if (driverClassName.startsWith("org.h2")) {
-			driver = new org.h2.Driver();
-		} else if (driverClassName.startsWith("org.postgresql")) {
-			driver = new org.postgresql.Driver();
-		} else if (driverClassName.startsWith("oracle")) {
-			driver = new oracle.jdbc.OracleDriver();
-			/*
-			 * } else if (driverClassName.startsWith("com.ibm.db2")) { driver = new com.ibm.db2.jcc.DB2Driver();
-			 */
-		} else {
-			throw new IllegalStateException("Failed to get jdbc driver for " + driverClassName);
-		}
-		return driver;
 	}
 }
