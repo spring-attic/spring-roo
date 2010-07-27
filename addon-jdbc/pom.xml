@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+		<version>1.1.0.M3</version>
+		<relativePath>../osgi-roo-bundle</relativePath>
+	</parent>
+	<artifactId>org.springframework.roo.addon.jdbc</artifactId>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Addon - JDBC Driver Acquisition</name>
+	<!-- TEMPORARY EBR USAGE RETAINED ONLY UNTIL A CHANCE TO REPACKAGE JARS VIA WRAPPING (BPA 4/Jul/10) -->
+	<repositories>
+		<repository>
+			<id>com.springsource.repository.bundles.release</id>
+			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/release</url>
+		</repository>
+		<repository>
+			<id>com.springsource.repository.bundles.external</id>
+			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+			<url>http://repository.springsource.com/maven/bundles/external</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<!-- OSGi -->
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+		</dependency>
+		<!-- Apache Felix -->
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.scr.annotations</artifactId>
+		</dependency>
+        <!-- Apache Felix: OSGi Bundle Repository (OBR) support -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <version>1.4.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.osgi.service.obr</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.shell</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.kxml</groupId>
+                    <artifactId>kxml2</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+		<!-- Roo -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.support</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.obr</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<!-- JDBC Drivers Available From Maven -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>com.springsource.org.hsqldb</artifactId>
+			<version>1.8.0.10</version>
+		</dependency>
+		<dependency>
+			<groupId>com.mysql.jdbc</groupId>
+			<artifactId>com.springsource.com.mysql.jdbc</artifactId>
+			<version>5.1.6</version>
+		</dependency>
+		<!-- disabled due to the untidiness of Derby insisting on creating derby.log when we don't want it to
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>com.springsource.org.apache.derby</artifactId>
+			<version>10.5.1000001.764942</version>
+		</dependency> -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>com.springsource.org.h2</artifactId>
+			<version>1.0.71</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>com.springsource.org.postgresql.jdbc3</artifactId>
+			<version>8.3.603</version>
+		</dependency>
+		<!-- Oracle -->
+		<dependency>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>com.springsource.oracle.jdbc</artifactId>
+			<version>10.2.0.2</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.resource</groupId>
+			<artifactId>com.springsource.javax.resource</artifactId>
+			<version>1.5.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>com.springsource.javax.transaction</artifactId>
+			<version>1.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- -->
+	</dependencies>
+	
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>maven-bundle-plugin</artifactId>
+          <configuration>
+            <instructions>
+               <Import-Package>*,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
+            </instructions>
+          </configuration>
+        </plugin>
+      </plugins>
+    </build>
+    
+</project>

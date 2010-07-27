@@ -160,6 +160,8 @@
             <excludes>
                 <exclude>org.springframework.roo.bootstrap-*.jar</exclude>
                 <exclude>org.apache.felix.framework-*.jar</exclude>
+                <!--  Ensures no JDBC drivers are included in the distribution ZIP -->
+                <exclude>com.springsource.*.jar</exclude>
             </excludes>
         </fileSet>
 	</fileSets>
