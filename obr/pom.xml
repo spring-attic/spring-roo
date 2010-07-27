@@ -7,9 +7,9 @@
         <version>1.1.0.M3</version>
 		<relativePath>../osgi-roo-bundle</relativePath>
     </parent>
-    <artifactId>org.springframework.roo.shell.osgi</artifactId>
+    <artifactId>org.springframework.roo.obr</artifactId>
     <packaging>bundle</packaging>
-    <name>Spring Roo - Shell (OSGi Launcher)</name>
+    <name>Spring Roo - OBR Services</name>
     <dependencies>
         <!-- OSGi -->
          <dependency>
@@ -53,18 +53,6 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.obr</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.shell</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>

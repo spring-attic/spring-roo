@@ -23,6 +23,7 @@
         <module>support-osgi</module>
         <module>url-stream</module>
         <module>url-stream-jdk</module>
+        <module>obr</module>
         <module>shell</module>
         <module>shell-json</module>
         <module>shell-osgi</module>
@@ -64,6 +65,7 @@
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
 	<module>addon-gwt</module>
+	<module>addon-jdbc</module> 
 	<module>addon-dbre</module> 
 	<module>addon-creator</module>
         <module>annotations</module>
