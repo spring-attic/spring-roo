@@ -3,7 +3,7 @@
 	<databases>
 		<database id="H2">
 			<dependencies>
-				<dependency org="com.h2database" name="h2" rev="1.2.138" />
+				<dependency org="com.h2database" name="h2" rev="1.2.140" />
 			</dependencies>
 		</database>
 		<database id="HYPERSONIC">
@@ -43,7 +43,7 @@
 		</database>
 		<database id="DERBY">
 			<dependencies>
-				<dependency org="org.apache.derby" name="derby" rev="10.5.3.0_1" />
+				<dependency org="org.apache.derby" name="derby" rev="10.6.1.0" />
 			</dependencies>
 		</database>
 		<database id="GAE">
