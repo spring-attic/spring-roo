@@ -7,8 +7,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
-import org.springframework.roo.addon.dbre.model.TableModelService;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -32,8 +30,8 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
-	@Reference private DatabaseModelService databaseModelService;
-	@Reference private TableModelService tableModelService;
+	@Reference private DbreModelService dbreModelService;
+	@Reference private DbreTableService dbreTableService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -74,12 +72,12 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
 		Database database = null;
 		try {
-			database = databaseModelService.getDatabase(null);
+			database = dbreModelService.getDatabase(null);
 		} catch (Exception e) {
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, tableModelService, database);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, dbreTableService, database);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

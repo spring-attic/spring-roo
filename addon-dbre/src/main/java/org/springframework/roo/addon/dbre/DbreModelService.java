@@ -1,8 +1,9 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.util.Set;
 
-import org.springframework.roo.addon.dbre.DatabaseListener;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.Schema;
 
 /**
  * Specifies methods to retrieve database metadata.
@@ -15,7 +16,7 @@ import org.springframework.roo.addon.dbre.DatabaseListener;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface DatabaseModelService {
+public interface DbreModelService {
 
 	/**
 	 * Returns a Set of available database {@link Schema schemas). 

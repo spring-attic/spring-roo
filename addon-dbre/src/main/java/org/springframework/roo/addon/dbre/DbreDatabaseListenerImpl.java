@@ -15,9 +15,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.dbre.model.TableModelService;
 import org.springframework.roo.addon.entity.Identifier;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
@@ -46,7 +44,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Responds to discovery of database structural information from {@link DatabaseModelService} and creates and manages entities based on this.
+ * Responds to discovery of database structural information from {@link DbreModelService} and creates and manages entities based on this.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -59,8 +57,8 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
-	@Reference private DatabaseModelService databaseModelService;
-	@Reference private TableModelService tableModelService;
+	@Reference private DbreModelService dbreModelService;
+	@Reference private DbreTableService dbreTableService;
 	@Reference private Shell shell;
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 	private JavaPackage destinationPackage = null;
@@ -87,7 +85,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationToUse = this.destinationPackage;
 		if (destinationToUse == null) {
-			SortedSet<JavaType> existingDbreManagedEntities = tableModelService.getDatabaseManagedEntities();
+			SortedSet<JavaType> existingDbreManagedEntities = dbreTableService.getDatabaseManagedEntities();
 			if (!existingDbreManagedEntities.isEmpty()) {
 				// Take the package of the first one
 				destinationToUse = existingDbreManagedEntities.first().getPackage();
@@ -106,7 +104,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!database.isJoinTable(table)) {
-				JavaType javaType = tableModelService.findTypeForTableName(table.getName(), destinationToUse);
+				JavaType javaType = dbreTableService.findTypeForTableName(table.getName(), destinationToUse);
 				if (javaType == null) {
 					createNewManagedEntityFromTable(table, destinationToUse);
 				} else {
@@ -119,7 +117,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
-		JavaType javaType = tableModelService.suggestTypeNameForNewTable(table.getName(), javaPackage);
+		JavaType javaType = dbreTableService.suggestTypeNameForNewTable(table.getName(), javaPackage);
 
 		// Create type annotations for new entity
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -222,7 +220,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	public List<Identifier> getIdentifiers(JavaType pkType) {
 		if (identifierResults == null) {
 			// Need to populate the identifier results before returning from this method
-			processDatabase(databaseModelService.getDatabase(null));
+			processDatabase(dbreModelService.getDatabase(null));
 		}
 		if (identifierResults == null) {
 			// It's still null, so maybe the DBRE XML file isn't available at this time or similar
@@ -255,7 +253,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Add primary key fields to the identifier class
 		for (Column column : columns) {
 			if (column.isPrimaryKey()) {
-				JavaSymbolName fieldName = new JavaSymbolName(tableModelService.suggestFieldName(column.getName()));
+				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(column.getName()));
 				JavaType fieldType = column.getType().getJavaType();
 				String columnName = column.getName();
 				result.add(new Identifier(fieldName, fieldType, columnName));
@@ -266,15 +264,15 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private void deleteManagedTypes() {
-		Set<JavaType> managedIdentifierTypes = tableModelService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : tableModelService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
+		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
 			deleteManagedTypes(javaType, managedIdentifierTypes);
 		}
 	}
 
 	private void deleteManagedTypesNotInModel(Set<Table> tables) {
-		Set<JavaType> managedIdentifierTypes = tableModelService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : tableModelService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
+		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
 			// Check for existence of entity from table model and delete if not in database model
 			if (!isDetectedEntityInModel(javaType, tables)) {
 				deleteManagedTypes(javaType, managedIdentifierTypes);
@@ -294,7 +292,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private boolean isDetectedEntityInModel(JavaType javaType, Set<Table> tables) {
-		String tableNamePattern = tableModelService.suggestTableNameForNewType(javaType);
+		String tableNamePattern = dbreTableService.suggestTableNameForNewType(javaType);
 		for (Table table : tables) {
 			if (table.getName().equalsIgnoreCase(tableNamePattern)) {
 				return true;

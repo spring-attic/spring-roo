@@ -9,7 +9,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.metadata.MetadataService;
@@ -34,7 +33,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
-	@Reference private DatabaseModelService databaseModelService;
+	@Reference private DbreModelService dbreModelService;
 	@Reference private DbreDatabaseListener dbreDatabaseListener;
 
 	public boolean isDbreAvailable() {
@@ -42,7 +41,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void displayDatabaseMetadata(Schema schema, File file) {
-		Database database = databaseModelService.refreshDatabaseSafely(schema);
+		Database database = dbreModelService.refreshDatabaseSafely(schema);
 		if (database == null) {
 			throw new IllegalStateException("Cannot obtain database information for schema '" + schema + "'");
 		}
@@ -69,10 +68,10 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 		if (schema == null) {
 			// No schema, so try to look it up
-			schema = databaseModelService.getLastSchema();
+			schema = dbreModelService.getLastSchema();
 			Assert.notNull(schema, "Schema must be specified given no prior database introspection information is available");
 		}
 		// Force it to refresh the database from the actual JDBC connection
-		databaseModelService.refreshDatabase(schema);
+		dbreModelService.refreshDatabase(schema);
 	}
 }

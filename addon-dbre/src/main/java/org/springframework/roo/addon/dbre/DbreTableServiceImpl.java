@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.io.File;
 import java.util.Collections;
@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.dbre.RooDbManaged;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -26,14 +25,14 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Implementation of {@link TableModelService}.
+ * Implementation of {@link DbreTableService}.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 @Component
 @Service
-public class TableModelServiceImpl implements TableModelService {
+public class DbreTableServiceImpl implements DbreTableService {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
@@ -112,7 +111,7 @@ public class TableModelServiceImpl implements TableModelService {
 	}
 
 	public SortedSet<JavaType> getDatabaseManagedEntities() {
-		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new DatabaseManagedTypesComparator());
+		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new DbreManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
@@ -136,7 +135,7 @@ public class TableModelServiceImpl implements TableModelService {
 	}
 
 	public SortedSet<JavaType> getDatabaseManagedIdentifiers() {
-		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new DatabaseManagedTypesComparator());
+		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new DbreManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);

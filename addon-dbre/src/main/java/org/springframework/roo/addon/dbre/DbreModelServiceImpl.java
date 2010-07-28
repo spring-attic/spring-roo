@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -23,8 +23,11 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.dbre.DatabaseListener;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.SchemaIntrospector;
+import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
+import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
@@ -39,7 +42,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Implementation of {@link DatabaseModelService).
+ * Implementation of {@link DbreModelService).
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -47,7 +50,7 @@ import org.w3c.dom.Element;
 @Component
 @Service
 @Reference(name = "databaseListener", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = DatabaseListener.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessManagerStatusListener {
+public class DbreModelServiceImpl implements DbreModelService, ProcessManagerStatusListener {
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private FileManager fileManager;
@@ -79,7 +82,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessMa
 		synchronized (listeners) {
 			listeners.add(listener);
 			if (startupCompleted) {
-				// this listener missed that startup event, so we should share it with them now they're online
+				// This listener missed that startup event, so we should share it with them now they're online
 				// We use "safe mode" to avoid telling everybody else about the database (they would already know separately)
 				Database database = getDatabase(lastSchema, false, true);
 				if (database != null) {
@@ -101,7 +104,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessMa
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection);
+			SchemaIntrospector introspector = new SchemaIntrospector(connection);
 			return introspector.getSchemas();
 		} catch (Exception e) {
 			return Collections.emptySet();
@@ -179,7 +182,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessMa
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseSchemaIntrospector introspector = new DatabaseSchemaIntrospector(connection, schema);
+			SchemaIntrospector introspector = new SchemaIntrospector(connection, schema);
 			Database database = introspector.getDatabase();
 
 			if (safeMode) {
@@ -198,7 +201,7 @@ public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessMa
 			publishToListeners(database);
 
 			return database;
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		} finally {
 			connectionProvider.closeConnection(connection);
@@ -255,11 +258,12 @@ public class DatabaseModelServiceImpl implements DatabaseModelService, ProcessMa
 
 	private Connection getConnection() throws SQLException {
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
-			connectionProvider.configure(propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties"));
+			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
+			return connectionProvider.getConnection(connectionProperties);
 		} else {
-			connectionProvider.configure(getConnectionPropertiesFromDataNucleusConfiguration());
+			Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
+			return connectionProvider.getConnection(connectionProperties);
 		}
-		return connectionProvider.getConnection();
 	}
 
 	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {

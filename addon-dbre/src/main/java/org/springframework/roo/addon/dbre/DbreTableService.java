@@ -1,9 +1,8 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.util.Set;
 import java.util.SortedSet;
 
-import org.springframework.roo.addon.dbre.RooDbManaged;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.model.JavaPackage;
@@ -16,7 +15,7 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface TableModelService {
+public interface DbreTableService {
 
 	/**
 	 * Locates the type associated with the presented table name.

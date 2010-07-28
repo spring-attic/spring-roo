@@ -17,7 +17,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class DatabaseSchemaIntrospector {
+public class SchemaIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
 	private DatabaseMetaData databaseMetaData;
 	private String catalog;
@@ -26,14 +26,14 @@ public class DatabaseSchemaIntrospector {
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	DatabaseSchemaIntrospector(Connection connection, Schema schema) throws SQLException {
+	public SchemaIntrospector(Connection connection, Schema schema) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		databaseMetaData = connection.getMetaData();
 		catalog = databaseMetaData.getConnection().getCatalog();
 		this.schema = schema;
 	}
 
-	DatabaseSchemaIntrospector(Connection connection) throws SQLException {
+	public SchemaIntrospector(Connection connection) throws SQLException {
 		this(connection, null);
 	}
 

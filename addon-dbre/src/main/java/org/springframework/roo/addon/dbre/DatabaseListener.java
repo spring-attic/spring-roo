@@ -1,11 +1,10 @@
 package org.springframework.roo.addon.dbre;
 
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.DatabaseModelService;
 
 /**
  * Implemented by a class that wishes to be notified whenever a {@link Database} is
- * refreshed. This behaviour is guaranteed by {@link DatabaseModelService}. Note
+ * refreshed. This behaviour is guaranteed by {@link DbreModelService}. Note
  * the notification will only occur when a database change is detected for some
  * reason. It will also publish when an initial startup takes place when the remainder
  * of the Roo components are notified to start processing.

@@ -21,28 +21,36 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class ConnectionProviderImpl implements ConnectionProvider {
+	private static final String USER = "user";
+	private static final String PASSWORD = "password";
 	@Reference private JdbcDriverManager jdbcDriverManager;
-	private Properties props;
 
-	public void configure(Properties props) {
-		Assert.notNull(props, "Connection properties must not be null");
-		props.put("user", props.get("database.username"));
-		props.put("password", props.get("database.password"));
-		this.props = props;
-	}
+	public Connection getConnection(Properties props) throws RuntimeException {
+		Assert.isTrue(props != null && !props.isEmpty(), "Connection properties must not be null or empty");
 
-	public void configure(Map<String, String> map) {
-		Assert.notNull(map, "Connection properties map must not be null");
-		Properties props = new Properties();
-		props.putAll(map);
-		configure(props);
-	}
+		// The properties "user" and "password" are required to make a connection
+		if (props.getProperty(USER) == null) {
+			props.put(USER, props.getProperty("database.username"));
+		}
+		if (props.getProperty(PASSWORD) == null) {
+			props.put(PASSWORD, props.getProperty("database.password"));
+		}
 
-	public Connection getConnection() throws SQLException {
 		String driverClassName = props.getProperty("database.driverClassName");
 		Driver driver = jdbcDriverManager.loadDriver(driverClassName);
 		Assert.notNull(driver, "JDBC driver not available for '" + driverClassName + "'");
-		return driver.connect(props.getProperty("database.url"), props);
+		try {
+			return driver.connect(props.getProperty("database.url"), props);
+		} catch (SQLException e) {
+			throw new IllegalStateException("Unable to get connection from driver", e);
+		}
+	}
+
+	public Connection getConnection(Map<String, String> map) throws RuntimeException {
+		Assert.isTrue(map != null && !map.isEmpty(), "Connection properties map must not be null or empty");
+		Properties props = new Properties();
+		props.putAll(map);
+		return getConnection(props);
 	}
 
 	public void closeConnection(Connection connection) {

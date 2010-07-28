@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre;
 
 import java.util.Comparator;
 
@@ -11,7 +11,7 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart.
  * @since 1.1
  */
-public class DatabaseManagedTypesComparator implements Comparator<JavaType> {
+public class DbreManagedTypesComparator implements Comparator<JavaType> {
 
 	public int compare(JavaType o1, JavaType o2) {
 		return o1.getPackage().getFullyQualifiedPackageName().compareTo(o2.getPackage().getFullyQualifiedPackageName());
