@@ -49,6 +49,10 @@ import org.springframework.roo.support.util.StringUtils;
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
+	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
+	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
+	private static final JavaType NOT_NULL = new JavaType("javax.validation.constraints.NotNull");
 
 	private DataOnDemandAnnotationValues annotationValues;
 	private ProjectMetadata projectMetadata;
@@ -289,14 +293,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				Integer maxValue = null;
 				
 				// Check for @Size
-				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
+				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 				AnnotationAttributeValue<?> maxAttributeValue;
 				if (sizeAnnotationMetadata != null && (maxAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"))) != null) {
 					maxValue = (Integer) maxAttributeValue.getValue();
 				} 
 				
 				// Check for @Max
-				AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
+				AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
 				if (maxAnnotationMetadata != null) {
 					AnnotationAttributeValue<?> valueAttributeValue = maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
 					maxValue = (Integer) valueAttributeValue.getValue();
@@ -505,13 +509,15 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					initializer = "new java.util.Date()";
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max")) != null || hasManyToOne || field.getAnnotations().size() == 0) {
+			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null ) {
+				initializer = "true";
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX) != null || hasManyToOne || field.getAnnotations().size() == 0) {
 				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
 				if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
 					initializer = field.getFieldName().getSymbolName();
 					
 					// Check for @Size
-					AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size"));
+					AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 					if (sizeAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> maxAttributeValue = sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max"));
 						if (maxAttributeValue != null && (Integer) maxAttributeValue.getValue() > 1 && (initializer.length() + 2) > (Integer) maxAttributeValue.getValue()) {
@@ -524,7 +530,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 					
 					// Check for @Max
-					AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Max"));
+					AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
 					if (maxAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> valueAttributeValue = maxAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
 						if ((Integer) valueAttributeValue.getValue() > 1 && (initializer.length() + 2) > (Integer) valueAttributeValue.getValue()) {
@@ -533,7 +539,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 					
 					// Check for @Min
-					AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Min"));
+					AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 					if (minAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> valueAttributeValue =  minAnnotationMetadata.getAttribute(new JavaSymbolName("value"));
 						if ((initializer.length() + 2) < (Integer) valueAttributeValue.getValue()) {
