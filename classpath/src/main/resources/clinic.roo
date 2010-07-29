@@ -54,6 +54,9 @@ finder add --finderName findVisitsByDescriptionLike
 
 controller all --package ~.web
 
+web mvc install language --code de
+web mvc install language --code es
+
 selenium test --controller ~.web.OwnerController
 selenium test --controller ~.web.PetController
 selenium test --controller ~.web.VetController

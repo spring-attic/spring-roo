@@ -15,6 +15,9 @@ controller scaffold ~.web.VoteController
 
 controller class ~.web.PublicVoteController --preferredMapping /public
 
+web mvc install language --code de
+web mvc install language --code es
+
 logging setup --level DEBUG --package WEB
 
 security setup
