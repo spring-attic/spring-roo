@@ -42,13 +42,19 @@ public class I18nComponent implements I18nSupport {
 	}
 
 	public Set<I18n> getSupportedLanguages() {
-		return Collections.unmodifiableSet(i18nSet);
+		Set<I18n> set = null;
+		synchronized (mutex) {
+			set = Collections.unmodifiableSet(i18nSet);
+		}
+		return set;
 	}
 	
 	public I18n getLanguage(Locale locale) {
-		for (I18n lang: Collections.unmodifiableSet(i18nSet)) {
-			if (lang.getLocale().equals(locale)) {
-				return lang;
+		synchronized (mutex) {
+			for (I18n lang: Collections.unmodifiableSet(i18nSet)) {
+				if (lang.getLocale().equals(locale)) {
+					return lang;
+				}
 			}
 		}
 		return null;

@@ -33,10 +33,10 @@ public class CreatorCommands implements CommandMarker {
 	@CliCommand(value="addon create i18n", help="Create a new Internationalization add-on for Spring Roo")
 	public void i18n(
 			@CliOption(key="topLevelPackage", mandatory=true, help="The top level package of the new addon") JavaPackage tlp,
-			@CliOption(key="language", mandatory=true, help="The full name of the language (used as a label for the UI)") String language, 
 			@CliOption(key="locale", mandatory=true, help="The locale abbreviation (ie: en, or more specific like en_AU, or de_DE)") Locale locale, 
 			@CliOption(key="messageBundle", mandatory=true, help="Fully qualified path to the messages_xx.properties file") File messageBundle,
-			@CliOption(key="flagGraphic", mandatory=true, help="Fully qualified path to flag xx.png file") File flagGraphic,
+			@CliOption(key="language", mandatory=false, help="The full name of the language (used as a label for the UI)") String language, 
+			@CliOption(key="flagGraphic", mandatory=false, help="Fully qualified path to flag xx.png file") File flagGraphic,
 			@CliOption(key="description", mandatory=false, help="Description of your addon (surround text with double quotes)") String description) {
 		if (locale == null) {
 			throw new IllegalStateException("Could not read provided locale. Please use correct format (ie: en, or more specific like en_AU, or de_DE)");

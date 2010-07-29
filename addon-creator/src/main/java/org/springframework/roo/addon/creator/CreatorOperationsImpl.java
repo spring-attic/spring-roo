@@ -1,11 +1,17 @@
 package org.springframework.roo.addon.creator;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.Locale;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -22,6 +28,7 @@ import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -38,7 +45,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
-		
+	@Reference private UrlInputStreamService httpService;
+	
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
 	}
@@ -74,13 +82,46 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	
 	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
-		Assert.hasLength(language, "Language specification required");
 		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
-		Assert.notNull(flagGraphic, "Flag graphic required");
+
+		if (language == null || language.length() == 0) {
+			language = "";
+			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  File.separator + "iso3166.txt"));
+			BufferedReader br = new BufferedReader(is);
+			String line;
+			try {
+				while((line = br.readLine()) != null) { 
+					String[] split = line.split(";");
+					if (split[1].startsWith(locale.getCountry().toUpperCase())) {
+						if (split[0].contains(",")) {
+							split[0] = split[0].substring(0, split[0].indexOf(",") - 1); 
+						}
+						String[] langWords = split[0].split("\\s");
+						StringBuffer b = new StringBuffer();
+						for (String word: langWords) {
+							b.append(StringUtils.capitalize(word.toLowerCase())).append(" ");
+						}
+						language = b.toString().substring(0, b.length() -1);
+					}
+				}
+			} catch (IOException e) {
+				throw new IllegalStateException("Could not parse ISO 3166 language list, please use --language option in command");
+			} finally {
+				try {
+					br.close();
+					is.close();
+				} catch (Exception ignored) {}
+			}		
+		} 
+		String[] langWords = language.split("\\s");
+		StringBuffer b = new StringBuffer();
+		for (String word: langWords) {
+			b.append(StringUtils.capitalize(word.toLowerCase()));
+		}
+		String languageName = b.toString();
 		
-		String languageName = StringUtils.capitalize(language.replaceAll("\\s+", ""));
-		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', '/');
+		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
 		
 		if (description == null || description.length() == 0) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
@@ -91,16 +132,20 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		installIfNeeded("assembly.xml", topLevelPackage, Type.I18N);
 		
 		try {
-			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + messageBundle.getName())).getOutputStream());
-			FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + flagGraphic.getName())).getOutputStream());
+			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + messageBundle.getName())).getOutputStream());
+			if (flagGraphic != null) {
+				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + flagGraphic.getName())).getOutputStream());
+			} else {
+				installFlagGraphic(locale, packagePath);
+			} 
 		} catch (IOException e) {
-			throw new IllegalStateException("Could not copy addon resources into project");
+			throw new IllegalStateException("Could not copy addon resources into project", e);
 		}
 		
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/" + languageName + "Language.java");
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + languageName + "Language.java");
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() + "/Language.java-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  File.separator + "Language.java-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -108,7 +153,11 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				input = input.replace("__APP_NAME__", languageName);
 				input = input.replace("__LOCALE__", locale.toString());
 				input = input.replace("__LANGUAGE__", StringUtils.capitalize(language));
-				input = input.replace("__FLAG_FILE__", flagGraphic.getName());
+				if (flagGraphic != null) {
+					input = input.replace("__FLAG_FILE__", flagGraphic.getName());
+				} else {
+					input = input.replace("__FLAG_FILE__", locale.getCountry().toLowerCase() + ".png");
+				}
 				input = input.replace("__MESSAGE_BUNDLE__", messageBundle.getName());
 				
 				// Output the file for the user
@@ -125,7 +174,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		Document pom;
 		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml"));
+			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + File.separator + "roo-addon-" + type.name().toLowerCase() + "-template.xml"));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -145,34 +194,34 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 
 		writeTextFile("readme.txt", "welcome to my addon!", projectMetadata);
-		writeTextFile("legal/LICENSE.TXT", "Your license goes here", projectMetadata);
+		writeTextFile("legal" + File.separator + "LICENSE.TXT", "Your license goes here", projectMetadata);
 
 		fileManager.scan();
 	}
 	
 	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Type type) {
 		String tlp = topLevelPackage.getFullyQualifiedPackageName();
-		String packagePath = tlp.replace('.', '/');
+		String packagePath = tlp.replace('.', File.separatorChar);
 		String fileName = StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + targetFilename;
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/" + fileName);
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + fileName);
 		
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src/main/assembly/" + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src" + File.separator + "main" + File.separator + "assembly" + File.separator + targetFilename);
 		}
 		
 		// Different destination for configuration.xml
 		else if ("configuration.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + targetFilename);
 		}
 		
 		// Adjust name for Roo Annotation
 		else if (targetFilename.startsWith("RooAnnotation")) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + "/Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + "Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
 		}
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + File.separator + targetFilename + "-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -205,6 +254,46 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			FileCopyUtils.copy(input, mutableFile.getOutputStream());
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
+		}
+	}
+	
+	private void installFlagGraphic(Locale locale, String packagePath) {
+		boolean success = false;
+		
+		String countryCode = locale.getCountry().toLowerCase();
+
+		//retrieve the icon file:
+		BufferedInputStream bis = null;
+		ZipInputStream zis = null;
+		try {
+			bis = new BufferedInputStream(httpService.openConnection(new URL("http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip")));
+			zis = new ZipInputStream(bis);
+			ZipEntry entry;
+			String expectedEntryName = "png" + File.separator + countryCode + ".png";
+			while ((entry = zis.getNextEntry()) != null) {
+				if (entry.getName().equals(expectedEntryName)) {
+					int size;
+					byte[] buffer = new byte[2048];
+					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + countryCode + ".png"));
+					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
+					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
+						bos.write(buffer, 0, size);
+					}
+					bos.flush();
+					bos.close();
+					success = true;
+				}
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException("Could not acquire flag icon for locale " + locale.getCountry() + " please use --flagGraphic to specify the flag manually", e);
+		} finally {
+			try {
+				zis.close();
+				bis.close();
+			} catch (Exception ignore) {}
+		}
+		if (!success) {
+			throw new IllegalStateException("Could not acquire flag icon for locale " + locale + " please use --flagGraphic to specify the flag manually");
 		}
 	}
 }

@@ -19,8 +19,8 @@ public class LocaleConverter implements Converter {
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value.length() == 2) {
-			System.out.println();
-			return new Locale(value); 
+			//in case only a simpele ISO-639 code is provided we use that code also for the country (ie 'de_DE')
+			return new Locale(value, value.toUpperCase()); 
 		} else if (value.length() == 5) {
 			String[] split = value.split("_");
 			return new Locale(split[0], split[1]);
