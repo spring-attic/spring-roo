@@ -109,6 +109,9 @@ public class JspViewManager {
 		if (!webScaffoldAnnotationValues.isDelete()) {
 			fieldTable.setAttribute("delete", "false");
 		}
+		if (!entityMetadata.getIdentifierField().getFieldName().getSymbolName().equals("id")) {
+			fieldTable.setAttribute("typeIdFieldName", entityMetadata.getIdentifierField().getFieldName().getSymbolName());
+		}
 		fieldTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(fieldTable));
 		
 		int fieldCounter = 0;
