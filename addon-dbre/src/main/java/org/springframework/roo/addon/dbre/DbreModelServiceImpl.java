@@ -88,7 +88,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 				if (database != null) {
 					try {
 						listener.notifyDatabaseRefreshed(database);
-					} catch (RuntimeException ignore) {}
+					} catch (RuntimeException ignored) {}
 				}
 			}
 		}

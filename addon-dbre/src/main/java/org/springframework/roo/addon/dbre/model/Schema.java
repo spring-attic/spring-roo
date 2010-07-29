@@ -20,10 +20,6 @@ public class Schema implements Serializable {
 		return name;
 	}
 
-	public String toString() {
-		return name;
-	}
-
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -50,5 +46,9 @@ public class Schema implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public String toString() {
+		return name;
 	}
 }

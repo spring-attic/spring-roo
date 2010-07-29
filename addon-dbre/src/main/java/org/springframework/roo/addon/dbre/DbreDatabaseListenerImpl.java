@@ -63,7 +63,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 	private JavaPackage destinationPackage = null;
 
-	// This method will be called when the database becomes available for the first time and the rest of Roo has startup up OK
+	// This method will be called when the database becomes available for the first time and the rest of Roo has start up OK
 	public void notifyDatabaseRefreshed(Database newDatabase) {
 		processDatabase(newDatabase);
 	}

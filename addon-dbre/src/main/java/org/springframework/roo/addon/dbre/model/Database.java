@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * Represents the database model, ie. the tables in the database.
  * 
@@ -29,6 +31,7 @@ public class Database implements Serializable {
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
 	Database(String name, Schema schema, Set<Table> tables) {
+		Assert.notNull(tables, "tables required");
 		this.name = name;
 		this.schema = schema;
 		this.tables = tables;
