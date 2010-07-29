@@ -1,17 +1,5 @@
 package org.springframework.roo.addon.gwt;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
@@ -45,6 +33,19 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Metadata for GWT.
@@ -734,6 +735,19 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		buildRequestMethod(destinationMetadataId, methods, findEntriesMethod);
 
+
+    // add remove() and persist() methods, HACK. Fix TODO(amitmanjhi)
+    JavaType methodReturnType = new JavaType(
+        "com.google.gwt.requestfactory.shared.RequestFactory.RequestObject", 0,
+        DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
+    for (MethodMetadata metadata : new MethodMetadata[] {
+        entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod()}) {
+      MethodMetadata method1Metadata = new DefaultMethodMetadata(
+          destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(),
+          methodReturnType, null, null, null, null, null);
+      methods.add(method1Metadata);
+    }
+    
 		this.request = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 

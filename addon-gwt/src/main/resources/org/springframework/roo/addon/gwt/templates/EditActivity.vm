@@ -36,7 +36,7 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 	 * Creates an activity that uses its own view instance.
 	 */
 	public $className(String id, RecordEditView<${entity.record}> view, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
-		super(view, id, requests);
+		super(view, id, requests, requests.${entity.nameUncapitalized}Request().persist());
 		this.requests = requests;
 		this.placeController = placeController;
 	}
@@ -46,7 +46,7 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 	}
 
 	protected void fireFindRequest(Value<String> id, Receiver<${entity.record}> callback) {
-		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).to(callback).fire();
+		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).fire(callback);
 	}
 
 	protected Class getRecordClass() {

@@ -74,6 +74,6 @@ public class $className extends AbstractRecordListActivity<${entity.record}> {
 	}
 
 	protected void fireCountRequest(Receiver<Long> callback) {
-		requests.${entity.nameUncapitalized}Request().count${entity.pluralName}().to(callback).fire();
+		requests.${entity.nameUncapitalized}Request().count${entity.pluralName}().fire(callback);
 	}
 }
