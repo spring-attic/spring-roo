@@ -154,7 +154,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 			
-		JavaSymbolName categoryName = new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
+		JavaSymbolName categoryName = new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
 		if (webScaffoldMetadata.getAnnotationValues().isCreate()) {
 			String listPath = destinationDirectory + "/create.jspx";
