@@ -768,9 +768,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private List<MethodMetadata> getPopulateMethods() {
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		for (JavaType type: specialDomainTypes) {
-			if (type.equals(beanInfoMetadata.getJavaBean())) {
-				continue;
-			}
+//			there is a need to present a populator for self references (see ROO-1112)			
+//			if (type.equals(beanInfoMetadata.getJavaBean())) {
+//				continue;
+//			}
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 	
