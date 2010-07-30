@@ -738,7 +738,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
     // add remove() and persist() methods, HACK. Fix TODO(amitmanjhi)
     JavaType methodReturnType = new JavaType(
-        "com.google.gwt.requestfactory.shared.RequestFactory.RequestObject", 0,
+        "com.google.gwt.requestfactory.shared.RequestObject", 0,
         DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
     for (MethodMetadata metadata : new MethodMetadata[] {
         entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod()}) {
@@ -757,7 +757,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
 		boolean isList = methodMetaData.getReturnType().getFullyQualifiedTypeName().equals("java.util.List");
 		method1ReturnTypeArgs0.add(method1Name.getSymbolName().startsWith("count") ? JavaType.LONG_OBJECT : getDestinationJavaType(MirrorType.RECORD));
-		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.RequestFactory.RequestObject" : (isList ? "com.google.gwt.requestfactory.shared.RecordListRequest" : "com.google.gwt.requestfactory.shared.RecordRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
+		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.RequestObject" : (isList ? "com.google.gwt.requestfactory.shared.RecordListRequest" : "com.google.gwt.requestfactory.shared.RecordRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
 		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
 		method1ParameterNames.addAll(methodMetaData.getParameterNames());
