@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -111,7 +112,7 @@ public class DbreTableServiceImpl implements DbreTableService {
 	}
 
 	public SortedSet<JavaType> getDatabaseManagedEntities() {
-		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new DbreManagedTypesComparator());
+		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new ManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
@@ -135,7 +136,7 @@ public class DbreTableServiceImpl implements DbreTableService {
 	}
 
 	public SortedSet<JavaType> getDatabaseManagedIdentifiers() {
-		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new DbreManagedTypesComparator());
+		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new ManagedTypesComparator());
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
@@ -172,5 +173,12 @@ public class DbreTableServiceImpl implements DbreTableService {
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+	}
+	
+	private static class ManagedTypesComparator implements Comparator<JavaType> {
+		
+		public int compare(JavaType o1, JavaType o2) {
+			return o1.getFullyQualifiedTypeName().compareTo(o2.getFullyQualifiedTypeName());
+		}
 	}
 }

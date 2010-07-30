@@ -272,7 +272,8 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 	private void deleteManagedTypesNotInModel(Set<Table> tables) {
 		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedEntities = dbreTableService.getDatabaseManagedEntities();
+		for (JavaType javaType : managedEntities) {
 			// Check for existence of entity from table model and delete if not in database model
 			if (!isDetectedEntityInModel(javaType, tables)) {
 				deleteManagedTypes(javaType, managedIdentifierTypes);
