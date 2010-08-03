@@ -84,9 +84,9 @@ public class JdkDelegatingLogListener implements LogListener {
 		}
 		
 		if (jdkLevel.intValue() <= Level.INFO.intValue()) {
-			// Not very important message, so just flash it if possible
+			// Not very important message, so just flash it if possible and we're in development mode
 			synchronized (mutex) {
-				if (shell != null) {
+				if (shell != null && shell.isDevelopmentMode()) {
 					shell.flash(jdkLevel, buildMessage(entry), MY_SLOT);
 					// Immediately clear it once the timeout has been reached
 					shell.flash(jdkLevel, "", MY_SLOT);
