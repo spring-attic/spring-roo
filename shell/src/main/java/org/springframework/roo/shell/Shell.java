@@ -59,7 +59,7 @@ public interface Shell extends ShellStatusProvider, ShellPromptAccessor {
 	 * slot will be updated without conflicting with flash message sequences from other slots.
 	 * 
 	 * <p>
-	 * Passing null or an empty string in as the "message" indicates the slot should be cleared.
+	 * Passing an empty string in as the "message" indicates the slot should be cleared.
 	 * 
 	 * <p>
 	 * An implementation need not necessarily use the level or slot concepts. They are expected to be
