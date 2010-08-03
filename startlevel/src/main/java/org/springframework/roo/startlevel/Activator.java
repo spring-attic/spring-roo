@@ -110,6 +110,19 @@ public class Activator implements BundleActivator {
 		if (sr == null) {
 			return null;
 		}
+		if (sr.getProperty("component.name") != null) {
+			// Roo's convention is the component name should be the fully qualified class name.
+			// Roo's other convention is bundle symbolic names should be fully qualified package names.
+			// However, the user can change the BSN or component name, so we need to do a quick sanity check.
+			String componentName = sr.getProperty("component.name").toString();
+			if (componentName.startsWith(sr.getBundle().getSymbolicName())) {
+				// The type name appears under the BSN package, so they probably haven't changed our convention
+				return componentName;
+			}
+		}
+		
+		// To get here we couldn't rely on component name. The following is far less reliable given the 
+		// service may be unavailable by the time we try to do a getService(sr) invocation (ROO-1156).
 		Object obj = context.getService(sr);
 		if (obj == null) {
 			return null;
