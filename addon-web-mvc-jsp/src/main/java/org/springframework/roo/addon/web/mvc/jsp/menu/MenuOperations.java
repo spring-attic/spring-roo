@@ -36,7 +36,7 @@ public interface MenuOperations {
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, JavaSymbolName menuItemLabel, String globalMessageCode, String link, String idPrefix);
+	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix);
 
 	/**
 	 * Attempts to locate a unused finder menu items and remove them. 

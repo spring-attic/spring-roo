@@ -67,7 +67,7 @@ public class MenuOperationsImpl implements MenuOperations {
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuIteId, JavaSymbolName menuItemLabel, String globalMessageCode, String link, String idPrefix) {
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuIteId, String menuItemLabel, String globalMessageCode, String link, String idPrefix) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
 		Assert.notNull(menuIteId, "Menu item name required");
 		Assert.hasText(link, "Link required");
@@ -115,7 +115,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
 		}
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "_label", menuItemLabel.getReadableSymbolName(), true);
+		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
 		writeToDiskIfNecessary(document);
 	}
 	

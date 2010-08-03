@@ -1,0 +1,49 @@
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" version="2.0">
+	<jsp:output omit-xml-declaration="yes"/>
+	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
+	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
+	<jsp:directive.attribute name="documentId" type="java.lang.String" required="true" description="The id of the document to be displayed"/>
+	<jsp:directive.attribute name="provider" type="java.lang.String" required="true" description="The provider for the document to be displayed"/>
+
+	<c:choose>
+	
+		<c:when test="${provider eq 'google_presentation'}">
+			<spring:url value="http://docs.google.com/present/embed" var="document">
+				<spring:param name="id" value="${documentId}" />
+				<spring:param name="interval" value="10" />
+				<spring:param name="size" value="m" />
+		    </spring:url>
+			<iframe src="${document}" frameborder="0" width="545" height="445"><!-- content required --></iframe>
+		</c:when>
+		
+		<c:when test="${provider eq 'scribd'}">
+			<spring:url value="http://d1.scribdassets.com/ScribdViewer.swf" var="base_url"/>
+			<spring:url value="${base_url}" var="document">
+				<spring:param name="document_id" value="${documentId}" />
+				<spring:param name="access_key" value="key-y6ef708fmsw0acnmpjn" />
+				<spring:param name="page" value="1" />
+				<spring:param name="viewMode" value="slideshow" />
+		    </spring:url>
+			<object id="doc_124839913729923" name="doc_124839913729923" height="500" width="100%" type="application/x-shockwave-flash" data="${base_url}" style="outline:none;" rel="media:presentation" resource="${document}" xmlns:media="http://search.yahoo.com/searchmonkey/media/" xmlns:dc="http://purl.org/dc/terms/" > 
+				<param name="movie" value="${base_url}" />
+				<param name="wmode" value="opaque" /> 
+				<param name="bgcolor" value="#ffffff" /> 
+				<param name="allowFullScreen" value="true" /> 
+				<param name="allowScriptAccess" value="always" /> 
+				<param name="FlashVars" value="${fn:substringAfter(document, base_url)}" />
+				<embed id="doc_124839913729923" name="doc_124839913729923" src="${document}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" height="500" width="100%" wmode="opaque" bgcolor="#ffffff"></embed> 
+			</object> 
+		</c:when>
+		
+		<c:when test="${provider eq 'slideshare'}">
+			<object id="__sse4735954" width="545" height="400">
+				<param name="movie" value="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=${documentId}" />
+				<param name="allowFullScreen" value="true"/>
+				<param name="allowScriptAccess" value="always"/>
+				<embed name="__sse4735954" width="545" height="400" src="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=${documentId}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true"></embed>
+			</object>
+		</c:when>
+		
+	</c:choose>
+</jsp:root>

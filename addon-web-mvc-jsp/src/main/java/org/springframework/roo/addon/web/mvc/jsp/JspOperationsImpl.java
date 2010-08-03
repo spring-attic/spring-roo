@@ -185,7 +185,7 @@ public class JspOperationsImpl implements JspOperations {
 		}
 		String lcViewName = viewName.getSymbolName().toLowerCase();
 		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
-		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), viewName, "global_menu_new", folderName + "/" + lcViewName, null);
+		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), title, "global_generic", folderName + "/" + lcViewName, null);
 		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
 		
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
