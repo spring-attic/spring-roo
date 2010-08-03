@@ -51,6 +51,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
+	private static final boolean FLASH_MESSAGE_DISABLED = Boolean.getBoolean("flash.message.disabled");
 	
     private ConsoleReader reader;
     private boolean developmentMode = false;
@@ -178,7 +179,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 	
 	private void flashMessageRenderer() {
-		if (!reader.getTerminal().isANSISupported()) {
+		if (!reader.getTerminal().isANSISupported() || FLASH_MESSAGE_DISABLED) {
 			return;
 		}
 		// Setup a thread to ensure flash messages are displayed and cleared correctly
@@ -219,7 +220,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
-		if (!reader.getTerminal().isANSISupported()) {
+		if (!reader.getTerminal().isANSISupported() || FLASH_MESSAGE_DISABLED) {
 			super.flash(level, message, slot);
 			return;
 		}
