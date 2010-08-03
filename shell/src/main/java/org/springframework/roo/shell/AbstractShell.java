@@ -31,6 +31,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
 
+	private static final String MY_SLOT = AbstractShell.class.getName();
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment = false;
     protected ExitShellRequest exitShellRequest = null;
@@ -106,17 +107,20 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		// another command was attempted
     	setShellStatus(ShellStatus.PARSING);
 
-    	long lastWaitMessage = System.currentTimeMillis(); 
     	ExecutionStrategy executionStrategy = getExecutionStrategy();
+    	boolean flashedMessage = false;
     	while (executionStrategy == null || !executionStrategy.isReadyForCommands()) {
     		// Wait
     		try {
 				Thread.sleep(500);
 			} catch (InterruptedException ignore) {}
-			if (System.currentTimeMillis() > (lastWaitMessage + (3000*5))) {
-				lastWaitMessage = System.currentTimeMillis();
-				logger.finest("Waiting for process manager to become available - " + new Date().toString());
+			if (!flashedMessage) {
+				flash(Level.INFO, "Please wait - still loading", MY_SLOT);
+				flashedMessage = true;
 			}
+    	}
+    	if (flashedMessage) {
+			flash(Level.INFO, "", MY_SLOT);
     	}
 
     	try {
