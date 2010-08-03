@@ -2,8 +2,10 @@ package org.springframework.roo.process.manager;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.shell.ExecutionStrategy;
 import org.springframework.roo.shell.ParseResult;
@@ -20,24 +22,43 @@ import org.springframework.roo.support.util.ReflectionUtils;
  */
 @Component(immediate=true)
 @Service
+@Reference(name="processManager", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=ProcessManager.class, cardinality=ReferenceCardinality.MANDATORY_UNARY)
 public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy {
 
-	@Reference private ProcessManager processManager;
+	private Class<?> mutex = ProcessManagerHostedExecutionStrategy.class;
+	private ProcessManager processManager;
+
+	protected void bindProcessManager(ProcessManager processManager) {
+		synchronized (mutex) {
+			this.processManager = processManager;
+		}
+	}
 	
-	protected void activate(ComponentContext context) {
+	protected void unbindProcessManager(ProcessManager processManager) {
+		synchronized (mutex) {
+			this.processManager = null;
+		}
 	}
 
 	public Object execute(final ParseResult parseResult) throws RuntimeException {
 		Assert.notNull(parseResult, "Parse result required");
-		return processManager.execute(new CommandCallback<Object>() {
-			public Object callback() {
-				return ReflectionUtils.invokeMethod(parseResult.getMethod(), parseResult.getInstance(), parseResult.getArguments());
-			}
-		});
+		synchronized (mutex) {
+			Assert.isTrue(isReadyForCommands(), "ProcessManagerHostedExecutionStrategy not yet ready for commands");
+			return processManager.execute(new CommandCallback<Object>() {
+				public Object callback() {
+					return ReflectionUtils.invokeMethod(parseResult.getMethod(), parseResult.getInstance(), parseResult.getArguments());
+				}
+			});
+		}
 	}
 
 	public boolean isReadyForCommands() {
-		return !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.STARTING) && !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.BUSY_POLLING);
+		synchronized (mutex) {
+			if (processManager != null) {
+				return !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.STARTING) && !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.BUSY_POLLING);
+			}
+		}
+		return false;
 	}
 
 	
