@@ -19,6 +19,7 @@ public enum JdbcDatabase {
 	SYBASE("SYBASE", "com.sybase.jdbc2.jdbc.SybDriver", "jdbc:sybase:Tds:localhost:4100"), 
 	MSSQL("MSSQL", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:microsoft:sqlserver://localhost:1433"), 
 	DB2("DB2", "com.ibm.db2.jcc.DB2Driver", "jdbc:db2://localhost:50000"), 
+	DB2400("DB2400", "com.ibm.as400.access.AS400JDBCDriver", "jdbc:as400://localhost"), 
 	DERBY("DERBY", "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:TO_BE_CHANGED_BY_ADDON;create=true"),
 	GOOGLE_APP_ENGINE("GAE", "", "appengine");
 

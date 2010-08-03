@@ -41,6 +41,11 @@
 				<dependency org="com.ibm" name="db2jcc" rev="3.59.81" />
 			</dependencies>
 		</database>
+		<database id="DB2400">
+			<dependencies>
+				<dependency org="net.sf.jt400" name="jt400" rev="6.7" />
+			</dependencies>
+		</database>
 		<database id="DERBY">
 			<dependencies>
 				<dependency org="org.apache.derby" name="derby" rev="10.6.1.0" />
@@ -236,8 +241,8 @@
 		</provider>
 		<provider id="ECLIPSELINK">
 			<dependencies>
-				<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.0.1" />
-				<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.0" />
+				<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.1.0" />
+				<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.1" />
 			</dependencies>
 			<repositories>
 				<repository>
