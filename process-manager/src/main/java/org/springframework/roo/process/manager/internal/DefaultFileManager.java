@@ -43,12 +43,10 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class DefaultFileManager implements FileManager, MetadataNotificationListener {
-
 	@Reference private MetadataService metadataService;
 	@Reference private UndoManager undoManager;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
@@ -59,11 +57,11 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
-	
+
 	public boolean exists(String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "File identifier required");
 		return new File(fileIdentifier).exists();
@@ -144,20 +142,20 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		if (pathsRegistered) {
 			return;
 		}
-		
+
 		Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency), "Upstream dependency is an invalid metadata identification string ('" + upstreamDependency + "')");
-		
+
 		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
 			// Acquire the Project Metadata, if available
 			ProjectMetadata md = (ProjectMetadata) metadataService.get(upstreamDependency);
 			if (md == null) {
 				return;
 			}
-			
+
 			PathResolver pathResolver = md.getPathResolver();
 			Assert.notNull(pathResolver, "Path resolver could not be acquired from changed metadata '" + md + "'");
 			this.filenameResolver = new PathResolvingAwareFilenameResolver(pathResolver);
-			
+
 			Set<FileOperation> notifyOn = new HashSet<FileOperation>();
 			notifyOn.add(FileOperation.MONITORING_START);
 			notifyOn.add(FileOperation.MONITORING_FINISH);
@@ -165,7 +163,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			notifyOn.add(FileOperation.RENAMED);
 			notifyOn.add(FileOperation.UPDATED);
 			notifyOn.add(FileOperation.DELETED);
-			
+
 			for (Path p : pathResolver.getPaths()) {
 				// Verify path exists and ensure it's monitored, except root (which we assume is already monitored via ProcessManager)
 				if (!Path.ROOT.equals(p)) {
@@ -177,17 +175,13 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 						new CreateDirectory(undoManager, filenameResolver, file);
 					}
 					MonitoringRequest request = new DirectoryMonitoringRequest(file, true, notifyOn);
-					if (md.isValid()) {
-						new UndoableMonitoringRequest(undoManager, fileMonitorService, request, true);
-					} else {
-						new UndoableMonitoringRequest(undoManager, fileMonitorService, request, false);
-					}
+					new UndoableMonitoringRequest(undoManager, fileMonitorService, request, md.isValid());
 				}
 			}
-			
+
 			// Explicitly perform a scan now that we've added all the directories we wish to monitor
 			fileMonitorService.scanAll();
-			
+
 			// Avoid doing this operation again unless the validity changes
 			pathsRegistered = md.isValid();
 		}
@@ -198,7 +192,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 	}
 
 	public int scan() {
-		return ((NotifiableFileMonitorService)fileMonitorService).scanNotified();
+		return ((NotifiableFileMonitorService) fileMonitorService).scanNotified();
 	}
 
 	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
@@ -210,16 +204,15 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			try {
 				existing = FileCopyUtils.copyToString(new FileReader(f));
 			} catch (IOException ignoreAndJustOverwriteIt) {}
-			
+
 			if (!newContents.equals(existing)) {
 				mutableFile = updateFile(fileIdentifier);
 			}
-			
 		} else {
 			mutableFile = createFile(fileIdentifier);
 			Assert.notNull(mutableFile, "Could not create file '" + fileIdentifier + "'");
 		}
-		
+
 		try {
 			if (mutableFile != null) {
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
@@ -227,8 +220,5 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
-		
 	}
-
-	
 }

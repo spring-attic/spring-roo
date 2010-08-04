@@ -36,7 +36,6 @@ import java.util.SortedSet;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MetadataDependencyRegistry {
 	
@@ -94,7 +93,7 @@ public interface MetadataDependencyRegistry {
 	void addNotificationListener(MetadataNotificationListener listener);
 	
 	/**
-	 * Deregiostered an additional instance to receive {@link MetadataNotificationListener} events. If the
+	 * De-register an additional instance to receive {@link MetadataNotificationListener} events. If the
 	 * listener was never registered in the first place, the method simply returns.
 	 * 
 	 * @param listener to no longer receive notifications (required)
