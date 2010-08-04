@@ -127,7 +127,7 @@
 				<dependency>
 					<groupId>org.hibernate</groupId>
 					<artifactId>hibernate-core</artifactId>
-					<version>3.5.1-Final</version>
+					<version>3.5.4-Final</version>
 					<exclusions>
 						<exclusion>
 							<groupId>cglib</groupId>
@@ -154,7 +154,7 @@
 				<dependency>
 					<groupId>org.hibernate</groupId>
 					<artifactId>hibernate-entitymanager</artifactId>
-					<version>3.5.1-Final</version>
+					<version>3.5.4-Final</version>
 					<exclusions>
 						<exclusion>
 							<groupId>cglib</groupId>
@@ -364,7 +364,7 @@
 				<dependency>
 					<groupId>org.hibernate</groupId>
 					<artifactId>hibernate-validator</artifactId>
-					<version>4.0.2.GA</version>
+					<version>4.1.0.Final</version>
 					<exclusions>
 						<exclusion>
 							<groupId>javax.xml.bind</groupId>
