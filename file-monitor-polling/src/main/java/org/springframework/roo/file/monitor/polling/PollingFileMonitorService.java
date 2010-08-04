@@ -46,12 +46,9 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
-
 	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
-	
 	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
 	private Set<MonitoringRequest> requests = new HashSet<MonitoringRequest>();
 	private Map<MonitoringRequest,Map<File,Long>> priorExecution =new WeakHashMap<MonitoringRequest,Map<File,Long>>();
@@ -61,7 +58,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private Set<MonitoringRequest> notifiedFailingRequests = new HashSet<MonitoringRequest>();
 	
 	// Mutex
-	private Boolean lock = new Boolean(true);
+	private Boolean lock = Boolean.TRUE;
 	
 	public final void add(FileEventListener e) {
 		synchronized (lock) {
@@ -112,16 +109,16 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			DirectoryMonitoringRequest dmr = (DirectoryMonitoringRequest) request;
 			if (dmr.isWatchSubtree()) {
 				if (!filePath.startsWith(requestCanonicalPath)) {
-					return false; // not within this directory or a sub-directory
+					return false; // Not within this directory or a sub-directory
 				}
 			} else {
 				if (!FileDetails.matchesAntPath(requestCanonicalPath + File.separator + "*", filePath)) {
-					return false; // not within this directory
+					return false; // Not within this directory
 				}
 			}
 		} else {
 			if (!requestCanonicalPath.equals(filePath)) {
-				return false; // not a file
+				return false; // Not a file
 			}
 		}
 		return true;
@@ -137,7 +134,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			int changes = 0;
 				
 			for (MonitoringRequest request : requests) {
-				
 				List<FileEvent> eventsToPublish = new ArrayList<FileEvent>();
 
 				if (priorExecution.containsKey(request)) {
@@ -236,7 +232,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			int changes = 0;
 
 			for (MonitoringRequest request : requests) {
-
 				boolean includeSubtree = false;
 				if (request instanceof DirectoryMonitoringRequest) {
 					includeSubtree = ((DirectoryMonitoringRequest)request).isWatchSubtree();
@@ -266,7 +261,6 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 					
 					// Locate created and modified files
 					for (File thisFile : currentExecution.keySet()) {
-						
 						if (!priorFiles.containsKey(thisFile)) {
 							// This file did not exist last execution, so it must be new
 							eventsToPublish.add(new FileEvent(new FileDetails(thisFile, currentExecution.get(thisFile)), FileOperation.CREATED, null));
@@ -424,10 +418,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 				}
 			}
 			
-			boolean result;
-			result = requests.add(request);
-			
-			return result;
+			return requests.add(request);
 		}
 	}
 
@@ -449,36 +440,52 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 
 			priorExecution.remove(request);
 			
-			boolean result;
-			result = requests.remove(request);
-			
-			return result;
+			return requests.remove(request);
 		}
 	}
 
 	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
-		synchronized (lock) {
-			Assert.hasText(antPath, "Ant path required");
-			
-			SortedSet<FileDetails> result = new TreeSet<FileDetails>();
-			
-			if (requests.size() == 0) {
-				return result;
-			}
-		
-			for (MonitoringRequest request : requests) {
-				if (priorExecution.containsKey(request)) {
-					Map<File,Long> priorFiles = priorExecution.get(request);
-					for (File priorFile : priorFiles.keySet()) {
-						FileDetails fd = new FileDetails(priorFile, priorFiles.get(priorFile));
-						if (fd.matchesAntPath(antPath)) {
-							result.add(fd);
-						}
-					}
-				}
-			}
-			
+		Assert.hasText(antPath, "Ant path required");
+		SortedSet<FileDetails> result = new TreeSet<FileDetails>();
+		// Now we need to compute the starting directory by reference to the first * in the Ant Path
+		int index = antPath.indexOf("*");
+		// Conditionals are based on an index of 0 (not -1) to ensure the detected character is not the only character in the string
+		Assert.isTrue(index > 0, "'" + antPath + "' is not an Ant Path as it fails to include an * character");
+		String newPath = antPath.substring(0, index);
+		index = newPath.lastIndexOf(File.separatorChar);
+		Assert.isTrue(index > 0, "'" + antPath + "' fails to include any '" + File.separatorChar + "' directory separator");
+		newPath = newPath.substring(0, index);
+		File somePath = new File(newPath);
+		if (!somePath.exists()) {
+			// Path at the start of the Ant expression doesn't exist, so there's no way we'll find anything via a search
 			return result;
+		}
+		Assert.isTrue(somePath.isDirectory(), "Ant path '" + antPath + "' appears under file system path '" + somePath + "' but this is not a directory that can be searched");
+		recursiveAntMatch(antPath, somePath, result);
+		return result;
+	}
+	
+	/**
+	 * Locates all files under the specified current directory which patch the given Ant Path.
+	 * 
+	 * @param antPath to match (required)
+	 * @param currentDirectory an existing directory to search from (required)
+	 * @param result to append located files into (required)
+	 */
+	private void recursiveAntMatch(String antPath, File currentDirectory, SortedSet<FileDetails> result) {
+		Assert.isTrue(currentDirectory.exists() && currentDirectory.isDirectory(), "Path '" + currentDirectory + "' does not exist or is not a directory");
+		Assert.hasText(antPath, "Ant path required");
+		Assert.notNull(result, "Result required");
+		for (File f : currentDirectory.listFiles()) {
+			if (f.isFile()) {
+				try {
+					if (FileDetails.matchesAntPath(antPath, f.getCanonicalPath())) {
+						result.add(new FileDetails(f, f.lastModified()));
+					}
+				} catch (IOException ignored) {}
+			} else {
+				recursiveAntMatch(antPath, f, result);
+			}
 		}
 	}
 
@@ -523,5 +530,4 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 			}
 		}
 	}
-
 }
