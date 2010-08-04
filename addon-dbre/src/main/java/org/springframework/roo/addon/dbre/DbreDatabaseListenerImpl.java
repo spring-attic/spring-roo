@@ -33,6 +33,7 @@ import org.springframework.roo.classpath.details.annotations.ClassAttributeValue
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -49,13 +50,14 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-@Component(immediate = true)
+@Component
 @Service
 public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	private static final JavaSymbolName IDENTIFIER_TYPE = new JavaSymbolName("identifierType");
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
 	@Reference private DbreModelService dbreModelService;
 	@Reference private DbreTableService dbreTableService;
@@ -63,7 +65,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 	private JavaPackage destinationPackage = null;
 
-	// This method will be called when the database becomes available for the first time and the rest of Roo has start up OK
+	// This method will be called when the database becomes available for the first time and the rest of Roo has started up OK
 	public void notifyDatabaseRefreshed(Database newDatabase) {
 		processDatabase(newDatabase);
 	}
@@ -183,6 +185,15 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			// deleted from the table so we still need to trigger the metadata.
 			String dbreMetadataMid = DbreMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 			metadataService.get(dbreMetadataMid, true);
+			
+			// Most ITD-based metadata need not notify downstream dependencies because the ITDs are
+			// primarily based on .java type changes and therefore these are informed via standard
+			// notify(..) calls. DBRE is different from other ITD-based metadata because the contents
+			// of the ITD are primarily based on the Database object. Therefore we cannot rely on
+			// notify(..) calls as there won't be any (the Database object isn't a MetadataItem we
+			// are monitoring). Accordingly we need to explicitly let our downstream metadata items
+			// (like BeanInfoMetadata) know we have probably changed, so they can refresh themselves.
+			metadataDependencyRegistry.notifyDownstream(dbreMetadataMid);
 		}
 	}
 

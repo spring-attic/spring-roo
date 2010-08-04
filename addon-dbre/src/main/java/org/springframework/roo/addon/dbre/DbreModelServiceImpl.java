@@ -25,9 +25,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.SchemaIntrospector;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.SchemaIntrospector;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
@@ -70,6 +70,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	public void onProcessManagerStatusChange(ProcessManagerStatus oldStatus, ProcessManagerStatus newStatus) {
+		considerStartup(newStatus);
+	}
+	
+	public void considerStartup(ProcessManagerStatus newStatus) {
 		if (newStatus == ProcessManagerStatus.AVAILABLE && !startupCompleted) {
 			// This is the first time we're starting, so tell listeners about the database
 			startupCompleted = true;
@@ -301,6 +305,11 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 			}
 			if ("datanucleus.ConnectionPassword".equals(key)) {
 				properties.put("database.password", value);
+			}
+			
+			if (properties.size() == 4) {
+				// All required properties have been found so ignore rest of elements
+				break;
 			}
 		}
 		return properties;

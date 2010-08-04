@@ -40,8 +40,21 @@ public class DbreTableServiceImpl implements DbreTableService {
 	@Reference private FileManager fileManager;
 
 	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
-		JavaType javaType = suggestTypeNameForNewTable(tableNamePattern, javaPackage);
-		return getPhysicalTypeMetadata(javaType) != null ? javaType : null;
+		JavaType javaType = null;
+		for (JavaType managedEntity : getDatabaseManagedEntities()) {
+			if (managedEntity.getSimpleTypeName().equals(getName(tableNamePattern, false))) {
+				return managedEntity;
+			}
+		}
+
+		if (javaType == null) {
+			javaType = convertTableNameToType(tableNamePattern, javaPackage);
+			if (getPhysicalTypeMetadata(javaType) != null) {		
+				return javaType;
+			}
+		}
+		
+		return null;
 	}
 
 	public String suggestTableNameForNewType(JavaType javaType) {
@@ -116,7 +129,7 @@ public class DbreTableServiceImpl implements DbreTableService {
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
-
+	
 		for (FileDetails file : entries) {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java

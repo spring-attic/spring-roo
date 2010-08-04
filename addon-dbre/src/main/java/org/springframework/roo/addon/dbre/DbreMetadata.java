@@ -96,7 +96,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		this.entityMetadata = entityMetadata;
 		this.metadataService = metadataService;
 		this.dbreTableService = dbreTableService;
-
+		
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooDbManaged.class.getName()));
 		if (annotation != null) {
@@ -162,7 +162,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				Short keySequence = foreignKey.getKeySequence();
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
-				JavaType fieldType = dbreTableService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
+//				JavaType fieldType = dbreTableService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
+				JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
@@ -188,6 +189,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
+						
 						JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
@@ -234,7 +236,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				String foreignTableName = foreignKey.getForeignTableName();
 				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
-				JavaType fieldType = dbreTableService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
+				JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.

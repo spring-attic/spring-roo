@@ -26,12 +26,12 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 @Component
 @Service
-public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
+public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider, DatabaseListener {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
-	@Reference private DbreModelService dbreModelService;
 	@Reference private DbreTableService dbreTableService;
+	private Database database;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -59,6 +59,10 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
+	public void notifyDatabaseRefreshed(Database newDatabase) {
+		this.database = newDatabase;
+	}
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to lookup the metadata we depend on
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
@@ -70,11 +74,13 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata == null) {
+			return null;
+		}
+
 		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
-		Database database = null;
-		try {
-			database = dbreModelService.getDatabase(null);
-		} catch (Exception e) {
+		if (database == null) {
 			return null;
 		}
 
