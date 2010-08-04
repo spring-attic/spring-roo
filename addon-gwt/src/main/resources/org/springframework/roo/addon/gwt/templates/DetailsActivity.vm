@@ -30,20 +30,20 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 	private final ApplicationRequestFactory requests;
 	private final PlaceController<ApplicationPlace> placeController;
 	private final RecordDetailsView<${entity.record}> view;
-	private String id;
+	private Long id;
 	private Display display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
 		this(id, requests, placeController, getDefaultView());
 	}
 
 	/**
 	 * Creates an activity that uses its own view instance.
  	 */
-	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController, RecordDetailsView<${entity.record}> view) {
+	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController, RecordDetailsView<${entity.record}> view) {
 		this.placeController = placeController;
 		this.id = id;
 		this.requests = requests;

@@ -28,14 +28,14 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public $className(String id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
 		this(id, getDefaultView(), requests, placeController);
 	}
 
 	/**
 	 * Creates an activity that uses its own view instance.
 	 */
-	public $className(String id, RecordEditView<${entity.record}> view, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
+	public $className(Long id, RecordEditView<${entity.record}> view, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
 		super(view, id, requests.${entity.nameUncapitalized}Request().persist());
 		this.requests = requests;
 		this.placeController = placeController;
@@ -45,7 +45,7 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 		placeController.goTo(new ${entity.detailPlace}(getId(), Operation.DETAILS));
 	}
 
-	protected void fireFindRequest(Value<String> id, Receiver<${entity.record}> callback) {
+	protected void fireFindRequest(Value<Long> id, Receiver<${entity.record}> callback) {
 		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).fire(callback);
 	}
 

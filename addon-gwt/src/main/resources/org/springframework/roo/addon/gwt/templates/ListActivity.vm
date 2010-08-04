@@ -49,7 +49,7 @@ public class $className extends AbstractRecordListActivity<${entity.record}> {
 	}
 
 	public void createClicked() {
-		placeController.goTo(new ${entity.detailPlace}("", Operation.EDIT));
+		placeController.goTo(new ${entity.detailPlace}(0L, Operation.EDIT));
 	}
 
 	public void onStop() {

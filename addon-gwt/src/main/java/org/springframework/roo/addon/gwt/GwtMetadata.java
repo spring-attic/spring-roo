@@ -327,15 +327,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 					gwtSideType = returnType;
 					// Handle the identifier special case
 					if (idPropertyName.equals(propertyName) && idLongOnServerSide) {
-						gwtSideType = JavaType.STRING_OBJECT;
+						gwtSideType = JavaType.LONG_OBJECT;
 					}
 					// Handle the version special case
 					if (versionPropertyName.equals(propertyName) && versionIntegerOnServerSide) {
-						gwtSideType = JavaType.STRING_OBJECT;
+						gwtSideType = JavaType.INT_OBJECT;
 					}
 					// TODO: (cromwellian) HACK! handle foreign-id refs, we assume java.lang.Long is an id
 					if (gwtSideType.getFullyQualifiedTypeName().equals("java.lang.Long") && idLongOnServerSide) {
-						gwtSideType = JavaType.STRING_OBJECT;
+						gwtSideType = JavaType.LONG_OBJECT;
 					}
 				}
 
@@ -767,7 +767,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaType> typeParams = new ArrayList<JavaType>();
 			JavaType jtype = paramTypes.get(i).getJavaType();
 			if (method1Name.equals(findMethod.getMethodName())) {
-				jtype = JavaType.STRING_OBJECT;
+				jtype = JavaType.LONG_OBJECT;
 			}
 			typeParams.add(jtype);
 			JavaType propRef = new JavaType("com.google.gwt.valuestore.shared.PropertyReference", 0, DataType.TYPE, null, typeParams);
