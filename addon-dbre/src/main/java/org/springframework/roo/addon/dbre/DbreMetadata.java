@@ -109,7 +109,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (table == null) {
 			return;
 		}
-
+		
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(database, table);
 

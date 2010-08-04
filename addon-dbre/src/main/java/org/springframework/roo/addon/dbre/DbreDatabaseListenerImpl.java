@@ -183,18 +183,22 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		if (!changed) {
 			// Although @RooEntity annotation on disk did not change, other columns may have been added or
 			// deleted from the table so we still need to trigger the metadata.
-			String dbreMetadataMid = DbreMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-			metadataService.get(dbreMetadataMid, true);
-			
-			// Most ITD-based metadata need not notify downstream dependencies because the ITDs are
-			// primarily based on .java type changes and therefore these are informed via standard
-			// notify(..) calls. DBRE is different from other ITD-based metadata because the contents
-			// of the ITD are primarily based on the Database object. Therefore we cannot rely on
-			// notify(..) calls as there won't be any (the Database object isn't a MetadataItem we
-			// are monitoring). Accordingly we need to explicitly let our downstream metadata items
-			// (like BeanInfoMetadata) know we have probably changed, so they can refresh themselves.
-			metadataDependencyRegistry.notifyDownstream(dbreMetadataMid);
+			notify(javaType);
 		}
+	}
+
+	private void notify(JavaType javaType) {
+		String dbreMetadataMid = DbreMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
+		metadataService.get(dbreMetadataMid, true);
+		
+		// Most ITD-based metadata need not notify downstream dependencies because the ITDs are
+		// primarily based on .java type changes and therefore these are informed via standard
+		// notify(..) calls. DBRE is different from other ITD-based metadata because the contents
+		// of the ITD are primarily based on the Database object. Therefore we cannot rely on
+		// notify(..) calls as there won't be any (the Database object isn't a MetadataItem we
+		// are monitoring). Accordingly we need to explicitly let our downstream metadata items
+		// (like BeanInfoMetadata) know we have probably changed, so they can refresh themselves.
+		metadataDependencyRegistry.notifyDownstream(dbreMetadataMid);
 	}
 
 	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Table table) {
@@ -383,6 +387,10 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 				fileManager.delete(filePath);
 				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 			}
+			
+			
+			notify(javaType);
+
 			shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 		}
 	}
