@@ -12,13 +12,13 @@ public abstract class ApplicationRecordPlace extends ApplicationPlace {
 		EDIT, DETAILS
 	}
 
-	private final String id;
+	private final Long id;
 	private final Operation operation;
 
 	/**
 	 * @param record
 	 */
-	public ApplicationRecordPlace(String id, Operation operation) {
+	public ApplicationRecordPlace(Long id, Operation operation) {
 		assert null != id;
 		assert null != operation;
 
@@ -50,7 +50,7 @@ public abstract class ApplicationRecordPlace extends ApplicationPlace {
 	/**
 	 * @return the id for this record
 	 */
-	public String getId() {
+	public Long getId() {
 		return id;
 	}
 

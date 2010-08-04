@@ -12,7 +12,7 @@ public class $className extends ${shared.applicationRecordPlace} {
 		super(record.getId(), operation);
 	}
 
-	public $className(String id, Operation operation) {
+	public $className(Long id, Operation operation) {
 		super(id, operation);
 	}
 

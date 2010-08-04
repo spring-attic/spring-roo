@@ -71,7 +71,7 @@ public class ${className} extends Composite implements RecordDetailsView<${entit
 #foreach ($prop in $entity.properties)
 		${prop.name}.setInnerText(${prop.formatter}record.${prop.getter}()));
 #end
-		idSpan.setInnerText(record.getId());
+		idSpan.setInnerText(String.valueOf(record.getId()));
 		versionSpan.setInnerText(record.getVersion().toString());
 	}
 }
