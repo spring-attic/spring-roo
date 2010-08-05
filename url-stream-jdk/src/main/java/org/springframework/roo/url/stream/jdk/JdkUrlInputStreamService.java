@@ -7,9 +7,8 @@ import java.net.URLConnection;
 import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.shell.Shell;
+import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 
@@ -22,10 +21,8 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  */
 @Component
 @Service
-public class JdkUrlInputStreamService implements UrlInputStreamService {
+public class JdkUrlInputStreamService extends AbstractFlashingObject implements UrlInputStreamService {
 
-	@Reference private Shell shell;
-	
 	public InputStream openConnection(URL httpUrl) throws IOException {
 		URLConnection connection = httpUrl.openConnection();
 		connection.setRequestProperty("user-agent", "roo-jdk-url-input-stream");
@@ -65,7 +62,7 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 				int percentageDownloaded = Math.round((readSoFar / totalSize) * 100);
 				if (System.currentTimeMillis() > (lastNotified + 1000)) {
 					if (lastPercentageIndicated != percentageDownloaded) {
-						shell.flash(Level.FINE, "Downloaded " + percentageDownloaded + "% of " + text, JdkUrlInputStreamService.class.getName());
+						flash(Level.FINE, "Downloaded " + percentageDownloaded + "% of " + text, MY_SLOT);
 						lastPercentageIndicated = percentageDownloaded;
 						lastNotified = System.currentTimeMillis();
 					}
@@ -73,7 +70,7 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 			} else {
 				// Total size is not known, rely on time-based updates instead
 				if (System.currentTimeMillis() > (lastNotified + 1000)) {
-					shell.flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, JdkUrlInputStreamService.class.getName());
+					flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, MY_SLOT);
 					lastNotified = System.currentTimeMillis();
 				}
 			}
@@ -82,11 +79,11 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 			
 			if (result == -1) {
 				if (totalSize > 0) {
-					shell.flash(Level.FINE, "Downloaded 100% of " + text, JdkUrlInputStreamService.class.getName());
+					flash(Level.FINE, "Downloaded 100% of " + text, MY_SLOT);
 				} else {
-					shell.flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, JdkUrlInputStreamService.class.getName());
+					flash(Level.FINE, "Downloaded " + Math.round((readSoFar/1024)) + " kB of " + text, MY_SLOT);
 				}
-				shell.flash(Level.FINE, "", JdkUrlInputStreamService.class.getName());
+				flash(Level.FINE, "", MY_SLOT);
 			}
 			
 			return result;
@@ -94,10 +91,11 @@ public class JdkUrlInputStreamService implements UrlInputStreamService {
 
 		@Override
 		public void close() throws IOException {
-			shell.flash(Level.FINE, "", JdkUrlInputStreamService.class.getName());
+			flash(Level.FINE, "", MY_SLOT);
 			delegate.close();
 		}
 	}
+
 
 }
 

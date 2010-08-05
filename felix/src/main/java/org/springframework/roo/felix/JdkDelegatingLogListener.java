@@ -15,6 +15,7 @@ import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
 import org.osgi.service.log.LogService;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
@@ -31,25 +32,10 @@ import org.springframework.roo.support.logging.HandlerUtils;
  */
 @Component(immediate=true)
 @Reference(name="shell", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=Shell.class, cardinality=ReferenceCardinality.OPTIONAL_UNARY)
-public class JdkDelegatingLogListener implements LogListener {
+public class JdkDelegatingLogListener extends AbstractFlashingObject implements LogListener {
 
-	private Class<?> mutex = JdkDelegatingLogListener.class;
-	private Shell shell;
 	@Reference private LogReaderService logReaderService;
 	private final static Logger logger = HandlerUtils.getLogger(JdkDelegatingLogListener.class);
-	private final static String MY_SLOT = JdkDelegatingLogListener.class.getName();
-	
-	protected void bindShell(Shell shell) {
-		synchronized (mutex) {
-			this.shell = shell;
-		}
-	}
-
-	protected void unbindShell(Shell shell) {
-		synchronized (mutex) {
-			this.shell = null;
-		}
-	}
 	
 	@SuppressWarnings("unchecked")
 	protected void activate(ComponentContext context) {
@@ -85,12 +71,10 @@ public class JdkDelegatingLogListener implements LogListener {
 		
 		if (jdkLevel.intValue() <= Level.INFO.intValue()) {
 			// Not very important message, so just flash it if possible and we're in development mode
-			synchronized (mutex) {
-				if (shell != null && shell.isDevelopmentMode()) {
-					shell.flash(jdkLevel, buildMessage(entry), MY_SLOT);
-					// Immediately clear it once the timeout has been reached
-					shell.flash(jdkLevel, "", MY_SLOT);
-				}
+			if (isDevelopmentMode()) {
+				flash(jdkLevel, buildMessage(entry), MY_SLOT);
+				// Immediately clear it once the timeout has been reached
+				flash(jdkLevel, "", MY_SLOT);
 			}
 		} else {
 			// Important log message, so log it via JDK
