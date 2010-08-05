@@ -372,7 +372,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 					replacementAttributeValues.put(incomingAttributeName, incomingValue);
 					writeChangesToDisk = true;
 				}
-			} else {
+			} else if (attributesToDeleteIfPresent != null && !attributesToDeleteIfPresent.contains(incomingAttributeName)) {
 				// This is a new attribute that does not already exist, so add it to the end of the replacement attributes
 				replacementAttributeValues.put(incomingAttributeName, incomingValue);
 				writeChangesToDisk = true;
