@@ -6,6 +6,8 @@
 	xmlns:spring="http://www.springframework.org/tags"
 	xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" >  
 	
+	<jsp:output doctype-root-element="HTML" doctype-system="about:legacy-compat" />
+	
 	<jsp:directive.page contentType="text/html;charset=UTF-8" />  
 		
 	<head>
