@@ -7,20 +7,16 @@
 		<c:if test="${not empty exception}">
 			<p>
 				<h4><spring:message code="exception_details" /></h4>
-				
 				<spring:message var="message" code="exception_message" />
-				<div id="_exception">
-					<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_exception', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${message}', open:false}})); </script>
+				<page:page id="_exception" title="${message}">
 					<c:out value="${exception.localizedMessage}" />
-				</div>
-				
+				</page:page>
 				<spring:message var="stacktrace" code="exception_stacktrace" />
-				<div id="_stacktrace">
-					<script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_stacktrace', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${stacktrace}', open:false}})); </script>
+				<page:page id="_exception" title="${stacktrace}">
 					<c:forEach items="${exception.stackTrace}" var="trace">
 						<c:out value="${trace}"/><br/>
 					</c:forEach>
-				</div>
+				</page:page>
 			</p>
 		</c:if>
 	</page:page>	

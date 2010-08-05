@@ -177,11 +177,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(entityMetadata.getIdentifierField().getFieldType(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsFirstResult));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsMaxResults));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
 		paramNames.add(new JavaSymbolName("page"));
 		paramNames.add(new JavaSymbolName("size"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
@@ -193,6 +195,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + entityMetadata.getRemoveMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"page\", (page == null) ? \"1\" : page.toString());");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"size\", (size == null) ? \"10\" : size.toString());");
 		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "?page=\" + ((page == null) ? \"1\" : page.toString()) + \"&size=\" + ((size == null) ? \"10\" : size.toString());");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
@@ -227,12 +231,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsFirstResult));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), paramAnnotationsMaxResults));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("page"));
 		paramNames.add(new JavaSymbolName("size"));
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
@@ -247,17 +251,17 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("if (page != null || size != null) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("int sizeNo = size == null ? 10 : size.intValue();");
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindEntriesMethod().getMethodName() + "(page == null ? 0 : (page.intValue() - 1) * sizeNo, sizeNo));");
 		bodyBuilder.appendFormalLine("float nrOfPages = (float) " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getCountMethod().getMethodName() + "() / sizeNo;");
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"maxPages\", (int) ((nrOfPages > (int) nrOfPages || nrOfPages == 0.0) ? nrOfPages + 1 : nrOfPages));");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} else {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + plural + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
@@ -283,11 +287,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(entityMetadata.getIdentifierField().getFieldType(), typeAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
@@ -299,9 +303,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
@@ -327,12 +331,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
@@ -344,9 +348,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 		bodyBuilder.indentRemove();
@@ -370,10 +374,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return method;
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "form"));
@@ -384,9 +388,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "\", new " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "());");
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		boolean listAdded = false;
 		for (MethodMetadata accessorMethod: beanInfoMetadata.getPublicAccessors()) {
@@ -412,7 +416,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 		}
 		if (listAdded) {
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"dependencies\", dependencies);");
+			bodyBuilder.appendFormalLine("model.addAttribute(\"dependencies\", dependencies);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/create\";");
 
@@ -439,12 +443,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("PUT"))));
@@ -456,9 +460,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (result.hasErrors()) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + entityName + ");");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "\", " + entityName + ");");
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 		bodyBuilder.indentRemove();
@@ -487,11 +491,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(entityMetadata.getIdentifierField().getFieldType(), typeAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
@@ -503,9 +507,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotations.add(requestMapping);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
 		if (!dateTypes.isEmpty()) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 
@@ -529,30 +533,30 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
-		boolean needModelMap = false;
+		boolean needmodel = false;
 		for (JavaType javaType : types) {
 			EntityMetadata typeEntityMetadata = null;
 			if (javaType.isCommonCollectionType() && isSpecialType(javaType.getParameters().get(0))) {
 				javaType = javaType.getParameters().get(0);
 				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			} else if (isEnumType(javaType)) {		
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
+				bodyBuilder.appendFormalLine("model.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", java.util.Arrays.asList(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants()));");
 			} else if (isSpecialType(javaType)) {
 				typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 			}
 			if (typeEntityMetadata != null) {
-				bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
+				bodyBuilder.appendFormalLine("model.addAttribute(\"" + getPlural(javaType).toLowerCase() + "\", " + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "());");
 			}
-			needModelMap = true;
+			needmodel = true;
 		}
 		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + methodMetadata.getMethodName().getSymbolName() + "\";");
 
-		if (needModelMap) {
-			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-			paramNames.add(new JavaSymbolName("modelMap"));
+		if (needmodel) {
+			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
+			paramNames.add(new JavaSymbolName("model"));
 		}
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
@@ -616,10 +620,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			methodParams.delete(methodParams.length() - 2, methodParams.length());
 		}
 
-		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), new ArrayList<AnnotationMetadata>()));
+		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
 		newParamNames.addAll(paramNames);
-		newParamNames.add(new JavaSymbolName("modelMap"));
+		newParamNames.add(new JavaSymbolName("model"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("params"), "find=" + methodMetadata.getMethodName().getSymbolName().replaceFirst("find" + entityMetadata.getPlural(), "")));
@@ -628,9 +632,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		annotations.add(requestMapping);
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + methodMetadata.getMethodName().getSymbolName() + "(" + methodParams.toString() + ").getResultList());");
 		if (paramTypes.contains(new JavaType(Date.class.getName())) || paramTypes.contains(new JavaType(Calendar.class.getName()))) {
-			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(modelMap);");
+			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/list\";");
 
@@ -746,10 +750,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			return addDateTimeFormatPatternsMethod;
 	
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), new ArrayList<AnnotationMetadata>()));
 		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("modelMap"));
+		paramNames.add(new JavaSymbolName("model"));
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		Iterator<Map.Entry<JavaSymbolName, String>> it = dateTypes.entrySet().iterator();
@@ -759,7 +763,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			String dateTimeFormatSimple = dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 			JavaType localeContextHolder = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
 			String localeContextHolderSimple = localeContextHolder.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-			bodyBuilder.appendFormalLine("modelMap.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue() + "\", " + localeContextHolderSimple + ".getLocale()));");
+			bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue() + "\", " + localeContextHolderSimple + ".getLocale()));");
 		}
 	
 		return new DefaultMethodMetadata(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
