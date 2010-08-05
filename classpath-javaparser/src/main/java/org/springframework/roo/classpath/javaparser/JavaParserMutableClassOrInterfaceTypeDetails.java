@@ -68,15 +68,15 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @since 1.0
  */
 public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClassOrInterfaceTypeDetails, CompilationUnitServices {
-	// passed into constructor
+	// Passed into constructor
 	private FileManager fileManager;
 
-	// computed from constructor
+	// Computed from constructor
 	private String fileIdentifier;
 
 	private String declaredByMetadataId;
 
-	// to satisfy interface
+	// To satisfy interface
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
@@ -88,7 +88,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 
-	// internal use
+	// Internal use
 	private ClassOrInterfaceDeclaration clazz;
 	private EnumDeclaration enumClazz;
 	private CompilationUnit compilationUnit;
@@ -112,12 +112,9 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		Assert.notNull(physicalTypeMetadataProvider, "Physical type metadata provider required");
 
 		this.name = typeName;
-
 		this.declaredByMetadataId = declaredByMetadataId;
 		this.fileManager = fileManager;
-
 		this.fileIdentifier = fileIdentifier;
-
 		this.compilationUnit = compilationUnit;
 
 		imports = compilationUnit.getImports();
@@ -245,7 +242,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 			// We defer this until now because it's illegal to refer to an inner type in the signature of the enclosing type
 			for (BodyDeclaration bodyDeclaration : members) {
 				if (bodyDeclaration instanceof TypeDeclaration) {
-					// found a type
+					// Found a type
 					innerTypes.add((TypeDeclaration) bodyDeclaration);
 				}
 			}
@@ -330,24 +327,36 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		JavaParserAnnotationMetadata.addAnnotationToList(this, annotations, annotation, true);
 	}
 
-	public boolean updateTypeAnnotation(AnnotationMetadata annotation) {
+	public boolean updateTypeAnnotation(AnnotationMetadata annotation, Set<JavaSymbolName> attributesToDeleteIfPresent) {
 		boolean writeChangesToDisk = false;
-		
+
+		// We are going to build a replacement AnnotationMetadata.
+		// This variable tracks the new attribute values the replacement will hold.
+		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
+
 		AnnotationMetadata existing = MemberFindingUtils.getTypeAnnotation(this, annotation.getAnnotationType());
 		if (existing == null) {
 			// Not already present, so just go and add it
-			addTypeAnnotation(annotation);
+			for (JavaSymbolName incomingAttributeName : annotation.getAttributeNames()) {
+				// Do not copy incoming attributes which exist in the attributesToDeleteIfPresent Set
+				if (attributesToDeleteIfPresent == null || !attributesToDeleteIfPresent.contains(incomingAttributeName)) {
+					AnnotationAttributeValue<?> incomingValue = annotation.getAttribute(incomingAttributeName);
+					replacementAttributeValues.put(incomingAttributeName, incomingValue);
+				}
+			}
+			AnnotationMetadata replacement = new DefaultAnnotationMetadata(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
+			addTypeAnnotation(replacement);
 			return true;
 		}
 		
-		// We are going to build a replacement AnnotationMetadata by the time this method ends.
-		// This variable tracks the new attribute values the replacement will hold.
-		Map<JavaSymbolName, AnnotationAttributeValue<?>> replacementAttributeValues = new LinkedHashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
-		
 		// Copy the existing attributes into the new attributes
 		for (JavaSymbolName existingAttributeName : existing.getAttributeNames()) {
-			AnnotationAttributeValue<?> existingValue = existing.getAttribute(existingAttributeName);
-			replacementAttributeValues.put(existingAttributeName, existingValue);
+			if (attributesToDeleteIfPresent != null && attributesToDeleteIfPresent.contains(existingAttributeName)) {
+				writeChangesToDisk = true;
+			} else {
+				AnnotationAttributeValue<?> existingValue = existing.getAttribute(existingAttributeName);
+				replacementAttributeValues.put(existingAttributeName, existingValue);
+			}
 		}
 
 		// Now we ensure every incoming attribute replaces the existing
@@ -368,7 +377,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 				replacementAttributeValues.put(incomingAttributeName, incomingValue);
 				writeChangesToDisk = true;
 			}
-			
 		}
 		
 		// Were there any material changes?

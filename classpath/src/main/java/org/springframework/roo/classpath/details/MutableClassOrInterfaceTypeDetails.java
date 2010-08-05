@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
@@ -46,10 +47,15 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * annotation metadata is @RooFoo(b=2), there is no net change and thus the java source on disk
 	 * remains unchanged.
 	 * 
+	 * <p>
+	 * If there are attributes in the presented attributesToDeleteIfPresent Set, these attributes are
+	 * removed from the annotation regardless of any attribute values that may have changed.
+	 * 
 	 * @param annotation to update (required)
+	 * @param attributesToDeleteIfPresent attributes to delete from annotation
 	 * @return true if the disk was changed, false otherwise
 	 */
-	boolean updateTypeAnnotation(AnnotationMetadata annotation);
+	boolean updateTypeAnnotation(AnnotationMetadata annotation, Set<JavaSymbolName> attributesToDeleteIfPresent);
 
 	/**
 	 * Removes the type-level annotation of the {@link JavaType} indicated. This annotation must
