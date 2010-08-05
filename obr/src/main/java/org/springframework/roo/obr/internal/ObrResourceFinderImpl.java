@@ -1,5 +1,6 @@
 package org.springframework.roo.obr.internal;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.osgi.service.obr.Repository;
 import org.osgi.service.obr.RepositoryAdmin;
 import org.osgi.service.obr.Resource;
 import org.springframework.roo.obr.ObrResourceFinder;
+import org.springframework.roo.url.stream.UrlInputStreamService;
 
 /**
  * Default implementation of {@link ObrResourceFinder}.
@@ -22,6 +24,7 @@ import org.springframework.roo.obr.ObrResourceFinder;
 @Service
 public class ObrResourceFinderImpl implements ObrResourceFinder {
 	@Reference private RepositoryAdmin repositoryAdmin;
+	@Reference private UrlInputStreamService urlInputStreamService;
 	private boolean obrRepositoriesDownloaded = false;
 
 	protected void activate(ComponentContext context) {
@@ -29,10 +32,13 @@ public class ObrResourceFinderImpl implements ObrResourceFinder {
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				try {
+					// Do not proceed if the user appears disconnect from the network (ROO-1169)
+					urlInputStreamService.openConnection(new URL("http://www.springsource.org/roo"));
+					
+					// To get this far the network appears connected, so let's proceed
 					repositoryAdmin.listRepositories();
 					obrRepositoriesDownloaded = true;
-				} catch (RuntimeException ignore) {
-				}
+				} catch (Throwable ignore) {}
 			}
 		}, "OBR Resource Finder Eager Download");
 		t.start();
