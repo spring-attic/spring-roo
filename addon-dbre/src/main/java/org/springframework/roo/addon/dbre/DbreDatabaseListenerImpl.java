@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -87,10 +88,10 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationToUse = this.destinationPackage;
 		if (destinationToUse == null) {
-			SortedSet<JavaType> existingDbreManagedEntities = dbreTableService.getDatabaseManagedEntities();
-			if (!existingDbreManagedEntities.isEmpty()) {
+			SortedSet<JavaType> managedEntities = dbreTableService.getDatabaseManagedEntities();
+			if (!managedEntities.isEmpty()) {
 				// Take the package of the first one
-				destinationToUse = existingDbreManagedEntities.first().getPackage();
+				destinationToUse = managedEntities.first().getPackage();
 
 				// Change the local field, as this means the user really has specified a package as DBRE has entities on disk
 				this.destinationPackage = destinationToUse;
@@ -114,8 +115,16 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 				}
 			}
 		}
-
+		
 		deleteManagedTypesNotInModel(tables);
+
+		// Fields may have changed so ensure metadata providers get a chance to refresh themselves
+		metadataService.evictAll();
+		for (JavaType managedType : dbreTableService.getDatabaseManagedEntities()) {
+			String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
+			metadataService.get(physicalTypeMid, true);
+			metadataDependencyRegistry.notifyDownstream(physicalTypeMid);
+		}
 	}
 
 	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
@@ -130,7 +139,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
 		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		manageEntityIdentifier(javaType, entityAttributes, table);
+		manageEntityIdentifier(javaType, entityAttributes, new HashSet<JavaSymbolName>(), table);
 		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), entityAttributes));
 
 		// Add @RooDbManaged
@@ -175,33 +184,15 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 
 		// Get new @RooEntity attributes
-		manageEntityIdentifier(javaType, entityAttributes, table);
+		Set<JavaSymbolName> attributesToDeleteIfPresent = new HashSet<JavaSymbolName>();
+		manageEntityIdentifier(javaType, entityAttributes, attributesToDeleteIfPresent, table);
 
 		// Update the annotation on disk
 		AnnotationMetadata annotation = new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes);
-		boolean changed = mutableTypeDetails.updateTypeAnnotation(annotation);
-		if (!changed) {
-			// Although @RooEntity annotation on disk did not change, other columns may have been added or
-			// deleted from the table so we still need to trigger the metadata.
-			notify(javaType);
-		}
+		mutableTypeDetails.updateTypeAnnotation(annotation, attributesToDeleteIfPresent);
 	}
 
-	private void notify(JavaType javaType) {
-		String dbreMetadataMid = DbreMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		metadataService.get(dbreMetadataMid, true);
-		
-		// Most ITD-based metadata need not notify downstream dependencies because the ITDs are
-		// primarily based on .java type changes and therefore these are informed via standard
-		// notify(..) calls. DBRE is different from other ITD-based metadata because the contents
-		// of the ITD are primarily based on the Database object. Therefore we cannot rely on
-		// notify(..) calls as there won't be any (the Database object isn't a MetadataItem we
-		// are monitoring). Accordingly we need to explicitly let our downstream metadata items
-		// (like BeanInfoMetadata) know we have probably changed, so they can refresh themselves.
-		metadataDependencyRegistry.notifyDownstream(dbreMetadataMid);
-	}
-
-	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Table table) {
+	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Set<JavaSymbolName> attributesToDeleteIfPresent, Table table) {
 		JavaType identifierType = getIdentifierType(javaType);
 		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 
@@ -214,7 +205,9 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			if (isIdentifierDeletable(identifierType)) {
 				deleteManagedType(identifierType);
 			}
-
+			
+			attributesToDeleteIfPresent.add(IDENTIFIER_TYPE);
+			
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
 			identifierResults.put(javaType, identifiers);
 		} else if (pkCount > 1) {
@@ -287,8 +280,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 	private void deleteManagedTypesNotInModel(Set<Table> tables) {
 		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
-		Set<JavaType> managedEntities = dbreTableService.getDatabaseManagedEntities();
-		for (JavaType javaType : managedEntities) {
+		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
 			// Check for existence of entity from table model and delete if not in database model
 			if (!isDetectedEntityInModel(javaType, tables)) {
 				deleteManagedTypes(javaType, managedIdentifierTypes);
@@ -388,9 +380,6 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 				shell.flash(Level.FINE, "Deleted " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 			}
 			
-			
-			notify(javaType);
-
 			shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 		}
 	}
