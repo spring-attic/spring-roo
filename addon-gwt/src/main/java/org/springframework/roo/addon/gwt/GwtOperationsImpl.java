@@ -317,6 +317,16 @@ public class GwtOperationsImpl implements GwtOperations {
 			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
 			.build(), firstRule);
 		
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationMobileScaffold/**").build())
+			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationMobileScaffold/$1").build())
+			.build(), firstRule);
+		
+		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
+			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationMobileScaffold.html").build())
+			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationMobileScaffold.html").build())
+			.build(), firstRule);
+		
 		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc).addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/gwtRequest").build())
 			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/gwtRequest").build())
 			.build(), firstRule);
