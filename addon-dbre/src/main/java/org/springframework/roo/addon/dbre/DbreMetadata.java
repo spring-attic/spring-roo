@@ -425,7 +425,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				uniqueFields.put(fieldName, field);
 			} else if ((getIdField() != null && column.isPrimaryKey()) || table.findForeignKeyByLocalColumnName(columnName) != null || (table.findExportedKeyByLocalColumnName(columnName) != null && table.findUniqueReference(columnName) != null)) {
 				field = null;
-			} else if (!isCompositeKeyField) {
+			} else if (!isCompositeKeyField) {				
 				field = getField(fieldName, column);
 				uniqueFields.put(fieldName, field);
 			}

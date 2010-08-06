@@ -121,9 +121,9 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Fields may have changed so ensure metadata providers get a chance to refresh themselves
 		metadataService.evictAll();
 		for (JavaType managedType : dbreTableService.getDatabaseManagedEntities()) {
-			String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
-			metadataService.get(physicalTypeMid, true);
-			metadataDependencyRegistry.notifyDownstream(physicalTypeMid);
+			String dbreMid = DbreMetadata.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
+			metadataService.get(dbreMid, true);
+			metadataDependencyRegistry.notifyDownstream(dbreMid);
 		}
 	}
 

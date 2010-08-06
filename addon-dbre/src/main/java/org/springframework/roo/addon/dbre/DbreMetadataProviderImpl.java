@@ -26,12 +26,12 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 @Component
 @Service
-public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider, DatabaseListener {
+public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
 	@Reference private DbreTableService dbreTableService;
-	private Database database;
+	@Reference private DbreModelService dbreModelService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -59,10 +59,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
-	public void notifyDatabaseRefreshed(Database newDatabase) {
-		this.database = newDatabase;
-	}
-
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to lookup the metadata we depend on
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
@@ -80,6 +76,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		}
 
 		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
+		Database database = dbreModelService.getDatabase(null);
 		if (database == null) {
 			return null;
 		}
