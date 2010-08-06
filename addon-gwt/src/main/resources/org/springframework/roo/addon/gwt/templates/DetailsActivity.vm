@@ -56,7 +56,7 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 			return;
 		}
    		
-	        RequestObject<Void> deleteRequest = requests.${entity.nameUncapitalized}Request().remove(); // TODO: remove the hard-coding 
+	    RequestObject<Void> deleteRequest = requests.${entity.nameUncapitalized}Request().remove(view.getValue()); // TODO: remove the hard-coding 
 		DeltaValueStore deltas = deleteRequest.getDeltaValueStore();
 		deltas.delete(view.getValue());
 		deleteRequest.fire(new Receiver<Void>() {

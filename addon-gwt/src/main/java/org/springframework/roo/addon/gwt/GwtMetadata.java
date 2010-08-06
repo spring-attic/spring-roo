@@ -735,19 +735,24 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		buildRequestMethod(destinationMetadataId, methods, findEntriesMethod);
 
-
-    // add remove() and persist() methods, HACK. Fix TODO(amitmanjhi)
-    JavaType methodReturnType = new JavaType(
+		// remove(EmployeeRecord record) and persist(EmployeeRecord record) methods.
+		JavaType methodReturnType = new JavaType(
         "com.google.gwt.requestfactory.shared.RequestObject", 0,
         DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
     for (MethodMetadata metadata : new MethodMetadata[] {
         entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod()}) {
+      List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(
+          getDestinationJavaType(MirrorType.RECORD), null));
+      List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName(
+          "record"));
+      List<AnnotationMetadata> annotations = Collections.singletonList((AnnotationMetadata) new DefaultAnnotationMetadata(
+          new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>>emptyList()));
       MethodMetadata method1Metadata = new DefaultMethodMetadata(
           destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(),
-          methodReturnType, null, null, null, null, null);
+          methodReturnType, parameterTypes, parameterNames, annotations, null, null);
       methods.add(method1Metadata);
     }
-    
+
 		this.request = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 
