@@ -2,6 +2,8 @@ package org.springframework.roo.addon.propfiles;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -77,26 +79,18 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} else {
 			props = new Properties();
 		}
-		
-		try {
-			if (fileManager.exists(filePath)) {
-				mutableFile = fileManager.updateFile(filePath);
-				props.load(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Properties file not found");
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+
+		if (fileManager.exists(filePath)) {
+			mutableFile = fileManager.updateFile(filePath);
+			loadProps(props, mutableFile.getInputStream());
+		} else {
+			throw new IllegalStateException("Properties file not found");
 		}
+
 		String propValue = props.getProperty(key);
 		if (propValue == null || !propValue.equals(value)) {
 			props.setProperty(key, value);
-			
-			try {
-				props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
-			} catch (IOException ioe) {
-				throw new IllegalStateException(ioe);
-			}
+			storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 		}
 	}
 	
@@ -108,24 +102,17 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
-		
-		try {
-			if (fileManager.exists(filePath)) {
-				mutableFile = fileManager.updateFile(filePath);
-				props.load(mutableFile.getInputStream());
-			} else {
-				throw new IllegalStateException("Properties file not found");
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+
+		if (fileManager.exists(filePath)) {
+			mutableFile = fileManager.updateFile(filePath);
+			loadProps(props, mutableFile.getInputStream());
+		} else {
+			throw new IllegalStateException("Properties file not found");
 		}
+
 		props.remove(key);
 		
-		try {
-			props.store(mutableFile.getOutputStream(), "Updated at " + new Date());
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
+		storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 	}
 
 	public String getProperty(Path propertyFilePath, String propertyFilename, String key) {
@@ -137,15 +124,11 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
 		
-		try {
-			if (fileManager.exists(filePath)) {
-				mutableFile = fileManager.updateFile(filePath);
-				props.load(mutableFile.getInputStream());
-			} else {
-				return null;
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		if (fileManager.exists(filePath)) {
+			mutableFile = fileManager.updateFile(filePath);
+			loadProps(props, mutableFile.getInputStream());
+		} else {
+			return null;
 		}
 		
 		return props.getProperty(key);
@@ -160,7 +143,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		
 		try {
 			if (fileManager.exists(filePath)) {
-				props.load(new FileInputStream(filePath));
+				loadProps(props, new FileInputStream(filePath));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}
@@ -190,7 +173,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		
 		try {
 			if (fileManager.exists(filePath)) {
-				props.load(new FileInputStream(filePath));
+				loadProps(props, new FileInputStream(filePath));
 			} else {
 				throw new IllegalStateException("Properties file not found");
 			}
@@ -203,5 +186,29 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			result.put(key.toString(), props.getProperty(key.toString()));
 		}
 		return Collections.unmodifiableMap(result);
+	}
+	
+	private void loadProps(Properties props, InputStream is) {
+		try {
+			props.load(is);
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not load properties", e);
+		} finally {
+			try {
+				is.close();
+			} catch (IOException ignore) {}
+		}
+	}
+	
+	private void storeProps(Properties props, OutputStream os, String comment) {
+		try {
+			props.store(os, comment);
+		} catch (IOException e) {
+			throw new IllegalStateException("Could not store properties", e);
+		} finally {
+			try {
+				os.close();
+			} catch (IOException ignore) {}
+		}
 	}
 }
