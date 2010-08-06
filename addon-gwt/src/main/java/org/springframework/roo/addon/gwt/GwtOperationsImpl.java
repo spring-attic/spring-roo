@@ -154,6 +154,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
+                        if (fileName.contains("GaeUserInformation") && !isGaeEnabled()) {
+                          continue;
+                        }
 
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
@@ -285,8 +288,14 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
-		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
-
+		WebXmlUtils.WebXmlParam initParams = null;
+		if (isGaeEnabled()) {
+                  String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".gwt.GaeUserInformation";
+                  initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
+                  WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
+		} else {
+                  WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
+                }
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
 		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
 

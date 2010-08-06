@@ -195,6 +195,7 @@ public class GwtFileListener implements FileEventListener {
 		bb.reset();
 		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
 		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.RequestFactory;");
+		bb.appendFormalLine("import com.google.gwt.requestfactory.shared.UserInformationRequest;");
 		bb.appendFormalLine("public interface " + destType.getFullName() + " extends RequestFactory {");
 		bb.indent();
 
@@ -205,6 +206,7 @@ public class GwtFileListener implements FileEventListener {
 			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
 			bb.appendFormalLine(javaType.getSimpleTypeName() + " " + StringUtils.uncapitalize(javaType.getSimpleTypeName()) + "();");
 		}
+	       	bb.appendFormalLine("UserInformationRequest userInformationRequest();");
 
 		bb.indentRemove();
 		bb.appendFormalLine("}");
