@@ -11,18 +11,26 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
+import com.google.gwt.requestfactory.client.LoginWidget;
+import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.RequestEvent;
+import com.google.gwt.requestfactory.shared.UserInformationRecord;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationPlace;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
+import com.google.gwt.valuestore.shared.SyncResult;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Mobile application for browsing the entities of the Expenses app.
@@ -42,6 +50,21 @@ public class ScaffoldMobile implements EntryPoint {
 		/* Top level UI */
 
 		final ScaffoldMobileShell shell = new ScaffoldMobileShell();
+
+		/* Check for Authentication failures or mismatches */
+
+		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+
+		/* Add a login widget to the page */
+
+		final LoginWidget login = shell.getLoginWidget();
+		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
+		  public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
+		    login.setUserInformation(userInformationRecord);
+		  }
+		};
+		requestFactory.userInformationRequest().getCurrentUserInformation(
+		     Location.getHref()).fire(receiver);
 
 		/* Left side lets us pick from all the types of entities */
 

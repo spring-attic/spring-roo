@@ -3,6 +3,7 @@ package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 import com.google.gwt.app.place.PlacePickerView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.requestfactory.client.LoginWidget;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -21,6 +22,7 @@ public class ScaffoldMobileShell extends Composite {
 
 	@UiField SimplePanel body;
 	@UiField DivElement error;
+	@UiField LoginWidget loginWidget;
 	@UiField PlacePickerView<ApplicationListPlace> placesBox;
 
 	public ScaffoldMobileShell() {
@@ -32,6 +34,13 @@ public class ScaffoldMobileShell extends Composite {
 	 */
 	public SimplePanel getBody() {
 		return body;
+	}
+
+	/**
+	 * @return the login widget
+	 */
+	public LoginWidget getLoginWidget() {
+	  return loginWidget;
 	}
 
 	public PlacePickerView<ApplicationListPlace> getPlacesBox() {
