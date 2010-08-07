@@ -46,7 +46,7 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 		return Window.confirm(msg);
 	}
 
-	public {{=entity.record}} getValue() {
+	public {{=record}} getValue() {
 		return record;
 	}
 
