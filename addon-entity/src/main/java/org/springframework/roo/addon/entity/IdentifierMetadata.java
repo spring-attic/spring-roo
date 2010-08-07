@@ -44,6 +44,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	private boolean noArgConstructor;
+	private List<FieldMetadata> fields;
 
 	// From annotation
 	@AutoPopulate private boolean gettersByDefault = true;
@@ -73,33 +74,33 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		builder.addTypeAnnotation(getEmbeddableAnnotation());
 		
 		// Add declared fields and accessors and mutators
-		List<FieldMetadata> fields = getFields();
+		fields = getFields();
 		for (FieldMetadata field : fields) {
 			builder.addField(field);
 		}
 		
 		// Obtain an parameterised constructor,
-		builder.addConstructor(getParameterizedConstructor(fields));
+		builder.addConstructor(getParameterizedConstructor());
 
 		// Obtain a no-arg constructor, if one is appropriate to provide
 		builder.addConstructor(getNoArgConstructor());
 
 		if (gettersByDefault) {
-			List<MethodMetadata> accessors = getAccessors(fields);
+			List<MethodMetadata> accessors = getAccessors();
 			for (MethodMetadata accessor : accessors) {
 				builder.addMethod(accessor);
 			}
 		}
 		if (settersByDefault) {
-			List<MethodMetadata> mutators = getMutators(fields);
+			List<MethodMetadata> mutators = getMutators();
 			for (MethodMetadata mutator : mutators) {
 				builder.addMethod(mutator);
 			}
 		}
 
 		// Add equals and hashCode methods
-		builder.addMethod(getEqualsMethod(fields));
-		builder.addMethod(getHashCodeMethod(fields));
+		builder.addMethod(getEqualsMethod());
+		builder.addMethod(getHashCodeMethod());
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -197,7 +198,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * 
 	 * @return the accessors (never returns null)
 	 */
-	public List<MethodMetadata> getAccessors(List<FieldMetadata> fields) {
+	public List<MethodMetadata> getAccessors() {
 		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> accessors = new LinkedList<MethodMetadata>();
 
@@ -236,7 +237,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * 
 	 * @return the mutators (never returns null)
 	 */
-	public List<MethodMetadata> getMutators(List<FieldMetadata> fields) {
+	public List<MethodMetadata> getMutators() {
 		Assert.notNull(fields, "Fields required");
 		List<MethodMetadata> mutators = new LinkedList<MethodMetadata>();
 
@@ -281,7 +282,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * @param fields the declared fields
 	 * @return the constructor, never null.
 	 */
-	public ConstructorMetadata getParameterizedConstructor(List<FieldMetadata> fields) {
+	public ConstructorMetadata getParameterizedConstructor() {
 		Assert.notNull(fields, "Fields required");
 		// Search for an existing constructor
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -341,7 +342,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return new DefaultConstructorMetadata(getId(), Modifier.PRIVATE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
 	}
 
-	public MethodMetadata getEqualsMethod(List<FieldMetadata> fields) {
+	public MethodMetadata getEqualsMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the equals method
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -388,7 +389,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
-	public MethodMetadata getHashCodeMethod(List<FieldMetadata> fields) {
+	public MethodMetadata getHashCodeMethod() {
 		Assert.notNull(fields, "Fields required");
 		// See if the user provided the hashCode method
 		MethodMetadata hashCodeMethod = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName("hashCode"), new ArrayList<JavaType>());
