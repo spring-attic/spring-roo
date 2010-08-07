@@ -2,9 +2,7 @@ package org.springframework.roo.addon.web.mvc.jsp.menu;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
@@ -77,7 +75,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		Document document;
-		try {			
+		try {		
 			document = XmlUtils.getDocumentBuilder().parse(getMenuFile());
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Unable to parse menu.jspx" + (e.getMessage() == null || "".equals(e.getMessage()) ? "" : " (" + e.getMessage() + ")"), e);
@@ -177,7 +175,7 @@ public class MenuOperationsImpl implements MenuOperations {
 		writeToDiskIfNecessary(document);
 	}
 	
-	private InputStream getMenuFile() {			
+	private File getMenuFile() {			
 		if (!fileManager.exists(menuFile)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "menu.jspx"), fileManager.createFile(menuFile).getOutputStream());
@@ -209,15 +207,8 @@ public class MenuOperationsImpl implements MenuOperations {
 				new IllegalStateException("Encountered an error during copying of resources for MVC Menu addon.", e);
 			}			
 		}
-		
-		// We know the menu file already exists, as the logic earlier copied it from a template
-		InputStream existingMenu;
-		try {
-			existingMenu = new FileInputStream(new File(menuFile));
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}		
-		return existingMenu;
+			
+		return new File(menuFile);
 	}
 	
 	/** return indicates if disk was changed (ie updated or created) */
@@ -248,7 +239,7 @@ public class MenuOperationsImpl implements MenuOperations {
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
 				String jspContent = byteArrayOutputStream.toString();
-
+				byteArrayOutputStream.close();
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file

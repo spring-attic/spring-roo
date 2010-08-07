@@ -250,7 +250,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
 				String jspContent = byteArrayOutputStream.toString();
-
+				byteArrayOutputStream.close();
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file
@@ -259,7 +259,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		} catch (IOException ioe) {
 			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
-		
 		// A file existed, but it contained the same content, so we return false
 		return false;
 	}

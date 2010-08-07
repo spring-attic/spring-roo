@@ -359,6 +359,9 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
+		try {
+			configTemplateInputStream.close();
+		} catch (IOException ignore) {}
 	}
 
 	/**

@@ -72,7 +72,12 @@ public final class XmlUtils {
 		
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		try {
-			transformer.transform(new DOMSource(document), createUnixStreamResultForEntry(outputEntry));
+			StreamResult streamResult = createUnixStreamResultForEntry(outputEntry);
+			transformer.transform(new DOMSource(document), streamResult);
+			OutputStream os = streamResult.getOutputStream();
+			if (os != null) {
+				os.close();
+			}
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}

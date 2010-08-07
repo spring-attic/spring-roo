@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -52,24 +52,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	
 	public void installAllWebMvcArtifacts() {
 		installMinmalWebArtefacts();
-		copyUrlRewrite();
 		manageWebXml();
 		updateConfiguration();
-	}
-	
-	private void copyUrlRewrite(){
-		String urlrewriteFilename = "WEB-INF/urlrewrite.xml";
-	
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename))) {
-			//file exists, so nothing to do
-			return;
-		}		
-		
-		try {
-			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "urlrewrite-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/urlrewrite.xml")).getOutputStream());
-		} catch (IOException e) {
-			new IllegalStateException("Encountered an error during copying of resources for maven addon.", e);
-		}
 	}
 
 	private void copyWebXml() {
@@ -96,7 +80,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		WebXmlUtils.setDescription("Roo generated " + projectMetadata.getProjectName() + " application", webXml, null);		
 		
 		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"), webXml);
-		
+		try {
+			templateInputStream.close();
+		} catch (IOException ignore) {}
 		fileManager.scan();
 	}
 	
@@ -122,14 +108,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", webXml, null);
-		WebXmlUtils.addFilter(WebMvcOperations.URL_REWRITE_FILTER_NAME, "org.tuckey.web.filters.urlrewrite.UrlRewriteFilter", "/*", webXml, null);
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/app/*", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
-		WebXmlUtils.addServlet("Resource Servlet", "org.springframework.js.resource.ResourceServlet", "/resources/*", new Integer(0), webXml, null);
+		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
 		WebXmlUtils.setSessionTimeout(new Integer(10), webXml, null);
 		WebXmlUtils.addWelcomeFile("index", webXml, null);
-		WebXmlUtils.addExceptionType("java.lang.Exception", "/app/uncaughtException", webXml, null);
-		WebXmlUtils.addErrorCode(new Integer(404), "/app/resourceNotFound", webXml, null);
+		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
+		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", webXml, null);
 
 		writeToDiskIfNecessary(webXmlFile, webXml);
 	}
@@ -158,7 +142,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Element rootElement = (Element) webMvcConfig.getFirstChild();
 		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"), webMvcConfig);
-
+		try {
+			templateInputStream.close();
+		} catch (IOException ignore) {}
 		fileManager.scan();
 	}
 
@@ -180,6 +166,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, proposed);
 		String xmlContent = byteArrayOutputStream.toString();
+		try {
+			byteArrayOutputStream.close();
+		} catch (IOException ignore) {}
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
 		MutableFile mutableFile = null;
