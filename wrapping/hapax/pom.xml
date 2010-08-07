@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>wrapping</artifactId>
+		<version>1.1.0.M3</version>
+	</parent>
+    <groupId>org.springframework.roo.wrapping</groupId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+    <version>${osgiVersion}</version>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+
+    <properties>
+        <pkgArtifactId>hapax</pkgArtifactId>
+        <pkgVersion>2.3.2</pkgVersion>
+        <osgiVersion>${pkgVersion}.0001</osgiVersion>
+        <pkgVendor>The Hapax2 Project</pkgVendor>
+        <pkgDocUrl>http://code.google.com/p/hapax2/</pkgDocUrl>
+        <pkgLicense>http://www.opensource.org/licenses/mit-license.php</pkgLicense>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>hapax</groupId>
+            <artifactId>${pkgArtifactId}</artifactId>
+            <version>${pkgVersion}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

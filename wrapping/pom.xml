@@ -23,7 +23,9 @@
         <module>postgresql</module>
 	<module>hsqldb</module>
 	<module>jtds</module>
-    </modules>
+	<module>jtopen</module>
+ 	<module>hapax</module>
+   </modules>
 
     <repositories>
         <repository>

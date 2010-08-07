@@ -1,5 +1,23 @@
 package org.springframework.roo.addon.gwt;
 
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateLoader;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
@@ -33,19 +51,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Metadata for GWT.
@@ -116,7 +121,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		buildListView();
 		buildListViewUiXml();
-		buildDetailsView();
+	//  buildDetailsView();
+	buildDetailsViewHapax();
 		buildDetailsViewUiXml();
 		buildEditView();
 		buildEditViewUiXml();
@@ -488,6 +494,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 		writeWithTemplate(destFile, buildContext(destType), templateFile);
 	}
 
+	private void writeWithHapaxTemplate(MirrorType destType, String baseDir, String templateFile) throws Exception {
+		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
+		writeWithHapaxTemplate(destFile, buildDataDictionary(destType), baseDir, templateFile);
+	}
+
 	private void writeWithTemplate(MirrorType destType, VelocityContext context, String templateFile) throws Exception {
 		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
 		writeWithTemplate(destFile, context, templateFile);
@@ -501,6 +512,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		StringWriter sw = new StringWriter();
 		engine.getTemplate(templateFile).merge(context, sw);
 		write(destFile, sw.toString(), fileManager);
+	}
+
+	private void writeWithHapaxTemplate(String destFile, TemplateDataDictionary dataDictionary, String baseDir, String templateFile) throws Exception {
+		TemplateLoader templateLoader = GwtTemplateLoader.create(baseDir);
+		Template template = templateLoader.getTemplate(templateFile);
+		write(destFile, template.renderToString(dataDictionary), fileManager);
 	}
 
 	public static class Property {
@@ -576,6 +593,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 		public String getReadableName() {
 			return new JavaSymbolName(name).getReadableSymbolName();
 		}
+		
+		public String toString() {
+			return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("record.").append(getGetter()).append("()));").toString();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -620,6 +641,52 @@ public class GwtMetadata extends AbstractMetadataItem {
 		return context;
 	}
 
+	@SuppressWarnings("unchecked")
+	private TemplateDataDictionary buildDataDictionary(MirrorType destType) {
+		JavaType javaType = getDestinationJavaType(destType);
+		String clazz = javaType.getSimpleTypeName();
+		JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
+
+		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+	//	dataDictionary.addSection("shared", newsta HashMap());
+		HashMap eMap = new HashMap();
+	//	dataDictionary.put("entity", eMap);
+		dataDictionary.setVariable("className", clazz);
+		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+		ArrayList<String> imports = new ArrayList<String>();
+		imports.add(recordType.getFullyQualifiedTypeName());
+	//	context.put("imports", imports);
+		dataDictionary.addSection("imports").setVariable("import", recordType.getFullyQualifiedTypeName());
+		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
+		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
+		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
+		dataDictionary.setVariable("record", recordType.getSimpleTypeName());
+		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
+
+		ArrayList<String> fieldNames = new ArrayList<String>();
+		for (FieldMetadata f : record.getDeclaredFields()) {
+			if (f.getFieldName().getSymbolName().equals("TOKEN")) {
+				continue;
+			}
+			dataDictionary.addSection("entityFields").setVariable("field", f.getFieldName().getSymbolName());
+			fieldNames.add(f.getFieldName().getSymbolName());
+		}
+		eMap.put("fields", fieldNames);
+
+		ArrayList<Property> props = new ArrayList<Property>();
+		for (MethodMetadata f : record.getDeclaredMethods()) {
+			if (!f.getMethodName().getSymbolName().startsWith("get")) {
+				continue;
+			}
+			String getter = f.getMethodName().getSymbolName();
+			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), f.getReturnType());
+			dataDictionary.addSection("entityProperties").setVariable("prop", property.toString());
+
+		}
+		eMap.put("properties", props);
+		return dataDictionary;
+	}
+
 	private void buildListViewUiXml() {
 		MirrorType dType = MirrorType.LIST_VIEW;
 		String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
@@ -637,6 +704,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 			throw new IllegalStateException(e);
 		}
 	}
+
+	private void buildDetailsViewHapax() {
+		try {
+			writeWithHapaxTemplate(MirrorType.DETAILS_VIEW, "org/springframework/roo/addon/gwt/templates/", "DetailsView");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 
 	private void buildDetailsViewUiXml() {
 		MirrorType dType = MirrorType.DETAILS_VIEW;
