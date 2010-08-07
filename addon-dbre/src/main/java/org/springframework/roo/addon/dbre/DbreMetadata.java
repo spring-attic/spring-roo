@@ -17,11 +17,11 @@ import org.springframework.roo.addon.dbre.model.JoinTable;
 import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -87,15 +87,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
-	private DbreTableService dbreTableService;
+	private DbreTypeResolutionService dbreTypeResolutionService;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, DbreTableService dbreTableService, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, MetadataService metadataService, DbreTypeResolutionService dbreTypeResolutionService, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
 		this.entityMetadata = entityMetadata;
 		this.metadataService = metadataService;
-		this.dbreTableService = dbreTableService;
+		this.dbreTypeResolutionService = dbreTypeResolutionService;
 		
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooDbManaged.class.getName()));
@@ -105,7 +105,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 
-		Table table = database.findTable(dbreTableService.suggestTableNameForNewType(javaType));
+		Table table = database.findTable(dbreTypeResolutionService.suggestTableNameForNewType(javaType));
 		if (table == null) {
 			return;
 		}
@@ -135,14 +135,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			String fieldSuffix = manyToManyCount > 0 ? String.valueOf(manyToManyCount) : "";
 
 			if (joinTable.getOwningSideTable().equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTableService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
 
 			if (joinTable.getInverseSideTable().equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTableService.suggestFieldName(joinTable.getOwningSideTable().getName())) + fieldSuffix);
-				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTableService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getOwningSideTable().getName())) + fieldSuffix);
+				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
@@ -161,9 +161,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String foreignTableName = foreignKey.getForeignTableName();
 				Short keySequence = foreignKey.getKeySequence();
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
-				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
-//				JavaType fieldType = dbreTableService.suggestTypeNameForNewTable(foreignTableName, governorTypeDetails.getName().getPackage());
-				JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
+				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
+				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
@@ -188,12 +187,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					if (isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
-						JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
+						JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 						
-						JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
+						JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
-						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTableService.suggestFieldName(table.getName()) + fieldSuffix);
+						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
 						addToBuilder(field);
 					}
@@ -213,8 +212,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					if (!isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
-						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTableService.suggestFieldName(foreignTableName)) + fieldSuffix);
-						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTableService.suggestFieldName(table.getName()) + fieldSuffix);
+						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(foreignTableName)) + fieldSuffix);
+						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
 						addToBuilder(field);
 					}
@@ -235,8 +234,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				Short keySequence = foreignKey.getKeySequence();
 				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
 				String foreignTableName = foreignKey.getForeignTableName();
-				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(foreignTableName) + fieldSuffix);
-				JavaType fieldType = dbreTableService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
+				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
+				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
@@ -253,7 +252,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private FieldMetadata getManyToManyOwningSideField(JavaSymbolName fieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = dbreTableService.findTypeForTableName(joinTable.getInverseSideTable().getName(), javaPackage);
+		JavaType element = dbreTypeResolutionService.findTypeForTableName(joinTable.getInverseSideTable().getName(), javaPackage);
 		Assert.notNull(element, getErrorMsg(joinTable.getInverseSideTable().getName()));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
@@ -294,7 +293,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private FieldMetadata getManyToManyInverseSideField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, JoinTable joinTable, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		JavaType element = dbreTableService.findTypeForTableName(joinTable.getOwningSideTable().getName(), javaPackage);
+		JavaType element = dbreTypeResolutionService.findTypeForTableName(joinTable.getOwningSideTable().getName(), javaPackage);
 		Assert.notNull(element, getErrorMsg(joinTable.getOwningSideTable().getName()));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
@@ -345,7 +344,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, JavaPackage javaPackage) {
 		List<JavaType> params = new ArrayList<JavaType>();
 
-		JavaType element = dbreTableService.findTypeForTableName(foreignTableName, javaPackage);
+		JavaType element = dbreTypeResolutionService.findTypeForTableName(foreignTableName, javaPackage);
 		Assert.notNull(element, getErrorMsg(foreignTableName));
 		params.add(element);
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA);
@@ -415,7 +414,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		for (Column column : table.getColumns()) {
 			String columnName = column.getName();
-			JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(column.getName()));
+			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
 			boolean isCompositeKeyField = isCompositeKeyField(fieldName, javaType);
 			FieldMetadata field = null;
 
@@ -425,7 +424,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				uniqueFields.put(fieldName, field);
 			} else if ((getIdField() != null && column.isPrimaryKey()) || table.findForeignKeyByLocalColumnName(columnName) != null || (table.findExportedKeyByLocalColumnName(columnName) != null && table.findUniqueReference(columnName) != null)) {
 				field = null;
-			} else if (!isCompositeKeyField) {				
+			} else if (!isCompositeKeyField && !isVersionField(column.getName())) {	
 				field = getField(fieldName, column);
 				uniqueFields.put(fieldName, field);
 			}
@@ -445,26 +444,28 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
 			if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
 				// The identifierType is not a simple type, ie not of type 'java.lang', so find the type
-				String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-				PhysicalTypeMetadata identifierPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
-				if (identifierPhysicalTypeMetadata != null) {
-					// The identifierType exists
-					ClassOrInterfaceTypeDetails identifierTypeDetails = (ClassOrInterfaceTypeDetails) identifierPhysicalTypeMetadata.getPhysicalTypeDetails();
-					if (identifierTypeDetails != null) {
-						// Check governor for declared fields
-						List<? extends FieldMetadata> identifierFields = identifierTypeDetails.getDeclaredFields();
-						// Loop through declared fields to check the supplied field exists on the governor
-						for (FieldMetadata field : identifierFields) {
-							if (fieldName.equals(field.getFieldName())) {
-								return true;
-							}
+				String identifierMetadataMid = IdentifierMetadata.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
+				if (identifierMetadata != null) {
+					List<? extends FieldMetadata> identifierFields = identifierMetadata.getFields();
+					for (FieldMetadata field : identifierFields) {
+						if (fieldName.equals(field.getFieldName())) {
+							return true;
 						}
 					}
 				}
+
 			}
 		}
 
 		return false;
+	}
+
+	private boolean isVersionField(String columnName) {
+		FieldMetadata versionField = entityMetadata.getVersionField();
+		if (versionField != null) {
+		}
+		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
 	}
 
 	private boolean isIdField(JavaSymbolName fieldName) {

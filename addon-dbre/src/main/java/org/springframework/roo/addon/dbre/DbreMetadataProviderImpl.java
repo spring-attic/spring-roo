@@ -30,7 +30,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
-	@Reference private DbreTableService dbreTableService;
+	@Reference private DbreTypeResolutionService dbreTypeResolutionService;
 	@Reference private DbreModelService dbreModelService;
 
 	protected void activate(ComponentContext context) {
@@ -69,7 +69,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
-
+		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata == null) {
 			return null;
@@ -81,7 +81,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, dbreTableService, database);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, metadataService, dbreTypeResolutionService, database);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

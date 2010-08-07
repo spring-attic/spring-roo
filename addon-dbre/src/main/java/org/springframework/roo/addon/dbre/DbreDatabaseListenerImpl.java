@@ -55,13 +55,15 @@ import org.springframework.roo.support.util.StringUtils;
 @Service
 public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	private static final JavaSymbolName IDENTIFIER_TYPE = new JavaSymbolName("identifierType");
+	private static final JavaSymbolName VERSION_FIELD = new JavaSymbolName("versionField");
+	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
 	@Reference private DbreModelService dbreModelService;
-	@Reference private DbreTableService dbreTableService;
+	@Reference private DbreTypeResolutionService dbreTypeResolutionService;
 	@Reference private Shell shell;
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 	private JavaPackage destinationPackage = null;
@@ -88,7 +90,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationToUse = this.destinationPackage;
 		if (destinationToUse == null) {
-			SortedSet<JavaType> managedEntities = dbreTableService.getDatabaseManagedEntities();
+			SortedSet<JavaType> managedEntities = dbreTypeResolutionService.getDatabaseManagedEntities();
 			if (!managedEntities.isEmpty()) {
 				// Take the package of the first one
 				destinationToUse = managedEntities.first().getPackage();
@@ -107,7 +109,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!database.isJoinTable(table)) {
-				JavaType javaType = dbreTableService.findTypeForTableName(table.getName(), destinationToUse);
+				JavaType javaType = dbreTypeResolutionService.findTypeForTableName(table.getName(), destinationToUse);
 				if (javaType == null) {
 					createNewManagedEntityFromTable(table, destinationToUse);
 				} else {
@@ -120,7 +122,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 		// Fields may have changed so ensure metadata providers get a chance to refresh themselves
 		metadataService.evictAll();
-		for (JavaType managedType : dbreTableService.getDatabaseManagedEntities()) {
+		for (JavaType managedType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
 			String dbreMid = DbreMetadata.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
 			metadataService.get(dbreMid, true);
 			metadataDependencyRegistry.notifyDownstream(dbreMid);
@@ -128,7 +130,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
-		JavaType javaType = dbreTableService.suggestTypeNameForNewTable(table.getName(), javaPackage);
+		JavaType javaType = dbreTypeResolutionService.suggestTypeNameForNewTable(table.getName(), javaPackage);
 
 		// Create type annotations for new entity
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
@@ -140,7 +142,13 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
 		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		manageEntityIdentifier(javaType, entityAttributes, new HashSet<JavaSymbolName>(), table);
-		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), entityAttributes));
+
+		if (!hasVersionField(table)) {
+			entityAttributes.add(new StringAttributeValue(VERSION_FIELD, ""));
+		}
+
+		AnnotationMetadata entityAnnotation = new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), entityAttributes);
+		annotations.add(entityAnnotation);
 
 		// Add @RooDbManaged
 		List<AnnotationAttributeValue<?>> dbManagedAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -185,17 +193,42 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new HashSet<JavaSymbolName>();
+
 		manageEntityIdentifier(javaType, entityAttributes, attributesToDeleteIfPresent, table);
 
+		// Manage versionField attribute
+		AnnotationAttributeValue<?> versionFieldAttribute = entityAnnotation.getAttribute(VERSION_FIELD);
+		if (versionFieldAttribute != null) {
+			String versionFieldValue = (String) versionFieldAttribute.getValue();
+			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
+				attributesToDeleteIfPresent.add(VERSION_FIELD);
+			}
+		} else {
+			if (hasVersionField(table)) {
+				attributesToDeleteIfPresent.add(VERSION_FIELD);
+			} else {
+				entityAttributes.add(new StringAttributeValue(VERSION_FIELD, ""));
+			}
+		}
+				
 		// Update the annotation on disk
 		AnnotationMetadata annotation = new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes);
 		mutableTypeDetails.updateTypeAnnotation(annotation, attributesToDeleteIfPresent);
 	}
 
+	private boolean hasVersionField(Table table) {
+		for (Column column : table.getColumns()) {
+			if (VERSION.equals(column.getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Set<JavaSymbolName> attributesToDeleteIfPresent, Table table) {
 		JavaType identifierType = getIdentifierType(javaType);
 		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
-
+		
 		// Process primary keys and add 'identifierType' attribute
 		int pkCount = table.getPrimaryKeyCount();
 		List<Identifier> identifiers = getIdentifiersFromColumns(table.getPrimaryKeys());
@@ -261,7 +294,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Add primary key fields to the identifier class
 		for (Column column : columns) {
 			if (column.isPrimaryKey()) {
-				JavaSymbolName fieldName = new JavaSymbolName(dbreTableService.suggestFieldName(column.getName()));
+				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
 				JavaType fieldType = column.getType().getJavaType();
 				String columnName = column.getName();
 				result.add(new Identifier(fieldName, fieldType, columnName));
@@ -272,15 +305,15 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private void deleteManagedTypes() {
-		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getDatabaseManagedIdentifiers();
+		for (JavaType javaType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
 			deleteManagedTypes(javaType, managedIdentifierTypes);
 		}
 	}
 
 	private void deleteManagedTypesNotInModel(Set<Table> tables) {
-		Set<JavaType> managedIdentifierTypes = dbreTableService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : dbreTableService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getDatabaseManagedIdentifiers();
+		for (JavaType javaType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
 			// Check for existence of entity from table model and delete if not in database model
 			if (!isDetectedEntityInModel(javaType, tables)) {
 				deleteManagedTypes(javaType, managedIdentifierTypes);
@@ -300,7 +333,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private boolean isDetectedEntityInModel(JavaType javaType, Set<Table> tables) {
-		String tableNamePattern = dbreTableService.suggestTableNameForNewType(javaType);
+		String tableNamePattern = dbreTypeResolutionService.suggestTableNameForNewType(javaType);
 		for (Table table : tables) {
 			if (table.getName().equalsIgnoreCase(tableNamePattern)) {
 				return true;

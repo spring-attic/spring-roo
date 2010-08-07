@@ -26,14 +26,14 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Implementation of {@link DbreTableService}.
+ * Implementation of {@link DbreTypeResolutionService}.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 @Component
 @Service
-public class DbreTableServiceImpl implements DbreTableService {
+public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;

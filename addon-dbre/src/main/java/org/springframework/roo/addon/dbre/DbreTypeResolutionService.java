@@ -15,7 +15,7 @@ import org.springframework.roo.model.JavaType;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface DbreTableService {
+public interface DbreTypeResolutionService {
 
 	/**
 	 * Locates the type associated with the presented table name.
