@@ -15,7 +15,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
 public class GwtTemplateLoader implements TemplateLoader {
-	protected final Map<String, Template> cache = new HashMap<String, Template>();
+	private static final Map<String, Template> cache = new HashMap<String, Template>();
 	protected final String baseDir;
 	protected final TemplateParser parser;
 
