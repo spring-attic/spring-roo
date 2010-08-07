@@ -108,6 +108,11 @@
 			<artifactId>org.springframework.roo.wrapping.jtds</artifactId>
 			<version>1.2.4.0001</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.jtopen</artifactId>
+			<version>6.7.0.0001</version>
+		</dependency>
 		<!-- Oracle; this comes from SpringSource EBR until we make a decision on final release packaging for it -->
 		<!-- No JARs from SpringSource EBR are included in user distribution due to an exclusion in assembly.xml -->
 		<dependency>
@@ -128,6 +133,13 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- -->
+		<!--
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.db2jcc</artifactId>
+			<version>3.59.81.0001</version>
+		</dependency>
+		-->
 	</dependencies>
 	
     <build>
