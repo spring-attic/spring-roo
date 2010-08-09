@@ -155,7 +155,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		@SuppressWarnings("unchecked")
 		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader()).getMethod("out").invoke(null);
 		WindowsTerminal ansiTerminal = new WindowsTerminal() {
-			public boolean isANSISupported() { return true; }
+a		public boolean isANSISupported() { return true; }
 		};
 		ansiTerminal.initializeTerminal();
 		// make sure to reset the original shell's colors on shutdown by closing the stream
@@ -220,7 +220,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
-		if (!reader.getTerminal().isANSISupported() || FLASH_MESSAGE_DISABLED) {
+		if ((reader !=null && !reader.getTerminal().isANSISupported()) || FLASH_MESSAGE_DISABLED) {
 			super.flash(level, message, slot);
 			return;
 		}
