@@ -1,5 +1,7 @@
 package org.springframework.roo.startlevel;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -138,10 +140,18 @@ public class Activator implements BundleActivator {
 	
 	public void process(URL url) {
 		Document document;
+		InputStream is = null;
 		try {
-			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream());
+			is = url.openStream();
+			document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
 		} catch (Exception ex) {
 			throw new IllegalStateException("Could not open " + url, ex);
+		} finally {
+			try {
+				if (is != null) {
+					is.close();
+				}
+			} catch (IOException ignored) {}
 		}
 		
 		Element rootElement = (Element) document.getFirstChild();

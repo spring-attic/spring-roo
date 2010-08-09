@@ -1,5 +1,7 @@
 package org.springframework.roo.obr.internal;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,14 +33,26 @@ public class ObrResourceFinderImpl implements ObrResourceFinder {
 		// Do a quick background query so we have the results cached
 		Thread t = new Thread(new Runnable() {
 			public void run() {
+				InputStream is = null;
 				try {
 					// Do not proceed if the user appears disconnect from the network (ROO-1169)
-					urlInputStreamService.openConnection(new URL("http://www.springsource.org/roo"));
+					is = urlInputStreamService.openConnection(new URL("http://www.springsource.org/roo"));
+					if (is != null) {
+						is.close();
+						is = null;
+					}
 					
 					// To get this far the network appears connected, so let's proceed
 					repositoryAdmin.listRepositories();
 					obrRepositoriesDownloaded = true;
-				} catch (Throwable ignore) {}
+				} catch (Throwable ignore) {
+				} finally {
+					try {
+						if (is != null) {
+							is.close();
+						}
+					} catch (IOException ignored) {}
+				}
 			}
 		}, "OBR Resource Finder Eager Download");
 		t.start();

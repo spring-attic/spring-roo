@@ -281,12 +281,19 @@ public class PgpServiceImpl implements PgpService {
 
 	public PGPPublicKeyRing getPublicKey(PgpKeyId keyId) {
 		Assert.notNull(keyId, "Key ID required");
+		InputStream in = null;
 		try {
 			URL lookup = getKeyServerUrlToRetrieveKeyId(keyId);
-			InputStream in = urlInputStreamService.openConnection(lookup);
+			in = urlInputStreamService.openConnection(lookup);
 			return getPublicKey(in);
 		} catch (Exception e) {
 			throw new IllegalStateException("Public key ID '" + keyId + "' not available from key server", e);
+		} finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (IOException ignored) {}
 		}
 	}
 
