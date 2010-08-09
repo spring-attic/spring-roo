@@ -551,6 +551,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				hasManyToOne = optionalAttribute != null && !((Boolean) optionalAttribute.getValue());
 			}
 			
+			AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
+
 			String initializer = "null";
 
 			// Date fields included for DataNucleus (
@@ -624,7 +626,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "new Integer(index).shortValue()"; // Auto-boxed
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 					initializer = "new Integer(index).shortValue()";
-				} else if (manyToOneAnnotation != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null) {
+				} else if (manyToOneAnnotation != null || oneToOneAnnotation != null) {
 					if (field.getFieldType().equals(this.getAnnotationValues().getEntity())) {
 						// Avoid circular references (ROO-562)
 						initializer = "obj";
@@ -636,7 +638,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
 
 						// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-						boolean oneToOne = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne")) != null;
+						boolean oneToOne = oneToOneAnnotation != null;
 
 						metadataDependencyRegistry.registerDependency(otherProvider, getId());
 						DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
