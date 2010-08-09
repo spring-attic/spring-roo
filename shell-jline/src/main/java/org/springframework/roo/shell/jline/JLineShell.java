@@ -155,7 +155,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		@SuppressWarnings("unchecked")
 		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader()).getMethod("out").invoke(null);
 		WindowsTerminal ansiTerminal = new WindowsTerminal() {
-a		public boolean isANSISupported() { return true; }
+		public boolean isANSISupported() { return true; }
 		};
 		ansiTerminal.initializeTerminal();
 		// make sure to reset the original shell's colors on shutdown by closing the stream
