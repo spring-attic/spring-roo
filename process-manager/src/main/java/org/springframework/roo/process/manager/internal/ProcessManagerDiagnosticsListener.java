@@ -6,8 +6,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusListener;
@@ -30,20 +28,18 @@ public class ProcessManagerDiagnosticsListener extends AbstractFlashingObject im
 
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private boolean isDebug = false;
-	private boolean rooArgs = false;
 	
 	protected void activate(ComponentContext context) {
 		processManagerStatusProvider.addProcessManagerStatusListener(this);
-		rooArgs = System.getProperty("roo-args") != null;
+		isDebug = System.getProperty("roo-args") != null && isDevelopmentMode();
 	}
 
 	protected void deactivate(ComponentContext context) {
 		processManagerStatusProvider.removeProcessManagerStatusListener(this);
 	}
 
-	
 	public void onProcessManagerStatusChange(ProcessManagerStatus oldStatus, ProcessManagerStatus newStatus) {
-		if (isDebug || (rooArgs && isDevelopmentMode())) {
+		if (isDebug) {
 			flash(Level.FINE, newStatus.name(), MY_SLOT);
 		}
 	}
