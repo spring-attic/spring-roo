@@ -291,8 +291,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
-				// Check for @Size
+				// Check for @Size or @Column with length attribute
 				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+				AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
+
 				if (sizeAnnotationMetadata != null && sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max")) != null) {
 					Integer maxValue = (Integer) sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max")).getValue();
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
@@ -302,13 +304,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
-				} else {
-					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
-				}
-				
-				// Check for @Column with length attribute if @Size is not present
-				AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
-				if (sizeAnnotationMetadata == null && columnAnnotationMetadata != null) {
+				} else	if (sizeAnnotationMetadata == null && columnAnnotationMetadata != null) {
 					AnnotationAttributeValue<?> lengthAttributeValue = columnAnnotationMetadata.getAttribute(new JavaSymbolName("length"));
 					if (lengthAttributeValue != null) {
 						Integer lengthValue = (Integer) columnAnnotationMetadata.getAttribute(new JavaSymbolName("length")).getValue();
