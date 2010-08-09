@@ -31,15 +31,12 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
 	private BeanInfoMetadata beanInfoMetadata;
-	
+
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 
@@ -47,11 +44,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
-		
+
 		if (!isValid()) {
 			return;
 		}
-		
+
 		this.beanInfoMetadata = beanInfoMetadata;
 
 		// Process values from the annotation, if present
@@ -63,11 +60,11 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		// Generate the toString
 		MethodMetadata toStringMethod = getToStringMethod();
 		builder.addMethod(toStringMethod);
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * Obtains the "toString" method for this type, if available.
 	 * 
@@ -82,22 +79,22 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		if (!this.toStringMethod.equals("")) {
 			methodName = new JavaSymbolName(this.toStringMethod);
 		}
-		
+
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
 		if (result != null) {
 			return result;
 		}
-		
+
 		// Decide whether we need to produce the toString method
 		if (!this.toStringMethod.equals("")) {
 			InvocableMemberBodyBuilder builder = new InvocableMemberBodyBuilder();
 			builder.appendFormalLine("StringBuilder sb = new StringBuilder();");
-			
-			/** key: field name, value: accessor name*/
+
+			/** key: field name, value: accessor name */
 			Map<String, String> map = new HashMap<String, String>();
-			
-			/** field names*/
+
+			/** field names */
 			List<String> order = new ArrayList<String>();
 
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
@@ -121,22 +118,22 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				index++;
 				String accessorText = map.get(fieldName);
 				StringBuilder string = new StringBuilder();
-				string.append("sb.append(\"" + fieldName  + ": \").append(" + accessorText + ")");
+				string.append("sb.append(\"" + fieldName + ": \").append(" + accessorText + ")");
 				if (index < size) {
 					string.append(".append(\", \")");
 				}
 				string.append(";");
 				builder.appendFormalLine(string.toString());
 			}
-					
+
 			builder.appendFormalLine("return sb.toString();");
-			
+
 			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, builder.getOutput());
- 		}
-		
+		}
+
 		return result;
 	}
-	
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -151,7 +148,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
@@ -167,6 +164,4 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-
-	
 }

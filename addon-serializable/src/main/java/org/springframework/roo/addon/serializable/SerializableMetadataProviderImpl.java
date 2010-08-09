@@ -24,7 +24,7 @@ public final class SerializableMetadataProviderImpl extends AbstractItdMetadataP
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooSerializable.class.getName()));
 	}
-	
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		return new SerializableMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}

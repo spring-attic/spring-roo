@@ -30,7 +30,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = SerializableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
