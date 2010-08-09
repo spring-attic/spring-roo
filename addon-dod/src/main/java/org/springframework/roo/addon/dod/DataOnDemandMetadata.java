@@ -52,6 +52,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
+	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType NOT_NULL = new JavaType("javax.validation.constraints.NotNull");
 
 	private DataOnDemandAnnotationValues annotationValues;
@@ -289,8 +290,42 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-
-			if (isNumericFieldType(field)) {
+			if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
+				// Check for @Size
+				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
+				if (sizeAnnotationMetadata != null && sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max")) != null) {
+					Integer maxValue = (Integer) sizeAnnotationMetadata.getAttribute(new JavaSymbolName("max")).getValue();
+					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
+					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + maxValue + ") {");
+					bodyBuilder.indent();
+					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + "  = " + field.getFieldName().getSymbolName() + ".substring(0, " + maxValue + ");");
+					bodyBuilder.indentRemove();
+					bodyBuilder.appendFormalLine("}");
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
+				} else {
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
+				}
+				
+				// Check for @Column with length attribute if @Size is not present
+				AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
+				if (sizeAnnotationMetadata == null && columnAnnotationMetadata != null) {
+					AnnotationAttributeValue<?> lengthAttributeValue = columnAnnotationMetadata.getAttribute(new JavaSymbolName("length"));
+					if (lengthAttributeValue != null) {
+						Integer lengthValue = (Integer) columnAnnotationMetadata.getAttribute(new JavaSymbolName("length")).getValue();
+						bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
+						bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + ".length() > " + lengthValue + ") {");
+						bodyBuilder.indent();
+						bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + "  = " + field.getFieldName().getSymbolName() + ".substring(0, " + lengthValue + ");");
+						bodyBuilder.indentRemove();
+						bodyBuilder.appendFormalLine("}");
+						bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
+					} else {
+						bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
+					}
+				} else {
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");					
+				}
+			} else if (isNumericFieldType(field)) {
 				// Check for @Min and @Max
 				AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 				AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
@@ -552,7 +587,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					}
 
 					// Check for @Column
-					AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Column"));
+					AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
 					if (columnAnnotationMetadata != null) {
 						AnnotationAttributeValue<?> lengthValue = columnAnnotationMetadata.getAttribute(new JavaSymbolName("length"));
 						if (lengthValue != null && (initializer.length() + 2) > (Integer) lengthValue.getValue()) {
