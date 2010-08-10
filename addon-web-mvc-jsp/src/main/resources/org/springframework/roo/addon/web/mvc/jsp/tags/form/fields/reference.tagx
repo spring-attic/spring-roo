@@ -21,7 +21,7 @@
 	        	<spring:param name="form" />
 	        </spring:url>
 	        <a href="${create_url}">
-	            <spring:url value="/static/images/add.png" var="create_img_url"/>
+	            <spring:url value="/resources/images/add.png" var="create_img_url"/>
 	            <spring:message arguments="${field}" code="global_menu_new" var="add_message"/>
 	            <img alt="${add_message}" src="${create_img_url}" title="${add_message}"/>
 	        </a>        

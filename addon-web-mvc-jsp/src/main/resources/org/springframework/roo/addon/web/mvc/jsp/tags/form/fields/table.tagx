@@ -60,7 +60,7 @@
                    </c:forTokens>
 	               <td>
 	                   <spring:url value="${path}/${item[typeIdFieldName]}" var="show_form_url"/>
-	                   <spring:url value="/static/images/show.png" var="show_image_url"/>
+	                   <spring:url value="/resources/images/show.png" var="show_image_url"/>
 	                   <spring:message arguments="${typeName}" code="entity_show" var="show_label"/>
 	                   <a href="${show_form_url}" alt="${show_label}" title="${show_label}">
 	                   		<img alt="${show_label}" class="image" src="${show_image_url}" title="${show_label}" />
@@ -71,7 +71,7 @@
 		                   <spring:url value="${path}/${item[typeIdFieldName]}" var="update_form_url">
 		                   		<spring:param name="form" />
 		                   </spring:url>
-		                   <spring:url value="/static/images/update.png" var="update_image_url"/>
+		                   <spring:url value="/resources/images/update.png" var="update_image_url"/>
 						   <spring:message arguments="${typeName}" code="entity_update" var="update_label"/>
 		                   <a href="${update_form_url}" alt="${update_label}" title="${update_label}">
 		                   		<img alt="${update_label}" class="image" src="${update_image_url}" title="${update_label}" />
@@ -81,7 +81,7 @@
 	               <c:if test="${delete}">
 	               	   <td>
 		                   <spring:url value="${path}/${item[typeIdFieldName]}" var="delete_form_url"/>
-		                   <spring:url value="/static/images/delete.png" var="delete_image_url"/>
+		                   <spring:url value="/resources/images/delete.png" var="delete_image_url"/>
 		                   <form:form action="${delete_form_url}" method="DELETE">
 		                       <spring:message arguments="${typeName}" code="entity_delete" var="delete_label"/>
 		                       <input alt="${delete_label}" class="image" src="${delete_image_url}" title="${delete_label}" type="image" value="${delete_label}"/>
@@ -104,7 +104,7 @@
 		                   		<spring:param name="form" />
 		                   </spring:url>
 		                   <a href="${create_url}">
-		                       <spring:url value="/static/images/add.png" var="create_img_url"/>
+		                       <spring:url value="/resources/images/add.png" var="create_img_url"/>
 		                       <spring:message arguments="${typeName}" code="global_menu_new" var="add_message"/>
 		                       <img alt="${add_message}" src="${create_img_url}" title="${add_message}"/>
 		                   </a>

@@ -52,23 +52,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	
 	public void installAllWebMvcArtifacts() {
 		installMinmalWebArtefacts();
-		copyUrlRewrite();
 		manageWebXml();
 		updateConfiguration();
 	}
-	
-	private void copyUrlRewrite(){
-        String urlrewriteFilename = "WEB-INF/urlrewrite.xml";
-        if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, urlrewriteFilename))) {
-         //file exists, so nothing to do
-        	return;
-        }                           
-        try {
-        	FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "urlrewrite-template.xml"), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/urlrewrite.xml")).getOutputStream());
-        } catch (IOException e) {
-        	throw new IllegalStateException("Encountered an error during copying of resources for maven addon.", e);
-	 	}
-    }
 
 	private void copyWebXml() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -122,14 +108,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", webXml, null);
-		WebXmlUtils.addFilter(WebMvcOperations.URL_REWRITE_FILTER_NAME, "org.tuckey.web.filters.urlrewrite.UrlRewriteFilter", "/*", webXml, null);
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/app/*", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
-	 	WebXmlUtils.addServlet("Resource Servlet", "org.springframework.js.resource.ResourceServlet", "/resources/*", new Integer(0), webXml, null);		 	
+		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
 	 	WebXmlUtils.setSessionTimeout(new Integer(10), webXml, null);
 		WebXmlUtils.addWelcomeFile("index", webXml, null);
-		WebXmlUtils.addExceptionType("java.lang.Exception", "/app/uncaughtException", webXml, null);
-		WebXmlUtils.addErrorCode(new Integer(404), "/app/resourceNotFound", webXml, null);
+		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
+		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", webXml, null);
 
 		writeToDiskIfNecessary(webXmlFile, webXml);
 	}

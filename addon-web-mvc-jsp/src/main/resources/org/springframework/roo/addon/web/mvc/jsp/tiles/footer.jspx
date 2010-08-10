@@ -6,7 +6,7 @@
     <c:if test="${pageContext['request'].userPrincipal != null}">	
     	<c:out value=" | "/> 
     	<span>			    
-		    <spring:url var="logout" value="/static/j_spring_security_logout" /> 
+		    <spring:url var="logout" value="/resources/j_spring_security_logout" /> 
 		    <a href="${logout}"><spring:message code="security_logout" /></a> 
 	    </span>					    
 	</c:if>			    

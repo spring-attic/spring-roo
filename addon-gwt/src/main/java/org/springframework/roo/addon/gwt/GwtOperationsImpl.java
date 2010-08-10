@@ -12,7 +12,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.web.mvc.controller.UrlRewriteOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
@@ -53,7 +52,6 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
-	@Reference private UrlRewriteOperations urlRewriteOperations;
 	@Reference private WebMvcOperations mvcOperations;
 
 	private ComponentContext context;
@@ -115,9 +113,6 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Update web.xml
 		updateWebXml(projectMetadata);
-
-		// Update urlrewrite.xml
-		updateUrlRewriteXml();
 
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
@@ -300,43 +295,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
-	}
-
-	private void updateUrlRewriteXml() {
-		Document urlRewriteDoc = urlRewriteOperations.getUrlRewriteDocument();
-		Element root = urlRewriteDoc.getDocumentElement();
-		Element firstRule = XmlUtils.findRequiredElement("/urlrewrite/rule", root);
-
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationScaffold/**").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationScaffold/$1").build())
-			.build(), firstRule);
-		
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationScaffold.html").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationScaffold.html").build())
-			.build(), firstRule);
-		
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/applicationMobileScaffold/**").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/applicationMobileScaffold/$1").build())
-			.build(), firstRule);
-		
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/ApplicationMobileScaffold.html").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/ApplicationMobileScaffold.html").build())
-			.build(), firstRule);
-		
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc)
-			.addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/_ah/**").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/_ah/$1").build())
-			.build(), firstRule);
-		
-		root.insertBefore(new XmlElementBuilder("rule", urlRewriteDoc).addChild(new XmlElementBuilder("from", urlRewriteDoc).setText("/gwtRequest").build())
-			.addChild(new XmlElementBuilder("to", urlRewriteDoc).addAttribute("last", "true").setText("/gwtRequest").build())
-			.build(), firstRule);
-		
-		urlRewriteOperations.writeUrlRewriteDocument(urlRewriteDoc);
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {

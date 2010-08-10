@@ -41,7 +41,7 @@
 				<spring:param name="page" value="1" />
 				<spring:param name="size" value="${size}" />
 			</spring:url>
-			<spring:url value="/static/images/resultset_first.png" var="first_image_url" />
+			<spring:url value="/resources/images/resultset_first.png" var="first_image_url" />
 			<spring:message code="list_first" var="first_label" />
 			<a class="image" href="${first}" title="${first_label}">
 			<img alt="${first_label}" src="${first_image_url}" />
@@ -52,7 +52,7 @@
 				<spring:param name="page" value="${page - 1}" />
 				<spring:param name="size" value="${size}" />
 			</spring:url>
-			<spring:url value="/static/images/resultset_previous.png" var="previous_image_url" />
+			<spring:url value="/resources/images/resultset_previous.png" var="previous_image_url" />
 			<spring:message code="list_previous" var="previous_label" />
 			<a class="image" href="${previous}" title="${previous_label}">
 			<img alt="${previous_label}" src="${previous_image_url}" />
@@ -66,7 +66,7 @@
 				<spring:param name="page" value="${page + 1}" />
 				<spring:param name="size" value="${size}" />
 			</spring:url>
-			<spring:url value="/static/images/resultset_next.png" var="next_image_url" />
+			<spring:url value="/resources/images/resultset_next.png" var="next_image_url" />
 			<spring:message code="list_next" var="next_label" />
 			<a class="image" href="${next}" title="${next_label}">
 			<img alt="${next_label}" src="${next_image_url}" />
@@ -77,7 +77,7 @@
 				<spring:param name="page" value="${maxPages}" />
 				<spring:param name="size" value="${size}" />
 			</spring:url>
-			<spring:url value="/static/images/resultset_last.png" var="last_image_url" />
+			<spring:url value="/resources/images/resultset_last.png" var="last_image_url" />
 			<spring:message code="list_last" var="last_label" />
 			<a class="image" href="${last}" title="${last_label}">
 			<img alt="${last_label}" src="${last_image_url}" />

@@ -174,7 +174,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Element td = suite.createElement("td");
 		tr.appendChild(td);
 		Element a = suite.createElement("a");
-		a.setAttribute("href", serverURL + projectMetadata.getProjectName() + "/static/" + testPath);
+		a.setAttribute("href", serverURL + projectMetadata.getProjectName() + "/resources/" + testPath);
 		a.setTextContent(name);
 		td.appendChild(a);
 		
@@ -187,7 +187,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 				new JavaSymbolName("Test"),
 				"Test",
 				"selenium_menu_test_suite",
-				"/static/" + relativeTestFilePath,
+				"/resources/" + relativeTestFilePath,
 				"si_");		
 	}
 	

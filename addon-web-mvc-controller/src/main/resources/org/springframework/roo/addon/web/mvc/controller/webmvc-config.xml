@@ -17,6 +17,15 @@
 	     Also registers default Formatters and Validators for use across all @Controllers -->
 	<mvc:annotation-driven />
 	
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources -->
+	<mvc:resources location="classpath:/META-INF/dojo/" mapping="/resources/dojo/**"/>
+	<mvc:resources location="classpath:/META-INF/dijit/" mapping="/resources/dijit/**"/>
+	<mvc:resources location="classpath:/META-INF/spring/" mapping="/resources/spring/**"/>
+	<mvc:resources location="/" mapping="/resources/**"/>
+	
+	<!-- Allows for mapping the DispatcherServlet to "/" by forwarding static resource requests to the container's default Servlet -->
+	<mvc:default-servlet-handler/>
+	
 	<!-- register "global" interceptor beans to apply to all registered HandlerMappings -->
 	<mvc:interceptors>
 		<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
@@ -24,7 +33,7 @@
 	</mvc:interceptors>
 	
 	<!-- selects a static view for rendering without the need for an explicit controller -->
-	<mvc:view-controller path="/index" />
+	<mvc:view-controller path="/" view-name="index"/>
 	<mvc:view-controller path="/uncaughtException" />
 	<mvc:view-controller path="/resourceNotFound" />
 	<mvc:view-controller path="/dataAccessFailure" />
