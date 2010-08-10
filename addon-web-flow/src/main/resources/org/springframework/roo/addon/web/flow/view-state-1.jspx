@@ -1,16 +1,18 @@
-<div xmlns:spring="http://www.springframework.org/tags"  xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
-	<jsp:output omit-xml-declaration="yes"/>
-	<spring:message var="title" code="webflow_state1_title" />
-	<page:page id="title" title="${title}">
-		<h1>${title}</h1>	
-		<p><spring:message code="webflow_state1_message" /></p>		
-		<form method="POST" >
-			<div class="submit">
-				<spring:message var="cancel" code="button_cancel" />
-				<spring:message var="proceed" code="button_proceed" />
-				<input type="submit" id="cancel" name="_eventId_cancel" value="${cancel}"/>			
-				<input type="submit" id="success" name="_eventId_success" value="${proceed}" />
-			</div>
-		</form>
-	</page:page>
+<div xmlns:spring="http://www.springframework.org/tags" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+  <jsp:output omit-xml-declaration="yes" />
+  <spring:message var="title" code="webflow_state1_title" />
+  <util:panel id="title" title="${title}">
+    <h1>${title}</h1>
+    <p>
+      <spring:message code="webflow_state1_message" />
+    </p>
+    <form method="POST">
+      <div class="submit">
+        <spring:message var="cancel" code="button_cancel" />
+        <spring:message var="proceed" code="button_proceed" />
+        <input type="submit" id="cancel" name="_eventId_cancel" value="${cancel}" />
+        <input type="submit" id="success" name="_eventId_success" value="${proceed}" />
+      </div>
+    </form>
+  </util:panel>
 </div>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <config>
-    <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" id="tilesViewResolver">
-        <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView"/>
-    </bean>
+  <bean class="org.springframework.web.servlet.view.UrlBasedViewResolver" id="tilesViewResolver">
+    <property name="viewClass" value="org.springframework.web.servlet.view.tiles2.TilesView" />
+  </bean>
 
-    <bean class="org.springframework.web.servlet.view.tiles2.TilesConfigurer" id="tilesConfigurer">
-        <property name="definitions">
-            <list>
-                <value>/WEB-INF/layouts/layouts.xml</value>
-                <!-- Scan views directory for Tiles configurations -->
-                <value>/WEB-INF/views/**/views.xml</value>
-            </list>
-        </property>
-    </bean>
+  <bean class="org.springframework.web.servlet.view.tiles2.TilesConfigurer" id="tilesConfigurer">
+    <property name="definitions">
+      <list>
+        <value>/WEB-INF/layouts/layouts.xml</value>
+        <!-- Scan views directory for Tiles configurations -->
+        <value>/WEB-INF/views/**/views.xml</value>
+      </list>
+    </property>
+  </bean>
 </config>

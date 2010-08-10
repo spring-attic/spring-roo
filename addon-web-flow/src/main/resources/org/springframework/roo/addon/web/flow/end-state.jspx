@@ -1,9 +1,11 @@
-<div xmlns:spring="http://www.springframework.org/tags"  xmlns:page="urn:jsptagdir:/WEB-INF/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
-	<jsp:output omit-xml-declaration="yes"/>
-	
-	<spring:message var="title" code="webflow_endstate_title" />
-	<page:page id="title" title="${title}">
-		<h1>${title}</h1>		
-		<p><spring:message code="webflow_endstate_message" /></p>	
-	</page:page>
+<div xmlns:spring="http://www.springframework.org/tags" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+  <jsp:output omit-xml-declaration="yes" />
+
+  <spring:message var="title" code="webflow_endstate_title" />
+  <util:panel id="title" title="${title}">
+    <h1>${title}</h1>
+    <p>
+      <spring:message code="webflow_endstate_message" />
+    </p>
+  </util:panel>
 </div>

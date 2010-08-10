@@ -1,14 +1,14 @@
 <jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" version="2.0">
-	<jsp:output omit-xml-declaration="yes"/>
-	<jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)"/>
-	<jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
-	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
-	<jsp:directive.attribute name="waveId" type="java.lang.String" required="true" description="The id of the wave to be displayed"/>
-	
-	<div id="waveframe" style="width: 550px; height: 500px"></div>
-	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
-	<script type="text/javascript">
-		google.load("wave", "1");
+  <jsp:output omit-xml-declaration="yes" />
+  <jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)" />
+  <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
+  <jsp:directive.attribute name="waveId" type="java.lang.String" required="true" description="The id of the wave to be displayed" />
+
+  <div id="waveframe" style="width: 550px; height: 500px"></div>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+        google.load("wave", "1");
 		google.setOnLoadCallback(initialize);
 		function initialize() {
 		  var waveframe = document.getElementById("waveframe");

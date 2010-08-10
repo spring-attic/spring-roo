@@ -79,7 +79,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 		if(!fileManager.exists(jspx)) {
 			//add document namespaces
 			Element div = new XmlElementBuilder("div", document)
-									.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
+									.addAttribute("xmlns:util", "urn:jsptagdir:/WEB-INF/tags/util")
 									.addAttribute("xmlns:embed", "urn:jsptagdir:/WEB-INF/tags/embed")
 									.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 									.addAttribute("version", "2.0")
@@ -87,7 +87,7 @@ public abstract class AbstractEmbeddedProvider implements EmbeddedProvider {
 								.build();
 			document.appendChild(div);
 			
-			div.appendChild(new XmlElementBuilder("page:page", document).addAttribute("id", "title").addAttribute("title", title).addChild(contentElement).build());
+			div.appendChild(new XmlElementBuilder("util:panel", document).addAttribute("id", "title").addAttribute("title", title).addChild(contentElement).build());
 			
 			jspOperations.installView("/embed", viewName, title, "Embedded", document);
 		} else {

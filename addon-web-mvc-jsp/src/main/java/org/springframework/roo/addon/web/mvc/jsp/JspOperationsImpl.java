@@ -156,18 +156,18 @@ public class JspOperationsImpl implements JspOperations {
 		path = cleanPath(path);
 		viewName = cleanViewName(viewName);
 		String lcViewName = viewName.toLowerCase();
-		if (document != null) {
-			XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
-		} else {
+		System.out.println("installing view");
+		if (document == null) {
 			try {
-				Document doc = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
-				XmlUtils.findRequiredElement("/div/message", doc.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
-				XmlUtils.findRequiredElement("/div/page", doc.getDocumentElement()).setAttribute("id", path.replace("/", "_") + "_" + lcViewName);
-				XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), doc);
+				System.out.println("test");
+				document = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
+				XmlUtils.findRequiredElement("/div/message", document.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
+				XmlUtils.findRequiredElement("/div/page", document.getDocumentElement()).setAttribute("id", path.replace("/", "_") + "_" + lcViewName);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
 		}
+		XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
 		installView(new JavaSymbolName(viewName), path, title, category, registerStaticController);
 	}
 
