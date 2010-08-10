@@ -2,18 +2,7 @@
 <configuration>
 	<springWebFlow>
 		<dependencies>
-			<dependency org="org.springframework.webflow" name="spring-binding" rev="2.0.9.RELEASE" />
-			<dependency org="org.springframework.webflow" name="spring-webflow" rev="2.0.9.RELEASE" />
-			<dependency org="org.springframework.webflow" name="spring-js" rev="2.0.9.RELEASE" />
-			<dependency org="org.springframework" name="spring-tx" rev="${spring.version}" />
-			<dependency org="org.jboss.el" name="jboss-el" rev="2.0.1.GA" />
+			<dependency org="org.springframework.webflow" name="spring-webflow" rev="2.1.1.RELEASE" />
 		</dependencies>
-		<repositories>
-			<repository>
-				<id>JBoss Repo</id>
-				<name>JBoss Repo</name>
-				<url>https://repository.jboss.org/nexus/content/repositories/releases</url>
-			</repository>
-		</repositories>
 	</springWebFlow>
 </configuration>

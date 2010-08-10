@@ -156,10 +156,8 @@ public class JspOperationsImpl implements JspOperations {
 		path = cleanPath(path);
 		viewName = cleanViewName(viewName);
 		String lcViewName = viewName.toLowerCase();
-		System.out.println("installing view");
 		if (document == null) {
 			try {
-				System.out.println("test");
 				document = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "index-template.jspx"));
 				XmlUtils.findRequiredElement("/div/message", document.getDocumentElement()).setAttribute("code", "label" + path.replace("/", "_") + "_" + lcViewName);
 				XmlUtils.findRequiredElement("/div/page", document.getDocumentElement()).setAttribute("id", path.replace("/", "_") + "_" + lcViewName);
