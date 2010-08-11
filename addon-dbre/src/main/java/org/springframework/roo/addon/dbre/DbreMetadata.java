@@ -463,8 +463,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private boolean isVersionField(String columnName) {
 		FieldMetadata versionField = entityMetadata.getVersionField();
-		if (versionField != null) {
-		}
 		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
 	}
 
@@ -522,7 +520,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(new JavaType("java.util.Date"))) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
+			attrs.add(new EnumAttributeValue(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
 			AnnotationMetadata temporalAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs);
 			annotations.add(temporalAnnotation);
 		}
