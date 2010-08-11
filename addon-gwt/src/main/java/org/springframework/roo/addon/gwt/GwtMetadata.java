@@ -370,6 +370,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			fields.add(fieldMetadata);
 		}
 
+		// getter methods for EmployeeRecord
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
 			JavaType methodReturnType = propToGwtSideType.get(propertyName);
 			JavaSymbolName methodName = new JavaSymbolName("get" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
@@ -391,6 +392,28 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, annotations, null, null);
 			methods.add(methodMetadata);
 		}
+
+		// isChanged method
+    methods.add(new DefaultMethodMetadata(destinationMetadataId,
+        Modifier.ABSTRACT, new JavaSymbolName("isChanged"),
+        JavaType.BOOLEAN_PRIMITIVE,
+        AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()),
+        new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(),
+        null, null));
+
+		// setter methods for EmployeeRecord
+		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
+      JavaType methodReturnType = JavaType.VOID_PRIMITIVE;
+        // propToGwtSideType.get(propertyName);
+      JavaSymbolName methodName = new JavaSymbolName("set" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
+      List<JavaType> methodParameterTypes = Collections.<JavaType>singletonList(propToGwtSideType.get(propertyName));
+      List<JavaSymbolName> methodParameterNames = Collections.<JavaSymbolName>singletonList(propertyName);
+
+      List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+      MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, annotations, null, null);
+      methods.add(methodMetadata);
+    }
+
 
 		this.record = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}

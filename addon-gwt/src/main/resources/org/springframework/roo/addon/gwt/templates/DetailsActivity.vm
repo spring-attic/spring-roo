@@ -4,7 +4,6 @@ package ${packageName};
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.RecordDetailsView;
-import com.google.gwt.requestfactory.shared.DeltaValueStore;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.valuestore.shared.SyncResult;
@@ -57,8 +56,7 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 		}
    		
 	    RequestObject<Void> deleteRequest = requests.${entity.nameUncapitalized}Request().remove(view.getValue()); // TODO: remove the hard-coding 
-		DeltaValueStore deltas = deleteRequest.getDeltaValueStore();
-		deltas.delete(view.getValue());
+		deleteRequest.delete(view.getValue());
 		deleteRequest.fire(new Receiver<Void>() {
 			public void onSuccess(Void ignore, Set<SyncResult> response) {
 				if (display == null) {
