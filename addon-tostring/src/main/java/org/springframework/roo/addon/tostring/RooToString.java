@@ -11,13 +11,12 @@ import java.util.Collection;
  * 
  * <p>
  * Whilst it is possible to apply this annotation to any class that you'd like a {@link Object#toString()} method
- * produced for, it is generally trigger automatically via the use of most other annotations in the system.
+ * produced for, it is generally triggered automatically via the use of most other annotations in the system.
  * The created method is conservative and only includes public accessor methods within the produced string. Further,
  * any accessor which returns a common JDK {@link Collection} type is restricted to displaying its size only.
  *  
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
@@ -27,5 +26,4 @@ public @interface RooToString {
 	 * @return the name of the {@link Object#toString()} method to generate (defaults to "toString"; if empty, does not create)
 	 */
 	String toStringMethod() default "toString";
-	
 }
