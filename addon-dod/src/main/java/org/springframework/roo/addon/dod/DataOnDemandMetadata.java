@@ -325,7 +325,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				// Check for @Min and @Max
 				AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
 				AnnotationMetadata maxAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX);
-				String suffix = field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) ? "L" : "";
+				String suffix = "";
+				if (field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+					suffix = "L";
+				} else if (field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+					suffix = "F";
+				} else if (field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+					suffix = "D";
+				}
 
 				if (minAnnotationMetadata != null && maxAnnotationMetadata == null) {
 					Long minValue = (Long) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
