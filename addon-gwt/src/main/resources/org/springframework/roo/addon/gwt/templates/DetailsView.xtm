@@ -19,13 +19,12 @@ import com.google.gwt.user.client.ui.Widget;
  * Details view for {{=name}} records.
  */
 public class {{=className}} extends Composite implements RecordDetailsView<{{=record}}> {
-	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
-	}
+	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	{{=record}} record;
-{{#entityFields}}
+	{{#entityFields}}
 	@UiField SpanElement {{=field}};{{/entityFields}}	
 	@UiField SpanElement idSpan;
 	@UiField SpanElement versionSpan;

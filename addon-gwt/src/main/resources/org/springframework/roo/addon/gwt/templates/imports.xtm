@@ -1,1 +1,1 @@
-{{#imports}}import {{=import}};{{/imports}}	
+{{#imports}}import {{=import}};{{/imports}}
