@@ -1,10 +1,8 @@
 package org.springframework.roo.addon.serializable;
 
-import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Random;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -34,8 +32,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	// From annotation
-	@AutoPopulate
-	private String serialVersionUIDField = "serialVersionUID";
+	@AutoPopulate private String serialVersionUIDField = "serialVersionUID";
 
 	public SerializableMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -51,7 +48,7 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			AutoPopulationUtils.populate(this, annotation);
 		}
 		
-		// Generate the "implements Serializable"
+		// Generate "implements Serializable"
 		if (!isJavaSerializableInterfaceIntroduced()) {
 			builder.addImplementsType(new JavaType(Serializable.class.getName()));
 		}
@@ -102,21 +99,14 @@ public class SerializableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		if (!this.serialVersionUIDField.equals("")) {
 			fieldName = new JavaSymbolName(this.serialVersionUIDField);
 		}
-
+	
 		// See if the type itself declared the field
 		FieldMetadata result = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
 		if (result != null) {
 			return result;
 		}
-
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, getUid(), new ArrayList<AnnotationMetadata>());
-	}
-
-	private String getUid() {
-		File f = new File(governorPhysicalTypeMetadata.getPhysicalLocationCanonicalPath());
-		long lastModified = f.lastModified();
-		Random random = new Random(lastModified);
-		return random.nextLong() + "L";
+		
+		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, fieldName, JavaType.LONG_PRIMITIVE, "1L", new ArrayList<AnnotationMetadata>());
 	}
 
 	public String toString() {
