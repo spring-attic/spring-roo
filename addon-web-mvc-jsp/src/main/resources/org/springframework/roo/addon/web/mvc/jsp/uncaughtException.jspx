@@ -12,7 +12,7 @@
           <spring:message code="exception_details" />
         </h4>
         <spring:message var="message" code="exception_message" />
-        <util:panel id="_exception" title="${message}" openPane="false">
+        <util:panel id="_message" title="${message}" openPane="false">
           <c:out value="${exception.localizedMessage}" />
         </util:panel>
         <spring:message var="stacktrace" code="exception_stacktrace" />
