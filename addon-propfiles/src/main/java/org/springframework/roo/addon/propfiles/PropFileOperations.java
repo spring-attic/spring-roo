@@ -36,6 +36,27 @@ public interface PropFileOperations {
 	 * @param value the property value to set into the property key (required)
 	 */
 	void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value);
+	
+	/**
+	 * Adds a property only if the given key (and value) does not exist already.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to update (required)
+	 * @param value the property value to set into the property key (required)
+	 */
+	void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value);
+	
+	/**
+	 * Adds a property only if the given key (and value) does not exist already.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param key the property key to update (required)
+	 * @param value the property value to set into the property key (required)
+	 * @param indicates if the resulting properties should be sorted alphabetically
+	 */
+	void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted);
 
 	/**
 	 * Removes the specified property, throwing an exception if the file does not exist.

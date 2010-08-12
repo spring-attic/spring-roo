@@ -176,17 +176,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}		
 		//setup labels for i18n support
 		String resourceId = XmlUtils.convertId("label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase());
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName(), true);
+		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName(), true);
 		
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName(), true);
+		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName(), true);
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
 			JavaSymbolName fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (!fieldName.equals(entityMetadata.getIdentifierField().getFieldName()) || !fieldName.equals(entityMetadata.getVersionField().getFieldName())) {
 				String sb = fieldName.getReadableSymbolName();
-				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb, true);
+				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb, true);
 			}
 		}
 
@@ -212,7 +212,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 						MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 				for (JavaSymbolName paramName: finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
-					propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName(), true);
+					propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName(), true);
 				}
 				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName +".jspx");
 			}

@@ -98,7 +98,7 @@ public class MenuOperationsImpl implements MenuOperations {
 															.addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase())
 														.build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
-			propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName(), true);
+			propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName(), true);
 		}
 		
 		//check for existence of menu item by looking for the indentifier provided
@@ -113,7 +113,7 @@ public class MenuOperationsImpl implements MenuOperations {
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
 		}
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
+		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
 		writeToDiskIfNecessary(document);
 	}
 	

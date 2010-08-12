@@ -134,7 +134,7 @@ public class JspOperationsImpl implements JspOperations {
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
 				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
-				propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
+				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
@@ -182,7 +182,7 @@ public class JspOperationsImpl implements JspOperations {
 			installCommonViewArtefacts();
 		}
 		String lcViewName = viewName.getSymbolName().toLowerCase();
-		propFileOperations.changeProperty(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
+		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
 		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), title, "global_generic", folderName + "/" + lcViewName, null);
 		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
 		

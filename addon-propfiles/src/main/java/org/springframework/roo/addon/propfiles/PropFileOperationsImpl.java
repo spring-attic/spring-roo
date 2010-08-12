@@ -39,15 +39,30 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	
+	private static final boolean SORTED = true;
+	private static final boolean CHANGE_EXISTING = true;
+	
 	public boolean isPropertiesCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 	
+	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value) {
+		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, !CHANGE_EXISTING);
+	}
+	
+	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, !CHANGE_EXISTING);
+	}
+	
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-		changeProperty(propertyFilePath, propertyFilename, key, value, false);
+		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, CHANGE_EXISTING);
 	}
 	
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
+		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, CHANGE_EXISTING);
+	}
+	
+	private void manageProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted, boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
@@ -88,7 +103,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		}
 
 		String propValue = props.getProperty(key);
-		if (propValue == null || !propValue.equals(value)) {
+		if (propValue == null || (!propValue.equals(value) && changeExisting)) {
 			props.setProperty(key, value);
 			storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 		}
