@@ -13,5 +13,5 @@ public enum PhysicalTypeCategory {
 	ANNOTATION,
 	ENUMERATION,
 	ITD,
-	OTHER
+	OTHER;
 }

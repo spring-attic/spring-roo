@@ -19,7 +19,6 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class MetadataCommands implements CommandMarker {
-	
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
@@ -40,8 +39,8 @@ public class MetadataCommands implements CommandMarker {
 		return sb.toString();
 	}
 	
-	@CliCommand(value="metadata for id", help="Shows detailed information about the metadata item")
-	public String metadataForId(@CliOption(key={"", "metadataId"}, mandatory=true, help="The metadata ID (should start with MID:)") String metadataId) {
+	@CliCommand(value = "metadata for id", help = "Shows detailed information about the metadata item")
+	public String metadataForId(@CliOption(key = { "", "metadataId" }, mandatory = true, help = "The metadata ID (should start with MID:)") String metadataId) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Identifier : ").append(metadataId).append(System.getProperty("line.separator"));
 		
@@ -102,5 +101,4 @@ public class MetadataCommands implements CommandMarker {
 		sb.append(metadataForId(id));
 		return sb.toString();
 	}
-
 }

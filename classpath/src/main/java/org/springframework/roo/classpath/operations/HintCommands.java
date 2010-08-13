@@ -22,17 +22,14 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class HintCommands implements CommandMarker {
-	
 	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator; 
-
+	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
-	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
 	
 	@CliCommand(value="hint", help="Provides step-by-step hints and context-sensitive guidance")
 	public String hint(@CliOption(key={"", "topic"}, mandatory=false, optionContext="topics", help="The topic for which advice should be provided") String topic) {
@@ -78,5 +75,4 @@ public class HintCommands implements CommandMarker {
 		
 		return "general";
 	}
-
 }

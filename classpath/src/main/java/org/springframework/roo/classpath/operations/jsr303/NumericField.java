@@ -86,5 +86,4 @@ public class NumericField extends StringOrNumericField {
 	public void setMax(Long max) {
 		this.max = max;
 	}
-	
 }

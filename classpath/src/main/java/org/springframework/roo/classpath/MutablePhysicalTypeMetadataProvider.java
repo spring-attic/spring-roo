@@ -22,5 +22,4 @@ public interface MutablePhysicalTypeMetadataProvider extends PhysicalTypeMetadat
 	 * @param toCreate to create (required)
 	 */
 	void createPhysicalType(PhysicalTypeMetadata toCreate);
-
 }

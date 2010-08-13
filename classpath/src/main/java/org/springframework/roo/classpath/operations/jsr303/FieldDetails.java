@@ -17,30 +17,30 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class FieldDetails {
+
 	/** The JPA @Column value */
 	private String column = null;
-	
+
 	/** The type that will receive the field */
 	private String physicalTypeIdentifier;
-	
+
 	/** The type of field to be added */
 	private JavaType fieldType;
-	
+
 	/** The name of the field to be added */
 	private JavaSymbolName fieldName;
-	
+
 	/** Whether the JSR 303 @NotNull annotation will be added */
 	private boolean notNull = false;
-	
+
 	/** Whether the JSR 303 @Null annotation will be added */
 	private boolean nullRequired = false;
-	
+
 	/** Any JavaDoc comments (reserved for future expansion) */
 	protected String comment = "";
-	
+
 	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
 		Assert.notNull(fieldType, "Field type required");
@@ -64,7 +64,7 @@ public class FieldDetails {
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attrs));
 		}
 	}
-	
+
 	public boolean isNotNull() {
 		return notNull;
 	}
@@ -110,5 +110,4 @@ public class FieldDetails {
 	public JavaSymbolName getFieldName() {
 		return fieldName;
 	}
-
 }

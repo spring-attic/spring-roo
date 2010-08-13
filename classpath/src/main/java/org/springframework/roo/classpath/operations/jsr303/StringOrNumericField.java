@@ -51,5 +51,4 @@ public class StringOrNumericField extends FieldDetails {
 	public void setDecimalMax(String decimalMax) {
 		this.decimalMax = decimalMax;
 	}
-
 }

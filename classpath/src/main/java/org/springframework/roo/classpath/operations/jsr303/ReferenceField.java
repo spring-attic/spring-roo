@@ -30,10 +30,8 @@ import org.springframework.roo.model.JavaType;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ReferenceField extends FieldDetails {
-	
 	private JavaType fieldType;
 	private String joinColumnName;
 	private Fetch fetch = null;
@@ -68,7 +66,7 @@ public class ReferenceField extends FieldDetails {
 		
 		if (fetch != null) {
 			JavaSymbolName value = new JavaSymbolName("EAGER");
-			if (fetch.equals(Fetch.LAZY)) {
+			if (fetch == Fetch.LAZY) {
 				value = new JavaSymbolName("LAZY");
 			}
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));

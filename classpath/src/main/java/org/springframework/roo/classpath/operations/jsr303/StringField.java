@@ -16,7 +16,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class StringField extends StringOrNumericField {
 	
@@ -75,5 +74,4 @@ public class StringField extends StringOrNumericField {
 	public void setRegexp(String regexp) {
 		this.regexp = regexp;
 	}	
-
 }

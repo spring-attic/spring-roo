@@ -254,10 +254,9 @@ public class ClasspathCommands implements CommandMarker {
 		}
 		if (inheritanceType != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.getKey()))));
+			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.name()))));
 			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Inheritance"), attrs));
-
-			if (InheritanceType.SINGLE_TABLE.equals(inheritanceType)) {
+			if (inheritanceType == InheritanceType.SINGLE_TABLE) {
 				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
 				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.DiscriminatorColumn"), new ArrayList<AnnotationAttributeValue<?>>()));
 			}

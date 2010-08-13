@@ -30,7 +30,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class SetField extends CollectionField {
 	
@@ -60,7 +59,7 @@ public class SetField extends CollectionField {
 		attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
 		if (fetch != null) {
 			JavaSymbolName value = new JavaSymbolName("EAGER");
-			if (fetch.equals(Fetch.LAZY)) {
+			if (fetch == Fetch.LAZY) {
 				value = new JavaSymbolName("LAZY");
 			}
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));

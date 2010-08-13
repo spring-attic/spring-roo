@@ -2,7 +2,6 @@ package org.springframework.roo.classpath;
 
 import org.springframework.roo.model.JavaType;
 
-
 /**
  * Provides details of the actual type presented by a {@link PhysicalTypeMetadata} instance.
  * 
@@ -13,7 +12,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface PhysicalTypeDetails {
 	
@@ -29,5 +27,4 @@ public interface PhysicalTypeDetails {
 	 * available type parameters (may be null if unable to parse)
 	 */
 	JavaType getName();
-
 }

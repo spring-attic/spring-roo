@@ -10,10 +10,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public final class PhysicalTypeIdentifier {
-
 	private static final String PROVIDES_TYPE_STRING = PhysicalTypeIdentifier.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	
@@ -41,5 +39,4 @@ public final class PhysicalTypeIdentifier {
 		Assert.isTrue(isValid(metadataIdentificationString), "Invalid metadata identification string '" + metadataIdentificationString + "' provided");
 		return getPath(metadataIdentificationString) + "/" + getJavaType(metadataIdentificationString);
 	}
-
 }

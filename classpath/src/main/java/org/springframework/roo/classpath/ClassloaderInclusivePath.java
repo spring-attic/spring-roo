@@ -9,7 +9,6 @@ import org.springframework.roo.project.Path;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ClassloaderInclusivePath extends Path {
 	private String classpath;

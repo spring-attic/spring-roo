@@ -17,10 +17,8 @@ import org.springframework.roo.model.JavaType;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class EnumField extends FieldDetails {
-	
 	private EnumType enumType;
 
 	public EnumField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {		
@@ -41,7 +39,7 @@ public class EnumField extends FieldDetails {
 		
 		if (enumType != null) {
 			JavaSymbolName value = new JavaSymbolName("ORDINAL");
-			if (enumType.equals(EnumType.STRING)) {
+			if (enumType == EnumType.STRING) {
 				value = new JavaSymbolName("STRING");
 			}
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.EnumType"), value)));
@@ -49,5 +47,4 @@ public class EnumField extends FieldDetails {
 		
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Enumerated"), attributes));
 	}
-
 }

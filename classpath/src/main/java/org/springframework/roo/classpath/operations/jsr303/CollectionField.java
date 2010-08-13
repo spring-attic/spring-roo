@@ -66,6 +66,5 @@ public abstract class CollectionField extends FieldDetails {
 
 	public void setGenericParameterTypeName(JavaType genericParameterTypeName) {
 		this.genericParameterTypeName = genericParameterTypeName;
-	}
-	
+	}	
 }

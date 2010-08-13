@@ -13,14 +13,14 @@ public class BooleanField extends FieldDetails {
 
 	/** Whether the JSR 303 @AssertTrue annotation will be added */
 	private boolean assertTrue = false;
-	
+
 	/** Whether the JSR 303 @AssertFalse annotation will be added */
 	private boolean assertFalse = false;
-	
+
 	public BooleanField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
-	
+
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (assertTrue) {
@@ -46,7 +46,4 @@ public class BooleanField extends FieldDetails {
 	public void setAssertFalse(boolean assertFalse) {
 		this.assertFalse = assertFalse;
 	}
-	
-	
-
 }

@@ -11,7 +11,6 @@ import org.springframework.roo.project.Path;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ClasspathOperations {
 
@@ -53,6 +52,12 @@ public interface ClasspathOperations {
 	 */
 	void generateClassFile(ClassOrInterfaceTypeDetails details);
 
+	/**
+	 * Adds a new enum constant to an existing class.
+	 * 
+	 * @param physicalTypeIdentifier to add (required)
+	 * @param the name of the constant (required)
+	 */
 	void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName);
 
 	/**
