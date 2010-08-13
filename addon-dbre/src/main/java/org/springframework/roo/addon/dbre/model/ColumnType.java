@@ -26,7 +26,7 @@ public enum ColumnType {
 	DECIMAL(Types.DECIMAL, new JavaType(BigDecimal.class.getName())), 
 	CHAR(Types.CHAR, JavaType.STRING_OBJECT), 
 	VARCHAR(Types.VARCHAR, JavaType.STRING_OBJECT), 
-	LONGVARCHAR(Types.LONGNVARCHAR, JavaType.STRING_OBJECT), 
+	LONGVARCHAR(Types.LONGVARCHAR, JavaType.STRING_OBJECT), 
 	DATE(Types.DATE, new JavaType(Date.class.getName())), 
 	TIME(Types.TIME, new JavaType(Date.class.getName())), 
 	TIMESTAMP(Types.TIMESTAMP, new JavaType(Date.class.getName())), 
