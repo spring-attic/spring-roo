@@ -7,6 +7,10 @@ import org.springframework.roo.support.util.Assert;
 /**
  * Represents a join table for a many-valued association with many-to-many multiplicity.
  * 
+ * <p>
+ * A join table must have have exactly two primary keys and have exactly two foreign-keys 
+ * pointing to other entity tables and have no other columns.
+ * 
  * @author Alan Stewart
  * @since 1.1
  */
