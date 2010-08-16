@@ -55,9 +55,17 @@
       <c:forEach items="${data}" var="item">
         <tr>
           <c:forTokens items="${columnProperties}" delims="," var="column" varStatus="num">
-            <c:set var="columnMaxLength" value="${lengths[num.count - 1]}" scope="request" />
+            <c:set var="columnMaxLength" value="${lengths[num.count-1]}" scope="request" />
             <td>
-              <c:out value="${columnMaxLength lt 0 ? item[column] : fn:substring(item[column], 0, columnMaxLength)}" />
+            <c:choose>
+              <c:when test="${columnMaxLength lt 0}">
+                <spring:eval expression="item[column]" />
+              </c:when>
+              <c:otherwise>
+                <spring:eval expression="item[column]" var="colTxt"/>
+                <c:out value="${fn:substring(colTxt, 0, columnMaxLength)}" />
+              </c:otherwise>
+            </c:choose>			   
             </td>
           </c:forTokens>
           <td>
