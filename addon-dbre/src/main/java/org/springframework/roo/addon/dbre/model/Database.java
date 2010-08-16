@@ -29,6 +29,9 @@ public class Database implements Serializable {
 
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
+	
+	/** Database sequences */
+	private Set<Sequence> sequences = new LinkedHashSet<Sequence>();
 
 	Database(String name, Schema schema, Set<Table> tables) {
 		Assert.notNull(tables, "tables required");
@@ -48,6 +51,14 @@ public class Database implements Serializable {
 
 	public Set<Table> getTables() {
 		return tables;
+	}
+
+	public Set<Sequence> getSequences() {
+		return sequences;
+	}
+
+	public void setSequences(Set<Sequence> sequences) {
+		this.sequences = sequences;
 	}
 
 	public boolean hasTables() {

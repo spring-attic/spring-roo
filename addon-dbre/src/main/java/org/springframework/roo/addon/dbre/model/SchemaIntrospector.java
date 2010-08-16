@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -9,6 +10,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.roo.addon.dbre.model.dialect.DB2400Dialect;
+import org.springframework.roo.addon.dbre.model.dialect.DerbyDialect;
+import org.springframework.roo.addon.dbre.model.dialect.Dialect;
+import org.springframework.roo.addon.dbre.model.dialect.H2Dialect;
+import org.springframework.roo.addon.dbre.model.dialect.HSQLDialect;
+import org.springframework.roo.addon.dbre.model.dialect.MySQLDialect;
+import org.springframework.roo.addon.dbre.model.dialect.OracleDialect;
+import org.springframework.roo.addon.dbre.model.dialect.PostgreSQLDialect;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -19,6 +28,7 @@ import org.springframework.roo.support.util.Assert;
  */
 public class SchemaIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
+	private Connection connection;
 	private DatabaseMetaData databaseMetaData;
 	private String catalog;
 	private Schema schema;
@@ -28,8 +38,9 @@ public class SchemaIntrospector {
 
 	public SchemaIntrospector(Connection connection, Schema schema) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
-		databaseMetaData = connection.getMetaData();
-		catalog = databaseMetaData.getConnection().getCatalog();
+		this.connection = connection;
+		catalog = this.connection.getCatalog();
+		databaseMetaData = this.connection.getMetaData();
 		this.schema = schema;
 	}
 
@@ -37,8 +48,8 @@ public class SchemaIntrospector {
 		this(connection, null);
 	}
 
-	public Connection getConnection() throws SQLException {
-		return databaseMetaData.getConnection();
+	public Connection getConnection() {
+		return connection;
 	}
 
 	public String getCatalog() {
@@ -101,10 +112,13 @@ public class SchemaIntrospector {
 	}
 
 	public Database getDatabase() throws SQLException {
-		return new Database(catalog, schema, readTables());
+		Database database = new Database(catalog, schema, readTables());
+		database.setSequences(readSequences());
+		return database;
 	}
 
 	private Set<Table> readTables() throws SQLException {
+		readSequences();
 		Set<Table> tables = new LinkedHashSet<Table>();
 
 		ResultSet rs = databaseMetaData.getTables(catalog, getSchemaPattern(), tableNamePattern, types);
@@ -142,14 +156,15 @@ public class SchemaIntrospector {
 
 		return tables;
 	}
-	
+
 	private boolean ignoreTables() {
 		boolean ignore = false;
 		try {
 			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableNamePattern.startsWith("BIN$")) {
 				ignore = true;
 			}
-		} catch (SQLException ignored) {}
+		} catch (SQLException ignored) {
+		}
 		return ignore;
 	}
 
@@ -333,5 +348,60 @@ public class SchemaIntrospector {
 		}
 
 		return columnNames;
+	}
+
+	private Set<Sequence> readSequences() {
+		Set<Sequence> sequences = new LinkedHashSet<Sequence>();
+		Dialect dialect = getDialect();
+		if (dialect != null && dialect.supportsSequences()) {
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			try {
+				pstmt = connection.prepareStatement(dialect.getQuerySequencesString(schema));
+				rs = pstmt.executeQuery();
+				while (rs.next()) {
+					sequences.add(new Sequence(rs.getString(1)));
+				}
+			} catch (SQLException ignored) {} 
+			finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException ignored) {}
+				}
+				if (pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException ignored) {}
+				}
+			}
+		}
+		return sequences;
+	}
+	
+	private Dialect getDialect() {
+		String productName;
+		try {
+			productName = databaseMetaData.getDatabaseProductName();
+		} catch (SQLException ignored) {
+			return null;
+		}
+		 
+		if (productName.equalsIgnoreCase("Oracle")) {
+			return new OracleDialect();
+		} else if (productName.equalsIgnoreCase("PostgreSQL")) {
+			return new PostgreSQLDialect();
+		} else if (productName.startsWith("HSQL")) {
+			return new HSQLDialect();
+		} else if (productName.equalsIgnoreCase("H2")) {
+			return new H2Dialect();
+		} else if (productName.equalsIgnoreCase("MySQL")) {
+			return new MySQLDialect();
+		} else if (productName.contains("Derby")) {
+			return new DerbyDialect();
+		} else if (productName.contains("DB2")) {
+			return new DB2400Dialect();
+		}
+		return null;
 	}
 }

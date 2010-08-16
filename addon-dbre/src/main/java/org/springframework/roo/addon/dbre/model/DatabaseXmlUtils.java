@@ -115,6 +115,17 @@ public abstract class DatabaseXmlUtils {
 			databaseElement.appendChild(tableElement);
 		}
 
+		Set<Sequence> sequences = database.getSequences();
+		if (!sequences.isEmpty()) {
+			Element sequencesElement = document.createElement("sequences");
+			for (Sequence sequence : sequences) {
+				Element sequenceElement = document.createElement("sequence");
+				sequenceElement.setAttribute(NAME, sequence.getName());
+				sequencesElement.appendChild(sequenceElement);
+			}
+			databaseElement.appendChild(sequencesElement);
+		}
+		
 		document.appendChild(databaseElement);
 
 		XmlUtils.writeXml(outputStream, document);
@@ -186,11 +197,20 @@ public abstract class DatabaseXmlUtils {
 
 			tables.add(table);
 		}
+		
+		Set<Sequence> sequences = new LinkedHashSet<Sequence>();
+		List<Element> sequenceElements = XmlUtils.findElements("sequences/sequence", databaseElement);
+		for (Element sequenceElement : sequenceElements) {
+			Sequence sequence = new Sequence(sequenceElement.getAttribute(NAME));
+			sequences.add(sequence);
+		}
 
 		String name = databaseElement.getAttribute(NAME);
 		Schema schema = new Schema(databaseElement.getAttribute("schema"));
 
-		return new Database(name, schema, tables);
+		Database database = new Database(name, schema, tables);
+		database.setSequences(sequences);
+		return database;
 	}
 
 	private static Document getDocument(InputStream inputStream) {
