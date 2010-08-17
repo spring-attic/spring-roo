@@ -49,7 +49,7 @@
     <b:CellTable width='100%' ui:field='table' pageSize='8'/>
     <div class='{style.controls}'>      
       <g:Button styleName='{style.createButton}' ui:field='newButton'>Create ${entity.name}</g:Button>
-      <b:SimplePager view='{table}' location='RIGHT'/>
+      <b:SimplePager display='{table}' location='RIGHT'/>
     </div>
   </g:HTMLPanel>
 </ui:UiBinder>
