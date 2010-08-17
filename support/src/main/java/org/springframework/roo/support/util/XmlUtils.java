@@ -37,7 +37,6 @@ import org.w3c.dom.NodeList;
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
- * 
  */
 public final class XmlUtils {
 	private static final Map<String, XPathExpression> compiledExpressionCache = new HashMap<String, XPathExpression>();
@@ -49,7 +48,7 @@ public final class XmlUtils {
 	}
 
 	/**
-	 * Write an XML document to the outputstream provided. This will use the preconfigured Roo provided Transformer.
+	 * Write an XML document to the OutputStream provided. This will use the pre-configured Roo provided Transformer.
 	 * 
 	 * @param outputEntry The output stream to write to.
 	 * @param document The document to write
@@ -78,8 +77,8 @@ public final class XmlUtils {
 			if (os != null) {
 				os.close();
 			}
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 	
@@ -133,7 +132,6 @@ public final class XmlUtils {
 	 * 
 	 * @param xPathExpression the xPathExpression (required)
 	 * @param root the parent DOM element (required)
-	 * 
 	 * @return the Element if discovered (null if not found)
 	 */
 	public static Element findFirstElement(String xPathExpression, Element root) {
@@ -153,15 +151,13 @@ public final class XmlUtils {
 	 * want to find a element <beans><sec:http> you need to use the following
 	 * XPath expression '/beans/http'.
 	 * 
-	 * @param xPathExpression the xPathExpression (required)
+	 * @param xPathExpression the XPath expression (required)
 	 * @param root the parent DOM element (required)
-	 * 
 	 * @return the Node if discovered (null if not found)
 	 */
 	public static Node findNode(String xPathExpression, Element root) {
-		if (xPathExpression == null || root == null || xPathExpression.length() == 0) {
-			throw new IllegalArgumentException("Xpath expression and root element required");
-		}
+		Assert.hasText(xPathExpression, "XPath expression required");
+		Assert.notNull(root, "Root element required");
 		Node node = null;
 		try {
 			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
@@ -171,7 +167,7 @@ public final class XmlUtils {
 			}
 			node = (Node) expr.evaluate(root, XPathConstants.NODE);
 		} catch (XPathExpressionException e) {
-			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
+			throw new IllegalArgumentException("Unable evaluate XPath expression", e);
 		}
 		return node;
 	}
@@ -182,7 +178,6 @@ public final class XmlUtils {
 	 * 
 	 * @param name the Element name (required)
 	 * @param root the parent DOM element (required)
-	 * 
 	 * @return the Element if discovered
 	 */
 	public static Element findFirstElementByName(String name, Element root) {
@@ -200,11 +195,9 @@ public final class XmlUtils {
 	 * want to find a element <beans><sec:http> you need to use the following
 	 * XPath expression '/beans/http'.
 	 * 
-	 * @param xPathExpression the xPathExpression (required)
+	 * @param xPathExpression the XPath expression (required)
 	 * @param root the parent DOM element (required)
-	 * 
-	 * @return the Element if discovered (never null; an exception is thrown if
-	 *         cannot be found)
+	 * @return the Element if discovered (never null; an exception is thrown if cannot be found)
 	 */
 	public static Element findRequiredElement(String xPathExpression, Element root) {
 		Assert.hasText(xPathExpression, "XPath expression required");
@@ -225,7 +218,6 @@ public final class XmlUtils {
 	 * 
 	 * @param xPathExpression the xPathExpression
 	 * @param root the parent DOM element
-	 * 
 	 * @return a {@link List} of type {@link Element} if discovered, otherwise null
 	 */
 	public static List<Element> findElements(String xPathExpression, Element root) {
@@ -239,7 +231,7 @@ public final class XmlUtils {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
 		}
 
-		for (int i = 0; i < nodes.getLength(); i++) {
+		for (int i = 0, n = nodes.getLength(); i < n; i++) {
 			elements.add((Element) nodes.item(i));
 		}
 		return elements;
@@ -251,7 +243,6 @@ public final class XmlUtils {
 	 * 
 	 * @param xPathExpression the xPathExpression (required)
 	 * @param element (required)
-	 * 
 	 * @return the Node if discovered (null if not found)
 	 */
 	public static Node findFirstAttribute(String xPathExpression, Element element) {
@@ -277,8 +268,8 @@ public final class XmlUtils {
 		try {
 			transformerFactory.setAttribute("indent-number", 4);
 			xformer = transformerFactory.newTransformer();
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 		xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
