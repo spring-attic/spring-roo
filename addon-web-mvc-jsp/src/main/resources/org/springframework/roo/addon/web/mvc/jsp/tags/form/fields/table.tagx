@@ -32,7 +32,7 @@
       <c:set var="delete" value="true" />
     </c:if>
 
-    <c:set var="typeName" value="${fn:split(id,'_')[fn:length(fn:split(id,'_')) - 1]}" />
+    <c:set var="typeName" value="${fn:split(fn:escapeXml(id),'_')[fn:length(fn:split(fn:escapeXml(id),'_')) - 1]}" />
     <c:set var="lengths" value="${fn:split(columnMaxLengths, ',')}" scope="request" />
 
     <table>
@@ -69,7 +69,7 @@
             </td>
           </c:forTokens>
           <td>
-            <spring:url value="${path}/${item[typeIdFieldName]}" var="show_form_url" />
+            <spring:url value="${fn:escapeXml(path)}/${item[fn:escapeXml(typeIdFieldName)]}" var="show_form_url" />
             <spring:url value="/resources/images/show.png" var="show_image_url" />
             <spring:message arguments="${typeName}" code="entity_show" var="show_label" />
             <a href="${show_form_url}" alt="${show_label}" title="${show_label}">
@@ -78,7 +78,7 @@
           </td>
           <c:if test="${update}">
             <td>
-              <spring:url value="${path}/${item[typeIdFieldName]}" var="update_form_url">
+              <spring:url value="${fn:escapeXml(path)}/${item[fn:escapeXml(typeIdFieldName)]}" var="update_form_url">
                 <spring:param name="form" />
               </spring:url>
               <spring:url value="/resources/images/update.png" var="update_image_url" />
@@ -90,7 +90,7 @@
           </c:if>
           <c:if test="${delete}">
             <td>
-              <spring:url value="${path}/${item[typeIdFieldName]}" var="delete_form_url" />
+              <spring:url value="${fn:escapeXml(path)}/${item[fn:escapeXml(typeIdFieldName)]}" var="delete_form_url" />
               <spring:url value="/resources/images/delete.png" var="delete_image_url" />
               <form:form action="${delete_form_url}" method="DELETE">
                 <spring:message arguments="${typeName}" code="entity_delete" var="delete_label" />
@@ -110,7 +110,7 @@
         <td colspan="10">
           <c:if test="${empty create or create}">
             <span class="new">
-              <spring:url value="/${path}" var="create_url">
+              <spring:url value="/${fn:escapeXml(path)}" var="create_url">
                 <spring:param name="form" />
               </spring:url>
               <a href="${create_url}">

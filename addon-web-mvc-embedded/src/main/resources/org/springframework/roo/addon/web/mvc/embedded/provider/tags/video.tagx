@@ -1,4 +1,4 @@
-<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" version="2.0">
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
   <jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
@@ -10,10 +10,10 @@
 
     <c:when test="${provider eq 'youtube'}">
       <object width="545" height="320">
-        <param name="movie" value="http://www.youtube.com/v/${videoId}"></param>
+        <param name="movie" value="http://www.youtube.com/v/${fn:escapeXml(videoId)}"></param>
         <param name="allowFullScreen" value="true"></param>
         <param name="allowscriptaccess" value="always"></param>
-        <embed src="http://www.youtube.com/v/${videoId}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="545" height="320"></embed>
+        <embed src="http://www.youtube.com/v/${fn:escapeXml(videoId)}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="545" height="320"></embed>
       </object>
     </c:when>
 
@@ -36,11 +36,11 @@
 
     <c:when test="${provider eq 'viddler'}">
       <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="545" height="320" id="viddler">
-        <param name="movie" value="http://www.viddler.com/player/${videoId}" />
+        <param name="movie" value="http://www.viddler.com/player/${fn:escapeXml(videoId)}" />
         <param name="allowScriptAccess" value="always" />
         <param name="allowFullScreen" value="true" />
         <param name="flashvars" value="fake=1" />
-        <embed src="http://www.viddler.com/player/${videoId}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
+        <embed src="http://www.viddler.com/player/${fn:escapeXml(videoId)}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
       </object>
     </c:when>
 
@@ -56,9 +56,9 @@
     <c:when test="${provider eq 'screenr'}">
       <object width='545' height='340' classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'>
         <param name='movie' value='http://screenr.com/Content/assets/screenr_1116090935.swf' />
-        <param name='flashvars' value='${videoId}' />
+        <param name='flashvars' value='${fn:escapeXml(videoId)}' />
         <param name='allowFullScreen' value='true' />
-        <embed src='http://screenr.com/Content/assets/screenr_1116090935.swf' flashvars='${videoId}' allowFullScreen='true' width='545' height='340' pluginspage='http://www.macromedia.com/go/getflashplayer'></embed>
+        <embed src='http://screenr.com/Content/assets/screenr_1116090935.swf' flashvars='${fn:escapeXml(videoId)}' allowFullScreen='true' width='545' height='340' pluginspage='http://www.macromedia.com/go/getflashplayer'></embed>
       </object>
     </c:when>
 

@@ -10,7 +10,7 @@
 
     <c:when test="${provider eq 'google_presentation'}">
       <spring:url value="http://docs.google.com/present/embed" var="document">
-        <spring:param name="id" value="${documentId}" />
+        <spring:param name="id" value="${fn:escapeXml(documentId)}" />
         <spring:param name="interval" value="10" />
         <spring:param name="size" value="m" />
       </spring:url>
@@ -21,7 +21,7 @@
     <c:when test="${provider eq 'scribd'}">
       <spring:url value="http://d1.scribdassets.com/ScribdViewer.swf" var="base_url" />
       <spring:url value="${base_url}" var="document">
-        <spring:param name="document_id" value="${documentId}" />
+        <spring:param name="document_id" value="${fn:escapeXml(documentId)}" />
         <spring:param name="access_key" value="key-y6ef708fmsw0acnmpjn" />
         <spring:param name="page" value="1" />
         <spring:param name="viewMode" value="slideshow" />
@@ -39,7 +39,7 @@
 
     <c:when test="${provider eq 'slideshare'}">
       <object id="__sse4735954" width="545" height="400">
-        <param name="movie" value="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=${documentId}" />
+        <param name="movie" value="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=${fn:escapeXml(documentId)}" />
         <param name="allowFullScreen" value="true" />
         <param name="allowScriptAccess" value="always" />
         <embed name="__sse4735954" width="545" height="400" src="http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=${documentId}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true"></embed>

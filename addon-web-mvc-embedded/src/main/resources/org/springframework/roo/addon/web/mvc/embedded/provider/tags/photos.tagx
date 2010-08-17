@@ -1,4 +1,4 @@
-<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" version="2.0">
+<jsp:root xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
   <jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
@@ -8,13 +8,12 @@
   <jsp:directive.attribute name="provider" type="java.lang.String" required="true" description="The provider for the gallery to be displayed" />
 
   <c:choose>
-
     <c:when test="${provider eq 'picasa'}">
-      <embed width="545" height="330" type="application/x-shockwave-flash" src="http://picasaweb.google.com/s/c/bin/slideshow.swf" flashvars="host=picasaweb.google.com&amp;hl=en_US&amp;feat=flashalbum&amp;RGB=0xffffff&amp;feed=http%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2F${userId}%2Falbumid%2F${albumId}%3Falt%3Drss%26kind%3Dphoto%26hl%3Den_US" pluginspage="http://www.macromedia.com/go/getflashplayer"></embed>
+      <embed width="545" height="330" type="application/x-shockwave-flash" src="http://picasaweb.google.com/s/c/bin/slideshow.swf" flashvars="host=picasaweb.google.com&amp;hl=en_US&amp;feat=flashalbum&amp;RGB=0xffffff&amp;feed=http%3A%2F%2Fpicasaweb.google.com%2Fdata%2Ffeed%2Fapi%2Fuser%2F${fn:escapeXml(userId)}%2Falbumid%2F${fn:escapeXml(albumId)}%3Falt%3Drss%26kind%3Dphoto%26hl%3Den_US" pluginspage="http://www.macromedia.com/go/getflashplayer"></embed>
     </c:when>
 
     <c:when test="${provider eq 'flikr'}">
-      <c:set var="flashvars" value="offsite=true&amp;page_show_url=%2Fphotos%2F${userId}%2Fshow%2F&amp;page_show_back_url=%2Fphotos%2F${albumId}%2F&amp;user_id=${userId}" />
+      <c:set var="flashvars" value="offsite=true&amp;page_show_url=%2Fphotos%2F${fn:escapeXml(userId)}%2Fshow%2F&amp;page_show_back_url=%2Fphotos%2F${fn:escapeXml(albumId)}%2F&amp;user_id=${fn:escapeXml(userId)}" />
       <object width="545" height="400">
         <param name="flashvars" value="${flashvars}"></param>
         <param name="movie" value="http://www.flickr.com/apps/slideshow/show.swf?v=71649"></param>
@@ -22,7 +21,5 @@
         <embed type="application/x-shockwave-flash" src="http://www.flickr.com/apps/slideshow/show.swf?v=71649" allowFullScreen="true" flashvars="${flashvars}" width="545" height="400"></embed>
       </object>
     </c:when>
-
   </c:choose>
-
 </jsp:root>

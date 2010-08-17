@@ -1,7 +1,4 @@
-<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-  xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:form="http://www.springframework.org/tags/form"
-  xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:spring="http://www.springframework.org/tags"
-  version="2.0">
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:form="http://www.springframework.org/tags/form" xmlns:jsp="http://java.sun.com/JSP/Page" xmlns:spring="http://www.springframework.org/tags" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
 
   <jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)" />
@@ -17,16 +14,16 @@
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" />
     </c:if>
     <c:if test="${empty labelPlural}">
-      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}_plural" var="labelPlural" />
+      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(fn:escapeXml(id),'_'))}_plural" var="labelPlural" />
     </c:if>
-    <spring:message arguments="${labelPlural}" code="entity_list_all" var="title_msg" />
-    <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
+    <spring:message arguments="${fn:escapeXml(labelPlural)}" code="entity_list_all" var="title_msg" />
+    <util:panel id="${fn:escapeXml(id)}" title="${title_msg}" openPane="${openPane}">
       <c:choose>
         <c:when test="${not empty items}">
           <jsp:doBody />
         </c:when>
         <c:otherwise>
-          <spring:message arguments="${label}" code="entity_not_found" />
+          <spring:message arguments="${fn:escapeXml(label)}" code="entity_not_found" />
         </c:otherwise>
       </c:choose>
     </util:panel>

@@ -12,13 +12,13 @@
     <c:if test="${empty label}">
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
     </c:if>
-    <spring:message arguments="${label}" code="entity_create" var="title_msg"/>
-    <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
+    <spring:message arguments="${fn:escapeXml(label)}" code="entity_create" var="title_msg"/>
+    <util:panel id="${fn:escapeXml(id)}" title="${title_msg}" openPane="${openPane}">
       <spring:url value="${path}" var="form_url"/>
       <form:form action="${form_url}" method="POST" modelAttribute="${modelAttribute}">
         <form:errors cssClass="errors" delimiter="&lt;p/&gt;"/>
         <jsp:doBody />
-        <div class="submit" id="${id}_submit">
+        <div class="submit" id="${fn:escapeXml(id)}_submit">
           <spring:message code="button_save" var="save_button"/>
           <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
           <input id="proceed" type="submit" value="${save_button}"/>

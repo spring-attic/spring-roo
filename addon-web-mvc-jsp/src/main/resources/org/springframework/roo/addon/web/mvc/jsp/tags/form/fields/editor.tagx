@@ -25,27 +25,31 @@
     <c:if test="${empty required}">
       <c:set value="false" var="required" />
     </c:if>
+    
+    <c:set var="sec_field">
+      <spring:escapeBody javaScriptEscape="true" >${field}</spring:escapeBody>
+    </c:set>
 
     <script type="text/javascript">dojo.require("dijit.Editor");</script>
-    <div id="_${id}_id">
-      <label for="_${field}_id">
-        <c:out value="${label}" />
+    <div id="_${fn:escapeXml(id)}_id">
+      <label for="_${sec_field}_id">
+        <c:out value="${fn:escapeXml(label)}" />
         :
       </label>
-      <form:textarea id="_${field}_id" path="${field}" disabled="${disabled}" />
+      <form:textarea id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
       <br />
-      <form:errors cssClass="errors" id="_${field}_error_id" path="${field}" />
-      <spring:message arguments="${label}" code="field_invalid" var="field_invalid" />
+      <form:errors cssClass="errors" id="_${sec_field}_error_id" path="${sec_field}" />
+      <spring:message arguments="${fn:escapeXml(label)}" code="field_invalid" var="field_invalid" />
       <c:choose>
         <c:when test="${required}">
           <spring:message code="field_required" var="field_required" />
-          <spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field_simple_validation" var="field_validation" />
+          <spring:message argumentSeparator="," arguments="${fn:escapeXml(label)},(${field_required})" code="field_simple_validation" var="field_validation" />
         </c:when>
         <c:otherwise>
-          <spring:message argumentSeparator="," arguments="${label}, " code="field_simple_validation" var="field_validation" />
+          <spring:message argumentSeparator="," arguments="${fn:escapeXml(label)}, " code="field_simple_validation" var="field_validation" />
         </c:otherwise>
       </c:choose>
-      <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${field}_id', widgetType : 'dijit.Editor', widgetAttrs : {disabled: ${disabled}}})); </script>
+      <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id', widgetType : 'dijit.Editor', widgetAttrs : {disabled: ${disabled}}})); </script>
     </div>
     <br />
   </c:if>

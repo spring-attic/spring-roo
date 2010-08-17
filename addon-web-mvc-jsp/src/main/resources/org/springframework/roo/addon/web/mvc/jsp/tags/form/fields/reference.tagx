@@ -15,21 +15,21 @@
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" />
     </c:if>
 
-    <div id="_${id}_id">
-      <label for="_${field}_id">
-        <c:out value="${label}" />
+    <div id="_${fn:escapeXml(id)}_id">
+      <label for="_${fn:escapeXml(field)}_id">
+        <c:out value="${fn:escapeXml(label)}" />
         :
       </label>
-      <spring:url value="${path}" var="create_url">
+      <spring:url value="${fn:escapeXml(path)}" var="create_url">
         <spring:param name="form" />
       </spring:url>
       <a href="${create_url}">
         <spring:url value="/resources/images/add.png" var="create_img_url" />
-        <spring:message arguments="${field}" code="global_menu_new" var="add_message" />
+        <spring:message arguments="${fn:escapeXml(field)}" code="global_menu_new" var="add_message" />
         <img alt="${add_message}" src="${create_img_url}" title="${add_message}" />
       </a>
       <c:out value=" " />
-      <spring:message arguments="${label}" code="entity_not_found" />
+      <spring:message arguments="${fn:escapeXml(label)}" code="entity_not_found" />
       <c:if test="${not empty required and required eq 'true'}">
         (
         <spring:message code="field_required" />

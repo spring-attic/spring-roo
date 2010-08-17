@@ -1,4 +1,4 @@
-<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:spring="http://www.springframework.org/tags" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
 
   <jsp:directive.attribute name="locale" type="java.lang.String" required="true" description="The locale for the language to be added." />
@@ -22,7 +22,7 @@
         <spring:param name="size" value="${param.size}" />
       </c:if>
     </spring:url>
-    <spring:message code="global_language_switch" arguments="${label}" var="lang_label" />
+    <spring:message code="global_language_switch" arguments="${fn:escapeXml(label)}" var="lang_label" />
     <a href="${url}" title="${lang_label}">
       <img class="flag" src="${img}" alt="${lang_label}" />
     </a>

@@ -12,12 +12,12 @@
     <c:if test="${empty label}">
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
     </c:if>
-    <spring:message arguments="${label}" code="entity_create" var="title_msg"/>
-    <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
+    <spring:message arguments="${fn:escapeXml(label)}" code="entity_create" var="title_msg"/>
+    <util:panel id="${fn:escapeXml(id)}" title="${title_msg}" openPane="${openPane}">
     <spring:message code="entity_dependency_required"/>
     <c:forEach items="${dependencies}" var="dependency" >
       <p>
-        <field:reference field="${dependency[0]}" id="${id}_${dependency[0]}" path="/${dependency[1]}"/>
+        <field:reference field="${dependency[0]}" id="${fn:escapeXml(id)}_${dependency[0]}" path="/${dependency[1]}"/>
       </p>
 	</c:forEach>
     </util:panel>

@@ -12,27 +12,33 @@
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
 
   <c:if test="${empty render or render}">
-
     <c:if test="${not empty object and empty label}">
-      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" />
+      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(fn:escapeXml(id),'_'))}" var="label" />
     </c:if>
 
     <c:if test="${empty dateTimePattern}">
       <c:set value="MM/dd/yyyy" var="dateTimePattern" />
     </c:if>
+    
+    <c:set var="sec_object" value="${fn:escapeXml(object)}" />
+    <c:set var="sec_field" value="${fn:escapeXml(field)}" />
 
-    <div id="_${id}_id">
-      <label for="_${field}_id">
-        <c:out value="${label}" />
+    <div id="_${fn:escapeXml(id)}_id">
+      <label for="_${fn:escapeXml(field)}_id">
+        <c:out value="${fn:escapeXml(label)}" />
         :
       </label>
-      <div class="box" id="_${id}_${field}_id">
+      <div class="box" id="_${fn:escapeXml(id)}_${fn:escapeXml(field)}_id">
         <c:choose>
           <c:when test="${date}">
-            <fmt:formatDate value="${object[field]}" pattern="${dateTimePattern}" />
+            <spring:escapeBody>
+              <fmt:formatDate value="${object[field]}" pattern="${fn:escapeXml(dateTimePattern)}" />
+            </spring:escapeBody>
           </c:when>
           <c:when test="${calendar}">
-            <fmt:formatDate value="${object[field].time}" pattern="${dateTimePattern}" />
+            <spring:escapeBody>
+              <fmt:formatDate value="${object[field].time}" pattern="${fn:escapeXml(dateTimePattern)}" />
+            </spring:escapeBody>
           </c:when>
           <c:otherwise>
             <spring:eval expression="object[field]" />

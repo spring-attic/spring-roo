@@ -7,14 +7,18 @@
 	<jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)"/>
 	
 	<c:set var="path" value="${path}" scope="request"/>
+  
+    <c:set var="sec_id">
+      <spring:escapeBody javaScriptEscape="true" >${id}</spring:escapeBody>
+    </c:set>
 	<c:if test="${empty label}">
-		<spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
+		<spring:message code="label_${fn:toLowerCase(fn:substringAfter(sec_id,'_'))}" var="label"/>
 	</c:if>
 
 	<script type="text/javascript">dojo.require('dijit.TitlePane')</script>
-    <div id="_title_${id}_id">
-        <spring:message arguments="${label}" code="entity_find" var="title_msg"/>
-        <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_${id}_id', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
+    <div id="_title_${sec_id}_id">
+        <spring:message arguments="${fn:escapeXml(label)}" code="entity_find" var="title_msg"/>
+        <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_title_${sec_id}_id', widgetType : 'dijit.TitlePane', widgetAttrs : {title: '${title_msg}'}})); </script>
 		<jsp:doBody />
     </div>
     
