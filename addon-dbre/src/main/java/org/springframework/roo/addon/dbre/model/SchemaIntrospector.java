@@ -10,14 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.addon.dbre.model.dialect.DB2400Dialect;
-import org.springframework.roo.addon.dbre.model.dialect.DerbyDialect;
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
-import org.springframework.roo.addon.dbre.model.dialect.H2Dialect;
-import org.springframework.roo.addon.dbre.model.dialect.HSQLDialect;
-import org.springframework.roo.addon.dbre.model.dialect.MySQLDialect;
-import org.springframework.roo.addon.dbre.model.dialect.OracleDialect;
-import org.springframework.roo.addon.dbre.model.dialect.PostgreSQLDialect;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -380,28 +373,11 @@ public class SchemaIntrospector {
 	}
 	
 	private Dialect getDialect() {
-		String productName;
 		try {
-			productName = databaseMetaData.getDatabaseProductName();
-		} catch (SQLException ignored) {
+			String productName = databaseMetaData.getDatabaseProductName();
+			return (Dialect) Class.forName("org.springframework.roo.addon.dbre.model.dialect." + productName + "Dialect").newInstance();
+		} catch (Exception e) {
 			return null;
 		}
-		 
-		if (productName.equalsIgnoreCase("Oracle")) {
-			return new OracleDialect();
-		} else if (productName.equalsIgnoreCase("PostgreSQL")) {
-			return new PostgreSQLDialect();
-		} else if (productName.startsWith("HSQL")) {
-			return new HSQLDialect();
-		} else if (productName.equalsIgnoreCase("H2")) {
-			return new H2Dialect();
-		} else if (productName.equalsIgnoreCase("MySQL")) {
-			return new MySQLDialect();
-		} else if (productName.contains("Derby")) {
-			return new DerbyDialect();
-		} else if (productName.contains("DB2")) {
-			return new DB2400Dialect();
-		}
-		return null;
 	}
 }

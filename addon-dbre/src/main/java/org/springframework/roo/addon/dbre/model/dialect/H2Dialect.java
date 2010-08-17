@@ -10,15 +10,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
  */
 public class H2Dialect extends AbstractDialect implements Dialect {
 
-	public boolean supportsSequences() {
-		return true;
-	}
-
 	public String getQuerySequencesString(Schema schema) {
 		return "select sequence_name from system_sequences";
-	}
-
-	public String getSequenceNextValString(Schema schema, String sequenceName) {
-		return "select nextval('" + (schema != null ? schema.getName() + "." : "") + sequenceName + "')";
 	}
 }

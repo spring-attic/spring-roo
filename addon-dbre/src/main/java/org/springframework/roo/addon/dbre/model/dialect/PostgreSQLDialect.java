@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre.model.dialect;
 
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * An SQL dialect for the PostgreSQL database.
@@ -10,15 +11,8 @@ import org.springframework.roo.addon.dbre.model.Schema;
  */
 public class PostgreSQLDialect extends AbstractDialect implements Dialect {
 
-	public boolean supportsSequences() {
-		return true;
-	}
-
 	public String getQuerySequencesString(Schema schema) {
-		return "select relname from pg_class where relkind = 'S'AND relnamespace IN ( SELECT oid FROM pg_namespace WHERE nspname = '" + schema.getName() + "')";
-	}
-
-	public String getSequenceNextValString(Schema schema, String sequenceName) {
-		return "select nextval ('" + (schema != null ? schema.getName() + "." : "") + sequenceName + "')";
+		Assert.notNull(schema, "Schema required");
+		return "SELECT RELNAME FROM PG_CLASS WHERE RELKIND = 'S' AND RELNAMESPACE IN (SELECT OID FROM PG_NAMESPACE WHERE NSPNAME = '" + schema.getName() + "')";
 	}
 }

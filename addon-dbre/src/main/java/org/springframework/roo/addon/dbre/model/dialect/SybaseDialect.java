@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre.model.dialect;
 
+import org.springframework.roo.addon.dbre.model.Schema;
+
 /**
  * An SQL dialect for the MySQL database.
  * 
@@ -8,7 +10,11 @@ package org.springframework.roo.addon.dbre.model.dialect;
  */
 public class SybaseDialect extends AbstractDialect implements Dialect {
 	
-	protected String getDatabaseName() {
-		return "Sybase";
+	public boolean supportsSequences() {
+		return false;
+	}
+
+	public String getQuerySequencesString(Schema schema) {
+		throw new UnsupportedOperationException("Sybase does not support sequences");
 	}
 }

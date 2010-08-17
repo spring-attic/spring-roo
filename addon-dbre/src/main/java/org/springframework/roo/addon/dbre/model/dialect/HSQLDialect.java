@@ -10,15 +10,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
  */
 public class HSQLDialect extends AbstractDialect implements Dialect {
 
-	public boolean supportsSequences() {
-		return true;
-	}
-
 	public String getQuerySequencesString(Schema schema) {
 		return "select sequence_name from system_sequences";
-	}
-
-	public String getSequenceNextValString(Schema schema, String sequenceName) {
-		return "select next value for " + (schema != null ? schema.getName() + "." : "") + sequenceName + " from dual_" + sequenceName;
 	}
 }
