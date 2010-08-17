@@ -6,7 +6,6 @@ import org.springframework.roo.project.ProjectMetadata;
 public enum GwtPath {
 	// TODO: Make this cleaner; should be passing into a GwtPath(String segmentName, String sourceAntPath) constructor instead of the glorified conditional statements
 	GWT_ROOT, 
-	GWT_PLACE, 
 	GWT_REQUEST, 
 	GWT_SCAFFOLD, 
 	GWT_SCAFFOLD_GENERATED, 
@@ -19,8 +18,6 @@ public enum GwtPath {
 	private String segmentName() {
 		if (GWT_ROOT.equals(this)) {
 			return "/gwt";
-		} else if (GWT_PLACE.equals(this)) {
-			return "/gwt/scaffold/place";
 		} else if (GWT_REQUEST.equals(this)) {
 			return "/gwt/request";
 		} else if (GWT_SCAFFOLD.equals(this)) {

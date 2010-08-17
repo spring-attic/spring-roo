@@ -1,0 +1,40 @@
+#parse ("common.vm")
+package $packageName;
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.Place;
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyPlace;
+#declareImports()
+ 
+/**
+ * Instantiates detail activities.
+ */
+public class ApplicationDetailsActivities implements ActivityMapper {
+  private final ${shared.requestFactory} requests;
+  private final PlaceController placeController;
+
+  public ApplicationDetailsActivities(${shared.requestFactory} requestFactory,
+      PlaceController placeController) {
+    this.requests = requestFactory;
+    this.placeController = placeController;
+  }
+
+  public Activity getActivity(Place place) {
+    if (!(place instanceof ProxyPlace)) {
+      return null;
+    }
+
+    final ProxyPlace proxyPlace = (ProxyPlace) place;
+
+    return new ApplicationEntityTypesProcessor<Activity>() {
+#foreach ($ent in $entities)
+      @Override
+      public void handle${ent.name}(${ent.record} proxy) {
+        setResult(new ${ent.name}ActivitiesMapper(requests, placeController).getActivity(proxyPlace));
+      }
+#end
+    }.process(proxyPlace.getProxy());
+  }
+}

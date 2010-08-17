@@ -33,6 +33,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @author Ray Cromwell
  * @author Amit Manjhi
+ * @author Ray Ryan
  */
 @Component
 @Service
@@ -115,78 +116,41 @@ public class GwtFileListener implements FileEventListener {
 
 		// Now we need to refresh all the application-wide files
 		processedApplicationFiles = true;
-		// We're going to do this crudely (no JavaParser) just to get it done in a sensible period of time...
 		updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
 		updateApplicationRequestFactory(fileManager, projectMetadata);
-		updateListPlaceRendered(fileManager, projectMetadata);
-		updateListActivitiesMapper();
-
-		updatePlaceProcessor(fileManager, projectMetadata);
-		// TODO: (cromwellian) don't know if I'm supposed to be doing this here instead of GwtMetaData, but I'm low on time updateScaffoldActivities(fileManager, projectMetadata);
+		updateListPlaceRenderer(fileManager, projectMetadata);
+		
+		// TODO: (cromwellian) don't know if I'm supposed to be doing this here instead of GwtMetaData, but I'm low on time
+		updateFactory();
 		updateMasterActivities();
 		updateDetailsActivities();
 		updateMobileActivities();
-		updatePlaceFilter();
-		updateBasePlaceFilter();
-		updatePlaceTypeFilter();
 	}
 
 	private void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.APP_ENTITY_TYPES_PROCESSOR;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		final String param = "Class<? extends Record>";
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import java.util.HashSet;");
-		bb.appendFormalLine("import java.util.Set;");
-		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
-		bb.appendFormalLine("public class " + destType.getFullName() + " {");
-		bb.indent();
-		bb.appendFormalLine("private static Set<" + param + "> instance;");
-		bb.appendFormalLine("private static Set<" + param + "> get() {");
-		bb.indent();
-		bb.appendFormalLine("if (instance == null) {");
-		bb.indent();
-		bb.appendFormalLine("instance = new HashSet<" + param + ">();");
+    SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
+    VelocityContext ctx = buildContext(type);
 
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			if (!fullPath.equals(param)) {
-				bb.appendFormalLine("instance.add(" + javaType.getSimpleTypeName() + ".class);");
-			}
-		}
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		bb.appendFormalLine("return instance;");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("public static void processAll(EntityTypesProcessor processor) {");
-		bb.indent();
-		bb.appendFormalLine("for (" + param + " record : get()) {");
-		bb.indent();
-		bb.appendFormalLine("processor.processType(record);");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.appendFormalLine("public interface EntityTypesProcessor {");
-		bb.indent();
-		bb.appendFormalLine("void processType(" + param + " record);");
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		
-		write(destFile, bb.getOutput(), fileManager);
-	}
+    MirrorType locate = MirrorType.RECORD;
+    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+    ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+    ctx.put("entities", entities);
+    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+      String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+      String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+      Map<String, String> ent = new HashMap<String, String>();
+      ent.put("record", fullPath);
+      ent.put("name", simpleName);
+      ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
+      entities.add(ent);
+    }
+  
+    try {
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
 
 	private void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType destType = SharedType.APP_REQUEST_FACTORY;
@@ -206,7 +170,7 @@ public class GwtFileListener implements FileEventListener {
 			JavaType javaType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
 			bb.appendFormalLine(javaType.getSimpleTypeName() + " " + StringUtils.uncapitalize(javaType.getSimpleTypeName()) + "();");
 		}
-	       	bb.appendFormalLine("UserInformationRequest userInformationRequest();");
+	  bb.appendFormalLine("UserInformationRequest userInformationRequest();");
 
 		bb.indentRemove();
 		bb.appendFormalLine("}");
@@ -221,69 +185,31 @@ public class GwtFileListener implements FileEventListener {
 		return type.getFullyQualifiedTypeName(projectMetadata);
 	}
 
-	private void updatePlaceProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.APP_PLACE_PROCESSOR;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
+	private void updateListPlaceRenderer(FileManager fileManager, ProjectMetadata projectMetadata) {
+    SharedType type = SharedType.LIST_PLACE_RENDERER;
+    VelocityContext ctx = buildContext(type);
+    addReference(ctx, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+    MirrorType locate = MirrorType.RECORD;
+    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+    ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+    ctx.put("entities", entities);
+    List<String> imports = asList(ctx.get("imports"));
+    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+      String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+      String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+      Map<String, String> ent = new HashMap<String, String>();
+      ent.put("record", fullPath);
+      ent.put("name", simpleName);
+      imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+      entities.add(ent);
+    }
 
-		bb.appendFormalLine("public interface " + destType.getFullName() + " {");
-		bb.indent();
-
-		bb.appendFormalLine("void process(ApplicationListPlace object);");
-
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-			bb.appendFormalLine("void process(" + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix() + " place);");
-		}
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		
-		write(destFile, bb.getOutput(), fileManager);
-	}
-
-	private void updateListPlaceRendered(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType destType = SharedType.LIST_PLACE_RENDERER;
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata, destType.getFullName() + ".java");
-		InvocableMemberBodyBuilder bb = new InvocableMemberBodyBuilder();
-		bb.reset();
-		bb.appendFormalLine("package " + destType.getPath().packageName(projectMetadata) + ";");
-		bb.appendFormalLine("import com.google.gwt.text.shared.AbstractRenderer;");
-		bb.appendFormalLine("import com.google.gwt.valuestore.shared.Record;");
-		bb.appendFormalLine("import " + SharedType.APP_LIST_PLACE.getFullyQualifiedTypeName(projectMetadata) + ";");
-
-		bb.appendFormalLine("public class " + destType.getFullName() + " extends AbstractRenderer<" + SharedType.APP_LIST_PLACE.getFullName() + "> {");
-		bb.indent();
-
-		bb.appendFormalLine("public String render(ApplicationListPlace object) {");
-		bb.indent();
-		bb.appendFormalLine("Class<? extends Record> type = object.getType();");
-		MirrorType locate = MirrorType.RECORD;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			JavaType keyType = new JavaType(locate.getPath().packageName(projectMetadata) + "." + fullPath);
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-			bb.appendFormalLine("if (type.equals(" + keyType.getFullyQualifiedTypeName() + ".class)) {");
-			bb.indent();
-			bb.appendFormalLine("return \"" + simpleName + "s\";");
-			bb.indentRemove();
-			bb.appendFormalLine("}");
-		}
-		bb.appendFormalLine("throw new IllegalArgumentException(\"Cannot render unknown type \" + object);");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-
-		bb.indentRemove();
-		bb.appendFormalLine("}");
-		
-		write(destFile, bb.getOutput(), fileManager);
-	}
+    try {
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
 
 	private void write(String destFile, String newContents, FileManager fileManager) {
 		// Write to disk, or update a file if it is already present
@@ -321,184 +247,70 @@ public class GwtFileListener implements FileEventListener {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public void updatePlaceFilter() {
-		try {
-			SharedType type = SharedType.APP_PLACE_FILTER;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("detailsPlace", simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				entities.add(ent);
-			}
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public void updateBasePlaceFilter() {
-		try {
-			SharedType type = SharedType.BASE_PLACE_FILTER;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE_FILTER);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("detailsPlace", simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				entities.add(ent);
-			}
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public void updatePlaceTypeFilter() {
-		try {
-			SharedType type = SharedType.APP_PLACE_TO_RECORD_TYPE;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE_FILTER);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("detailsPlace", simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
-				ent.put("record", simpleName + MirrorType.RECORD.getSuffix());
-				entities.add(ent);
-			}
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
 	public void updateMobileActivities() {
-		try {
-			SharedType type = SharedType.MOBILE_ACTIVITIES;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, SharedType.APP_PLACE_FILTER);
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("name", simpleName);
-				ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
-				ent.put("activitiesMapper", simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
-				imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
-				ent.put("detailsPlace", simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				entities.add(ent);
-			}
+		SharedType type = SharedType.MOBILE_ACTIVITIES;
+		VelocityContext ctx = buildContext(type);
+		addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+		MirrorType locate = MirrorType.RECORD;
+		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+		List<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+		ctx.put("entities", entities);
+		List<String> imports = asList(ctx.get("imports"));
+		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			Map<String, String> ent = new HashMap<String, String>();
+			ent.put("name", simpleName);
+			ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
+			ent.put("activitiesMapper", simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
+			imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
+			entities.add(ent);
+		}
 
+    try {
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	public void updateFactory() {
+    SharedType type = SharedType.FACTORY;
+    VelocityContext ctx = buildContext(type);
+    addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+    addReference(ctx, SharedType.PLACE_HISTORY_HANDLER);
+
+    try {
+      writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
 	public void updateDetailsActivities() {
-		try {
-			SharedType type = SharedType.DETAILS_ACTIVITIES;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, SharedType.BASE_PLACE_FILTER);
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("name", simpleName);
-				ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
-				ent.put("activitiesMapper", simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
-				imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
-				ent.put("detailsPlace", simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				imports.add(MirrorType.SCAFFOLD_PLACE.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.SCAFFOLD_PLACE.getSuffix());
-				entities.add(ent);
-			}
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+		SharedType type = SharedType.DETAILS_ACTIVITIES;
+		VelocityContext ctx = buildContext(type);
+    addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+    addReference(ctx, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+		MirrorType locate = MirrorType.RECORD;
+		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+		ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+		ctx.put("entities", entities);
+		List<String> imports = asList(ctx.get("imports"));
+		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			Map<String, String> ent = new HashMap<String, String>();
+      ent.put("record", fullPath);
+			ent.put("name", simpleName);
+			ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
+			ent.put("activitiesMapper", simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
+      imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+      imports.add(MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
+			entities.add(ent);
 		}
-	}
 
-	@SuppressWarnings("unchecked")
-	private void updateListActivitiesMapper() {
-		try {
-			SharedType type = SharedType.LIST_ACTIVITIES_MAPPER;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			MirrorType locate = MirrorType.RECORD;
-			String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-			ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
-			ctx.put("entities", entities);
-			ArrayList<String> imports = (ArrayList<String>) ctx.get("imports");
-			for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-				String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-				String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
-				Map<String, String> ent = new HashMap<String, String>();
-				ent.put("name", simpleName);
-				ent.put("listActivity", simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
-				imports.add(MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
-				ent.put("record", simpleName + MirrorType.RECORD.getSuffix());
-				imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
-				entities.add(ent);
-			}
-
+    try {
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -506,27 +318,52 @@ public class GwtFileListener implements FileEventListener {
 	}
 
 	public void updateMasterActivities() {
-		try {
-			SharedType type = SharedType.MASTER_ACTIVITIES;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-			addReference(ctx, SharedType.APP_PLACE_TO_RECORD_TYPE);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
-			addReference(ctx, SharedType.LIST_ACTIVITIES_MAPPER);
+		SharedType type = SharedType.MASTER_ACTIVITIES;
+		VelocityContext ctx = buildContext(type);
+    addReference(ctx, SharedType.APP_REQUEST_FACTORY);
+    addReference(ctx, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+
+    MirrorType locate = MirrorType.RECORD;
+    String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+    ArrayList<Map<String, String>> entities = new ArrayList<Map<String, String>>();
+    ctx.put("entities", entities);
+    List<String> imports = asList(ctx.get("imports"));
+    for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+      String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+      String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+      Map<String, String> ent = new HashMap<String, String>();
+      ent.put("record", fullPath);
+      ent.put("name", simpleName);
+      ent.put("nameUncapitalized", StringUtils.uncapitalize(simpleName));
+      ent.put("listActivity", simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
+      imports.add(MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
+      imports.add(MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+      entities.add(ent);
+    }  
+    
+    try {
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
+  private <T> List<T> asList(Object object) {
+    return (List<T>) object;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private <K, V> Map<K, V> asMap(Object object) {
+    return (Map<K, V>) object;
+  }
+  
 	private VelocityContext buildContext(SharedType destType) {
 		JavaType javaType = new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
 		String clazz = javaType.getSimpleTypeName();
 
 		VelocityContext context = new VelocityContext();
-		context.put("shared", new HashMap());
+		context.put("shared", new HashMap<String, String>());
 		context.put("className", clazz);
 		context.put("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		ArrayList<String> imports = new ArrayList<String>();
@@ -553,11 +390,11 @@ public class GwtFileListener implements FileEventListener {
 		write(destFile, sw.toString(), fileManager);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addReference(VelocityContext ctx, SharedType type) {
-		addImport((List<String>) ctx.get("imports"), type);
-		Map<String, String> sMap = (Map<String, String>) ctx.get("shared");
-		sMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+		List<String> imports = asList(ctx.get("imports"));
+    addImport(imports, type);
+		Map<String, String> shared = asMap(ctx.get("shared"));
+		shared.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
 	private void addImport(List<String> imports, SharedType type) {

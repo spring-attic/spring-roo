@@ -5,102 +5,115 @@ import com.google.gwt.app.place.ActivityManager;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.IsWidget;
 import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.PlacePicker;
+import com.google.gwt.app.place.PlaceHistoryHandler;
+import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
 import com.google.gwt.requestfactory.client.LoginWidget;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestEvent;
 import com.google.gwt.requestfactory.shared.UserInformationRecord;
-import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
-import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationPlace;
+import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
 import com.google.gwt.user.client.Window.Location;
+import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.valuestore.shared.SyncResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Mobile application for browsing the entities of the Expenses app.
+ * Mobile application for browsing entities.
  * 
  * TODO(jgw): Make this actually mobile-friendly.
  */
 public class ScaffoldMobile implements EntryPoint {
 
 	public void onModuleLoad() {
-		/* App controllers and services */
+    ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
 
-		final HandlerManager eventBus = new HandlerManager(null);
-		final ApplicationRequestFactory requestFactory = GWT.create(ApplicationRequestFactory.class);
-		requestFactory.init(eventBus);
-		final PlaceController<ApplicationPlace> placeController = new PlaceController<ApplicationPlace>(eventBus);
+    /* App controllers and services */
 
-		/* Top level UI */
+    final EventBus eventBus = factory.getEventBus();
+    final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
+    final PlaceController placeController = factory.getPlaceController();
 
-		final ScaffoldMobileShell shell = new ScaffoldMobileShell();
+    /* Top level UI */
 
-		/* Check for Authentication failures or mismatches */
+    final ScaffoldMobileShell shell = factory.getMobileShell();
 
-		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+    /* Check for Authentication failures or mismatches */
 
-		/* Add a login widget to the page */
+    eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
 
-		final LoginWidget login = shell.getLoginWidget();
-		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
-		  public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
-		    login.setUserInformation(userInformationRecord);
-		  }
-		};
-		requestFactory.userInformationRequest().getCurrentUserInformation(
-		     Location.getHref()).fire(receiver);
+    /* Add a login widget to the page */
 
-		/* Left side lets us pick from all the types of entities */
+    final LoginWidget login = shell.getLoginWidget();
+    Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
+      public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
+        login.setUserInformation(userInformationRecord);
+      }
+     };
+     requestFactory.userInformationRequest().getCurrentUserInformation(
+         Location.getHref()).fire(receiver);
 
-		PlacePicker<ApplicationListPlace> placePicker = new PlacePicker<ApplicationListPlace>(shell.getPlacesBox(), placeController, new ListPlaceRenderer());
-		placePicker.setPlaces(getTopPlaces());
+    /* Left side lets us pick from all the types of entities */
 
-		/*
-		 * The body is run by an ActivitManager that listens for PlaceChange events and finds the corresponding Activity to run
-		 */
+    HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
+    placePickerView.setValues(getTopPlaces());
+    factory.getListPlacePicker().register(eventBus, placePickerView);
 
-		final ActivityMapper<ApplicationPlace> mapper = new ScaffoldMobileActivities(new ListActivitiesMapper(eventBus, requestFactory, placeController), requestFactory, placeController);
-		final ActivityManager<ApplicationPlace> activityManager = new ActivityManager<ApplicationPlace>(mapper, eventBus);
+    /*
+     * The body is run by an ActivitManager that listens for PlaceChange events
+     * and finds the corresponding Activity to run
+     */
 
-		activityManager.setDisplay(new Activity.Display() {
-			public void showActivityWidget(IsWidget widget) {
-				shell.getBody().setWidget(widget == null ? null : widget.asWidget());
-			}
-		});
+    final ActivityMapper mapper = new ScaffoldMobileActivities(
+        new ApplicationMasterActivities(requestFactory, placeController),
+        new ApplicationDetailsActivities(requestFactory, placeController));
+    final ActivityManager activityManager = new ActivityManager(mapper,
+        eventBus);
 
-		/* Hide the loading message */
+    activityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+      }
+    });
 
-		Element loading = Document.get().getElementById("loading");
-		loading.getParentElement().removeChild(loading);
+    /* Hide the loading message */
 
-		/* And show the user the shell */
+    Element loading = Document.get().getElementById("loading");
+    loading.getParentElement().removeChild(loading);
 
-		RootLayoutPanel.get().add(shell);
-	}
+    /* Browser history integration */
+    PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
+    placeHistoryHandler.register(placeController, eventBus, 
+        /* defaultPlace */ getTopPlaces().iterator().next());
+    placeHistoryHandler.handleCurrentHistory();
 
-	private List<ApplicationListPlace> getTopPlaces() {
-		final List<ApplicationListPlace> rtn = new ArrayList<ApplicationListPlace>();
-		ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.EntityTypesProcessor() {
-			public void processType(Class<? extends Record> recordType) {
-				rtn.add(new ApplicationListPlace(recordType));
-			}
-		});
-		return Collections.unmodifiableList(rtn);
-	}
+    /* And show the user the shell */
+
+    RootLayoutPanel.get().add(shell);
+  }
+
+  // TODO(rjrjr) No reason to make the place objects in advance, just make
+  // it list the class objects themselves. Needs to be sorted by rendered name,
+  // too 
+  private Set<ProxyListPlace> getTopPlaces() {
+    Set<Class<? extends Record>> types = ApplicationEntityTypesProcessor.getAll();
+    Set<ProxyListPlace> rtn = new HashSet<ProxyListPlace>(types.size());
+
+    for (Class<? extends Record> type : types) {
+      rtn.add(new ProxyListPlace(type));
+    }
+
+    return rtn;
+  }
 }

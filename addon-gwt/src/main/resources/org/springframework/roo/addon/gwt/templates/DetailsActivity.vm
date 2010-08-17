@@ -3,7 +3,10 @@ package ${packageName};
 
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyPlace;
 import com.google.gwt.app.place.RecordDetailsView;
+import com.google.gwt.app.place.ProxyPlace.Operation;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.valuestore.shared.SyncResult;
@@ -27,24 +30,24 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 	}
 
 	private final ApplicationRequestFactory requests;
-	private final PlaceController<ApplicationPlace> placeController;
+	private final PlaceController placeController;
 	private final RecordDetailsView<${entity.record}> view;
-	private Long id;
+	private ${entity.record} record;
 	private Display display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
-		this(id, requests, placeController, getDefaultView());
+	public $className(${entity.record} proxy, ApplicationRequestFactory requests, PlaceController placeController) {
+		this(proxy, requests, placeController, getDefaultView());
 	}
 
 	/**
-	 * Creates an activity that uses its own view instance.
+   * Creates an activity that uses its own view instance.
  	 */
-	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController, RecordDetailsView<${entity.record}> view) {
+	public $className(${entity.record} proxy, ApplicationRequestFactory requests, PlaceController placeController, RecordDetailsView<${entity.record}> view) {
 		this.placeController = placeController;
-		this.id = id;
+		this.record = proxy;
 		this.requests = requests;
 		view.setDelegate(this);
 		this.view = view;
@@ -55,21 +58,22 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 			return;
 		}
    		
-	    RequestObject<Void> deleteRequest = requests.${entity.nameUncapitalized}Request().remove(view.getValue()); // TODO: remove the hard-coding 
-		deleteRequest.delete(view.getValue());
+	  RequestObject<Void> deleteRequest = requests.${entity.nameUncapitalized}Request().remove(view.getValue());
 		deleteRequest.fire(new Receiver<Void>() {
+		
 			public void onSuccess(Void ignore, Set<SyncResult> response) {
 				if (display == null) {
 					// This activity is dead
 					return;
 				}
+
 				display.showActivityWidget(null);
 			}
 		});
 	}
 
 	public void editClicked() {
-		placeController.goTo(new ${entity.detailPlace}(view.getValue(), Operation.EDIT));
+    placeController.goTo(new ProxyPlace(view.getValue(), Operation.EDIT));
 	}
 
 	public void onCancel() {
@@ -80,15 +84,18 @@ public class $className extends AbstractActivity implements RecordDetailsView.De
 		display = null;
 	}
 
-	public void start(final Display display) {
-    	this.display = display;
+  public void start(Display displayIn, EventBus eventBus) {
+    	this.display = displayIn;
     	Receiver<${entity.record}> callback = new Receiver<${entity.record}>() {
 			public void onSuccess(${entity.record} record, Set<SyncResult> syncResults) {
+        if (display == null) {
+          return;
+        }
 				view.setValue(record);
 				display.showActivityWidget(view);
 			}
 		};
 
-		requests.${entity.nameUncapitalized}Request().find${entity.name}(Value.of(id)).fire(callback);
+		requests.${entity.nameUncapitalized}Request().find${entity.name}(Value.of(record.getId())).fire(callback);
 	}
 }

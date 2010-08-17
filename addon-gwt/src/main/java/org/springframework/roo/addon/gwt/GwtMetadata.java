@@ -122,12 +122,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildListView();
 		buildListViewUiXml();
 	//  buildDetailsView();
-	buildDetailsViewHapax();
+		buildDetailsViewHapax();
 		buildDetailsViewUiXml();
 		buildEditView();
 		buildEditViewUiXml();
 		buildRequest();
-		buildApplicationPlace();
 	}
 
 	public List<ClassOrInterfaceTypeDetails> getAllTypes() {
@@ -238,24 +237,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 		try {
 			MirrorType type = MirrorType.ACTIVITIES_MAPPER;
 			VelocityContext ctx = buildContext(type);
-			addReference(ctx, MirrorType.SCAFFOLD_PLACE);
 			addReference(ctx, MirrorType.DETAIL_ACTIVITY);
 			addReference(ctx, MirrorType.EDIT_ACTIVITY);
-			addReference(ctx, SharedType.APP_PLACE);
 			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
-	private void buildApplicationPlace() {
-		try {
-			MirrorType type = MirrorType.SCAFFOLD_PLACE;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, SharedType.APP_PLACE_FILTER);
-			addReference(ctx, SharedType.APP_PLACE_PROCESSOR);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -418,17 +402,19 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.record = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addReference(VelocityContext ctx, MirrorType type) {
-		addImport((List<String>) ctx.get("imports"), type);
-		Map<String, String> eMap = (Map<String, String>) ctx.get("entity");
+		List<String> imports = asList(ctx.get("imports"));
+    addImport(imports, type);
+		Map<String, String> map = asMap(ctx.get("entity"));
+    Map<String, String> eMap = map;
 		eMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addReference(VelocityContext ctx, SharedType type) {
-		addImport((List<String>) ctx.get("imports"), type);
-		Map<String, String> sMap = (Map<String, String>) ctx.get("shared");
+		List<String> imports = asList(ctx.get("imports"));
+    addImport(imports, type);
+		Map<String, String> map = asMap(ctx.get("shared"));
+    Map<String, String> sMap = map;
 		sMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
@@ -439,21 +425,23 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void addImport(List<String> imports, MirrorType type) {
 		imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
 	}
-
-	@SuppressWarnings("unchecked")
+	
+  @SuppressWarnings("unchecked")
+  private <T> List<T> asList(Object object) {
+    return (List<T>) object;
+  }
+  
+  @SuppressWarnings("unchecked")
+  private <K, V> Map<K, V> asMap(Object object) {
+    return (Map<K, V>) object;
+  }
+  
 	private void buildEditActivity() {
 		try {
 			MirrorType type = MirrorType.EDIT_ACTIVITY;
 			VelocityContext ctx = buildContext(MirrorType.EDIT_ACTIVITY);
-			List<String> imports = (List<String>) ctx.get("imports");
 			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-			addReference(ctx, MirrorType.SCAFFOLD_PLACE);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
 			addReference(ctx, MirrorType.EDIT_VIEW);
-
-			imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName() + ".Operation");
 
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
@@ -461,20 +449,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void buildDetailsActivity() {
 		try {
 			MirrorType type = MirrorType.DETAIL_ACTIVITY;
 
 			VelocityContext ctx = buildContext(MirrorType.DETAIL_ACTIVITY);
-			List<String> imports = (List<String>) ctx.get("imports");
 
 			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_LIST_PLACE);
-			addReference(ctx, MirrorType.SCAFFOLD_PLACE);
 			addReference(ctx, MirrorType.DETAILS_VIEW);
-			imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName() + ".Operation");
 
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
@@ -482,21 +464,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void buildListActivity() {
 		try {
 			MirrorType type = MirrorType.LIST_ACTIVITY;
 
 			VelocityContext ctx = buildContext(MirrorType.LIST_ACTIVITY);
-			List<String> imports = (List<String>) ctx.get("imports");
+
 			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, SharedType.APP_PLACE);
-			addReference(ctx, SharedType.APP_RECORD_PLACE);
-			addReference(ctx, MirrorType.SCAFFOLD_PLACE);
 			addReference(ctx, MirrorType.LIST_VIEW);
 			addReference(ctx, MirrorType.RECORD_CHANGED);
 			addReference(ctx, MirrorType.CHANGED_HANDLER);
-			imports.add(getDestinationJavaType(SharedType.APP_RECORD_PLACE).getFullyQualifiedTypeName() + ".Operation");
 
 			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
 		} catch (Exception e) {
@@ -622,15 +599,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private VelocityContext buildContext(MirrorType destType) {
 		JavaType javaType = getDestinationJavaType(destType);
 		String clazz = javaType.getSimpleTypeName();
 		JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
 
 		VelocityContext context = new VelocityContext();
-		context.put("shared", new HashMap());
-		HashMap eMap = new HashMap();
+		context.put("shared", new HashMap<String, String>());
+		HashMap<String, Object> eMap = new HashMap<String, Object>();
 		context.put("entity", eMap);
 		context.put("className", clazz);
 		context.put("packageName", javaType.getPackage().getFullyQualifiedPackageName());
@@ -664,21 +640,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		return context;
 	}
 
-	@SuppressWarnings("unchecked")
 	private TemplateDataDictionary buildDataDictionary(MirrorType destType) {
 		JavaType javaType = getDestinationJavaType(destType);
 		String clazz = javaType.getSimpleTypeName();
 		JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
 
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
-	//	dataDictionary.addSection("shared", newsta HashMap());
-		HashMap eMap = new HashMap();
-	//	dataDictionary.put("entity", eMap);
+		HashMap<String, Object> eMap = new HashMap<String, Object>();
 		dataDictionary.setVariable("className", clazz);
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		ArrayList<String> imports = new ArrayList<String>();
 		imports.add(recordType.getFullyQualifiedTypeName());
-	//	context.put("imports", imports);
 		dataDictionary.addSection("imports").setVariable("import", recordType.getFullyQualifiedTypeName());
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
@@ -720,14 +692,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	private void buildDetailsView() {
-		try {
-			writeWithTemplate(MirrorType.DETAILS_VIEW, "org/springframework/roo/addon/gwt/templates/DetailsView.vm");
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	private void buildDetailsViewHapax() {
 		try {
 			writeWithHapaxTemplate(MirrorType.DETAILS_VIEW, "org/springframework/roo/addon/gwt/templates/", "DetailsView");
@@ -735,7 +699,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			throw new IllegalStateException(e);
 		}
 	}
-
 
 	private void buildDetailsViewUiXml() {
 		MirrorType dType = MirrorType.DETAILS_VIEW;

@@ -2,28 +2,35 @@
 package $packageName;
 
 import com.google.gwt.app.place.Activity;
-import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyPlace;
 #declareImports()
 
 /**
- * Maps {@link ${entity.detailsPlace}} instances to the {@link Activity} to run.
+ * Maps {@link ProxyPlace} instances to the {@link Activity} to run.
  */
-public class $className implements ActivityMapper<${entity.detailPlace}> {
+public class $className {
 	private final ${shared.requestFactory} requests;
-	private final PlaceController<${shared.applicationPlace}> placeController;
+	private final PlaceController placeController;
 
-	public $className(${shared.requestFactory} requests, PlaceController<${shared.applicationPlace}> placeController) {
+	public $className(${shared.requestFactory} requests, PlaceController placeController) {
 		this.requests = requests;
 		this.placeController = placeController;
 	}
 
-	public Activity getActivity(${entity.detailPlace} place) {
+	public Activity getActivity(ProxyPlace place) {
 		switch (place.getOperation()) {
 		case DETAILS:
-			return new ${entity.detailsActivity}(place.getId(), requests, placeController);
+			return new ${entity.detailsActivity}((${entity.record}) place.getProxy(), 
+			    requests, placeController);
+			
 		case EDIT:
-			return new ${entity.editActivity}(place.getId(), requests, placeController);
+			return new ${entity.editActivity}((${entity.record}) place.getProxy(), 
+			    requests, placeController, false);
+      
+    case CREATE:
+      return new ${entity.editActivity}((${entity.record}) place.getProxy(), 
+          requests, placeController, true);
 		}
 
 		throw new IllegalArgumentException("Unknown operation " + place.getOperation());

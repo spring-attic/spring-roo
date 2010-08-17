@@ -1,129 +1,151 @@
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityManager;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.CachingActivityMapper;
+import com.google.gwt.app.place.FilteredActivityMapper;
 import com.google.gwt.app.place.IsWidget;
 import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.PlacePicker;
+import com.google.gwt.app.place.PlaceHistoryHandler;
+import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
 import com.google.gwt.requestfactory.client.LoginWidget;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestEvent;
-import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import com.google.gwt.requestfactory.shared.UserInformationRecord;
+import com.google.gwt.requestfactory.shared.RequestEvent.State;
+import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
+import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
 import com.google.gwt.user.client.Window.Location;
+import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.valuestore.shared.Record;
 import com.google.gwt.valuestore.shared.SyncResult;
 
-import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationListPlace;
-import __TOP_LEVEL_PACKAGE__.gwt.scaffold.place.ApplicationPlace;
-import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
-import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ApplicationKeyNameRenderer;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ListPlaceRenderer;
-import __TOP_LEVEL_PACKAGE__.gwt.ui.ListActivitiesMapper;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Application for browsing the entities of the Expenses app.
+ * Application for browsing entities.
  */
 public class Scaffold implements EntryPoint {
-
 	public void onModuleLoad() {
-		/* App controllers and services */
+    ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
 
-		final HandlerManager eventBus = new HandlerManager(null);
-		final ApplicationRequestFactory requestFactory = GWT.create(ApplicationRequestFactory.class);
-		requestFactory.init(eventBus);
-		final PlaceController<ApplicationPlace> placeController = new PlaceController<ApplicationPlace>(eventBus);
+    /* App controllers and services */
 
-		/* Top level UI */
+    final EventBus eventBus = factory.getEventBus();
+    final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
+    final PlaceController placeController = factory.getPlaceController();
 
-		final ScaffoldShell shell = new ScaffoldShell();
+    /* Top level UI */
 
-		/* Display loading notifications when we touch the network. */
+    final ScaffoldShell shell = factory.getShell();
 
-		eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {
-			// Only show loading status if a request isn't serviced in 250ms.
-			private static final int LOADING_TIMEOUT = 250;
-			public void onRequestEvent(RequestEvent requestEvent) {
-				if (requestEvent.getState() == State.SENT) {
-					shell.getMole().showDelayed(LOADING_TIMEOUT);
-				} else {
-					shell.getMole().hide();
-				}
-			}
-		});
+    /* Display loading notifications when we touch the network. */
 
-		/* Check for Authentication failures or mismatches */
+    eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {
+      // Only show loading status if a request isn't serviced in 250ms.
+      private static final int LOADING_TIMEOUT = 250;
 
-		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+      public void onRequestEvent(RequestEvent requestEvent) {
+        if (requestEvent.getState() == State.SENT) {
+          shell.getMole().showDelayed(LOADING_TIMEOUT);
+        } else {
+          shell.getMole().hide();
+        }
+      }
+    });
 
-		/* Add a login widget to the page */
+    /* Check for Authentication failures or mismatches */
 
-		final LoginWidget login = shell.getLoginWidget();
-		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
-		  public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
-		    login.setUserInformation(userInformationRecord);
-		  }
-		};
-		requestFactory.userInformationRequest()
-                    .getCurrentUserInformation(Location.getHref()).fire(receiver);
+    eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
 
-		/* Left side lets us pick from all the types of entities */
+    /* Add a login widget to the page */
 
-		PlacePicker<ApplicationListPlace> placePicker = new PlacePicker<ApplicationListPlace>(shell.getPlacesBox(), placeController, new ListPlaceRenderer());
-		placePicker.setPlaces(getTopPlaces());
+    final LoginWidget login = shell.getLoginWidget();
+    Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
+      public void onSuccess(UserInformationRecord userInformationRecord,
+          Set<SyncResult> syncResults) {
+        login.setUserInformation(userInformationRecord);
+      }
+    };
+    requestFactory.userInformationRequest().getCurrentUserInformation(
+        Location.getHref()).fire(receiver);
 
-		/*
-		 * The app is run by ActivityManager instances that listen for place change events and run the appropriate Activity
-		 * 
-		 * The top half runs list activities of a traditional master / details view, although here "master" is a misnomer. The two ActivityManagers are completely independent of one another.
-		 */
-		final ActivityManager<ApplicationPlace> masterActivityManager = new ActivityManager<ApplicationPlace>(new ScaffoldMasterActivities(new ListActivitiesMapper(eventBus, requestFactory, placeController)), eventBus);
-		masterActivityManager.setDisplay(new Activity.Display() {
-			public void showActivityWidget(IsWidget widget) {
-				shell.getMasterPanel().setWidget(widget == null ? null : widget.asWidget());
-			}
-		});
+    /* Left side lets us pick from all the types of entities */
 
-		/*
-		 * The bottom half handles details
-		 */
-		final ActivityManager<ApplicationPlace> detailsActivityManager = new ActivityManager<ApplicationPlace>(new ScaffoldDetailsActivities(requestFactory, placeController), eventBus);
-		detailsActivityManager.setDisplay(new Activity.Display() {
-			public void showActivityWidget(IsWidget widget) {
-				shell.getDetailsPanel().setWidget(widget == null ? null : widget.asWidget());
-			}
-		});
+    HasConstrainedValue<ProxyListPlace> listPlacePickerView = shell.getPlacesBox();
+    listPlacePickerView.setValues(getTopPlaces());
+    factory.getListPlacePicker().register(eventBus, listPlacePickerView);
 
-		/* Hide the loading message */
+    /*
+     * Top of the screen is the master list of a master / detail UI. Set it up
+     * to filter ProxyPlace instances to an appropriate ProxyListPlace, and put
+     * a cache on it to keep the same activity instance running rather than
+     * building a new one on each detail change.
+     */
 
-		Element loading = Document.get().getElementById("loading");
-		loading.getParentElement().removeChild(loading);
+    CachingActivityMapper cached = new CachingActivityMapper(
+        new ApplicationMasterActivities(requestFactory, placeController));
+    ActivityMapper masterActivityMap = new FilteredActivityMapper(
+        factory.getProxyPlaceToListPlace(), cached);
+    final ActivityManager masterActivityManager = new ActivityManager(
+        masterActivityMap, eventBus);
 
-		/* And show the user the shell */
+    masterActivityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getMasterPanel().setWidget(
+            widget == null ? null : widget.asWidget());
+      }
+    });
 
-		RootLayoutPanel.get().add(shell);
+    /* Bottom of the screen shows the details of a master / detail UI */
+
+    final ActivityManager detailsActivityManager = new ActivityManager(
+        new ApplicationDetailsActivities(requestFactory, placeController),
+        eventBus);
+
+    detailsActivityManager.setDisplay(new Activity.Display() {
+      public void showActivityWidget(IsWidget widget) {
+        shell.getDetailsPanel().setWidget(
+            widget == null ? null : widget.asWidget());
+      }
+    });
+
+    /* Hide the loading message */
+
+    Element loading = Document.get().getElementById("loading");
+    loading.getParentElement().removeChild(loading);
+
+    /* Browser history integration */
+    PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
+    placeHistoryHandler.register(placeController, eventBus, 
+        /* defaultPlace */ getTopPlaces().iterator().next());
+    placeHistoryHandler.handleCurrentHistory();
+
+    /* And show the user the shell */
+
+    RootLayoutPanel.get().add(shell);
 	}
 
-	private List<ApplicationListPlace> getTopPlaces() {
-		final List<ApplicationListPlace> rtn = new ArrayList<ApplicationListPlace>();
-		ApplicationEntityTypesProcessor.processAll(new ApplicationEntityTypesProcessor.EntityTypesProcessor() {
-			public void processType(Class<? extends Record> recordType) {
-				rtn.add(new ApplicationListPlace(recordType));
-			}
-		});
-		return Collections.unmodifiableList(rtn);
-	}
+  // TODO(rjrjr) No reason to make the place objects in advance, just make
+  // it list the class objects themselves. Needs to be sorted by rendered name,
+  // too 
+  private Set<ProxyListPlace> getTopPlaces() {
+    Set<Class<? extends Record>> types = ApplicationEntityTypesProcessor.getAll();
+    Set<ProxyListPlace> rtn = new HashSet<ProxyListPlace>(types.size());
+
+    for (Class<? extends Record> type : types) {
+      rtn.add(new ProxyListPlace(type));
+    }
+
+    return rtn;
+  }
 }

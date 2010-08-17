@@ -22,7 +22,6 @@ public enum MirrorType {
 	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changeHandler", "ChangeHandler.vm"), 
 	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", "Request.vm"), 
 	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper.vm"), 
-	SCAFFOLD_PLACE(GwtPath.GWT_PLACE, "ScaffoldPlace", "detailPlace", "ScaffoldPlace.vm"), 
 	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity.vm"), 
 	EDIT_ACTIVITY(GwtPath.GWT_UI, "EditActivity", "editActivity", "EditActivity.vm"), 
 	LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity", "listActivity", "ListActivity.vm"), 

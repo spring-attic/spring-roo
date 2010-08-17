@@ -5,6 +5,7 @@ import com.google.gwt.app.place.AbstractRecordEditActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.RecordEditView;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.valuestore.shared.Value;
 #declareImports()
 
@@ -23,37 +24,28 @@ public class $className extends AbstractRecordEditActivity<${entity.record}> {
 	}
 
 	private final ApplicationRequestFactory requests;
-	private final PlaceController<ApplicationPlace> placeController;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public $className(Long id, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
-		this(id, getDefaultView(), requests, placeController);
+	public $className(${entity.record} proxy, ApplicationRequestFactory requests, PlaceController placeController, boolean creating) {
+		this(getDefaultView(), proxy, requests, placeController, creating);
 	}
 
 	/**
 	 * Creates an activity that uses its own view instance.
 	 */
-	public $className(Long id, RecordEditView<${entity.record}> view, ApplicationRequestFactory requests, PlaceController<ApplicationPlace> placeController) {
-		super(view, id, requests);
+	public $className(RecordEditView<${entity.record}> view, ${entity.record} proxy, ApplicationRequestFactory requests, PlaceController placeController, boolean creating) {
+		super(view, proxy, ${entity.record}.class, creating, requests, placeController);
 		this.requests = requests;
-		this.placeController = placeController;
 	}
 
-	protected void exit() {
-		placeController.goTo(new ${entity.detailPlace}(getId(), Operation.DETAILS));
-	}
-
+  @Override
 	protected void fireFindRequest(Value<Long> id, Receiver<${entity.record}> callback) {
 		requests.${entity.nameUncapitalized}Request().find${entity.name}(id).fire(callback);
 	}
 
-	protected Class getRecordClass() {
-		return ${entity.record}.class;
-	}
-
-	protected void setRequestObject(${entity.record} record) {
-	    requestObject = requests.${entity.nameUncapitalized}Request().persist(record);
+	protected RequestObject<Void> getPersistRequest(${entity.record} record) {
+	    return requests.${entity.nameUncapitalized}Request().persist(record);
 	}
 }
