@@ -273,13 +273,19 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			for (Execution execution : executions) {
 				Element executionElement = document.createElement("execution");
 				
-				Element executionId = document.createElement("id");
-				executionId.setTextContent(execution.getId());
-				executionElement.appendChild(executionId);
+				String id = execution.getId();
+				if (id != null && id.length() > 0) {
+					Element executionId = document.createElement("id");
+					executionId.setTextContent(id);
+					executionElement.appendChild(executionId);
+				}
 				
-				Element executionPhase = document.createElement("phase");
-				executionPhase.setTextContent(execution.getPhase());
-				executionElement.appendChild(executionPhase);
+				String phase = execution.getPhase();
+				if (phase != null && phase.length() > 0) {
+					Element executionPhase = document.createElement("phase");
+					executionPhase.setTextContent(phase);
+					executionElement.appendChild(executionPhase);
+				}
 				
 				Element goalsElement = document.createElement("goals");
 				for (String goal : execution.getGoals()) {
