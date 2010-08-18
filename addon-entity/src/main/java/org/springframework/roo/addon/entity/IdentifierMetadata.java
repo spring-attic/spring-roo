@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -134,6 +135,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 				List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 				columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
+				columnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("nullable"), false));
 				AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
 				annotations.add(columnAnnotation);
 

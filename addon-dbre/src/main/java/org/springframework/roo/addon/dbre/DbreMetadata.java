@@ -31,6 +31,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
@@ -167,7 +168,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
-				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey.getReferences(), column);
+				FieldMetadata field = getOneToOneField(fieldName, fieldType, foreignKey.getReferences(), column, isCompositeKeyColumn(column.getName(), fieldType));
 				uniqueFields.put(fieldName, field);
 			}
 		}
@@ -240,7 +241,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
-				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences());
+				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences(), isCompositeKeyColumn(column.getName(), fieldType));
 				uniqueFields.put(fieldName, field);
 			}
 		}
@@ -309,7 +310,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	private FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column) {
+	private FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column, boolean nullable) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -321,11 +322,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			// Add @JoinColumn annotation
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttributes.add(new StringAttributeValue(NAME, column.getName()));
+			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
 			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 			annotations.add(joinColumnAnnotation);
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references));
+			annotations.add(getJoinColumnsAnnotation(references, nullable));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
@@ -360,7 +362,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldDetails.getFieldName(), fieldDetails.getFieldType(), null, annotations);
 	}
 
-	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references) {
+	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, boolean nullable) {
 		// Add annotations to field
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 
@@ -373,24 +375,33 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttributes.add(new StringAttributeValue(NAME, references.first().getLocalColumnName()));
 			joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, references.first().getForeignColumnName()));
+			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
 			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 			annotations.add(joinColumnAnnotation);
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references));
+			annotations.add(getJoinColumnsAnnotation(references, nullable));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
 	}
 
-	private AnnotationMetadata getJoinColumnsAnnotation(SortedSet<Reference> references) {
+	private void addOtherJoinColumnAttributes(boolean nullable, List<AnnotationAttributeValue<?>> joinColumnAttributes) {
+		if (nullable) {
+			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("insertable"), false));
+			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("updatable"), false));
+		}
+	}
+
+	private AnnotationMetadata getJoinColumnsAnnotation(SortedSet<Reference> references, boolean nullable) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 
 		for (Reference reference : references) {
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
-			attributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumnName()));
-			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, attributes);
+			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
+			joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumnName()));
+			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
+			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 			arrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation));
 		}
 
@@ -436,6 +447,35 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isCompositeKeyField(JavaSymbolName fieldName, JavaType javaType) {
+		List<FieldMetadata> identifierFields = getIdentifierFields(javaType);
+		for (FieldMetadata field : identifierFields) {
+			if (fieldName.equals(field.getFieldName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isCompositeKeyColumn(String columnName, JavaType javaType) {
+		List<FieldMetadata> identifierFields = getIdentifierFields(javaType);
+		for (FieldMetadata field : identifierFields) {
+			for (AnnotationMetadata annotation : field.getAnnotations()) {
+				if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Column"))) {
+					AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(NAME);
+					if (nameAttribute != null) {
+						String name = (String) nameAttribute.getValue();
+						if (columnName.equals(name)) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	private List<FieldMetadata> getIdentifierFields(JavaType javaType) {
+		List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
 		// Check for identifier class and exclude fields that are part of the composite primary key
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 		AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
@@ -447,18 +487,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String identifierMetadataMid = IdentifierMetadata.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
 				if (identifierMetadata != null) {
-					List<? extends FieldMetadata> identifierFields = identifierMetadata.getFields();
-					for (FieldMetadata field : identifierFields) {
-						if (fieldName.equals(field.getFieldName())) {
-							return true;
-						}
-					}
+					identifierFields.addAll(identifierMetadata.getFields());
 				}
-
 			}
 		}
-
-		return false;
+		return identifierFields;
 	}
 
 	private boolean isVersionField(String columnName) {
