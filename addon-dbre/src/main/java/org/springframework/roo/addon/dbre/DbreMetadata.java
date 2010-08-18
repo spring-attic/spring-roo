@@ -552,10 +552,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(new JavaType("java.util.Date"))) {
-			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new EnumAttributeValue(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
-			AnnotationMetadata temporalAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs);
-			annotations.add(temporalAnnotation);
+			List<AnnotationAttributeValue<?>> temporalAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			temporalAttributes.add(new EnumAttributeValue(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), temporalAttributes));
+
+			List<AnnotationAttributeValue<?>> dateTimeFormatattributes = new ArrayList<AnnotationAttributeValue<?>>();
+			dateTimeFormatattributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatattributes));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
