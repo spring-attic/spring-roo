@@ -24,7 +24,7 @@ import org.springframework.roo.project.ProjectMetadata;
  * @author Alan Stewart
  * @since 1.1
  */
-@Component
+@Component(immediate=true)
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;

@@ -16,7 +16,7 @@ import org.springframework.roo.project.Path;
  * @author Alan Stewart
  * @since 1.1
  */
-@Component
+@Component(immediate=true)
 @Service
 public final class SerializableMetadataProviderImpl extends AbstractItdMetadataProvider implements SerializableMetadataProvider {
 

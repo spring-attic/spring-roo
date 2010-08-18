@@ -23,7 +23,7 @@ import org.springframework.roo.project.PathResolver;
  * @since 1.1
  *
  */
-@Component
+@Component(immediate=true)
 @Service
 public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 	
