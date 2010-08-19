@@ -12,7 +12,7 @@
 			<spring:message code="menu_category_${fn:toLowerCase(fn:substringAfter(id,'_'))}_label" var="label"/>
 		</c:if>
 		
-		<li id="${id}">
+		<li id="${fn:escapeXml(id)}">
 			<h2>
 				<c:out value="${label}" />
 			</h2>

@@ -89,7 +89,7 @@
           </c:choose>
         </c:when>
         <c:otherwise>
-          <field:reference field="${fn:escapeXml(label)}" id="${fn:escapeXml(id)}" path="${fn:escapeXml(path)}" required="${required}" />
+          <field:reference field="${label}" id="${id}" path="${path}" required="${required}" />
         </c:otherwise>
       </c:choose>
     </div>

@@ -39,16 +39,6 @@
       <form:textarea id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
       <br />
       <form:errors cssClass="errors" id="_${sec_field}_error_id" path="${sec_field}" />
-      <spring:message arguments="${fn:escapeXml(label)}" code="field_invalid" var="field_invalid" />
-      <c:choose>
-        <c:when test="${required}">
-          <spring:message code="field_required" var="field_required" />
-          <spring:message argumentSeparator="," arguments="${fn:escapeXml(label)},(${field_required})" code="field_simple_validation" var="field_validation" />
-        </c:when>
-        <c:otherwise>
-          <spring:message argumentSeparator="," arguments="${fn:escapeXml(label)}, " code="field_simple_validation" var="field_validation" />
-        </c:otherwise>
-      </c:choose>
       <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id', widgetType : 'dijit.Editor', widgetAttrs : {disabled: ${disabled}}})); </script>
     </div>
     <br />

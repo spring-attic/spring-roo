@@ -20,7 +20,7 @@
 		
 		<li id="${id}">
 	        <spring:url value="${url}" var="menu_item_url"/>
-	        <a href="${menu_item_url}" title="${label}">
+	        <a href="${fn:escapeXml(menu_item_url)}" title="${fn:escapeXml(label)}">
 	        	<c:out value="${label}" />
 	        </a>
 	    </li>

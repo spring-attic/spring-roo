@@ -13,15 +13,15 @@
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label"/>
     </c:if>
     <spring:message arguments="${fn:escapeXml(label)}" code="entity_find" var="title_msg"/>
-    <util:panel id="${fn:escapeXml(id)}" title="${title_msg}" openPane="${openPane}">
+    <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
       <spring:url value="${path}" var="form_url" />
-      <form:form action="${form_url}" method="GET">
+      <form:form action="${fn:escapeXml(form_url)}" method="GET">
         <input type="hidden" name="find" value="${fn:escapeXml(finderName)}" />
         <jsp:doBody />
         <div class="submit" id="${fn:escapeXml(id)}_${fn:escapeXml(finderName)}_submit">
           <spring:message code="button_find" var="find_button"/>
           <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
-          <input id="proceed" type="submit" value="${find_button}"/>
+          <input id="proceed" type="submit" value="${fn:escapeXml(find_button)}"/>
         </div>
       </form:form>
     </util:panel>

@@ -1,8 +1,8 @@
-<div xmlns:spring="http://www.springframework.org/tags" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+<div xmlns:spring="http://www.springframework.org/tags" xmlns:fn="http://java.sun.com/jsp/jstl/functions" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
   <jsp:output omit-xml-declaration="yes" />
   <spring:message var="title" code="webflow_state1_title" />
   <util:panel id="title" title="${title}">
-    <h1>${title}</h1>
+    <h1>${fn:escapeXml(title)}</h1>
     <p>
       <spring:message code="webflow_state1_message" />
     </p>
@@ -10,8 +10,8 @@
       <div class="submit">
         <spring:message var="cancel" code="button_cancel" />
         <spring:message var="proceed" code="button_proceed" />
-        <input type="submit" id="cancel" name="_eventId_cancel" value="${cancel}" />
-        <input type="submit" id="success" name="_eventId_success" value="${proceed}" />
+        <input type="submit" id="cancel" name="_eventId_cancel" value="${fn:escapeXml(cancel)}" />
+        <input type="submit" id="success" name="_eventId_success" value="${fn:escapeXml(proceed)}" />
       </div>
     </form>
   </util:panel>

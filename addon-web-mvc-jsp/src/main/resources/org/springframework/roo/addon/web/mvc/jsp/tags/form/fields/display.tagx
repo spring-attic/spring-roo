@@ -13,7 +13,7 @@
 
   <c:if test="${empty render or render}">
     <c:if test="${not empty object and empty label}">
-      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(fn:escapeXml(id),'_'))}" var="label" />
+      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" />
     </c:if>
 
     <c:if test="${empty dateTimePattern}">
@@ -25,7 +25,7 @@
 
     <div id="_${fn:escapeXml(id)}_id">
       <label for="_${fn:escapeXml(field)}_id">
-        <c:out value="${fn:escapeXml(label)}" />
+        <c:out value="${label}" />
         :
       </label>
       <div class="box" id="_${fn:escapeXml(id)}_${fn:escapeXml(field)}_id">

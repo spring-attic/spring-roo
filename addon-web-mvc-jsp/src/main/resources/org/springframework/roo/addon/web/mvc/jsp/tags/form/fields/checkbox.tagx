@@ -10,13 +10,13 @@
 
   <c:if test="${empty render or render}">
     <c:if test="${empty sec_label}">
-      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(fn:escapeXml(id),'_'))}" var="label" />
+      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" />
     </c:if>
     <c:set var="sec_field">
       <spring:escapeBody javaScriptEscape="true">${field}</spring:escapeBody>
     </c:set>
    
-    <div id="_${fn:escapeXml(id)}_id">
+    <div id="_${sec_id}_id">
       <label for="_${sec_field}_id">
         <c:out value="${fn:escapeXml(label)}" />:
       </label>

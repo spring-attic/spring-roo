@@ -21,16 +21,16 @@
     <c:if test="${empty versionField}">
       <c:set value="version" var="versionField" />
     </c:if>
-    <spring:message arguments="${fn:escapeXml(label)}" code="entity_update" var="title_msg" />
-    <util:panel id="${fn:escapeXml(id)}" title="${title_msg}" openPane="${openPane}">
-      <spring:url value="${fn:escapeXml(path)}" var="form_url" />
-      <form:form action="${form_url}" method="PUT" modelAttribute="${fn:escapeXml(modelAttribute)}">
+    <spring:message arguments="${label}" code="entity_update" var="title_msg" />
+    <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
+      <spring:url value="${path}" var="form_url" />
+      <form:form action="${fn:escapeXml(form_url)}" method="PUT" modelAttribute="${modelAttribute}">
         <form:errors cssClass="errors" delimiter="&lt;p/&gt;" />
         <jsp:doBody />
         <div class="submit" id="${fn:escapeXml(id)}_submit">
           <spring:message code="button_save" var="save_button" />
           <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
-          <input id="proceed" type="submit" value="${save_button}" />
+          <input id="proceed" type="submit" value="${fn:escapeXml(save_button)}" />
         </div>
         <form:hidden id="_${fn:escapeXml(idField)}_id" path="${fn:escapeXml(idField)}" />
         <c:if test="${versionField ne 'none'}">

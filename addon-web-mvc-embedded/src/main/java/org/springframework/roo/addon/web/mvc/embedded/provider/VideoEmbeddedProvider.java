@@ -75,7 +75,7 @@ public class VideoEmbeddedProvider extends AbstractEmbeddedProvider {
 		}
 		String id = options.get("id");
 		
-		if (VideoProvider.SCREENR.equals(provider)) {
+		if (VideoProvider.SCREENR.name().equals(provider)) {
 			id = getScreenrId("http://screenr.com/" + id);
 		}
 		installTagx("video");

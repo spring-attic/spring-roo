@@ -9,11 +9,12 @@
   <c:choose>
 
     <c:when test="${provider eq 'youtube'}">
+      <spring:url value="http://www.youtube.com/v/${videoId}" var="video" />
       <object width="545" height="320">
-        <param name="movie" value="http://www.youtube.com/v/${fn:escapeXml(videoId)}"></param>
+        <param name="movie" value="${fn:escapeXml(video)}"></param>
         <param name="allowFullScreen" value="true"></param>
         <param name="allowscriptaccess" value="always"></param>
-        <embed src="http://www.youtube.com/v/${fn:escapeXml(videoId)}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="545" height="320"></embed>
+        <embed src="" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="545" height="320"></embed>
       </object>
     </c:when>
 
@@ -29,36 +30,37 @@
       <object width="545" height="320">
         <param name="allowfullscreen" value="true" />
         <param name="allowscriptaccess" value="always" />
-        <param name="movie" value="${video}" />
-        <embed src="${video}" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="545" height="320"></embed>
+        <param name="movie" value="${fn:escapeXml(video)}" />
+        <embed src="${fn:escapeXml(video)}" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="545" height="320"></embed>
       </object>
     </c:when>
 
     <c:when test="${provider eq 'viddler'}">
+      <spring:url value="http://www.viddler.com/player/${videoId}" var="video"/>
       <object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" width="545" height="320" id="viddler">
-        <param name="movie" value="http://www.viddler.com/player/${fn:escapeXml(videoId)}" />
+        <param name="movie" value="" />
         <param name="allowScriptAccess" value="always" />
         <param name="allowFullScreen" value="true" />
         <param name="flashvars" value="fake=1" />
-        <embed src="http://www.viddler.com/player/${fn:escapeXml(videoId)}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
+        <embed src="${fn:escapeXml(video)}" width="545" height="320" type="application/x-shockwave-flash" allowScriptAccess="always" allowFullScreen="true" flashvars="fake=1" name="viddler"></embed>
       </object>
     </c:when>
 
     <c:when test="${provider eq 'google_video'}">
-      <spring:url var="url" value="http://video.google.com/googleplayer.swf?">
+      <spring:url var="video" value="http://video.google.com/googleplayer.swf">
         <spring:param name="docid" value="${videoId}" />
         <spring:param name="fs" value="true" />
       </spring:url>
-      <embed id="VideoPlayback" src="${url}" style="width:545px;height:400px" allowFullScreen="true" allowScriptAccess="always" type="application/x-shockwave-flash">
+      <embed id="VideoPlayback" src="${fn:escapeXml(video)}" style="width:545px;height:400px" allowFullScreen="true" allowScriptAccess="always" type="application/x-shockwave-flash">
       </embed>
     </c:when>
 
     <c:when test="${provider eq 'screenr'}">
       <object width='545' height='340' classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,115,0'>
         <param name='movie' value='http://screenr.com/Content/assets/screenr_1116090935.swf' />
-        <param name='flashvars' value='${fn:escapeXml(videoId)}' />
+        <param name='flashvars' value='${videoId}' />
         <param name='allowFullScreen' value='true' />
-        <embed src='http://screenr.com/Content/assets/screenr_1116090935.swf' flashvars='${fn:escapeXml(videoId)}' allowFullScreen='true' width='545' height='340' pluginspage='http://www.macromedia.com/go/getflashplayer'></embed>
+        <embed src='http://screenr.com/Content/assets/screenr_1116090935.swf' flashvars='${videoId}' allowFullScreen='true' width='545' height='340' pluginspage='http://www.macromedia.com/go/getflashplayer'></embed>
       </object>
     </c:when>
 
