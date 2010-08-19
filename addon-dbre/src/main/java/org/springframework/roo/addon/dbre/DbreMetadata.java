@@ -555,9 +555,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			temporalAttributes.add(new EnumAttributeValue(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), temporalAttributes));
 
-			List<AnnotationAttributeValue<?>> dateTimeFormatattributes = new ArrayList<AnnotationAttributeValue<?>>();
-			dateTimeFormatattributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatattributes));
+			List<AnnotationAttributeValue<?>> dateTimeFormatAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+			dateTimeFormatAttributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatAttributes));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
