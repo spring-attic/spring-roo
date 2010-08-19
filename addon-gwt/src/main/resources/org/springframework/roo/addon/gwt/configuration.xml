@@ -4,26 +4,26 @@
         <repository>
            <id>gwt-repo</id>
            <name>Google Web Toolkit Repository</name>
-           <url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M2/gwt/maven</url>
+           <url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>gwt-plugin-repo</id>
            <name>Google Web Toolkit Plugin Repository</name>
-           <url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M2/gwt/maven</url>
+           <url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven</url>
         </pluginRepository>
     </pluginRepositories>
 	<dependencies>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-servlet</artifactId>
-			<version>2.1.0.M3</version>
+			<version>2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<version>2.1.0.M3</version>
+			<version>2.1-SNAPSHOT</version>
             <scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -40,7 +40,7 @@
 			<configuration>
 				<logLevel>INFO</logLevel>
 				<style>PRETTY</style>
-				<gwtVersion>2.1.0.M3</gwtVersion>
+				<gwtVersion>2.1-SNAPSHOT</gwtVersion>
 				<runTarget>/ApplicationScaffold.html</runTarget>
                 <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 				<modules>
@@ -85,7 +85,7 @@
 			<configuration>
 				<logLevel>INFO</logLevel>
 				<style>PRETTY</style>
-                <gwtVersion>2.1.0.M3</gwtVersion>
+                <gwtVersion>2.1-SNAPSHOT</gwtVersion>
 				<runTarget>/ApplicationScaffold.html</runTarget>
                 <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 				<modules>
