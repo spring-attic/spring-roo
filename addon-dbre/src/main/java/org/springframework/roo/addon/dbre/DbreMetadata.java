@@ -34,7 +34,6 @@ import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -537,9 +536,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		columnAttributes.add(new StringAttributeValue(NAME, column.getName()));
 
 		// Add length attribute for Strings
-		if (fieldType.equals(JavaType.STRING_OBJECT)) {
-			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
-		}
+		// if (fieldType.equals(JavaType.STRING_OBJECT)) {
+		// columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
+		// }
 
 		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), columnAttributes);
 		annotations.add(columnAnnotation);
