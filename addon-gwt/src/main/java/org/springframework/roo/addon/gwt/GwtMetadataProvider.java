@@ -48,12 +48,10 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @author Ray Cromwell
  * @since 1.1
- *
  */
 @Component(immediate = true)
 @Service
 public final class GwtMetadataProvider implements MetadataNotificationListener, MetadataProvider {
-	
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference protected FileManager fileManager;
 	@Reference protected MetadataService metadataService;
@@ -86,7 +84,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 				return null;
 			}
 		}
-		
+
 		// Obtain the governor's information
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath));
 		if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
@@ -97,7 +95,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		// Next let's obtain a handle to the "record" we'd want to produce/modify/delete as applicable for this governor
 		JavaType keyTypeName = mirrorTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(MirrorType.RECORD, projectMetadata, governorTypeName);
 		Path keyTypePath = Path.SRC_MAIN_JAVA;
-		
+
 		// Lookup any existing record type and verify it is mapped to this governor MID (ie detect name collisions and abort if necessary)
 		// We do this before deleting, to verify we don't get into a delete-create-delete type case if there are name collisions
 		PhysicalTypeMetadata keyPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
@@ -109,15 +107,15 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 			AnnotationAttributeValue<?> value = rooGwtAnnotation.getAttribute(new JavaSymbolName("value"));
 			Assert.isInstanceOf(ClassAttributeValue.class, value, "Expected class-based content in @" + RooGwtMirroredFrom.class.getSimpleName() + " on " + keyTypeName.getFullyQualifiedTypeName());
 			JavaType actualValue = ((ClassAttributeValue) value).getValue();
-			
+
 			// Now we've read the original type, let's verify it's the same as what we're expecting
 			Assert.isTrue(actualValue.equals(governorTypeName), "Every mappable type in the project must have a unique simple type name (" + governorTypeName + " and " + actualValue + " both cannot map to single key " + keyTypeName + ")");
 		}
-		
+
 		// Excellent, so we have uniqueness taken care of by now; let's get the some metadata so we can discover what fields are available (NB: this will return null for enums)
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(governorTypeName, governorTypePath));
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
-		
+
 		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
 		if (!isMappable(governorTypeDetails, entityMetadata)) {
 			// Delete the key; this will trigger the listener to delete the rest
@@ -127,7 +125,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 			}
 			return null;
 		}
-		
+
 		// Our general strategy is to instantiate GwtMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager);
 
@@ -135,12 +133,12 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
 			// Determine the canonical filename
 			String physicalLocationCanonicalPath = classpathOperations.getPhysicalLocationCanonicalPath(details.getDeclaredByMetadataId());
-			
+
 			// Create (or modify the .java file)
 			PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(details.getDeclaredByMetadataId(), physicalLocationCanonicalPath, details);
 			physicalTypeMetadataProvider.createPhysicalType(toCreate);
 		}
-		
+
 		return gwtMetadata;
 	}
 
@@ -155,21 +153,21 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		}
 		return false;
 	}
-	
+
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		if (projectMetadata == null) {
 			return;
 		}
-		
+
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected class-level notifications only for PhysicalTypeIdentifier (not '" + upstreamDependency + "')");
-			
+
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType typeName = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
 			Path typePath = PhysicalTypeIdentifier.getPath(upstreamDependency);
 			downstreamDependency = createLocalIdentifier(typeName, typePath);
-			
+
 			// We only need to proceed if the downstream dependency relationship is not already registered
 			// (if it's already registered, the event will be delivered directly later on)
 			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
@@ -179,7 +177,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
-		
+
 		metadataService.evict(downstreamDependency);
 		if (get(downstreamDependency) != null) {
 			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
@@ -189,11 +187,11 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	private ProjectMetadata getProjectMetadata() {
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 	}
-	
+
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}

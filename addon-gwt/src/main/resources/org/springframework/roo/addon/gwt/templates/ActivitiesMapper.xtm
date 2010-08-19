@@ -1,0 +1,32 @@
+package {{=packageName}};
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyPlace;
+{{#imports}}import {{=import}};
+{{/imports}}
+/**
+ * Maps {@link ProxyPlace} instances to the {@link Activity} to run.
+ */
+public class {{=className}} {
+	private final {{=requestFactory}} requests;
+	private final PlaceController placeController;
+
+	public {{=className}}({{=requestFactory}} requests, PlaceController placeController) {
+		this.requests = requests;
+		this.placeController = placeController;
+	}
+
+	public Activity getActivity(ProxyPlace place) {
+		switch (place.getOperation()) {
+			case DETAILS:
+				return new {{=detailsActivity}}(({{=record}}) place.getProxy(), requests, placeController);
+			case EDIT:
+				return new {{=editActivity}}(({{=record}}) place.getProxy(), requests, placeController, false);
+			case CREATE:
+      			return new {{=editActivity}}(({{=record}}) place.getProxy(), requests, placeController, true);
+		}
+
+		throw new IllegalArgumentException("Unknown operation " + place.getOperation());
+	}
+}

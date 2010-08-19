@@ -13,8 +13,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-{{>imports}}
-
+{{#imports}}import {{=import}};
+{{/imports}}
 /**
  * Details view for {{=name}} records.
  */
@@ -24,8 +24,8 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 	private static final Binder BINDER = GWT.create(Binder.class);
 
 	{{=record}} record;
-	{{#entityFields}}
-	@UiField SpanElement {{=field}};{{/entityFields}}	
+	{{#fields}}
+	@UiField SpanElement {{=field}};{{/fields}}	
 	@UiField SpanElement idSpan;
 	@UiField SpanElement versionSpan;
 	@UiField HasClickHandlers edit;
@@ -50,12 +50,12 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 	}
 
 	@UiHandler("delete")
-	public void onDeleteClicked(@SuppressWarnings("unused") ClickEvent e) {
+	public void onDeleteClicked(ClickEvent e) {
 		delegate.deleteClicked();
 	}
 
 	@UiHandler("edit")
-	public void onEditClicked(@SuppressWarnings("unused") ClickEvent e) {
+	public void onEditClicked(ClickEvent e) {
 		delegate.editClicked();
 	}
 
@@ -64,8 +64,8 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 	}
 
 	public void setValue({{=record}} record) {
-		this.record = record;{{#entityProperties}}
-	    {{=prop}}{{/entityProperties}}	
+		this.record = record;{{#props1}}
+	    {{=prop}}{{/props1}}	
 		idSpan.setInnerText(String.valueOf(record.getId()));
 		versionSpan.setInnerText(record.getVersion().toString());
 	}

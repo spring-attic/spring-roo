@@ -1,6 +1,5 @@
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
-import com.google.gwt.app.client.NotificationMole;
 import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -18,42 +17,42 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ScaffoldMobileShell extends Composite {
 
-  interface Binder extends UiBinder<Widget, ScaffoldMobileShell> { }
-  private static final Binder BINDER = GWT.create(Binder.class);
+	interface Binder extends UiBinder<Widget, ScaffoldMobileShell> {
+	}
 
-  @UiField SimplePanel body;
-  @UiField DivElement error;
-  @UiField(provided = true)
-  ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(
-      new ApplicationListPlaceRenderer());
-  @UiField LoginWidget loginWidget;
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-  public ScaffoldMobileShell() {
-    initWidget(BINDER.createAndBindUi(this));
-  }
+	@UiField SimplePanel body;
+	@UiField DivElement error;
+	@UiField(provided = true) ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(new ApplicationListPlaceRenderer());
+	@UiField LoginWidget loginWidget;
 
-  /**
-   * @return the body
-   */
-  public SimplePanel getBody() {
-    return body;
-  }
+	public ScaffoldMobileShell() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-  /**
-   * @return the login widget
-   */
-  public LoginWidget getLoginWidget() {
-    return loginWidget;
-  }
+	/**
+	 * @return the body
+	 */
+	public SimplePanel getBody() {
+		return body;
+	}
 
-  public HasConstrainedValue<ProxyListPlace> getPlacesBox() {
-    return placesBox;
-  }
+	/**
+	 * @return the login widget
+	 */
+	public LoginWidget getLoginWidget() {
+		return loginWidget;
+	}
 
-  /**
-   * @param string
-   */
-  public void setError(String string) {
-    error.setInnerText(string);
-  }
+	public HasConstrainedValue<ProxyListPlace> getPlacesBox() {
+		return placesBox;
+	}
+
+	/**
+	 * @param string
+	 */
+	public void setError(String string) {
+		error.setInnerText(string);
+	}
 }

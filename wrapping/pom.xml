@@ -21,11 +21,11 @@
         <module>bcprov-jdk15</module>
         <module>bcpg-jdk15</module>
         <module>postgresql</module>
-	<module>hsqldb</module>
-	<module>jtds</module>
-	<module>jtopen</module>
- 	<module>hapax</module>
-   </modules>
+		<module>hsqldb</module>
+		<module>jtds</module>
+		<module>jtopen</module>
+ 		<module>hapax</module>
+	</modules>
 
     <repositories>
         <repository>

@@ -1,0 +1,34 @@
+package {{=packageName}};
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.ActivityMapper;
+import com.google.gwt.app.place.Place;
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyListPlace;
+{{#imports}}import {{=import}};
+{{/imports}}
+/**
+ * Instantiates master activities.
+ */
+public final class ApplicationMasterActivities implements ActivityMapper {
+	private final {{=requestFactory}} requests;
+	private final PlaceController placeController;
+
+	public ApplicationMasterActivities({{=requestFactory}} requests, PlaceController placeController) {
+  		this.requests = requests;
+		this.placeController = placeController;
+	}
+
+	public Activity getActivity(Place place) {
+		if (!(place instanceof ProxyListPlace)) {
+			return null;
+		}
+
+		ProxyListPlace listPlace = (ProxyListPlace) place;
+
+		return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
+			@Override
+{{=entity}}{{/entities}}
+		}.process(listPlace.getProxyClass());
+	}
+}

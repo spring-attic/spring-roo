@@ -32,88 +32,81 @@ import java.util.Set;
 /**
  * Mobile application for browsing entities.
  * 
- * TODO(jgw): Make this actually mobile-friendly.
+ * TODO (jgw): Make this actually mobile-friendly.
  */
 public class ScaffoldMobile implements EntryPoint {
 
 	public void onModuleLoad() {
-    ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
+		ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
 
-    /* App controllers and services */
+		/* App controllers and services */
 
-    final EventBus eventBus = factory.getEventBus();
-    final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
-    final PlaceController placeController = factory.getPlaceController();
+		final EventBus eventBus = factory.getEventBus();
+		final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
+		final PlaceController placeController = factory.getPlaceController();
 
-    /* Top level UI */
+		/* Top level UI */
 
-    final ScaffoldMobileShell shell = factory.getMobileShell();
+		final ScaffoldMobileShell shell = factory.getMobileShell();
 
-    /* Check for Authentication failures or mismatches */
+		/* Check for Authentication failures or mismatches */
 
-    eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
 
-    /* Add a login widget to the page */
+		/* Add a login widget to the page */
 
-    final LoginWidget login = shell.getLoginWidget();
-    Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
-      public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
-        login.setUserInformation(userInformationRecord);
-      }
-     };
-     requestFactory.userInformationRequest().getCurrentUserInformation(
-         Location.getHref()).fire(receiver);
+		final LoginWidget login = shell.getLoginWidget();
+		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
+			public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
+				login.setUserInformation(userInformationRecord);
+			}
+		};
+		requestFactory.userInformationRequest().getCurrentUserInformation(Location.getHref()).fire(receiver);
 
-    /* Left side lets us pick from all the types of entities */
+		/* Left side lets us pick from all the types of entities */
 
-    HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
-    placePickerView.setValues(getTopPlaces());
-    factory.getListPlacePicker().register(eventBus, placePickerView);
+		HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
+		placePickerView.setValues(getTopPlaces());
+		factory.getListPlacePicker().register(eventBus, placePickerView);
 
-    /*
-     * The body is run by an ActivitManager that listens for PlaceChange events
-     * and finds the corresponding Activity to run
-     */
+		/*
+		 * The body is run by an ActivitManager that listens for PlaceChange events and finds the corresponding Activity to run
+		 */
 
-    final ActivityMapper mapper = new ScaffoldMobileActivities(
-        new ApplicationMasterActivities(requestFactory, placeController),
-        new ApplicationDetailsActivities(requestFactory, placeController));
-    final ActivityManager activityManager = new ActivityManager(mapper,
-        eventBus);
+		final ActivityMapper mapper = new ScaffoldMobileActivities(new ApplicationMasterActivities(requestFactory, placeController), new ApplicationDetailsActivities(requestFactory, placeController));
+		final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
 
-    activityManager.setDisplay(new Activity.Display() {
-      public void showActivityWidget(IsWidget widget) {
-        shell.getBody().setWidget(widget == null ? null : widget.asWidget());
-      }
-    });
+		activityManager.setDisplay(new Activity.Display() {
+			public void showActivityWidget(IsWidget widget) {
+				shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+			}
+		});
 
-    /* Hide the loading message */
+		/* Hide the loading message */
 
-    Element loading = Document.get().getElementById("loading");
-    loading.getParentElement().removeChild(loading);
+		Element loading = Document.get().getElementById("loading");
+		loading.getParentElement().removeChild(loading);
 
-    /* Browser history integration */
-    PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
-    placeHistoryHandler.register(placeController, eventBus, 
-        /* defaultPlace */ getTopPlaces().iterator().next());
-    placeHistoryHandler.handleCurrentHistory();
+		/* Browser history integration */
+		PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
+		placeHistoryHandler.register(placeController, eventBus, getTopPlaces().iterator().next()); /* defaultPlace */
+		placeHistoryHandler.handleCurrentHistory();
 
-    /* And show the user the shell */
+		/* And show the user the shell */
 
-    RootLayoutPanel.get().add(shell);
-  }
+		RootLayoutPanel.get().add(shell);
+	}
 
-  // TODO(rjrjr) No reason to make the place objects in advance, just make
-  // it list the class objects themselves. Needs to be sorted by rendered name,
-  // too 
-  private Set<ProxyListPlace> getTopPlaces() {
-    Set<Class<? extends Record>> types = ApplicationEntityTypesProcessor.getAll();
-    Set<ProxyListPlace> rtn = new HashSet<ProxyListPlace>(types.size());
+	// TODO (rjrjr) No reason to make the place objects in advance, just make
+	// it list the class objects themselves. Needs to be sorted by rendered name, too
+	private Set<ProxyListPlace> getTopPlaces() {
+		Set<Class<? extends Record>> types = ApplicationEntityTypesProcessor.getAll();
+		Set<ProxyListPlace> rtn = new HashSet<ProxyListPlace>(types.size());
 
-    for (Class<? extends Record> type : types) {
-      rtn.add(new ProxyListPlace(type));
-    }
+		for (Class<? extends Record> type : types) {
+			rtn.add(new ProxyListPlace(type));
+		}
 
-    return rtn;
-  }
+		return rtn;
+	}
 }

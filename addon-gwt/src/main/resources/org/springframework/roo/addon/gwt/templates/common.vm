@@ -1,5 +1,0 @@
-#macro(declareImports)
-#foreach ($import in $imports)
-import $import;
-#end
-#end

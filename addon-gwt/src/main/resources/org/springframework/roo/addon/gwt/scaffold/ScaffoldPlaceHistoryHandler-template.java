@@ -9,11 +9,13 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * forth buttons work for you, and also makes each spot in your app
  * bookmarkable. The instance used by this app is available via
  * {@link ScaffoldFactory#getPlaceHistoryHandler()}.
+ * 
  * <p>
  * The simplest way to make new {@link com.google.gwt.app.place.Place Place}
  * types available to your app is to uncomment the {@literal @}WithTokenizers
  * annotation below and list their corresponding
  * {@link com.google.gwt.app.place.PlaceTokenizer PlaceTokenizer}s.
+ * 
  * <p>
  * This code generated object looks to both the {@literal @}WithTokenizers
  * annotation and the factory to infer the types of
@@ -26,6 +28,5 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * an individual entity).
  */
 // @WithTokenizers({MyNewPlace.Tokenizer, MyOtherNewPlace.Tokenizer})
-interface ScaffoldPlaceHistoryHandler extends
-    PlaceHistoryHandlerWithFactory<ScaffoldFactory> {
+interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<ScaffoldFactory> {
 }

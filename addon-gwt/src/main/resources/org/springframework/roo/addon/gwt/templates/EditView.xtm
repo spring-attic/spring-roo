@@ -1,5 +1,4 @@
-#parse("common.vm")
-package ${packageName};
+package {{=packageName}};
 
 import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.app.client.DoubleBox;
@@ -23,27 +22,25 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.valuestore.shared.Property;
-#declareImports()
-
+{{#imports}}import {{=import}};
+{{/imports}}
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Edit view for ${entity.name} records.
+ * Edit view for {{=name}} records.
  */
-public class ${className} extends Composite implements RecordEditView<${entity.record}> {
-	interface Binder extends UiBinder<HTMLPanel, ${className}> {
+public class {{=className}} extends Composite implements RecordEditView<{{=record}}> {
+	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
-	interface DataBinder extends EditorSupport<${entity.record}, ${className}> {
+	interface DataBinder extends EditorSupport<{{=record}}, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 	private static final DataBinder DATA_BINDER = GWT.create(DataBinder.class);
-
-#foreach ($prop in $entity.properties)
-	@UiField ${prop.editor} ${prop.name};
-#end
+	{{#props2}}
+	@UiField {{=prop}};{{/props2}}	
 	@UiField Button cancel;
 	@UiField Button save;
 	@UiField InlineLabel id;
@@ -54,14 +51,14 @@ public class ${className} extends Composite implements RecordEditView<${entity.r
 	@UiField Element createTitle;
 
 	private Delegate delegate;
-	private ${entity.record} record;
+	private {{=record}} record;
 
-	public ${className}() {
+	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
 		DATA_BINDER.init(this);
 	}
 
-	public ${className} asWidget() {
+	public {{=className}} asWidget() {
 		return this;
 	}	
 
@@ -69,7 +66,7 @@ public class ${className} extends Composite implements RecordEditView<${entity.r
 		return DATA_BINDER.getProperties();
 	}
 
-	public ${entity.record} getValue() {
+	public {{=record}} getValue() {
 		return record;
 	}
 
@@ -96,7 +93,7 @@ public class ${className} extends Composite implements RecordEditView<${entity.r
 		save.setEnabled(enabled);
 	}
 
-	public void setValue(${entity.record} value) {
+	public void setValue({{=record}} value) {
 		this.record = value;
 		DATA_BINDER.setValue(this, value);
 	}
@@ -106,12 +103,12 @@ public class ${className} extends Composite implements RecordEditView<${entity.r
 	}
 
 	@UiHandler("cancel")
-	void onCancel(@SuppressWarnings("unused") ClickEvent event) {
+	void onCancel(ClickEvent event) {
 		delegate.cancelClicked();
 	}
 
 	@UiHandler("save")
-	void onSave(@SuppressWarnings("unused") ClickEvent event) {
+	void onSave(ClickEvent event) {
 		delegate.saveClicked();
 	}
 }

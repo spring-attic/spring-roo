@@ -3,12 +3,12 @@ package org.springframework.roo.addon.gwt;
 import hapax.Template;
 import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
+import hapax.TemplateException;
 import hapax.TemplateLoader;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -55,7 +53,6 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * Metadata for GWT.
  * 
- * 
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
@@ -63,10 +60,10 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class GwtMetadata extends AbstractMetadataItem {
-	private FileManager fileManager;
 	private static final String PROVIDES_TYPE_STRING = GwtMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
+	private FileManager fileManager;
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
 	private MethodMetadata findAllMethod;
@@ -112,17 +109,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildRecord();
 		buildActivitiesMapper();
 		// TODO (cromwellian) Argh! Why must I make this an outer class!
-		this.listViewBinder = buildListViewBinder(MirrorType.LIST_VIEW_BINDER, MirrorType.LIST_VIEW);
-		this.detailsViewBinder = buildListViewBinder(MirrorType.DETAILS_VIEW_BINDER, MirrorType.DETAILS_VIEW);
-		this.editViewBinder = buildListViewBinder(MirrorType.EDIT_VIEW_BINDER, MirrorType.EDIT_VIEW);
+		listViewBinder = buildListViewBinder(MirrorType.LIST_VIEW_BINDER, MirrorType.LIST_VIEW);
+		detailsViewBinder = buildListViewBinder(MirrorType.DETAILS_VIEW_BINDER, MirrorType.DETAILS_VIEW);
+		editViewBinder = buildListViewBinder(MirrorType.EDIT_VIEW_BINDER, MirrorType.EDIT_VIEW);
 		buildEditActivity();
 		buildDetailsActivity();
 		buildListActivity();
-
 		buildListView();
 		buildListViewUiXml();
-	//  buildDetailsView();
-		buildDetailsViewHapax();
+		buildDetailsView();
 		buildDetailsViewUiXml();
 		buildEditView();
 		buildEditViewUiXml();
@@ -236,11 +231,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void buildActivitiesMapper() {
 		try {
 			MirrorType type = MirrorType.ACTIVITIES_MAPPER;
-			VelocityContext ctx = buildContext(type);
-			addReference(ctx, MirrorType.DETAIL_ACTIVITY);
-			addReference(ctx, MirrorType.EDIT_ACTIVITY);
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, MirrorType.DETAIL_ACTIVITY);
+			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY);
+			writeWithTemplate(type, dataDictionary, type.getTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -279,7 +274,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		List<AnnotationMetadata> typeAnnotations = createAnnotations();
 		// @DataTransferObject(Employee.class)
-    typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.DataTransferObject")));
+		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.DataTransferObject")));
 		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
@@ -288,7 +283,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		// attribs.add(new ClassAttributeValue(new JavaSymbolName("type"), beanInfoMetadata.getJavaBean()));
 		// attribs.add(new StringAttributeValue(new JavaSymbolName("token"), governorTypeDetails.getName().getSimpleTypeName()));
-
 		// typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.ServerType"), attribs));
 
 		// extends Record
@@ -354,7 +348,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			fields.add(fieldMetadata);
 		}
 
-		// getter methods for EmployeeRecord
+		// Getter methods for EmployeeRecord
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
 			JavaType methodReturnType = propToGwtSideType.get(propertyName);
 			JavaSymbolName methodName = new JavaSymbolName("get" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
@@ -363,87 +357,50 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 			// Potentially add GWT's annotation helpers
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			// if (propertyName.equals(idPropertyName)) {
-			// annotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.Id"), new ArrayList<AnnotationAttributeValue<?>>()));
-			// if (idLongOnServerSide) {
-			// annotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.LongString"), new ArrayList<AnnotationAttributeValue<?>>()));
-			// }
-			// }
-			// if (propertyName.equals(versionPropertyName)) {
-			// annotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.Version"), new ArrayList<AnnotationAttributeValue<?>>()));
-			// }
-
 			MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, annotations, null, null);
 			methods.add(methodMetadata);
 		}
 
 		// isChanged method
-    methods.add(new DefaultMethodMetadata(destinationMetadataId,
-        Modifier.ABSTRACT, new JavaSymbolName("isChanged"),
-        JavaType.BOOLEAN_PRIMITIVE,
-        AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()),
-        new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(),
-        null, null));
+		methods.add(new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, new JavaSymbolName("isChanged"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, null));
 
-		// setter methods for EmployeeRecord
+		// Setter methods for EmployeeRecord
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
-      JavaType methodReturnType = JavaType.VOID_PRIMITIVE;
-        // propToGwtSideType.get(propertyName);
-      JavaSymbolName methodName = new JavaSymbolName("set" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
-      List<JavaType> methodParameterTypes = Collections.<JavaType>singletonList(propToGwtSideType.get(propertyName));
-      List<JavaSymbolName> methodParameterNames = Collections.<JavaSymbolName>singletonList(propertyName);
+			JavaType methodReturnType = JavaType.VOID_PRIMITIVE;
+			// propToGwtSideType.get(propertyName);
+			JavaSymbolName methodName = new JavaSymbolName("set" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
+			List<JavaType> methodParameterTypes = Collections.<JavaType> singletonList(propToGwtSideType.get(propertyName));
+			List<JavaSymbolName> methodParameterNames = Collections.<JavaSymbolName> singletonList(propertyName);
 
-      List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-      MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, annotations, null, null);
-      methods.add(methodMetadata);
-    }
-
+			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+			MethodMetadata methodMetadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, annotations, null, null);
+			methods.add(methodMetadata);
+		}
 
 		this.record = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 
-	private void addReference(VelocityContext ctx, MirrorType type) {
-		List<String> imports = asList(ctx.get("imports"));
-    addImport(imports, type);
-		Map<String, String> map = asMap(ctx.get("entity"));
-    Map<String, String> eMap = map;
-		eMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+	private void addReference(TemplateDataDictionary dataDictionary, MirrorType type) {
+		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
+		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	private void addReference(VelocityContext ctx, SharedType type) {
-		List<String> imports = asList(ctx.get("imports"));
-    addImport(imports, type);
-		Map<String, String> map = asMap(ctx.get("shared"));
-    Map<String, String> sMap = map;
-		sMap.put(type.getVelocityName(), getDestinationJavaType(type).getSimpleTypeName());
+	private void addReference(TemplateDataDictionary dataDictionary, SharedType type) {
+		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
+		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
 
-	private void addImport(List<String> imports, SharedType type) {
-		imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
+	private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {
+		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
 	}
 
-	private void addImport(List<String> imports, MirrorType type) {
-		imports.add(getDestinationJavaType(type).getFullyQualifiedTypeName());
-	}
-	
-  @SuppressWarnings("unchecked")
-  private <T> List<T> asList(Object object) {
-    return (List<T>) object;
-  }
-  
-  @SuppressWarnings("unchecked")
-  private <K, V> Map<K, V> asMap(Object object) {
-    return (Map<K, V>) object;
-  }
-  
 	private void buildEditActivity() {
 		try {
 			MirrorType type = MirrorType.EDIT_ACTIVITY;
-			VelocityContext ctx = buildContext(MirrorType.EDIT_ACTIVITY);
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, MirrorType.EDIT_VIEW);
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, MirrorType.EDIT_VIEW);
+			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -452,13 +409,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void buildDetailsActivity() {
 		try {
 			MirrorType type = MirrorType.DETAIL_ACTIVITY;
-
-			VelocityContext ctx = buildContext(MirrorType.DETAIL_ACTIVITY);
-
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, MirrorType.DETAILS_VIEW);
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, MirrorType.DETAILS_VIEW);
+			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -467,15 +421,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void buildListActivity() {
 		try {
 			MirrorType type = MirrorType.LIST_ACTIVITY;
-
-			VelocityContext ctx = buildContext(MirrorType.LIST_ACTIVITY);
-
-			addReference(ctx, SharedType.APP_REQUEST_FACTORY);
-			addReference(ctx, MirrorType.LIST_VIEW);
-			addReference(ctx, MirrorType.RECORD_CHANGED);
-			addReference(ctx, MirrorType.CHANGED_HANDLER);
-
-			writeWithTemplate(type, ctx, TemplateResourceLoader.TEMPLATE_DIR + type.getVelocityTemplate());
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, MirrorType.LIST_VIEW);
+			addReference(dataDictionary, MirrorType.RECORD_CHANGED);
+			addReference(dataDictionary, MirrorType.CHANGED_HANDLER);
+			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -483,249 +434,134 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	private void buildListView() {
 		try {
-			writeWithTemplate(MirrorType.LIST_VIEW, "org/springframework/roo/addon/gwt/templates/ListView.vm");
+			writeWithTemplate(MirrorType.LIST_VIEW);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private void writeWithTemplate(MirrorType destType, String templateFile) throws Exception {
+	private void writeWithTemplate(MirrorType destType) throws TemplateException {
 		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
-		writeWithTemplate(destFile, buildContext(destType), templateFile);
+		writeWithTemplate(destFile, destType, destType.getTemplate());
 	}
 
-	private void writeWithHapaxTemplate(MirrorType destType, String baseDir, String templateFile) throws Exception {
+	private void writeWithTemplate(MirrorType destType, String templateFile) throws TemplateException {
 		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
-		writeWithHapaxTemplate(destFile, buildDataDictionary(destType), baseDir, templateFile);
+		writeWithTemplate(destFile, destType, templateFile);
 	}
 
-	private void writeWithTemplate(MirrorType destType, VelocityContext context, String templateFile) throws Exception {
+	private void writeWithTemplate(String destFile, MirrorType destType, String templateFile) throws TemplateException {
+		writeWithTemplate(destFile, buildDataDictionary(destType), templateFile);
+	}
+
+	private void writeWithTemplate(MirrorType destType, TemplateDataDictionary dataDictionary, String templateFile) throws TemplateException {
 		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
-		writeWithTemplate(destFile, context, templateFile);
+		writeWithTemplate(destFile, dataDictionary, templateFile);
 	}
 
-	private void writeWithTemplate(String destFile, VelocityContext context, String templateFile) throws Exception {
-		VelocityEngine engine = new VelocityEngine();
-		engine.setProperty("resource.loader", "mine");
-		engine.setProperty("mine.resource.loader.instance", new TemplateResourceLoader());
-
-		StringWriter sw = new StringWriter();
-		engine.getTemplate(templateFile).merge(context, sw);
-		write(destFile, sw.toString(), fileManager);
+	private void writeWithTemplate(MirrorType destType, TemplateDataDictionary dataDictionary) throws TemplateException {
+		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
+		writeWithTemplate(destFile, dataDictionary, destType.getTemplate());
 	}
 
-	private void writeWithHapaxTemplate(String destFile, TemplateDataDictionary dataDictionary, String baseDir, String templateFile) throws Exception {
-		TemplateLoader templateLoader = GwtTemplateLoader.create(baseDir);
+	private void writeWithTemplate(String destFile, TemplateDataDictionary dataDictionary, String templateFile) throws TemplateException {
+		TemplateLoader templateLoader = TemplateResourceLoader.create();
 		Template template = templateLoader.getTemplate(templateFile);
 		write(destFile, template.renderToString(dataDictionary), fileManager);
 	}
 
-	public static class Property {
-		private String name;
-		private String getter;
-		private String setter;
-		private JavaType type;
-
-		public Property(String getter, String name, String setter) {
-			this.getter = getter;
-			this.name = name;
-			this.setter = setter;
-		}
-
-		public Property(String getter, String name, String setting, JavaType returnType) {
-			this(getter, name, setting);
-			this.type = returnType;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getSetter() {
-			return setter;
-		}
-
-		public String getGetter() {
-			return getter;
-		}
-
-		public String getType() {
-			return type.getFullyQualifiedTypeName();
-		}
-
-		public void setGetter(String getter) {
-			this.getter = getter;
-		}
-
-		public boolean isNonString() {
-			return type != null && type.equals(new JavaType("java.util.Date"));
-		}
-
-		public String getBinder() {
-			if (type.equals(JavaType.DOUBLE_OBJECT))
-				return "app:DoubleBox";
-			if (type.equals(JavaType.LONG_OBJECT))
-				return "app:LongBox";
-			if (type.equals(JavaType.INT_OBJECT))
-				return "app:IntegerBox";
-			return isNonString() ? "d:DateBox" : "g:TextBox";
-		}
-
-		public String getEditor() {
-			if (type.equals(JavaType.DOUBLE_OBJECT))
-				return "DoubleBox";
-			if (type.equals(JavaType.LONG_OBJECT))
-				return "LongBox";
-			if (type.equals(JavaType.INT_OBJECT))
-				return "IntegerBox";
-
-			return isNonString() ? "DateBox" : "TextBox";
-		}
-
-		public String getFormatter() {
-			return isNonString() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
-		}
-
-		public String getRenderer() {
-			return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}";
-		}
-
-		public String getReadableName() {
-			return new JavaSymbolName(name).getReadableSymbolName();
-		}
-		
-		public String toString() {
-			return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("record.").append(getGetter()).append("()));").toString();
-		}
-	}
-
-	private VelocityContext buildContext(MirrorType destType) {
-		JavaType javaType = getDestinationJavaType(destType);
-		String clazz = javaType.getSimpleTypeName();
-		JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
-
-		VelocityContext context = new VelocityContext();
-		context.put("shared", new HashMap<String, String>());
-		HashMap<String, Object> eMap = new HashMap<String, Object>();
-		context.put("entity", eMap);
-		context.put("className", clazz);
-		context.put("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-		ArrayList<String> imports = new ArrayList<String>();
-		imports.add(recordType.getFullyQualifiedTypeName());
-		context.put("imports", imports);
-		eMap.put("name", governorTypeDetails.getName().getSimpleTypeName());
-		eMap.put("pluralName", entityMetadata.getPlural());
-		eMap.put("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
-		eMap.put("record", recordType.getSimpleTypeName());
-		eMap.put("pluralName", entityMetadata.getPlural());
-
-		ArrayList<String> fieldNames = new ArrayList<String>();
-		for (FieldMetadata f : record.getDeclaredFields()) {
-			if (f.getFieldName().getSymbolName().equals("TOKEN")) {
-				continue;
-			}
-			fieldNames.add(f.getFieldName().getSymbolName());
-		}
-		eMap.put("fields", fieldNames);
-
-		ArrayList<Property> props = new ArrayList<Property>();
-		for (MethodMetadata f : record.getDeclaredMethods()) {
-			if (!f.getMethodName().getSymbolName().startsWith("get")) {
-				continue;
-			}
-			String getter = f.getMethodName().getSymbolName();
-			props.add(new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), f.getReturnType()));
-		}
-		eMap.put("properties", props);
-		return context;
-	}
 
 	private TemplateDataDictionary buildDataDictionary(MirrorType destType) {
 		JavaType javaType = getDestinationJavaType(destType);
-		String clazz = javaType.getSimpleTypeName();
 		JavaType recordType = getDestinationJavaType(MirrorType.RECORD);
 
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
-		HashMap<String, Object> eMap = new HashMap<String, Object>();
-		dataDictionary.setVariable("className", clazz);
+		addImport(dataDictionary, recordType.getFullyQualifiedTypeName());
+		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-		ArrayList<String> imports = new ArrayList<String>();
-		imports.add(recordType.getFullyQualifiedTypeName());
-		dataDictionary.addSection("imports").setVariable("import", recordType.getFullyQualifiedTypeName());
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
 		dataDictionary.setVariable("record", recordType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 
-		ArrayList<String> fieldNames = new ArrayList<String>();
-		for (FieldMetadata f : record.getDeclaredFields()) {
-			if (f.getFieldName().getSymbolName().equals("TOKEN")) {
+		for (FieldMetadata field : record.getDeclaredFields()) {
+			if (field.getFieldName().getSymbolName().equals("TOKEN")) {
 				continue;
 			}
-			dataDictionary.addSection("entityFields").setVariable("field", f.getFieldName().getSymbolName());
-			fieldNames.add(f.getFieldName().getSymbolName());
+			dataDictionary.addSection("fields").setVariable("field", field.getFieldName().getSymbolName());
 		}
-		eMap.put("fields", fieldNames);
 
-		ArrayList<Property> props = new ArrayList<Property>();
-		for (MethodMetadata f : record.getDeclaredMethods()) {
-			if (!f.getMethodName().getSymbolName().startsWith("get")) {
+		for (MethodMetadata method : record.getDeclaredMethods()) {
+			if (!method.getMethodName().getSymbolName().startsWith("get")) {
 				continue;
 			}
-			String getter = f.getMethodName().getSymbolName();
-			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), f.getReturnType());
-			dataDictionary.addSection("entityProperties").setVariable("prop", property.toString());
+			String getter = method.getMethodName().getSymbolName();
+			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), method.getReturnType());
 
+			// Formatted text for DetailsView
+			dataDictionary.addSection("props1").setVariable("prop", property.getPropStr1());
+
+			// Formatted text for EditView
+			dataDictionary.addSection("props2").setVariable("prop", property.getPropStr2());
+
+			// Formatted text for DetailsViewUiXml
+			dataDictionary.addSection("props3").setVariable("prop", property.getPropStr3());
+
+			// Formatted text for ListView
+			dataDictionary.addSection("props4").setVariable("prop", property.getPropStr4(recordType.getSimpleTypeName()));
+
+			// Formatted text for EditViewUiXml
+			dataDictionary.addSection("props5").setVariable("prop", property.getPropStr5());
 		}
-		eMap.put("properties", props);
 		return dataDictionary;
 	}
 
 	private void buildListViewUiXml() {
-		MirrorType dType = MirrorType.LIST_VIEW;
-		String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
 		try {
-			writeWithTemplate(destFile, buildContext(dType), "org/springframework/roo/addon/gwt/templates/ListViewUiXml.vm");
+			MirrorType destType = MirrorType.LIST_VIEW;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "ListViewUiXml");
 		} catch (Exception e) {
-			throw new IllegalStateException(e); // To change body of catch statement use File | Settings | File Templates.
+			throw new IllegalStateException(e);
 		}
 	}
 
-	private void buildDetailsViewHapax() {
+	private void buildDetailsView() {
 		try {
-			writeWithHapaxTemplate(MirrorType.DETAILS_VIEW, "org/springframework/roo/addon/gwt/templates/", "DetailsView");
+			MirrorType destType = MirrorType.DETAILS_VIEW;
+			writeWithTemplate(destType);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	private void buildDetailsViewUiXml() {
-		MirrorType dType = MirrorType.DETAILS_VIEW;
-		String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
 		try {
-			writeWithTemplate(destFile, buildContext(dType), "org/springframework/roo/addon/gwt/templates/DetailsViewUiXml.vm");
+			MirrorType destType = MirrorType.DETAILS_VIEW;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "DetailsViewUiXml");
 		} catch (Exception e) {
-			throw new IllegalStateException(e); // To change body of catch statement use File | Settings | File Templates.
+			throw new IllegalStateException(e);
 		}
 	}
 
 	private void buildEditView() {
-		MirrorType dType = MirrorType.EDIT_VIEW;
 		try {
-			writeWithTemplate(dType, "org/springframework/roo/addon/gwt/templates/EditView.vm");
+			MirrorType type = MirrorType.EDIT_VIEW;
+			writeWithTemplate(type, type.getTemplate());
 		} catch (Exception e) {
-			throw new IllegalStateException(e); // To change body of catch statement use File | Settings | File Templates.
+			throw new IllegalStateException(e);
 		}
 	}
 
 	private void buildEditViewUiXml() {
-		MirrorType dType = MirrorType.EDIT_VIEW;
-		String destFile = dType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(dType).getSimpleTypeName() + ".ui.xml";
 		try {
-			writeWithTemplate(destFile, buildContext(dType), "org/springframework/roo/addon/gwt/templates/EditViewUiXml.vm");
+			MirrorType destType = MirrorType.EDIT_VIEW;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "EditViewUiXml");
 		} catch (Exception e) {
-			throw new IllegalStateException(e); // To change body of catch statement use File | Settings | File Templates.
+			throw new IllegalStateException(e);
 		}
 	}
 
@@ -784,8 +620,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
 		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-    // @Service(Employee.class)
-    typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.Service")));
+		// @Service(Employee.class)
+		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.Service")));
 		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
@@ -794,26 +630,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildRequestMethod(destinationMetadataId, methods, findAllMethod);
 		buildRequestMethod(destinationMetadataId, methods, findMethod);
 		buildRequestMethod(destinationMetadataId, methods, countMethod);
-
 		buildRequestMethod(destinationMetadataId, methods, findEntriesMethod);
 
 		// remove(EmployeeRecord record) and persist(EmployeeRecord record) methods.
-		JavaType methodReturnType = new JavaType(
-        "com.google.gwt.requestfactory.shared.RequestObject", 0,
-        DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
-    for (MethodMetadata metadata : new MethodMetadata[] {
-        entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod()}) {
-      List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(
-          getDestinationJavaType(MirrorType.RECORD), null));
-      List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName(
-          "record"));
-      List<AnnotationMetadata> annotations = Collections.singletonList((AnnotationMetadata) new DefaultAnnotationMetadata(
-          new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>>emptyList()));
-      MethodMetadata method1Metadata = new DefaultMethodMetadata(
-          destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(),
-          methodReturnType, parameterTypes, parameterNames, annotations, null, null);
-      methods.add(method1Metadata);
-    }
+		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.RequestObject", 0, DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
+		for (MethodMetadata metadata : new MethodMetadata[] { entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod() }) {
+			List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(getDestinationJavaType(MirrorType.RECORD), null));
+			List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName("record"));
+			List<AnnotationMetadata> annotations = Collections.singletonList((AnnotationMetadata) new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>> emptyList()));
+			MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(), methodReturnType, parameterTypes, parameterNames, annotations, null, null);
+			methods.add(method1Metadata);
+		}
 
 		this.request = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
@@ -843,6 +670,106 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, null);
 		methods.add(method1Metadata);
+	}
+
+	public static class Property {
+		private String name;
+		private String getter;
+		private String setter;
+		private JavaType type;
+
+		public Property(String getter, String name, String setter) {
+			this.getter = getter;
+			this.name = name;
+			this.setter = setter;
+		}
+
+		public Property(String getter, String name, String setting, JavaType returnType) {
+			this(getter, name, setting);
+			this.type = returnType;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getSetter() {
+			return setter;
+		}
+
+		public String getGetter() {
+			return getter;
+		}
+
+		public String getType() {
+			return type.getFullyQualifiedTypeName();
+		}
+
+		public void setGetter(String getter) {
+			this.getter = getter;
+		}
+
+		public boolean isNonString() {
+			return type != null && type.equals(new JavaType("java.util.Date"));
+		}
+
+		public String getBinder() {
+			if (type.equals(JavaType.DOUBLE_OBJECT)) {
+				return "app:DoubleBox";
+			}
+			if (type.equals(JavaType.LONG_OBJECT)) {
+				return "app:LongBox";
+			}
+			if (type.equals(JavaType.INT_OBJECT)) {
+				return "app:IntegerBox";
+			}
+			return isNonString() ? "d:DateBox" : "g:TextBox";
+		}
+
+		public String getEditor() {
+			if (type.equals(JavaType.DOUBLE_OBJECT)) {
+				return "DoubleBox";
+			}
+			if (type.equals(JavaType.LONG_OBJECT)) {
+				return "LongBox";
+			}
+			if (type.equals(JavaType.INT_OBJECT)) {
+				return "IntegerBox";
+			}
+			return isNonString() ? "DateBox" : "TextBox";
+		}
+
+		public String getFormatter() {
+			return isNonString() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
+		}
+
+		public String getRenderer() {
+			return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}";
+		}
+
+		public String getReadableName() {
+			return new JavaSymbolName(name).getReadableSymbolName();
+		}
+
+		public String getPropStr1() {
+			return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("record.").append(getGetter()).append("()));").toString();
+		}
+
+		public String getPropStr2() {
+			return new StringBuilder(getEditor()).append(" ").append(getName()).toString();
+		}
+
+		public String getPropStr3() {
+			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><span ui:field='").append(getName()).append("'></span></td></tr>").toString();
+		}
+
+		public String getPropStr4(String record) {
+			return new StringBuilder("columns.add(new PropertyColumn<").append(record).append(", ").append(getType()).append(">(").append(record).append(".").append(getName()).append(", ").append(getRenderer()).append("));").toString();
+		}
+
+		public String getPropStr5() {
+			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();
+		}
 	}
 
 	class ExportedMethod {
@@ -888,9 +815,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	private AnnotationMetadata createAdditionalAnnotation(JavaType serverType) {
-    List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-    serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
-    return new DefaultAnnotationMetadata(serverType, serverTypeAttributes);
+		List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
+		return new DefaultAnnotationMetadata(serverType, serverTypeAttributes);
 	}
 
 	/**

@@ -23,7 +23,7 @@ public class GwtCommands implements CommandMarker {
 		return gwtOperations.isSetupGwtAvailable();
 	}
 	
-	@CliCommand(value="gwt setup", help="Install Google Web Toolkit (GWT) into your project")
+	@CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
 	public void installSecurity() {
 		gwtOperations.setupGwt();
 	}

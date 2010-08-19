@@ -34,14 +34,12 @@
       <h3 class='{style.header}' ui:field="editTitle">
         <ui:msg>Edit ${entity.name} <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg>
       </h3>
-      <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New ${entity.name}</ui:msg></h3>
+      <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New {{=name}}</ui:msg></h3>
     </div>
-    <div ui:field='errors' style='background-color: red; '></div>
+    <div ui:field='errors' style='background-color: red;'></div>
 
-    <table class="{style.fields}">
-#foreach ($prop in $entity.properties)  
-      <tr><td><div class='{style.label}'>${prop.readableName}:</div></td><td><${prop.binder} ui:field='${prop.name}'></${prop.binder}></td></tr>
-#end
+    <table class="{style.fields}">{{#props5}}
+	    {{=prop}}{{/props5}}
     </table>
 
     <div class='{style.bar}'>

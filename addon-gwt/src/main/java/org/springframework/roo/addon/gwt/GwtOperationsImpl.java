@@ -55,7 +55,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	@Reference private WebMvcOperations mvcOperations;
 
 	private ComponentContext context;
-	boolean isGaeEnabled;
+	private boolean isGaeEnabled;
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
@@ -95,7 +95,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (Element dependency : dependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
-		
+
 		if (isGaeEnabled) {
 			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
 			for (Element dependency : XmlUtils.findElements("/configuration/gae-dependencies/dependency", configuration)) {
@@ -149,9 +149,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
-                        if (fileName.contains("GaeUserInformation") && !isGaeEnabled()) {
-                          continue;
-                        }
+			if (fileName.contains("GaeUserInformation") && !isGaeEnabled()) {
+				continue;
+			}
 
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
@@ -285,12 +285,12 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		WebXmlUtils.WebXmlParam initParams = null;
 		if (isGaeEnabled()) {
-                  String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".gwt.GaeUserInformation";
-                  initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
-                  WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
+			String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".gwt.GaeUserInformation";
+			initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
+			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
 		} else {
-                  WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
-                }
+			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
+		}
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
 		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
 

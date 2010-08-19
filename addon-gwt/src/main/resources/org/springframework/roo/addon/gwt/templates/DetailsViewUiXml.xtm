@@ -29,14 +29,12 @@
   </ui:style>
   <g:HTMLPanel>
     <div class='{style.underline}'>
-      <h3 class='{style.header}'><ui:msg>${entity.name} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+      <h3 class='{style.header}'><ui:msg>{{=name}} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
     </div>
 
-    <table class='{style.fields}'>
-#foreach ($prop in $entity.properties)  
-      <tr><td><div class='{style.label}'>${prop.readableName}:</div></td><td><span ui:field='${prop.name}'></span></td></tr>
-#end
-    </table>
+    <table class='{style.fields}'>{{#props3}}
+	    {{=prop}}{{/props3}}
+	</table>
 
   <div class="{style.bar}">
     <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>

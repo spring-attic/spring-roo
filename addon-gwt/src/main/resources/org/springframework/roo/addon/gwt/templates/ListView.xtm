@@ -1,5 +1,4 @@
-#parse("common.vm")
-package ${packageName};
+package {{=packageName}};
 
 import com.google.gwt.app.place.AbstractRecordListView;
 import com.google.gwt.app.place.PropertyColumn;
@@ -12,34 +11,33 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
-#declareImports()
-
+{{#imports}}import {{=import}};
+{{/imports}}
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link AbstractRecordListView} specialized to {@link ${entity.name}Key}} values.
+ * {@link AbstractRecordListView} specialized to {@link {{=name}}Key}} values.
  */
-public class ${className} extends AbstractRecordListView<${entity.record}> {
-	interface Binder extends UiBinder<HTMLPanel, ${className}> {
+public class {{=className}} extends AbstractRecordListView<{{=record}}> {
+	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField CellTable<${entity.record}> table;
+	@UiField CellTable<{{=record}}> table;
 	@UiField Button newButton;
   
-	public ${className}() {
+	public {{=className}}() {
 		init(BINDER.createAndBindUi(this), table, newButton, getColumns());
 	}
 
-	protected List<PropertyColumn<${entity.record}, ?>> getColumns() {
+	protected List<PropertyColumn<{{=record}}, ?>> getColumns() {
 		// TODO These should be <g:col> elements in a <g:table> in the ui.xml file
 
-		List<PropertyColumn<${entity.record}, ?>> columns = new ArrayList<PropertyColumn<${entity.record}, ?>>();
-#foreach ($prop in $entity.properties)
-		columns.add(new PropertyColumn<${entity.record}, ${prop.type}>(${entity.record}.${prop.name}, ${prop.renderer}));  
-#end
-		return columns;
+		List<PropertyColumn<{{=record}}, ?>> columns = new ArrayList<PropertyColumn<{{=record}}, ?>>();
+		{{#props4}}
+	    {{=prop}}{{/props4}}		
+	    return columns;
 	}
 }

@@ -10,7 +10,6 @@ import org.springframework.roo.project.ProjectMetadata;
  * 
  * @author Ben Alex
  * @since 1.1
- * 
  */
 @Component
 @Service

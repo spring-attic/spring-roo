@@ -8,37 +8,27 @@ import org.springframework.roo.project.ProjectMetadata;
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.1
- *
  */
 public enum SharedType {
-	APP_ENTITY_TYPES_PROCESSOR(GwtPath.GWT_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor.vm"), 
-	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory.vm"), 
-  FACTORY(GwtPath.GWT_SCAFFOLD, "ScaffoldFactory", "factory", "ScaffoldFactory.vm"), 
-  PLACE_HISTORY_HANDLER(GwtPath.GWT_SCAFFOLD, "ScaffoldPlaceHistoryHandler", "placeHistoryHandler", "ScaffoldPlaceHistoryHandler.vm"), 
-	LIST_PLACE_RENDERER(GwtPath.GWT_SCAFFOLD, "ApplicationListPlaceRenderer", "listPlaceRenderer", "ApplicationListPlaceRenderer.vm"), 
-	MASTER_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationMasterActivities", "masterActivities", "ApplicationMasterActivities.vm"), 
-	DETAILS_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationDetailsActivities", "detailsActivities", "ApplicationDetailsActivities.vm"), 
-	MOBILE_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldMobileActivities", "mobileActivities", "ScaffoldMobileActivities.vm"),
-	;    
+	APP_ENTITY_TYPES_PROCESSOR(GwtPath.GWT_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor"), 
+	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory"), 
+	FACTORY(GwtPath.GWT_SCAFFOLD, "ScaffoldFactory", "factory", "ScaffoldFactory"), 
+	// PLACE_HISTORY_HANDLER(GwtPath.GWT_SCAFFOLD, "ScaffoldPlaceHistoryHandler", "placeHistoryHandler", "ScaffoldPlaceHistoryHandler.vm"), 
+	LIST_PLACE_RENDERER(GwtPath.GWT_SCAFFOLD, "ApplicationListPlaceRenderer", "listPlaceRenderer", "ApplicationListPlaceRenderer"), 
+	MASTER_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationMasterActivities", "masterActivities", "ApplicationMasterActivities"), 
+	DETAILS_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationDetailsActivities", "detailsActivities", "ApplicationDetailsActivities"), 
+	MOBILE_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldMobileActivities", "mobileActivities", "ScaffoldMobileActivities");    
 
 	private GwtPath path;
 	private String fullName;
-	private String velocityName;
-	private String velocityTemplate;
+	private String name;
+	private String template;
 
-	public String getVelocityName() {
-		return velocityName;
-	}
-
-	public String getVelocityTemplate() {
-		return velocityTemplate;
-	}
-
-	private SharedType(GwtPath path, String fullName, String velocityName, String velocityTemplate) {
+	private SharedType(GwtPath path, String fullName, String name, String template) {
 		this.path = path;
 		this.fullName = fullName;
-		this.velocityName = velocityName;
-		this.velocityTemplate = velocityTemplate;
+		this.name = name;
+		this.template = template;
 	}
 
 	public GwtPath getPath() {
@@ -47,6 +37,14 @@ public enum SharedType {
 
 	public String getFullName() {
 		return fullName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getTemplate() {
+		return template;
 	}
 
 	public String getFullyQualifiedTypeName(ProjectMetadata projectMetadata) {

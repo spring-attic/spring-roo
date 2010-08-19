@@ -14,34 +14,33 @@ package org.springframework.roo.addon.gwt;
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.1
- *
  */
 public enum MirrorType {
-	RECORD(GwtPath.GWT_REQUEST, "Record", "record", "Record.vm"), 
-	RECORD_CHANGED(GwtPath.GWT_REQUEST, "RecordChanged", "recordChanged", "RecordChanged.vm"), 
-	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changeHandler", "ChangeHandler.vm"), 
-	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", "Request.vm"), 
-	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper.vm"), 
-	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity.vm"), 
-	EDIT_ACTIVITY(GwtPath.GWT_UI, "EditActivity", "editActivity", "EditActivity.vm"), 
-	LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity", "listActivity", "ListActivity.vm"), 
-	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView", "listView", "ListView.vm"), 
-	LIST_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "ListViewBinder", "listViewBinder", "ListViewBinder.vm"), 
-	DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder", "detailsViewBinder", "DetailsViewBinder.vm"), 
-	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView.vm"),
-	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", "EditViewBinder.vm"), 
-	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView.vm");  
+	RECORD(GwtPath.GWT_REQUEST, "Record", "record", null), 
+	RECORD_CHANGED(GwtPath.GWT_REQUEST, "RecordChanged", "recordChanged", null), 
+	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changedHandler", null), 
+	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", null), 
+	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"), 
+	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity"), 
+	EDIT_ACTIVITY(GwtPath.GWT_UI, "EditActivity", "editActivity", "EditActivity"), 
+	LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity", "listActivity", "ListActivity"), 
+	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView", "listView", "ListView"), 
+	LIST_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "ListViewBinder", "listViewBinder", null), 
+	DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder", "detailsViewBinder", null), 
+	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView"),
+	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", null), 
+	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView");  
 
 	private GwtPath path;
 	private String suffix;
-	private String velocityName;
-	private String velocityTemplate;
+	private String name;
+	private String template;
 
-	private MirrorType(GwtPath path, String suffix, String velocityName, String velocityTemplate) {
+	private MirrorType(GwtPath path, String suffix, String name, String template) {
 		this.path = path;
 		this.suffix = suffix;
-		this.velocityName = velocityName;
-		this.velocityTemplate = velocityTemplate;
+		this.name = name;
+		this.template = template;
 	}
 
 	public GwtPath getPath() {
@@ -52,11 +51,11 @@ public enum MirrorType {
 		return suffix;
 	}
 
-	public String getVelocityName() {
-		return velocityName;
+	public String getName() {
+		return name;
 	}
 
-	public String getVelocityTemplate() {
-		return velocityTemplate;
+	public String getTemplate() {
+		return template;
 	}
 }
