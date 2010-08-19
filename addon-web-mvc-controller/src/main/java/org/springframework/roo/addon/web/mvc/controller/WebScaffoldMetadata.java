@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -23,6 +24,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -679,7 +681,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					}
 					if (typeEntityMetadata != null) {
 						if (accessor.getMethodName().equals(typeEntityMetadata.getIdentifierAccessor().getMethodName()) || 
-								accessor.getMethodName().equals(typeEntityMetadata.getVersionAccessor().getMethodName())) {
+								(typeEntityMetadata.getVersionAccessor() != null && accessor.getMethodName().equals(typeEntityMetadata.getVersionAccessor().getMethodName()))) {
 							continue;
 						}
 					}
@@ -778,13 +780,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 //			}
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-	
+			
+			
 			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 			if (typeEntityMetadata != null) {
 				bodyBuilder.appendFormalLine("return " + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + typeEntityMetadata.getFindAllMethod().getMethodName() + "();");
 			} else if (isEnumType(type)) {
 				JavaType arrays = new JavaType("java.util.Arrays");
 				bodyBuilder.appendFormalLine("return " + arrays.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".asList(" + type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".class.getEnumConstants());");
+			} else if (isRooIdentifier(type)) {
+				continue;
+			} else {
+				throw new IllegalStateException("Could not scaffold controller for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + ", the referenced type " + type.getFullyQualifiedTypeName() + " cannot be handled");
 			}
 			
 			JavaSymbolName populateMethodName = new JavaSymbolName("populate" + getPlural(type));
@@ -900,6 +907,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 		}
 		return false;
+	}
+	
+	private boolean isRooIdentifier(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			return false;
+		}
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		if (cid == null) {
+			return false;
+		}
+		return null != MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
 	}
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {

@@ -15,12 +15,17 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
+import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -183,8 +188,17 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		for (MethodMetadata method: beanInfoMetadata.getPublicAccessors(false)) {
 			JavaSymbolName fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
-			if (!fieldName.equals(entityMetadata.getIdentifierField().getFieldName()) || !fieldName.equals(entityMetadata.getVersionField().getFieldName())) {
+			if (field != null && isRooIdentifier(field.getFieldType())) {
+				IdentifierMetadata im = (IdentifierMetadata) metadataService.get(IdentifierMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
+				if (im != null) {
+					for (FieldMetadata f: im.getFields()) {
+						String sb = f.getFieldName().getReadableSymbolName();
+						propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", XmlUtils.convertId(resourceId + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + f.getFieldName().getSymbolName().toLowerCase()), (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb, true);					
+					}
+				}
+			} else if (!fieldName.equals(entityMetadata.getIdentifierField().getFieldName()) || !fieldName.equals(entityMetadata.getVersionField().getFieldName())) {
 				String sb = fieldName.getReadableSymbolName();
 				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", fieldResourceId, (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb, true);
 			}
@@ -293,6 +307,18 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
+	}
+	
+	private boolean isRooIdentifier(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			return false;
+		}
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		if (cid == null) {
+			return false;
+		}
+		return null != MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	public void notify(String upstreamDependency, String downstreamDependency) {

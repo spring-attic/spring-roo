@@ -12,6 +12,8 @@ import javax.xml.parsers.DocumentBuilder;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
+import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
@@ -20,6 +22,8 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -214,7 +218,18 @@ public class JspViewManager {
 			formCreate.setAttribute("path", controllerPath);
 		}
 		
-		createFieldsForCreateAndUpdate(document, formCreate, "create");
+		List<FieldMetadata> formFields = fields;
+		JavaType idType = entityMetadata.getIdentifierField().getFieldType();
+		//handle Roo identifiers
+		if (isRooIdentifier(idType)) {
+			IdentifierMetadata im = (IdentifierMetadata) metadataService.get(IdentifierMetadata.createIdentifier(idType, Path.SRC_MAIN_JAVA));
+			if (im != null) {
+				for (FieldMetadata field: im.getFields()) {
+					formFields.add(new DefaultFieldMetadata(field.getDeclaredByMetadataId(), field.getModifier(), new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()), field.getFieldType(), field.getFieldInitializer(), field.getAnnotations()));
+				}
+			}
+		} 
+		createFieldsForCreateAndUpdate(formFields, document, formCreate, true);
 		formCreate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formCreate));
 
 		Element dependency = new XmlElementBuilder("form:dependency", document)
@@ -260,7 +275,7 @@ public class JspViewManager {
 			formUpdate.setAttribute("versionField", entityMetadata.getVersionField().getFieldName().getSymbolName());
 		}
 		
-		createFieldsForCreateAndUpdate(document, formUpdate, "update");
+		createFieldsForCreateAndUpdate(fields, document, formUpdate, false);
 		
 		formUpdate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formUpdate));
 		
@@ -362,8 +377,8 @@ public class JspViewManager {
 		return document;
 	}	
 	
-	private void createFieldsForCreateAndUpdate(Document document, Element root, String createOrUpdate) {		
-		for (FieldMetadata field : fields) {
+	private void createFieldsForCreateAndUpdate(List<FieldMetadata> formFields, Document document, Element root, boolean isCreate) {		
+		for (FieldMetadata field : formFields) {
 			String fieldName = field.getFieldName().getSymbolName();
 			JavaType fieldType = field.getFieldType();
 			List<AnnotationMetadata> annotations = field.getAnnotations();
@@ -373,6 +388,10 @@ public class JspViewManager {
 			if (fieldType.equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
+			//fields contained in the embedded Id type have been added seperately to the field list
+			if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.EmbeddedId"))) {
+				continue;
+			}
 			if (fieldType.getFullyQualifiedTypeName().equals(Set.class.getName())) {
 				if (fieldType.getParameters().size() != 1) {
 					throw new IllegalArgumentException("A set is defined without specification of its type (via generics) - unable to create view for it");
@@ -380,8 +399,7 @@ public class JspViewManager {
 				fieldType = fieldType.getParameters().get(0);
 			}
 			Element fieldElement = null; 
-					
-			//handle boolean fields
+			
 			if (fieldType.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(boolean.class.getName())) {
 				 fieldElement = document.createElement("field:checkbox");
 			//handle enum fields	 
@@ -540,6 +558,18 @@ public class JspViewManager {
 				fieldElement.setAttribute("required", "true");
 			}
 		}
+	}
+	
+	private boolean isRooIdentifier(JavaType type) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			return false;
+		}
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		if (cid == null) {
+			return false;
+		}
+		return null != MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	private boolean isEnumType(JavaType type) {
