@@ -27,12 +27,9 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaParserClassMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
-
 	private static final Logger logger = HandlerUtils.getLogger(JavaParserClassMetadata.class);
-
 	private String fileIdentifier;
 	private PhysicalTypeDetails physicalTypeDetails;
 
@@ -61,37 +58,36 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 
 		try {
 			Assert.isTrue(fileManager.exists(fileIdentifier), "Path '" + fileIdentifier + "' must exist");
-			CompilationUnit compilationUnit= JavaParser.parse(fileManager.getInputStream(fileIdentifier));
-			
+			CompilationUnit compilationUnit = JavaParser.parse(fileManager.getInputStream(fileIdentifier));
+
 			for (TypeDeclaration candidate : compilationUnit.getTypes()) {
 				// This implementation only supports the main type declared within a compilation unit
 				if (PhysicalTypeIdentifier.getJavaType(metadataIdentificationString).getSimpleTypeName().equals(candidate.getName())) {
 					// We have the required type declaration
 					physicalTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, candidate, fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
-					
 					break;
 				}
 			}
 			Assert.notNull(physicalTypeDetails, "Parsing empty, enum or annotation types is unsupported");
-			
+
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.finest("Parsed '" + metadataIdentificationString + "'");
 			}
 		} catch (Throwable ex) {
-			// non-fatal, it just means the type could not be parsed
-			
+			// Non-fatal, it just means the type could not be parsed
+
 			if (ex.getMessage() != null && ex.getMessage().startsWith(JavaParserMutableClassOrInterfaceTypeDetails.UNSUPPORTED_MESSAGE_PREFIX)) {
-				// we don't want the limitation of the metadata parsing subsystem to confuse the user into thinking there is a problem with their source code
+				// We don't want the limitation of the metadata parsing subsystem to confuse the user into thinking there is a problem with their source code
 				valid = false;
 				return;
 			}
-			
+
 			ProcessManager pm = ActiveProcessManager.getActiveProcessManager();
 			if (pm != null && pm.isDevelopmentMode()) {
-				logger.log(Level.INFO, "Parsing failure (development mode diagnostics)", ex);
+				logger.log(Level.INFO, "Parsing failure for '" + fileIdentifier + "' (development mode diagnostics)", ex);
 			}
 			if (logger.isLoggable(Level.FINEST)) {
-				logger.log(Level.FINEST, "Unable to parse '" + metadataIdentificationString + "'", ex);
+				logger.log(Level.FINEST, "Unable to parse '" + fileIdentifier + "'", ex);
 			}
 			valid = false;
 		}
@@ -128,5 +124,4 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 		tsc.append("physicalTypeDetails", physicalTypeDetails);
 		return tsc.toString();
 	}
-	
 }
