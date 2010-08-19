@@ -79,13 +79,19 @@ public @interface RooWebScaffold {
 	 */
 	boolean update() default true;
 	
-	
 	/**
 	 * Will scan the formBackingObjects for installed finder methods and expose them when configured. 
 	 * 
 	 * @return indicates if the finders methods should be provided (defaults to "true"; optional)
 	 */
 	boolean exposeFinders() default true;
+	
+	/**
+	 * Will scan the formBackingObjects for {@link RooJson} annotation and expose json when configured. 
+	 * 
+	 * @return indicates if the json methods should be provided (defaults to "true"; optional)
+	 */
+	boolean exposeJson() default true;
 	
 	/**
 	 * Registers an @InitBinder method to provide converters for String presentation of objects. Useful

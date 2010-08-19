@@ -9,15 +9,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
+import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -72,8 +73,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private String controllerPath;
 	private String entityName;
 	private Map<JavaSymbolName, String> dateTypes;
-	private Map<JavaType, String> pluralCache;
-
+	private Map<JavaType, String> pluralCache;	
+	private JsonMetadata jsonMetadata;
+	
 	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -126,6 +128,28 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
+		}
+		
+		if (annotationValues.isExposeJson()) {
+			//decide if we want to build json support
+			this.jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
+			if (jsonMetadata != null) {
+				if (jsonMetadata.getToJsonMethod() != null) {
+					builder.addMethod(getJsonShowMethod());
+				}
+				
+				if (jsonMetadata.getFromJsonMethod() != null) {
+					builder.addMethod(getJsonCreateMethod());
+				}
+				
+				if (jsonMetadata.getToJsonArrayMethod() != null) {
+					builder.addMethod(getJsonListMethod());
+				}
+				
+				if (jsonMetadata.getFromJsonArrayMethod() != null) {
+					builder.addMethod(getCreateFromJsonArrayMethod());
+				}
+			}
 		}
 
 		itdTypeDetails = builder.build();
@@ -516,6 +540,159 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/update\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
+	}
+	
+	private MethodMetadata getJsonShowMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("showJson");
+		
+		// See if the type itself declared the method
+		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		if (result != null) {
+			return result;
+		}
+		
+		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
+		parameters.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.PathVariable"), attributes));
+
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(entityMetadata.getIdentifierField().getFieldType(), parameters));
+
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName()));
+
+		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/{" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "}"));
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
+	
+		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		annotations.add(requestMapping);
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ResponseBody"), new ArrayList<AnnotationAttributeValue<?>>()));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + jsonMetadata.getToJsonMethod().getMethodName().getSymbolName() + "();");
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
+	}
+	
+	private MethodMetadata getJsonCreateMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("createFromJson");
+		
+		// See if the type itself declared the method
+		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		if (result != null) {
+			return result;
+		}
+		
+		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
+		parameters.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestBody"), new ArrayList<AnnotationAttributeValue<?>>()));
+
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), parameters));
+
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("json"));
+
+		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
+	
+		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		annotations.add(requestMapping);
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + jsonMetadata.getFromJsonMethod().getMethodName().getSymbolName() + "(json)." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		
+		List<JavaType> typeParams = new ArrayList<JavaType>();
+		typeParams.add(new JavaType(String.class.getName()));
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
+		
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
+	}
+	
+	private MethodMetadata getCreateFromJsonArrayMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("createFromJsonArray");
+		
+		// See if the type itself declared the method
+		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		if (result != null) {
+			return result;
+		}
+		
+		List<AnnotationMetadata> parameters = new ArrayList<AnnotationMetadata>();
+		parameters.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestBody"), new ArrayList<AnnotationAttributeValue<?>>()));
+
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), parameters));
+
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("json"));
+
+		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "/jsonArray"));
+		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
+	
+		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		annotations.add(requestMapping);
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		String beanName = beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		
+		List<JavaType> params = new ArrayList<JavaType>();
+		params.add(beanInfoMetadata.getJavaBean());
+		bodyBuilder.appendFormalLine("for (" + beanName + " " + beanName.toLowerCase() + ": " + beanName + "." + jsonMetadata.getFromJsonArrayMethod().getMethodName().getSymbolName() + "(json)) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(beanName.toLowerCase() + "." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		
+		List<JavaType> typeParams = new ArrayList<JavaType>();
+		typeParams.add(new JavaType(String.class.getName()));
+		JavaType returnType = new JavaType("org.springframework.http.ResponseEntity", 0, DataType.TYPE, null, typeParams);
+		
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
+	}
+	
+	private MethodMetadata getJsonListMethod() {
+		JavaSymbolName methodName = new JavaSymbolName("listJson");
+		
+		// See if the type itself declared the method
+		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
+		if (result != null) {
+			return result;
+		}
+		
+		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("headers"), "Accept=application/json"));
+	
+		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+
+		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		annotations.add(requestMapping);
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.ResponseBody"), new ArrayList<AnnotationAttributeValue<?>>()));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		
+		String entityName = beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		
+		bodyBuilder.appendFormalLine("return " + entityName + "." + jsonMetadata.getToJsonArrayMethod().getMethodName().getSymbolName() + "(" + entityName + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
 	}
 
 	private MethodMetadata getFinderFormMethod(MethodMetadata methodMetadata) {
