@@ -182,7 +182,6 @@ public class GwtFileListener implements FileEventListener {
 			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
 			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" isNull) {\n").append("\t\t\t\tsetResult(\"").append(simpleName).append("s\");\n\t\t\t}").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
-		//	dataDictionary.addSection("importDeclarations").setVariable("import",  MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
 			addImport(dataDictionary, MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
 		}
 
