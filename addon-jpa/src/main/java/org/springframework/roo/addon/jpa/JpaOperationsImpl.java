@@ -403,8 +403,14 @@ public class JpaOperationsImpl implements JpaOperations {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 		if (StringUtils.hasText(databaseName)) {
-			connectionString += databaseName.startsWith("/") ? databaseName : "/" + databaseName;
+			if (database == JdbcDatabase.ORACLE) {
+				//Oracle uses a different connection URL - see ROO-1203
+				connectionString += databaseName.startsWith(":") ? databaseName : ":" + databaseName;
+			} else {
+				connectionString += databaseName.startsWith("/") ? databaseName : "/" + databaseName;
+			}
 		}
+		
 		props.put("database.url", connectionString);
 
 		switch (database) {
