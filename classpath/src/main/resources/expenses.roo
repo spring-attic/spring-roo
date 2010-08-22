@@ -8,7 +8,7 @@ field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
 field string --fieldName displayName
 field string --fieldName password
-field number --type java.lang.Long supervisorKey
+field reference --type Employee supervisor
 
 entity --class ~.server.domain.Report --testAutomatically
 // field date --fieldName created --type java.util.Date --past --notNull
@@ -17,8 +17,8 @@ field string --fieldName department
 field string --fieldName notes
 field string --fieldName purpose
 field string --fieldName purposeLowerCase
-field number --type java.lang.Long reporterKey
-field number --type java.lang.Long approvedSupervisorKey
+field reference --type Employee reporter
+field reference --type Employee approvedSupervisor
 
 entity --class ~.server.domain.Expense --testAutomatically
 field number --type java.lang.Double amount
@@ -28,9 +28,8 @@ field string --fieldName category
 field date --fieldName created --type java.util.Date
 field string --fieldName description
 field string --fieldName reasonDenied
-field number --type java.lang.Long reportId
+field reference --type Report report
 
-// NB: "field reference" does not work as of GWT 2.1.0.M1 / Roo 1.1.0.M1
 
 //field string --fieldName password --sizeMin 2 --sizeMax 30
 //field reference --fieldName supervisor --type ~.server.domain.Employee

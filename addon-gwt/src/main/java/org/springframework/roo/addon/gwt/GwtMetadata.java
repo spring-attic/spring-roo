@@ -13,8 +13,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -121,6 +123,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildDetailsViewUiXml();
 		buildEditView();
 		buildEditViewUiXml();
+                buildEditRenderer();
 		buildRequest();
 	}
 
@@ -491,14 +494,18 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 			dataDictionary.addSection("fields").setVariable("field", field.getFieldName().getSymbolName());
 		}
-
+                String displayField = null, displayFieldGetter = null;
+                Set<String> importSet = new HashSet<String>();
 		for (MethodMetadata method : record.getDeclaredMethods()) {
 			if (!method.getMethodName().getSymbolName().startsWith("get")) {
 				continue;
 			}
 			String getter = method.getMethodName().getSymbolName();
 			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), method.getReturnType());
-
+                        if (property.isString()) {
+                          displayField = property.getName();
+                          displayFieldGetter = property.getGetter();
+                        }
 			// Formatted text for DetailsView
 			dataDictionary.addSection("props1").setVariable("prop", property.getPropStr1());
 
@@ -513,7 +520,30 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 			// Formatted text for EditViewUiXml
 			dataDictionary.addSection("props5").setVariable("prop", property.getPropStr5());
+
+                        if (property.isRecord()) {
+                          TemplateDataDictionary section = dataDictionary.addSection("setValuePickers");
+                          section.setVariable("setValuePicker", property.getSetValuePickerMethod());
+                          section.setVariable("setValuePickerName", property.getSetValuePickerMethodName());
+                          String propTypeName = StringUtils.uncapitalize(method.getReturnType().getSimpleTypeName());
+                          propTypeName = propTypeName.substring(0, propTypeName.indexOf("Record"));
+                          section.setVariable("requestInterface", propTypeName+"Request");
+                          section.setVariable("findMethod", "find"+StringUtils.capitalize(propTypeName)+"Entries(0, 50)");
+                          section.setVariable("rendererType", property.getRendererType());
+                          section.setVariable("valueType", property.getPropertyType().getSimpleTypeName());
+                          if (!importSet.contains(property.getType())) {
+                            addImport(dataDictionary, property.getType());
+                            importSet.add(property.getType());
+                          }
+                        }
+
 		}
+                if (displayField == null) {
+                  displayField = "id";
+                  displayFieldGetter = "getId";
+                }
+                dataDictionary.setVariable("displayField", displayField);
+                dataDictionary.setVariable("displayFieldGetter", displayFieldGetter);
 		return dataDictionary;
 	}
 
@@ -541,6 +571,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType destType = MirrorType.DETAILS_VIEW;
 			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
 			writeWithTemplate(destFile, destType, "DetailsViewUiXml");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+        private void buildEditRenderer() {
+ 		try {
+                    writeWithTemplate(MirrorType.EDIT_RENDERER);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -672,7 +710,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		methods.add(method1Metadata);
 	}
 
-	public static class Property {
+	public class Property {
 		private String name;
 		private String getter;
 		private String setter;
@@ -705,13 +743,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 			return type.getFullyQualifiedTypeName();
 		}
 
+                public JavaType getPropertyType() {
+			return type;
+		}
+
 		public void setGetter(String getter) {
 			this.getter = getter;
 		}
 
-		public boolean isNonString() {
+		public boolean isDate() {
 			return type != null && type.equals(new JavaType("java.util.Date"));
 		}
+
+                public boolean isPrimitive() {
+                        return isDate() || isString()|| type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT);
+                }
+
+                public boolean isString() {
+                        return type != null && type.equals(new JavaType("java.lang.String"));
+                }
 
 		public String getBinder() {
 			if (type.equals(JavaType.DOUBLE_OBJECT)) {
@@ -723,7 +773,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (type.equals(JavaType.INT_OBJECT)) {
 				return "app:IntegerBox";
 			}
-			return isNonString() ? "d:DateBox" : "g:TextBox";
+			return isDate() ? "d:DateBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 		}
 
 		public String getEditor() {
@@ -736,18 +786,26 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (type.equals(JavaType.INT_OBJECT)) {
 				return "IntegerBox";
 			}
-			return isNonString() ? "DateBox" : "TextBox";
+			return isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
 		}
 
 		public String getFormatter() {
-			return isNonString() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
+			return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
 		}
 
 		public String getRenderer() {
-			return isNonString() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}";
+			return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : isPrimitive() ?
+                            "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return String.valueOf(obj);\n      }    \n}" :
+                            getRendererType() + ".instance()";
 		}
 
-		public String getReadableName() {
+          private String getRendererType() {
+            return
+                MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata)
+                    + "." + type.getSimpleTypeName() + "Renderer";
+          }
+
+          public String getReadableName() {
 			return new JavaSymbolName(name).getReadableSymbolName();
 		}
 
@@ -756,7 +814,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		public String getPropStr2() {
-			return new StringBuilder(getEditor()).append(" ").append(getName()).toString();
+			return new StringBuilder("@UiField "+getEditor()).append(" ").append(getName()).toString() + (!isRecord() ? "" : "=new ValueListBox<"+type.getFullyQualifiedTypeName()+">("+getRendererType()+".instance())");
 		}
 
 		public String getPropStr3() {
@@ -770,7 +828,22 @@ public class GwtMetadata extends AbstractMetadataItem {
 		public String getPropStr5() {
 			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();
 		}
-	}
+
+          public boolean isRecord() {
+            return !isDate() && !isString() && !isPrimitive();
+          }
+
+          public String getSetValuePickerMethod() {
+            return "\tpublic void " + getSetValuePickerMethodName()
+                + "(Collection<" +type.getSimpleTypeName()+"> values) {\n"+
+                "\t\t"+getName() + ".setAcceptableValues(values);\n" +
+                "\t}\n";      
+          }
+
+          private String getSetValuePickerMethodName() {
+            return "set" + StringUtils.capitalize(getName()) + "PickerValues";
+          }
+        }
 
 	class ExportedMethod {
 		JavaSymbolName operationName; // Mandatory

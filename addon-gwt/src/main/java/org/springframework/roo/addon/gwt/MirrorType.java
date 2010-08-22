@@ -29,8 +29,8 @@ public enum MirrorType {
 	DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder", "detailsViewBinder", null), 
 	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView"),
 	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", null), 
-	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView");  
-
+	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView"),
+        EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "RecordRenderer", "renderer", "EditRenderer");
 	private GwtPath path;
 	private String suffix;
 	private String name;
