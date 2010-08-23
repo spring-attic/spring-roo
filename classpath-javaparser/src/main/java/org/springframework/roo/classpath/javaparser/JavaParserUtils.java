@@ -311,7 +311,13 @@ public class JavaParserUtils  {
 	 * type arguments are preserved (a {@link NameExpr} does not contain type arguments).
 	 * 
 	 * <p>
-	 * A name expression can be either qualified or unqualified. If qualified, that represents the fully-qualified name.
+	 * A name expression can be either qualified or unqualified.
+	 * 
+	 * <p>
+	 * If a name expression is qualified and the qualification starts with a lowercase letter, that represents the
+	 * fully-qualified name. If the qualification starts with an uppercase letter, the package name is prepended to the qualifier.
+	 * 
+	 * <p>
 	 * If a name expression is unqualified, the imports are scanned. If the unqualified name expression is found in the
 	 * imports, that import declaration represents the fully-qualified name. If the unqualified name expression is not
 	 * found in the imports, it indicates the name to find is either in the same package as the qualified name expression,
@@ -342,8 +348,21 @@ public class JavaParserUtils  {
 				return new JavaType(name);
 			}
 			
-			// treat it as a fully-qualified name expression that includes the package
-			return new JavaType(qne.toString());
+			// refers to a different enclosing type, so calculate the package name based on convention of an uppercase letter denotes same package (ROO-1210)
+			if (qne.toString().length() > 1 && Character.isUpperCase(qne.toString().charAt(0))) {
+				// First letter is uppercase, so this likely requires prepending of some package name
+				ImportDeclaration importDeclaration = getImportDeclarationFor(compilationUnitServices, qne.getQualifier());
+				if (importDeclaration  == null && compilationUnitPackage.getFullyQualifiedPackageName() != "") {
+					// It was not imported, so let's assume it's in the same package
+					return new JavaType(compilationUnitServices.getCompilationUnitPackage().getFullyQualifiedPackageName() + "." + qne.toString());
+				}
+				
+				// This name expression (which contains a dot) had its qualifier imported, so let's use the import
+				return new JavaType(importDeclaration.getName().toString() + "." + qne.getName().toString());
+			} else {
+				// First letter is lowercase, so the reference already includes a package
+				return new JavaType(qne.toString());
+			}
 		}
 		
 		// Unqualified name detected, so check if it's in the type parameter list
