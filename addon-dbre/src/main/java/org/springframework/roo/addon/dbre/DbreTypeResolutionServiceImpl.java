@@ -134,7 +134,6 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
 			JavaType javaType = new JavaType(fullPath);
-
 			String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 			if (id != null) {
 				// Now I've found it, let's work out the Path it is from
