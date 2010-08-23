@@ -163,6 +163,11 @@ To try Roo out, you should type the following:
   cd ~/some-directory
   roo-dev
 
+It's important that you run roo-dev from a directory that you'd like
+to eventually contain a Roo-created project. Don't try to run roo-dev
+unless your current working directory is empty or contains a
+previously-created Roo project.
+
 If this fails, please review the "OSGi Wrapping JARs" section above.
 
 Notice we used "mvn install" rather than "mvn package". This is simply
