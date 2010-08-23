@@ -36,7 +36,7 @@
       <spring:escapeBody javaScriptEscape="true" >${field}</spring:escapeBody>
     </c:set>
 
-    <div id="_${fn:escapeXml(id)}}_id">
+    <div id="_${fn:escapeXml(id)}_id">
       <c:choose>
         <c:when test="${not empty items}">
           <label for="_${sec_field}_id">
