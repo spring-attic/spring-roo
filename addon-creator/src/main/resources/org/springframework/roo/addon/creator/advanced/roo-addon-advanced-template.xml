@@ -25,6 +25,7 @@
     <url>http://www.some.company</url>
 	<properties>
 		<roo.version>1.1.0.M3</roo.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<repositories>
 		<repository>
