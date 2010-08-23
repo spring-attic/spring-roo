@@ -494,7 +494,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 			dataDictionary.addSection("fields").setVariable("field", field.getFieldName().getSymbolName());
 		}
-                String displayField = null, displayFieldGetter = null;
+                String displayFields = null, displayFieldGetter = null;
                 Set<String> importSet = new HashSet<String>();
 		for (MethodMetadata method : record.getDeclaredMethods()) {
 			if (!method.getMethodName().getSymbolName().startsWith("get")) {
@@ -503,8 +503,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 			String getter = method.getMethodName().getSymbolName();
 			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), method.getReturnType());
                         if (property.isString()) {
-                          displayField = property.getName();
                           displayFieldGetter = property.getGetter();
+                        }
+                        if (property.isRecord()) {
+                          if (displayFields != null) {
+                            displayFields += ", ";
+                          } else {
+                            displayFields = "";
+                          }
+                          displayFields += "\"" + property.getName() + "\"";
                         }
 			// Formatted text for DetailsView
 			dataDictionary.addSection("props1").setVariable("prop", property.getPropStr1());
@@ -538,11 +545,10 @@ public class GwtMetadata extends AbstractMetadataItem {
                         }
 
 		}
-                if (displayField == null) {
-                  displayField = "id";
+                if (displayFieldGetter == null) {
                   displayFieldGetter = "getId";
                 }
-                dataDictionary.setVariable("displayField", displayField);
+                dataDictionary.setVariable("displayFields", displayFields);
                 dataDictionary.setVariable("displayFieldGetter", displayFieldGetter);
 		return dataDictionary;
 	}
@@ -790,7 +796,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		public String getFormatter() {
-			return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : "String.valueOf(";
+			return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : isRecord() ? getRendererType() + ".instance().render(" : "String.valueOf(";
 		}
 
 		public String getRenderer() {

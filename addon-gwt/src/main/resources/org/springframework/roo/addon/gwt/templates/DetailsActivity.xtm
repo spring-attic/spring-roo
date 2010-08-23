@@ -94,6 +94,6 @@ public class {{=className}} extends AbstractActivity implements RecordDetailsVie
 			}
 		};
 
-		requests.{{=nameUncapitalized}}Request().find{{=name}}(Value.of(record.getId())).fire(callback);
+		requests.{{=nameUncapitalized}}Request().find{{=name}}(Value.of(record.getId())).with({{=displayFields}}).fire(callback);
 	}
 }
