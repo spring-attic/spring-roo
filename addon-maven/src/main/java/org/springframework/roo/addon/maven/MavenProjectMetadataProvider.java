@@ -92,6 +92,12 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Obtain top level package
 		Element groupIdElement = XmlUtils.findFirstElement("/project/groupId", rootElement);
+		
+		if (groupIdElement == null) {
+			// Fallback to a group ID assumed to be the same as any possible <parent> (ROO-1193)
+			groupIdElement = XmlUtils.findFirstElement("/project/parent/groupId", rootElement);
+		}
+		
 		Assert.notNull(groupIdElement, "Maven pom.xml must provide a <groupId> for the <project>");
 		String topLevelPackageString = groupIdElement.getTextContent();
 		Assert.hasText(topLevelPackageString, "Top level package name could not be determined from POM '" + pom + "'");
