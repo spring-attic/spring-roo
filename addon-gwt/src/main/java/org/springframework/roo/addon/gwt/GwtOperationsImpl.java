@@ -113,6 +113,9 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Update web.xml
 		updateWebXml(projectMetadata);
+		
+		// Update webmvc-config.xml
+		updateSpringWebCtx();
 
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
@@ -292,16 +295,43 @@ public class GwtOperationsImpl implements GwtOperations {
 			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		}
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
-		WebXmlUtils.addWelcomeFile("ApplicationScaffold.html", webXmlDoc, "Changed by 'gwt setup' command");
+		removeIfFound("/web-app/error-page", webXmlRoot);
+		WebXmlUtils.addWelcomeFile("/", webXmlDoc, "Changed by 'gwt setup' command");
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
+	
+	private void updateSpringWebCtx() {
+		String mvcXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		Assert.isTrue(fileManager.exists(mvcXml), "webmvc-config.xml not found; cannot continue");
+
+		MutableFile mutableMvcXml = null;
+		Document mvcXmlDoc;
+		try {
+			mutableMvcXml = fileManager.updateFile(mvcXml);
+			mvcXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableMvcXml.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element rootElement = mvcXmlDoc.getDocumentElement();
+		Element welcomeFile = XmlUtils.findFirstElement("/beans/view-controller[@path='/']", rootElement);
+
+		if (welcomeFile == null) {
+			rootElement.appendChild(new XmlElementBuilder("mvc:view-controller", mvcXmlDoc).addAttribute("view-name", "/ApplicationScaffold.html").addAttribute("path", "/").build());
+		} else {
+			welcomeFile.setAttribute("view-name", "/ApplicationScaffold.html");
+		}
+
+		XmlUtils.writeXml(mutableMvcXml.getOutputStream(), mvcXmlDoc);
+	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
-		Element toRemove = XmlUtils.findFirstElement(xpath, webXmlRoot);
-		if (toRemove != null) {
-			toRemove.getParentNode().removeChild(toRemove);
-			toRemove = null;
+		for (Element toRemove: XmlUtils.findElements(xpath, webXmlRoot)) {
+			if (toRemove != null) {
+				toRemove.getParentNode().removeChild(toRemove);
+				toRemove = null;
+			}
 		}
 	}
 }
