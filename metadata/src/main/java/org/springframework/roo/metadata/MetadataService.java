@@ -3,7 +3,6 @@ package org.springframework.roo.metadata;
 import java.util.Set;
 import java.util.SortedSet;
 
-
 /**
  * Indicates a service which is aware of all {@link MetadataProvider}s in the system and
  * can provide access to their respective capabilities.
@@ -16,8 +15,8 @@ import java.util.SortedSet;
  * 
  * <p>
  * An instance of {@link MetadataService} becomes aware of candidate {@link MetadataProvider}
- * instances by way of "registration". The {@link #register(MetadataProvider)} and
- * {@link #deregister(MetadataProvider)} methods are used for registration management.
+ * instances by way of "registration". An implementation is required to use OSGi declarative
+ * services to detect the presence of {@link MetadataProvider} instances.
  * 
  * <p>
  * As indicated by the {@link MetadataService} interface extending {@link MetadataCache},
@@ -51,7 +50,6 @@ import java.util.SortedSet;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MetadataService extends MetadataNotificationListener, MetadataCache {
 	
@@ -89,7 +87,7 @@ public interface MetadataService extends MetadataNotificationListener, MetadataC
 	 * This method will throw an exception if the caller has provided an invalid input argument.
 	 * This would be the case if the input argument is null, empty, does not return true from
 	 * {@link MetadataIdentificationUtils#isIdentifyingInstance(String)}, or the requested metadata
-	 * identifier is not of the same class as indicated by {@link #getProvidesType()}).
+	 * identifier is not of the same class as indicated by getProvidesType()).
 	 * 
 	 * <p>
 	 * An exception will also be thrown if the identification string is related to a provider

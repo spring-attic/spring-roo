@@ -12,7 +12,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public final class AnnotatedJavaType {
 	private JavaType javaType;
@@ -57,7 +56,7 @@ public final class AnnotatedJavaType {
 	}
 	
 	/**
-	 * Converts a non-null {@link List} of {@link JavaTypes}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
+	 * Converts a non-null {@link List} of {@link JavaType}s into a {@link List} of equivalent {@link AnnotatedJavaType}s.
 	 * Note that each returned {@link AnnotatedJavaType} will have no annotation metadata, as the input {@link JavaType}s
 	 * cannot store any such metadata.
 	 * 
@@ -74,7 +73,7 @@ public final class AnnotatedJavaType {
 	}
 
 	/**
-	 * Converts a non-null {@link List} of {@link AnnotatedJavaTypes}s into a {@link List} of equivalent {@link JavaType}s.
+	 * Converts a non-null {@link List} of {@link AnnotatedJavaType}s into a {@link List} of equivalent {@link JavaType}s.
 	 * Note the annotation metadata will be discarded, as it cannot be stored inside a {@link JavaType}.
 	 * 
 	 * @param annotatedJavaTypes to convert (required)
@@ -88,5 +87,4 @@ public final class AnnotatedJavaType {
 		}
 		return result;
 	}
-
 }

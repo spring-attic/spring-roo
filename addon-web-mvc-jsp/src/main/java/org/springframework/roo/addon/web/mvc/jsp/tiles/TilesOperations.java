@@ -19,7 +19,7 @@ public interface TilesOperations {
 	 * @param folderName The name of the folder under /WEB-INF/views (specified via the path attribute in {@link WebScaffoldMetadata}
 	 * @param tilesViewName The simple name of the view (ie 'list', 'show', 'update', etc) or, if views are nested in sub-folders the name should be 'owner/list', 'owner/show', etc
 	 * @param tilesTemplateName The template name (ie 'admin', 'public')
-	 * @param templateLocation The location of the template in the Web application (ie "/WEB-INF/views/owner/list.jspx")
+	 * @param viewLocation The location of the view in the Web application (ie "/WEB-INF/views/owner/list.jspx")
 	 */
 	void addViewDefinition(String folderName, String tilesViewName, String tilesTemplateName, String viewLocation);
 

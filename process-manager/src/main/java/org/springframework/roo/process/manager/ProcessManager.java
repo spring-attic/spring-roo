@@ -13,7 +13,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * A {@link ProcessManager} delivers:
  * <ul>
  * <li>A well-defined state publication model via {@link ProcessManagerStatusProvider}</li>
- * <li>Startup-time registration of a {@link InitialMonitoringRequest} (after the 
+ * <li>Startup-time registration of the initial monitoring requests (after the 
  * {@link #completeStartup()} method has been called)</li>
  * <li>Specific polling of {@link FileMonitorService} at well-defined times</li>
  * <li>The ability to execute {@link CommandCallback}s for user-requested operations</li>
@@ -34,7 +34,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * <ul>
  * <li>The status will remain {@link ProcessManagerStatus#STARTING} until {@link #completeStartup()} has been called.
  * This is intended to allow objects depending on {@link ProcessManager} or other {@link MetadataService}s to
- * be constructed and register for events. The {@link InitialMonitoringRequest} will only be registered
+ * be constructed and register for events. The initial monitoring requests will only be registered
  * during {@link #completeStartup()}, which therefore simplifies the design of dependent objects as they generally
  * (i) don't need to retrieve metadata produced before they were listening and (ii) can freely modify the
  * file system pursuant to {@link FileManager} with assurance of correct "transaction" behaviour.</li>
@@ -53,7 +53,6 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ProcessManager extends ProcessManagerStatusProvider {
 	
@@ -101,14 +100,13 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
 	 */
 	boolean isDevelopmentMode();
 
-	public void timerBasedPoll();
+	void timerBasedPoll();
 	
-	public void setDevelopmentMode(boolean developmentMode);
+	void setDevelopmentMode(boolean developmentMode);
 
-	public void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
+	void setMinimumDelayBetweenPoll(long minimumDelayBetweenPoll);
 
-	public long getMinimumDelayBetweenPoll();
+	long getMinimumDelayBetweenPoll();
 
-	public long getLastPollDuration();
-	
+	long getLastPollDuration();
 }

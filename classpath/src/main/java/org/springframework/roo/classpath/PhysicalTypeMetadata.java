@@ -24,7 +24,7 @@ import org.springframework.roo.model.JavaType;
  *  
  * @author Ben Alex
  * @since 1.0
- * @see ItdMetadata
+ * @see ItdMetadataProvider
  */
 public interface PhysicalTypeMetadata extends MetadataItem {
 
@@ -39,7 +39,7 @@ public interface PhysicalTypeMetadata extends MetadataItem {
 	String getPhysicalLocationCanonicalPath();
 	
 	/**
-	 * Obtains the canoncial file path to where an ITD can be emitted for this physical Java type.
+	 * Obtains the canonical file path to where an ITD can be emitted for this physical Java type.
 	 * 
 	 * @param metadataProvider so the {@link ItdMetadataProvider#getItdUniquenessFilenameSuffix()} can be queried (never null)
 	 * @return a full file path that can be used to produce an ITD (never null)
@@ -53,5 +53,4 @@ public interface PhysicalTypeMetadata extends MetadataItem {
 	 * @return the {@link JavaType} applicable for this ITD (never null)
 	 */
 	JavaType getItdJavaType(ItdMetadataProvider metadataProvider);
-	
 }

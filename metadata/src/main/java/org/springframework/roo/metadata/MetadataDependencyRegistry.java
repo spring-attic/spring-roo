@@ -111,7 +111,6 @@ public interface MetadataDependencyRegistry {
 	 * 
 	 * @param upstreamDependency the upstream dependency (required)
 	 * @param downstreamDependency the downstream dependency (required)
-	 * @return
 	 */
 	void deregisterDependency(String upstreamDependency, String downstreamDependency);
 	

@@ -32,7 +32,7 @@ public class XmlElementBuilder {
 	 * 
 	 * @param qName The attribute name (required, not empty)
 	 * @param value The value of the attribute (required)
-	 * @return
+	 * @return the current XmlElementBuilder
 	 */
 	public XmlElementBuilder addAttribute(String qName, String value) {
 		Assert.hasText(qName, "Attribute qName required.");
@@ -57,7 +57,7 @@ public class XmlElementBuilder {
 	 * Add text contents to the current element. This will overwrite
 	 * any previous text content.
 	 * 
-	 * @param element The text content (required, not empty)
+	 * @param text The text content (required, not empty)
 	 * @return The builder for the current element
 	 */
 	public XmlElementBuilder setText(String text) {

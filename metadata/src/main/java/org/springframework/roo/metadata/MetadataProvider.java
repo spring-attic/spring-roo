@@ -6,7 +6,6 @@ package org.springframework.roo.metadata;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MetadataProvider {
 
@@ -36,5 +35,4 @@ public interface MetadataProvider {
 	 * @return the metadata, or null if the identification was valid but the metadata is unavailable
 	 */
 	MetadataItem get(String metadataIdentificationString);
-	
 }

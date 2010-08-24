@@ -101,7 +101,7 @@ public abstract class HandlerUtils {
 	 * {@link Handler} and the returned count represents how many overwrites took place.
 	 * 
 	 * @param logger to introspect for {@link DeferredLogHandler} instances (required)
-	 * @param target to set as the target {@link 
+	 * @param target to set as the target {@link Handler}
 	 * @return number of {@link DeferredLogHandler} instances detected and updated (may be 0 if none found)
 	 */
 	public static final int registerTargetHandler(Logger logger, Handler target) {

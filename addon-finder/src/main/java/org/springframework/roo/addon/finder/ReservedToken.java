@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.addon.finder;
 
 import org.springframework.roo.support.util.Assert;
@@ -11,18 +8,16 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ReservedToken implements Token, Comparable<ReservedToken> {
-	
 	private String value;
 	
 	/**
 	 * Create an instance of the {@link ReservedToken} 
 	 * 
-	 * @param token This token must be defined as part of {@link ReservedToken#getAllReservedTokens()}
+	 * @param token the String token.
 	 */
-	public ReservedToken(String token){
+	public ReservedToken(String token) {
 		Assert.hasText(token, "Reserved token required");
 		this.value = token;
 	}

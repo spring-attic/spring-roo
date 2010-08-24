@@ -15,14 +15,13 @@ import org.springframework.roo.project.Path;
  * 
  * <p>
  * Generally other add-ons which depend on Spring's @Configurable annotation being present will add their
- * annotation as a trigger annotation to instances of {@ink ConfigurableMetadataProvider}. This action will
+ * annotation as a trigger annotation to instances of {@link ConfigurableMetadataProvider}. This action will
  * guarantee any class with the added trigger annotation will made @Configurable.
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class ConfigurableMetadataProviderImpl extends AbstractItdMetadataProvider implements ConfigurableMetadataProvider {
 
@@ -53,5 +52,4 @@ public final class ConfigurableMetadataProviderImpl extends AbstractItdMetadataP
 	public String getProvidesType() {
 		return ConfigurableMetadata.getMetadataIdentiferType();
 	}
-	
 }

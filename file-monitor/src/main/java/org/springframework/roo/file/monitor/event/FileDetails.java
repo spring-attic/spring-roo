@@ -61,7 +61,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	 * Ant path matching etc. This method provides the canoncial file name without forcing the user to
 	 * deal with the exceptions that would arise from using {@link File} directly. 
 	 * 
-	 * @return
+	 * @return the canonical path.
 	 */
 	public String getCanonicalPath() {
 		try {
@@ -74,8 +74,8 @@ public class FileDetails implements Comparable<FileDetails> {
 	/**
 	 * Static convenience method to allow the acquisition of a canonical file path for a {@link File}.
 	 * 
-	 * @param file
-	 * @return
+	 * @param file the File to find the canonical path for.
+	 * @return the canonical path.
 	 */
 	public static String getCanonicalPath(File file) {
 		Assert.notNull(file, "File required");
@@ -89,7 +89,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	/**
 	 * Indicates whether the presented canonical path is a child of the current
 	 * {@link FileDetails} instance. Put differently, returning true indicates the
-	 * current instance is a parent directory of the presented {@link FileIdentifier}.
+	 * current instance is a parent directory of the presented possibleChildCanonicalPath.
 	 * 
 	 * <p>
 	 * This method will return true if the presented child is a child of the current
@@ -145,7 +145,7 @@ public class FileDetails implements Comparable<FileDetails> {
 	/**
 	 * The {@link FileMonitorService} is required to advise of last modification times. This method provides access to the
 	 * modification time according to {@link FileMonitorService}, which may be out of date due to the polling mechanisms
-	 * often used by implementations. Instead you should generally use {@link #getFile()#getLastModified()} for
+	 * often used by implementations. Instead you should generally use {@link #getFile()#lastModified()} for
 	 * the most accurate disk-derived representation of the last modification time.
 	 * 
 	 * @return the time the file was last modified, or in the case of a delete, it is implementation-specific (may return null)

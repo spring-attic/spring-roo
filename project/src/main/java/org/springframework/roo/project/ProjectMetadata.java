@@ -96,7 +96,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 * Convenience method for determining whether a particular plugin repository
 	 * is registered.
 	 * 
-	 * @param plugin repository to check (required)
+	 * @param repository repository to check (required)
 	 * @return whether the plugin repository is currently registered or not
 	 */
 	public boolean isPluginRepositoryRegistered(Repository repository) {

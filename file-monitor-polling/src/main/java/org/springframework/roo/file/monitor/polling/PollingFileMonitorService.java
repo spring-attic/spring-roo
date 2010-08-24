@@ -40,7 +40,7 @@ import org.springframework.roo.support.util.Assert;
  * 
  * <p>
  * In the case of {@link FileOperation#DELETED} events, this implementation will present in the
- * {@link FileEvent#getLastModified()} times equal to the last time a deleted file was
+ * {@link FileEvent} times equal to the last time a deleted file was
  * modified. The time does NOT represent the deletion time nor the time the deletion was first
  * detected.
  * 

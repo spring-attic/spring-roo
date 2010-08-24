@@ -44,7 +44,7 @@ public class Repository implements Comparable<Repository> {
 	 * @param id the repository id (required)
 	 * @param name the repository name (required)
 	 * @param url the repository url (required)
-	 * @param snapshots allowed? (required)
+	 * @param enableSnapshots true if snapshots are allowed, otherwise false
 	 */
 	public Repository(String id, String name, String url, boolean enableSnapshots) {
 		Assert.hasText(id, "Group ID required");

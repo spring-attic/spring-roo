@@ -9,10 +9,16 @@ import org.springframework.roo.model.JavaType;
  * Interface to {@link ControllerOperationsImpl}.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  *
  */
 public interface ControllerOperations {
 
+	/**
+	 * Creates Spring MVC controllers for all JPA entities in the project.
+	 * 
+	 * @param javaPackage The package where the new controllers are scaffolded.
+	 */
 	void generateAll(JavaPackage javaPackage);
 
 	boolean isNewControllerAvailable();
@@ -27,7 +33,8 @@ public interface ControllerOperations {
 	 * 
 	 * @param controller the controller class to create (required)
 	 * @param entity the entity this controller should edit (required)
-	 * @param set of disallowed operations (required, but can be empty)
+	 * @param disallowedOperations specify a set of disallowed operation names (required, but can be empty)
+	 * @param path the path which the controller should be accessible via REST requests
 	 */
 	void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path);
 

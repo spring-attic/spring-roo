@@ -160,7 +160,17 @@ public class JspViewManager {
 		Element pageShow = new XmlElementBuilder("page:show", document)
 								.addAttribute("id", XmlUtils.convertId("ps:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
+								.addAttribute("path", controllerPath)
 							.build();
+		if (!webScaffoldAnnotationValues.isCreate()) {
+			pageShow.setAttribute("create", "false");
+		}
+		if (!webScaffoldAnnotationValues.isUpdate()) {
+			pageShow.setAttribute("update", "false");
+		}
+		if (!webScaffoldAnnotationValues.isDelete()) {
+			pageShow.setAttribute("delete", "false");
+		}
 		pageShow.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageShow));
 
 		//add field:display elements for each field

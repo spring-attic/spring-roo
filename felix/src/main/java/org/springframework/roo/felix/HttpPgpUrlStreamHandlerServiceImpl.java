@@ -31,7 +31,7 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * This implementation offers two main features:
  * 
  * <ul>
- * <li>It delegates the downloading process to {@Link UrlInputStreamService} so that an
+ * <li>It delegates the downloading process to {@link UrlInputStreamService} so that an
  * alternate implementation can be added that may offer more advanced capabilities or
  * configuration (eg as available from a hosting IDE)</li>
  * <li>It downloads an .asc file (computed by the original URL + ".asc") and verifies the
@@ -46,16 +46,13 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandlerService implements HttpPgpUrlStreamHandlerService {
-
 	@Reference private UrlInputStreamService urlInputStreamService;
 	@Reference private PgpService pgpService;
 	private static final Logger logger = HandlerUtils.getLogger(HttpPgpUrlStreamHandlerServiceImpl.class);
-	
 
 	protected void activate(ComponentContext context) {
 		Hashtable<String,String> dict = new Hashtable<String,String>();
@@ -64,11 +61,11 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 	}
 	
 	@Override
-    public URLConnection openConnection(URL u) throws IOException {
+	public URLConnection openConnection(URL u) throws IOException {
 		// Convert httppgp:// URL into a standard http:// URL
 		URL resourceUrl = new URL(u.toExternalForm().replace("httppgp", "http"));
 		// Add .asc to the end of the standard resource URL
-		URL ascUrl =  new URL(resourceUrl.toExternalForm() + ".asc");
+		URL ascUrl = new URL(resourceUrl.toExternalForm() + ".asc");
 
 		// Start with the ASC file, as if this is for an untrusted key, there's no point download the larger resource
 		File ascUrlFile = File.createTempFile("roo_asc", null);
@@ -83,7 +80,7 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 
 		// Abort if a signature wasn't downloaded (this is a httppgp:// URL after all, so it should be available)
 		Assert.isTrue(ascUrlFile.exists(), "Signature verification file is not available at '" + ascUrl.toExternalForm() + "'; continuing");
-		
+
 		// Decide if this signature file is well-formed and of a key ID that is trusted by the user
 		SignatureDecision decision = pgpService.isSignatureAcceptable(new FileInputStream(ascUrlFile));
 		if (!decision.isSignatureAcceptable()) {
@@ -92,22 +89,21 @@ public class HttpPgpUrlStreamHandlerServiceImpl extends AbstractURLStreamHandler
 			logger.log(Level.SEVERE, "Use 'pgp key view' to view this key, 'pgp trust' to trust it, or 'pgp automatic trust' to trust any keys");
 			throw new IOException("Download URL '" + resourceUrl.toExternalForm() + "' has untrusted PGP signature");
 		} else {
-//			logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' signature uses acceptable PGP key ID '" + decision.getSignatureAsHex() + "'");
+			// logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' signature uses acceptable PGP key ID '" + decision.getSignatureAsHex() + "'");
 		}
 
 		// So far so good. Next we need the actual resource to ensure the ASC file really did sign it
 		File resourceFile = File.createTempFile("roo_resource", null);
 		resourceFile.deleteOnExit();
 		FileCopyUtils.copy(urlInputStreamService.openConnection(resourceUrl), new FileOutputStream(resourceFile));
-		
+
 		Assert.isTrue(pgpService.isResourceSignedBySignature(new FileInputStream(resourceFile), new FileInputStream(ascUrlFile)), "PGP signature illegal for URL '" + resourceUrl.toExternalForm() + "'");
 
 		// Excellent it worked! We don't need the ASC file anymore, so get rid of it
 		ascUrlFile.delete();
 
-//		logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' was correctly signed by key");
+		// logger.log(Level.FINE, "Download URL '" + resourceUrl.toExternalForm() + "' was correctly signed by key");
 
 		return resourceFile.toURI().toURL().openConnection();
-    }
-
+	}
 }

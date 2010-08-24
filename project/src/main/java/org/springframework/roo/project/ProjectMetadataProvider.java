@@ -53,7 +53,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to remove the specified build plugin dependency. If the dependency does not 
-	 * exist according to {@link ProjectMetadata#isBuildPluginDependencyRegistered(Plugin)},
+	 * exist according to {@link ProjectMetadata#isBuildPluginRegistered(Plugin)},
 	 * the method silently returns. Otherwise the located dependency is removed.
 	 * 
 	 * <p>
@@ -99,7 +99,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param plugin repository to add (required)
+	 * @param repository repository to add (required)
 	 */
 	void addPluginRepository(Repository repository);
 	
@@ -112,13 +112,13 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param plugin repository to remove (required)
+	 * @param repository repository to remove (required)
 	 */
 	void removePluginRepository(Repository repository);
 
 	/**
 	 * Attempts to add the specified property. If the property already exists 
-	 * according to {@link ProjectMetadata#isBuildPropertyRegistered(Property)}, 
+	 * according to {@link ProjectMetadata#isPropertyRegistered(Property)}, 
 	 * the method silently returns. Otherwise the property is added.
 	 * 
 	 * <p>
@@ -131,7 +131,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to remove the specified property dependency. If the dependency does not 
-	 * exist according to {@link ProjectMetadata#isPropertyDependencyRegistered(Property)},
+	 * exist according to {@link ProjectMetadata#isPropertyRegistered(Property)},
 	 * the method silently returns. Otherwise the located dependency is removed.
 	 * 
 	 * <p>
@@ -150,7 +150,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param ProjectType to update (required)
+	 * @param projectType to update (required)
 	 */
 	void updateProjectType(ProjectType projectType);
 }

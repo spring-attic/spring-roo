@@ -158,7 +158,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param plugin repository to remove (required)
+	 * @param repository repository to remove (required)
 	 */
 	void removePluginRepository(Repository repository);
 
@@ -191,7 +191,7 @@ public interface ProjectOperations {
 	 * 
 	 * @param plugin to remove (required)
 	 */
-	void buildPluginUpdate(Plugin buildPlugin);
+	void buildPluginUpdate(Plugin plugin);
 	
 	/**
 	 * Allows addition of a property to the POM. 

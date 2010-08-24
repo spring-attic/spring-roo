@@ -16,7 +16,7 @@
         <spring:message code="security_login_message" />
       </p>
     </c:if>
-    <spring:url value="/resources/j_spring_security_check' var="form_url" />
+    <spring:url value="/resources/j_spring_security_check" var="form_url" />
     <form name="f" action="${fn:escapeXml(form_url)}" method="POST">
       <div>
         <label for="j_username">

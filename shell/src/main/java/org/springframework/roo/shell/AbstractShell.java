@@ -27,10 +27,8 @@ import org.springframework.roo.support.util.Assert;
  * Provides a base {@link Shell} implementation.
  * 
  * @author Ben Alex
- *
  */
 public abstract class AbstractShell extends AbstractShellStatusPublisher implements Shell {
-
 	private static final String MY_SLOT = AbstractShell.class.getName();
 	protected final Logger logger = HandlerUtils.getLogger(getClass());
     protected boolean inBlockComment = false;
@@ -44,8 +42,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	protected abstract Parser getParser();
 
 	@CliCommand(value={"script"}, help="Parses the specified resource file and executes its commands")
-	public void script(@CliOption(key={"","file"}, help="The file to locate and execute", mandatory=true) File resource,
-						@CliOption(key="lineNumbers", mandatory=false, specifiedDefaultValue="true", unspecifiedDefaultValue="false", help="Display line numbers when executing the script") boolean lineNumbers) {
+	public void script(@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File resource, 
+			@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
 		Assert.notNull(resource, "Resource to parser is required");
 		long started = new Date().getTime();
 		InputStream inputStream = null;
@@ -175,8 +173,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		} catch (RuntimeException ex) {
 	    	setShellStatus(ShellStatus.EXECUTION_RESULT_PROCESSING);
 			// We rely on execution strategy to log it
-	    	//Throwable root = ExceptionUtils.extractRootCause(ex);
-			//logger.log(Level.FINE, root.getMessage());
+			// Throwable root = ExceptionUtils.extractRootCause(ex);
+			// logger.log(Level.FINE, root.getMessage());
 	    	try {
 	    		logCommandIfRequired(line, false);
 	    	} catch (Exception ignoreIt) {}
@@ -419,7 +417,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	}
 
 	/**
-	 * Simple implementation of {@link #flash(String)} that simply displays the message via the logger. It is
+	 * Simple implementation of {@link #flash(Level, String, String)} that simply displays the message via the logger. It is
 	 * strongly recommended shell implementations override this method with a more effective approach.
 	 */
 	public void flash(Level level, String message, String slot) {
@@ -430,5 +428,4 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			logger.log(level, message);
 		}
 	}
-
 }

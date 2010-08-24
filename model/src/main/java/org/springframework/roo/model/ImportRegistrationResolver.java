@@ -57,7 +57,7 @@ public interface ImportRegistrationResolver {
 	 * required by implementations that are otherwise unaware of all the types available in a particular package.
 	 * 
 	 * @param javaType
-	 * @return
+	 * @return true is the presented type can be legally presented to {@link #addImport(JavaType)}, otherwise false.
 	 */
 	boolean isAdditionLegal(JavaType javaType);
 

@@ -5,12 +5,11 @@ package org.springframework.roo.file.monitor.event;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface FileEventListener {
 	
 	/**
-	 * Invoked by a {@link FileEventPublisher} to report a new status.
+	 * Invoked by a {@link org.springframework.roo.file.monitor.polling.PollingFileMonitorService} to report a new status.
 	 * 
 	 * @param fileEvent the file event (never null)
 	 */

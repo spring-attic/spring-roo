@@ -43,7 +43,6 @@ import java.util.Set;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.1
- * @see TypeUtils
  * @see ReflectionUtils
  */
 public abstract class ClassUtils {

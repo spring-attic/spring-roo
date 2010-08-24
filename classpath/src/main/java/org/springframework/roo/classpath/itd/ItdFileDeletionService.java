@@ -13,7 +13,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Listens for {@link FileMetadata} and automatically deletes any ITD that should not exist
+ * Automatically deletes any ITD that should not exist
  * due to the non-existence of the {@link PhysicalTypeMetadata} that the ITD would have been
  * introduced into.
  * 
@@ -25,14 +25,13 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class ItdFileDeletionService implements FileEventListener {
-
 	private static String ANT_PATH_ALL_ITD_SOURCE = "**" + File.separator + "*_Roo_*.aj";
 	private static String ANT_PATH_ALL_JAVA_SOURCE = "**" + File.separator + "*.java";
+	@Reference private FileManager fileManager;
 
 	static {
 		if ("/".equals(File.separator)) {
@@ -41,8 +40,6 @@ public class ItdFileDeletionService implements FileEventListener {
 			ANT_PATH_ALL_JAVA_SOURCE = File.separator + ANT_PATH_ALL_JAVA_SOURCE;
 		}
 	}
-	
-	@Reference private FileManager fileManager;
 
 	public void onFileEvent(FileEvent fileEvent) {
 		Assert.notNull(fileEvent, "File event required");
@@ -74,6 +71,5 @@ public class ItdFileDeletionService implements FileEventListener {
 				}
 			}
 		}
-	}
-		
+	}	
 }

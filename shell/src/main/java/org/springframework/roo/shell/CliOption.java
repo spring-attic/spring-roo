@@ -40,7 +40,7 @@ public @interface CliOption {
 	String specifiedDefaultValue() default "__NULL__";
 	
 	/**
-	 * @return the name of a context which will be available to the {@link PropertyEditor} and {@link Completor}
+	 * @return the name of a context which will be available to the {@link PropertyEditor} and {@link jline.Completor}
 	 * when being asked to process the option (defaults to an empty String, meaning no option context is set)
 	 */
 	String optionContext() default "";

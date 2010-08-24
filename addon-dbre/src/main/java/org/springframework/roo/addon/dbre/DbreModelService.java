@@ -19,7 +19,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
 public interface DbreModelService {
 
 	/**
-	 * Returns a Set of available database {@link Schema schemas). 
+	 * Returns a Set of available database {@link Schema schemas}. 
 	 * 
 	 * @return a Set of schemas.
 	 */

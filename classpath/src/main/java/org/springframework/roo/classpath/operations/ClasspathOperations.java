@@ -56,7 +56,7 @@ public interface ClasspathOperations {
 	 * Adds a new enum constant to an existing class.
 	 * 
 	 * @param physicalTypeIdentifier to add (required)
-	 * @param the name of the constant (required)
+	 * @param constantName the name of the constant (required)
 	 */
 	void addEnumConstant(String physicalTypeIdentifier, JavaSymbolName constantName);
 
