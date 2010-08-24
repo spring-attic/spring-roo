@@ -16,8 +16,8 @@ import org.springframework.roo.model.JavaType;
 public class JsonAnnotationValues extends AbstractAnnotationValues {
 	
 	@AutoPopulate String toJsonMethod = "toJson";
-	@AutoPopulate String fromJsonMethod = "fromJson";
-	@AutoPopulate String fromJsonArrayMethod = "fromJsonArray";
+	@AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
+	@AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
 	@AutoPopulate String toJsonArrayMethod = "toJsonArray";
 	
 	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {

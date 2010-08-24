@@ -24,20 +24,20 @@ public @interface RooJson {
 	String toJsonMethod() default "toJson";
 	
 	/**
-	 * Specify name of the "fromJson" method to generate. Use a value of "" to avoid the generation 
+	 * Specify name of the "fromJsonTo<TypeName>" method to generate. Use a value of "" to avoid the generation 
 	 * of this method.
 	 * 
-	 * @return the name of the "fromJson" method to generate (defaults to "fromJson"; mandatory)
+	 * @return the name of the "fromJsonTo<TypeName>" method to generate (defaults to "fromJsonTo<TypeName>"; mandatory)
 	 */
-	String fromJsonMethod() default "fromJson";
+	String fromJsonMethod() default "fromJsonTo<TypeName>";
 	
 	/**
-	 * Specify name of the "fromJsonArray" method to generate. Use a value of "" to avoid the generation 
+	 * Specify name of the "fromJsonArrayTo<TypeNamePlural>" method to generate. Use a value of "" to avoid the generation 
 	 * of this method.
 	 * 
-	 * @return the name of the "fromJsonArray" method to generate (defaults to "fromJsonArray"; mandatory)
+	 * @return the name of the "fromJsonArrayTo<TypeNamePlural>" method to generate (defaults to "fromJsonArrayTo<TypeNamePlural>"; mandatory)
 	 */
-	String fromJsonArrayMethod() default "fromJsonArray";
+	String fromJsonArrayMethod() default "fromJsonArrayTo<TypeNamePlural>";
 	
 	/**
 	 * Specify name of the "toJsonArray" method to generate. Use a value of "" to avoid the generation 
