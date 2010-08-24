@@ -71,8 +71,18 @@ public class GwtOperationsImpl implements GwtOperations {
 			return false;
 		}
 		// Do not permit installation if they have a gwt package already in their project
-		String root = GwtPath.GWT_ROOT.canonicalFileSystemPath(projectMetadata);
-		return !fileManager.exists(root);
+                // shared is allowed
+                for (GwtPath path : GwtPath.values()) {
+                  if (path == GwtPath.GWT_REQUEST || path == GwtPath.GWT_SCAFFOLD ||
+                      path == GwtPath.GWT_SCAFFOLD_GENERATED || path == GwtPath.GWT_UI) {
+                    String fPath = path.canonicalFileSystemPath(projectMetadata);
+//                    System.err.println("Checking "+fPath+" with "+path);
+                      if (fileManager.exists(fPath)) {
+                       return false;
+                      }
+                  }
+                }
+		return true;
 	}
 
 	public void setupGwt() {

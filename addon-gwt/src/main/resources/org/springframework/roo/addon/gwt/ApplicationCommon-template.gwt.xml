@@ -11,6 +11,7 @@
   <source path='request'/>
   <source path='place'/>
   <source path='ui'/>
+  <source path='shared'/>
 
   <!-- Logging Configuration -->
   <set-property name="gwt.logging.enabled" value="TRUE"/> 

@@ -3,12 +3,18 @@ project --topLevelPackage com.springsource.extrack
 persistence setup --provider DATANUCLEUS --database HYPERSONIC_IN_MEMORY
 // persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 
+enum type --class ~.gwt.shared.Gender
+enum constant --name MALE
+enum constant --name FEMALE
+
 entity --class ~.server.domain.Employee --testAutomatically
 field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
 field string --fieldName displayName
 field string --fieldName password
 field reference --type Employee supervisor
+field enum --fieldName gender --type ~.gwt.shared.Gender
+
 
 entity --class ~.server.domain.Report --testAutomatically
 // field date --fieldName created --type java.util.Date --past --notNull

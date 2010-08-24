@@ -52,7 +52,7 @@ public class {{=className}} extends AbstractRecordEditActivity<{{=record}}> {
     @Override
     public void start(Display display, EventBus eventBus) {
     {{#setEnumValuePickers}}
-    get{{=editView}}().{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values());
+    get{{=editView}}().{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values()));
 
     {{/setEnumValuePickers}}
     {{#setRecordValuePickers}}

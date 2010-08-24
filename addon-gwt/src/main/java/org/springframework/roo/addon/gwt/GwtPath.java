@@ -13,7 +13,8 @@ public enum GwtPath {
 	SERVER, 
 	WEB, 
 	STYLE, 
-	STYLE_CLIENT;
+	STYLE_CLIENT,
+        SHARED;
 	
 	private String segmentName() {
 		if (GWT_ROOT.equals(this)) {
@@ -32,6 +33,8 @@ public enum GwtPath {
 			return "/gwt/style";
 		} else if (STYLE_CLIENT.equals(this)) {
 			return "/gwt/style/client";
+		} else if (SHARED.equals(this)) {
+			return "/gwt/shared";
 		} else {
 			return "/";
 		}
