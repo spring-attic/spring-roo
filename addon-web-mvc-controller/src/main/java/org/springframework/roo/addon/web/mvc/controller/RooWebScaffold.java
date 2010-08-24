@@ -19,7 +19,7 @@ import org.springframework.roo.addon.entity.RooEntity;
  * The following functionality will be introduced in the ITD:
  * 
  * <ul>
- * <li>The Spring MVC {@link org.springframework.stereotype.Controller} annotation will be declared on the controller type if not exists</li>
+ * <li>The Spring MVC org.springframework.stereotype.Controller annotation will be declared on the controller type if not exists</li>
  * <li>Setting this annotation will also generate JSP view pages corresponding to the functionalities included</li>
  * <li>The {@link RooWebScaffold#formBackingObject()} property defines the {@link RooEntity} which is exposed through this
  * controller</li>
@@ -87,7 +87,7 @@ public @interface RooWebScaffold {
 	boolean exposeFinders() default true;
 	
 	/**
-	 * Will scan the formBackingObjects for {@link RooJson} annotation and expose json when configured. 
+	 * Will scan the formBackingObjects for org.springframework.roo.addon.json.RooJson annotation and expose json when configured. 
 	 * 
 	 * @return indicates if the json methods should be provided (defaults to "true"; optional)
 	 */
