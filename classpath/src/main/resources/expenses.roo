@@ -7,7 +7,6 @@ entity --class ~.server.domain.Employee --testAutomatically
 field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
 field string --fieldName displayName
-field string --fieldName password
 field reference --type Employee supervisor
 
 entity --class ~.server.domain.Report --testAutomatically
