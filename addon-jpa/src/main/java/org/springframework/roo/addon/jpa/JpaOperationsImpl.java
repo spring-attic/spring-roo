@@ -125,8 +125,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element root = appCtx.getDocumentElement();
 
 		// Checking for existence of configurations, if found abort
-		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id='dataSource']", root);
-		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id='dataSource']", root);
+		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id = 'dataSource']", root);
+		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id = 'dataSource']", root);
 
 		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
 			if (dataSource != null) {
@@ -160,7 +160,19 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 
-		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id='transactionManager']", root);
+		if (dataSource != null) {
+			Element validationQueryElement = XmlUtils.findFirstElement("property[@name = 'validationQuery']", dataSource);
+			Element testOnBorrowElement = XmlUtils.findFirstElement("property[@name = 'testOnBorrow']", dataSource);
+			if (database != JdbcDatabase.MYSQL && validationQueryElement != null && testOnBorrowElement != null) {
+				dataSource.removeChild(validationQueryElement);
+				dataSource.removeChild(testOnBorrowElement);
+			} else if (database == JdbcDatabase.MYSQL && validationQueryElement == null && testOnBorrowElement == null) {
+				dataSource.appendChild(createPropertyElement("validationQuery", "SELECT 1 FROM DUAL", appCtx));
+				dataSource.appendChild(createPropertyElement("testOnBorrow", "true", appCtx));
+			}
+		}
+
+		Element transactionManager = XmlUtils.findFirstElement("/beans/bean[@id = 'transactionManager']", root);
 		if (transactionManager == null) {
 			transactionManager = appCtx.createElement("bean");
 			transactionManager.setAttribute("id", "transactionManager");
@@ -177,7 +189,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			root.appendChild(aspectJTxManager);
 		}
 
-		Element entityManagerFactory = XmlUtils.findFirstElement("/beans/bean[@id='entityManagerFactory']", root);
+		Element entityManagerFactory = XmlUtils.findFirstElement("/beans/bean[@id = 'entityManagerFactory']", root);
 		if (entityManagerFactory != null) {
 			root.removeChild(entityManagerFactory);
 		}
