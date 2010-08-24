@@ -26,7 +26,7 @@ field reference --type Employee approvedSupervisor
 
 entity --class ~.server.domain.Expense --testAutomatically
 field number --type java.lang.Double amount
-field string --fieldName approval
+field boolean --fieldName approval
 field string --fieldName category
 // field date --fieldName date --type java.util.Date --past
 field date --fieldName created --type java.util.Date

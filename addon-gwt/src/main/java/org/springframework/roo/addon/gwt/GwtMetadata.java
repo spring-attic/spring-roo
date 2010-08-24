@@ -756,6 +756,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		methods.add(method1Metadata);
 	}
 
+        // TODO (cromwellian): class is getting ugly, clean this up
 	public class Property {
 		private String name;
 		private String getter;
@@ -801,12 +802,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 			this.getter = getter;
 		}
 
+                public boolean isBoolean() {
+                        return type != null && type.equals(JavaType.BOOLEAN_OBJECT);
+                }
+
 		public boolean isDate() {
 			return type != null && type.equals(new JavaType("java.util.Date"));
 		}
 
                 public boolean isPrimitive() {
-                        return isDate() || isString()|| type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT);
+                        return isDate() || isString()|| type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT) || isBoolean();
                 }
 
                 public boolean isString() {
@@ -823,7 +828,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (type.equals(JavaType.INT_OBJECT)) {
 				return "app:IntegerBox";
 			}
-			return isDate() ? "d:DateBox" : isString() ? "g:TextBox" : "g:ValueListBox";
+			return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 		}
 
 		public String getEditor() {
@@ -836,6 +841,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (type.equals(JavaType.INT_OBJECT)) {
 				return "IntegerBox";
 			}
+                        if (isBoolean()) {
+                                return "(provided = true) CheckBox";
+                        }
 			return isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
 		}
 
@@ -855,6 +863,11 @@ public class GwtMetadata extends AbstractMetadataItem {
                     + "." + type.getSimpleTypeName() + "Renderer";
           }
 
+          public String getCheckboxSubtype() {
+            // TODO: Ugly hack, fix in M4
+              return "= new CheckBox() { public void setValue(Boolean value) { super.setValue(value == null ? Boolean.FALSE : value); } }";  
+          }
+
           public String getReadableName() {
 			return new JavaSymbolName(name).getReadableSymbolName();
 		}
@@ -864,7 +877,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		public String getPropStr2() {
-			return new StringBuilder("@UiField "+getEditor()).append(" ").append(getName()).toString() + (!isRecord()  && !isEnum() ? "" : "=new ValueListBox<"+type.getFullyQualifiedTypeName()+">("+(isEnum() ? getRenderer() + ")" : getRendererType()+".instance())"));
+			return new StringBuilder("@UiField "+getEditor()).append(" ").append(getName()).toString() + (!isRecord()  && !isEnum() ? (isBoolean() ? getCheckboxSubtype() : "") : "=new ValueListBox<"+type.getFullyQualifiedTypeName()+">("+(isEnum() ? getRenderer() + ")" : getRendererType()+".instance())"));
 		}
 
 		public String getPropStr3() {
