@@ -16,7 +16,6 @@ field date --fieldName created --type java.util.Date
 field string --fieldName department
 field string --fieldName notes
 field string --fieldName purpose
-field string --fieldName purposeLowerCase
 field reference --type Employee reporter
 field reference --type Employee approvedSupervisor
 
