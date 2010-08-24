@@ -36,10 +36,10 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 
 		for (int i = 0; i < maxDepth; i++) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-				
-				JavaSymbolName propertyName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
+
+				JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
 				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-				//ignoring java.util.Map field types (see ROO-194)
+				// Ignoring java.util.Map field types (see ROO-194)
 				if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
 					continue;
 				}
@@ -52,11 +52,11 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				} else {
 					tempFinders.addAll(createFinders(field, finders, "And", false));
 					tempFinders.addAll(createFinders(field, finders, "Or", false));
-				}				
-			}	
+				}
+			}
 			finders.addAll(tempFinders);
 		}
-		
+
 		return new ArrayList<JavaSymbolName>(finders);
 	}
 
@@ -66,7 +66,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		Assert.notNull(finderName, "JavaSymbolName required");
 
 		String tablename = beanInfoMetadata.getJavaBean().getSimpleTypeName();
-		
+
 		StringBuilder builder = new StringBuilder();
 		builder.append("SELECT ").append(tablename);
 		builder.append(" FROM ").append(tablename);
@@ -87,7 +87,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				boolean setField = true;
 
 				if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
-					if(isNewField){
+					if (isNewField) {
 						if (reservedToken.equalsIgnoreCase("Like")) {
 							builder.append("LOWER(").append(tablename.toLowerCase()).append(".").append(fieldName).append(")");
 						} else {
@@ -95,19 +95,19 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						}
 						isNewField = false;
 						isFieldApplied = false;
-					} 
+					}
 					if (reservedToken.equalsIgnoreCase("And")) {
-						if(!isFieldApplied){
+						if (!isFieldApplied) {
 							builder.append(" = :").append(fieldName);
 							isFieldApplied = true;
 						}
 						builder.append(" AND ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Or")) {
-						if(!isFieldApplied){
+						if (!isFieldApplied) {
 							builder.append(" = :").append(fieldName);
 							isFieldApplied = true;
-						}					
+						}
 						builder.append(" OR ");
 						setField = false;
 					} else if (reservedToken.equalsIgnoreCase("Between")) {
@@ -115,7 +115,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						setField = false;
 						isFieldApplied = true;
 					} else if (reservedToken.equalsIgnoreCase("Like")) {
-						builder.append(" LIKE ");					
+						builder.append(" LIKE ");
 						setField = true;
 					} else if (reservedToken.equalsIgnoreCase("IsNotNull")) {
 						builder.append(" IS NOT NULL ");
@@ -139,29 +139,29 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						builder.append(" >= ");
 					} else if (reservedToken.equalsIgnoreCase("Equals")) {
 						builder.append(" = ");
-					} 
-					if(setField) {
+					}
+					if (setField) {
 						if (builder.toString().endsWith("LIKE ")) {
 							builder.append("LOWER(:").append(fieldName).append(") ");
 						} else {
 							builder.append(":").append(fieldName).append(" ");
 						}
 						isFieldApplied = true;
-					}		
+					}
 				}
 			} else {
 				lastFieldToken = (FieldToken) token;
 				isNewField = true;
 			}
 		}
-		if(isNewField){
-			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+		if (isNewField) {
+			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(tablename.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 			isFieldApplied = false;
 		}
-		if(!isFieldApplied) {
-			if(!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+		if (!isFieldApplied) {
+			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 		}
@@ -184,20 +184,20 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				String fieldName = (((FieldToken) token).getField().getFieldName().getSymbolName());
 				names.add(new JavaSymbolName(fieldName));
 			} else {
-				if("Between".equals(token.getValue())) {
-					Token field = tokens.get(i-1);
-					if(field instanceof FieldToken) {
+				if ("Between".equals(token.getValue())) {
+					Token field = tokens.get(i - 1);
+					if (field instanceof FieldToken) {
 						JavaSymbolName fieldName = names.get(names.size() - 1);
-						//remove the last field token
-						names.remove(names.size()-1);
-						//and replace by a min and a max value
+						// Remove the last field token
+						names.remove(names.size() - 1);
+						// Replace by a min and a max value
 						names.add(new JavaSymbolName("min" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 						names.add(new JavaSymbolName("max" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 					}
-				} else if("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
-					Token field = tokens.get(i-1);
-					if(field instanceof FieldToken) {
-						names.remove(names.size()-1);
+				} else if ("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
+					Token field = tokens.get(i - 1);
+					if (field instanceof FieldToken) {
+						names.remove(names.size() - 1);
 					}
 				}
 			}
@@ -221,15 +221,15 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			if (token instanceof FieldToken) {
 				types.add(((FieldToken) token).getField().getFieldType());
 			} else {
-				if("Between".equals(token.getValue())) {
-					Token field = tokens.get(i-1);
-					if(field instanceof FieldToken) {
-						types.add(types.get(types.size() - 1));						
+				if ("Between".equals(token.getValue())) {
+					Token field = tokens.get(i - 1);
+					if (field instanceof FieldToken) {
+						types.add(types.get(types.size() - 1));
 					}
-				} else if("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
-					Token field = tokens.get(i-1);
-					if(field instanceof FieldToken) {
-						types.remove(types.size()-1);
+				} else if ("IsNull".equals(token.getValue()) || "IsNotNull".equals(token.getValue())) {
+					Token field = tokens.get(i - 1);
+					if (field instanceof FieldToken) {
+						types.remove(types.size() - 1);
 					}
 				}
 			}
@@ -252,9 +252,9 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			for (ReservedToken keyWord : ReservedTokenHolder.getBooleanTokens()) {
 				tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, keyWord.getValue()));
 			}
-		} 
+		}
 		tempFinders.addAll(populateFinders(finders, field, prepend, isFirst, ""));
-		
+
 		return tempFinders;
 	}
 
