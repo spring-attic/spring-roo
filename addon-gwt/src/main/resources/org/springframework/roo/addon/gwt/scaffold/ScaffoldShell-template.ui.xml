@@ -51,8 +51,7 @@
       left: 75%;
       right: 0%;
       text-align: center;
-      background-color: white;
-      color: #7b8fae;
+      color: #def;
     }
 
     .users {
