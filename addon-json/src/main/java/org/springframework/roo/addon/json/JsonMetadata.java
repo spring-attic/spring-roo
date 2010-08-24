@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
@@ -16,6 +17,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -36,11 +38,13 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private BeanInfoMetadata beanInfoMetadata;
 	private JsonAnnotationValues annotationValues;
+	private MetadataService metadataService;
 
-	public JsonMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JsonAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata) {
+	public JsonMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, JsonAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(annotationValues, "Annotation values required");
+		Assert.notNull(metadataService, "Metadata service values required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		
 		if (!isValid()) {
@@ -49,6 +53,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.annotationValues = annotationValues;
+		this.metadataService = metadataService;
 
 		builder.addMethod(getToJsonMethod());
 		builder.addMethod(getFromJsonMethod());
@@ -59,17 +64,21 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		itdTypeDetails = builder.build();
 	}
 	
-	public JsonAnnotationValues getAnnotationValues() {
-		return annotationValues;
-	}
-	
-	public MethodMetadata getToJsonMethod() {
+	public JavaSymbolName getToJsonMethodName() {
 		String methodLabel = annotationValues.getToJsonMethod();
 		if (methodLabel == null || methodLabel.length() == 0) {
 			return null;
 		}
+		return new JavaSymbolName(methodLabel);
+	}
+	
+	private MethodMetadata getToJsonMethod() {
 		// Compute the relevant method name
-		JavaSymbolName methodName = new JavaSymbolName(methodLabel);
+		JavaSymbolName methodName = getToJsonMethodName();
+		
+		if (methodName == null) {
+			return null;
+		}
 		
 		// See if the type itself declared the method
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
@@ -84,13 +93,21 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, bodyBuilder.getOutput());
 	}
 	
-	public MethodMetadata getToJsonArrayMethod() {
+	public JavaSymbolName getToJsonArrayMethodName() {
 		String methodLabel = annotationValues.getToJsonArrayMethod();
 		if (methodLabel == null || methodLabel.length() == 0) {
 			return null;
 		}
+		return new JavaSymbolName(methodLabel);
+	}
+	
+	private MethodMetadata getToJsonArrayMethod() {
 		// Compute the relevant method name
-		JavaSymbolName methodName = new JavaSymbolName(methodLabel);
+		JavaSymbolName methodName = getToJsonArrayMethodName();
+		
+		if (methodName == null) {
+			return null;
+		}
 		
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(beanInfoMetadata.getJavaBean());
@@ -116,13 +133,27 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultMethodMetadata(getId(), modifier, methodName, new JavaType("java.lang.String"), parameters, paramNames, new ArrayList<AnnotationMetadata>(), null, bodyBuilder.getOutput());
 	}
    
-	public MethodMetadata getFromJsonArrayMethod() {
+	public JavaSymbolName getFromJsonArrayMethodName() {
 		String methodLabel = annotationValues.getFromJsonArrayMethod();
 		if (methodLabel == null || methodLabel.length() == 0) {
 			return null;
 		}
+		
+		String pluralTerm = beanInfoMetadata.getJavaBean().getSimpleTypeName() + "s";
+		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
+		if (plural != null) {
+			pluralTerm = plural.getPlural();
+		}
+		return new JavaSymbolName(methodLabel.replace("<TypeNamePlural>", pluralTerm));
+	}
+	
+	private MethodMetadata getFromJsonArrayMethod() {
 		// Compute the relevant method name
-		JavaSymbolName methodName = new JavaSymbolName(methodLabel);
+		JavaSymbolName methodName = getFromJsonArrayMethodName();
+		
+		if (methodName == null) {
+			return null;
+		}
 		
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
 		parameters.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));
@@ -154,13 +185,20 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return new DefaultMethodMetadata(getId(), modifier, methodName, collection, parameters, paramNames, new ArrayList<AnnotationMetadata>(), null, bodyBuilder.getOutput());
 	}
 	
-	public MethodMetadata getFromJsonMethod() {
+	public JavaSymbolName getFromJsonMethodName() {
 		String methodLabel = annotationValues.getFromJsonMethod();
 		if (methodLabel == null || methodLabel.length() == 0) {
 			return null;
 		}
 		// Compute the relevant method name
-		JavaSymbolName methodName = new JavaSymbolName(methodLabel);
+		return new JavaSymbolName(methodLabel.replace("<TypeName>", beanInfoMetadata.getJavaBean().getSimpleTypeName()));
+	}
+	
+	private MethodMetadata getFromJsonMethod() {
+		JavaSymbolName methodName = getFromJsonMethodName();
+		if (methodName == null) {
+			return null;
+		}
 		
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
 		parameters.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));

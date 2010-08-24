@@ -41,21 +41,18 @@ public final class JsonMetadataProvider extends AbstractItdMetadataProvider {
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
 		Path path = JsonMetadata.getPath(metadataIdentificationString);
-		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 		
-		// We need to parse the annotation, if it is not present we will simply get the default annotation values
-		JsonAnnotationValues annotationValues = new JsonAnnotationValues(governorPhysicalTypeMetadata);
+		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(javaType, path));
 		
-		// We want to be notified if the getter info changes in any way 
-		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
-		
-		// Abort if we don't have getter information available
+		// Abort if we don't have getter information available or if the target type is abstract
 		if (beanInfoMetadata == null) {
 			return null;
 		}
 		
-		return new JsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata);
+		// We need to parse the annotation, if it is not present we will simply get the default annotation values
+		JsonAnnotationValues annotationValues = new JsonAnnotationValues(governorPhysicalTypeMetadata);
+		
+		return new JsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

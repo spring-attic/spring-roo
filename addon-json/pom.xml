@@ -33,6 +33,12 @@
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.plural</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.metadata</artifactId>

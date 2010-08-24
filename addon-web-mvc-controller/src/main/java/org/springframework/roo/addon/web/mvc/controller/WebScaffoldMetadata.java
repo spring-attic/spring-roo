@@ -134,21 +134,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			//decide if we want to build json support
 			this.jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 			if (jsonMetadata != null) {
-				if (jsonMetadata.getToJsonMethod() != null) {
-					builder.addMethod(getJsonShowMethod());
-				}
-				
-				if (jsonMetadata.getFromJsonMethod() != null) {
-					builder.addMethod(getJsonCreateMethod());
-				}
-				
-				if (jsonMetadata.getToJsonArrayMethod() != null) {
-					builder.addMethod(getJsonListMethod());
-				}
-				
-				if (jsonMetadata.getFromJsonArrayMethod() != null) {
-					builder.addMethod(getCreateFromJsonArrayMethod());
-				}
+				builder.addMethod(getJsonShowMethod());
+				builder.addMethod(getJsonCreateMethod());
+				builder.addMethod(getJsonListMethod());
+				builder.addMethod(getCreateFromJsonArrayMethod());
 			}
 		}
 
@@ -332,6 +321,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(model);");
 		}
 		bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName.toLowerCase() + "\", " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "));");
+		bodyBuilder.appendFormalLine("model.addAttribute(\"itemId\", " + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ");");
 		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/show\";");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
@@ -543,6 +533,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getJsonShowMethod() {
+		JavaSymbolName toJsonMethodName = jsonMetadata.getToJsonMethodName();
+		if (toJsonMethodName == null) {
+			return null;
+		}
+		
 		JavaSymbolName methodName = new JavaSymbolName("showJson");
 		
 		// See if the type itself declared the method
@@ -575,15 +570,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
-		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + jsonMetadata.getToJsonMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + toJsonMethodName.getSymbolName() + "();");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), paramTypes, paramNames, annotations, null, bodyBuilder.getOutput());
 	}
 	
 	private MethodMetadata getJsonCreateMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("createFromJson");
+		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
+		if (fromJsonMethodName == null) {
+			return null;
+		}
 		
 		// See if the type itself declared the method
+		JavaSymbolName methodName = new JavaSymbolName("createFromJson");
+		
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
 		if (result != null) {
 			return result;
@@ -609,7 +609,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
-		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + jsonMetadata.getFromJsonMethod().getMethodName().getSymbolName() + "(json)." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + fromJsonMethodName.getSymbolName() + "(json)." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 		
 		List<JavaType> typeParams = new ArrayList<JavaType>();
@@ -620,9 +620,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getCreateFromJsonArrayMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("createFromJsonArray");
+		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
+		if (fromJsonArrayMethodName == null) {
+			return null;
+		}
 		
 		// See if the type itself declared the method
+		JavaSymbolName methodName = new JavaSymbolName("createFromJsonArray");
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
 		if (result != null) {
 			return result;
@@ -653,7 +657,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(beanInfoMetadata.getJavaBean());
-		bodyBuilder.appendFormalLine("for (" + beanName + " " + beanName.toLowerCase() + ": " + beanName + "." + jsonMetadata.getFromJsonArrayMethod().getMethodName().getSymbolName() + "(json)) {");
+		bodyBuilder.appendFormalLine("for (" + beanName + " " + beanName.toLowerCase() + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(beanName.toLowerCase() + "." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
 		bodyBuilder.indentRemove();
@@ -669,9 +673,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata getJsonListMethod() {
-		JavaSymbolName methodName = new JavaSymbolName("listJson");
+		JavaSymbolName toJsonArrayMethodName = jsonMetadata.getToJsonArrayMethodName();
+		if (toJsonArrayMethodName == null) {
+			return null;
+		}
 		
 		// See if the type itself declared the method
+		JavaSymbolName methodName = new JavaSymbolName("listJson");
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
 		if (result != null) {
 			return result;
@@ -690,7 +698,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		String entityName = beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		
-		bodyBuilder.appendFormalLine("return " + entityName + "." + jsonMetadata.getToJsonArrayMethod().getMethodName().getSymbolName() + "(" + entityName + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("return " + entityName + "." + toJsonArrayMethodName.getSymbolName() + "(" + entityName + "." + entityMetadata.getFindAllMethod().getMethodName() + "());");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType(String.class.getName()), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
 	}
