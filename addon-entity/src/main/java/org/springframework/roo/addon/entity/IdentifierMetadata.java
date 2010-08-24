@@ -196,7 +196,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * 
 	 * <p>
 	 * If {@link #getFields()} returns fields created by this ITD, public accessors will automatically be produced in the declaring class.
-	 * @param fields
 	 * 
 	 * @return the accessors (never returns null)
 	 */
@@ -235,7 +234,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	 * 
 	 * <p>
 	 * If {@link #getFields()} returns fields created by this ITD, public mutators will automatically be produced in the declaring class.
-	 * @param fields
 	 * 
 	 * @return the mutators (never returns null)
 	 */
@@ -281,7 +279,6 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 	/**
 	 * Locates the parameterised constructor consisting of the id fields for this class.
 	 *  
-	 * @param fields the declared fields
 	 * @return the constructor, never null.
 	 */
 	public ConstructorMetadata getParameterizedConstructor() {

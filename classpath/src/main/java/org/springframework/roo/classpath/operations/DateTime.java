@@ -31,7 +31,7 @@ public enum DateTime {
 	 * is recognized it will return DateFormat.SHORT.
 	 * 
 	 * @param style the date or time style, ie 'S'
-	 * @return
+	 * @return the DateTime style.
 	 */
 	public static int parseDateFormat(char style) {
 		switch (style) {

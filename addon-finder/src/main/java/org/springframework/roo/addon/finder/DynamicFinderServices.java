@@ -49,7 +49,7 @@ public interface DynamicFinderServices {
 	List<JavaType> getParameterTypes(JavaSymbolName finderName, String plural, BeanInfoMetadata beanInfoMetadata);
 	
 	/**
-	 * This method should be used in combination with {@link #getJpaQueryFor(JavaSymbolName, BeanInfoMetadata)} 
+	 * This method should be used in combination with {@link #getJpaQueryFor(JavaSymbolName, String, BeanInfoMetadata)} 
 	 * in order to find out about the parameter names used in the named JPA query.
 	 * 
 	 * @param finderName the finder method signature to use. Must be a valid signature. (required)

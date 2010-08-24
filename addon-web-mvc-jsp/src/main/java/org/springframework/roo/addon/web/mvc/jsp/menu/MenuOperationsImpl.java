@@ -58,16 +58,16 @@ public class MenuOperationsImpl implements MenuOperations {
 	 * <i>addon-name_intention_menu_item</i>.
 	 *  
 	 * 
-	 * @param menuCategoryId the identifier for the menu category (required)
-	 * @param menuCategoryLabel the category label (required)
+	 * @param menuCategoryName the identifier for the menu category (required)
 	 * @param menuItemId the menu item identifier (required)
 	 * @param menuItemLabel the menu item label (required)
+	 * @param globalMessageCode the global message code
 	 * @param link the menu item link (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
-	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuIteId, String menuItemLabel, String globalMessageCode, String link, String idPrefix) {
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
-		Assert.notNull(menuIteId, "Menu item name required");
+		Assert.notNull(menuItemId, "Menu item name required");
 		Assert.hasText(link, "Link required");
 		
 		if (idPrefix == null || idPrefix.length() == 0) {
@@ -102,18 +102,18 @@ public class MenuOperationsImpl implements MenuOperations {
 		}
 		
 		//check for existence of menu item by looking for the indentifier provided
-		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "']", rootElement);
+		Element menuItem = XmlUtils.findFirstElement("//*[@id='" + idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "']", rootElement);
 		
 		if (menuItem == null) {
 			menuItem = new XmlElementBuilder("menu:item", document)
-							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase())
+							.addAttribute("id", idPrefix + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase())
 							.addAttribute("messageCode", globalMessageCode)
 							.addAttribute("url", link)
 						.build();
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
 		}
-		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuIteId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
+		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
 		writeToDiskIfNecessary(document);
 	}
 	
@@ -144,8 +144,8 @@ public class MenuOperationsImpl implements MenuOperations {
 	/**
 	 * Attempts to locate a menu item and remove it. 
 	 * 
-	 * @param menuCategoryId the identifier for the menu category (required)
-	 * @param menuItemId the menu item identifier (required)
+	 * @param menuCategoryName the identifier for the menu category (required)
+	 * @param menuItemName the menu item identifier (required)
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
 	public void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix) {

@@ -10,7 +10,7 @@ public interface ClasspathProvidingProjectMetadata {
 	 * 
 	 * <p>
 	 * This method need not return a complete classpath, due to the complexity of determining transitive
-	 * relationships. The method may also return {@link Strings}s that reflect non-existent paths (as the
+	 * relationships. The method may also return {@link String}s that reflect non-existent paths (as the
 	 * build system has yet to download them). The classpath computation is therefore on a "best effort" basis only.
 	 * An implementation must guarantee to send a notification event should there be a change to the calculated classpath.
 	 * An implementation must also ensure that no {@link String} presented is nested within any

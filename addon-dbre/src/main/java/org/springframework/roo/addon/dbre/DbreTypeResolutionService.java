@@ -40,7 +40,7 @@ public interface DbreTypeResolutionService {
 	/**
 	 * Returns a JavaType given a table identity.
 	 * 
-	 * @param the table name to convert
+	 * @param tableNamePattern the table name to convert
 	 * @param javaPackage the Java package to use for the type.
 	 * @return a new JavaType
 	 */

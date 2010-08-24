@@ -13,7 +13,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface ItdRoleAwareMetadataProvider extends ItdMetadataProvider {
 
@@ -23,6 +22,6 @@ public interface ItdRoleAwareMetadataProvider extends ItdMetadataProvider {
 	Set<ItdProviderRole> getRoles();
 	
 	void addMetadataTrigger(JavaType javaType);
+	
 	void removeMetadataTrigger(JavaType javaType);
-
 }

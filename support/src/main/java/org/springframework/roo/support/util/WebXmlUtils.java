@@ -20,7 +20,6 @@ public abstract class WebXmlUtils {
 	 * @param displayName (required)
 	 * @param webXml the web.xml document (required)
 	 * @param comment (optional)
-	 * @return the document representing the adjusted web.xml
 	 */
 	public static void setDisplayName(String displayName, Document webXml, String comment) {
 		Assert.hasText(displayName, "display name required");
@@ -86,14 +85,12 @@ public abstract class WebXmlUtils {
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added AFTER (FilterPosition.LAST) all existing filters.
 	 * 
-	 * @param filterPosition Filter position (required)
-	 * @param filterPositionFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
 	 * @param filterName (required)
 	 * @param filterClass the fully qualified name of the filter type (required)
 	 * @param urlPattern (required)
 	 * @param webXml the web.xml document (required)
 	 * @param comment (optional)
-	 * @param initParams (optional)
+	 * @param initParams a vararg of initial parameters (optional)
 	 */
 	public static void addFilter(String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
 		addFilterAtPosition(FilterPosition.LAST, null, null, filterName, filterClass, urlPattern, webXml, comment, initParams);

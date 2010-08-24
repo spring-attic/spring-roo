@@ -12,7 +12,7 @@ import org.springframework.roo.project.ProjectMetadata;
  * 
  * <p>
  * Advanced implementations may also monitor the {@link ClasspathProvidingProjectMetadata} locations if desired,
- * which will result in {@link FileMetadata} being created for all types related to the project classpath.
+ * which will result in {@link PollingFileMonitorService} being created for all types related to the project classpath.
  * 
  * <p>
  * Add-ons can rely on there being only one {@link PhysicalTypeMetadataProvider} active at a time. Initially
@@ -23,7 +23,6 @@ import org.springframework.roo.project.ProjectMetadata;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface PhysicalTypeMetadataProvider extends MetadataProvider {
 
@@ -47,5 +46,4 @@ public interface PhysicalTypeMetadataProvider extends MetadataProvider {
 	 * @return the string (in {@link PhysicalTypeIdentifier} format) if found, or null if not found
 	 */
 	String findIdentifier(JavaType javaType);
-
 }

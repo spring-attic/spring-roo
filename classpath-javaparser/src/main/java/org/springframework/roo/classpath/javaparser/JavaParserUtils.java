@@ -48,7 +48,7 @@ import org.springframework.roo.support.util.Assert;
 public class JavaParserUtils  {
 	
 	/**
-	 * Converts the presented class name into a name expression (either a {@link NamedExpr} or
+	 * Converts the presented class name into a name expression (either a {@link NameExpr} or
 	 * {@link QualifiedNameExpr} depending on whether a package was presented).
 	 * 
 	 * @param className to convert (required; can be fully qualified or simple name only)
@@ -307,7 +307,7 @@ public class JavaParserUtils  {
 	 * Resolves the effective {@link JavaType} a {@link NameExpr} represents.
 	 * 
 	 * <p>
-	 * You should use {@link #getJavaType(JavaPackage, List, ClassOrInterfaceType)} where possible so that
+	 * You should use {@link #getJavaType(CompilationUnitServices, Type, Set)} where possible so that
 	 * type arguments are preserved (a {@link NameExpr} does not contain type arguments).
 	 * 
 	 * <p>
@@ -429,7 +429,7 @@ public class JavaParserUtils  {
 	 * 
 	 * <p>
 	 * Presenting a non-primitive type to this method will throw an exception. If you have a
-	 * non-primitive type, use {@link #importTypeIfRequired(JavaPackage, List, JavaType)} and
+	 * non-primitive type, use {@link #importTypeIfRequired(JavaType, List, JavaType)} and
 	 * then present the {@link NameExpr} it returns to {@link #getClassOrInterfaceType(NameExpr)}.
 	 * 
 	 * @param javaType a primitive type (required, and must be primitive)
@@ -683,7 +683,6 @@ public class JavaParserUtils  {
 		} else {
 			return new QualifiedNameExpr(new NameExpr(typeToImport.getPackage().getFullyQualifiedPackageName()), typeToImport.getSimpleTypeName());
 		}
-		
 	}
 
 	/**
@@ -740,5 +739,4 @@ public class JavaParserUtils  {
 		// Make no changes
 		return value;
 	}
-
 }

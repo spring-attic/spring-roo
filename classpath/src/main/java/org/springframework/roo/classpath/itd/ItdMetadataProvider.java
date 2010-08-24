@@ -43,15 +43,11 @@ import org.springframework.roo.project.Path;
  * {@link PhysicalTypeMetadata} represents an instance that should have ITD-specific metadata created. If so, the
  * implementation should create a metadata instance and cause that instance to monitor the {@link PhysicalTypeMetadata}
  * directly. The {@link ItdMetadataProvider} should instantiate an ITD metadata instance with both the
- * {@link PhysicalTypeMetadata} it is monitoring, plus {@link FileMetadata} for the .aj it should monitor (even
+ * {@link PhysicalTypeMetadata} it is monitoring, plus {@link PollingFileMonitorService} for the .aj it should monitor (even
  * if the .aj does not yet exist, because the metadata will create it).
- * 
  * 
  * @author Ben Alex
  * @since 1.0
- *
- * @param <ID> the identifier
- * @param <T> the ITD metadata
  */
 public interface ItdMetadataProvider extends MetadataProvider {
 

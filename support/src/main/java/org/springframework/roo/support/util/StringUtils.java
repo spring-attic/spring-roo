@@ -1113,7 +1113,7 @@ public abstract class StringUtils {
 	/**
 	 * Converts the given String to uppercase.
 	 * 
-	 * @param the input String (may be <code>null</code>)
+	 * @param str the input String (may be <code>null</code>)
 	 * @return the String in uppercase, otherwise null
 	 */
 	public static String toUpperCase(String str) {
@@ -1123,7 +1123,7 @@ public abstract class StringUtils {
 	/**
 	 * Converts the given String to lowercase.
 	 * 
-	 * @param the input String (may be <code>null</code>)
+	 * @param str the input String (may be <code>null</code>)
 	 * @return the String in lowercase, otherwise null
 	 */
 	public static String toLowerCase(String str) {

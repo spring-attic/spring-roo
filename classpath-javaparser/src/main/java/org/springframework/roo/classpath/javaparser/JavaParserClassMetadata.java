@@ -43,8 +43,10 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 	 * If the file contains any errors, the invalid flag will be set.
 	 * 
 	 * @param fileManager that can be used for subsequently modifying the file (required)
-	 * @param fileMetadata to parse (required)
+	 * @param fileIdentifier the file identifier (required)
 	 * @param metadataIdentificationString to assign to this instance (required)
+	 * @param metadataService the metadata service (required)
+	 * @param physicalTypeMetadataProvider the physical-type metadata provider (required)
 	 */
 	public JavaParserClassMetadata(FileManager fileManager, String fileIdentifier, String metadataIdentificationString, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) {
 		super(metadataIdentificationString);

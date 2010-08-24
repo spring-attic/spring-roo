@@ -50,11 +50,9 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(componentAbstract=true)
+@Component(componentAbstract = true)
 public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadataProvider, MetadataNotificationListener {
-
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference protected FileManager fileManager;
 	@Reference protected MetadataService metadataService;
@@ -332,5 +330,4 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 	public final Set<ItdProviderRole> getRoles() {
 		return Collections.unmodifiableSet(this.roles);
 	}
-
 }

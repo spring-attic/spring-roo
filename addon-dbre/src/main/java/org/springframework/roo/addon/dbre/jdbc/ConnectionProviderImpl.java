@@ -13,7 +13,7 @@ import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Implementation of {@link ConnectionProvider).
+ * Implementation of {@link ConnectionProvider}.
  * 
  * @author Alan Stewart
  * @since 1.1

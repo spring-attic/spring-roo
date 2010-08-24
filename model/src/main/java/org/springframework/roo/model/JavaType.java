@@ -27,7 +27,6 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public final class JavaType implements Comparable<JavaType>, Cloneable {
 	private List<JavaType> parameters = new ArrayList<JavaType>();
@@ -112,7 +111,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			simpleTypeName = fullyQualifiedTypeName;
 		} else {
 			int offset = fullyQualifiedTypeName.lastIndexOf(".");
-			simpleTypeName = fullyQualifiedTypeName.substring(offset+1);
+			simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
 		}
 		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
 			// Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
@@ -120,7 +119,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 				throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
 			}
 		}
-		
+
 		this.array = array;
 		this.dataType = primitive;
 		if (parameters != null) {
@@ -143,7 +142,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return fullyQualifiedTypeName;
 	}
 
-	// used for wildcard type parameters; it must be one or the other
+	// Used for wildcard type parameters; it must be one or the other
 	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");  // List<? extends YY>
 	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");      // List<? super XXXX>
 	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_");  // List<?>
@@ -177,15 +176,15 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			if (this.fullyQualifiedTypeName.equals(Integer.class.getName())) {
 				return "int" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Character.class.getName())) {
-					return "char" + getArraySuffix();
+				return "char" + getArraySuffix();
 			} else if (this.fullyQualifiedTypeName.equals(Void.class.getName())) {
 				return "void";
 			}
 			return StringUtils.uncapitalize(this.getSimpleTypeName() + getArraySuffix());
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		if (WILDCARD_EXTENDS.equals(argName)) {
 			sb.append("?");
 			if (dataType == DataType.TYPE || !staticForm) {
@@ -208,10 +207,10 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 				sb.append(" extends ");
 			}
 		}
-		
+
 		if (!WILDCARD_NEITHER.equals(argName)) {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
-			
+
 			if (dataType == DataType.TYPE || !staticForm) {
 				// TODO: Use the import registration resolver
 				if (resolver != null) {
@@ -224,7 +223,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 					sb.append(fullyQualifiedTypeName);
 				}
 			}
-			
+
 			if (this.parameters.size() > 0 && (dataType == DataType.TYPE || !staticForm)) {
 				sb.append("<");
 				int counter = 0;
@@ -238,14 +237,14 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 				}
 				sb.append(">");
 			}
-			
+
 			sb.append(getArraySuffix());
 		}
 
 		if (argName != null && !argName.equals(WILDCARD_EXTENDS) && !argName.equals(WILDCARD_SUPER) && !argName.equals(WILDCARD_NEITHER)) {
 			types.put(this.argName.getSymbolName(), sb.toString());
 		}
-		
+
 		return sb.toString();
 	}
 	
@@ -256,7 +255,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (isDefaultPackage()) {
 			return new JavaPackage("");
 		}
-		
+
 		JavaType enclosingType = getEnclosingType();
 		if (enclosingType != null) {
 			return enclosingType.getPackage();
@@ -265,7 +264,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		return new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
 	}
-	
+
 	/**
 	 * @return the enclosing type, if any (will return null if there is no enclosing type)
 	 */
@@ -277,18 +276,18 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		}
 		String possibleName = fullyQualifiedTypeName.substring(0, offset);
 		int offset2 = possibleName.lastIndexOf(".");
-		
-		// start by handling if the type name is Foo.Bar (ie an enclosed type within the default package)
+
+		// Start by handling if the type name is Foo.Bar (ie an enclosed type within the default package)
 		String enclosedWithinPackage = null;
 		String enclosedWithinTypeName = possibleName;
 
-		// handle the probability the type name is within a package like com.alpha.Foo.Bar
+		// Handle the probability the type name is within a package like com.alpha.Foo.Bar
 		if (offset2 > -1) {
 			enclosedWithinPackage = possibleName.substring(0, offset2);
-			enclosedWithinTypeName = possibleName.substring(offset2+1);
+			enclosedWithinTypeName = possibleName.substring(offset2 + 1);
 		}
 		if (enclosedWithinTypeName.charAt(0) == enclosedWithinTypeName.toUpperCase().charAt(0)) {
-			// first letter is uppercase, so treat it as a type name
+			// First letter is uppercase, so treat it as a type name
 			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
 			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
 		}

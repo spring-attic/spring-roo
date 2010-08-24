@@ -684,7 +684,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	}
 
 	/**
-	 * @return the physical type identifier for the {@link BeanInfoMetadata} specified via {@link RooDataOnDemand#create()} (never null or empty unless metadata is invalid)
+	 * @return the physical type identifier for the {@link BeanInfoMetadata} (never null or empty unless metadata is invalid)
 	 */
 	public String getIdentifierForBeanInfoMetadata() {
 		return beanInfoMetadata.getId();

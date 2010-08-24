@@ -42,7 +42,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Implementation of {@link DbreModelService).
+ * Implementation of {@link DbreModelService}.
  * 
  * @author Alan Stewart
  * @since 1.1
