@@ -11,6 +11,7 @@ import com.google.gwt.valuestore.shared.Value;
 {{#imports}}import {{=import}};
 {{/imports}}
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +50,11 @@ public class {{=className}} extends AbstractRecordEditActivity<{{=record}}> {
 
     @Override
     public void start(Display display, EventBus eventBus) {
-    {{#setValuePickers}}
+    {{#setEnumValuePickers}}
+    get{{=editView}}().{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values());
+
+    {{/setEnumValuePickers}}
+    {{#setRecordValuePickers}}
     get{{=editView}}().{{=setValuePickerName}}(Collections.<{{=valueType}}> emptyList());
 
     requests.{{=requestInterface}}().{{=findMethod}}.with(
@@ -63,7 +68,7 @@ public class {{=className}} extends AbstractRecordEditActivity<{{=record}}> {
                     get{{=editView}}().{{=setValuePickerName}}(values);
             }
     });
-    {{/setValuePickers}}
+    {{/setRecordValuePickers}}
         super.start(display, eventBus);
     }
 
