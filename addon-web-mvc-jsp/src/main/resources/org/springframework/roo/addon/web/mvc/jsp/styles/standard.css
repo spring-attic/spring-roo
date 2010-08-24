@@ -96,6 +96,18 @@ body {
 
 #footer a:link {color: #7db223;}
 
+.quicklinks {
+	clear:both; 
+	padding-bottom: 15px
+}
+.quicklinks span {
+	float: right;
+}
+
+table.navigation {
+	border: 0px;
+}
+
 label {
 	width:100px;
 	float:left;
