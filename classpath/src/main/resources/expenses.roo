@@ -11,7 +11,6 @@ entity --class ~.server.domain.Employee --testAutomatically
 field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
 field string --fieldName displayName
-field string --fieldName password
 field reference --type Employee supervisor
 field enum --fieldName gender --type ~.gwt.shared.Gender
 
@@ -22,7 +21,6 @@ field date --fieldName created --type java.util.Date
 field string --fieldName department
 field string --fieldName notes
 field string --fieldName purpose
-field string --fieldName purposeLowerCase
 field reference --type Employee reporter
 field reference --type Employee approvedSupervisor
 
