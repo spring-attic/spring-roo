@@ -633,6 +633,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = "new Integer(index).shortValue()"; // Auto-boxed
 				} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 					initializer = "new Integer(index).shortValue()";
+				} else if (field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
+					initializer = "new java.math.BigDecimal(index)";
+				} else if (field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
+					initializer = "java.math.BigInteger.valueOf(index)";
 				} else if (manyToOneAnnotation != null || oneToOneAnnotation != null) {
 					if (field.getFieldType().equals(this.getAnnotationValues().getEntity())) {
 						// Avoid circular references (ROO-562)
