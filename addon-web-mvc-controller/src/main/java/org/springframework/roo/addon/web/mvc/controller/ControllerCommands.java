@@ -43,7 +43,7 @@ public class ControllerCommands implements CommandMarker {
 	}
 
 	@CliCommand(value="controller all", help="Scaffold a controller for all entities without an existing controller")
-	public void generateAll(@CliOption(key="package", mandatory=true, help="The package in which new controllers will be placed") JavaPackage javaPackage) {
+	public void generateAll(@CliOption(key="package", mandatory=true, optionContext="update", help="The package in which new controllers will be placed") JavaPackage javaPackage) {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Could not obtain ProjectMetadata");
 		if (!javaPackage.getFullyQualifiedPackageName().startsWith(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName())) {

@@ -57,7 +57,9 @@ public class JavaPackageConverter implements Converter {
 			newValue = newValue.substring(0, newValue.length() - 1);
 		}
 		JavaPackage result = new JavaPackage(newValue);
-		lastUsed.setPackage(result);
+		if (optionContext.contains("update")) {
+			lastUsed.setPackage(result);
+		}
 		return result;
 	}
 
