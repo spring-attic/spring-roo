@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.0.M2 [rev 765cb2a].</para>
+    <para>This appendix was automatically built from Roo 1.1.0.M3 [rev d2fc92d].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-backup-commands">
         <title>Backup Commands</title>
@@ -344,18 +344,12 @@
         <section xml:id="command-index-addon-create-i18n">
             <title>addon create i18n</title>
             <para>Create a new Internationalization add-on for Spring Roo</para>
-            <programlisting><![CDATA[addon create i18n --topLevelPackage --language --locale --messageBundle --flagGraphic]]></programlisting>
+            <programlisting><![CDATA[addon create i18n --topLevelPackage --locale --messageBundle]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--topLevelPackage</term>
                     <listitem>
                         <para>The top level package of the new addon; no default value (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--language</term>
-                    <listitem>
-                        <para>The full name of the language (used as a label for the UI); no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -371,9 +365,15 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--language</term>
+                    <listitem>
+                        <para>The full name of the language (used as a label for the UI); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--flagGraphic</term>
                     <listitem>
-                        <para>Fully qualified path to flag xx.png file; no default value (mandatory) </para>
+                        <para>Fully qualified path to flag xx.png file; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -399,6 +399,253 @@
                     <term>--description</term>
                     <listitem>
                         <para>Description of your addon (surround text with double quotes); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-dbre-commands">
+        <title>Dbre Commands</title>
+        <para>Dbre Commands are contained in org.springframework.roo.addon.dbre.DbreCommands.</para>
+        <section xml:id="command-index-database-introspect">
+            <title>database introspect</title>
+            <para>Displays database metadata</para>
+            <programlisting><![CDATA[database introspect --schema]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--schema</term>
+                    <listitem>
+                        <para>The database schema name; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--file</term>
+                    <listitem>
+                        <para>The file to save the metadata to; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-database-reverse-engineer">
+            <title>database reverse engineer</title>
+            <para>Create and updates entities based on the database metadata</para>
+            <programlisting><![CDATA[database reverse engineer]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--schema</term>
+                    <listitem>
+                        <para>The database schema name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>The package in which new entities will be placed; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-embedded-commands">
+        <title>Embedded Commands</title>
+        <para>Embedded Commands are contained in org.springframework.roo.addon.web.mvc.embedded.EmbeddedCommands.</para>
+        <section xml:id="command-index-web-mvc-embed-document">
+            <title>web mvc embed document</title>
+            <para>Embed a document for your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed document --provider --documentId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The id of the document; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--documentId</term>
+                    <listitem>
+                        <para>The id of the document; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-finances">
+            <title>web mvc embed finances</title>
+            <para>Embed a stock ticker into your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed finances --stockSymbol]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--stockSymbol</term>
+                    <listitem>
+                        <para>The stock symbol; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-generic">
+            <title>web mvc embed generic</title>
+            <para>Embed media by URL into your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed generic --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The url of the source to be embedded; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-map">
+            <title>web mvc embed map</title>
+            <para>Embed a map for your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed map --location]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--location</term>
+                    <listitem>
+                        <para>The location of the map (ie "Sydney, Australia"); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-photos">
+            <title>web mvc embed photos</title>
+            <para>Embed a photo gallery for your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed photos --provider --userId --albumId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The provider of the photo gallery; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--userId</term>
+                    <listitem>
+                        <para>The user id; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--albumId</term>
+                    <listitem>
+                        <para>The album id; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-stream-video">
+            <title>web mvc embed stream video</title>
+            <para>Embed a video stream into your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed stream video --provider --streamId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The provider of the video stream; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--streamId</term>
+                    <listitem>
+                        <para>The stream id; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-twitter">
+            <title>web mvc embed twitter</title>
+            <para>Embed twitter messages into your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed twitter --searchTerm]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--searchTerm</term>
+                    <listitem>
+                        <para>The search term to display results for; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-video">
+            <title>web mvc embed video</title>
+            <para>Embed a video for your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed video --provider --videoId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--provider</term>
+                    <listitem>
+                        <para>The id of the video; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--videoId</term>
+                    <listitem>
+                        <para>The id of the video; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-web-mvc-embed-wave">
+            <title>web mvc embed wave</title>
+            <para>Embed Google wave integration for your WEB MVC application</para>
+            <programlisting><![CDATA[web mvc embed wave --waveId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--waveId</term>
+                    <listitem>
+                        <para>The key of the wave; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--viewName</term>
+                    <listitem>
+                        <para>The name of the jspx view; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1403,7 +1650,7 @@
                 <varlistentry>
                     <term>--topic</term>
                     <listitem>
-                        <para>The topic for which advice should be provided; no default value</para>
+                        <para>The topic for which advice should be provided</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1457,6 +1704,12 @@
             <title>date</title>
             <para>Displays the local date and time</para>
             <programlisting><![CDATA[date]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-flash-test">
+            <title>flash test</title>
+            <para>Tests message flashing</para>
+            <programlisting><![CDATA[flash test]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
         <section xml:id="command-index-script">
@@ -1657,6 +1910,23 @@
                     <term>--password</term>
                     <listitem>
                         <para>The password to use; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-json-commands">
+        <title>Json Commands</title>
+        <para>Json Commands are contained in org.springframework.roo.addon.json.JsonCommands.</para>
+        <section xml:id="command-index-json-add">
+            <title>json add</title>
+            <para>Adds @RooJson annotation to target type</para>
+            <programlisting><![CDATA[json add]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The java type to apply this annotation to; default if option not present: '*'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2109,6 +2379,23 @@
             <para>Display file system polling information</para>
             <programlisting><![CDATA[poll status]]></programlisting>
             <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section xml:id="command-index-process-manager-diagnostics-listener">
+        <title>Process Manager Diagnostics Listener</title>
+        <para>Process Manager Diagnostics Listener are contained in org.springframework.roo.process.manager.internal.ProcessManagerDiagnosticsListener.</para>
+        <section xml:id="command-index-process-manager-debug">
+            <title>process manager debug</title>
+            <para>Indicates if process manager debugging is desired</para>
+            <programlisting><![CDATA[process manager debug]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--enabled</term>
+                    <listitem>
+                        <para>Activates debug mode; default: 'true'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </section>
     </section>
     <section xml:id="command-index-prop-file-commands">
