@@ -201,9 +201,9 @@
 
       <listitem>
         <para>Edit your project's <code>pom.xml</code> and verify the Spring
-        Roo annotations JAR matches the new Roo release you are
-        installing. Spring Roo 1.1.0.M3 and above will do this automatically
-        on your behalf when you load it on an existing project.</para>
+        Roo annotations JAR matches the new Roo release you are installing.
+        Spring Roo 1.1.0.M3 and above will do this automatically on your
+        behalf when you load it on an existing project.</para>
       </listitem>
 
       <listitem>
@@ -232,6 +232,38 @@
     <para>If you experience any difficulty with upgrading your projects,
     please use the <link linkend="resources-forums">community support
     forum</link> for assistance.</para>
+  </section>
+
+  <section xml:id="upgrade-1.1.0.M2">
+    <title>Upgrading to 1.1.0.M3</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.0.M2 to Spring Roo 1.1.0.M3 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+
+      <listitem>
+        <para>There have been changes made to the <code>web.xml</code>
+        configuration following the adoption of Spring Framework 3.0.4
+        improvements around root servlet mapping of
+        <code>DispatcherServlet</code>. Please compare a <code>web.xml
+        </code>produced in a new Spring Roo project with your current
+        project's <code>web.xml</code> to identify differences.</para>
+      </listitem>
+
+      <listitem>
+        <para>If you are trying the early-access Google Web Toolkit (GWT)
+        support, please be aware that from Spring Roo 1.1.0.M3 until Spring
+        Roo 1.1.0.RELEASE we will be using GWT 2.1 "snapshot" JARs. This
+        enables you to have access to the latest improvements in GWT
+        2.1.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="upgrade-1.1.0.M2">
