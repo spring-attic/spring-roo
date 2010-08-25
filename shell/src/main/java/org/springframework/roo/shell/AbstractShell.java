@@ -89,7 +89,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	    } catch (IOException e) {
 	    	throw new IllegalStateException(e);
 	    }
-	    logger.fine("Milliseconds required: " + (new Date().getTime() - started));
+	    logger.fine("Script required " + ((new Date().getTime() - started)/1000) + " second(s) to execute");
 	}
 	
 	/**
