@@ -26,8 +26,7 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 	{{=record}} record;
 	{{#fields}}
 	@UiField SpanElement {{=field}};{{/fields}}	
-	@UiField SpanElement idSpan;
-	@UiField SpanElement versionSpan;
+	@UiField SpanElement displayRenderer;
 	@UiField HasClickHandlers edit;
 	@UiField HasClickHandlers delete;
 
@@ -65,8 +64,8 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 
 	public void setValue({{=record}} record) {
 		this.record = record;{{#props1}}
-	    {{=prop}}{{/props1}}	
-		idSpan.setInnerText(String.valueOf(record.getId()));
-		versionSpan.setInnerText(record.getVersion().toString());
+	    {{=prop}}{{/props1}}
+
+		displayRenderer.setInnerText({{=recordRendererType}}.instance().render(record));
 	}
 }

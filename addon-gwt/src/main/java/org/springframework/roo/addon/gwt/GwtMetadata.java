@@ -566,6 +566,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 			// Formatted text for EditViewUiXml
 			dataDictionary.addSection("props5").setVariable("prop", property.getPropStr5());
 
+                        dataDictionary.setVariable("recordRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata)
+                    + "." + record.getName().getSimpleTypeName() + "Renderer");
+
                         if (property.isRecord() || property.isEnum()) {
                           TemplateDataDictionary section = dataDictionary.addSection(property.isEnum() ? "setEnumValuePickers" : "setRecordValuePickers");
                           section.setVariable("setValuePicker", property.getSetValuePickerMethod());

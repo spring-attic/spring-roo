@@ -29,7 +29,7 @@
   </ui:style>
   <g:HTMLPanel>
     <div class='{style.underline}'>
-      <h3 class='{style.header}'><ui:msg>{{=name}} <span ui:field='idSpan' /> (v<span ui:field='versionSpan'/>)</ui:msg></h3>
+      <h3 class='{style.header}'><ui:msg><span ui:field='displayRenderer' /></ui:msg></h3>
     </div>
 
     <table class='{style.fields}'>{{#props3}}
