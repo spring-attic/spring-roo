@@ -234,7 +234,7 @@
     forum</link> for assistance.</para>
   </section>
 
-  <section xml:id="upgrade-1.1.0.M2">
+  <section xml:id="upgrade-1.1.0.M3">
     <title>Upgrading to 1.1.0.M3</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
