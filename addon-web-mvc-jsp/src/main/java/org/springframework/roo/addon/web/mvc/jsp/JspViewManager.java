@@ -461,6 +461,9 @@ public class JspViewManager {
 //							}
 //						}
 					}
+					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Lob")) {
+						fieldElement = new XmlElementBuilder("field:textarea", document).build();
+					}
 				}
 				if (null != (annotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Size")))) {
 					AnnotationAttributeValue<?> max = annotationMetadata.getAttribute(new JavaSymbolName("max"));
