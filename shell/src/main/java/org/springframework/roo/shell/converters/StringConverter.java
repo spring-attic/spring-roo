@@ -23,7 +23,7 @@ public class StringConverter implements Converter {
 	}
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
-		return String.class.isAssignableFrom(requiredType);
+		return String.class.isAssignableFrom(requiredType) && (optionContext == null || !optionContext.contains("disable-string-converter"));
 	}
 
 }
