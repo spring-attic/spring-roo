@@ -386,16 +386,16 @@ public class SimpleParser implements Parser {
 			if (targets.size() > 1) {
 				// Assist them locate a particular target
 				for (MethodTarget target : targets) {
-					// Only add the first word of each target, if they've typed nothing on the CLI so far
-					if ("".equals(translated) && target.key.contains(" ")) {
-						results.add(target.key.substring(0, target.key.indexOf(" ")));
-					} else {
-						// Only add the commands which start with whatever they've typed.
-						// This is needed so they don't get overwhelmed by too many options appearing
-						if (target.key.startsWith(translated)) {
-							results.add(target.key);
-						}
+					// Calculate the correct starting position
+					int startAt = translated.length();
+					
+					// Only add the first word of each target
+					int stopAt = target.key.indexOf(" ", startAt);
+					if (stopAt == -1) {
+						stopAt = target.key.length();
 					}
+					
+					results.add(target.key.substring(0, stopAt) + " ");
 				}
 				candidates.addAll(results);
 				return 0;
