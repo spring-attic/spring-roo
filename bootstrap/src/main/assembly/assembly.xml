@@ -162,8 +162,10 @@
                 <exclude>org.apache.felix.framework-*.jar</exclude>
                 <!--  Ensures EBR-sourced JDBC drivers are not included in the distribution ZIP -->
                 <exclude>com.springsource.*.jar</exclude>
-                <!--  Ensures Derby (due to large size) is not included in the distribution ZIP -->
+                <!--  Ensures Derby, HSQLDB and JTOpen (due to large size) is not included in the distribution ZIP -->
                 <exclude>derby-*.jar</exclude>
+                <exclude>org.springframework.roo.wrapping.hsqldb-*.jar</exclude>
+                <exclude>org.springframework.roo.wrapping.jtopen-*.jar</exclude>
             </excludes>
         </fileSet>
 	</fileSets>
