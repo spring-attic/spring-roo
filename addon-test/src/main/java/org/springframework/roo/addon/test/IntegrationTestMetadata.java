@@ -34,16 +34,15 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = IntegrationTestMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType TEST = new JavaType("org.junit.Test");
 
 	private IntegrationTestAnnotationValues annotationValues;
 	private DataOnDemandMetadata dataOnDemandMetadata;
 	private JavaType dodGovernor;
-	private boolean isGaeEnabled;
 	
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata versionAccessorMethod;
@@ -89,8 +88,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		addRequiredIntegrationTestClassIntroductions();
 		
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
-		isGaeEnabled = projectMetadata.isGaeEnabled();
-		if (isGaeEnabled) {
+		if (projectMetadata.isGaeEnabled()) {
 			addOptionalIntegrationTestClassIntroductions();
 		}
 		
@@ -122,6 +120,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			List<AnnotationAttributeValue<?>> ctxCfg = new ArrayList<AnnotationAttributeValue<?>>();
 			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/META-INF/spring/applicationContext.xml"));
 			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
+		}
+		
+		// Add an @Transactional, if the user did not define it on the governor directly
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
+			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>()));
 		}
 	
 		// Add the data on demand field if the user did not define it on the governor directly
@@ -201,7 +204,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -230,7 +233,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -263,10 +266,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -298,10 +298,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -333,10 +330,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (!isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -375,10 +369,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (!isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 	
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -418,10 +409,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (!isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -454,10 +442,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-			if (!isGaeEnabled) {
-				addTransactionalAnnotation(annotations);
-			}
+			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -473,10 +458,6 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		}
 
 		return method;
-	}
-
-	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations) {
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>()));
 	}
 
 	/**

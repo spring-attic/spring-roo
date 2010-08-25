@@ -22,18 +22,15 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -56,35 +53,30 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private static final JavaType NOT_NULL = new JavaType("javax.validation.constraints.NotNull");
 
 	private DataOnDemandAnnotationValues annotationValues;
-	private ProjectMetadata projectMetadata;
 	private BeanInfoMetadata beanInfoMetadata;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata findMethod;
 
-	/** The "findEntityEntries(Integer,Integer):List<Entity>" static method for the entity (required) */
-	private MethodMetadata findEntriesMethod;
-	
 	/** The "persist():void" instance method for the entity we are to create (required) */
 	private MethodMetadata persistMethod;
-	
+
 	/** Mandatory methods, in order of discovery (so we can guarantee the ITD is generated in a consistent manner for SCM compatibility) */
 	private List<MethodMetadata> mandatoryMutators = new ArrayList<MethodMetadata>();
-	
+
 	/** key: mandatory setter to invoke; value: the argument to present to the mutator method, expressed as a string */
-	private Map<MethodMetadata,String> mutatorArguments = new HashMap<MethodMetadata, String>();
-	
+	private Map<MethodMetadata, String> mutatorArguments = new HashMap<MethodMetadata, String>();
+
 	/** Other entities requiring a data on demand instance; fields must exist for each of these in the class */
 	private List<JavaType> requiredDataOnDemandCollaborators = new ArrayList<JavaType>();
 
 	// Needed to lookup other DataOnDemand metadata we depend on
 	private MetadataService metadataService;
 	private MetadataDependencyRegistry metadataDependencyRegistry;
-	
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, ProjectMetadata projectMetadata, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
+
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(projectMetadata, "Project metadata required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(identifierAccessor, "Identifier accessor method required");
 		Assert.notNull(findMethod, "Find method required");
@@ -92,35 +84,33 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.notNull(persistMethod, "Persist method required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		
+
 		if (!isValid()) {
 			return;
 		}
 
 		this.annotationValues = annotationValues;
-		this.projectMetadata = projectMetadata;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.identifierAccessorMethod = identifierAccessor;
 		this.findMethod = findMethod;
-		this.findEntriesMethod = findEntriesMethod;
 		this.persistMethod = persistMethod;
 		this.metadataService = metadataService;
 		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		
+
 		mutatorDiscovery();
-		
+
 		if (isComponentAnnotationIntroduced()) {
 			builder.addTypeAnnotation(getComponentAnnotation());
 		}
-		
+
 		builder.addField(getRndField());
 		builder.addField(getDataField());
-		
+
 		Set<JavaSymbolName> fieldsAddedToItd = new HashSet<JavaSymbolName>();
 		for (JavaType entityNeedingCollaborator : requiredDataOnDemandCollaborators) {
 			JavaType collaboratorType = getCollaboratingType(entityNeedingCollaborator);
 			String collaboratingFieldName = getCollaboratingFieldName(entityNeedingCollaborator).getSymbolName();
-			
+
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(collaboratingFieldName);
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
@@ -131,12 +121,12 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				// It's ok, so we can move onto the new field
 				continue;
 			}
-			
+
 			// Must make the field
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));
 			FieldMetadata field = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, collaboratorType, null, annotations);
-			
+
 			// Add it to the ITD, if it hasn't already been
 			if (!fieldsAddedToItd.contains(field.getFieldName())) {
 				fieldsAddedToItd.add(field.getFieldName());
@@ -144,20 +134,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				fieldsAddedToItd.add(field.getFieldName());
 			}
 		}
-		
+
 		builder.addMethod(getNewTransientEntityMethod());
 		builder.addMethod(getSpecificPersistentEntityMethod());
 		builder.addMethod(getRandomPersistentEntityMethod());
 		builder.addMethod(getModifyMethod());
 		builder.addMethod(getInitMethod());
-		
+
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
-	 * Adds the @org.springframework.stereotype.Component annotation to the type, unless
-	 * it already exists.
-	 *  
+	 * Adds the @org.springframework.stereotype.Component annotation to the type, unless it already exists.
+	 * 
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
 	public AnnotationMetadata getComponentAnnotation() {
@@ -167,11 +156,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
 	}
-	
+
 	/**
-	 * Indicates whether the @org.springframework.stereotype.Component annotation will
-	 * be introduced via this ITD.
-	 *  
+	 * Indicates whether the @org.springframework.stereotype.Component annotation will be introduced via this ITD.
+	 * 
 	 * @return true if it will be introduced, false otherwise
 	 */
 	public boolean isComponentAnnotationIntroduced() {
@@ -193,7 +181,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				fieldName = fieldName + "_";
 			}
 			fieldName = fieldName + "rnd";
-			
+
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
@@ -202,17 +190,17 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// Candidate is not private, so we might run into naming clashes if someone subclasses this (therefore go onto the next possible name)
 					continue;
 				}
-				
+
 				if (!candidate.getFieldType().equals(new JavaType("java.util.Random"))) {
 					// Candidate isn't a java.util.Random, so it isn't suitable
 					continue;
 				}
-				
+
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
 				return candidate;
 			}
-			
+
 			// Candidate not found, so let's create one
 			return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.Random"), "new java.security.SecureRandom()", null);
 		}
@@ -235,7 +223,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			// The type parameters to be used by the field type
 			List<JavaType> typeParams = new ArrayList<JavaType>();
 			typeParams.add(annotationValues.getEntity());
-			
+
 			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
 			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
 			if (candidate != null) {
@@ -244,18 +232,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					// Candidate is not private, so we might run into naming clashes if someone subclasses this (therefore go onto the next possible name)
 					continue;
 				}
-				
+
 				if (!candidate.getFieldType().equals(new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams))) {
 					// Candidate isn't a java.util.List<theEntity>, so it isn't suitable
 					// The equals method also verifies type params are present
 					continue;
 				}
-				
+
 				// If we got this far, we found a valid candidate
 				// We don't check if there is a corresponding initializer, but we assume the user knows what they're doing and have made one
 				return candidate;
 			}
-			
+
 			// Candidate not found, so let's create one
 			return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldSymbolName, new JavaType("java.util.List", 0, DataType.TYPE, null, typeParams), null, null);
 		}
@@ -272,18 +260,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("index"));
 		JavaType returnType = beanInfoMetadata.getJavaBean();
-		
+
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
-		
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + " obj = new " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "();");
-		
+
 		for (MethodMetadata mutator : mandatoryMutators) {
 			String initializer = mutatorArguments.get(mutator);
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator);
@@ -304,7 +292,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
-				} else	if (sizeAnnotationMetadata == null && columnAnnotationMetadata != null) {
+				} else if (sizeAnnotationMetadata == null && columnAnnotationMetadata != null) {
 					AnnotationAttributeValue<?> lengthAttributeValue = columnAnnotationMetadata.getAttribute(new JavaSymbolName("length"));
 					if (lengthAttributeValue != null) {
 						Integer lengthValue = (Integer) columnAnnotationMetadata.getAttribute(new JavaSymbolName("length")).getValue();
@@ -319,7 +307,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
 					}
 				} else {
-					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");					
+					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
 				}
 			} else if (isNumericFieldType(field)) {
 				// Check for @Min and @Max
@@ -340,7 +328,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + minValue  + suffix + ";");
+					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + minValue + suffix + ";");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
@@ -357,8 +345,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else if (minAnnotationMetadata != null && maxAnnotationMetadata != null) {
 					Long minValue = (Long) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
 					Long maxValue = (Long) maxAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
-					Assert.isTrue(maxValue >= minValue, "The value of @Max must be greater or equal to the value of @Min for field " + field.getFieldName().getSymbolName() );
-						
+					Assert.isTrue(maxValue >= minValue, "The value of @Max must be greater or equal to the value of @Min for field " + field.getFieldName().getSymbolName());
+
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + suffix + " || " + field.getFieldName().getSymbolName() + " > " + suffix + maxValue + ") {");
 					bodyBuilder.indent();
@@ -373,17 +361,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
 			}
 		}
-		
+
 		bodyBuilder.appendFormalLine("return obj;");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
-		
+
 	private boolean isNumericFieldType(FieldMetadata field) {
-		return field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || 
-			field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || 
-			field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE) || 
-			field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || 
-			field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE);
+		return field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE);
 	}
 
 	/**
@@ -397,21 +381,21 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 		JavaType returnType = JavaType.BOOLEAN_PRIMITIVE;
-		
+
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
-		
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		// TODO: We should port this more fully from original code base
 		bodyBuilder.appendFormalLine("return false;");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
-	
+
 	/**
 	 * @return the "getRandomEntity():Entity" method (never returns null)
 	 */
@@ -421,18 +405,18 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		JavaType returnType = beanInfoMetadata.getJavaBean();
-		
+
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
 			Assert.isTrue(userMethod.getReturnType().equals(returnType), "Method '" + methodName + "' on '" + governorTypeDetails.getName() + "' must return '" + returnType.getNameIncludingTypeParameters() + "'");
 			return userMethod;
 		}
-		
+
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("init();");
-		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() + ".get(" + getRndField().getFieldName().getSymbolName() + ".nextInt(" + getDataField().getFieldName().getSymbolName() + ".size()));");
 		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
@@ -448,7 +432,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("index"));
 		JavaType returnType = beanInfoMetadata.getJavaBean();
-		
+
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
@@ -461,7 +445,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine("init();");
 		bodyBuilder.appendFormalLine("if (index < 0) index = 0;");
 		bodyBuilder.appendFormalLine("if (index > (" + getDataField().getFieldName().getSymbolName() + ".size() - 1)) index = " + getDataField().getFieldName().getSymbolName() + ".size() - 1;");
-		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() +".get(index);");
+		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getSimpleTypeName() + " obj = " + getDataField().getFieldName().getSymbolName() + ".get(index);");
 		bodyBuilder.appendFormalLine("return " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
@@ -476,7 +460,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
-		
+
 		// Locate user-defined method
 		MethodMetadata userMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (userMethod != null) {
@@ -485,34 +469,10 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		}
 
 		// Create the method
-		
-		// Create the annotations
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		if (!projectMetadata.isGaeEnabled()) {
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
-		}
-		
+
 		// Create the body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
-		bodyBuilder.appendFormalLine("if (" + dataField + " != null && !" + dataField + ".isEmpty()) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-		
-		bodyBuilder.appendFormalLine("");
-		bodyBuilder.appendFormalLine(dataField + " = " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
-		bodyBuilder.appendFormalLine("if (data == null) throw new IllegalStateException(\"Find entries implementation for '" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "' illegally returned null\");");
-		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("return;");
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-
-		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine(dataField + " = new java.util.ArrayList<" + getDataField().getFieldType().getParameters().get(0).getNameIncludingTypeParameters() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + annotationValues.getQuantity() + "; i++) {");
 		bodyBuilder.indent();
@@ -521,8 +481,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
 	private void mutatorDiscovery() {
@@ -557,7 +517,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				AnnotationAttributeValue<?> optionalAttribute = manyToOneAnnotation.getAttribute(new JavaSymbolName("optional"));
 				hasManyToOne = optionalAttribute != null && !((Boolean) optionalAttribute.getValue());
 			}
-			
+
 			AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
 
 			String initializer = "null";
@@ -571,7 +531,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					initializer = "new java.util.Date()";
 				}
-			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null ) {
+			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null) {
 				initializer = "true";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX) != null || hasManyToOne || field.getAnnotations().size() == 0) {
 				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
@@ -673,7 +633,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 				}
 			}
-			
+
 			mandatoryMutators.add(mutatorMethod);
 			mutatorArguments.put(mutatorMethod, initializer);
 		}
@@ -682,7 +642,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private JavaSymbolName getCollaboratingFieldName(JavaType entity) {
 		return new JavaSymbolName(StringUtils.uncapitalize(getCollaboratingType(entity).getSimpleTypeName()));
 	}
-	
+
 	private JavaType getCollaboratingType(JavaType entity) {
 		return new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
 	}
@@ -693,7 +653,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public String getIdentifierForBeanInfoMetadata() {
 		return beanInfoMetadata.getId();
 	}
-	
+
 	/**
 	 * @return the annotation values specified via {@link RooDataOnDemand} (never null unless the metadata itself is invalid)
 	 */
@@ -715,7 +675,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
