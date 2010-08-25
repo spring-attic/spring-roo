@@ -460,6 +460,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element existing = XmlUtils.findFirstElement("/project/properties/" + property.getName(), document.getDocumentElement());
 		if (existing != null) {
 			existing.setTextContent(property.getValue());
+			mutableFile.setDescriptionOfChange("Updating property '" + property.getName() + "' to '" + property.getValue() + "'");
 		} else {
 			Element properties = XmlUtils.findFirstElement("/project/properties", document.getDocumentElement());
 			if (null == properties) {
@@ -468,6 +469,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 			Element propertyElement = new XmlElementBuilder(property.getName(), document).setText(property.getValue()).build();
 			properties.appendChild(propertyElement);
+			mutableFile.setDescriptionOfChange("Adding property '" + property.getName() + "' to '" + property.getValue() + "'");
 		}
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);

@@ -202,7 +202,8 @@
       <listitem>
         <para>Edit your project's <code>pom.xml</code> and verify the Spring
         Roo annotations JAR matches the new Roo release you are
-        installing.</para>
+        installing. Spring Roo 1.1.0.M3 and above will do this automatically
+        on your behalf when you load it on an existing project.</para>
       </listitem>
 
       <listitem>
