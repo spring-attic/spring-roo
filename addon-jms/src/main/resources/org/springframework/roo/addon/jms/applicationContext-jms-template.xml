@@ -15,7 +15,7 @@
   <amq:connectionFactory id="jmsFactory" brokerURL="vm://localhost" />
 
   <!-- JMS ConnectionFactory to use for Spring JMS template -->
-  <bean class="org.springframework.jms.connection.CachingConnectionFactory">
+  <bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
     <property name="targetConnectionFactory">
       <ref local="jmsFactory" />
     </property>
@@ -24,6 +24,6 @@
   <!-- Spring JMS Template -->
   <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
     <!-- lets wrap in a pool to avoid creating a connection per send -->
-    <property name="connectionFactory" ref="jmsFactory" />
+    <property name="connectionFactory" ref="cachingConnectionFactory" />
   </bean>
 </beans>
