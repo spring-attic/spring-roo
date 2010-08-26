@@ -25,8 +25,8 @@ import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.valuestore.shared.Record;
-import com.google.gwt.valuestore.shared.SyncResult;
+import com.google.gwt.requestfactory.shared.Record;
+import com.google.gwt.requestfactory.shared.SyncResult;
 
 import java.util.HashSet;
 import java.util.Set;

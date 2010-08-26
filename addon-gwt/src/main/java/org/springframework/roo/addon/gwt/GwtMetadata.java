@@ -191,7 +191,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<JavaType> extParams = new ArrayList<JavaType>();
 		extParams.add(getDestinationJavaType(MirrorType.RECORD));
 		extParams.add(getDestinationJavaType(MirrorType.CHANGED_HANDLER));
-		extendsTypes.add(new JavaType("com.google.gwt.valuestore.shared.RecordChangedEvent", 0, DataType.TYPE, null, extParams));
+		extendsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.RecordChangedEvent", 0, DataType.TYPE, null, extParams));
 
 		// public static final Type<EmployeeChangedHandler> TYPE = new com.google.gwt.event.shared.GwtEvent.Type<EmployeeChangedHandler>();
 		JavaType fieldType = gwtEventType;
@@ -199,12 +199,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL, new JavaSymbolName("TYPE"), fieldType, fieldInitializer, null);
 		fields.add(fieldMetadata);
 
-		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record, com.google.gwt.valuestore.shared.WriteOperation) {
+		// public EmployeeRecordChanged(com.springsource.extrack.gwt.request.EmployeeRecord record, com.google.gwt.requestfactory.shared.WriteOperation) {
 		// super(record, writeOperation);
 		// }
 		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
 		constructorParameterTypes.add(getDestinationJavaType(MirrorType.RECORD));
-		constructorParameterTypes.add(new JavaType("com.google.gwt.valuestore.shared.WriteOperation"));
+		constructorParameterTypes.add(new JavaType("com.google.gwt.requestfactory.shared.WriteOperation"));
 		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
 		constructorParameterNames.add(new JavaSymbolName("record"));
 		constructorParameterNames.add(new JavaSymbolName("writeOperation"));
@@ -300,7 +300,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		// typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.ServerType"), attribs));
 
 		// extends Record
-		extendsTypes.add(new JavaType("com.google.gwt.valuestore.shared.Record"));
+		extendsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.Record"));
 
 		// Decide fields we'll be mapping
 		SortedMap<JavaSymbolName, JavaType> propToGwtSideType = new TreeMap<JavaSymbolName, JavaType>();
@@ -310,8 +310,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
 
 				JavaType gwtSideType = null;
-				JavaType wrapperType = new JavaType("com.google.gwt.valuestore.shared.Property");
-                                JavaType enumWrapperType = new JavaType("com.google.gwt.valuestore.shared.EnumProperty");
+				JavaType wrapperType = new JavaType("com.google.gwt.requestfactory.shared.Property");
+                                JavaType enumWrapperType = new JavaType("com.google.gwt.requestfactory.shared.EnumProperty");
 				// TODO id and version excluded as they specified in the Record interface. Revisit later
 				if ("id".equals(propertyName.getSymbolName()) || "version".equals(propertyName.getSymbolName())) {
 					wrapperType = null;
@@ -362,7 +362,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaType> fieldArgs = new ArrayList<JavaType>();
 			fieldArgs.add(propToGwtSideType.get(propertyName));
 
-			JavaType fieldType = new JavaType(new JavaType("com.google.gwt.valuestore.shared.Property").getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
+			JavaType fieldType = new JavaType(new JavaType("com.google.gwt.requestfactory.shared.Property").getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
                         JavaType rhsType = new JavaType(propToWrapperType.get(propertyName).getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
 
                   String clazz = propToGwtSideType.get(propertyName)
@@ -751,7 +751,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 				jtype = JavaType.LONG_OBJECT;
 			}
 			typeParams.add(jtype);
-			JavaType propRef = new JavaType("com.google.gwt.valuestore.shared.PropertyReference", 0, DataType.TYPE, null, typeParams);
+			JavaType propRef = new JavaType("com.google.gwt.requestfactory.shared.PropertyReference", 0, DataType.TYPE, null, typeParams);
 			method1ParameterTypes.add(jtype.isPrimitive() ? jtype : propRef);
 		}
 

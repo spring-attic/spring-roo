@@ -21,7 +21,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.valuestore.shared.Property;
+import com.google.gwt.requestfactory.shared.Property;
 import com.google.gwt.text.shared.AbstractRenderer;
 
 {{#imports}}import {{=import}};
