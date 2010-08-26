@@ -160,7 +160,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (foreignKey != null && isOneToOne(table, foreignKey)) {
 				String foreignTableName = foreignKey.getForeignTableName();
 				Short keySequence = foreignKey.getKeySequence();
-				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
+				String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
@@ -186,7 +186,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 					if (isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
-						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
+						String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 						
 						JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
@@ -211,7 +211,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 					if (!isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
-						String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
+						String fieldSuffix = keySequence != null  && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(foreignTableName)) + fieldSuffix);
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
@@ -232,7 +232,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (foreignKey != null && !isOneToOne(table, foreignKey)) {
 				// Assume many-to-one multiplicity
 				Short keySequence = foreignKey.getKeySequence();
-				String fieldSuffix = keySequence > 0 ? String.valueOf(keySequence) : "";
+				String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 				String foreignTableName = foreignKey.getForeignTableName();
 				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(foreignTableName, governorTypeDetails.getName().getPackage());
