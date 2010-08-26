@@ -2,6 +2,7 @@ package org.springframework.roo.addon.jdbc.polling.internal;
 
 import java.sql.Driver;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -70,17 +71,20 @@ public class PollingJdbcDriverManager implements JdbcDriverManager, AddOnFinder 
 
 	public SortedMap<String, String> findAddOnsOffering(String driverClassName) {
 		SortedMap<String, String> result = new TreeMap<String, String>();
-		for (Resource resource : obrResourceFinder.getKnownResources()) {
-			outer: for (Capability capability : resource.getCapabilities()) {
-				if ("package".equals(capability.getName())) {
-					Map<?, ?> props = capability.getProperties();
-					Object v = props.get("package");
-					if (v != null) {
-						String vString = v.toString();
-						if (driverClassName.startsWith(vString)) {
-							// Found the JDBC driver
-							result.put(resource.getSymbolicName(), resource.getPresentationName());
-							break outer;
+		List<Resource> resources = obrResourceFinder.getKnownResources();
+		if (resources != null) {
+			for (Resource resource : resources) {
+				outer: for (Capability capability : resource.getCapabilities()) {
+					if ("package".equals(capability.getName())) {
+						Map<?, ?> props = capability.getProperties();
+						Object v = props.get("package");
+						if (v != null) {
+							String vString = v.toString();
+							if (driverClassName.startsWith(vString)) {
+								// Found the JDBC driver
+								result.put(resource.getSymbolicName(), resource.getPresentationName());
+								break outer;
+							}
 						}
 					}
 				}

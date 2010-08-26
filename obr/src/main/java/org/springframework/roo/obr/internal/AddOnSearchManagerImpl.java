@@ -30,7 +30,8 @@ public class AddOnSearchManagerImpl implements AddOnSearchManager {
 			return 0;
 		}
 		if (result.size() == 0) {
-			if (obrResourceFinder.getRepositoryCount() == 0) {
+			Integer repositoryCount = obrResourceFinder.getRepositoryCount();
+			if (repositoryCount == null || repositoryCount == 0) {
 				logger.warning("No remote OBR repositories registered; no search of available " + finder.getFinderTargetPlural() + " performed");
 			} else {
 				logger.warning("No Spring Roo add-ons were found that offer a similar " + finder.getFinderTargetSingular());

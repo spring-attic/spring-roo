@@ -36,7 +36,7 @@ import org.springframework.roo.shell.model.ModelSerializer;
  */
 @Component
 @Service
-@References(value={
+@References(value = {
 	@Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
 	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 })
@@ -47,19 +47,22 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 	
 	public SortedMap<String, String> findAddOnsOffering(String command) {
 		SortedMap<String, String> result = new TreeMap<String, String>();
-		for (Resource resource : obrResourceFinder.getKnownResources()) {
-			outer: for (Capability capability : resource.getCapabilities()) {
-				if ("shell-info-1".equals(capability.getName())) {
-					Map<?, ?> props = capability.getProperties();
-					Object r = props.get("shell-info-1");
-					if (r != null) {
-						String rString = r.toString();
-						List<CommandInfo> commandInfo = modelSerializer.deserializeList(rString);
-						for (CommandInfo info : commandInfo) {
-							for (String commandName : info.getCommandNames()) {
-								if (commandName.startsWith(command) || command.startsWith(commandName)) {
-									result.put(resource.getSymbolicName(), resource.getPresentationName());
-									break outer;
+		List<Resource> resources = obrResourceFinder.getKnownResources();
+		if (resources != null) {
+			for (Resource resource : resources) {
+				outer: for (Capability capability : resource.getCapabilities()) {
+					if ("shell-info-1".equals(capability.getName())) {
+						Map<?, ?> props = capability.getProperties();
+						Object r = props.get("shell-info-1");
+						if (r != null) {
+							String rString = r.toString();
+							List<CommandInfo> commandInfo = modelSerializer.deserializeList(rString);
+							for (CommandInfo info : commandInfo) {
+								for (String commandName : info.getCommandNames()) {
+									if (commandName.startsWith(command) || command.startsWith(commandName)) {
+										result.put(resource.getSymbolicName(), resource.getPresentationName());
+										break outer;
+									}
 								}
 							}
 						}
