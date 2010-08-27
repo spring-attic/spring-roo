@@ -6,6 +6,7 @@ import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.CachingActivityMapper;
 import com.google.gwt.app.place.FilteredActivityMapper;
 import com.google.gwt.app.place.IsWidget;
+import com.google.gwt.app.place.Place;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.PlaceHistoryHandler;
 import com.google.gwt.app.place.ProxyListPlace;
@@ -22,6 +23,7 @@ import com.google.gwt.requestfactory.shared.UserInformationRecord;
 import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -45,6 +47,13 @@ public class Scaffold implements EntryPoint {
 		final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
 		final PlaceController placeController = factory.getPlaceController();
 
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable e) {
+        Window.alert("Error: " + e.getMessage());
+        placeController.goTo(Place.NOWHERE);
+      }
+    });
+    
 		/* Top level UI */
 
 		final ScaffoldShell shell = factory.getShell();
