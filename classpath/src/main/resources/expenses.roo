@@ -1,6 +1,6 @@
 project --topLevelPackage com.springsource.extrack
 
-persistence setup --provider DATANUCLEUS --database HYPERSONIC_IN_MEMORY
+persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 // persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 
 enum type --class ~.gwt.shared.Gender
