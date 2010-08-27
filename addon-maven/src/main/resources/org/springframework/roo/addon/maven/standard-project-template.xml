@@ -9,7 +9,7 @@
 	<properties>
 		<roo.version>1.1.0.M4</roo.version>
 		<spring.version>3.0.4.RELEASE</spring.version>
-		<aspectj.version>1.6.10.M1</aspectj.version>
+		<aspectj.version>1.6.10.M2</aspectj.version>
 		<slf4j.version>1.6.1</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -80,6 +80,11 @@
 			<artifactId>aspectjrt</artifactId>
 			<version>${aspectj.version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
