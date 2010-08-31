@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides {@link FinderMetadata}.
@@ -19,9 +20,8 @@ import org.springframework.roo.project.Path;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class FinderMetadataProvider extends AbstractItdMetadataProvider {
 
@@ -42,6 +42,7 @@ public final class FinderMetadataProvider extends AbstractItdMetadataProvider {
 		// We need to lookup the metadata we depend on
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
@@ -52,7 +53,7 @@ public final class FinderMetadataProvider extends AbstractItdMetadataProvider {
 		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		
-		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, beanInfoMetadata, entityMetadata);
+		return new FinderMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, beanInfoMetadata, entityMetadata, projectMetadata);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

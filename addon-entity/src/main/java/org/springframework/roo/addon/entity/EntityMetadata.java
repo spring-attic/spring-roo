@@ -50,6 +50,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ENTITY = new JavaType("javax.persistence.Entity");
 	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
@@ -60,6 +61,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private boolean noArgConstructor;
 	private String plural;
 	private boolean isGaeEnabled;
+	private boolean isDataNucleusEnabled;
 	
 	// From annotation
 	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
@@ -90,6 +92,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
 		this.isGaeEnabled = projectMetadata.isGaeEnabled();
+		this.isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -110,10 +113,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}			
 		}
+		
+		// Add @Entity annotation if not a mapped superclass
+		builder.addTypeAnnotation(getEntityAnnotation());
 
 		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.
-		FieldMetadata entityManager = getEntityManagerField();
-		builder.addField(entityManager);
+		builder.addField(getEntityManagerField());
 		
 		// Obtain a no-arg constructor, if one is appropriate to provide
 		builder.addConstructor(getNoArgConstructor());
@@ -145,6 +150,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 	
+	public AnnotationMetadata getEntityAnnotation() {
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, ENTITY);
+		if (entityAnnotation != null || isMappedSuperClass()) {
+			return null;
+		}
+
+		return new DefaultAnnotationMetadata(ENTITY, new ArrayList<AnnotationAttributeValue<?>>());
+	}
+	
+	private boolean isMappedSuperClass() {
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.MappedSuperclass")) != null;
+	}
+
 	/**
 	 * Locates the identifier field.
 	 * 
@@ -468,14 +486,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * 
 	 * <p>
 	 * We generally expect the field to be named "entityManager" and be of type javax.persistence.EntityManager. We
-	 * also require it to be public or protected, and annotated with @javax.persistence.PersistenceContext. If there is an
+	 * also require it to be public or protected, and annotated with @PersistenceContext. If there is an
 	 * existing field which doesn't meet these latter requirements, we add an underscore prefix to the "entityManager" name
 	 * and try again, until such time as we come up with a unique name that either meets the requirements or the
 	 * name is not used and we will create it.
-	 * 
-	 * <p>
-	 * Due to the above resolution logic, it is important that ITDs do not rely on a particular 
-	 * 
+	 *  
 	 * @return the entity manager field (never returns null)
 	 */
 	public FieldMetadata getEntityManagerField() {
@@ -812,11 +827,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create method
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
+		if (isDataNucleusEnabled) {
+			addSuppressWarnings(annotations);
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getResultList();");
+		} else {
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).getResultList();");
+		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
@@ -891,18 +908,27 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		if (isDataNucleusEnabled) {
+			addSuppressWarnings(annotations);
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+		} else {
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class).setFirstResult(firstResult).setMaxResults(maxResults).getResultList();");
+		}
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
 		
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+	}
+
+	private void addSuppressWarnings(List<AnnotationMetadata> annotations) {
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
 	}
 	
 	/**

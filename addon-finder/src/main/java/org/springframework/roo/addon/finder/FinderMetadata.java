@@ -16,9 +16,11 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -31,19 +33,16 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
-	private static final JavaType QUERY = new JavaType("javax.persistence.Query");
-
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
+	private boolean isDataNucleusEnabled;
 	
-	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata) {
+	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, ProjectMetadata projectMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
@@ -55,6 +54,7 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
+		this.isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
 		
 		for (String method : entityMetadata.getDynamicFinders()) {
 			builder.addMethod(getDynamicFinderMethod(method, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
@@ -78,6 +78,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		Assert.isTrue(entityMetadata.getDynamicFinders().contains(dynamicFinderMethodName), "Undefined method name '" + dynamicFinderMethodName + "'");
 		
 		JavaSymbolName methodName = new JavaSymbolName(dynamicFinderMethodName);
+
+		List<JavaType> parameters = new ArrayList<JavaType>();
+		parameters.add(governorTypeDetails.getName());
+		JavaType queryType = new JavaType("javax.persistence.Query");
+		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
 		
 		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative
 		// We do not scan the superclass, as the caller is expected to know we'll only scan the current class
@@ -160,7 +165,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(name.getSymbolName().toLowerCase()) + name.getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
 				}
 			}		
-			bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
+			if (isDataNucleusEnabled) {
+				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString());");
+			} else {
+				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString(), " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
+			}
 			
 			for (int i = 0; i < paramTypes.size(); i++) {
 				if (paramTypes.get(i).isCommonCollectionType()) {
@@ -175,8 +184,12 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				}
 			}				
 		} else {
-			bodyBuilder.appendFormalLine(QUERY.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
-			
+			if (isDataNucleusEnabled) {
+				bodyBuilder.appendFormalLine(queryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\");");
+			} else {
+				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
+			}
+		
 			for (JavaSymbolName name : paramNames) {
 				bodyBuilder.appendFormalLine("q.setParameter(\"" + name + "\", " + name + ");");
 			}
@@ -184,9 +197,9 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		bodyBuilder.appendFormalLine("return q;");
 		
-		int modifier = Modifier.PUBLIC;
-		modifier = modifier |= Modifier.STATIC;
-		return new DefaultMethodMetadata(getId(), modifier, methodName, QUERY, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		
+		return new DefaultMethodMetadata(getId(), modifier, methodName, (isDataNucleusEnabled ? queryType : typedQueryType), AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 	
 	public String toString() {

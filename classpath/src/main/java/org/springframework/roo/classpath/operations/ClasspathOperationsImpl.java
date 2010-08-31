@@ -208,7 +208,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		// Verify the requested entity actually exists as a class and is not abstract
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
 		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
+		// Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
 		
 		// Everything is OK to proceed
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);

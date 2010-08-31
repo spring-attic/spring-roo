@@ -225,6 +225,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return false;
 	}
 	
+	/**
+	 * Determines whether the DataNucleus maven plugin exists in the pom.
+	 * 
+	 * @return true if the maven-datanucleus-plugin is present in the pom.xml, otherwise false
+	 */
+	public boolean isDataNucleusEnabled() {
+		for (Plugin buildPlugin : buildPlugins) {
+			if ("maven-datanucleus-plugin".equals(buildPlugin.getArtifactId().getSymbolName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
