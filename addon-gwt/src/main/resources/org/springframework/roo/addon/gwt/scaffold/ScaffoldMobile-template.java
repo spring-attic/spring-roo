@@ -39,71 +39,10 @@ import java.util.Set;
 public class ScaffoldMobile implements EntryPoint {
 
 	public void onModuleLoad() {
-		ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
-
-		/* App controllers and services */
-
-		final EventBus eventBus = factory.getEventBus();
-		final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
-		final PlaceController placeController = factory.getPlaceController();
-
-    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-      public void onUncaughtException(Throwable e) {
-        Window.alert("Error: " + e.getMessage());
-        placeController.goTo(Place.NOWHERE);
-      }
-    });
-    
-		/* Top level UI */
-
-		final ScaffoldMobileShell shell = factory.getMobileShell();
-
-		/* Check for Authentication failures or mismatches */
-
-		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
-
-		/* Add a login widget to the page */
-
-		final LoginWidget login = shell.getLoginWidget();
-		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
-			public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
-				login.setUserInformation(userInformationRecord);
-			}
-		};
-		requestFactory.userInformationRequest().getCurrentUserInformation(Location.getHref()).fire(receiver);
-
-		/* Left side lets us pick from all the types of entities */
-
-		HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
-		placePickerView.setAcceptableValues(getTopPlaces());
-		factory.getListPlacePicker().register(eventBus, placePickerView);
-
-		/*
-		 * The body is run by an ActivitManager that listens for PlaceChange events and finds the corresponding Activity to run
-		 */
-
-		final ActivityMapper mapper = new ScaffoldMobileActivities(new ApplicationMasterActivities(requestFactory, placeController), new ApplicationDetailsActivities(requestFactory, placeController));
-		final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
-
-		activityManager.setDisplay(new Activity.Display() {
-			public void showActivityWidget(IsWidget widget) {
-				shell.getBody().setWidget(widget == null ? null : widget.asWidget());
-			}
-		});
-
-		/* Hide the loading message */
-
-		Element loading = Document.get().getElementById("loading");
-		loading.getParentElement().removeChild(loading);
-
-		/* Browser history integration */
-		PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
-		placeHistoryHandler.register(placeController, eventBus, getTopPlaces().iterator().next()); /* defaultPlace */
-		placeHistoryHandler.handleCurrentHistory();
-
-		/* And show the user the shell */
-
-		RootLayoutPanel.get().add(shell);
+	
+	//Silly having two modules when you can detect browser 
+	//and use deferred binding to use mobile specific shell.
+	
 	}
 
 	// TODO (rjrjr) No reason to make the place objects in advance, just make

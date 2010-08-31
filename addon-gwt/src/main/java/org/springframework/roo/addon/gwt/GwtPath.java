@@ -14,7 +14,8 @@ public enum GwtPath {
 	WEB, 
 	STYLE, 
 	STYLE_CLIENT,
-        SHARED;
+        SHARED,
+        IOC;
 	
 	private String segmentName() {
 		if (GWT_ROOT.equals(this)) {
@@ -35,6 +36,8 @@ public enum GwtPath {
 			return "/gwt/style/client";
 		} else if (SHARED.equals(this)) {
 			return "/gwt/shared";
+		} else if (IOC.equals(this)) {
+			return "/gwt/scaffold/ioc";
 		} else {
 			return "/";
 		}

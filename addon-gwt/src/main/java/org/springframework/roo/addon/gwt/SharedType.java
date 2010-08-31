@@ -11,8 +11,9 @@ import org.springframework.roo.project.ProjectMetadata;
  */
 public enum SharedType {
 	APP_ENTITY_TYPES_PROCESSOR(GwtPath.GWT_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor"), 
-	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory"), 
-	FACTORY(GwtPath.GWT_SCAFFOLD, "ScaffoldFactory", "factory", "ScaffoldFactory"), 
+	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory"),
+	IOC_INJECTOR(GwtPath.IOC, "ScaffoldInjector", "injector", "ScaffoldInjector"),
+	IOC_MODULE(GwtPath.IOC, "ScaffoldModule", "module", "ScaffoldModule"),
 	// PLACE_HISTORY_HANDLER(GwtPath.GWT_SCAFFOLD, "ScaffoldPlaceHistoryHandler", "placeHistoryHandler", "ScaffoldPlaceHistoryHandler.vm"), 
 	LIST_PLACE_RENDERER(GwtPath.GWT_SCAFFOLD, "ApplicationListPlaceRenderer", "listPlaceRenderer", "ApplicationListPlaceRenderer"), 
 	MASTER_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationMasterActivities", "masterActivities", "ApplicationMasterActivities"), 

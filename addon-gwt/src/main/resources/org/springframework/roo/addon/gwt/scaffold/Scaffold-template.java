@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.requestfactory.shared.Record;
 import com.google.gwt.requestfactory.shared.SyncResult;
+import __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc.ScaffoldInjector;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,15 +38,16 @@ import java.util.Set;
  * Application for browsing entities.
  */
 public class Scaffold implements EntryPoint {
+
+	final private ScaffoldInjector injector = GWT.create(ScaffoldInjector.class);
 	
 	public void onModuleLoad() {
-		ScaffoldFactory factory = GWT.create(ScaffoldFactory.class);
 
 		/* App controllers and services */
 
-		final EventBus eventBus = factory.getEventBus();
-		final ApplicationRequestFactory requestFactory = factory.getRequestFactory();
-		final PlaceController placeController = factory.getPlaceController();
+		final EventBus eventBus = injector.getEventBus();
+		final ApplicationRequestFactory requestFactory = injector.getRequestFactory();
+		final PlaceController placeController = injector.getPlaceController();
 
     GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
       public void onUncaughtException(Throwable e) {
@@ -56,7 +58,7 @@ public class Scaffold implements EntryPoint {
     
 		/* Top level UI */
 
-		final ScaffoldShell shell = factory.getShell();
+		final ScaffoldShell shell = injector.getShell();
 
 		/* Display loading notifications when we touch the network. */
 
@@ -91,7 +93,7 @@ public class Scaffold implements EntryPoint {
 
 		HasConstrainedValue<ProxyListPlace> listPlacePickerView = shell.getPlacesBox();
 		listPlacePickerView.setAcceptableValues(getTopPlaces());
-		factory.getListPlacePicker().register(eventBus, listPlacePickerView);
+		injector.getListPlacePicker().register(eventBus, listPlacePickerView);
 
 		/*
 		 * Top of the screen is the master list of a master / detail UI. Set it up to filter ProxyPlace instances to an appropriate ProxyListPlace, and put a cache on it to keep the same activity
@@ -99,7 +101,7 @@ public class Scaffold implements EntryPoint {
 		 */
 
 		CachingActivityMapper cached = new CachingActivityMapper(new ApplicationMasterActivities(requestFactory, placeController));
-		ActivityMapper masterActivityMap = new FilteredActivityMapper(factory.getProxyPlaceToListPlace(), cached);
+		ActivityMapper masterActivityMap = new FilteredActivityMapper(injector.getProxyPlaceToListPlace(), cached);
 		final ActivityManager masterActivityManager = new ActivityManager(masterActivityMap, eventBus);
 
 		masterActivityManager.setDisplay(new Activity.Display() {
@@ -124,7 +126,7 @@ public class Scaffold implements EntryPoint {
 		loading.getParentElement().removeChild(loading);
 
 		/* Browser history integration */
-		PlaceHistoryHandler placeHistoryHandler = factory.getPlaceHistoryHandler();
+		PlaceHistoryHandler placeHistoryHandler = injector.getPlaceHistoryHandler();
 		placeHistoryHandler.register(placeController, eventBus,
 		getTopPlaces().iterator().next()); /* defaultPlace */
 		placeHistoryHandler.handleCurrentHistory();

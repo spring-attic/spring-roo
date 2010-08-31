@@ -6,6 +6,7 @@
   <inherits name='__TOP_LEVEL_PACKAGE__.gwt.style.Style'/>
   <inherits name="com.google.gwt.user.cellview.CellView" />
   <inherits name='com.google.gwt.logging.Logging'/>
+  <inherits name="com.google.gwt.inject.Inject"/>
 
   <source path='scaffold'/>
   <source path='request'/>

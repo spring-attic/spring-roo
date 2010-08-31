@@ -1,0 +1,66 @@
+package {{=packageName}};
+
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
+import com.google.gwt.app.place.ProxyListPlace;
+import com.google.gwt.app.place.ProxyListPlacePicker;
+import com.google.gwt.app.place.ProxyPlace;
+import com.google.gwt.app.place.ProxyPlaceToListPlace;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+{{#imports}}import {{=import}};
+{{/imports}}
+
+public class {{=className}} extends AbstractGinModule {
+
+	@Override
+	protected void configure() {}
+	
+	@Provides @Singleton
+	EventBus provideEventBus() {
+		return new HandlerManager(null);
+	}
+	
+	@Provides @Singleton
+	{{=requestFactory}} provideRequestFactory(EventBus eventBus) {
+		{{=requestFactory}} requestFactory = GWT.create({{=requestFactory}}.class);
+		requestFactory.init(eventBus);		
+		return requestFactory;
+	}
+	
+	@Provides @Singleton
+	PlaceController providePlaceController(EventBus eventBus) {
+		return new PlaceController(eventBus);
+	}
+	
+	@Provides @Singleton
+	ProxyPlace.Tokenizer provideProxyPlaceTokenizer({{=requestFactory}} requestFactory) {
+		return new ProxyPlace.Tokenizer(requestFactory);
+	}
+	
+	@Provides @Singleton
+	ProxyListPlace.Tokenizer provideProxyListPlaceTokenizer({{=requestFactory}} requestFactory) {
+		return new ProxyListPlace.Tokenizer(requestFactory);
+	}
+	
+	@Provides @Singleton
+	PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> providePlaceHistoryHandler(PlaceHistoryFactory placeHistoryFactory) {
+		PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> scaffoldPlaceHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
+		scaffoldPlaceHistoryHandler.setFactory(placeHistoryFactory);
+		return scaffoldPlaceHistoryHandler;
+	}
+		
+	@Provides @Singleton
+	ProxyPlaceToListPlace provideProxyPlaceToListPlace({{=requestFactory}} requestFactory) {
+		return new ProxyPlaceToListPlace(requestFactory);
+	}
+	
+	@Provides @Singleton
+	ProxyListPlacePicker provideProxyListPlacePicker(ProxyPlaceToListPlace proxyPlaceToListPlace, PlaceController placeController) {
+		return new ProxyListPlacePicker(placeController, proxyPlaceToListPlace);
+	}
+}

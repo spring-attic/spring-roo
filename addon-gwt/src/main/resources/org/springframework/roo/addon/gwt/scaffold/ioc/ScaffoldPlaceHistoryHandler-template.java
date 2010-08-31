@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc;
 
 import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
 
@@ -8,7 +8,7 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * the browser history system &mdash; that is, it makes the browser's back and
  * forth buttons work for you, and also makes each spot in your app
  * bookmarkable. The instance used by this app is available via
- * {@link ScaffoldFactory#getPlaceHistoryHandler()}.
+ * {@link PlaceHistoryFactory#getPlaceHistoryHandler()}.
  * 
  * <p>
  * The simplest way to make new {@link com.google.gwt.app.place.Place Place}
@@ -20,13 +20,13 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * This code generated object looks to both the {@literal @}WithTokenizers
  * annotation and the factory to infer the types of
  * {@link com.google.gwt.app.place.Place Place}s your app can navigate to. In
- * this case it will find the {@link ScaffoldFactory#getProxyListPlaceTokenizer()} and
- * {@link ScaffoldFactory#getProxyPlaceTokenizer()} methods, and so be able to handle
+ * this case it will find the {@link PlaceHistoryFactory#getProxyListPlaceTokenizer()} and
+ * {@link PlaceHistoryFactory#getProxyPlaceTokenizer()} methods, and so be able to handle
  * {@link com.google.gwt.app.place.ProxyListPlace ProxyListPlace}s (which show
  * all entities of a particular type) and
  * {@link com.google.gwt.app.place.ProxyPlace ProxyPlace}s (which give access to
  * an individual entity).
  */
 // @WithTokenizers({MyNewPlace.Tokenizer, MyOtherNewPlace.Tokenizer})
-interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<ScaffoldFactory> {
+interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> {
 }

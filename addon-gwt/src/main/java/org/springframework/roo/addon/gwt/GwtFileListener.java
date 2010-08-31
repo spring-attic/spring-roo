@@ -107,7 +107,8 @@ public class GwtFileListener implements FileEventListener {
 		updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
 		updateApplicationRequestFactory(fileManager, projectMetadata);
 		updateListPlaceRenderer(fileManager, projectMetadata);
-		updateFactory();
+		updateModule();
+		updateInjector();
 		updateMasterActivities();
 		updateDetailsActivities();
 		updateMobileActivities();
@@ -227,17 +228,30 @@ public class GwtFileListener implements FileEventListener {
 			fileManager.delete(canonicalPath);
 		}
 	}
-
-	public void updateFactory() {
-		SharedType type = SharedType.FACTORY;
+	
+	public void updateInjector() {
+		SharedType type = SharedType.IOC_INJECTOR;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+		addReference(dataDictionary, SharedType.IOC_MODULE);
 		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-
+		
 		try {
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
-		}
+		}	
+	}
+	
+	public void updateModule() {
+		SharedType type = SharedType.IOC_MODULE;
+		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+		
+		try {
+			writeWithTemplate(type, dataDictionary);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}	
 	}
 
 	public void updateMasterActivities() {
