@@ -70,6 +70,7 @@
 	<module>addon-dbre</module> 
 	<module>addon-creator</module>
 	<module>addon-json</module>
+	<module>addon-op4j</module>
         <module>annotations</module>
     </modules>
 

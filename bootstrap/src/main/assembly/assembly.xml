@@ -166,6 +166,8 @@
                 <exclude>derby-*.jar</exclude>
                 <exclude>org.springframework.roo.wrapping.hsqldb-*.jar</exclude>
                 <exclude>org.springframework.roo.wrapping.jtopen-*.jar</exclude>
+                <!-- temporary excludes until addons are ready for release -->
+                <exclude>org.springframework.roo.addon.op4j-*.jar</exclude>
             </excludes>
         </fileSet>
 	</fileSets>
