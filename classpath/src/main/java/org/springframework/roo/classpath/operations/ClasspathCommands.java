@@ -247,6 +247,8 @@ public class ClasspathCommands implements CommandMarker {
 
 		if (mappedSuperclass) {
 			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.MappedSuperclass"), new ArrayList<AnnotationAttributeValue<?>>()));
+		} else {
+			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Entity"), new ArrayList<AnnotationAttributeValue<?>>()));
 		}
 		if (serializable) {
 			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), entityAttrs));

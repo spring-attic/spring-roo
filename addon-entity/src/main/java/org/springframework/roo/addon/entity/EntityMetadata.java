@@ -50,7 +50,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String ENTITY_MANAGER_METHOD_NAME = "entityManager";
 	private static final String PROVIDES_TYPE_STRING = EntityMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private static final JavaType ENTITY = new JavaType("javax.persistence.Entity");
 	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType EMBEDDED_ID = new JavaType("javax.persistence.EmbeddedId");
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
@@ -114,9 +113,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}			
 		}
 		
-		// Add @Entity annotation if not a mapped superclass
-		builder.addTypeAnnotation(getEntityAnnotation());
-
 		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.
 		builder.addField(getEntityManagerField());
 		
@@ -149,20 +145,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
-	public AnnotationMetadata getEntityAnnotation() {
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, ENTITY);
-		if (entityAnnotation != null || isMappedSuperClass()) {
-			return null;
-		}
-
-		return new DefaultAnnotationMetadata(ENTITY, new ArrayList<AnnotationAttributeValue<?>>());
-	}
-	
-	private boolean isMappedSuperClass() {
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.MappedSuperclass")) != null;
-	}
-
+		
 	/**
 	 * Locates the identifier field.
 	 * 
