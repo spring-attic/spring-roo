@@ -417,13 +417,13 @@ public class JpaOperationsImpl implements JpaOperations {
 		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 		if (StringUtils.hasText(databaseName)) {
 			if (database == JdbcDatabase.ORACLE) {
-				//Oracle uses a different connection URL - see ROO-1203
+				// Oracle uses a different connection URL - see ROO-1203
 				connectionString += databaseName.startsWith(":") ? databaseName : ":" + databaseName;
 			} else {
 				connectionString += databaseName.startsWith("/") ? databaseName : "/" + databaseName;
 			}
 		}
-		
+
 		props.put("database.url", connectionString);
 
 		switch (database) {
