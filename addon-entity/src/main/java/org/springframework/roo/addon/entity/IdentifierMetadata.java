@@ -366,11 +366,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		for (FieldMetadata field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
-			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+			JavaType fieldType = field.getFieldType();
+			if (fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.LONG_PRIMITIVE) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " != other." + fieldName + ") return false;");
-			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("if (Double.doubleToLongBits(" + fieldName + ") != Double.doubleToLongBits(other." + fieldName + ")) return false;");
-			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine("if (Float.floatToIntBits(" + fieldName + ") != Float.floatToIntBits(other." + fieldName + ")) return false;");
 			} else {
 				bodyBuilder.appendFormalLine("if (" + fieldName + " == null) {");
@@ -408,15 +409,16 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		String header = "result = prime * result + ";
 		for (FieldMetadata field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
-			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
+			JavaType fieldType = field.getFieldType();
+			if (fieldType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine(header + "(" + fieldName + " ? 1231 : 1237);");
-			} else if (field.getFieldType().equals(JavaType.INT_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.INT_PRIMITIVE) || fieldType.equals(JavaType.SHORT_PRIMITIVE) || fieldType.equals(JavaType.CHAR_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine(header + fieldName + ";");
-			} else if (field.getFieldType().equals(JavaType.LONG_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.LONG_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine(header + "(int) (" + fieldName + " ^ (" + fieldName + " >>> 32));");
-			} else if (field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.DOUBLE_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine(header + "(int) (Double.doubleToLongBits(" + fieldName + ") ^ (Double.doubleToLongBits(" + fieldName + ") >>> 32));");
-			} else if (field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE)) {
+			} else if (fieldType.equals(JavaType.FLOAT_PRIMITIVE)) {
 				bodyBuilder.appendFormalLine(header + "Float.floatToIntBits(" + fieldName + ");");
 			} else {
 				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + fieldName + ".hashCode());");
