@@ -90,8 +90,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.parent = parent;
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
-		this.isGaeEnabled = projectMetadata.isGaeEnabled();
-		this.isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+		isGaeEnabled = projectMetadata.isGaeEnabled();
+		isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -104,11 +104,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				List<JavaSymbolName> attributeNames = annotation.getAttributeNames();
 				if (!attributeNames.contains(new JavaSymbolName("identifierType")) && !attributeNames.contains(new JavaSymbolName("identifierField")) && !attributeNames.contains(new JavaSymbolName("identifierColumn"))) {
 					// User has not specified any identifier information, so let's use what IdentifierService offered
-					Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity " + governorTypeDetails.getName() + " (should only be 1 identifier field given this is an entity, not an Identifier class)");
+					Assert.isTrue(identifierServiceResult.size() == 1, "Identifier service indicates " + identifierServiceResult.size() + " fields illegally for a entity " + governorTypeDetails.getName() + " (should only be one identifier field given this is an entity, not an Identifier class)");
 					Identifier id = identifierServiceResult.iterator().next();
-					this.identifierColumn = id.getColumnName();
-					this.identifierField = id.getFieldName().getSymbolName();
-					this.identifierType = id.getFieldType();
+					identifierColumn = id.getColumnName();
+					identifierField = id.getFieldName().getSymbolName();
+					identifierType = id.getFieldType();
 				}
 			}			
 		}
@@ -146,6 +146,115 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 		
+	/**
+	 * Locates the entity manager field that should be used.
+	 * 
+	 * <p>
+	 * If a parent is defined, it must provide the field.
+	 * 
+	 * <p>
+	 * We generally expect the field to be named "entityManager" and be of type javax.persistence.EntityManager. We
+	 * also require it to be public or protected, and annotated with @PersistenceContext. If there is an
+	 * existing field which doesn't meet these latter requirements, we add an underscore prefix to the "entityManager" name
+	 * and try again, until such time as we come up with a unique name that either meets the requirements or the
+	 * name is not used and we will create it.
+	 *  
+	 * @return the entity manager field (never returns null)
+	 */
+	public FieldMetadata getEntityManagerField() {
+		if (parent != null) {
+			// The parent is required to guarantee this is available
+			return parent.getEntityManagerField();
+		}
+		
+		// Need to locate it ourself
+		int index = -1;
+		while (true) {
+			// Compute the required field name
+			index++;
+			String fieldName = "";
+			for (int i = 0; i < index; i++) {
+				fieldName = fieldName + "_";
+			}
+			fieldName = fieldName + "entityManager";
+			
+			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
+			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
+			if (candidate != null) {
+				// Verify if candidate is suitable
+				
+				if (!Modifier.isPublic(candidate.getModifier()) && !Modifier.isProtected(candidate.getModifier()) && (Modifier.TRANSIENT != candidate.getModifier())) {
+					// Candidate is not public and not protected and not simply a transient field (in which case subclasses
+					// will see the inherited field), so any subsequent subclasses won't be able to see it. Give up!
+					continue;
+				}
+				
+				if (!candidate.getFieldType().equals(ENTITY_MANAGER)) {
+					// Candidate isn't an EntityManager, so give up
+					continue;
+				}
+				
+				if (MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), PERSISTENCE_CONTEXT) == null) {
+					// Candidate doesn't have a PersistenceContext annotation, so give up
+					continue;
+				}
+				
+				// If we got this far, we found a valid candidate
+				return candidate;
+			}
+			
+			// Candidate not found, so let's create one
+			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+			AnnotationMetadata annotation = new DefaultAnnotationMetadata(PERSISTENCE_CONTEXT, new ArrayList<AnnotationAttributeValue<?>>());
+			annotations.add(annotation);
+			
+			return new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
+		}
+	}
+	
+	/**
+	 * Locates the no-arg constructor for this class, if available.
+	 * 
+	 * <p>
+	 * If a class defines a no-arg constructor, it is returned (irrespective of access modifiers).
+	 * 
+	 * <p>
+	 * If a class does not define a no-arg constructor, one might be created. It will only be created if
+	 * the {@link #noArgConstructor} is true AND there is at least one other constructor declared
+	 * in the source file. If a constructor is created, it will have a public access modifier.
+	 * 
+	 * @return the constructor (may return null if no constructor is to be produced)
+	 */
+	public ConstructorMetadata getNoArgConstructor() {
+		// Compute the mutator method parameters
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+
+		// Search for an existing constructor
+		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
+		if (result != null) {
+			// Found an existing no-arg constructor on this class, so return it
+			return result;
+		}
+		
+		// To get this far, the user did not define a no-arg constructor
+		
+		if (!noArgConstructor) {
+			// This metadata instance is prohibited from making a no-arg constructor
+			return null;
+		}
+		
+		if (governorTypeDetails.getDeclaredConstructors().size() == 0) {
+			// Default constructor will apply, so quit
+			return null;
+		}
+
+		// Create the constructor
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("super();");
+		
+		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+	}
+	
 	/**
 	 * Locates the identifier field.
 	 * 
@@ -224,7 +333,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 					if (value instanceof EnumAttributeValue) {
 						EnumAttributeValue enumAttributeValue = (EnumAttributeValue) value;
 						EnumDetails details = enumAttributeValue.getValue();
-						if ("javax.persistence.InheritanceType".equals(details.getType().getFullyQualifiedTypeName())) {
+						if (details != null && "javax.persistence.InheritanceType".equals(details.getType().getFullyQualifiedTypeName())) {
 							if ("TABLE_PER_CLASS".equals(details.getField().getSymbolName())) {
 								generationType = "TABLE";
 							}
@@ -238,9 +347,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			annotations.add(generatedValueAnnotation);
 
 			String columnName = idField.getSymbolName();
-			if (!"".equals(this.identifierColumn)) {
+			if (!"".equals(identifierColumn)) {
 				// User has specified an alternate column name
-				columnName = this.identifierColumn;
+				columnName = identifierColumn;
 			}
 
 			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -462,115 +571,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
-	 * Locates the entity manager field that should be used.
-	 * 
-	 * <p>
-	 * If a parent is defined, it must provide the field.
-	 * 
-	 * <p>
-	 * We generally expect the field to be named "entityManager" and be of type javax.persistence.EntityManager. We
-	 * also require it to be public or protected, and annotated with @PersistenceContext. If there is an
-	 * existing field which doesn't meet these latter requirements, we add an underscore prefix to the "entityManager" name
-	 * and try again, until such time as we come up with a unique name that either meets the requirements or the
-	 * name is not used and we will create it.
-	 *  
-	 * @return the entity manager field (never returns null)
-	 */
-	public FieldMetadata getEntityManagerField() {
-		if (parent != null) {
-			// The parent is required to guarantee this is available
-			return parent.getEntityManagerField();
-		}
-		
-		// Need to locate it ourself
-		int index = -1;
-		while (true) {
-			// Compute the required field name
-			index++;
-			String fieldName = "";
-			for (int i = 0; i < index; i++) {
-				fieldName = fieldName + "_";
-			}
-			fieldName = fieldName + "entityManager";
-			
-			JavaSymbolName fieldSymbolName = new JavaSymbolName(fieldName);
-			FieldMetadata candidate = MemberFindingUtils.getField(governorTypeDetails, fieldSymbolName);
-			if (candidate != null) {
-				// Verify if candidate is suitable
-				
-				if (!Modifier.isPublic(candidate.getModifier()) && !Modifier.isProtected(candidate.getModifier()) && (Modifier.TRANSIENT != candidate.getModifier())) {
-					// Candidate is not public and not protected and not simply a transient field (in which case subclasses
-					// will see the inherited field), so any subsequent subclasses won't be able to see it. Give up!
-					continue;
-				}
-				
-				if (!candidate.getFieldType().equals(ENTITY_MANAGER)) {
-					// Candidate isn't an EntityManager, so give up
-					continue;
-				}
-				
-				if (MemberFindingUtils.getAnnotationOfType(candidate.getAnnotations(), PERSISTENCE_CONTEXT) == null) {
-					// Candidate doesn't have a PersistenceContext annotation, so give up
-					continue;
-				}
-				
-				// If we got this far, we found a valid candidate
-				return candidate;
-			}
-			
-			// Candidate not found, so let's create one
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			AnnotationMetadata annotation = new DefaultAnnotationMetadata(PERSISTENCE_CONTEXT, new ArrayList<AnnotationAttributeValue<?>>());
-			annotations.add(annotation);
-			
-			return new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
-		}
-	}
-	
-	/**
-	 * Locates the no-arg constructor for this class, if available.
-	 * 
-	 * <p>
-	 * If a class defines a no-arg constructor, it is returned (irrespective of access modifiers).
-	 * 
-	 * <p>
-	 * If a class does not define a no-arg constructor, one might be created. It will only be created if
-	 * the {@link #noArgConstructor} is true AND there is at least one other constructor declared
-	 * in the source file. If a constructor is created, it will have a public access modifier.
-	 * 
-	 * @return the constructor (may return null if no constructor is to be produced)
-	 */
-	public ConstructorMetadata getNoArgConstructor() {
-		// Compute the mutator method parameters
-		List<JavaType> paramTypes = new ArrayList<JavaType>();
-
-		// Search for an existing constructor
-		ConstructorMetadata result = MemberFindingUtils.getDeclaredConstructor(governorTypeDetails, paramTypes);
-		if (result != null) {
-			// Found an existing no-arg constructor on this class, so return it
-			return result;
-		}
-		
-		// To get this far, the user did not define a no-arg constructor
-		
-		if (!noArgConstructor) {
-			// This metadata instance is prohibited from making a no-arg constructor
-			return null;
-		}
-		
-		if (governorTypeDetails.getDeclaredConstructors().size() == 0) {
-			// Default constructor will apply, so quit
-			return null;
-		}
-
-		// Create the constructor
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("super();");
-		
-		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
-	}
-	
-	/**
 	 * @return the merge method (may return null)
 	 */
 	public MethodMetadata getPersistMethod() {
@@ -689,8 +689,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (isGaeEnabled) {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
 		}
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes);
-		annotations.add(annotation);
+		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
 	}
 	
 	/**
