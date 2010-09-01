@@ -321,11 +321,24 @@ public class GwtMetadata extends AbstractMetadataItem {
                                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
                                 boolean isEnum = ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 
-				boolean isDomainObject = !isEnum && !isShared(returnType) && !(returnType.equals(JavaType.BOOLEAN_OBJECT) || returnType.equals(JavaType.INT_OBJECT) || returnType.equals(JavaType.LONG_OBJECT) || returnType.equals(JavaType.STRING_OBJECT) || returnType.equals(JavaType.DOUBLE_OBJECT) || returnType.equals(JavaType.FLOAT_OBJECT) || returnType.equals(new JavaType("java.util.Date")));
+				boolean isDomainObject = !isEnum && !isShared(returnType) && !(returnType.equals(JavaType.BOOLEAN_OBJECT) || returnType.equals(JavaType.INT_OBJECT) || returnType.isPrimitive() ||
+                                    returnType.equals(JavaType.LONG_OBJECT) || returnType.equals(JavaType.STRING_OBJECT) || returnType.equals(JavaType.DOUBLE_OBJECT) || returnType.equals(JavaType.FLOAT_OBJECT) || returnType.equals(new JavaType("java.util.Date")));
 				if (isDomainObject) {
 					gwtSideType = getDestinationJavaType(returnType, MirrorType.RECORD);
 				} else {
 					gwtSideType = returnType;
+                                        if (returnType.isPrimitive()) {
+                                          if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+                                            gwtSideType = JavaType.BOOLEAN_OBJECT;
+                                          }
+                                          if (returnType.equals(JavaType.INT_PRIMITIVE)) {
+                                            gwtSideType = JavaType.INT_OBJECT;
+                                          }if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+                                            gwtSideType = JavaType.DOUBLE_OBJECT;
+                                          }if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
+                                            gwtSideType = JavaType.LONG_OBJECT;
+                                          }
+                                        }
 					// Handle the identifier special case
 					if (idPropertyName.equals(propertyName) && idLongOnServerSide) {
 						gwtSideType = JavaType.LONG_OBJECT;
@@ -338,6 +351,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 					if (gwtSideType.getFullyQualifiedTypeName().equals("java.lang.Long") && idLongOnServerSide) {
 						gwtSideType = JavaType.LONG_OBJECT;
 					}
+
 				}
 
                                 if (isEnum) {
@@ -814,7 +828,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
                 public boolean isPrimitive() {
-                        return isDate() || isString()|| type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT) || isBoolean();
+                        return type.isPrimitive() || isDate() || isString()|| type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT) || isBoolean();
                 }
 
                 public boolean isString() {
