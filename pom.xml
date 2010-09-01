@@ -71,6 +71,7 @@
 	<module>addon-creator</module>
 	<module>addon-json</module>
 	<module>addon-op4j</module>
+	<module>addon-git</module>
         <module>annotations</module>
     </modules>
 

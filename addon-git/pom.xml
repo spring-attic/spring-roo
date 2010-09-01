@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+		<version>1.1.0.M4</version>
+		<relativePath>../osgi-roo-bundle</relativePath>
+	</parent>
+	<artifactId>org.springframework.roo.addon.git</artifactId>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Addon - GIT</name>
+	<repositories>
+		<repository>
+			<id>jgit-repository</id>
+			<url>http://download.eclipse.org/jgit/maven</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<!-- OSGi -->
+		<dependency>
+        		<groupId>org.osgi</groupId>
+        		<artifactId>org.osgi.core</artifactId>
+        	</dependency>
+        	<dependency>
+        		<groupId>org.osgi</groupId>
+        		<artifactId>org.osgi.compendium</artifactId>
+        	</dependency>
+        	<!-- Apache Felix -->
+        	<dependency>
+        		<groupId>org.apache.felix</groupId>
+        		<artifactId>org.apache.felix.scr.annotations</artifactId>
+        	</dependency>
+		<!-- Roo -->
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.classpath</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.file.monitor</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.file.undo</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.metadata</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.model</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.process.manager</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.project</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.shell</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo</groupId>
+			<artifactId>org.springframework.roo.support</artifactId>
+			<version>${roo.version}</version>
+			<type>bundle</type>
+		</dependency>
+		<!-- JGit -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>0.8.4</version>
+		</dependency>
+	</dependencies>
+</project>
