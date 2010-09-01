@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -103,7 +104,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	
 	public boolean executeCommand(String line) {
 		// another command was attempted
-    	setShellStatus(ShellStatus.PARSING);
+    	setShellStatus(ShellStatus.Status.PARSING);
 
     	ExecutionStrategy executionStrategy = getExecutionStrategy();
     	boolean flashedMessage = false;
@@ -148,16 +149,16 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			// convert any TAB characters to whitespace (ROO-527)
 			line = line.replace('\t', ' ');
 			if ("".equals(line.trim())) {
-		    	setShellStatus(ShellStatus.EXECUTION_COMPLETE);
+				setShellStatus(Status.EXECUTION_SUCCESS);
 				return true;
 			}
 			ParseResult parseResult = getParser().parse(line);
 			if (parseResult == null) {
 				return false;
 			} else {
-				setShellStatus(ShellStatus.EXECUTING);
+				setShellStatus(Status.EXECUTING);
 		    	Object result = executionStrategy.execute(parseResult);
-		    	setShellStatus(ShellStatus.EXECUTION_RESULT_PROCESSING);
+		    	setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
 		    	if (result != null) {
 		    		if (result instanceof ExitShellRequest) {
 		    			exitShellRequest = (ExitShellRequest) result;
@@ -170,8 +171,11 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		    		}
 		    	}
 		    }
+			logCommandIfRequired(line, true);
+			setShellStatus(Status.EXECUTION_SUCCESS, line);
+			return true;
 		} catch (RuntimeException ex) {
-	    	setShellStatus(ShellStatus.EXECUTION_RESULT_PROCESSING);
+	    	setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
 			// We rely on execution strategy to log it
 			// Throwable root = ExceptionUtils.extractRootCause(ex);
 			// logger.log(Level.FINE, root.getMessage());
@@ -180,10 +184,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	    	} catch (Exception ignoreIt) {}
 			return false;
 		} finally {
-			setShellStatus(ShellStatus.EXECUTION_COMPLETE);
+			setShellStatus(Status.EXECUTION_FAILED, line);
 		}
-		logCommandIfRequired(line, true);
-		return true;
 	}
 	
 	/**

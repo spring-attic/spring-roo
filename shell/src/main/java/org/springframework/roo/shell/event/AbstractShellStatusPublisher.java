@@ -3,6 +3,7 @@ package org.springframework.roo.shell.event;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -15,7 +16,7 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractShellStatusPublisher implements ShellStatusProvider {
 	
 	protected Set<ShellStatusListener> shellStatusListeners = new CopyOnWriteArraySet<ShellStatusListener>();
-	protected ShellStatus shellStatus = ShellStatus.STARTING;
+	protected ShellStatus shellStatus = new ShellStatus(Status.STARTING);
 	
 	public final void addShellStatusListener(ShellStatusListener shellStatusListener) {
 		Assert.notNull(shellStatusListener, "Status listener required");
@@ -37,18 +38,29 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 		}
 	}
 	
-	protected void setShellStatus(ShellStatus shellStatus) {
+	protected void setShellStatus(Status shellStatus) {
+		setShellStatus(shellStatus, null);
+	}
+	
+	protected void setShellStatus(Status shellStatus, String msg) {
 		Assert.notNull(shellStatus, "Shell status required");
 		
 		synchronized (this.shellStatus) {
-			if (this.shellStatus == shellStatus) {
+			ShellStatus st;
+			if (msg == null || msg.length() == 0) {
+				st = new ShellStatus(shellStatus);
+			} else {
+				st = new ShellStatus(shellStatus, msg);
+			}
+			
+			if (this.shellStatus.equals(st)) {
 				return;
 			}
 			
 			for (ShellStatusListener listener : shellStatusListeners) {
-				listener.onShellStatusChange(this.shellStatus, shellStatus);
+				listener.onShellStatusChange(this.shellStatus, st);
 			}
-			this.shellStatus = shellStatus;
+			this.shellStatus = st;
 		}
 	}
 	
