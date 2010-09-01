@@ -371,18 +371,22 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		if (references.size() == 1) {
 			// Add @JoinColumn annotation
-			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			joinColumnAttributes.add(new StringAttributeValue(NAME, references.first().getLocalColumnName()));
-			joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, references.first().getForeignColumnName()));
-			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
-			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
-			annotations.add(joinColumnAnnotation);
+			Reference reference = references.first();
+			annotations.add(getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), nullable));
 		} else {
 			// Add @JoinColumns annotation
 			annotations.add(getJoinColumnsAnnotation(references, nullable));
 		}
 
 		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, fieldName, fieldType, null, annotations);
+	}
+
+	private AnnotationMetadata getJoinColumnAnnotation(String localColumnName, String foreignColumnName, boolean nullable) {
+		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		joinColumnAttributes.add(new StringAttributeValue(NAME, localColumnName));
+		joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, foreignColumnName));
+		addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
+		return new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
 	}
 
 	private void addOtherJoinColumnAttributes(boolean nullable, List<AnnotationAttributeValue<?>> joinColumnAttributes) {
@@ -396,11 +400,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 
 		for (Reference reference : references) {
-			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumnName()));
-			joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumnName()));
-			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
-			AnnotationMetadata joinColumnAnnotation = new DefaultAnnotationMetadata(JOIN_COLUMN, joinColumnAttributes);
+			AnnotationMetadata joinColumnAnnotation = getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), nullable);
 			arrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation));
 		}
 
