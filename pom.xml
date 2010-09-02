@@ -59,19 +59,19 @@
         <module>addon-backup</module>
         <module>addon-serializable</module>
         <module>addon-web-mvc-controller</module>
-	<module>addon-web-mvc-embedded</module>
+	    <module>addon-web-mvc-embedded</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-security</module>
-	<module>addon-solr</module>
+	    <module>addon-solr</module>
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
-	<module>addon-gwt</module>
-	<module>addon-jdbc</module> 
-	<module>addon-dbre</module> 
-	<module>addon-creator</module>
-	<module>addon-json</module>
-	<module>addon-op4j</module>
-	<module>addon-git</module>
+	    <module>addon-gwt</module>
+	    <module>addon-jdbc</module> 
+	    <module>addon-dbre</module> 
+	    <module>addon-creator</module>
+	    <module>addon-json</module>
+	    <module>addon-op4j</module>
+	    <module>addon-git</module>
         <module>annotations</module>
     </modules>
 
@@ -153,14 +153,6 @@
 
     <dependencies>
         <!-- JUnits with repo1 artifact/groupId required due to SureFire hard-coded dependency -->
-        <!--
-        <dependency>
-            <groupId>org.junit</groupId>
-            <artifactId>com.springsource.org.junit</artifactId>
-            <version>4.5.0</version>
-            <scope>test</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -461,7 +453,7 @@
                     <links>
                         <link>http://java.sun.com/javase/6/docs/api/</link>
                         <link>http://junit.sourceforge.net/javadoc/</link>
-                        <link>http://static.springsource.org/spring/docs/3.0.0.RELEASE/api/</link>
+                        <link>http://static.springsource.org/spring/docs/3.0.x/javadoc-api/</link>
                         <link>http://jline.sourceforge.net/javadoc/</link>
                         <link>http://jansi.fusesource.org/maven/1.1/apidocs/</link>
                     </links>
@@ -490,9 +482,6 @@
     </reporting>
 
     <properties>
-        <pom.version.osgi>0.2.0.SNAPSHOT</pom.version.osgi>
-        <spring.version>3.0.3.RELEASE</spring.version>
-        <spring.version.osgi>[2.5.6.A]</spring.version.osgi>
         <roo.version>1.1.0.M4</roo.version>
     </properties>
 
