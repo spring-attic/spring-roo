@@ -31,7 +31,7 @@ public class AutomaticProjectUpgradeService implements MetadataNotificationListe
 	protected void activate(ComponentContext componentContext) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		for (Bundle b : componentContext.getBundleContext().getBundles()) {
-			if (!b.getSymbolicName().equals(MY_BUNDLE_SYMBOLIC_NAME)) {
+			if (!MY_BUNDLE_SYMBOLIC_NAME.equals(b.getSymbolicName())) {
 				continue;
 			}
 			Object v = b.getHeaders().get("Bundle-Version");
