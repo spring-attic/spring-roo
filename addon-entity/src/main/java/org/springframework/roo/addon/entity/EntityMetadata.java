@@ -777,7 +777,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult()).longValue();");
+		if (isDataNucleusEnabled) {
+			bodyBuilder.appendFormalLine("return ((Number) " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\").getSingleResult()).longValue();");
+		} else {
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select count(o) from " + governorTypeDetails.getName().getSimpleTypeName() + " o\", Long.class).getSingleResult();");			
+		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
 		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
