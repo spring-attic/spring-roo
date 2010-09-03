@@ -47,6 +47,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
+ * @author Amit Manjhi
  * @since 1.1
  */
 @Component(immediate = true)
@@ -92,11 +93,11 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		}
 		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 
-		// Next let's obtain a handle to the "record" we'd want to produce/modify/delete as applicable for this governor
-		JavaType keyTypeName = mirrorTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(MirrorType.RECORD, projectMetadata, governorTypeName);
+		// Next let's obtain a handle to the "proxy" we'd want to produce/modify/delete as applicable for this governor
+		JavaType keyTypeName = mirrorTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(MirrorType.PROXY, projectMetadata, governorTypeName);
 		Path keyTypePath = Path.SRC_MAIN_JAVA;
 
-		// Lookup any existing record type and verify it is mapped to this governor MID (ie detect name collisions and abort if necessary)
+		// Lookup any existing proxy type and verify it is mapped to this governor MID (ie detect name collisions and abort if necessary)
 		// We do this before deleting, to verify we don't get into a delete-create-delete type case if there are name collisions
 		PhysicalTypeMetadata keyPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
 		if (keyPhysicalTypeMetadata != null && keyPhysicalTypeMetadata.isValid() && keyPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {

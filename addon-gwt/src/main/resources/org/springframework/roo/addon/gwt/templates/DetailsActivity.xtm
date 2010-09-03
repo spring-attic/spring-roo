@@ -3,7 +3,7 @@ package {{=packageName}};
 import com.google.gwt.app.place.AbstractActivity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyPlace;
-import com.google.gwt.app.place.RecordDetailsView;
+import com.google.gwt.app.place.ProxyDetailsView;
 import com.google.gwt.app.place.ProxyPlace.Operation;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.Receiver;
@@ -18,10 +18,10 @@ import java.util.Set;
  * An {@link com.google.gwt.app.place.Activity Activity} that requests and
  * displays detailed information on a given {{=name}}.
  */
-public class {{=className}} extends AbstractActivity implements RecordDetailsView.Delegate {
-	private static RecordDetailsView<{{=record}}> defaultView;
+public class {{=className}} extends AbstractActivity implements ProxyDetailsView.Delegate {
+	private static ProxyDetailsView<{{=proxy}}> defaultView;
 	
-	private static RecordDetailsView<{{=record}}> getDefaultView() {
+	private static ProxyDetailsView<{{=proxy}}> getDefaultView() {
 		if (defaultView == null) {
 			defaultView = new {{=detailsView}}();
 		}
@@ -30,30 +30,30 @@ public class {{=className}} extends AbstractActivity implements RecordDetailsVie
 
 	private final ApplicationRequestFactory requests;
 	private final PlaceController placeController;
-	private final RecordDetailsView<{{=record}}> view;
-	private {{=record}} record;
+	private final ProxyDetailsView<{{=proxy}}> view;
+	private {{=proxy}} proxy;
 	private Display display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public {{=className}}({{=record}} proxy, ApplicationRequestFactory requests, PlaceController placeController) {
+	public {{=className}}({{=proxy}} proxy, ApplicationRequestFactory requests, PlaceController placeController) {
 		this(proxy, requests, placeController, getDefaultView());
 	}
 
 	/**
    * Creates an activity that uses its own view instance.
  	 */
-	public {{=className}}({{=record}} proxy, ApplicationRequestFactory requests, PlaceController placeController, RecordDetailsView<{{=record}}> view) {
+	public {{=className}}({{=proxy}} proxy, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
 		this.placeController = placeController;
-		this.record = proxy;
+		this.proxy = proxy;
 		this.requests = requests;
 		view.setDelegate(this);
 		this.view = view;
 	}
 
 	public void deleteClicked() {
-		if (!view.confirm("Really delete this record? You cannot undo this change.")) {
+		if (!view.confirm("Really delete this proxy? You cannot undo this change.")) {
 			return;
 		}
    		
@@ -84,16 +84,16 @@ public class {{=className}} extends AbstractActivity implements RecordDetailsVie
 
 	public void start(Display displayIn, EventBus eventBus) {
     	this.display = displayIn;
-    	Receiver<{{=record}}> callback = new Receiver<{{=record}}>() {
-			public void onSuccess({{=record}} record, Set<SyncResult> syncResults) {
+    	Receiver<{{=proxy}}> callback = new Receiver<{{=proxy}}>() {
+			public void onSuccess({{=proxy}} proxy, Set<SyncResult> syncResults) {
         		if (display == null) {
           			return;
        			}
-				view.setValue(record);
+				view.setValue(proxy);
 				display.showActivityWidget(view);
 			}
 		};
 
-		requests.{{=nameUncapitalized}}Request().find{{=name}}(Value.of(record.getId())).with({{=displayFields}}).fire(callback);
+		requests.{{=nameUncapitalized}}Request().find{{=name}}(Value.of(proxy.getId())).with({{=displayFields}}).fire(callback);
 	}
 }

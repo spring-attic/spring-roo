@@ -60,10 +60,10 @@ public class GwtFileListener implements FileEventListener {
 
 		// Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
 		if (isMaintainedByRoo) {
-			// First thing is for us to figure out the record file (or what it used to be called, if it has gone away)
-			String recordFile = null;
-			if (eventPath.endsWith("Record.java")) {
-				recordFile = eventPath;
+			// First thing is for us to figure out the proxy file (or what it used to be called, if it has gone away)
+			String proxyFile = null;
+			if (eventPath.endsWith("Proxy.java")) {
+				proxyFile = eventPath;
 			} else {
 				String name = fileEvent.getFileDetails().getFile().getName();
 				name = name.substring(0, name.length() - 5); // Drop .java
@@ -77,21 +77,21 @@ public class GwtFileListener implements FileEventListener {
 					if (name.endsWith(t.getSuffix())) {
 						// Drop the part of the filename with the suffix, as well as the extension
 						String entityName = name.substring(0, name.lastIndexOf(t.getSuffix()));
-						recordFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Record.java");
+						proxyFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
 						break;
 					}
 				}
 			}
-			Assert.hasText(recordFile, "Record file not computed for input " + eventPath);
+			Assert.hasText(proxyFile, "Proxy file not computed for input " + eventPath);
 
-			// Calculate the name without the "Record.java" portion (simplifies working with it later)
-			String simpleName = new File(recordFile).getName();
-			simpleName = simpleName.substring(0, simpleName.length() - 11); // Drop Record.java
+			// Calculate the name without the "Proxy.java" portion (simplifies working with it later)
+			String simpleName = new File(proxyFile).getName();
+			simpleName = simpleName.substring(0, simpleName.length() - 10); // Drop Proxy.java
 
 			Assert.hasText(simpleName, "Simple name not computed for input " + eventPath);
 
 			// Remove all the related files should the key no longer exist
-			if (!fileManager.exists(recordFile)) {
+			if (!fileManager.exists(proxyFile)) {
 				for (MirrorType t : MirrorType.values()) {
 					String filename = simpleName + t.getSuffix() + ".java";
 					String canonicalPath = t.getPath().canonicalFileSystemPath(projectMetadata, filename);
@@ -118,13 +118,13 @@ public class GwtFileListener implements FileEventListener {
 		SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
-		MirrorType locate = MirrorType.RECORD;
+		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 
-			dataDictionary.addSection("records").setVariable("record", fullPath);
+			dataDictionary.addSection("proxys").setVariable("proxy", fullPath);
 
 			String entity1 = new StringBuilder("\t\tif (").append(fullPath).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") null);\n\t\t\treturn;\n\t\t}").toString();
 			dataDictionary.addSection("entities1").setVariable("entity", entity1);
@@ -147,11 +147,11 @@ public class GwtFileListener implements FileEventListener {
 		SharedType type = SharedType.APP_REQUEST_FACTORY;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
-		MirrorType locate = MirrorType.RECORD;
+		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 			String entity = new StringBuilder("\t").append(simpleName).append("Request ").append(StringUtils.uncapitalize(simpleName)).append("Request();").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
 		}
@@ -176,14 +176,14 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
 
-		MirrorType locate = MirrorType.RECORD;
+		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" isNull) {\n").append("\t\t\t\tsetResult(\"").append(simpleName).append("s\");\n\t\t\t}").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
-			addImport(dataDictionary, MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
 		}
 
 		try {
@@ -260,15 +260,15 @@ public class GwtFileListener implements FileEventListener {
 		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
 		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
 
-		MirrorType locate = MirrorType.RECORD;
+		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" isNull) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ListActivity(requests, placeController));\n\t\t\t}").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
 			addImport(dataDictionary, MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
-			addImport(dataDictionary, MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
 		}
 
 		try {
@@ -284,14 +284,14 @@ public class GwtFileListener implements FileEventListener {
 		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
 		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
 
-		MirrorType locate = MirrorType.RECORD;
+		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Record" suffix from filename
+			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
-			addImport(dataDictionary, MirrorType.RECORD.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.RECORD.getSuffix());
+			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
 			addImport(dataDictionary, MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
 		}
 

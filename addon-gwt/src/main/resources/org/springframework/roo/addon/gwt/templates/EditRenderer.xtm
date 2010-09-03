@@ -4,7 +4,7 @@ import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.app.client.DoubleBox;
 import com.google.gwt.app.client.IntegerBox;
 import com.google.gwt.app.client.LongBox;
-import com.google.gwt.app.place.RecordEditView;
+import com.google.gwt.app.place.ProxyEditView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Renders {@link {{=record}} for display to the user. Requires the
+ * Renders {@link {{=proxy}} for display to the user. Requires the
  * {{=displayField}} property to have been fetched.
  */
-public class {{=className}} extends ProxyRenderer<{{=record}}> {
+public class {{=className}} extends ProxyRenderer<{{=proxy}}> {
   private static {{=className}} INSTANCE;
 
   public static {{=className}} instance() {
@@ -46,7 +46,7 @@ public class {{=className}} extends ProxyRenderer<{{=record}}> {
     super(new String[] { {{=displayFields}}} );
   }
 
-  public String render({{=record}} object) {
+  public String render({{=proxy}} object) {
     if (object == null) {
       return "";
     }

@@ -1,23 +1,23 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.AbstractRecordListActivity;
+import com.google.gwt.app.place.AbstractProxyListActivity;
 import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.RecordListView;
+import com.google.gwt.app.place.ProxyListView;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.RecordListRequest;
+import com.google.gwt.requestfactory.shared.ProxyListRequest;
 import com.google.gwt.view.client.Range;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
- * Activity that requests and displays all {${entity.record}}
- * records.
+ * Activity that requests and displays all {${entity.proxy}}
+ * proxies.
  */
-public class {{=className}} extends AbstractRecordListActivity<{{=record}}> {
+public class {{=className}} extends AbstractProxyListActivity<{{=proxy}}> {
 
-	private static RecordListView<{{=record}}> defaultView;
+	private static ProxyListView<{{=proxy}}> defaultView;
 
-	private static RecordListView<{{=record}}> getDefaultView() {
+	private static ProxyListView<{{=proxy}}> getDefaultView() {
 		if (defaultView == null) {
 			defaultView = new {{=listView}}();
 		}
@@ -36,23 +36,23 @@ public class {{=className}} extends AbstractRecordListActivity<{{=record}}> {
 	/**
    * Creates an activity that uses the given view instance.
 	 */
-	public {{=className}}({{=requestFactory}} requests, RecordListView<{{=record}}> view, PlaceController placeController) {
-    	super(requests, placeController, view, {{=record}}.class);
+	public {{=className}}({{=requestFactory}} requests, ProxyListView<{{=proxy}}> view, PlaceController placeController) {
+    	super(requests, placeController, view, {{=proxy}}.class);
     	this.requests = requests;
 	}
 
 	public void start(Display display, EventBus eventBus) {
     	// TODO (rjrjr) this can move to super class when event bus gets smarter
-		eventBus.addHandler({{=recordChanged}}.TYPE, new {{=changedHandler}}() {
-			public void on{{=name}}Changed({{=recordChanged}} event) {
-				update(event.getWriteOperation(), event.getRecord());
+		eventBus.addHandler({{=proxyChanged}}.TYPE, new {{=changedHandler}}() {
+			public void on{{=name}}Changed({{=proxyChanged}} event) {
+				update(event.getWriteOperation(), event.getProxy());
 			}
 		});
 		
 		super.start(display, eventBus);
 	}
 
-	protected RecordListRequest<{{=record}}> createRangeRequest(Range range) {
+	protected ProxyListRequest<{{=proxy}}> createRangeRequest(Range range) {
 		return requests.{{=nameUncapitalized}}Request().find{{=name}}Entries(range.getStart(), range.getLength());
 	}
 

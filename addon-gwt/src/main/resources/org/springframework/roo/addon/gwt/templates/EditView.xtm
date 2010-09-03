@@ -4,7 +4,7 @@ import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.app.client.DoubleBox;
 import com.google.gwt.app.client.IntegerBox;
 import com.google.gwt.app.client.LongBox;
-import com.google.gwt.app.place.RecordEditView;
+import com.google.gwt.app.place.ProxyEditView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
@@ -31,13 +31,13 @@ import java.util.Set;
 import java.util.Collection;
 
 /**
- * Edit view for {{=name}} records.
+ * Edit view for {{=name}} proxys.
  */
-public class {{=className}} extends Composite implements RecordEditView<{{=record}}> {
+public class {{=className}} extends Composite implements ProxyEditView<{{=proxy}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
-	interface DataBinder extends EditorSupport<{{=record}}, {{=className}}> {
+	interface DataBinder extends EditorSupport<{{=proxy}}, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
@@ -54,7 +54,7 @@ public class {{=className}} extends Composite implements RecordEditView<{{=recor
 	@UiField Element createTitle;
 
 	private Delegate delegate;
-	private {{=record}} record;
+	private {{=proxy}} proxy;
 
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
@@ -69,8 +69,8 @@ public class {{=className}} extends Composite implements RecordEditView<{{=recor
 		return DATA_BINDER.getPaths();
 	}
 
-	public {{=record}} getValue() {
-		return record;
+	public {{=proxy}} getValue() {
+		return proxy;
 	}
 
 	public boolean isChanged() {
@@ -80,8 +80,8 @@ public class {{=className}} extends Composite implements RecordEditView<{{=recor
     {{#setEnumValuePickers}}
     {{=setValuePicker}}{{/setEnumValuePickers}}
 
-    {{#setRecordValuePickers}}
-    {{=setValuePicker}}{{/setRecordValuePickers}}
+    {{#setProxyValuePickers}}
+    {{=setValuePicker}}{{/setProxyValuePickers}}
     
 	public void setCreating(boolean creating) {
 		if (creating) {
@@ -102,8 +102,8 @@ public class {{=className}} extends Composite implements RecordEditView<{{=recor
 		save.setEnabled(enabled);
 	}
 
-	public void setValue({{=record}} value) {
-		this.record = value;
+	public void setValue({{=proxy}} value) {
+		this.proxy = value;
 		DATA_BINDER.setValue(this, value);
 	}
 

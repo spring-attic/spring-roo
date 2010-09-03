@@ -1,6 +1,6 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.RecordDetailsView;
+import com.google.gwt.app.place.ProxyDetailsView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -16,14 +16,14 @@ import com.google.gwt.user.client.ui.Widget;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
- * Details view for {{=name}} records.
+ * Details view for {{=name}} proxys.
  */
-public class {{=className}} extends Composite implements RecordDetailsView<{{=record}}> {
+public class {{=className}} extends Composite implements ProxyDetailsView<{{=proxy}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	{{=record}} record;
+	{{=proxy}} proxy;
 	{{#fields}}
 	@UiField SpanElement {{=field}};{{/fields}}	
 	@UiField SpanElement displayRenderer;
@@ -44,8 +44,8 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 		return Window.confirm(msg);
 	}
 
-	public {{=record}} getValue() {
-		return record;
+	public {{=proxy}} getValue() {
+		return proxy;
 	}
 
 	@UiHandler("delete")
@@ -62,10 +62,10 @@ public class {{=className}} extends Composite implements RecordDetailsView<{{=re
 		this.delegate = delegate;
 	}
 
-	public void setValue({{=record}} record) {
-		this.record = record;{{#props1}}
+	public void setValue({{=proxy}} proxy) {
+		this.proxy = proxy;{{#props1}}
 	    {{=prop}}{{/props1}}
 
-		displayRenderer.setInnerText({{=recordRendererType}}.instance().render(record));
+		displayRenderer.setInnerText({{=proxyRendererType}}.instance().render(proxy));
 	}
 }

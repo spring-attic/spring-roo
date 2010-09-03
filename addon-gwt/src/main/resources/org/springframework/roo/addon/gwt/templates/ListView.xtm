@@ -1,6 +1,6 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.AbstractRecordListView;
+import com.google.gwt.app.place.AbstractProxyListView;
 import com.google.gwt.app.place.PropertyColumn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -17,25 +17,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link AbstractRecordListView} specialized to {@link {{=name}}Key}} values.
+ * {@link AbstractProxyListView} specialized to {@link {{=name}}Key}} values.
  */
-public class {{=className}} extends AbstractRecordListView<{{=record}}> {
+public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
-	@UiField CellTable<{{=record}}> table;
+	@UiField CellTable<{{=proxy}}> table;
 	@UiField Button newButton;
   
 	public {{=className}}() {
 		init(BINDER.createAndBindUi(this), table, newButton, getColumns());
 	}
 
-	protected List<PropertyColumn<{{=record}}, ?>> getColumns() {
+	protected List<PropertyColumn<{{=proxy}}, ?>> getColumns() {
 		// TODO These should be <g:col> elements in a <g:table> in the ui.xml file
 
-		List<PropertyColumn<{{=record}}, ?>> columns = new ArrayList<PropertyColumn<{{=record}}, ?>>();
+		List<PropertyColumn<{{=proxy}}, ?>> columns = new ArrayList<PropertyColumn<{{=proxy}}, ?>>();
 		{{#props4}}
 	    {{=prop}}{{/props4}}		
 	    return columns;

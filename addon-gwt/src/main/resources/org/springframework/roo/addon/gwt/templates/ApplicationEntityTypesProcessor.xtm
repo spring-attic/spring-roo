@@ -1,6 +1,6 @@
 package {{=packageName}};
 
-import com.google.gwt.requestfactory.shared.Record;
+import com.google.gwt.requestfactory.shared.EntityProxy;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,10 +23,10 @@ public abstract class {{=className}}<T> {
 	/**
 	 * Return a set of all proxy types available to this application.
 	 */
-	public static Set<Class<? extends Record>> getAll() {
-		Set<Class<? extends Record>> rtn = new HashSet<Class<? extends Record>>();
-{{#records}}
-		rtn.add({{=record}}.class);{{/records}}
+	public static Set<Class<? extends EntityProxy>> getAll() {
+		Set<Class<? extends EntityProxy>> rtn = new HashSet<Class<? extends EntityProxy>>();
+{{#proxys}}
+		rtn.add({{=proxy}}.class);{{/proxys}}
   
 		return Collections.unmodifiableSet(rtn);
 	}
@@ -75,7 +75,7 @@ public abstract class {{=className}}<T> {
 	 * {@link #getClass()} method of a proxy object, due to limitations of GWT's
 	 * metadata. It will only work with against class objects in the set returned
 	 * by {@link #getAll()}, or returned by
-	 * {@link com.google.gwt.requestfactory.shared.RequestFactory#getClass(Record)}
+	 * {@link com.google.gwt.requestfactory.shared.RequestFactory#getClass(Proxy)}
 	 * or
 	 * {@link com.google.gwt.requestfactory.shared.RequestFactory#getClass(String)}.
  	 * 

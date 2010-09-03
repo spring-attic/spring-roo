@@ -13,11 +13,12 @@ package org.springframework.roo.addon.gwt;
  * 
  * @author Ben Alex
  * @author Alan Stewart
+ * @author Amit Manjhi 
  * @since 1.1
  */
 public enum MirrorType {
-	RECORD(GwtPath.GWT_REQUEST, "Record", "record", null), 
-	RECORD_CHANGED(GwtPath.GWT_REQUEST, "RecordChanged", "recordChanged", null), 
+	PROXY(GwtPath.GWT_REQUEST, "Proxy", "proxy", null), 
+	PROXY_CHANGED(GwtPath.GWT_REQUEST, "ProxyChanged", "proxyChanged", null), 
 	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changedHandler", null), 
 	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", null), 
 	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"), 
@@ -30,7 +31,7 @@ public enum MirrorType {
 	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView"),
 	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", null), 
 	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView"),
-        EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "RecordRenderer", "renderer", "EditRenderer");
+        EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "ProxyRenderer", "renderer", "EditRenderer");
 	private GwtPath path;
 	private String suffix;
 	private String name;

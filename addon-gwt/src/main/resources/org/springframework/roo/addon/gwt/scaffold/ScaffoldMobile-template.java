@@ -17,7 +17,7 @@ import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
 import com.google.gwt.requestfactory.client.LoginWidget;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestEvent;
-import com.google.gwt.requestfactory.shared.UserInformationRecord;
+import com.google.gwt.requestfactory.shared.UserInformationProxy;
 import com.google.gwt.requestfactory.shared.RequestEvent.State;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
@@ -25,7 +25,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.requestfactory.shared.Record;
+import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.gwt.requestfactory.shared.SyncResult;
 import __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc.ScaffoldInjector;
 
@@ -70,9 +70,9 @@ public class ScaffoldMobile implements EntryPoint {
 		/* Add a login widget to the page */
 
 		final LoginWidget login = shell.getLoginWidget();
-		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
-			public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
-				login.setUserInformation(userInformationRecord);
+		Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
+			public void onSuccess(UserInformationProxy userInformationProxy, Set<SyncResult> syncResults) {
+				login.setUserInformation(userInformationProxy);
 			}
 		};
 		requestFactory.userInformationRequest().getCurrentUserInformation(Location.getHref()).fire(receiver);
@@ -115,10 +115,10 @@ public class ScaffoldMobile implements EntryPoint {
 	// TODO (rjrjr) No reason to make the place objects in advance, just make
 	// it list the class objects themselves. Needs to be sorted by rendered name, too
 	private Set<ProxyListPlace> getTopPlaces() {
-		Set<Class<? extends Record>> types = ApplicationEntityTypesProcessor.getAll();
+		Set<Class<? extends EntityProxy>> types = ApplicationEntityTypesProcessor.getAll();
 		Set<ProxyListPlace> rtn = new HashSet<ProxyListPlace>(types.size());
 
-		for (Class<? extends Record> type : types) {
+		for (Class<? extends EntityProxy> type : types) {
 			rtn.add(new ProxyListPlace(type));
 		}
 
