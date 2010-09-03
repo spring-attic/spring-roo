@@ -8,6 +8,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.inject.client.GinModules;
 import com.google.gwt.inject.client.Ginjector;
 import com.springsource.extrack.gwt.scaffold.ScaffoldShell;
+import com.springsource.extrack.gwt.scaffold.ScaffoldMobileShell;
 {{#imports}}import {{=import}};
 {{/imports}}
 
@@ -17,6 +18,7 @@ public interface {{=className}} extends Ginjector {
 	EventBus getEventBus();
 	{{=requestFactory}} getRequestFactory();	
 	ScaffoldShell getShell();
+	ScaffoldMobileShell getMobileShell();
 	PlaceController getPlaceController();
 	ProxyListPlacePicker getListPlacePicker();		
 	ProxyPlaceToListPlace getProxyPlaceToListPlace();	

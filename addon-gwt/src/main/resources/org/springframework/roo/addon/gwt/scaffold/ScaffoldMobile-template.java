@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.requestfactory.shared.Record;
 import com.google.gwt.requestfactory.shared.SyncResult;
+import __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc.ScaffoldInjector;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,10 +39,76 @@ import java.util.Set;
  */
 public class ScaffoldMobile implements EntryPoint {
 
+	final private ScaffoldInjector injector = GWT.create(ScaffoldInjector.class);
+
 	public void onModuleLoad() {
 	
 	//Silly having two modules when you can detect browser 
 	//and use deferred binding to use mobile specific shell.
+	
+		/* App controllers and services */
+
+		final EventBus eventBus = injector.getEventBus();
+		final ApplicationRequestFactory requestFactory = injector.getRequestFactory();
+		final PlaceController placeController = injector.getPlaceController();
+
+    GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
+      public void onUncaughtException(Throwable e) {
+        Window.alert("Error: " + e.getMessage());
+        placeController.goTo(Place.NOWHERE);
+      }
+    });
+    
+		/* Top level UI */
+
+		final ScaffoldMobileShell shell = injector.getMobileShell();
+
+		/* Check for Authentication failures or mismatches */
+
+		eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+
+		/* Add a login widget to the page */
+
+		final LoginWidget login = shell.getLoginWidget();
+		Receiver<UserInformationRecord> receiver = new Receiver<UserInformationRecord>() {
+			public void onSuccess(UserInformationRecord userInformationRecord, Set<SyncResult> syncResults) {
+				login.setUserInformation(userInformationRecord);
+			}
+		};
+		requestFactory.userInformationRequest().getCurrentUserInformation(Location.getHref()).fire(receiver);
+
+		/* Left side lets us pick from all the types of entities */
+
+		HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
+		placePickerView.setAcceptableValues(getTopPlaces());
+		injector.getListPlacePicker().register(eventBus, placePickerView);
+
+		/*
+		 * The body is run by an ActivitManager that listens for PlaceChange events and finds the corresponding Activity to run
+		 */
+
+		final ActivityMapper mapper = new ScaffoldMobileActivities(new ApplicationMasterActivities(requestFactory, placeController), new ApplicationDetailsActivities(requestFactory, placeController));
+		final ActivityManager activityManager = new ActivityManager(mapper, eventBus);
+
+		activityManager.setDisplay(new Activity.Display() {
+			public void showActivityWidget(IsWidget widget) {
+				shell.getBody().setWidget(widget == null ? null : widget.asWidget());
+			}
+		});
+
+		/* Hide the loading message */
+
+		Element loading = Document.get().getElementById("loading");
+		loading.getParentElement().removeChild(loading);
+
+		/* Browser history integration */
+		PlaceHistoryHandler placeHistoryHandler = injector.getPlaceHistoryHandler();
+		placeHistoryHandler.register(placeController, eventBus, getTopPlaces().iterator().next()); /* defaultPlace */
+		placeHistoryHandler.handleCurrentHistory();
+
+		/* And show the user the shell */
+
+		RootLayoutPanel.get().add(shell);
 	
 	}
 
