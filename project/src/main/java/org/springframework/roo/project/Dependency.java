@@ -29,10 +29,9 @@ public class Dependency implements Comparable<Dependency> {
 	private DependencyType type;
 	private DependencyScope scope;
 	private List<Dependency> exclusions = new ArrayList<Dependency>();
+	private String systemPath;
 
-        private String systemPath;
-
-  /**
+	/**
 	 * Convenience constructor for producing a JAR dependency.
 	 * 
 	 * @param groupId the group ID (required)
@@ -126,14 +125,14 @@ public class Dependency implements Comparable<Dependency> {
 					throw new IllegalArgumentException("Invalid dependency scope: " + s);
 				}
 			}
-                        if (this.scope == DependencyScope.SYSTEM) {
-                          if(XmlUtils.findFirstElement("systemPath", dependency) != null) {
-                            String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
-                            this.systemPath = path;
-                          } else {
-                            throw new IllegalArgumentException("Missing <systemPath> declaraton for system scope");
-                          }
-                        }
+			if (this.scope == DependencyScope.SYSTEM) {
+				if (XmlUtils.findFirstElement("systemPath", dependency) != null) {
+					String path = XmlUtils.findFirstElement("systemPath", dependency).getTextContent().trim();
+					this.systemPath = path;
+				} else {
+					throw new IllegalArgumentException("Missing <systemPath> declaraton for system scope");
+				}
+			}
 			// Parsing for exclusions
 			List<Element> exclusionList = XmlUtils.findElements("exclusions/exclusion", dependency);
 			if (exclusionList.size() > 0) {
@@ -209,10 +208,10 @@ public class Dependency implements Comparable<Dependency> {
 		return scope;
 	}
 
-        public String getSystemPath() {
-                return systemPath;
-        }
-  
+	public String getSystemPath() {
+		return systemPath;
+	}
+
 	/**
 	 * @return list of exclusions (never null)
 	 */
@@ -247,7 +246,7 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @return a simple description, as would be used for console output
 	 */

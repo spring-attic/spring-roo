@@ -412,20 +412,17 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		props.put("database.driverClassName", database.getDriverClassName());
 
-		String connectionString = database.getConnectionString();
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		String connectionString = database.getConnectionString();
 		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 		if (StringUtils.hasText(databaseName)) {
-			if (database == JdbcDatabase.ORACLE) {
-				// Oracle uses a different connection URL - see ROO-1203
-				connectionString += databaseName.startsWith(":") ? databaseName : ":" + databaseName;
-			} else {
-				connectionString += databaseName.startsWith("/") ? databaseName : "/" + databaseName;
-			}
+			// Oracle uses a different connection URL - see ROO-1203
+			String dbDelimiter = database == JdbcDatabase.ORACLE ? ":" : "/";
+			connectionString += databaseName.startsWith(dbDelimiter) ? databaseName : dbDelimiter + databaseName;
 		}
-
 		props.put("database.url", connectionString);
 
+		String dbPropsMsg = "Please enter your database details in src/main/resources/META-INF/spring/database.properties.";
 		switch (database) {
 		case HYPERSONIC_IN_MEMORY:
 		case HYPERSONIC_PERSISTENT:
@@ -434,8 +431,12 @@ public class JpaOperationsImpl implements JpaOperations {
 			break;
 		case DERBY:
 			break;
+		case SYBASE:
+			userName = StringUtils.hasText(userName) ? userName : "sa";
+			logger.warning(dbPropsMsg);
+			break;
 		default:
-			logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+			logger.warning(dbPropsMsg);
 			break;
 		}
 
@@ -493,7 +494,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		// Hard coded to JPA & Hibernate Validator for now
-		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/dependencies/dependency", configuration);
+		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id = 'JPA']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jpaDependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
 		}
@@ -551,7 +552,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
-			if (!jdbcDatabase.getKey().equals(database.getKey())) {
+			if (!jdbcDatabase.getKey().equals(database.getKey()) && !jdbcDatabase.getDriverClassName().equals(database.getDriverClassName())) {
 				List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
 				for (Element dependencyElement : databaseDependencies) {
 					projectOperations.removeDependency(new Dependency(dependencyElement));
@@ -564,7 +565,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
-				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id='" + provider.name() + "']/properties/*", configuration);
+				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id = '" + provider.name() + "']/properties/*", configuration);
 				// for (Element propertyElement : pomProperties) {
 				// projectOperations.removeProperty(new Property(propertyElement));
 				// }
@@ -581,11 +582,11 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private String getDbXPath(JdbcDatabase database) {
-		return "/configuration/databases/database[@id='" + database.getKey() + "']";
+		return "/configuration/databases/database[@id = '" + database.getKey() + "']";
 	}
 
 	private String getProviderXPath(OrmProvider provider) {
-		return "/configuration/ormProviders/provider[@id='" + provider.name() + "']";
+		return "/configuration/ormProviders/provider[@id = '" + provider.name() + "']";
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {
