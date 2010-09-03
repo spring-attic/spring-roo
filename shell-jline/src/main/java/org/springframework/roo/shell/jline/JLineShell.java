@@ -29,7 +29,6 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
@@ -103,19 +102,19 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
         logger.info(version(null));
         logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
         
-        setShellStatus(Status.STARTED);
+        setShellStatus(ShellStatus.STARTED);
 
         // Handle any "execute-then-quit" operation
         String rooArgs = System.getProperty("roo.args");
         if (rooArgs != null && !"".equals(rooArgs)) {
-            setShellStatus(Status.USER_INPUT);
+            setShellStatus(ShellStatus.USER_INPUT);
         	boolean success = executeCommand(rooArgs);
             if (exitShellRequest == null) {
             	// The command itself did not specify an exit shell code, so we'll fall back to something sensible here
                 executeCommand("quit"); // ROO-839
                	exitShellRequest = success ? ExitShellRequest.NORMAL_EXIT : ExitShellRequest.FATAL_EXIT;
             }
-            setShellStatus(Status.SHUTTING_DOWN);
+            setShellStatus(ShellStatus.SHUTTING_DOWN);
         } else {
             // Normal RPEL processing
         	promptLoop();
@@ -162,7 +161,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// make sure to reset the original shell's colors on shutdown by closing the stream
 		statusListener = new ShellStatusListener() {
 			public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
-				if (newStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
+				if (newStatus == ShellStatus.SHUTTING_DOWN) {
 					ansiOut.close();
 				}
 			}
@@ -186,7 +185,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// Setup a thread to ensure flash messages are displayed and cleared correctly
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				while (!shellStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
+				while (shellStatus != ShellStatus.SHUTTING_DOWN) {
 					synchronized (flashInfoMap) {
 						
 						long now = System.currentTimeMillis();
@@ -313,13 +312,13 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 	
     public void promptLoop() {
-    	setShellStatus(Status.USER_INPUT);
+    	setShellStatus(ShellStatus.USER_INPUT);
     	String line;
     	
     	try {
             while (exitShellRequest == null && ( (line = reader.readLine() ) != null) ) {
             	JLineLogHandler.resetMessageTracking();
-            	setShellStatus(Status.USER_INPUT);
+            	setShellStatus(ShellStatus.USER_INPUT);
             	
             	if ("".equals(line)) {
                 	continue;
@@ -331,7 +330,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
         	throw new IllegalStateException("Shell line reading failure", ioe);
         }
         
-        setShellStatus(Status.SHUTTING_DOWN);
+        setShellStatus(ShellStatus.SHUTTING_DOWN);
     }
     
 	public void setDevelopmentMode(boolean developmentMode) {
