@@ -108,6 +108,13 @@
 			<artifactId>org.springframework.roo.wrapping.jtds</artifactId>
 			<version>1.2.4.0001</version>
 		</dependency>
+<!--
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.jcifs</artifactId>
+			<version>1.2.19.0001</version>
+		</dependency>
+-->
 		<dependency>
 			<groupId>org.springframework.roo.wrapping</groupId>
 			<artifactId>org.springframework.roo.wrapping.jtopen</artifactId>
@@ -149,7 +156,7 @@
           <artifactId>maven-bundle-plugin</artifactId>
           <configuration>
             <instructions>
-               <Import-Package>*,net.sourceforge.jtds;resolution:=optional,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
+               <Import-Package>*,net.sourceforge.jtds.jdbc;resolution:=optional,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
             </instructions>
           </configuration>
         </plugin>
