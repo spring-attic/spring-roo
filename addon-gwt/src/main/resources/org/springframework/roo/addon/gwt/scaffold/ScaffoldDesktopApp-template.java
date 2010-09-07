@@ -13,12 +13,15 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Set;
 
 /**
  * Application for browsing entities.
  */
 public class ScaffoldDesktopApp extends ScaffoldApp {
+    private static final Logger log = Logger.getLogger(Scaffold.class.getName());
 
     private final ScaffoldDesktopShell shell = new ScaffoldDesktopShell();
 
@@ -42,10 +45,10 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
     private void init() {
 
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-            public void onUncaughtException(Throwable e) {
-                Window.alert("Error: " + e.getMessage());
-                placeController.goTo(Place.NOWHERE);
-            }
+	    public void onUncaughtException(Throwable e) {
+	        Window.alert("Error: " + e.getMessage());
+	        log.log(Level.SEVERE, e.getMessage(), e);
+	    }
         });
 
         Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
@@ -100,7 +103,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
         ScaffoldPlaceHistoryHandler placeHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
         placeHistoryHandler.setFactory(placeHistoryFactory);
         placeHistoryHandler.register(placeController, eventBus,
-                getTopPlaces().iterator.next()); /* defaultPlace */
+	     getTopPlaces().iterator().next()); /* defaultPlace */
         placeHistoryHandler.handleCurrentHistory();
     }
 }

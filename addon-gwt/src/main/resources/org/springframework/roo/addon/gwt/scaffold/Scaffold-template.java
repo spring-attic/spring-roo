@@ -8,11 +8,9 @@ import __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc.ScaffoldInjector;
  * Application for browsing entities.
  */
 public class Scaffold implements EntryPoint {
-
     final private ScaffoldInjector injector = GWT.create(ScaffoldInjector.class);
 
     public void onModuleLoad() {
-
         /* Get and run platform specific app */
 
         injector.getScaffoldApp().run();

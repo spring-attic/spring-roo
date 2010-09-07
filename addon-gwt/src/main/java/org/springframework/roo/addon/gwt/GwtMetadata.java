@@ -23,7 +23,6 @@ import java.util.TreeMap;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -565,23 +564,15 @@ public class GwtMetadata extends AbstractMetadataItem {
                           }
                           displayFields += "\"" + property.getName() + "\"";
                         }
-			// Formatted text for DetailsView
-			dataDictionary.addSection("props1").setVariable("prop", property.getPropStr1());
 
-			// Formatted text for EditView
-			dataDictionary.addSection("props2").setVariable("prop", property.getPropStr2());
+			dataDictionary.addSection("props1").setVariable("prop", property.forDetailsView());
+			dataDictionary.addSection("props2").setVariable("prop", property.forEditView());
+			dataDictionary.addSection("props3").setVariable("prop", property.forDetailsUIXml());
+			dataDictionary.addSection("props4").setVariable("prop", property.forListView(proxyType.getSimpleTypeName()));
+			dataDictionary.addSection("props5").setVariable("prop", property.forEditUiXml());
 
-			// Formatted text for DetailsViewUiXml
-			dataDictionary.addSection("props3").setVariable("prop", property.getPropStr3());
-
-			// Formatted text for ListView
-			dataDictionary.addSection("props4").setVariable("prop", property.getPropStr4(proxyType.getSimpleTypeName()));
-
-			// Formatted text for EditViewUiXml
-			dataDictionary.addSection("props5").setVariable("prop", property.getPropStr5());
-
-                        dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata)
-                    + "." + proxy.getName().getSimpleTypeName() + "Renderer");
+            dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata)
+              + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
                         if (property.isProxy() || property.isEnum()) {
                           TemplateDataDictionary section = dataDictionary.addSection(property.isEnum() ? "setEnumValuePickers" : "setProxyValuePickers");
@@ -882,30 +873,45 @@ public class GwtMetadata extends AbstractMetadataItem {
 
           public String getCheckboxSubtype() {
             // TODO: Ugly hack, fix in M4
-              return "= new CheckBox() { public void setValue(Boolean value) { super.setValue(value == null ? Boolean.FALSE : value); } }";  
+              return "new CheckBox() { public void setValue(Boolean value) { super.setValue(value == null ? Boolean.FALSE : value); } }";  
           }
 
           public String getReadableName() {
 			return new JavaSymbolName(name).getReadableSymbolName();
 		}
 
-		public String getPropStr1() {
+		public String forDetailsView() {
 			return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("proxy.").append(getGetter()).append("()));").toString();
 		}
 
-		public String getPropStr2() {
-			return new StringBuilder("@UiField "+getEditor()).append(" ").append(getName()).toString() + (!isProxy()  && !isEnum() ? (isBoolean() ? getCheckboxSubtype() : "") : "=new ValueListBox<"+type.getFullyQualifiedTypeName()+">("+(isEnum() ? getRenderer() + ")" : getRendererType()+".instance())"));
-		}
+    public String forEditView() {
+      String initializer = "";
 
-		public String getPropStr3() {
+      if (isBoolean()) {
+        initializer = " = " + getCheckboxSubtype();
+      }
+
+      if (isEnum()) {
+        initializer = String.format(" = new ValueListBox<%s>(%s)", type.getFullyQualifiedTypeName(), getRenderer());
+      }
+
+      if (isProxy()) {
+        initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), " +
+        		"new com.google.gwt.app.place.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getRendererType());
+      }
+
+      return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
+    }
+
+		public String forDetailsUIXml() {
 			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><span ui:field='").append(getName()).append("'></span></td></tr>").toString();
 		}
 
-		public String getPropStr4(String proxy) {
+		public String forListView(String proxy) {
 			return new StringBuilder("columns.add(new PropertyColumn<").append(proxy).append(", ").append(getType()).append(">(").append(proxy).append(".").append(getName()).append(", ").append(getRenderer()).append("));").toString();
 		}
 
-		public String getPropStr5() {
+		public String forEditUiXml() {
 			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();
 		}
 
