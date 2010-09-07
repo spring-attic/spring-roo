@@ -45,15 +45,14 @@ import org.w3c.dom.Element;
  * @author Amit Manjhi
  * @since 1.1
  */
-@Component
-@Service
+@Component 
+@Service 
 public class GwtOperationsImpl implements GwtOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations mvcOperations;
-
 	private ComponentContext context;
 	private boolean isGaeEnabled;
 
@@ -70,18 +69,16 @@ public class GwtOperationsImpl implements GwtOperations {
 		if (projectMetadata == null) {
 			return false;
 		}
-		// Do not permit installation if they have a gwt package already in their project
-                // shared is allowed
-                for (GwtPath path : GwtPath.values()) {
-                  if (path == GwtPath.GWT_REQUEST || path == GwtPath.GWT_SCAFFOLD ||
-                      path == GwtPath.GWT_SCAFFOLD_GENERATED || path == GwtPath.GWT_UI) {
-                    String fPath = path.canonicalFileSystemPath(projectMetadata);
-//                    System.err.println("Checking "+fPath+" with "+path);
-                      if (fileManager.exists(fPath)) {
-                       return false;
-                      }
-                  }
-                }
+		
+		// Do not permit installation if they have a gwt package already in their project shared is allowed
+		for (GwtPath path : GwtPath.values()) {
+			if (path == GwtPath.GWT_REQUEST || path == GwtPath.GWT_SCAFFOLD || path == GwtPath.GWT_SCAFFOLD_GENERATED || path == GwtPath.GWT_UI) {
+				String fPath = path.canonicalFileSystemPath(projectMetadata);
+				if (fileManager.exists(fPath)) {
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
@@ -98,23 +95,23 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
 
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
 		// Add dependencies
-		List<Element> dependencies = XmlUtils.findElements("/configuration/dependencies/dependency", configuration);
+		List<Element> dependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
 		for (Element dependency : dependencies) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
 
 		if (isGaeEnabled) {
 			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
-			for (Element dependency : XmlUtils.findElements("/configuration/gae-dependencies/dependency", configuration)) {
+			for (Element dependency : XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration)) {
 				projectOperations.dependencyUpdate(new Dependency(dependency));
 			}
 		}
 
 		// Add POM plugin
-		List<Element> plugins = XmlUtils.findElements(isGaeEnabled ? "/configuration/gae-plugins/plugin" : "/configuration/plugins/plugin", configuration);
+		List<Element> plugins = XmlUtils.findElements(isGaeEnabled ? "/configuration/gwt/gae-plugins/plugin" : "/configuration/gwt/plugins/plugin", configuration);
 		for (Element plugin : plugins) {
 			projectOperations.addBuildPlugin(new Plugin(plugin));
 		}
@@ -123,7 +120,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Update web.xml
 		updateWebXml(projectMetadata);
-		
+
 		// Update webmvc-config.xml
 		updateSpringWebCtx();
 
@@ -176,6 +173,7 @@ public class GwtOperationsImpl implements GwtOperations {
 						String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
 						input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
+						
 						// Output the file for the user
 						MutableFile mutableFile = fileManager.createFile(targetFilename);
 						FileCopyUtils.copy(input.getBytes(), mutableFile.getOutputStream());
@@ -185,18 +183,6 @@ public class GwtOperationsImpl implements GwtOperations {
 				}
 			}
 		}
-	}
-
-	private Element getConfiguration() {
-		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "configuration.xml");
-		Assert.notNull(templateInputStream, "Could not acquire configuration.xml file");
-		Document dependencyDoc;
-		try {
-			dependencyDoc = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-		return (Element) dependencyDoc.getFirstChild();
 	}
 
 	private void updateMavenEclipsePlugin() {
@@ -237,6 +223,7 @@ public class GwtOperationsImpl implements GwtOperations {
 				newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.gwt.eclipse.core.gwtNature").build();
 				ctx = XmlUtils.findRequiredElement("configuration/additionalProjectnatures/projectnature[last()]", pluginElement);
 				ctx.getParentNode().appendChild(newEntry);
+				
 				// If gae plugin configured, add gaeNature
 				if (isGaeEnabled) {
 					newEntry = new XmlElementBuilder("projectnature", pomDoc).setText("com.google.appengine.eclipse.core.gaeNature").build();
@@ -257,6 +244,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			Element ctx = XmlUtils.findRequiredElement("/project/build", pomRoot);
 			ctx.appendChild(newEntry);
 		}
+		
 		// TODO CD is there a better way of doing this here?
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
@@ -268,14 +256,14 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	private void updateRepositories() {
-		Element configuration = getConfiguration();
+		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Element> repositories = XmlUtils.findElements("/configuration/repositories/repository", configuration);
+		List<Element> repositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
 		for (Element repositoryElement : repositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
 
-		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/pluginRepositories/pluginRepository", configuration);
+		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
 		for (Element repositoryElement : pluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(repositoryElement));
 		}
@@ -304,13 +292,14 @@ public class GwtOperationsImpl implements GwtOperations {
 		} else {
 			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		}
+		
 		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
 		removeIfFound("/web-app/error-page", webXmlRoot);
 		WebXmlUtils.addWelcomeFile("/", webXmlDoc, "Changed by 'gwt setup' command");
 
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
-	
+
 	private void updateSpringWebCtx() {
 		String mvcXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(mvcXml), "webmvc-config.xml not found; cannot continue");
@@ -337,7 +326,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	private void removeIfFound(String xpath, Element webXmlRoot) {
-		for (Element toRemove: XmlUtils.findElements(xpath, webXmlRoot)) {
+		for (Element toRemove : XmlUtils.findElements(xpath, webXmlRoot)) {
 			if (toRemove != null) {
 				toRemove.getParentNode().removeChild(toRemove);
 				toRemove = null;
