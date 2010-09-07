@@ -3,10 +3,52 @@
 <module rename-to="applicationScaffold">
   <inherits name="com.google.gwt.user.User" />
   <inherits name="com.google.gwt.user.theme.standard.Standard" />
+  <inherits name='com.google.gwt.app.App' />
+  <inherits name='com.google.gwt.requestfactory.RequestFactory'/>
+  <inherits name='__TOP_LEVEL_PACKAGE__.gwt.style.Style'/>
+  <inherits name="com.google.gwt.user.cellview.CellView" />
+  <inherits name='com.google.gwt.logging.Logging'/>
+  <inherits name="com.google.gwt.inject.Inject"/>
 
-  <inherits name="__TOP_LEVEL_PACKAGE__.gwt.ApplicationCommon" />
+  <source path='scaffold'/>
+  <source path='request'/>
+  <source path='place'/>
+  <source path='ui'/>
+  <source path='shared'/>
 
+  <!-- Logging Configuration -->
+  <set-property name="gwt.logging.enabled" value="TRUE"/> 
+  <set-property name="gwt.logging.logLevel" value="INFO"/>
+  <set-property name="gwt.logging.consoleHandler" value="ENABLED" /> 
+  <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
+  <set-property name="gwt.logging.firebugHandler" value="ENABLED" />
+  <set-property name="gwt.logging.hasWidgetsHandler" value="DISABLED" />
+  <set-property name="gwt.logging.popupHandler" value="DISABLED" />
+  <set-property name="gwt.logging.systemHandler" value="ENABLED" />
+  <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
+  
+  <define-property name="mobile.user.agent" values="mobilesafari, none"/>
+  
+  <property-provider name="mobile.user.agent">
+  
+  <![CDATA[
+  		var ua = navigator.userAgent.toLowerCase();
+  		if (ua.indexOf("webkit") != -1 && ua.indexOf("mobile") != -1) {
+  		return "mobilesafari";
+  		}
+  		return "none";
+  ]]>
+  
+  </property-provider>
+  
+  <replace-with class="com.springsource.extrack.gwt.scaffold.ScaffoldMobileApp">
+  		<when-type-is class="com.springsource.extrack.gwt.scaffold.ScaffoldDesktopApp"/>
+  		<all>
+  			<when-property-is name="mobile.user.agent" value="mobilesafari"/>
+        </all>
+  </replace-with>
+  
   <source path="scaffold" />
-  <entry-point
-    class="__TOP_LEVEL_PACKAGE__.gwt.scaffold.Scaffold" />
+  <entry-point class="__TOP_LEVEL_PACKAGE__.gwt.scaffold.Scaffold" />
+  	
 </module>

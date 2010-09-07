@@ -5,6 +5,7 @@ import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.Place;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyPlace;
+import com.google.inject.Inject;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
@@ -14,6 +15,7 @@ public class ApplicationDetailsActivities implements ActivityMapper {
 	private final {{=requestFactory}} requests;
 	private final PlaceController placeController;
 
+	@Inject
 	public ApplicationDetailsActivities({{=requestFactory}} requestFactory, PlaceController placeController) {
 		this.requests = requestFactory;
 		this.placeController = placeController;

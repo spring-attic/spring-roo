@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc;
+package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
 import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
 
@@ -28,5 +28,5 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * an individual entity).
  */
 // @WithTokenizers({MyNewPlace.Tokenizer, MyOtherNewPlace.Tokenizer})
-interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> {
+public interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> {
 }

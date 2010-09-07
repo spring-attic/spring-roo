@@ -3,6 +3,7 @@ package {{=packageName}};
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.ActivityMapper;
 import com.google.gwt.app.place.Place;
+import com.google.inject.Inject;
 
 /**
  * Instantiates activities for the mobile app.
@@ -11,6 +12,7 @@ public final class ScaffoldMobileActivities implements ActivityMapper {
 	private final ApplicationMasterActivities listActivityBuilder;
 	private final ApplicationDetailsActivities detailsActivityBuilder;
 
+	@Inject
 	public ScaffoldMobileActivities(ApplicationMasterActivities listActivitiesBuilder, ApplicationDetailsActivities detailsActivityBuilder) {
 		this.listActivityBuilder = listActivitiesBuilder;
 		this.detailsActivityBuilder = detailsActivityBuilder;

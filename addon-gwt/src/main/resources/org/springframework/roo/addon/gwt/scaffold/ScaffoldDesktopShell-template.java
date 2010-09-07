@@ -16,8 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * The outermost UI of the application.
  */
-public class ScaffoldShell extends Composite {
-	interface Binder extends UiBinder<Widget, ScaffoldShell> {
+public class ScaffoldDesktopShell extends Composite {
+	interface Binder extends UiBinder<Widget, ScaffoldDesktopShell> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
@@ -29,7 +29,7 @@ public class ScaffoldShell extends Composite {
 	@UiField NotificationMole mole;
 	@UiField(provided = true) ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(new ApplicationListPlaceRenderer());
 
-	public ScaffoldShell() {
+	public ScaffoldDesktopShell() {
 		initWidget(BINDER.createAndBindUi(this));
 	}
 

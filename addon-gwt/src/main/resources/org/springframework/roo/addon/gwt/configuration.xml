@@ -36,6 +36,11 @@
     		<artifactId>gin</artifactId>
     		<version>1.0</version>
     	</dependency>
+    	<dependency>
+    		<groupId>javax.validation</groupId>
+    		<artifactId>validation-api</artifactId>
+    		<version>1.0.0.GA</version>
+    	</dependency>
    	</dependencies>
 	<plugins>
 		<plugin>
@@ -50,7 +55,6 @@
                 <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 				<modules>
 					<module>${project.groupId}.gwt.ApplicationScaffold</module>
-                    <module>${project.groupId}.gwt.ApplicationMobileScaffold</module>
 				</modules>
                 <copyWebapp>true</copyWebapp>
 			</configuration>

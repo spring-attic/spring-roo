@@ -1,27 +1,14 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
-import com.google.gwt.app.place.ProxyListPlacePicker;
-import com.google.gwt.app.place.ProxyPlaceToListPlace;
-import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.inject.client.GinModules;
 import com.google.gwt.inject.client.Ginjector;
-import com.springsource.extrack.gwt.scaffold.ScaffoldShell;
-import com.springsource.extrack.gwt.scaffold.ScaffoldMobileShell;
+import com.springsource.extrack.gwt.scaffold.ScaffoldApp;
 {{#imports}}import {{=import}};
 {{/imports}}
 
 @GinModules(value = {{{=module}}.class})
 public interface {{=className}} extends Ginjector {
 	
-	EventBus getEventBus();
-	{{=requestFactory}} getRequestFactory();	
-	ScaffoldShell getShell();
-	ScaffoldMobileShell getMobileShell();
-	PlaceController getPlaceController();
-	ProxyListPlacePicker getListPlacePicker();		
-	ProxyPlaceToListPlace getProxyPlaceToListPlace();	
-	PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> getPlaceHistoryHandler();
+	ScaffoldApp getScaffoldApp();
 
 }
