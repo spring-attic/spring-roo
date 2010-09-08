@@ -239,7 +239,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		browser.setTextContent("*firefox");
 		configuration.appendChild(browser);
 		Element results = pom.createElement("results");
-		results.setTextContent("${project.build.directory}/target/selenium.txt");
+		results.setTextContent("${project.build.directory}/selenium.html");
 		configuration.appendChild(results);
 		Element startURL = pom.createElement("startURL");
 		startURL.setTextContent("http://localhost:4444/");
@@ -254,7 +254,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private List<FieldMetadata> getEligableFields() {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = beanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			
 			if(field != null && hasMutator(field)) {
@@ -275,7 +275,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	
 	private boolean hasMutator(FieldMetadata fieldMetadata) {
 		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(beanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}
