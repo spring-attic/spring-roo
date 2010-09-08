@@ -33,7 +33,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 
-	public void findTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
+	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		
@@ -60,7 +60,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 
 	public Set<JavaType> findTypesWithAnnotation(List<JavaType> annotationsToDetect) {
 		final Set<JavaType> types = new HashSet<JavaType>();
-		findTypesWithAnnotation(annotationsToDetect, new LocatedTypeCallback() {
+		processTypesWithAnnotation(annotationsToDetect, new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				types.add(located.getName());
 			}
@@ -72,9 +72,9 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		return findTypesWithAnnotation(Arrays.asList(annotationsToDetect));
 	}
 
-	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfacesWithAnnotation(JavaType... annotationsToDetect) {
+	public Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect) {
 		final Set<ClassOrInterfaceTypeDetails> types = new HashSet<ClassOrInterfaceTypeDetails>();
-		findTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
+		processTypesWithAnnotation(Arrays.asList(annotationsToDetect), new LocatedTypeCallback() {
 			public void process(ClassOrInterfaceTypeDetails located) {
 				types.add(located);
 			}

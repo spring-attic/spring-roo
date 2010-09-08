@@ -15,13 +15,13 @@ import org.springframework.roo.model.JavaType;
 public interface TypeLocationService {
 
 	/**
-	 * Locates types with the specified list of annotations and uses the supplied 
+	 * Processes types with the specified list of annotations and uses the supplied 
 	 * {@link LocatedTypeCallback callback} implementation to process the located types.
 	 * 
 	 * @param annotationsToDetect the list of annotations to detect on a type.
 	 * @param callback the {@link LocatedTypeCallback} to handle the processing of the located type
 	 */
-	void findTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback);
+	void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback);
 
 	/**
 	 * Returns a set of {@link JavaType}s that possess the specified list of annotations.
@@ -45,5 +45,5 @@ public interface TypeLocationService {
 	 * @param annotationsToDetect the annotations (as a vararg) to detect on a type.
 	 * @return a set of ClassOrInterfaceTypeDetails that have the specified annotations.
 	 */
-	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfacesWithAnnotation(JavaType... annotationsToDetect);
+	Set<ClassOrInterfaceTypeDetails> findClassesOrInterfaceDetailsWithAnnotation(JavaType... annotationsToDetect);
 }
