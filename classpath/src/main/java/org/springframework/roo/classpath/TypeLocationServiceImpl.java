@@ -41,7 +41,7 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 		for (FileDetails file : entries) {
 			String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
 			fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // Ditch the first / and .java
-			JavaType javaType = new JavaType(fullPath);
+			JavaType javaType;
 			try {
 				javaType = new JavaType(fullPath);
 			} catch (RuntimeException e) { // ROO-1022
