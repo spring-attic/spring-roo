@@ -3,6 +3,12 @@ package org.springframework.roo.project;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 
+/**
+ * Specifies methods for various project-related operations.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ */
 public interface ProjectOperations {
 
 	boolean isDependencyModificationAllowed();
@@ -10,42 +16,58 @@ public interface ProjectOperations {
 	boolean isPerformCommandAllowed();
 
 	/**
-	 * Register a listener to track changes in build dependencies
+	 * Register a listener to track changes in build dependencies.
+	 * 
+	 * @param listener the DependencyListener to register.
 	 */
 	void addDependencyListener(DependencyListener listener);
 
 	/**
-	 * Remove a dependency listener from change tracking
+	 * Remove a dependency listener from change tracking.
+	 *
+	 * @param listener the DependencyListener to remove.
 	 */
 	void removeDependencyListener(DependencyListener listener);
 
 	/**
-	 * Register a listener to track changes in repositories
+	 * Register a listener to track changes in repositories.
+	 *
+	 * @param listener the RepositoryListener to register.
 	 */
 	void addRepositoryListener(RepositoryListener listener);
 
 	/**
 	 * Remove a repository listener from change tracking
+	 *
+	 * @param listener the RepositoryListener to remove.
 	 */
 	void removeRepositoryListener(RepositoryListener listener);
 	
 	/**
 	 * Register a listener to track changes in plugin repositories
+	 *
+	 * @param listener the RepositoryListener to register.
 	 */
 	void addPluginRepositoryListener(RepositoryListener listener);
 
 	/**
 	 * Remove a plugin repository listener from change tracking
+	 *
+	 * @param listener the RepositoryListener to remove.
 	 */
 	void removePluginRepositoryListener(RepositoryListener listener);
 
 	/**
 	 * Register a listener to track changes in build plugins
+	 *
+	 * @param listener the PluginListener to register.
 	 */
 	void addPluginListener(PluginListener listener);
 
 	/**
 	 * Remove a build plugin listener from change tracking
+	 *
+	 * @param listener the PluginListener to remove.
 	 */
 	void removePluginListener(PluginListener listener);
 	
@@ -56,9 +78,16 @@ public interface ProjectOperations {
 
 	/**
 	 * Remove a property listener from change tracking
+	 *
+	 * @param listener the PropertyListener to remove.
 	 */
 	void removePropertyListener(PropertyListener listener);
 
+	/**
+	 * Updates the project type.
+	 * 
+	 * @param projectType the ProjectType to update.
+	 */
 	void updateProjectType(ProjectType projectType);
 
 	/**
@@ -79,9 +108,9 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param groupId to add (required)
-	 * @param artifactId to add (required)
-	 * @param version to add (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
 	 */
 	void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
 
@@ -103,9 +132,9 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param groupId to remove (required)
-	 * @param artifactId to remove (required)
-	 * @param version to remove (required)
+	 * @param groupId the group id of the dependency (required)
+	 * @param artifactId the artifact id of the dependency (required)
+	 * @param version the version of the dependency (required)
 	 */
 	void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
 
@@ -114,7 +143,7 @@ public interface ProjectOperations {
 	 * present, removes any dependency which matches {@link ProjectMetadata#getDependenciesExcludingVersion(Dependency)}.
 	 * Always adds the presented dependency.
 	 * 
-	 * @param dependency to add (required)
+	 * @param dependency dependency to add (required)
 	 */
 	void dependencyUpdate(Dependency dependency);
 
@@ -125,7 +154,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository to add (required)
+	 * @param repository repository to add (required)
 	 */
 	void addRepository(Repository repository);
 
@@ -136,7 +165,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository to remove (required)
+	 * @param repository repository to remove (required)
 	 */
 	void removeRepository(Repository repository);
 
@@ -147,7 +176,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository to add (required)
+	 * @param repository plugin repository to add (required)
 	 */
 	void addPluginRepository(Repository repository);
 	
@@ -158,7 +187,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository repository to remove (required)
+	 * @param repository plugin repository to remove (required)
 	 */
 	void removePluginRepository(Repository repository);
 
@@ -169,7 +198,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add 
 	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param plugin to add (required)
+	 * @param plugin build plugin to add (required)
 	 */
 	void addBuildPlugin(Plugin plugin);
 
@@ -180,7 +209,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * build plugin from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param plugin to add (required)
+	 * @param plugin build plugin to remove (required)
 	 */
 	void removeBuildPlugin(Plugin plugin);
 
@@ -189,7 +218,7 @@ public interface ProjectOperations {
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
 	 * Always adds the presented plugin.
 	 * 
-	 * @param plugin to remove (required)
+	 * @param plugin build plugin to update (required)
 	 */
 	void buildPluginUpdate(Plugin plugin);
 	
@@ -200,7 +229,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param property to add (required)
+	 * @param property POM property to add (required)
 	 */
 	void addProperty(Property property);
 
@@ -211,7 +240,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param property to remove (required)
+	 * @param property POM property to remove (required)
 	 */
 	void removeProperty(Property property);
 }
