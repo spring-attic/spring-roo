@@ -243,8 +243,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			throw new IllegalStateException(e);
 		}
 
-		Element rootElement = persistence.getDocumentElement();
-		Element persistenceElement = XmlUtils.findFirstElement("/persistence", rootElement);
+		Element root = persistence.getDocumentElement();
+		Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
 		Element persistenceUnit = XmlUtils.findFirstElement("persistence-unit", persistenceElement);
 
 		while (persistenceUnit.getFirstChild() != null) {
@@ -548,6 +548,47 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element pluginElement : ormPlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
+		
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+			updateEclipsePlugin(true);
+		}
+	}
+
+	private void updateEclipsePlugin(boolean addBuildCommand) {
+		String pomPath = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		MutableFile pomMutableFile = null;
+
+		Document pom;
+		try {
+			if (fileManager.exists(pomPath)) {
+				pomMutableFile = fileManager.updateFile(pomPath);
+				pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+			} else {
+				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
+			}
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element root = pom.getDocumentElement();
+		String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
+		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
+		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin reqired");
+		Element buildCommandElement = XmlUtils.findFirstElement("buildCommand[name = '" + gaeBuildCommandName + "']", additionalBuildcommandsElement);
+		
+		if (addBuildCommand && buildCommandElement == null) {
+			Element nameElement = pom.createElement("name");
+			nameElement.setTextContent(gaeBuildCommandName);
+			buildCommandElement = pom.createElement("buildCommand");
+			buildCommandElement.appendChild(nameElement);
+			additionalBuildcommandsElement.appendChild(buildCommandElement);
+			XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		} 
+		
+		if (!addBuildCommand && buildCommandElement != null) {
+			additionalBuildcommandsElement.removeChild(buildCommandElement);
+			XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+		}
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
@@ -578,6 +619,10 @@ public class JpaOperationsImpl implements JpaOperations {
 					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 				}
 			}
+		}
+		
+		if (database != JdbcDatabase.GOOGLE_APP_ENGINE) {
+			updateEclipsePlugin(false);
 		}
 	}
 
