@@ -10,5 +10,10 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
  */
 public interface LocatedTypeCallback {
 	
+	/**
+	 * Callback method to process the located {@link ClassOrInterfaceTypeDetails} type.
+	 * 
+	 * @param located the {@link ClassOrInterfaceTypeDetails} type.
+	 */
 	 void process(ClassOrInterfaceTypeDetails located);
 }
