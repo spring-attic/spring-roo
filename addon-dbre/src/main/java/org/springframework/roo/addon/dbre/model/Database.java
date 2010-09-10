@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
@@ -16,7 +18,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = 4051253195181886730L;
+	private static final long serialVersionUID = -6066594794515924423L;
 
 	/** The name of the database model. */
 	private String name;
@@ -29,7 +31,7 @@ public class Database implements Serializable {
 
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
-	
+
 	/** Database sequences */
 	private Set<Sequence> sequences = new LinkedHashSet<Sequence>();
 
@@ -96,7 +98,8 @@ public class Database implements Serializable {
 				column.setTable(table);
 			}
 
-			short keySequence = 0;
+			Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
+			Short keySequence;
 			for (ForeignKey foreignKey : table.getForeignKeys()) {
 				foreignKey.setTable(table);
 
@@ -104,11 +107,16 @@ public class Database implements Serializable {
 					String foreignTableName = foreignKey.getForeignTableName();
 					Table targetTable = findTable(foreignTableName);
 					if (targetTable != null) {
+						keySequence = keySequenceMap.get(foreignTableName);
+						if (keySequence == null) {
+							keySequence = 0;
+							keySequenceMap.put(foreignTableName, keySequence);
+						}
 						foreignKey.setForeignTable(targetTable);
 						if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
-							keySequence++;
+							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
 						}
-						foreignKey.setKeySequence(keySequence);
+						foreignKey.setKeySequence(keySequence.shortValue());
 					}
 				}
 
@@ -128,7 +136,8 @@ public class Database implements Serializable {
 				}
 			}
 
-			keySequence = 0;
+			keySequenceMap = new LinkedHashMap<String, Short>();
+			keySequence = null;
 			for (ForeignKey exportedKey : table.getExportedKeys()) {
 				exportedKey.setTable(table);
 
@@ -137,10 +146,15 @@ public class Database implements Serializable {
 					Table targetTable = findTable(foreignTableName);
 					if (targetTable != null) {
 						exportedKey.setForeignTable(targetTable);
-						if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
-							keySequence++;
+						keySequence = keySequenceMap.get(foreignTableName);
+						if (keySequence == null) {
+							keySequence = 0;
+							keySequenceMap.put(foreignTableName, keySequence);
 						}
-						exportedKey.setKeySequence(keySequence);
+						if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
+							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+						}
+						exportedKey.setKeySequence(keySequence.shortValue());
 					}
 				}
 
@@ -177,7 +191,6 @@ public class Database implements Serializable {
 
 	/**
 	 * Determines if a table is a many-to-many join table.
-	 * 
 	 * <p>
 	 * To be identified as a many-to-many join table, the table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns.
 	 */
