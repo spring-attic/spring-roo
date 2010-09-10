@@ -83,7 +83,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
-		Assert.notNull(entityMetadata, "Finder metadata required");
+		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.notNull(controllerOperations, "Controller operations required");
 		if (!isValid()) {
 			return;
