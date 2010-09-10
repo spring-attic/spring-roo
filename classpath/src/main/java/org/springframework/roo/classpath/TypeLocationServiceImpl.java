@@ -54,9 +54,10 @@ public class TypeLocationServiceImpl implements TypeLocationService {
 				Path path = PhysicalTypeIdentifier.getPath(id);
 				ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(javaType, path);
 				if (located != null) {
-					for (JavaType annotation : annotationsToDetect) {
+					annotation : for (JavaType annotation : annotationsToDetect) {
 						if (MemberFindingUtils.getTypeAnnotation(located, annotation) != null) {
 							callback.process(located);
+							break annotation;
 						}
 					}
 				}
