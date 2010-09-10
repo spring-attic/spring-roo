@@ -116,7 +116,7 @@ public class Database implements Serializable {
 						if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
 							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
 						}
-						foreignKey.setKeySequence(keySequence.shortValue());
+						foreignKey.setKeySequence(keySequence);
 					}
 				}
 
@@ -154,7 +154,7 @@ public class Database implements Serializable {
 						if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
 							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
 						}
-						exportedKey.setKeySequence(keySequence.shortValue());
+						exportedKey.setKeySequence(keySequence);
 					}
 				}
 
