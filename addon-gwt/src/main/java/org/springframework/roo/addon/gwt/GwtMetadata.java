@@ -6,20 +6,6 @@ import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -29,7 +15,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
 import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultConstructorMetadata;
 import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -39,7 +24,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
-import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
@@ -53,6 +37,20 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Metadata for GWT.
@@ -82,8 +80,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private ProjectMetadata projectMetadata;
 	private ClassOrInterfaceTypeDetails governorTypeDetails;
 	private Path mirrorTypePath;
-	private ClassOrInterfaceTypeDetails proxyChanged;
-	private ClassOrInterfaceTypeDetails changeHandler;
 	private ClassOrInterfaceTypeDetails request;
 
 	private ClassOrInterfaceTypeDetails proxy;
@@ -116,8 +112,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
           // We know GwtMetadataProvider already took care of all the necessary checks. So we can just re-create fresh representations of the types we're responsible for
 		resolveEntityInformation();
-		buildProxyChanged();
-		buildChangeHandler();
 		buildProxy();
 		buildActivitiesMapper();
 		// TODO (cromwellian) Argh! Why must I make this an outer class!
@@ -139,8 +133,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 	public List<ClassOrInterfaceTypeDetails> getAllTypes() {
 		List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
-		result.add(proxyChanged);
-		result.add(changeHandler);
 		result.add(proxy);
 		result.add(listViewBinder);
 		result.add(detailsViewBinder);
@@ -170,77 +162,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	private void buildProxyChanged() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.PROXY_CHANGED);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		// Shared Java Type: GwtEvent.Type<EmployeeChangedHandler>
-		List<JavaType> gwtEventTypeParams = new ArrayList<JavaType>();
-		gwtEventTypeParams.add(getDestinationJavaType(MirrorType.CHANGED_HANDLER));
-		JavaType gwtEventType = new JavaType("com.google.gwt.event.shared.GwtEvent.Type", 0, DataType.TYPE, null, gwtEventTypeParams);
-
-		// extends ProxyChangedEvent<EmployeeProxy, EmployeeChangedHandler>
-		List<JavaType> extParams = new ArrayList<JavaType>();
-		extParams.add(getDestinationJavaType(MirrorType.PROXY));
-		extParams.add(getDestinationJavaType(MirrorType.CHANGED_HANDLER));
-		extendsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.EntityProxyChangedEvent", 0, DataType.TYPE, null, extParams));
-
-		// public static final Type<EmployeeChangedHandler> TYPE = new com.google.gwt.event.shared.GwtEvent.Type<EmployeeChangedHandler>();
-		JavaType fieldType = gwtEventType;
-		String fieldInitializer = "new " + fieldType.getNameIncludingTypeParameters() + "()";
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(destinationMetadataId, Modifier.PUBLIC + Modifier.STATIC + Modifier.FINAL, new JavaSymbolName("TYPE"), fieldType, fieldInitializer, null);
-		fields.add(fieldMetadata);
-
-		// public EmployeeProxyChanged(com.springsource.extrack.gwt.request.EmployeeProxy proxy, com.google.gwt.requestfactory.shared.WriteOperation) {
-		// super(proxy, writeOperation);
-		// }
-		List<JavaType> constructorParameterTypes = new ArrayList<JavaType>();
-		constructorParameterTypes.add(getDestinationJavaType(MirrorType.PROXY));
-		constructorParameterTypes.add(new JavaType("com.google.gwt.requestfactory.shared.WriteOperation"));
-		List<JavaSymbolName> constructorParameterNames = new ArrayList<JavaSymbolName>();
-		constructorParameterNames.add(new JavaSymbolName("proxy"));
-		constructorParameterNames.add(new JavaSymbolName("writeOperation"));
-		InvocableMemberBodyBuilder constructorBodyBuilder = new InvocableMemberBodyBuilder();
-		constructorBodyBuilder.appendFormalLine("super(proxy, writeOperation);");
-		ConstructorMetadata constructorMetadata = new DefaultConstructorMetadata(destinationMetadataId, Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(constructorParameterTypes), constructorParameterNames, null, constructorBodyBuilder.getOutput());
-		constructors.add(constructorMetadata);
-
-		// public GwtEvent.Type<EmployeeChangedHandler> getAssociatedType() {
-		// return TYPE;
-		// }
-		JavaSymbolName method1Name = new JavaSymbolName("getAssociatedType");
-		JavaType method1ReturnType = gwtEventType;
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		InvocableMemberBodyBuilder method1BodyBuilder = new InvocableMemberBodyBuilder();
-		method1BodyBuilder.appendFormalLine("return TYPE;");
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PUBLIC, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, method1BodyBuilder.getOutput());
-		methods.add(method1Metadata);
-
-		// protected void dispatch(EmployeeChangedHandler handler) {
-		// handler.onEmployeeChanged(this);
-		// }
-		JavaSymbolName method2Name = new JavaSymbolName("dispatch");
-		JavaType method2ReturnType = JavaType.VOID_PRIMITIVE;
-		List<JavaType> method2ParameterTypes = new ArrayList<JavaType>();
-		method2ParameterTypes.add(getDestinationJavaType(MirrorType.CHANGED_HANDLER));
-		List<JavaSymbolName> method2ParameterNames = new ArrayList<JavaSymbolName>();
-		method2ParameterNames.add(new JavaSymbolName("handler"));
-		InvocableMemberBodyBuilder method2BodyBuilder = new InvocableMemberBodyBuilder();
-		method2BodyBuilder.appendFormalLine("handler." + getOnChangeMethod() + "(this);");
-		MethodMetadata method2Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.PROTECTED, method2Name, method2ReturnType, AnnotatedJavaType.convertFromJavaTypes(method2ParameterTypes), method2ParameterNames, null, null, method2BodyBuilder.getOutput());
-		methods.add(method2Metadata);
-
-		this.proxyChanged = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
-	}
-
 	private void buildActivitiesMapper() {
 		try {
 			MirrorType type = MirrorType.ACTIVITIES_MAPPER;
@@ -252,33 +173,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	private void buildChangeHandler() {
-		String destinationMetadataId = getDestinationMetadataId(MirrorType.CHANGED_HANDLER);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<AnnotationMetadata> typeAnnotations = createAnnotations();
-		List<ConstructorMetadata> constructors = new ArrayList<ConstructorMetadata>();
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		// extends com.google.gwt.event.shared.EventHandler
-		extendsTypes.add(new JavaType("com.google.gwt.event.shared.EventHandler"));
-
-		// void onEmployeeChanged(EmployeeProxyChanged event);
-		JavaSymbolName method1Name = new JavaSymbolName(getOnChangeMethod());
-		JavaType method1ReturnType = JavaType.VOID_PRIMITIVE;
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-		method1ParameterTypes.add(getDestinationJavaType(MirrorType.PROXY_CHANGED));
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		method1ParameterNames.add(new JavaSymbolName("event"));
-		MethodMetadata method1Metadata = new DefaultMethodMetadata(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, null, null, null);
-		methods.add(method1Metadata);
-
-		this.changeHandler = new DefaultClassOrInterfaceTypeDetails(destinationMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, constructors, fields, methods, null, extendsTypes, implementsTypes, typeAnnotations, null);
 	}
 
 	private void buildProxy() {
@@ -466,8 +360,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
 			addReference(dataDictionary, MirrorType.LIST_VIEW);
-			addReference(dataDictionary, MirrorType.PROXY_CHANGED);
-			addReference(dataDictionary, MirrorType.CHANGED_HANDLER);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -943,10 +835,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		boolean isList;
 	}
 
-	private String getOnChangeMethod() {
-		return "on" + governorTypeDetails.getName().getSimpleTypeName() + "Changed";
-	}
-
 	/**
 	 * @param mirrorType the mirror class we're producing (required)
 	 * @return the MID to the mirror class applicable for the current governor (never null)
@@ -992,14 +880,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		rooGwtMirroredFromConfig.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
 		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooGwtMirroredFrom.class.getName()), rooGwtMirroredFromConfig));
 		return annotations;
-	}
-
-	public ClassOrInterfaceTypeDetails getChanged() {
-		return proxyChanged;
-	}
-
-	public ClassOrInterfaceTypeDetails getChangeHandler() {
-		return changeHandler;
 	}
 
 	public ClassOrInterfaceTypeDetails getKey() {

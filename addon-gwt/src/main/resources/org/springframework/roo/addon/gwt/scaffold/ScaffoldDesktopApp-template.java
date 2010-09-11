@@ -58,7 +58,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
         };
         requestFactory.userInformationRequest().getCurrentUserInformation(Window.Location.getHref()).fire(receiver);
 
-        eventBus.addHandler(RequestEvent.TYPE, new RequestEvent.Handler() {
+        RequestEvent.register(eventBus, new RequestEvent.Handler() {
             // Only show loading status if a request isn't serviced in 250ms.
             private static final int LOADING_TIMEOUT = 250;
 
@@ -73,7 +73,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 
         /* Check for Authentication failures or mismatches */
 
-        eventBus.addHandler(RequestEvent.TYPE, new AuthenticationFailureHandler());
+        RequestEvent.register(eventBus, new AuthenticationFailureHandler());
 
         CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
         ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace(requestFactory);
