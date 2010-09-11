@@ -18,6 +18,8 @@ package org.springframework.roo.addon.gwt;
  */
 public enum MirrorType {
 	PROXY(GwtPath.GWT_REQUEST, "Proxy", "proxy", null), 
+	PROXY_CHANGED(GwtPath.GWT_REQUEST, "ProxyChanged", "proxyChanged", null), 
+	CHANGED_HANDLER(GwtPath.GWT_REQUEST, "ChangedHandler", "changedHandler", null), 
 	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", null), 
 	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"), 
 	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity"), 

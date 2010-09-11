@@ -3,7 +3,7 @@ package {{=packageName}};
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,7 +17,7 @@ public class {{=className}} extends AbstractGinModule {
 	@Override
     protected void configure() {
 
-        bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
+        bind(EventBus.class).toProvider(EventBusProvider.class).in(Singleton.class);
         bind({{=requestFactory}}.class).toProvider(RequestFactoryProvider.class).in(Singleton.class);
         bind(PlaceController.class).toProvider(PlaceControllerProvider.class).in(Singleton.class);
         bind(ScaffoldApp.class).toProvider(ScaffoldAppProvider.class).in(Singleton.class);
@@ -82,6 +82,14 @@ public class {{=className}} extends AbstractGinModule {
             requestFactory.init(eventBus);
 
             return requestFactory;
+        }
+    }
+
+    static class EventBusProvider implements Provider<EventBus> {
+
+        @Override
+        public EventBus get() {
+            return new HandlerManager(null);
         }
     }
 }
