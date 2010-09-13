@@ -49,6 +49,8 @@ import org.springframework.roo.classpath.javaparser.details.JavaParserConstructo
 import org.springframework.roo.classpath.javaparser.details.JavaParserFieldMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserMethodMetadata;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -67,7 +69,7 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @author Ben Alex
  * @since 1.0
  */
-public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClassOrInterfaceTypeDetails, CompilationUnitServices {
+public class JavaParserMutableClassOrInterfaceTypeDetails extends AbstractCustomDataAccessorProvider implements MutableClassOrInterfaceTypeDetails, CompilationUnitServices {
 	// Passed into constructor
 	private FileManager fileManager;
 
@@ -85,7 +87,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private ClassOrInterfaceTypeDetails superclass = null;
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
+	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 
 	// Internal use
@@ -102,6 +104,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 	private int modifier = 0;
 
 	public JavaParserMutableClassOrInterfaceTypeDetails(CompilationUnit compilationUnit, TypeDeclaration typeDeclaration, FileManager fileManager, String declaredByMetadataId, String fileIdentifier, JavaType typeName, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) throws ParseException, CloneNotSupportedException, IOException {
+		super(CustomDataImpl.NONE);
 		Assert.notNull(compilationUnit, "Compilation unit required");
 		Assert.notNull(typeDeclaration, "Unable to locate the class or interface declaration");
 		Assert.notNull(fileManager, "File manager requried");
@@ -231,7 +234,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		if (annotationsList != null) {
 			for (AnnotationExpr candidate : annotationsList) {
 				JavaParserAnnotationMetadata md = new JavaParserAnnotationMetadata(candidate, this);
-				typeAnnotations.add(md);
+				annotations.add(md);
 			}
 		}
 
@@ -310,8 +313,8 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		return Collections.unmodifiableList(implementsTypes);
 	}
 
-	public List<? extends AnnotationMetadata> getTypeAnnotations() {
-		return Collections.unmodifiableList(typeAnnotations);
+	public List<AnnotationMetadata> getAnnotations() {
+		return Collections.unmodifiableList(annotations);
 	}
 
 	public void addTypeAnnotation(AnnotationMetadata annotation) {
@@ -558,7 +561,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		// Add type annotations
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		typeDeclaration.setAnnotations(annotations);
-		for (AnnotationMetadata candidate : cit.getTypeAnnotations()) {
+		for (AnnotationMetadata candidate : cit.getAnnotations()) {
 			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, candidate, false);
 		}
 
@@ -620,7 +623,8 @@ public class JavaParserMutableClassOrInterfaceTypeDetails implements MutableClas
 		tsc.append("superclass", superclass);
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("implementsTypes", implementsTypes);
-		tsc.append("typeAnnotations", typeAnnotations);
+		tsc.append("typeAnnotations", annotations);
+		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
 

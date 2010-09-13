@@ -25,6 +25,8 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -37,7 +39,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class JavaParserFieldMetadata implements FieldMetadata {
+public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider implements FieldMetadata {
 	private JavaType fieldType;
 	private String fieldInitializer;
 	private JavaSymbolName fieldName;
@@ -46,6 +48,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 	private int modifier;
 
 	public JavaParserFieldMetadata(String declaredByMetadataId, FieldDeclaration fieldDeclaration, VariableDeclarator var, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+		super(CustomDataImpl.NONE);
 		Assert.notNull(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(fieldDeclaration, "Field declaration is mandatory");
 		Assert.notNull(var, "Variable declarator required");
@@ -240,6 +243,7 @@ public class JavaParserFieldMetadata implements FieldMetadata {
 		tsc.append("fieldName", fieldName);
 		tsc.append("fieldInitializer", fieldInitializer);
 		tsc.append("annotations", annotations);
+		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
 

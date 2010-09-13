@@ -6,8 +6,9 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Abstract implementation of {@link InvocableMemberMetadata}.
@@ -16,22 +17,19 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public abstract class AbstractInvocableMemberMetadata implements InvocableMemberMetadata {
+public abstract class AbstractInvocableMemberMetadata extends AbstractIdentifiableAnnotatedJavaStructureProvider implements InvocableMemberMetadata {
 
-	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaSymbolName> parameterNames =  new ArrayList<JavaSymbolName>();
-	private List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
+	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
+	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private String body;
-	private String declaredByMetadataId;
-	private int modifier;
 	
-	public AbstractInvocableMemberMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
-		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-		this.declaredByMetadataId = declaredByMetadataId;
+	public AbstractInvocableMemberMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
+		super(customData, declaredByMetadataId, modifier, annotations);
 
-		if (parameters != null) {
-			this.parameters = new ArrayList<AnnotatedJavaType>(parameters.size());
-			this.parameters.addAll(parameters);
+		if (parameterTypes != null) {
+			this.parameterTypes = new ArrayList<AnnotatedJavaType>(parameterTypes.size());
+			this.parameterTypes.addAll(parameterTypes);
 		}
 		
 		if (parameterNames != null) {
@@ -39,37 +37,27 @@ public abstract class AbstractInvocableMemberMetadata implements InvocableMember
 			this.parameterNames.addAll(parameterNames);
 		}
 		
-		this.body = body;
-		this.modifier = modifier;
-		
-		if (annotations != null) {
-			this.annotations = new ArrayList<AnnotationMetadata>(annotations.size());
-			this.annotations.addAll(annotations);
+		if (throwsTypes != null) {
+			this.throwsTypes = new ArrayList<JavaType>(throwsTypes.size());
+			this.throwsTypes.addAll(throwsTypes);
 		}
-	}
-	
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
-	}
 
-	public List<AnnotationMetadata> getAnnotations() {
-		return Collections.unmodifiableList(annotations);
+		this.body = body;
 	}
 	
-	public List<JavaSymbolName> getParameterNames() {
+	public final List<JavaSymbolName> getParameterNames() {
 		return Collections.unmodifiableList(parameterNames);
 	}
 
-	public List<AnnotatedJavaType> getParameterTypes() {
-		return Collections.unmodifiableList(parameters);
+	public final List<AnnotatedJavaType> getParameterTypes() {
+		return Collections.unmodifiableList(parameterTypes);
 	}
 	
-	public int getModifier() {
-		return modifier;
+	public final List<JavaType> getThrowsTypes() {
+		return Collections.unmodifiableList(throwsTypes);
 	}
 
-	public String getBody() {
+	public final String getBody() {
 		return body;
 	}
-	
 }

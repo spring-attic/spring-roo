@@ -3,34 +3,22 @@ package org.springframework.roo.classpath.details;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Provides information about the different members in a class, interface, enum or aspect.
+ * Immutable representation of the members in a class, interface, enum or aspect.
  * 
  * @author Ben Alex
  * @since 1.0
  *
  */
-public interface MemberHoldingTypeDetails extends PhysicalTypeDetails {
+public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, IdentifiableAnnotatedJavaStructure {
 	
 	List<? extends MethodMetadata> getDeclaredMethods();
 	
 	List<? extends ConstructorMetadata> getDeclaredConstructors();
 	
 	List<? extends FieldMetadata> getDeclaredFields();
-	
-	/**
-	 * Lists the type-level annotations.
-	 * 
-	 * <p>
-	 * This includes those annotations declared on the type, together with those defined via the ITD
-	 * "declare @type: DestinationType: @Annotation" feature.
-	 * 
-	 * @return an unmodifiable representation of annotations declared on this type (may be empty, but never null)
-	 */
-	List<? extends AnnotationMetadata> getTypeAnnotations();
 	
 	/**
 	 * Lists the classes this type extends. This may be empty. Always empty in the case of an enum.

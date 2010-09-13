@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath.details;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -15,11 +14,6 @@ import org.springframework.roo.model.JavaType;
  *
  */
 public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceTypeDetails {
-
-	/**
-	 * @return the type annotations (never null, but may be empty)
-	 */
-	List<? extends AnnotationMetadata> getTypeAnnotations();
 
 	/**
 	 * Adds a new type-level annotation. There must not already be an existing annotation of this

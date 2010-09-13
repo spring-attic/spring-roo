@@ -37,6 +37,7 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultMetadataService extends AbstractMetadataCache implements MetadataService {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	private int validGets = 0;
+	private int recursiveGets = 0;
 	private int cachePuts = 0;
 	private int cacheHits = 0;
 	private int cacheMisses = 0;
@@ -47,6 +48,8 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	// Mutex
 	private Boolean lock = new Boolean(true);
 
+	private Set<String> activeRequests = new HashSet<String>();
+	
 	protected void bindMetadataProvider(MetadataProvider mp) {
 		synchronized (lock) {
 			Assert.notNull(mp, "Metadata provider required");
@@ -100,6 +103,11 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a metadata instance");
 		
 		synchronized (lock) {
+			if (activeRequests.contains(metadataIdentificationString)) {
+				recursiveGets++;
+				return null;
+			}
+			
 			validGets++;
 			
 			if (!evictCache) {
@@ -112,6 +120,9 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			}
 			
 			cacheMisses++;
+
+			// Infinite loop management
+			activeRequests.add(metadataIdentificationString);
 
 			// Get the destination
 			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
@@ -139,6 +150,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				cachePuts++;
 			}
 			
+			activeRequests.remove(metadataIdentificationString);
 			return result;
 		}
 	}
@@ -218,6 +230,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("providers", getRegisteredProviders());
 		tsc.append("validGets", validGets);
+		tsc.append("recursiveGets", recursiveGets);
 		tsc.append("cachePuts", cachePuts);
 		tsc.append("cacheHits", cacheHits);
 		tsc.append("cacheMisses", cacheMisses);

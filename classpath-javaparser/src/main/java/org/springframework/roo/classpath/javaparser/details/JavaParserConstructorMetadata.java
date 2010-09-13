@@ -29,6 +29,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -41,16 +43,20 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class JavaParserConstructorMetadata implements ConstructorMetadata {
+public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorProvider implements ConstructorMetadata {
+
+	// TODO: Should parse the throws types from JavaParser source
 
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
+	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	private String body;
 	private String declaredByMetadataId;
 	private int modifier;
 	
 	public JavaParserConstructorMetadata(String declaredByMetadataId, ConstructorDeclaration constructorDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameterNames) {
+		super(CustomDataImpl.NONE);
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(constructorDeclaration, "Constructor declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -122,6 +128,10 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 		return Collections.unmodifiableList(parameterTypes);
 	}
 	
+	public List<JavaType> getThrowsTypes() {
+		return Collections.unmodifiableList(throwsTypes);
+	}
+
 	public String getBody() {
 		return body;
 	}
@@ -133,6 +143,7 @@ public class JavaParserConstructorMetadata implements ConstructorMetadata {
 		tsc.append("parameterTypes", parameterTypes);
 		tsc.append("parameterNames", parameterNames);
 		tsc.append("annotations", annotations);
+		tsc.append("customData", getCustomData());
 		tsc.append("body", body);
 		return tsc.toString();
 	}

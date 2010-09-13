@@ -1,11 +1,15 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 
 /**
@@ -17,10 +21,16 @@ import org.springframework.roo.support.style.ToStringCreator;
  */
 public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata implements ConstructorMetadata {
 
-	public DefaultConstructorMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
-		super(declaredByMetadataId, modifier, parameters, parameterNames, annotations, body);
+	// package protected to mandate the use of ConstructorMetadataBuilder
+	DefaultConstructorMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
+		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 	}
-	
+
+	@Deprecated
+	public DefaultConstructorMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
+		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), parameters, parameterNames, new ArrayList<JavaType>(), body);
+	}
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
@@ -28,6 +38,7 @@ public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata 
 		tsc.append("parameterTypes", getParameterTypes());
 		tsc.append("parameterNames", getParameterNames());
 		tsc.append("annotations", getAnnotations());
+		tsc.append("customData", getCustomData());
 		tsc.append("body", getBody());
 		return tsc.toString();
 	}

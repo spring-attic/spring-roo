@@ -356,7 +356,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		}
 
 		// Check type annotations
-		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getTypeAnnotations();
+		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getAnnotations();
 
 		boolean hasRequiredAnnotations = true;
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
@@ -387,7 +387,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		}
 
 		// Check for required type annotations
-		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getTypeAnnotations();
+		List<? extends AnnotationMetadata> typeAnnotations = typeDetails.getAnnotations();
 
 		boolean hasRequiredAnnotations = true;
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();

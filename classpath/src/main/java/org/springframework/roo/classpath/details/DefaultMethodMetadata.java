@@ -1,11 +1,12 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -18,35 +19,31 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
+public final class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
 
 	private JavaSymbolName methodName;
 	private JavaType returnType;
-	private List<JavaType> throwsTypes = new ArrayList<JavaType>();
 	
-	public DefaultMethodMetadata(String declaredByMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, List<JavaType> throwsTypes, String body) {
-		super(declaredByMetadataId, modifier, parameters, parameterNames, annotations, body);
+	// package protected to mandate the use of MethodMetadataBuilder
+	DefaultMethodMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
+		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 		Assert.notNull(methodName, "Method name required");
 		Assert.notNull(returnType, "Return type required");
 		this.methodName = methodName;
 		this.returnType = returnType;
-		
-		if (throwsTypes != null) {
-			this.throwsTypes = new ArrayList<JavaType>(throwsTypes.size());
-			this.throwsTypes.addAll(throwsTypes);
-		}
 	}
 
+	@Deprecated
+	public DefaultMethodMetadata(String declaredByMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, List<JavaType> throwsTypes, String body) {
+		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), methodName, returnType, parameters, parameterNames, throwsTypes, body);
+	}
+	
 	public JavaSymbolName getMethodName() {
 		return methodName;
 	}
 
-	public JavaType getReturnType() {
+	public final JavaType getReturnType() {
 		return returnType;
-	}
-
-	public List<JavaType> getThrowsTypes() {
-		return throwsTypes;
 	}
 
 	public String toString() {
@@ -58,7 +55,8 @@ public class DefaultMethodMetadata extends AbstractInvocableMemberMetadata imple
 		tsc.append("parameterNames", getParameterNames());
 		tsc.append("returnType", returnType);
 		tsc.append("annotations", getAnnotations());
-		tsc.append("throwsTypes", throwsTypes);
+		tsc.append("throwsTypes", getThrowsTypes());
+		tsc.append("customData", getCustomData());
 		tsc.append("body", getBody());
 		return tsc.toString();
 	}

@@ -3,8 +3,8 @@ package org.springframework.roo.classpath.details;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Metadata concerning an invocable member, namely a method or constructor.
@@ -13,7 +13,7 @@ import org.springframework.roo.model.JavaSymbolName;
  * @since 1.0
  *
  */
-public interface InvocableMemberMetadata extends IdentifiableMember {
+public interface InvocableMemberMetadata extends IdentifiableAnnotatedJavaStructure {
 	
 	/**
 	 * @return the parameter types (never null, but may be an empty)
@@ -26,10 +26,10 @@ public interface InvocableMemberMetadata extends IdentifiableMember {
 	List<JavaSymbolName> getParameterNames();
 
 	/**
-	 * @return annotations on this invocable member (never null, but may be empty)
+	 * @return a list of types that the invocable member can throw (never null)
 	 */
-	 List<AnnotationMetadata> getAnnotations();
-	 
+	List<JavaType> getThrowsTypes();
+
 	 /**
 	  * @return the body of the method, if available (can be null if unavailable)
 	  */

@@ -90,7 +90,7 @@ public abstract class MemberFindingUtils {
 	public static final AnnotationMetadata getDeclaredTypeAnnotation(MemberHoldingTypeDetails memberHoldingTypeDetails, JavaType type) {
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
 		Assert.notNull(type, "Annotation type to locate required");
-		for (AnnotationMetadata md : memberHoldingTypeDetails.getTypeAnnotations()) {
+		for (AnnotationMetadata md : memberHoldingTypeDetails.getAnnotations()) {
 			if (md.getAnnotationType().equals(type)) {
 				return md;
 			}

@@ -9,12 +9,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -39,23 +41,19 @@ import org.springframework.roo.support.util.StringUtils;
 public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private BeanInfoMetadata beanInfoMetadata;
+	private List<MemberHoldingTypeDetails> memberHoldingTypeDetails;
 
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] ignoreFields;
 
-	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata) {
+	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MemberHoldingTypeDetails> memberHoldingTypeDetails) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
+		Assert.notNull(memberHoldingTypeDetails, "Bean info metadata required");
 
-		if (!isValid()) {
-			return;
-		}
-
-		this.beanInfoMetadata = beanInfoMetadata;
-
+		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
+		
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooToString.class.getName()));
 		if (annotation != null) {
@@ -70,6 +68,32 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		itdTypeDetails = builder.build();
 	}
 
+	private List<MethodMetadata> getPublicAccessors(boolean sortByAccessorName) {
+		// We keep these in a TreeMap so the methods are output in alphabetic order
+		/** key: string based method name, value: MethodMetadata */
+		TreeMap<String, MethodMetadata> map = new TreeMap<String, MethodMetadata>();
+		List<MethodMetadata> sortedByDetectionOrder = new ArrayList<MethodMetadata>();
+		
+		for (MemberHoldingTypeDetails holder : memberHoldingTypeDetails) {
+			for (MethodMetadata method : holder.getDeclaredMethods()) {
+				String accessorName = method.getMethodName().getSymbolName();
+				if (Modifier.isPublic(method.getModifier()) && method.getParameterTypes().size() == 0 && (accessorName.startsWith("get") || accessorName.startsWith("is"))) {
+					// We've got a public, no parameter, get|is method
+					if (sortByAccessorName) {
+						map.put(accessorName, method);
+					} else {
+						sortedByDetectionOrder.add(method);
+					}
+				}
+			}
+		}
+		if (sortByAccessorName) {
+			return new ArrayList<MethodMetadata>(map.values());
+		}
+		return sortedByDetectionOrder;
+	}
+
+	
 	/**
 	 * Obtains the "toString" method for this type, if available.
 	 * 
@@ -107,7 +131,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				Collections.addAll(ignoreFieldsSet, ignoreFields);
 			}
 
-			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+			for (MethodMetadata accessor : getPublicAccessors(false)) {
 				String accessorName = accessor.getMethodName().getSymbolName();
 				String fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				if (!ignoreFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {

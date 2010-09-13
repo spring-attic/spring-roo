@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 
 /**
@@ -10,4 +10,4 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @since 1.1
  *
  */
-public interface WebScaffoldMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface WebScaffoldMetadataProvider extends ItdTriggerBasedMetadataProvider {}

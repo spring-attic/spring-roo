@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.plural;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Interface to methods available on {@link PluralMetadataProviderImpl}.
@@ -9,4 +9,4 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @since 1.1
  *
  */
-public interface PluralMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface PluralMetadataProvider extends ItdTriggerBasedMetadataProvider {}

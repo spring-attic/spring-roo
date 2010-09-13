@@ -318,7 +318,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (cid == null) {
 			return false;
 		}
-		return null != MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
+		return null != MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooIdentifier.class.getName()));
 	}
 	
 	public void notify(String upstreamDependency, String downstreamDependency) {

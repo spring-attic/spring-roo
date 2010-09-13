@@ -12,7 +12,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -26,11 +25,6 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * <p>
  * Represents common information about beans, such as their accessors and mutators.
- * 
- * <p>
- * This metadata will introspect all {@link ItdProviderRole#ACCESSOR_MUTATOR} providers. As such those providers
- * must not rely on details provided by this metadata (it is permitted, however, for those providers to register
- * an additional trigger against this provider).
  * 
  * @author Ben Alex
  * @since 1.0

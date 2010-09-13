@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.beaninfo;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Interface to methods available on {@link BeanInfoMetadataProviderImpl}.
@@ -9,4 +9,4 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @since 1.1
  *
  */
-public interface BeanInfoMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface BeanInfoMetadataProvider extends ItdTriggerBasedMetadataProvider {}

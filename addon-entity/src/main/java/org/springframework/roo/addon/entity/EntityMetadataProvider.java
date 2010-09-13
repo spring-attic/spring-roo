@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.entity;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Interface to methods available on {@link EntityMetadataProviderImpl}.
@@ -8,4 +8,4 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @author Stefan Schmidt
  * @since 1.1
  */
-public interface EntityMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface EntityMetadataProvider extends ItdTriggerBasedMetadataProvider {}

@@ -29,6 +29,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
+import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -41,7 +43,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class JavaParserMethodMetadata implements MethodMetadata {
+public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider implements MethodMetadata {
 
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
@@ -54,6 +56,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 	private int modifier;
 	
 	public JavaParserMethodMetadata(String declaredByMetadataId, MethodDeclaration methodDeclaration, CompilationUnitServices compilationUnitServices, Set<JavaSymbolName> typeParameters) {
+		super(CustomDataImpl.NONE);
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
@@ -161,6 +164,7 @@ public class JavaParserMethodMetadata implements MethodMetadata {
 		tsc.append("parameterNames", parameterNames);
 		tsc.append("returnType", returnType);
 		tsc.append("annotations", annotations);
+		tsc.append("customData", getCustomData());
 		tsc.append("body", body);
 		return tsc.toString();
 	}

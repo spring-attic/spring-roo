@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath.details;
 
-import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.springframework.roo.model.JavaSymbolName;
@@ -25,20 +24,6 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 	 * @return the superclass, if available (null will be returned for interfaces, or if the class isn't available)
 	 */
 	ClassOrInterfaceTypeDetails getSuperclass();
-	
-	/**
-	 * Obtains the modifiers, in a format consistent with {@link Modifier}.
-	 * 
-	 * @return the modifiers (zero means no modifiers)
-	 */
-	int getModifier();
-	
-	/**
-	 * Obtains the physical type identifier that included this {@link ClassOrInterfaceTypeDetails}.
-	 * 
-	 * @return the physical type identifier (never null)
-	 */
-	String getDeclaredByMetadataId();
 
 	/**
 	 * Lists the enum constants this type provides. Always empty except if an enum type.

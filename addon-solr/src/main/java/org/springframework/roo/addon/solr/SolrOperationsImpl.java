@@ -183,7 +183,7 @@ public class SolrOperationsImpl implements SolrOperations {
 				}
 				
 				MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
-				for (AnnotationMetadata annotation : mutableTypeDetails.getTypeAnnotations()) {
+				for (AnnotationMetadata annotation : mutableTypeDetails.getAnnotations()) {
 					if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Entity"))) {
 						addSolrSearchableAnnotation(mutableTypeDetails, javaType, id);
 					} 
@@ -215,7 +215,7 @@ public class SolrOperationsImpl implements SolrOperations {
 		if (Modifier.isAbstract(mutableTypeDetails.getModifier())) {
 			throw new IllegalStateException("The class specified is an abstract type. Can only add solr search for concrete types.");
 		}
-		for (AnnotationMetadata annotation : mutableTypeDetails.getTypeAnnotations()) {
+		for (AnnotationMetadata annotation : mutableTypeDetails.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Entity"))) {
 				addSolrSearchableAnnotation(mutableTypeDetails, javaType, id);
 			} 
@@ -232,7 +232,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	private void addSolrSearchableAnnotation(MutableClassOrInterfaceTypeDetails mutableTypeDetails, JavaType javaType, String id) {
 		// first add the @RooSolrSearchable annotation to type
 		JavaType rooSolrSearchable = new JavaType(RooSolrSearchable.class.getName());
-		if (!mutableTypeDetails.getTypeAnnotations().contains(rooSolrSearchable)) {
+		if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
 			mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
 		}
 	}

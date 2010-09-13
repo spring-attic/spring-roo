@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -19,7 +21,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeDetails {
+public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ClassOrInterfaceTypeDetails {
 	
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
@@ -29,27 +31,14 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 	private ClassOrInterfaceTypeDetails superclass;
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
-	private int modifier;
-	private String declaredByMetadataId;
 	
-	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier, PhysicalTypeCategory physicalTypeCategory, List<AnnotationMetadata> typeAnnotations) {
-		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
-		Assert.notNull(name, "Name required");
-		Assert.notNull(physicalTypeCategory, "Physical type category required");
-
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.modifier = modifier;
-		this.name = name;
-		this.physicalTypeCategory = physicalTypeCategory;
-
-		if (typeAnnotations != null) {
-			this.typeAnnotations = typeAnnotations;
-		}
-	}
-
-	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier,
+	// package protected to mandate the use of ClassOrInterfaceTypeDetailsBuilder
+	DefaultClassOrInterfaceTypeDetails(CustomData customData, 
+			String declaredByMetadataId, 
+			int modifier, 
+			List<AnnotationMetadata> annotations,
+			JavaType name,
 			PhysicalTypeCategory physicalTypeCategory,
 			List<ConstructorMetadata> declaredConstructors,
 			List<FieldMetadata> declaredFields,
@@ -57,14 +46,11 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 			ClassOrInterfaceTypeDetails superclass,
 			List<JavaType> extendsTypes,
 			List<JavaType> implementsTypes,
-			List<AnnotationMetadata> typeAnnotations,
 			List<JavaSymbolName> enumConstants) {
-		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
+		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.notNull(name, "Name required");
 		Assert.notNull(physicalTypeCategory, "Physical type category required");
 
-		this.declaredByMetadataId = declaredByMetadataId;
-		this.modifier = modifier;
 		this.name = name;
 		this.physicalTypeCategory = physicalTypeCategory;
 		this.superclass = superclass;
@@ -88,10 +74,6 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		if (implementsTypes != null) {
 			this.implementsTypes = implementsTypes;
 		}
-		
-		if (typeAnnotations != null) {
-			this.typeAnnotations = typeAnnotations;
-		}
 
 		if (enumConstants != null) {
 			Assert.isTrue(physicalTypeCategory == PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
@@ -99,12 +81,23 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		}
 	}
 
-	public String getDeclaredByMetadataId() {
-		return declaredByMetadataId;
+	@Deprecated
+	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier, PhysicalTypeCategory physicalTypeCategory, List<AnnotationMetadata> annotations) {
+		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), name, physicalTypeCategory, null, null, null, null, null, null, null);
 	}
 
-	public int getModifier() {
-		return modifier;
+	@Deprecated
+	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier,
+			PhysicalTypeCategory physicalTypeCategory,
+			List<ConstructorMetadata> declaredConstructors,
+			List<FieldMetadata> declaredFields,
+			List<MethodMetadata> declaredMethods,
+			ClassOrInterfaceTypeDetails superclass,
+			List<JavaType> extendsTypes,
+			List<JavaType> implementsTypes,
+			List<AnnotationMetadata> annotations,
+			List<JavaSymbolName> enumConstants) {
+		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), name, physicalTypeCategory, declaredConstructors, declaredFields, declaredMethods, superclass, extendsTypes, implementsTypes, enumConstants);
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {
@@ -139,20 +132,16 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		return Collections.unmodifiableList(implementsTypes);
 	}
 	
-	public List<? extends AnnotationMetadata> getTypeAnnotations() {
-		return Collections.unmodifiableList(typeAnnotations);
-	}
-	
 	public ClassOrInterfaceTypeDetails getSuperclass() {
 		return superclass;
 	}
-
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("name", name);
-		tsc.append("modifier", Modifier.toString(modifier));
+		tsc.append("modifier", Modifier.toString(getModifier()));
 		tsc.append("physicalTypeCategory", physicalTypeCategory);
-		tsc.append("declaredByMetadataId", declaredByMetadataId);
+		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
 		tsc.append("declaredConstructors", declaredConstructors);
 		tsc.append("declaredFields", declaredFields);
 		tsc.append("declaredMethods", declaredMethods);
@@ -160,7 +149,8 @@ public class DefaultClassOrInterfaceTypeDetails implements ClassOrInterfaceTypeD
 		tsc.append("superclass", superclass);
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("implementsTypes", implementsTypes);
-		tsc.append("typeAnnotations", typeAnnotations);
+		tsc.append("annotations", getAnnotations());
+		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
 

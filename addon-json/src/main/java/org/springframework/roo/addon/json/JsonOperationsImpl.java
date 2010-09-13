@@ -51,9 +51,9 @@ public class JsonOperationsImpl implements JsonOperations {
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getTypeAnnotations(), new JavaType(RooJson.class.getName()))) {
+		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooJson.class.getName()))) {
 			JavaType rooSolrSearchable = new JavaType(RooJson.class.getName());
-			if (!mutableTypeDetails.getTypeAnnotations().contains(rooSolrSearchable)) {
+			if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
 				mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
 			}
 		}

@@ -13,7 +13,6 @@ import org.springframework.roo.addon.plural.PluralMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -40,7 +39,6 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
 	

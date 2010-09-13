@@ -2,10 +2,7 @@ package org.springframework.roo.classpath.itd;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,6 +11,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -52,14 +50,14 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadataProvider, MetadataNotificationListener {
+public abstract class AbstractItdMetadataProvider implements ItdMetadataProvider, MetadataNotificationListener {
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference protected FileManager fileManager;
 	@Reference protected MetadataService metadataService;
+	@Reference protected MemberDetailsScanner memberDetailsScanner;
 
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	private boolean dependsOnGovernorBeingAClass = true;
-	private Set<ItdProviderRole> roles = new HashSet<ItdProviderRole>();
 
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
 	private List<JavaType> metadataTriggers = new ArrayList<JavaType>();
@@ -181,16 +179,6 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 		this.metadataTriggers.remove(javaType);
 	}
 	
-	protected final void addProviderRole(ItdProviderRole role) {
-		Assert.notNull(role, "Provider role required");
-		this.roles.add(role);
-	}
-	
-	protected final void removeProviderRole(ItdProviderRole role) {
-		Assert.notNull(role, "Provider role required");
-		this.roles.remove(role);
-	}
-	
 	protected boolean isIgnoreTriggerAnnotations() {
 		return ignoreTriggerAnnotations;
 	}
@@ -265,6 +253,7 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 			
 			// Register a direct connection between the physical type and this metadata
 			// (this is needed so changes to the inheritance hierarchies are eventually notified to us)
+			// TODO: DETERMINE IF THIS IS REALLY NECESSARY, AS IT SHOULD FILTER DOWN VIA PTM (BPA 6 Sep 10)
 			metadataDependencyRegistry.registerDependency(governorPhysicalTypeMetadata.getId(), metadataIdentificationString);
 			
 			// Quit if the subclass returned null; it might not have experienced issues parsing etc
@@ -327,7 +316,4 @@ public abstract class AbstractItdMetadataProvider implements ItdRoleAwareMetadat
 		this.dependsOnGovernorBeingAClass = dependsOnGovernorBeingAClass;
 	}
 
-	public final Set<ItdProviderRole> getRoles() {
-		return Collections.unmodifiableSet(this.roles);
-	}
 }

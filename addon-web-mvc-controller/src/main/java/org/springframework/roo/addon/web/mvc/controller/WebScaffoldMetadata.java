@@ -1103,7 +1103,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (cid == null) {
 			return false;
 		}
-		return null != MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooIdentifier.class.getName()));
+		return null != MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooIdentifier.class.getName()));
 	}
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {

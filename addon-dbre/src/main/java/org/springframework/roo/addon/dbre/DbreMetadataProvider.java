@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Interface to methods available on {@link DbreMetadataProviderImpl}.
@@ -8,5 +8,5 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @author Alan Stewart
  * @since 1.1
  */
-public interface DbreMetadataProvider extends ItdRoleAwareMetadataProvider {
+public interface DbreMetadataProvider extends ItdTriggerBasedMetadataProvider {
 }

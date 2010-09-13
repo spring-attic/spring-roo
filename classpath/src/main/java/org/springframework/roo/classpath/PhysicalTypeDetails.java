@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath;
 
+import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.0
  */
-public interface PhysicalTypeDetails {
+public interface PhysicalTypeDetails extends CustomDataAccessor {
 	
 	/**
 	 * @return the category of Java type being provided by this {@link PhysicalTypeDetails} instance (never null)

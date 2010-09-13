@@ -145,7 +145,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
 		
 		// We know there should be an existing Entity annotation
-		List<? extends AnnotationMetadata> annotations = mutable.getTypeAnnotations();
+		List<? extends AnnotationMetadata> annotations = mutable.getAnnotations();
 		AnnotationMetadata found = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType(RooEntity.class.getName()));
 		if (found == null) {
 			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");

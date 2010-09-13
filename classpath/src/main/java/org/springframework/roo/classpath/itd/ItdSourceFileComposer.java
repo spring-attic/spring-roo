@@ -133,7 +133,7 @@ public class ItdSourceFileComposer {
 	}
 	
 	private void appendTypeAnnotations() {
-		List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails.getTypeAnnotations();
+		List<? extends AnnotationMetadata> typeAnnotations = itdTypeDetails.getAnnotations();
 		if (typeAnnotations == null || typeAnnotations.size() == 0) {
 			return;
 		}

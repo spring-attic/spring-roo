@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.model.CustomData;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -20,7 +21,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class DefaultItdTypeDetails implements ItdTypeDetails {
+public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ItdTypeDetails {
 	
 	private ClassOrInterfaceTypeDetails governor;
 	private JavaType aspect;
@@ -31,14 +32,14 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
-	private List<AnnotationMetadata> typeAnnotations = new ArrayList<AnnotationMetadata>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private Set<JavaType> registeredImports = new HashSet<JavaType>();
 	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
 	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
 	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	
-	public DefaultItdTypeDetails(ClassOrInterfaceTypeDetails governor, JavaType aspect,
+	// package protected to force the use of the corresponding builder
+	DefaultItdTypeDetails(CustomData customData, String declaredByMetadataId, int modifier, ClassOrInterfaceTypeDetails governor, JavaType aspect,
 			boolean privilegedAspect, Set<JavaType> registeredImports,
 			List<ConstructorMetadata> declaredConstructors,
 			List<FieldMetadata> declaredFields,
@@ -49,6 +50,7 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			List<DeclaredFieldAnnotationDetails> fieldAnnotations,
 			List<DeclaredMethodAnnotationDetails> methodAnnotations,
 			List<ClassOrInterfaceTypeDetails> innerTypes) {
+		super(customData, declaredByMetadataId, modifier, typeAnnotations);
 		Assert.notNull(governor, "Governor (to receive the introductions) required");
 		Assert.notNull(aspect, "Aspect required");
 		
@@ -80,10 +82,6 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 			this.implementsTypes = implementsTypes;
 		}
 
-		if (typeAnnotations != null) {
-			this.typeAnnotations = typeAnnotations;
-		}
-		
 		if (fieldAnnotations != null) {
 			this.fieldAnnotations = fieldAnnotations;
 		}
@@ -97,10 +95,6 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		}
 	}
 	
-	public static DefaultItdTypeDetailsBuilder getBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
-		return new DefaultItdTypeDetailsBuilder(declaredByMetadataId, governor, aspect, privilegedAspect);
-	}
-
 	public Set<JavaType> getRegisteredImports() {
 		return Collections.unmodifiableSet(registeredImports);
 	}
@@ -145,10 +139,6 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		return Collections.unmodifiableList(extendsTypes);
 	}
 	
-	public List<? extends AnnotationMetadata> getTypeAnnotations() {
-		return Collections.unmodifiableList(typeAnnotations);
-	}
-	
 	public List<DeclaredFieldAnnotationDetails> getFieldAnnotations() {
 		return Collections.unmodifiableList(fieldAnnotations);
 	}
@@ -163,6 +153,8 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
+		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
+		tsc.append("modifier", getModifier());
 		tsc.append("name", governor);
 		tsc.append("aspect", aspect);
 		tsc.append("physicalTypeCategory", physicalTypeCategory);
@@ -174,8 +166,9 @@ public class DefaultItdTypeDetails implements ItdTypeDetails {
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("fieldAnnotations", fieldAnnotations);
 		tsc.append("methodAnnotations", methodAnnotations);
-		tsc.append("typeAnnotations", typeAnnotations);
+		tsc.append("typeAnnotations", getAnnotations());
 		tsc.append("innerTypes", innerTypes);
+		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
 }

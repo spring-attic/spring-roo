@@ -33,7 +33,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof AbstractAnnotationAttributeValue)) {
+		if (!(obj instanceof AbstractAnnotationAttributeValue<?>)) {
 			return false;
 		}
 		AbstractAnnotationAttributeValue<?> other = (AbstractAnnotationAttributeValue<?>) obj;

@@ -1,6 +1,6 @@
 package org.springframework.roo.addon.configurable;
 
-import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 
 /**
  * Interface to methods available on {@link ConfigurableMetadataProviderImpl}.
@@ -9,4 +9,4 @@ import org.springframework.roo.classpath.itd.ItdRoleAwareMetadataProvider;
  * @since 1.1
  *
  */
-public interface ConfigurableMetadataProvider extends ItdRoleAwareMetadataProvider {}
+public interface ConfigurableMetadataProvider extends ItdTriggerBasedMetadataProvider {}

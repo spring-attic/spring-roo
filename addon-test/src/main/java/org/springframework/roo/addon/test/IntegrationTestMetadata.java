@@ -109,21 +109,21 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	 */
 	public void addRequiredIntegrationTestClassIntroductions() {
 		// Add an @RunWith(SpringJunit4ClassRunner) annotation to the type, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
 			List<AnnotationAttributeValue<?>> runWithAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			runWithAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.springframework.test.context.junit4.SpringJUnit4ClassRunner")));
 			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.junit.runner.RunWith"), runWithAttributes));
 		}
 		
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
 			List<AnnotationAttributeValue<?>> ctxCfg = new ArrayList<AnnotationAttributeValue<?>>();
 			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/META-INF/spring/applicationContext.xml"));
 			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
 		}
 		
 		// Add an @Transactional, if the user did not define it on the governor directly
-		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getTypeAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
+		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
 			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>()));
 		}
 	

@@ -8,7 +8,6 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
-import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -30,7 +29,6 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 		// Ensure we're notified of all metadata related to physical Java types, in particular their initial creation
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
-		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
 	

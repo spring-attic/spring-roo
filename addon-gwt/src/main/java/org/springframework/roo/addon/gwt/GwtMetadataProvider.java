@@ -103,7 +103,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		if (keyPhysicalTypeMetadata != null && keyPhysicalTypeMetadata.isValid() && keyPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
 			// The key presently exists, so do a sanity check
 			ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) keyPhysicalTypeMetadata.getPhysicalTypeDetails();
-			AnnotationMetadata rooGwtAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getTypeAnnotations(), new JavaType(RooGwtMirroredFrom.class.getName()));
+			AnnotationMetadata rooGwtAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooGwtMirroredFrom.class.getName()));
 			Assert.notNull(rooGwtAnnotation, "@" + RooGwtMirroredFrom.class.getSimpleName() + " removed from " + keyTypeName.getFullyQualifiedTypeName() + " unexpectedly");
 			AnnotationAttributeValue<?> value = rooGwtAnnotation.getAttribute(new JavaSymbolName("value"));
 			Assert.isInstanceOf(ClassAttributeValue.class, value, "Expected class-based content in @" + RooGwtMirroredFrom.class.getSimpleName() + " on " + keyTypeName.getFullyQualifiedTypeName());

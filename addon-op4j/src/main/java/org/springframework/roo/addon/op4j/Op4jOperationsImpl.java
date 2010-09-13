@@ -58,9 +58,9 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getTypeAnnotations(), new JavaType(RooOp4j.class.getName()))) {
+		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooOp4j.class.getName()))) {
 			JavaType rooSolrSearchable = new JavaType(RooOp4j.class.getName());
-			if (!mutableTypeDetails.getTypeAnnotations().contains(rooSolrSearchable)) {
+			if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
 				mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
 			}
 		}

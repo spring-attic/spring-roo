@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.DefaultMethodMetadata;
@@ -27,10 +26,6 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooJavaBean}.
- * 
- * <p>
- * Any getter or setter produced by this metadata is automatically included in the
- * {@link BeanInfoMetadata}.
  * 
  * @author Ben Alex
  * @since 1.0

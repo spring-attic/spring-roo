@@ -10,7 +10,6 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.serializable.SerializableMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.itd.ItdProviderRole;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -32,7 +31,6 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
-		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 

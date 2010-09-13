@@ -23,7 +23,15 @@ public final class DefaultAnnotationMetadata implements AnnotationMetadata {
 	private List<AnnotationAttributeValue<?>> attributes;
 	private Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
 	
+	@Deprecated
+	// It is recommended to use AnnotationMetadataBuilder instead
 	public DefaultAnnotationMetadata(JavaType annotationType, List<AnnotationAttributeValue<?>> attributes) {
+		this(annotationType, attributes, true);
+	}
+
+	// package protected to enforce use of AnnotationMetadataBuilder
+	// the "parameter" boolean flag is simply so AnnotationMetadataBuilder can use a non-deprecated method; it has no actual use
+	DefaultAnnotationMetadata(JavaType annotationType, List<AnnotationAttributeValue<?>> attributes, boolean parameter) {
 		Assert.notNull(annotationType, "Annotation type required");
 		Assert.notNull(attributes, "Attributes required");
 		this.annotationType = annotationType;
@@ -32,7 +40,7 @@ public final class DefaultAnnotationMetadata implements AnnotationMetadata {
 			this.attributeMap.put(v.getName(), v);
 		}
 	}
-
+	
 	public AnnotationAttributeValue<?> getAttribute(JavaSymbolName attributeName) {
 		Assert.notNull(attributeName, "Attribute name required");
 		return attributeMap.get(attributeName);

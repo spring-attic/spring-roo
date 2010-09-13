@@ -39,7 +39,6 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
-		addProviderRole(ItdProviderRole.ACCESSOR_MUTATOR);
 		addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 	}
 

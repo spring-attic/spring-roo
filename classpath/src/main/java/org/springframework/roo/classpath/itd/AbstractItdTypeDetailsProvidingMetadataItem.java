@@ -3,9 +3,8 @@ package org.springframework.roo.classpath.itd;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultItdTypeDetails;
-import org.springframework.roo.classpath.details.DefaultItdTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.ItdTypeDetailsBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -14,7 +13,7 @@ import org.springframework.roo.support.util.Assert;
 /**
  * Abstract implementation of {@link ItdTypeDetailsProvidingMetadataItem}, which assumes the subclass will require
  * a non-null {@link ClassOrInterfaceTypeDetails} representing the governor and wishes to build an ITD via the
- * {@link DefaultItdTypeDetailsBuilder} mechanism. 
+ * {@link ItdTypeDetailsBuilder} mechanism. 
  * 
  * @author Ben Alex
  * @since 1.0
@@ -29,7 +28,7 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 	protected JavaType aspectName;
 	protected PhysicalTypeMetadata governorPhysicalTypeMetadata;
 	
-	protected DefaultItdTypeDetailsBuilder builder;
+	protected ItdTypeDetailsBuilder builder;
 	
 	/**
 	 * Validates input and constructs a superclass that implements {@link ItdTypeDetailsProvidingMetadataItem}.
@@ -67,7 +66,7 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		this.destination = governorTypeDetails.getName();
 		
 		// Provide the subclass a builder, to make preparing an ITD even easier
-		this.builder = DefaultItdTypeDetails.getBuilder(getId(), governorTypeDetails, aspectName, true);
+		this.builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails, aspectName, true);
 	}
 	
 	public final ItdTypeDetails getItdTypeDetails() {
