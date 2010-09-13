@@ -3,9 +3,12 @@ package org.springframework.roo.addon.tostring;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -25,6 +28,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooToString}.
@@ -39,6 +43,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
+	@AutoPopulate private String[] ignoreFields;
 
 	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -92,43 +97,54 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			builder.appendFormalLine("StringBuilder sb = new StringBuilder();");
 
 			/** key: field name, value: accessor name */
-			Map<String, String> map = new HashMap<String, String>();
+			Map<String, String> map = new LinkedHashMap<String, String>();
 
 			/** field names */
 			List<String> order = new ArrayList<String>();
+			
+			Set<String> ignoreFieldsSet = new LinkedHashSet<String>();
+			if (ignoreFields != null && ignoreFields.length > 0) {
+				Collections.addAll(ignoreFieldsSet, ignoreFields);
+			}
 
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 				String accessorName = accessor.getMethodName().getSymbolName();
 				String fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-				String accessorText = accessorName + "()";
-				if (accessor.getReturnType().isCommonCollectionType()) {
-					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
-				} else if (accessor.getReturnType().isArray()) {
-					accessorText = "java.util.Arrays.toString(" + accessorName + "())";
-				} else if (Calendar.class.getName().equals(accessor.getReturnType().getFullyQualifiedTypeName())) {
-					accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
+				if (!ignoreFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+					String accessorText = accessorName + "()";
+					if (accessor.getReturnType().isCommonCollectionType()) {
+						accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";
+					} else if (accessor.getReturnType().isArray()) {
+						accessorText = "java.util.Arrays.toString(" + accessorName + "())";
+					} else if (Calendar.class.getName().equals(accessor.getReturnType().getFullyQualifiedTypeName())) {
+						accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().getTime()";
+					}
+					map.put(fieldName, accessorText);
+					order.add(fieldName);
 				}
-				map.put(fieldName, accessorText);
-				order.add(fieldName);
 			}
 
-			int index = 0;
-			int size = map.keySet().size();
-			for (String fieldName : order) {
-				index++;
-				String accessorText = map.get(fieldName);
-				StringBuilder string = new StringBuilder();
-				string.append("sb.append(\"" + fieldName + ": \").append(" + accessorText + ")");
-				if (index < size) {
-					string.append(".append(\", \")");
+			if (order.isEmpty()) {
+				result = null;
+			} else {
+				int index = 0;
+				int size = map.keySet().size();
+				for (String fieldName : order) {
+					index++;
+					String accessorText = map.get(fieldName);
+					StringBuilder string = new StringBuilder();
+					string.append("sb.append(\"" + fieldName + ": \").append(" + accessorText + ")");
+					if (index < size) {
+						string.append(".append(\", \")");
+					}
+					string.append(";");
+					builder.appendFormalLine(string.toString());
 				}
-				string.append(";");
-				builder.appendFormalLine(string.toString());
+
+				builder.appendFormalLine("return sb.toString();");
+
+				result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, builder.getOutput());
 			}
-
-			builder.appendFormalLine("return sb.toString();");
-
-			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, builder.getOutput());
 		}
 
 		return result;
