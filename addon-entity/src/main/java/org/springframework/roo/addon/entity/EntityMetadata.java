@@ -646,7 +646,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Create the method
 		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>(); 
-		addTransactionalAnnotation(annotations);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
@@ -659,13 +658,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 		if ("flush".equals(entityManagerDelegate)) {
+			addTransactionalAnnotation(annotations);
+			
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 		} else if ("merge".equals(entityManagerDelegate)) {
+			addTransactionalAnnotation(annotations);
 			returnType = new JavaType(governorTypeDetails.getName().getSimpleTypeName());
 			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " merged = this." + getEntityManagerField().getFieldName().getSymbolName() + ".merge(this);");
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 			bodyBuilder.appendFormalLine("return merged;");
 		} else if ("remove".equals(entityManagerDelegate)) {
+			addTransactionalAnnotation(annotations);
 			bodyBuilder.appendFormalLine("if (this." + getEntityManagerField().getFieldName().getSymbolName() + ".contains(this)) {");
 			bodyBuilder.indent();
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(this);");
@@ -678,20 +681,25 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("}");
 		} else {
 			// Persist
+			addTransactionalAnnotation(annotations, true);
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
 
 		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
 	}
 
-	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations) {
+	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations, boolean isPersistMethod) {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		if (isGaeEnabled) {
+		if (isGaeEnabled && isPersistMethod) {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
 		}
 		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
 	}
 	
+	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations) {
+		addTransactionalAnnotation(annotations, false);
+	}
+
 	/**
 	 * @return the static utility entityManager() method used by other methods to obtain
 	 * entity manager and available as a utility for user code (never returns nulls)

@@ -17,10 +17,12 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -43,6 +45,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 	private IntegrationTestAnnotationValues annotationValues;
 	private DataOnDemandMetadata dataOnDemandMetadata;
 	private JavaType dodGovernor;
+	private boolean isGaeSupported = false;
 	
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata versionAccessorMethod;
@@ -89,6 +92,7 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		// Add GAE LocalServiceTestHelper instance and @BeforeClass/@AfterClass methods if GAE is enabled
 		if (projectMetadata.isGaeEnabled()) {
+			isGaeSupported = true;
 			addOptionalIntegrationTestClassIntroductions();
 		}
 		
@@ -443,6 +447,11 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (method == null) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			if (isGaeSupported) {
+				List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+				attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("SUPPORTS"))));
+				annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+			}
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
