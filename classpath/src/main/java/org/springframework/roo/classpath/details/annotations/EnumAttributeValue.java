@@ -15,10 +15,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public class EnumAttributeValue extends AbstractAnnotationAttributeValue<EnumDetails> {
-
 	private EnumDetails value;
 	
 	public EnumAttributeValue(JavaSymbolName name, EnumDetails value) {

@@ -10,6 +10,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -145,7 +146,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible") boolean primitive, 
-			@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		JavaType useType = fieldType;
@@ -310,19 +311,22 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		// Check if the target type is a JPA @Entity
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata == null) {
 			throw new IllegalStateException("The specified target '--element' does not exist or can not be found. Please create this type first.");
 		}
+		
+		// Check if the target type is a JPA @Entity
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
-		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
-			throw new IllegalStateException("The field set command is only applicable to JPA @Entity elements.");
-		}	
-		
-		if (!(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY)) {
-			throw new IllegalStateException("Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
+		if (MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Entity")) != null) {
+			if (!(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY)) {
+				throw new IllegalStateException("Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
+			}
+		} else if (ptd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
+			cardinality = null;
+		} else {
+			throw new IllegalStateException("The field set command is only applicable to enum and JPA @Entity elements");
 		}
 		
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);

@@ -16,7 +16,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Properties used by the one side of a many-to-one relationship (called a "set").
+ * Properties used by the one side of a many-to-one relationship or an @ElementCollection of enums (called a "set").
  * 
  * <p>
  * For example, an Order-LineItem link would have the Order contain a "set" of Orders.
@@ -26,7 +26,8 @@ import org.springframework.roo.model.JavaType;
  * edit the generated files by hand anyway.
  * 
  * <p>
- * This field is intended for use with JSR 220 and will create a @OneToMany annotation.
+ * This field is intended for use with JSR 220 and will create a @OneToMany annotation or in the case of enums,
+ * an @ElementCollection annotation will be created.
  * 
  * @author Ben Alex
  * @since 1.0
@@ -37,7 +38,6 @@ public class SetField extends CollectionField {
 	private JavaSymbolName mappedBy = null;
 	
 	private Cardinality cardinality = null;
-
 	private Fetch fetch = null;
 	
 	public SetField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, JavaType genericParameterTypeName, Cardinality cardinality) {
@@ -56,31 +56,37 @@ public class SetField extends CollectionField {
 	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
-		if (fetch != null) {
-			JavaSymbolName value = new JavaSymbolName("EAGER");
-			if (fetch == Fetch.LAZY) {
-				value = new JavaSymbolName("LAZY");
+
+		if (cardinality == null) {
+			// Assume set field is an enum
+			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ElementCollection"), new ArrayList<AnnotationAttributeValue<?>>()));
+		} else {
+			attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
+			if (fetch != null) {
+				JavaSymbolName value = new JavaSymbolName("EAGER");
+				if (fetch == Fetch.LAZY) {
+					value = new JavaSymbolName("LAZY");
+				}
+				attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
 			}
-			attributes.add(new EnumAttributeValue(new JavaSymbolName("fetch"), new EnumDetails(new JavaType("javax.persistence.FetchType"), value)));
-		}
-		if (mappedBy != null) {
-			attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
-		}
-		
-		switch (cardinality) {
-			case ONE_TO_MANY:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
-				break;
-			case MANY_TO_ONE:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
-				break;
-			case ONE_TO_ONE:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
-				break;
-			default:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
-				break;
+			if (mappedBy != null) {
+				attributes.add(new StringAttributeValue(new JavaSymbolName("mappedBy"), mappedBy.getSymbolName()));
+			}
+
+			switch (cardinality) {
+				case ONE_TO_MANY:
+					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+					break;
+				case MANY_TO_ONE:
+					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+					break;
+				case ONE_TO_ONE:
+					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
+					break;
+				default:
+					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+					break;
+			}
 		}
 	}
 
