@@ -14,11 +14,15 @@ import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
+import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.XmlUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Provides database reverse engineering operations.
@@ -57,7 +61,7 @@ public class DbreOperationsImpl implements DbreOperations {
 			logger.info(database.toString());
 		}
 	}
-	
+
 	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage) {
 		if (destinationPackage == null) {
 			// No destination package, so verify that DBRE has run before and thus we know where to put the entities
@@ -73,5 +77,58 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 		// Force it to refresh the database from the actual JDBC connection
 		dbreModelService.refreshDatabase(schema);
+
+		// Change the persistence.xml file to prevent tables being created and dropped.
+		updatePersistenceXml();
+	}
+
+	private void updatePersistenceXml() {
+		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		MutableFile persistenceMutableFile = null;
+
+		Document persistence;
+		try {
+			persistenceMutableFile = fileManager.updateFile(persistencePath);
+			persistence = XmlUtils.getDocumentBuilder().parse(persistenceMutableFile.getInputStream());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+
+		Element root = persistence.getDocumentElement();
+		Element providerElement = XmlUtils.findFirstElement("/persistence/persistence-unit/provider", root);
+		Assert.notNull(providerElement, "/persistence/persistence-unit/provider is null");
+		String provider = providerElement.getTextContent();
+		Element propertyElement = null;
+		boolean changed = false;
+		if (provider.contains("hibernate")) {
+			changed = setPropertyValue(root, propertyElement, "hibernate.hbm2ddl.auto", "validate");
+		} else if (provider.contains("openjpa")) {
+			changed = setPropertyValue(root, propertyElement, "openjpa.jdbc.SynchronizeMappings", "validate");
+		} else if (provider.contains("eclipse")) {
+			changed = setPropertyValue(root, propertyElement, "eclipselink.ddl-generation", "none");
+		} else if (provider.contains("datanucleus")) {
+			changed = setPropertyValue(root, propertyElement, "datanucleus.autoCreateSchema", "false");
+			changed |= setPropertyValue(root, propertyElement, "datanucleus.autoCreateTables", "false");
+			changed |= setPropertyValue(root, propertyElement, "datanucleus.autoCreateColumns", "false");
+			changed |= setPropertyValue(root, propertyElement, "datanucleus.autoCreateConstraints", "false");
+			changed |= setPropertyValue(root, propertyElement, "datanucleus.validateTables", "false");
+			changed |= setPropertyValue(root, propertyElement, "datanucleus.validateConstraints", "false");
+		} else {
+			throw new IllegalStateException("Persistence provider " + provider + " is not supported");
+		}
+
+		if (changed) {
+			XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
+		}
+	}
+
+	private boolean setPropertyValue(Element root, Element propertyElement, String name, String value) {
+		boolean changed = false;
+		propertyElement = XmlUtils.findFirstElement("/persistence/persistence-unit/properties/property[@name = '" + name + "']", root);
+		if (propertyElement != null && !propertyElement.getAttribute("value").equals(value)) {
+			propertyElement.setAttribute("value", value);
+			changed = true;
+		}
+		return changed;
 	}
 }

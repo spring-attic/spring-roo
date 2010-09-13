@@ -323,6 +323,9 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.autoCreateColumns", "true", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.autoCreateConstraints", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.jpa.addClassTransformer", "false", persistence));
