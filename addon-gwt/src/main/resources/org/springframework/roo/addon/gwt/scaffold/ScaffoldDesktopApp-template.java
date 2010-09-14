@@ -80,11 +80,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
         ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);
         final ActivityManager masterActivityManager = new ActivityManager(masterActivityMap, eventBus);
 
-        masterActivityManager.setDisplay(new Activity.Display() {
-            public void showActivityWidget(IsWidget widget) {
-                shell.getMasterPanel().setWidget(widget == null ? null : widget.asWidget());
-            }
-        });
+        masterActivityManager.setDisplay(shell.getMasterPanel());
 
         ProxyListPlacePicker proxyListPlacePicker = new ProxyListPlacePicker(placeController, proxyPlaceToListPlace);
         HasConstrainedValue<ProxyListPlace> listPlacePickerView = shell.getPlacesBox();
@@ -93,17 +89,12 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 
         final ActivityManager detailsActivityManager = new ActivityManager(applicationDetailsActivities, eventBus);
 
-        detailsActivityManager.setDisplay(new Activity.Display() {
-            public void showActivityWidget(IsWidget widget) {
-                shell.getDetailsPanel().setWidget(widget == null ? null : widget.asWidget());
-            }
-        });
-
+        detailsActivityManager.setDisplay(shell.getDetailsPanel());
 
         ScaffoldPlaceHistoryHandler placeHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
         placeHistoryHandler.setFactory(placeHistoryFactory);
         placeHistoryHandler.register(placeController, eventBus,
-	     getTopPlaces().iterator().next()); /* defaultPlace */
+	      getTopPlaces().iterator().next()); /* defaultPlace */
         placeHistoryHandler.handleCurrentHistory();
     }
 }

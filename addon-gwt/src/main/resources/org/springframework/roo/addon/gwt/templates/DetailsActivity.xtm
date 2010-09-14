@@ -10,6 +10,7 @@ import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.Value;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 {{#imports}}import {{=import}};
 {{/imports}}
 import java.util.Set;
@@ -32,7 +33,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 	private final PlaceController placeController;
 	private final ProxyDetailsView<{{=proxy}}> view;
 	private {{=proxy}} proxy;
-	private Display display;
+	private AcceptsOneWidget display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
@@ -65,7 +66,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 					return;
 				}
 
-				display.showActivityWidget(null);
+				display.setWidget(null);
 			}
 		});
 	}
@@ -82,7 +83,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 		display = null;
 	}
 
-	public void start(Display displayIn, EventBus eventBus) {
+	public void start(AcceptsOneWidget displayIn, EventBus eventBus) {
     	this.display = displayIn;
     	Receiver<{{=proxy}}> callback = new Receiver<{{=proxy}}>() {
 			public void onSuccess({{=proxy}} proxy, Set<SyncResult> syncResults) {
@@ -90,7 +91,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
           			return;
        			}
 				view.setValue(proxy);
-				display.showActivityWidget(view);
+				display.setWidget(view);
 			}
 		};
 

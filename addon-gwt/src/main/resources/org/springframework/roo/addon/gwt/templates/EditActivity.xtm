@@ -9,6 +9,7 @@ import com.google.gwt.requestfactory.shared.RequestObject;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.Value;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
 {{#imports}}import {{=import}};
 {{/imports}}
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ public class {{=className}} extends AbstractProxyEditActivity<{{=proxy}}> {
 		this.requests = requests;
 	}
 
-    @Override
-    public void start(Display display, EventBus eventBus) {
+  @Override
+  public void start(AcceptsOneWidget display, EventBus eventBus) {
     {{#setEnumValuePickers}}
     get{{=editView}}().{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values()));
 

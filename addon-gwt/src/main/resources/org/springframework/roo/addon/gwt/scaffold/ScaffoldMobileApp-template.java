@@ -73,11 +73,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 
         final ActivityManager activityManager = new ActivityManager(scaffoldMobileActivities, eventBus);
 
-        activityManager.setDisplay(new Activity.Display() {
-            public void showActivityWidget(IsWidget widget) {
-                shell.getBody().setWidget(widget == null ? null : widget.asWidget());
-            }
-        });
+        activityManager.setDisplay(shell.getBody());
 
         /* Browser history integration */
         ScaffoldPlaceHistoryHandler placeHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
