@@ -10,7 +10,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
- *
  */
 public interface ControllerOperations {
 
@@ -37,5 +36,4 @@ public interface ControllerOperations {
 	 * @param path the path which the controller should be accessible via REST requests
 	 */
 	void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path);
-
 }

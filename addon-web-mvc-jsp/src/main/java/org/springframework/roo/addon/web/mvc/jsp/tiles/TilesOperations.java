@@ -6,12 +6,12 @@ import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public interface TilesOperations {
 	
-	public static final String DEFAULT_TEMPLATE = "default";
-	public static final String PUBLIC_TEMPLATE = "public";
+	String DEFAULT_TEMPLATE = "default";
+	
+	String PUBLIC_TEMPLATE = "public";
 
 	/**
 	 * Adds a new view definition to the views.xml tiles configuration
@@ -30,5 +30,4 @@ public interface TilesOperations {
 	 * @param folderName Th
 	 */
 	void removeViewDefinition(String name, String folderName);
-
 }

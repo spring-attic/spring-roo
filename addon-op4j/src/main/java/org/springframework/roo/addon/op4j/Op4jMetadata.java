@@ -63,10 +63,7 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), fieldModifier, new JavaSymbolName(targetName.toUpperCase()), function, initializer);
 		fields.add(fieldBuilder);
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId());
-		typeDetailsBuilder.setModifier(Modifier.PUBLIC | Modifier.STATIC);
-		typeDetailsBuilder.setName(new JavaType("Keys"));
-		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, new JavaType("Keys"), PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredFields(fields);
 		return typeDetailsBuilder.build();
 	}

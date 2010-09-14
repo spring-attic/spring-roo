@@ -82,10 +82,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		methodBuilder.setAnnotations(methodAnnotations);
 		methods.add(methodBuilder);
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
-		typeDetailsBuilder.setModifier(Modifier.PUBLIC);
-		typeDetailsBuilder.setName(name);
-		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredMethods(methods);
 
 		classpathOperations.generateClassFile(typeDetailsBuilder.build());

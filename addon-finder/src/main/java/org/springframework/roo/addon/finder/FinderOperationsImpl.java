@@ -20,8 +20,8 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
@@ -37,14 +37,11 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Component
 @Service
 public class FinderOperationsImpl implements FinderOperations {
-	
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
-	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
@@ -203,9 +200,8 @@ public class FinderOperationsImpl implements FinderOperations {
 		// Now let's add the "finder" attribute
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
 		
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), attributes);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()), attributes);
 		mutable.removeTypeAnnotation(new JavaType(RooEntity.class.getName()));
-		mutable.addTypeAnnotation(annotation);
+		mutable.addTypeAnnotation(annotation.build());
  	}
-	
 }

@@ -43,7 +43,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.javaparser.details.JavaParserAnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserConstructorMetadata;
 import org.springframework.roo.classpath.javaparser.details.JavaParserFieldMetadata;
@@ -347,8 +347,9 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends AbstractCustom
 					replacementAttributeValues.put(incomingAttributeName, incomingValue);
 				}
 			}
-			AnnotationMetadata replacement = new DefaultAnnotationMetadata(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
-			addTypeAnnotation(replacement);
+
+			AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
+			addTypeAnnotation(replacement.build());
 			return true;
 		}
 		
@@ -388,9 +389,9 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends AbstractCustom
 		}
 		
 		// Make a new AnnotationMetadata representing the replacement
-		AnnotationMetadata replacement = new DefaultAnnotationMetadata(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
+		AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
 		removeTypeAnnotation(replacement.getAnnotationType());
-		addTypeAnnotation(replacement);
+		addTypeAnnotation(replacement.build());
 		
 		return true;
 	}

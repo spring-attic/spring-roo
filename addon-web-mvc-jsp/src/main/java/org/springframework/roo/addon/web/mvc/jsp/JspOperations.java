@@ -9,7 +9,6 @@ import org.w3c.dom.Document;
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
- *
  */
 public interface JspOperations {
 
@@ -62,5 +61,4 @@ public interface JspOperations {
 	 * @param document the jspx document to use for the view
 	 */
 	void installView(String path, String viewName, String title, String category, Document document);
-
 }

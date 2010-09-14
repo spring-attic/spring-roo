@@ -11,10 +11,8 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHoldingTypeDetails> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
-
 	private List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
 	private List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
 	private List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();

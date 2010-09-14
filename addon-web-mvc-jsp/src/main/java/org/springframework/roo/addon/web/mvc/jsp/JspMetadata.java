@@ -19,13 +19,10 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JspMetadata extends AbstractMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = JspMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
 	private WebScaffoldMetadata webScaffoldMetadata;
 	private WebScaffoldAnnotationValues annotationValues;
 	

@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -28,7 +27,7 @@ public abstract class CollectionField extends FieldDetails {
 		this.genericParameterTypeName = genericParameterTypeName;		
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (sizeMin != null || sizeMax != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
@@ -38,7 +37,7 @@ public abstract class CollectionField extends FieldDetails {
 			if (sizeMax != null) {
 				attrs.add(new IntegerAttributeValue(new JavaSymbolName("max"), sizeMax));
 			}
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Size"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Size"), attrs));
 		}
 	}
 

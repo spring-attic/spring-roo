@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.DateTime;
@@ -40,13 +39,13 @@ public class DateField extends FieldDetails {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (past) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Past"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Past")));
 		}
 		if (future) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Future"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Future")));
 		}
 		if (persistenceType != null) {
 			// Add JSR 220 @Temporal annotation
@@ -60,12 +59,12 @@ public class DateField extends FieldDetails {
 			}
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(value))));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Temporal"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"), attrs));
 		}
 		//always add a DateTimeFormat annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("style"), (null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "S") + (null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-")));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));
 	}
 
 	public boolean isPast() {

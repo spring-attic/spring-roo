@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -22,17 +21,17 @@ public class StringOrNumericField extends FieldDetails {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (decimalMin != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), decimalMin));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.DecimalMin"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.DecimalMin"), attrs));
 		}
 		if (decimalMax != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), decimalMax));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.DecimalMax"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.DecimalMax"), attrs));
 		}
 	}
 

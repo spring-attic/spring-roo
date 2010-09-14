@@ -23,16 +23,15 @@ import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperationsImpl;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
@@ -45,6 +44,7 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -61,14 +61,11 @@ import org.w3c.dom.Node;
  * @author Stefan Schmidt
  * @author Jeremy Grelle
  * @since 1.0
- * 
  */
-@Component
-@Service
+@Component 
+@Service 
 public class JspOperationsImpl implements JspOperations {
-	
-	private Logger log = Logger.getLogger(JspOperationsImpl.class.getName());
-	
+	private static Logger logger = HandlerUtils.getLogger(JspOperationsImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private ClasspathOperations classpathOperations;
@@ -79,7 +76,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private I18nSupport i18nSupport;
-	
+
 	private ComponentContext context;
 
 	protected void activate(ComponentContext context) {
@@ -89,11 +86,11 @@ public class JspOperationsImpl implements JspOperations {
 	public boolean isProjectAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
-	
+
 	public boolean isInstallLanguageCommandAvailable() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/footer.jspx"));
 	}
-	
+
 	public void installCommonViewArtefacts() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
@@ -126,7 +123,7 @@ public class JspOperationsImpl implements JspOperations {
 		copyDirectoryContents("tags/form/fields/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/form/fields"));
 		copyDirectoryContents("tags/menu/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/menu"));
 		copyDirectoryContents("tags/util/*.tagx", pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/tags/util"));
-		
+
 		// Install default language 'en'
 		installI18n(i18nSupport.getLanguage(Locale.ENGLISH));
 
@@ -140,15 +137,15 @@ public class JspOperationsImpl implements JspOperations {
 			}
 		}
 	}
-	
+
 	public void installView(String path, String viewName, String title, String category) {
 		installView(path, viewName, title, category, null, true);
 	}
-	
+
 	public void installView(String path, String viewName, String title, String category, Document document) {
 		installView(path, viewName, title, category, document, true);
 	}
-	
+
 	private void installView(String path, String viewName, String title, String category, Document document, boolean registerStaticController) {
 		Assert.hasText(path, "Path required");
 		Assert.hasText(viewName, "View name required");
@@ -176,7 +173,7 @@ public class JspOperationsImpl implements JspOperations {
 	 * @param viewName the mapping this view should adopt (required, ie 'index')
 	 */
 	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
-		//probe if common we artifacts exist, and install them if needed
+		// Probe if common web artifacts exist, and install them if needed
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx"))) {
 			webMvcOperations.installAllWebMvcArtifacts();
 			installCommonViewArtefacts();
@@ -185,9 +182,9 @@ public class JspOperationsImpl implements JspOperations {
 		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "label" + folderName.replace("/", "_") + "_" + lcViewName, title, true);
 		menuOperations.addMenuItem(new JavaSymbolName(category), new JavaSymbolName(folderName.replace("/", "_") + lcViewName + "_id"), title, "global_generic", folderName + "/" + lcViewName, null);
 		tilesOperations.addViewDefinition(folderName, folderName + "/" + lcViewName, TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views" + folderName + "/" + lcViewName + ".jspx");
-		
+
 		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webmvc-config.xml");
-		
+
 		if (registerStaticController && fileManager.exists(mvcConfig)) {
 			MutableFile mvcConfigFile = fileManager.updateFile(mvcConfig);
 			Document doc;
@@ -196,7 +193,7 @@ public class JspOperationsImpl implements JspOperations {
 			} catch (Exception e) {
 				throw new IllegalStateException("Could not parse " + mvcConfig, e);
 			}
-			 
+
 			if (null == XmlUtils.findFirstElement("/beans/view-controller[@path='" + folderName + "/" + lcViewName + "']", doc.getDocumentElement())) {
 				Element sibling = XmlUtils.findFirstElement("/beans/view-controller", doc.getDocumentElement());
 				Element view = new XmlElementBuilder("mvc:view-controller", doc).addAttribute("path", folderName + "/" + lcViewName).build();
@@ -212,7 +209,6 @@ public class JspOperationsImpl implements JspOperations {
 
 	/**
 	 * Creates a new Spring MVC controller.
-	 * 
 	 * <p>
 	 * Request mappings assigned by this method will always commence with "/" and end with "/**". You may present this prefix and/or this suffix if you wish, although it will automatically be added
 	 * should it not be provided.
@@ -248,71 +244,84 @@ public class JspOperationsImpl implements JspOperations {
 		} else {
 			folderName = folderName.replace("/**", "");
 		}
+
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), preferredMapping));
-		AnnotationMetadata requestMapping = new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
+		annotations.add(requestMapping);
 
 		// Create annotation @Controller
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		AnnotationMetadata controllerAnnotation = new DefaultAnnotationMetadata(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
-
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		annotations.add(requestMapping);
+		AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
 		annotations.add(controllerAnnotation);
 
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
+		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 
-		List<AnnotationMetadata> getMethodAnnotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		getMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
+		getMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
+		
 		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
 		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
+		
 		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
 		getParamNames.add(new JavaSymbolName("modelMap"));
 		getParamNames.add(new JavaSymbolName("request"));
 		getParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata getMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, getMethodAnnotations, null, null);
-		methods.add(getMethod);
 
-		List<AnnotationMetadata> postMethodAnnotations = new ArrayList<AnnotationMetadata>();
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
+		MethodMetadataBuilder getMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, new InvocableMemberBodyBuilder());
+		getMethodBuilder.setAnnotations(getMethodAnnotations);
+		methods.add(getMethodBuilder);
+
+		List<AnnotationMetadataBuilder> postMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> postMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
 		postMethodAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), "{id}"));
-		postMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), postMethodAttributes));
+		postMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), postMethodAttributes));
+
 		List<AnnotatedJavaType> postParamTypes = new ArrayList<AnnotatedJavaType>();
 		List<AnnotationMetadata> idParamAnnotations = new ArrayList<AnnotationMetadata>();
-		idParamAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.PathVariable"), new ArrayList<AnnotationAttributeValue<?>>()));
+		AnnotationMetadataBuilder idParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.PathVariable"));
+		idParamAnnotations.add(idParamAnnotation.build());
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("java.lang.Long"), idParamAnnotations));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
 		postParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
+		
 		List<JavaSymbolName> postParamNames = new ArrayList<JavaSymbolName>();
 		postParamNames.add(new JavaSymbolName("id"));
 		postParamNames.add(new JavaSymbolName("modelMap"));
 		postParamNames.add(new JavaSymbolName("request"));
 		postParamNames.add(new JavaSymbolName("response"));
-		MethodMetadata postMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, postMethodAnnotations, null, null);
-		methods.add(postMethod);
 
-		List<AnnotationMetadata> indexMethodAnnotations = new ArrayList<AnnotationMetadata>();
+		MethodMetadataBuilder postMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, new InvocableMemberBodyBuilder());
+		getMethodBuilder.setAnnotations(postMethodAnnotations);
+		methods.add(postMethodBuilder);
+
+		List<AnnotationMetadataBuilder> indexMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> indexMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		indexMethodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), indexMethodAttributes));
+		indexMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), indexMethodAttributes));
 		List<AnnotatedJavaType> indexParamTypes = new ArrayList<AnnotatedJavaType>();
-		MethodMetadata indexMethod = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, indexParamTypes, postParamNames, indexMethodAnnotations, null, "return \"" + folderName + "/index\";");
-		methods.add(indexMethod);
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return \"" + folderName + "/index\";");
+		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, indexParamTypes, postParamNames, bodyBuilder);
+		indexMethodBuilder.setAnnotations(indexMethodAnnotations);
+		methods.add(indexMethodBuilder);
 
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, controller, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
-
-		classpathOperations.generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(annotations);
+		typeDetailsBuilder.setDeclaredMethods(methods);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 
 		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
 	}
 
 	/**
 	 * Adds Tiles Maven dependencies and updates the MVC config to include Tiles view support
-	 * 
 	 */
 	private void updateConfiguration() {
 		// Add tiles dependencies to pom
@@ -359,7 +368,8 @@ public class JspOperationsImpl implements JspOperations {
 		XmlUtils.writeXml(mutableMvcConfigFile.getOutputStream(), mvcConfigDocument);
 		try {
 			configTemplateInputStream.close();
-		} catch (IOException ignore) {}
+		} catch (IOException ignore) {
+		}
 	}
 
 	/**
@@ -397,19 +407,19 @@ public class JspOperationsImpl implements JspOperations {
 
 	public void installI18n(I18n i18n) {
 		Assert.notNull(i18n, "Language choice required");
-		 
+
 		if (i18n.getLocale() == null) {
-			log.warning("could not parse language choice");
+			logger.warning("could not parse language choice");
 			return;
 		}
-		
+
 		String targetDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "");
-		
-		//install message bundle
+
+		// Install message bundle
 		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale() + ".properties";
-		//special case for english locale (default)
+		// Special case for english locale (default)
 		if (i18n.getLocale().equals(Locale.ENGLISH)) {
-			messageBundle  = targetDirectory + "/WEB-INF/i18n/messages.properties";
+			messageBundle = targetDirectory + "/WEB-INF/i18n/messages.properties";
 		}
 		if (!fileManager.exists(messageBundle)) {
 			try {
@@ -418,8 +428,8 @@ public class JspOperationsImpl implements JspOperations {
 				new IllegalStateException("Encountered an error during copying of message bundle MVC JSP addon.", e);
 			}
 		}
-		
-		//install flag
+
+		// Install flag
 		String flagGraphic = targetDirectory + "/images/" + i18n.getLocale() + ".png";
 		if (!fileManager.exists(flagGraphic)) {
 			try {
@@ -428,8 +438,8 @@ public class JspOperationsImpl implements JspOperations {
 				new IllegalStateException("Encountered an error during copying of flag graphic for MVC JSP addon.", e);
 			}
 		}
-		
-		//setup language definition in languages.jspx
+
+		// Setup language definition in languages.jspx
 		String footerFileLocation = targetDirectory + "/WEB-INF/views/footer.jspx";
 		MutableFile footerFile = null;
 
@@ -444,31 +454,31 @@ public class JspOperationsImpl implements JspOperations {
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		
+
 		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().toString() + "']", footer.getDocumentElement())) {
 			Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
 			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
 		}
 	}
-	
+
 	private String cleanPath(String path) {
 		if (path.equals("/")) {
 			return "";
 		}
 		if (!path.startsWith("/")) {
 			path = "/".concat(path);
-		} 
+		}
 		if (path.contains(".")) {
 			path = path.substring(0, path.indexOf(".") - 1);
 		}
 		return path.toLowerCase();
 	}
-	
+
 	private String cleanViewName(String viewName) {
 		if (viewName.startsWith("/")) {
 			viewName = viewName.substring(1);
-		} 
+		}
 		if (viewName.contains(".")) {
 			viewName = viewName.substring(0, viewName.indexOf(".") - 1);
 		}

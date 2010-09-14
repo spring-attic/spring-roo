@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.operations.EnumType;
 import org.springframework.roo.model.EnumDetails;
@@ -33,7 +32,7 @@ public class EnumField extends FieldDetails {
 		this.enumType = enumType;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		
@@ -45,6 +44,6 @@ public class EnumField extends FieldDetails {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.EnumType"), value)));
 		}
 		
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Enumerated"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Enumerated"), attributes));
 	}
 }

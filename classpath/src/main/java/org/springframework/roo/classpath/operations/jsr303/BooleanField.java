@@ -1,11 +1,8 @@
 package org.springframework.roo.classpath.operations.jsr303;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -21,13 +18,13 @@ public class BooleanField extends FieldDetails {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (assertTrue) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.AssertTrue"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.AssertTrue")));
 		}
 		if (assertFalse) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.AssertFalse"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.AssertFalse")));
 		}
 	}
 

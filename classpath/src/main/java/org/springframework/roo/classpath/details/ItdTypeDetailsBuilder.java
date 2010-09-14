@@ -30,10 +30,8 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ItdTypeDetails> {
-
 	private ClassOrInterfaceTypeDetails governor;
 	private JavaType aspect;
 	private boolean privilegedAspect;
@@ -41,7 +39,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	private List<ClassOrInterfaceTypeDetails> innerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
 	private List<DeclaredFieldAnnotationDetails> fieldAnnotations = new ArrayList<DeclaredFieldAnnotationDetails>();
 	private List<DeclaredMethodAnnotationDetails> methodAnnotations = new ArrayList<DeclaredMethodAnnotationDetails>();
-	
+
 	public ItdTypeDetailsBuilder(String declaredByMetadataId, ClassOrInterfaceTypeDetails governor, JavaType aspect, boolean privilegedAspect) {
 		super(declaredByMetadataId);
 		Assert.notNull(governor, "Name (to receive the introductions) required");
@@ -51,7 +49,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 		this.privilegedAspect = privilegedAspect;
 		this.importRegistrationResolver = new ImportRegistrationResolverImpl(aspect.getPackage());
 	}
-	
+
 	public ItdTypeDetails build() {
 		return new DefaultItdTypeDetails(CustomDataImpl.NONE, getDeclaredByMetadataId(), getModifier(), governor, aspect, privilegedAspect, importRegistrationResolver.getRegisteredImports(), buildConstructors(), buildFields(), buildMethods(), getExtendsTypes(), getImplementsTypes(), buildAnnotations(), fieldAnnotations, methodAnnotations, innerTypes);
 	}
@@ -59,61 +57,61 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	public ImportRegistrationResolver getImportRegistrationResolver() {
 		return importRegistrationResolver;
 	}
-	
-	@Override
+
+	@Override 
 	protected void onAddConstructor(ConstructorMetadataBuilder md) {
 		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(governor, AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		Assert.isNull(MemberFindingUtils.getDeclaredConstructor(build(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Constructor with " + md.getParameterTypes().size() + " parameters already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 		Assert.hasText(md.getBody(), "Method '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
 	}
 
-	@Override
+	@Override 
 	protected void onAddField(FieldMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredField(governor, md.getFieldName()), "Field '" + md.getFieldName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredField(build(), md.getFieldName()), "Field '" + md.getFieldName() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + ")'");
+		Assert.isNull(MemberFindingUtils.getDeclaredField(governor, md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(MemberFindingUtils.getDeclaredField(build(), md.getFieldName()), "Field '" + md.getFieldName() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + ")'");
 	}
 
-	@Override
+	@Override 
 	protected void onAddMethod(MethodMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredMethod(governor, md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredMethod(build(), md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
+		Assert.isNull(MemberFindingUtils.getDeclaredMethod(governor, md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(MemberFindingUtils.getDeclaredMethod(build(), md.getMethodName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(md.getParameterTypes())), "Method '" + md.getMethodName() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 		Assert.hasText(md.getBody(), "Method '" + md + "' failed to provide a body, despite being identified for ITD inclusion");
 	}
 
-	@Override
+	@Override 
 	protected void onAddExtendsTypes(JavaType type) {
 		Assert.isTrue(!governor.getExtendsTypes().contains(type), "Type '" + type + "' already declared in extends types list in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		Assert.isTrue(!getExtendsTypes().contains(type), "Type '" + type + "' already declared in extends types list in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 	}
 
-	@Override
+	@Override 
 	protected void onAddImplementType(JavaType type) {
 		Assert.isTrue(!governor.getImplementsTypes().contains(type), "Type '" + type + "' already declared in implements types list in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		Assert.isTrue(!getImplementsTypes().contains(type), "Type '" + type + "' already declared in implements types list in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 	}
 
-	@Override
+	@Override 
 	protected void onAddAnnotation(AnnotationMetadataBuilder md) {
-		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(governor, md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(build(), md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() +"' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
+		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(governor, md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isNull(MemberFindingUtils.getDeclaredTypeAnnotation(build(), md.getAnnotationType()), "Type annotation '" + md.getAnnotationType() + "' already defined in ITD (ITD target '" + aspect.getFullyQualifiedTypeName() + "'");
 	}
 
 	public void addFieldAnnotation(DeclaredFieldAnnotationDetails declaredFieldAnnotationDetails) {
 		if (declaredFieldAnnotationDetails == null) {
 			return;
 		}
-		Assert.isTrue(!declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations().contains(declaredFieldAnnotationDetails.getFieldAnnotation()), "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isTrue(!declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations().contains(declaredFieldAnnotationDetails.getFieldAnnotation()), "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		fieldAnnotations.add(declaredFieldAnnotationDetails);
 	}
-	
+
 	public void addMethodAnnotation(DeclaredMethodAnnotationDetails declaredMethodAnnotationDetails) {
 		if (declaredMethodAnnotationDetails == null) {
 			return;
 		}
-		Assert.isTrue(!declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations().contains(declaredMethodAnnotationDetails.getMethodAnnotation()), "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() +"' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName()+ "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		Assert.isTrue(!declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations().contains(declaredMethodAnnotationDetails.getMethodAnnotation()), "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() + "' already defined in target type '" + governor.getName().getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName() + "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		methodAnnotations.add(declaredMethodAnnotationDetails);
 	}
-	
+
 	public void addInnerType(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
 		if (classOrInterfaceTypeDetails == null) {
 			return;
@@ -121,7 +119,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 		Assert.isTrue(Modifier.isStatic(classOrInterfaceTypeDetails.getModifier()), "Currently only static inner types are supported by AspectJ");
 		innerTypes.add(classOrInterfaceTypeDetails);
 	}
-	
+
 	@Deprecated
 	// should use addAnnotation() instead
 	public void addTypeAnnotation(AnnotationMetadata annotationMetadata) {

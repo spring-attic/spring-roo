@@ -34,7 +34,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class MenuOperationsImpl implements MenuOperations {
-	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private PropFileOperations propFileOperations;
@@ -253,4 +252,3 @@ public class MenuOperationsImpl implements MenuOperations {
 		return false;
 	}
 }
-

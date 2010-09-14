@@ -161,10 +161,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		bodyBuilder.appendFormalLine("System.out.println(\"JMS message received: \" + message);");
 		methods.add(new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("onMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder));
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
-		typeDetailsBuilder.setModifier(Modifier.PUBLIC);
-		typeDetailsBuilder.setName(targetType);
-		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, targetType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredMethods(methods);
 
 		// Determine the canonical filename

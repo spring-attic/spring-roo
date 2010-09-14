@@ -16,15 +16,13 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStructureProvider implements FieldMetadata {
-
 	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;
 	
-	// package protected to mandate the use of FieldMetadataBuilder
+	// Package protected to mandate the use of FieldMetadataBuilder
 	DefaultFieldMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
 		super(customData, declaredByMetadataId, modifier, annotations);
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
@@ -63,5 +61,4 @@ public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStruc
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
-
 }

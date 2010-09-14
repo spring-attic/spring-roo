@@ -171,10 +171,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		// Create entity class
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
-		typeDetailsBuilder.setModifier(Modifier.PUBLIC);
-		typeDetailsBuilder.setName(javaType);
-		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
 	
@@ -287,10 +284,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 
 		// Produce identifier itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
-		idTypeDetailsBuilder.setModifier(Modifier.PUBLIC | Modifier.FINAL);
-		idTypeDetailsBuilder.setName(identifierType);
-		idTypeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
 		classpathOperations.generateClassFile(idTypeDetailsBuilder.build());
 

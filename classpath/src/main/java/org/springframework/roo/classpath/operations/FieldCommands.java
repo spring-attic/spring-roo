@@ -14,11 +14,10 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
@@ -116,7 +115,7 @@ public class FieldCommands implements CommandMarker {
 			}
 		}
 		
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		fieldDetails.decorateAnnotationsList(annotations);
 		String initializer = null;
 		if (fieldDetails instanceof CollectionField) {
@@ -125,8 +124,9 @@ public class FieldCommands implements CommandMarker {
 		}
 		int mod = Modifier.PRIVATE;
 		if (transientModifier) mod += Modifier.TRANSIENT;
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(fieldDetails.getPhysicalTypeIdentifier(), mod, fieldDetails.getFieldName(), fieldDetails.getFieldType(), initializer, annotations);
-		classpathOperations.addField(fieldMetadata);
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), mod, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		fieldBuilder.setFieldInitializer(initializer);
+		classpathOperations.addField(fieldBuilder.build());
 	}
 	
 	@CliCommand(value="field number", help="Adds a private numeric field to an existing Java source file")

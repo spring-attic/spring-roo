@@ -17,19 +17,18 @@ import org.springframework.roo.support.style.ToStringCreator;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata implements ConstructorMetadata {
 
-	// package protected to mandate the use of ConstructorMetadataBuilder
+	// Package protected to mandate the use of ConstructorMetadataBuilder
 	DefaultConstructorMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
 		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 	}
 
-	@Deprecated
-	public DefaultConstructorMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
-		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), parameters, parameterNames, new ArrayList<JavaType>(), body);
-	}
+//	@Deprecated
+//	public DefaultConstructorMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
+//		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), parameters, parameterNames, new ArrayList<JavaType>(), body);
+//	}
 
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

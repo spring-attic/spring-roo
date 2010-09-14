@@ -74,7 +74,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		}
 
 		if (enumConstants != null) {
-			Assert.isTrue(physicalTypeCategory != PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
+			// Assert.isTrue(physicalTypeCategory != PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
 			this.enumConstants = enumConstants;
 		}
 	}

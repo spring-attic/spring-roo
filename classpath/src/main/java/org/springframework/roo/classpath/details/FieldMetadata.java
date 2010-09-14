@@ -8,7 +8,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure {
 
@@ -26,5 +25,4 @@ public interface FieldMetadata extends IdentifiableAnnotatedJavaStructure {
 	 * @return the field initializer, if known (may be null if there is no initializer)
 	 */
 	String getFieldInitializer();
-	
 }

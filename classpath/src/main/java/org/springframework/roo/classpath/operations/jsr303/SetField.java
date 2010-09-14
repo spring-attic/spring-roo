@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -53,13 +52,13 @@ public class SetField extends CollectionField {
 		this.fetch = fetch;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 
 		if (cardinality == null) {
 			// Assume set field is an enum
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ElementCollection"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ElementCollection")));
 		} else {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("cascade"), new EnumDetails(new JavaType("javax.persistence.CascadeType"), new JavaSymbolName("ALL"))));
 			if (fetch != null) {
@@ -75,16 +74,16 @@ public class SetField extends CollectionField {
 
 			switch (cardinality) {
 				case ONE_TO_MANY:
-					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToMany"), attributes));
 					break;
 				case MANY_TO_ONE:
-					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToOne"), attributes));
 					break;
 				case ONE_TO_ONE:
-					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToOne"), attributes));
 					break;
 				default:
-					annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+					annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToMany"), attributes));
 					break;
 			}
 		}

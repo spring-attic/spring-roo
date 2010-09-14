@@ -23,8 +23,8 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -49,7 +49,6 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public class JspViewManager {
-	
 	private List<FieldMetadata> fields; 
 	private BeanInfoMetadata beanInfoMetadata; 
 	private EntityMetadata entityMetadata;
@@ -91,7 +90,7 @@ public class JspViewManager {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 		
-		//add document namespaces
+		// Add document namespaces
 		Element div = new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:table", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -130,7 +129,7 @@ public class JspViewManager {
 			}
 		}
 		
-		//create page:list element
+		// Create page:list element
 		Element pageList = new XmlElementBuilder("page:list", document)
 								.addAttribute("id", XmlUtils.convertId("pl:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("items", "${" + getPlural(beanInfoMetadata.getJavaBean()).toLowerCase() + "}")
@@ -148,7 +147,7 @@ public class JspViewManager {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 			
-		//add document namespaces
+		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -173,9 +172,9 @@ public class JspViewManager {
 		}
 		pageShow.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(pageShow));
 
-		//add field:display elements for each field
+		// Add field:display elements for each field
 		for (FieldMetadata field : fields) {
-			//ignoring java.util.Map field types (see ROO-194)
+			// Ignoring java.util.Map field types (see ROO-194)
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
@@ -205,7 +204,7 @@ public class JspViewManager {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 			
-		//add document namespaces
+		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -216,7 +215,7 @@ public class JspViewManager {
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 
-		//add form create element
+		// Add form create element
 		Element formCreate = new XmlElementBuilder("form:create", document)
 						.addAttribute("id", XmlUtils.convertId("fc:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 						.addAttribute("modelAttribute", entityName)
@@ -230,12 +229,13 @@ public class JspViewManager {
 		
 		List<FieldMetadata> formFields = fields;
 		JavaType idType = entityMetadata.getIdentifierField().getFieldType();
-		//handle Roo identifiers
+		// Handle Roo identifiers
 		if (isRooIdentifier(idType)) {
 			IdentifierMetadata im = (IdentifierMetadata) metadataService.get(IdentifierMetadata.createIdentifier(idType, Path.SRC_MAIN_JAVA));
 			if (im != null) {
 				for (FieldMetadata field: im.getFields()) {
-					formFields.add(new DefaultFieldMetadata(field.getDeclaredByMetadataId(), field.getModifier(), new JavaSymbolName(entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + field.getFieldName().getSymbolName()), field.getFieldType(), field.getFieldInitializer(), field.getAnnotations()));
+					FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(field);
+					formFields.add(fieldBuilder.build());
 				}
 			}
 		} 
@@ -258,7 +258,7 @@ public class JspViewManager {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 			
-		//add document namespaces
+		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -267,7 +267,7 @@ public class JspViewManager {
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 
-		//add form update element
+		// Add form update element
 		Element formUpdate = new XmlElementBuilder("form:update", document)
 						.addAttribute("id", XmlUtils.convertId("fu:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 						.addAttribute("modelAttribute", entityName)
@@ -286,9 +286,7 @@ public class JspViewManager {
 		}
 		
 		createFieldsForCreateAndUpdate(fields, document, formUpdate, false);
-		
 		formUpdate.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formUpdate));
-		
 		div.appendChild(formUpdate);
 		
 		return document;
@@ -298,7 +296,7 @@ public class JspViewManager {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 			
-		//add document namespaces
+		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -326,10 +324,10 @@ public class JspViewManager {
 			JavaSymbolName paramName = paramNames.get(i);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(paramName);
 			if (field == null) {
-				//it may be that the field has an min or max prepended
+				// It may be that the field has an min or max prepended
 				field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(Introspector.decapitalize(paramName.getSymbolName().substring(3))));
 			}
-			//ignoring java.util.Map field types (see ROO-194)
+			// Ignoring java.util.Map field types (see ROO-194)
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
@@ -394,11 +392,11 @@ public class JspViewManager {
 			List<AnnotationMetadata> annotations = field.getAnnotations();
 			AnnotationMetadata annotationMetadata;
 			
-			//ignoring java.util.Map field types (see ROO-194)
+			// Ignoring java.util.Map field types (see ROO-194)
 			if (fieldType.equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
-			//fields contained in the embedded Id type have been added seperately to the field list
+			// Fields contained in the embedded Id type have been added seperately to the field list
 			if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.EmbeddedId"))) {
 				continue;
 			}
@@ -412,15 +410,15 @@ public class JspViewManager {
 			
 			if (fieldType.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(boolean.class.getName())) {
 				 fieldElement = document.createElement("field:checkbox");
-			//handle enum fields	 
+			// Handle enum fields	 
 			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(fieldType)) {
 				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + getPlural(fieldType).toLowerCase() + "}").addAttribute("path", getPlural(fieldType).toLowerCase()).build();
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
-						//OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
-						//the link URL is determined as a best effort attempt following Roo REST conventions, this link might be wrong if custom paths are used
-						//if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
+						// OneToMany relationships are managed from the 'many' side of the relationship, therefore we provide a link to the relevant form
+						// the link URL is determined as a best effort attempt following Roo REST conventions, this link might be wrong if custom paths are used
+						// if custom paths are used the developer can adjust the path attribute in the field:reference tag accordingly
 						EntityMetadata typeEntityMetadata = getEntityMetadataForField(field);
 						if (typeEntityMetadata != null) {
 							fieldElement = new XmlElementBuilder("field:simple", document).addAttribute("messageCode", "entity_reference_not_managed").addAttribute("messageCodeAttribute", new JavaSymbolName(fieldType.getSimpleTypeName()).getReadableSymbolName()).build();
@@ -438,12 +436,12 @@ public class JspViewManager {
 													.addAttribute("path", "/" + getPlural(referenceType).toLowerCase())
 												.build();
 											
-							if(annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
+							if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
 								fieldElement.setAttribute("multiple", "true");
 							}
 						}
 					} 
-					// only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
+					// Only include the date picker for styles supported by Dojo (SMALL & MEDIUM)
 					if (fieldType.getFullyQualifiedTypeName().equals(Date.class.getName()) || fieldType.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 							fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + fieldName.toLowerCase() + "_date_format}").build();
 						
@@ -453,13 +451,13 @@ public class JspViewManager {
 							fieldElement.setAttribute("past", "true");
 						}
 						
-//						AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-//						if (annotation != null) {
-//							AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("style"));
-//							if (null != value && !value.getValue().toString().contains("L") && !value.getValue().toString().contains("F")) {
-//								//dojo can not deal with any other format
-//							}
-//						}
+						// AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+						// if (annotation != null) {
+						// AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("style"));
+						// if (null != value && !value.getValue().toString().contains("L") && !value.getValue().toString().contains("F")) {
+						// // dojo can not deal with any other format
+						// }
+						// }
 					}
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.Lob")) {
 						fieldElement = new XmlElementBuilder("field:textarea", document).build();
@@ -475,7 +473,7 @@ public class JspViewManager {
 					}
 				} 
 			}
-			//use a default input field if no other criteria apply
+			// Use a default input field if no other criteria apply
 			if (fieldElement == null) {
 				fieldElement = document.createElement("field:input");
 			}
@@ -491,7 +489,7 @@ public class JspViewManager {
 	
 	private JavaType getJavaTypeForField(FieldMetadata field) {
 		if (field.getFieldType().isCommonCollectionType()) {
-			//currently there is no scaffolding available for Maps (see ROO-194)
+			// Currently there is no scaffolding available for Maps (see ROO-194)
 			if(field.getFieldType().equals(new JavaType(Map.class.getName()))) {
 				return null;
 			}
@@ -511,7 +509,7 @@ public class JspViewManager {
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {
 		AnnotationMetadata annotationMetadata;
-		if(field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())
+		if (field.getFieldType().equals(new JavaType(Integer.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(int.class.getName())
 				|| field.getFieldType().equals(new JavaType(Short.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(short.class.getName())
 				|| field.getFieldType().equals(new JavaType(Long.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName())
 				|| field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
@@ -586,7 +584,7 @@ public class JspViewManager {
 	}
 	
 	private boolean isEnumType(JavaType type) {
-		PhysicalTypeMetadata physicalTypeMetadata  = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata != null) {
 			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
 			if (details != null) {
@@ -600,10 +598,10 @@ public class JspViewManager {
 	
 	private boolean isSpecialType(JavaType javaType) {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		//we are only interested if the type is part of our application and if no editor exists for it already
+		// We are only interested if the type is part of our application and if no editor exists for it already
 		if (metadataService.get(physicalTypeIdentifier) != null) {
-		  return true;
-		}		
+			return true;
+		}
 		return false;
 	}
 	
@@ -618,6 +616,6 @@ public class JspViewManager {
 			return pluralMetadata.getPlural();
 		}
 		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
-		return pluralMetadata.getPlural() + "Items";	
+		return pluralMetadata.getPlural() + "Items";
 	}
 }

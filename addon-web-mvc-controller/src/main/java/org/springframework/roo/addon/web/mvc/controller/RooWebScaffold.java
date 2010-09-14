@@ -35,12 +35,10 @@ import org.springframework.roo.addon.entity.RooEntity;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface RooWebScaffold {
-	
 	
 	/**
 	 * All view-related artifacts for a specific controller are stored in a sub-directory under 

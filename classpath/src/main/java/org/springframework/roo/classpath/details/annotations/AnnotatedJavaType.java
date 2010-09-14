@@ -30,7 +30,7 @@ public final class AnnotatedJavaType {
 			this.annotations = annotations;
 		}
 	}
-
+	
 	/**
 	 * @return the type (never returns null)
 	 */

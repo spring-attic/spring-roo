@@ -36,7 +36,6 @@ import org.xml.sax.SAXException;
 @Component
 @Service
 public class TilesOperationsImpl implements TilesOperations {
-
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	
@@ -164,7 +163,7 @@ public class TilesOperationsImpl implements TilesOperations {
 			if (systemId.equals("http://tiles.apache.org/dtds/tiles-config_2_1.dtd")) {				
 				return new InputSource(TemplateUtils.getTemplate(TilesOperationsImpl.class, "tiles-config_2_1.dtd"));
 			} else {
-				// use the default behaviour
+				// Use the default behaviour
 				return null;
 			}
 		}

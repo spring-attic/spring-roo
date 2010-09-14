@@ -33,6 +33,13 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		enumConstants.addAll(existing.getEnumConstants());
 	}
 
+	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, int modifier, JavaType name, PhysicalTypeCategory physicalTypeCategory) {
+		this(declaredbyMetadataId);
+		setModifier(modifier);
+		this.name = name;
+		this.physicalTypeCategory = physicalTypeCategory;
+	}
+	
 	public JavaType getName() {
 		return name;
 	}

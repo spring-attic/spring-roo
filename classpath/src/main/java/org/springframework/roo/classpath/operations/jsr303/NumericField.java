@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
@@ -30,24 +29,24 @@ public class NumericField extends StringOrNumericField {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		if (min != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new LongAttributeValue(new JavaSymbolName("value"), min));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Min"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Min"), attrs));
 		}
 		if (max != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new LongAttributeValue(new JavaSymbolName("value"), max));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Max"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Max"), attrs));
 		}
 		Assert.isTrue(isDigitsSetCorrectly(), "Validation constraints for @Digit are not correctly set");
 		if (digitsInteger != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new IntegerAttributeValue(new JavaSymbolName("integer"), digitsInteger));
 			attrs.add(new IntegerAttributeValue(new JavaSymbolName("fraction"), digitsFraction));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Digits"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Digits"), attrs));
 		}
 	}
 	

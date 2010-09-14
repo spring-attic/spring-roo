@@ -9,17 +9,17 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.DefaultConstructorMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -72,7 +72,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 		
 		// Add @Embeddable annotation
-		builder.addTypeAnnotation(getEmbeddableAnnotation());
+		builder.addAnnotation(getEmbeddableAnnotation());
 		
 		// Add declared fields and accessors and mutators
 		fields = getFields();
@@ -111,7 +111,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, EMBEDDABLE) != null) {
 			return null;
 		}
-		return new DefaultAnnotationMetadata(EMBEDDABLE, new ArrayList<AnnotationAttributeValue<?>>());
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(EMBEDDABLE);
+		return annotationBuilder.build();
 	}
 
 	/**
@@ -132,15 +133,15 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			for (Identifier identifier : identifierServiceResult) {
 				// Compute the column name, as required
 				String columnName = identifier.getColumnName();
-				List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+				List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 				List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 				columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
 				columnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("nullable"), false));
-				AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
-				annotations.add(columnAnnotation);
+				annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 
-				FieldMetadata idField = new DefaultFieldMetadata(getId(), Modifier.PRIVATE, identifier.getFieldName(), identifier.getFieldType(), null, annotations);
-
+				FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, identifier.getFieldName(), identifier.getFieldType());
+				FieldMetadata idField = fieldBuilder.build();
+				
 				// Only add field to ITD if not declared on governor
 				if (!hasField(declaredFields, idField)) {
 					fields.add(idField);
@@ -169,15 +170,15 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 				
 		// We need to create a default identifier field
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Compute the column name, as required
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), "id"));
-		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
-		annotations.add(columnAnnotation);
+		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 
-		fields.add(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName("id"), new JavaType(Long.class.getName()), null, annotations));
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("id"), new JavaType(Long.class.getName()));
+		fields.add(fieldBuilder.build());
 		
 		return fields;
 	}
@@ -226,7 +227,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		String requiredAccessorName = getRequiredAccessorName(field);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), field.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), field.getFieldType(), bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -273,7 +276,9 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -304,7 +309,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 			paramNames.add(field.getFieldName());
 		}
 
-		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+		constructorBuilder.setModifier(Modifier.PUBLIC);
+		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
+		constructorBuilder.setParameterNames(paramNames);
+		constructorBuilder.setBodyBuilder(bodyBuilder);
+		return constructorBuilder.build();
 	}
 
 	/**
@@ -338,7 +348,12 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		// Create the constructor
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
-		return new DefaultConstructorMetadata(getId(), Modifier.PRIVATE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+
+		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+		constructorBuilder.setModifier(Modifier.PRIVATE);
+		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
+		constructorBuilder.setBodyBuilder(bodyBuilder);
+		return constructorBuilder.build();
 	}
 
 	public MethodMetadata getEqualsMethod() {
@@ -386,7 +401,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("obj"));
 
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("equals"), JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	public MethodMetadata getHashCodeMethod() {
@@ -426,7 +442,8 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 		bodyBuilder.appendFormalLine("return result;");
 
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName("hashCode"), JavaType.INT_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("hashCode"), JavaType.INT_PRIMITIVE, bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	public static final String getMetadataIdentiferType() {

@@ -8,16 +8,16 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
-import org.springframework.roo.classpath.details.DefaultConstructorMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -204,11 +204,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}
 			
 			// Candidate not found, so let's create one
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			AnnotationMetadata annotation = new DefaultAnnotationMetadata(PERSISTENCE_CONTEXT, new ArrayList<AnnotationAttributeValue<?>>());
-			annotations.add(annotation);
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(PERSISTENCE_CONTEXT);
+			annotations.add(annotationBuilder);
 			
-			return new DefaultFieldMetadata(getId(), Modifier.TRANSIENT, fieldSymbolName, ENTITY_MANAGER, null, annotations);
+			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, annotations, fieldSymbolName, ENTITY_MANAGER);
+			return fieldBuilder.build();
 		}
 	}
 	
@@ -252,7 +253,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("super();");
 		
-		return new DefaultConstructorMetadata(getId(), Modifier.PUBLIC, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), bodyBuilder.getOutput());
+		ConstructorMetadataBuilder constructorBuilder = new ConstructorMetadataBuilder(getId());
+		constructorBuilder.setModifier(Modifier.PUBLIC);
+		constructorBuilder.setParameterTypes(AnnotatedJavaType.convertFromJavaTypes(paramTypes));
+		constructorBuilder.setBodyBuilder(bodyBuilder);
+		return constructorBuilder.build();
 	}
 	
 	/**
@@ -314,11 +319,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// We need to create one
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		boolean hasIdClass = !(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")));
 		JavaType annotationType = hasIdClass ? EMBEDDED_ID : ID;
-		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(annotationType, new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(idAnnotation);
+		annotations.add(new AnnotationMetadataBuilder(annotationType));
 					
 		// Compute the column name, as required
 		if (!hasIdClass) {
@@ -343,8 +347,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}
 			
 			generatedValueAttributes.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.GenerationType"), new JavaSymbolName(generationType))));
-			AnnotationMetadata generatedValueAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes);
-			annotations.add(generatedValueAnnotation);
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.GeneratedValue"), generatedValueAttributes));
 
 			String columnName = idField.getSymbolName();
 			if (!"".equals(identifierColumn)) {
@@ -354,11 +357,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
-			AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
-			annotations.add(columnAnnotation);
+			annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		}
 		
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, idField, identifierType, null, annotations);
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType);
+		return fieldBuilder.build();
 	}
 	
 	/**
@@ -393,7 +396,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
 		
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder);
+		return methodBuilder.build();
 	}
 	
 	public MethodMetadata getIdentifierMutator() {
@@ -423,7 +427,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + id.getFieldName().getSymbolName() + " = id;");
 		
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -480,16 +485,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// We're creating one
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		AnnotationMetadata idAnnotation = new DefaultAnnotationMetadata(new JavaType("javax.persistence.Version"), new ArrayList<AnnotationAttributeValue<?>>());
-		annotations.add(idAnnotation);
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
 		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionField.getSymbolName()));
-		AnnotationMetadata columnAnnotation = new DefaultAnnotationMetadata(COLUMN, columnAttributes);
-		annotations.add(columnAnnotation);
+		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		
-		return new DefaultFieldMetadata(getId(), Modifier.PRIVATE, versionField, versionType, null, annotations);
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, versionField, versionType);
+		return fieldBuilder.build();
 	}
 
 	/**
@@ -533,7 +537,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + version.getFieldName().getSymbolName() + ";");
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), version.getFieldType(), bodyBuilder);
+		return methodBuilder.build();
 	}
 	
 	public MethodMetadata getVersionMutator() {
@@ -567,7 +573,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// We declared the field in this ITD, so produce a public mutator for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("this." + version.getFieldName().getSymbolName() + " = version;");
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredMutatorName), JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -645,7 +653,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create the method
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>(); 
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>(); 
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
@@ -685,18 +693,20 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + "." + entityManagerDelegate  + "(this);");
 		}
 
-		return new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
-	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations, boolean isPersistMethod) {
+	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		if (isGaeEnabled && isPersistMethod) {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
 		}
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
 	}
 	
-	private void addTransactionalAnnotation(List<AnnotationMetadata> annotations) {
+	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations) {
 		addTransactionalAnnotation(annotations, false);
 	}
 
@@ -758,7 +768,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return em;");
 		int modifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 		
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), null, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -779,7 +790,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
@@ -792,7 +803,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -819,7 +832,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
 			addSuppressWarnings(annotations);
@@ -832,7 +845,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
 	/**
@@ -858,7 +873,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		if (isGaeEnabled) {
 			addTransactionalAnnotation(annotations);
 		}
@@ -872,7 +887,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
 		int modifier = Modifier.PUBLIC | Modifier.STATIC;
 		
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 	
 	/**
@@ -902,7 +919,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Create method
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (isDataNucleusEnabled) {
@@ -916,13 +933,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 		
-		return new DefaultMethodMetadata(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, annotations, new ArrayList<JavaType>(), bodyBuilder.getOutput());
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
 	}
 
-	private void addSuppressWarnings(List<AnnotationMetadata> annotations) {
+	private void addSuppressWarnings(List<AnnotationMetadataBuilder> annotations) {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("value"), "unchecked"));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("java.lang.SuppressWarnings"), attributes));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("java.lang.SuppressWarnings"), attributes));
 	}
 	
 	/**

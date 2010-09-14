@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceTypeDetails {
 
@@ -81,5 +80,4 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * @param methodMetadata to add (required)
 	 */
 	void addMethod(MethodMetadata methodMetadata);
-	
 }

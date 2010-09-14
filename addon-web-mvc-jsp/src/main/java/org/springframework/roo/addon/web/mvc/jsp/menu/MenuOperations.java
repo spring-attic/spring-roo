@@ -10,12 +10,12 @@ import org.springframework.roo.model.JavaSymbolName;
  * @author Stefan Schmidt
  * @author Ben Alex
  * @since 1.1
- *
  */
 public interface MenuOperations {
 
-	public static final String DEFAULT_MENU_ITEM_PREFIX = "i_";
-	public static final String FINDER_MENU_ITEM_PREFIX = "fi_";
+	String DEFAULT_MENU_ITEM_PREFIX = "i_";
+	
+	String FINDER_MENU_ITEM_PREFIX = "fi_";
 
 	/**
 	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
@@ -54,5 +54,4 @@ public interface MenuOperations {
 	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
 	 */
 	void cleanUpMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemName, String idPrefix);
-
 }

@@ -10,12 +10,10 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.EnumDetails;
@@ -83,19 +81,22 @@ public class ClasspathCommands implements CommandMarker {
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		if (rooAnnotations) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
 		}
 
 		int modifier = Modifier.PUBLIC;
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, annotations, null);
-		classpathOperations.generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(classpathOperations.getSuperclass(superclass)));
+		typeDetailsBuilder.setExtendsTypes(extendsTypes);
+		typeDetailsBuilder.setAnnotations(annotations);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "interface", help = "Creates a new Java interface source file in any project path")
@@ -109,9 +110,8 @@ public class ClasspathCommands implements CommandMarker {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.INTERFACE, null, null, null, null, null, null, null, null);
-		classpathOperations.generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "enum type", help = "Creates a new Java enum source file in any project path")
@@ -125,9 +125,8 @@ public class ClasspathCommands implements CommandMarker {
 		}
 
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
-
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.ENUMERATION, null, null, null, null, null, null, null, null);
-		classpathOperations.generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.ENUMERATION);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
 
 	@CliCommand(value = "enum constant", help = "Inserts a new enum constant into an enum")
@@ -220,9 +219,9 @@ public class ClasspathCommands implements CommandMarker {
 
 		// Produce entity itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
-		List<AnnotationMetadata> entityAnnotations = new ArrayList<AnnotationMetadata>();
-		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
-		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
+		List<AnnotationMetadataBuilder> entityAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
+		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
 
 		List<AnnotationAttributeValue<?>> entityAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 		if (identifierField != null) {
@@ -234,32 +233,32 @@ public class ClasspathCommands implements CommandMarker {
 		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
 			entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
 		} 
-		entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
+		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
 
 		if (table != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), table));
-			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Table"), attrs));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"), attrs));
 		}
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
 		if (mappedSuperclass) {
-			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.MappedSuperclass"), new ArrayList<AnnotationAttributeValue<?>>()));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.MappedSuperclass")));
 		} else {
-			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Entity"), new ArrayList<AnnotationAttributeValue<?>>()));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Entity")));
 		}
 		if (serializable) {
-			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), entityAttrs));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), entityAttrs));
 		}
 		if (inheritanceType != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.name()))));
-			entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Inheritance"), attrs));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Inheritance"), attrs));
 			if (inheritanceType == InheritanceType.SINGLE_TABLE) {
 				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
-				entityAnnotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.DiscriminatorColumn"), new ArrayList<AnnotationAttributeValue<?>>()));
+				entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.DiscriminatorColumn")));
 			}
 		}
 		
@@ -267,8 +266,14 @@ public class ClasspathCommands implements CommandMarker {
 		if (createAbstract) {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, modifier, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, entityAnnotations, null);
-		classpathOperations.generateClassFile(details);
+		
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		if (classpathOperations.getSuperclass(superclass) != null) {
+			typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(classpathOperations.getSuperclass(superclass)));
+		}
+		typeDetailsBuilder.setExtendsTypes(extendsTypes);
+		typeDetailsBuilder.setAnnotations(entityAnnotations);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 		
 		// Create entity identifier class if required
 		if (!(identifierType.getPackage().getFullyQualifiedPackageName().startsWith("java.") || identifierType.equals(new JavaType("com.google.appengine.api.datastore.Key")))) {
@@ -283,11 +288,12 @@ public class ClasspathCommands implements CommandMarker {
 	private void createIdentifierClass(JavaType identifierType, String identifierField, String identifierColumn) {
 		// Produce identifier itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		List<AnnotationMetadata> identifierAnnotations = new ArrayList<AnnotationMetadata>();
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"), new ArrayList<AnnotationAttributeValue<?>>()));
+		List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooIdentifier")));
 		
-		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, identifierType, Modifier.PUBLIC | Modifier.FINAL, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, identifierAnnotations, null);
-		classpathOperations.generateClassFile(idClassDetails);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(identifierAnnotations);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
 }

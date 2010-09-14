@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -59,7 +58,7 @@ public class ReferenceField extends FieldDetails {
 		this.fetch = fetch;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new ClassAttributeValue(new JavaSymbolName("targetEntity"), fieldType));
@@ -74,16 +73,16 @@ public class ReferenceField extends FieldDetails {
 		
 		switch (cardinality) {
 			case ONE_TO_MANY:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToMany"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToMany"), attributes));
 				break;
 			case MANY_TO_MANY:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToMany"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToMany"), attributes));
 				break;
 			case ONE_TO_ONE:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.OneToOne"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.OneToOne"), attributes));
 				break;
 			default:
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.ManyToOne"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.ManyToOne"), attributes));
 				break;
 		}
 		
@@ -91,6 +90,6 @@ public class ReferenceField extends FieldDetails {
 		if (joinColumnName != null) {
 			jcAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
 		}
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.JoinColumn"), jcAttrs));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), jcAttrs));
 	}
 }

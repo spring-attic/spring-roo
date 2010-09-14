@@ -15,10 +15,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public final class DefaultAnnotationMetadata implements AnnotationMetadata {
-
 	private JavaType annotationType;
 	private List<AnnotationAttributeValue<?>> attributes;
 	private Map<JavaSymbolName, AnnotationAttributeValue<?>> attributeMap = new HashMap<JavaSymbolName, AnnotationAttributeValue<?>>();
@@ -29,8 +27,8 @@ public final class DefaultAnnotationMetadata implements AnnotationMetadata {
 		this(annotationType, attributes, true);
 	}
 
-	// package protected to enforce use of AnnotationMetadataBuilder
-	// the "parameter" boolean flag is simply so AnnotationMetadataBuilder can use a non-deprecated method; it has no actual use
+	// Package protected to enforce use of AnnotationMetadataBuilder
+	// The "parameter" boolean flag is simply so AnnotationMetadataBuilder can use a non-deprecated method; it has no actual use
 	DefaultAnnotationMetadata(JavaType annotationType, List<AnnotationAttributeValue<?>> attributes, boolean parameter) {
 		Assert.notNull(annotationType, "Annotation type required");
 		Assert.notNull(attributes, "Attributes required");

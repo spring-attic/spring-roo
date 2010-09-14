@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -50,18 +49,18 @@ public class FieldDetails {
 		this.fieldName = fieldName;
 	}
 
-	public void decorateAnnotationsList(List<AnnotationMetadata> annotations) {
+	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(annotations);
 		if (notNull) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.NotNull"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.NotNull")));
 		}
 		if (nullRequired) {
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.validation.constraints.Null"), new ArrayList<AnnotationAttributeValue<?>>()));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Null")));
 		}
 		if (column != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), column));
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Column"), attrs));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"), attrs));
 		}
 	}
 

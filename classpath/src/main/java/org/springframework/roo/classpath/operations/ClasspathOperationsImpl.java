@@ -14,17 +14,17 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -185,19 +185,22 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			return;
 		}
 
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> config = new ArrayList<AnnotationAttributeValue<?>>();
 		config.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.test.RooIntegrationTest"), config));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.test.RooIntegrationTest"), config));
 
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		List<AnnotationMetadata> methodAnnotations = new ArrayList<AnnotationMetadata>();
-		methodAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.Test"), new ArrayList<AnnotationAttributeValue<?>>()));
-		MethodMetadata method = new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, null, null, methodAnnotations, null, null);
-		methods.add(method);
+		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+		List<AnnotationMetadataBuilder> methodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		methodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.Test")));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("testMarkerMethod"), JavaType.VOID_PRIMITIVE, new InvocableMemberBodyBuilder());
+		methodBuilder.setAnnotations(methodAnnotations);
+		methods.add(methodBuilder);
 
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, methods, null, null, null, annotations, null);
-		generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(annotations);
+		typeDetailsBuilder.setDeclaredMethods(methods);
+		generateClassFile(typeDetailsBuilder.build());
 	}
 
 	public void newDod(JavaType entity, JavaType name, Path path) {
@@ -218,13 +221,14 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 			return;
 		}
 		
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> dodConfig = new ArrayList<AnnotationAttributeValue<?>>();
 		dodConfig.add(new ClassAttributeValue(new JavaSymbolName("entity"), entity));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand"), dodConfig));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.dod.RooDataOnDemand"), dodConfig));
 
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, name, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, annotations, null);
-		generateClassFile(details);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(annotations);
+		generateClassFile(typeDetailsBuilder.build());
 	}
 		
 	/**
