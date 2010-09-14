@@ -7,16 +7,15 @@ import java.util.List;
 import org.springframework.roo.addon.dod.DataOnDemandMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
@@ -116,19 +115,19 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.junit.runner.RunWith")) == null) {
 			List<AnnotationAttributeValue<?>> runWithAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			runWithAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), new JavaType("org.springframework.test.context.junit4.SpringJUnit4ClassRunner")));
-			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.junit.runner.RunWith"), runWithAttributes));
+			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.junit.runner.RunWith"), runWithAttributes));
 		}
 		
 		// Add an @ContextConfiguration("classpath:/applicationContext.xml") annotation to the type, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.test.context.ContextConfiguration")) == null) {
 			List<AnnotationAttributeValue<?>> ctxCfg = new ArrayList<AnnotationAttributeValue<?>>();
 			ctxCfg.add(new StringAttributeValue(new JavaSymbolName("locations"), "classpath:/META-INF/spring/applicationContext.xml"));
-			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
+			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.test.context.ContextConfiguration"), ctxCfg));
 		}
 		
 		// Add an @Transactional, if the user did not define it on the governor directly
 		if (MemberFindingUtils.getAnnotationOfType(governorTypeDetails.getAnnotations(), new JavaType("org.springframework.transaction.annotation.Transactional")) == null) {
-			builder.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), new ArrayList<AnnotationAttributeValue<?>>()));
+			builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional")));
 		}
 	
 		// Add the data on demand field if the user did not define it on the governor directly
@@ -138,9 +137,10 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.beans.factory.annotation.Autowired")), "Field 'dod' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @Autowired");
 		} else {
 			// Add the field via the ITD
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));
-			builder.addField(new DefaultFieldMetadata(getId(), Modifier.PRIVATE, new JavaSymbolName("dod"), dodGovernor, null, annotations));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, new JavaSymbolName("dod"), dodGovernor);
+			builder.addField(fieldBuilder.build());
 		}
 	}
 
@@ -153,7 +153,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		} else {
 			// Add the field via the ITD
 			String initializer = "new LocalServiceTestHelper(new com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig())";
-			builder.addField(new DefaultFieldMetadata(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, new JavaSymbolName("helper"), helperType, initializer, null));
+			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL, new JavaSymbolName("helper"), helperType, initializer);
+			builder.addField(fieldBuilder.build());
 		}
 
 		// Initialise parameters for setUp/tearDown methods
@@ -166,13 +167,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(setUpMethod.getAnnotations(), new JavaType("org.junit.BeforeClass")), "Method 'setUp' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @BeforeClass");
 		} else {
 			// Add the method via the ITD
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.BeforeClass"), new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.BeforeClass")));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("helper.setUp();");
 
-			builder.addMethod(new DefaultMethodMetadata(getId(), Modifier.PUBLIC | Modifier.STATIC, setUpMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput()));
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, setUpMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			builder.addMethod(methodBuilder.build());
 		}
 
 		// Prepare tearDown method signature
@@ -182,13 +185,15 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			Assert.notNull(MemberFindingUtils.getAnnotationOfType(tearDownMethod.getAnnotations(), new JavaType("org.junit.AfterClass")), "Method 'tearDown' on '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "' must be annotated with @AfterClass");
 		} else {
 			// Add the method via the ITD
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(new JavaType("org.junit.AfterClass"), new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.junit.AfterClass")));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("helper.tearDown();");
 
-			builder.addMethod(new DefaultMethodMetadata(getId(), Modifier.PUBLIC | Modifier.STATIC, tearDownMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput()));
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, tearDownMethodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			builder.addMethod(methodBuilder.build());
 		}
 	}
 
@@ -207,15 +212,17 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
 			bodyBuilder.appendFormalLine("long count = " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + countMethod.getMethodName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Counter for '" + annotationValues.getEntity().getSimpleTypeName() + "' incorrectly reported there were no entries\", count > 0);");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -236,8 +243,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -248,7 +255,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null for id '\" + id + \"'\", obj);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned the incorrect identifier\", id, obj." + identifierAccessorMethod.getMethodName().getSymbolName() + "());");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -269,8 +278,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -280,7 +289,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Find all method for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to return any data\", result.size() > 0);");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -301,8 +312,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -312,7 +323,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' illegally returned null\", result);");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertEquals(\"Find entries method for '" + annotationValues.getEntity().getSimpleTypeName() + "' returned an incorrect number of entries\", count, result.size());");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -333,8 +346,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -351,7 +364,10 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			} else {
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 			}
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -372,8 +388,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 	
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine(annotationValues.getEntity().getFullyQualifiedTypeName() + " obj = dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "();");
@@ -391,7 +407,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 				bodyBuilder.appendFormalLine("org.junit.Assert.assertTrue(\"Version for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to increment on merge and flush directive\", (currentVersion != null && obj." + versionAccessorMethod.getMethodName().getSymbolName() + "() > currentVersion) || !modified);");
 			}
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -412,8 +430,8 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Data on demand for '" + annotationValues.getEntity().getSimpleTypeName() + "' failed to initialize correctly\", dod." + dataOnDemandMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "());");
@@ -424,7 +442,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNotNull(\"Expected '" + annotationValues.getEntity().getSimpleTypeName() + "' identifier to no longer be null\", obj." + identifierAccessorMethod.getMethodName().getSymbolName()  + "());");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;
@@ -445,12 +465,12 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 		
 		MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, methodName, parameters);
 		if (method == null) {
-			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-			annotations.add(new DefaultAnnotationMetadata(TEST, new ArrayList<AnnotationAttributeValue<?>>()));
+			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+			annotations.add(new AnnotationMetadataBuilder(TEST));
 			if (isGaeSupported) {
 				List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 				attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("SUPPORTS"))));
-				annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
+				annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.transaction.annotation.Transactional"), attributes));
 			}
 			
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -463,7 +483,9 @@ public class IntegrationTestMetadata extends AbstractItdTypeDetailsProvidingMeta
 			bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 			bodyBuilder.appendFormalLine("org.junit.Assert.assertNull(\"Failed to remove '" + annotationValues.getEntity().getSimpleTypeName() + "' with identifier '\" + id + \"'\", " + annotationValues.getEntity().getFullyQualifiedTypeName() + "." + findMethod.getMethodName().getSymbolName() + "(id));");
 
-			method = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), annotations, null, bodyBuilder.getOutput());
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(parameters), new ArrayList<JavaSymbolName>(), bodyBuilder);
+			methodBuilder.setAnnotations(annotations);
+			method = methodBuilder.build();
 		}
 
 		return method;

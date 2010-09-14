@@ -7,18 +7,16 @@ import org.springframework.roo.model.JavaType;
  * Interface to {@link JmsOperationsImpl}.
  * 
  * @author Ben Alex
- *
  */
 public interface JmsOperations {
 
-	public abstract boolean isInstallJmsAvailable();
+	boolean isInstallJmsAvailable();
 
-	public abstract boolean isManageJmsAvailable();
+	boolean isManageJmsAvailable();
 
-	public abstract void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType);
+	void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType);
 
-	public abstract void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName);
+	void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName);
 
-	public abstract void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType);
-
+	void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType);
 }

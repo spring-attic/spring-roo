@@ -6,7 +6,6 @@ import org.springframework.roo.model.JavaType;
  * Interface of {@link IntegrationTestOperationsImpl}.
  * 
  * @author Ben Alex
- *
  */
 public interface IntegrationTestOperations {
 

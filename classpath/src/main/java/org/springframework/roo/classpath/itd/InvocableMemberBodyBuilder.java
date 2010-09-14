@@ -11,14 +11,10 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class InvocableMemberBodyBuilder {
-	
 	private boolean reset = false;
-	
 	private int indentLevel = 0;
-	
 	private StringBuilder stringBuilder = new StringBuilder();
 
 	public InvocableMemberBodyBuilder() {
@@ -60,7 +56,7 @@ public class InvocableMemberBodyBuilder {
 		}
         // We use \n for consistency with JavaParser's DumpVisitor, which always uses \n
 		stringBuilder.append("\n");
-		//pw.append(System.getProperty("line.separator"));
+		// stringBuilder.append(System.getProperty("line.separator"));
 		return this;
 	}
 	
@@ -108,5 +104,4 @@ public class InvocableMemberBodyBuilder {
 		}
 		return stringBuilder.toString();
 	}
-
 }

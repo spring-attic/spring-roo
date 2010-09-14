@@ -34,8 +34,8 @@ import org.w3c.dom.Element;
  * @author Alan Stewart
  * @since 1.0
  */
-@Component
-@Service
+@Component 
+@Service 
 public class SecurityOperationsImpl implements SecurityOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -61,7 +61,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	public void installSecurity() {
 		// Parse the configuration.xml file
 		Element configuration = XmlUtils.getConfiguration(getClass());
-		
+
 		// Add POM properties
 		updatePomProperties(configuration);
 

@@ -1,6 +1,5 @@
 package org.springframework.roo.addon.op4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -12,8 +11,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
@@ -33,7 +31,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class Op4jOperationsImpl implements Op4jOperations{
-
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
@@ -59,9 +56,10 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooOp4j.class.getName()))) {
-			JavaType rooSolrSearchable = new JavaType(RooOp4j.class.getName());
-			if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
-				mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
+			JavaType rooOp4j = new JavaType(RooOp4j.class.getName());
+			if (!mutableTypeDetails.getAnnotations().contains(rooOp4j)) {
+				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooOp4j);
+				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
 		}
 	}

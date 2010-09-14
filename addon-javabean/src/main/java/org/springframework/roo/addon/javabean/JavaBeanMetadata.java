@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
@@ -29,21 +29,19 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = JavaBeanMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
+
 	// From annotation
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
-	
+
 	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		
+
 		if (!isValid()) {
 			return;
 		}
@@ -59,11 +57,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			builder.addMethod(getDeclaredGetter(field));
 			builder.addMethod(getDeclaredSetter(field));
 		}
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * Obtains the specific accessor method that is either contained within the normal Java compilation unit or will
 	 * be introduced by this add-on via an ITD.
@@ -73,7 +71,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 */
 	public MethodMetadata getDeclaredGetter(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
-		
+
 		// Compute the accessor method name
 		JavaSymbolName methodName;
 
@@ -82,23 +80,25 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		} else {
 			methodName = new JavaSymbolName("get" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 		}
-		
+
 		// See if the type itself declared the accessor
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, null);
 		if (result != null) {
 			return result;
 		}
-		
+
 		// Decide whether we need to produce the accessor method (see ROO-619 for reason we allow a getter for a final field)
 		if (this.gettersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
-			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, field.getFieldType(), bodyBuilder);
+			result = methodBuilder.build();
 		}
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Obtains the specific mutator method that is either contained within the normal Java compilation unit or will
 	 * be introduced by this add-on via an ITD.
@@ -108,31 +108,33 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	 */
 	public MethodMetadata getDeclaredSetter(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
-		
+
 		// Compute the mutator method name
 		JavaSymbolName methodName = new JavaSymbolName("set" + StringUtils.capitalize(field.getFieldName().getSymbolName()));
 
 		// Compute the mutator method parameters
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(field.getFieldType());
-		
+
 		// See if the type itself declared the mutator
 		MethodMetadata result = MemberFindingUtils.getDeclaredMethod(governorTypeDetails, methodName, paramTypes);
 		if (result != null) {
 			return result;
 		}
-		
+
 		// Compute the mutator method parameter names
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(field.getFieldName());
-		
+
 		// Decide whether we need to produce the mutator method (disallowed for final fields as per ROO-36)
 		if (this.settersByDefault && !Modifier.isTransient(field.getModifier()) && !Modifier.isStatic(field.getModifier()) && !Modifier.isFinal(field.getModifier())) {
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("this." + field.getFieldName().getSymbolName() + " = " + field.getFieldName().getSymbolName() + ";");
-			result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput());
+
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+			result = methodBuilder.build();
 		}
-		
+
 		return result;
 	}
 
@@ -150,7 +152,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
@@ -166,5 +168,4 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-	
 }

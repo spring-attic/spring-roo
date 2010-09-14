@@ -14,11 +14,10 @@ import java.util.TreeMap;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulate;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -53,7 +52,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		Assert.notNull(memberHoldingTypeDetails, "Bean info metadata required");
 
 		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
-		
+
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooToString.class.getName()));
 		if (annotation != null) {
@@ -73,7 +72,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		/** key: string based method name, value: MethodMetadata */
 		TreeMap<String, MethodMetadata> map = new TreeMap<String, MethodMetadata>();
 		List<MethodMetadata> sortedByDetectionOrder = new ArrayList<MethodMetadata>();
-		
+
 		for (MemberHoldingTypeDetails holder : memberHoldingTypeDetails) {
 			for (MethodMetadata method : holder.getDeclaredMethods()) {
 				String accessorName = method.getMethodName().getSymbolName();
@@ -93,10 +92,8 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return sortedByDetectionOrder;
 	}
 
-	
 	/**
 	 * Obtains the "toString" method for this type, if available.
-	 * 
 	 * <p>
 	 * If the user provided a non-default name for "toString", that method will be returned.
 	 * 
@@ -117,15 +114,15 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		// Decide whether we need to produce the toString method
 		if (!this.toStringMethod.equals("")) {
-			InvocableMemberBodyBuilder builder = new InvocableMemberBodyBuilder();
-			builder.appendFormalLine("StringBuilder sb = new StringBuilder();");
+			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+			bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
 
 			/** key: field name, value: accessor name */
 			Map<String, String> map = new LinkedHashMap<String, String>();
 
 			/** field names */
 			List<String> order = new ArrayList<String>();
-			
+
 			Set<String> ignoreFieldsSet = new LinkedHashSet<String>();
 			if (ignoreFields != null && ignoreFields.length > 0) {
 				Collections.addAll(ignoreFieldsSet, ignoreFields);
@@ -162,12 +159,13 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 						string.append(".append(\", \")");
 					}
 					string.append(";");
-					builder.appendFormalLine(string.toString());
+					bodyBuilder.appendFormalLine(string.toString());
 				}
 
-				builder.appendFormalLine("return sb.toString();");
+				bodyBuilder.appendFormalLine("return sb.toString();");
 
-				result = new DefaultMethodMetadata(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), new ArrayList<AnnotationMetadata>(), null, builder.getOutput());
+				MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), bodyBuilder);
+				result = methodBuilder.build();
 			}
 		}
 

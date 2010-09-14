@@ -11,15 +11,13 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public class JsonAnnotationValues extends AbstractAnnotationValues {
-	
 	@AutoPopulate String toJsonMethod = "toJson";
 	@AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
 	@AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
 	@AutoPopulate String toJsonArrayMethod = "toJsonArray";
-	
+
 	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooJson.class.getName()));
 		AutoPopulationUtils.populate(this, annotationMetadata);
@@ -28,15 +26,15 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	public String getToJsonMethod() {
 		return toJsonMethod;
 	}
-	
+
 	public String getFromJsonMethod() {
 		return fromJsonMethod;
 	}
-	
+
 	public String getToJsonArrayMethod() {
 		return toJsonArrayMethod;
 	}
-	
+
 	public String getFromJsonArrayMethod() {
 		return fromJsonArrayMethod;
 	}

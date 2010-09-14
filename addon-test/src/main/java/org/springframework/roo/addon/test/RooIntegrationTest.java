@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
@@ -22,12 +21,20 @@ public @interface RooIntegrationTest {
 	Class<?> entity();
 	
 	boolean count() default true; 
+	
 	boolean find() default true; 
+	
 	boolean findEntries() default true; 
+	
 	boolean findAll() default true;
+	
 	int findAllMaximum() default 250;
+	
 	boolean flush() default true; 
+	
 	boolean persist() default true; 
+	
 	boolean remove() default true; 
+	
 	boolean merge() default true; 
 }

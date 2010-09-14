@@ -15,19 +15,20 @@ import org.springframework.roo.shell.CommandMarker;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component
-@Service
+@Component 
+@Service 
 public class JsonCommands implements CommandMarker {
-
 	@Reference private JsonOperations operations;
-	
-	@CliAvailabilityIndicator({"json setup", "json add", "json all"})
+
+	@CliAvailabilityIndicator({ "json setup", "json add", "json all" }) 
 	public boolean isPropertyAvailable() {
 		return operations.isCommandAvailable();
 	}
-	
-	@CliCommand(value="json add", help="Adds @RooJson annotation to target type")
-	public void add(@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The java type to apply this annotation to") JavaType target) {
+
+	@CliCommand(value = "json add", help = "Adds @RooJson annotation to target type") 
+	public void add(
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The java type to apply this annotation to") JavaType target) {
+		
 		operations.annotateType(target);
 	}
 }

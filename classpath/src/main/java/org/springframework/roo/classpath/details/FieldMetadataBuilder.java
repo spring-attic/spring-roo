@@ -1,5 +1,8 @@
 package org.springframework.roo.classpath.details;
 
+import java.util.List;
+
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -8,10 +11,8 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStructureBuilder<FieldMetadata> {
-
 	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;
@@ -25,6 +26,22 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 		this.fieldInitializer = existing.getFieldInitializer();
 		this.fieldName = existing.getFieldName();
 		this.fieldType = existing.getFieldType();
+	}
+	
+	public FieldMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
+		this(declaredbyMetadataId);
+		setModifier(modifier);
+		this.fieldName = fieldName;
+		this.fieldType = fieldType;
+		this.fieldInitializer = fieldInitializer;
+	}
+
+	public FieldMetadataBuilder(String declaredbyMetadataId, int modifier, List<AnnotationMetadataBuilder> annotations, JavaSymbolName fieldName, JavaType fieldType) {
+		this(declaredbyMetadataId);
+		setModifier(modifier);
+		setAnnotations(annotations);
+		this.fieldName = fieldName;
+		this.fieldType = fieldType;
 	}
 	
 	public FieldMetadata build() {
@@ -54,5 +71,4 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 	public void setFieldType(JavaType fieldType) {
 		this.fieldType = fieldType;
 	}
-	
 }

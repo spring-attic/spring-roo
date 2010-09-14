@@ -19,10 +19,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnnotatedJavaStructureProvider implements ClassOrInterfaceTypeDetails {
-	
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
@@ -54,7 +52,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		this.name = name;
 		this.physicalTypeCategory = physicalTypeCategory;
 		this.superclass = superclass;
-		
+	
 		if (declaredConstructors != null) {
 			this.declaredConstructors = declaredConstructors;
 		}
@@ -62,11 +60,11 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		if (declaredFields != null) {
 			this.declaredFields = declaredFields;
 		}
-		
+	
 		if (declaredMethods != null) {
 			this.declaredMethods = declaredMethods;
 		}
-		
+	
 		if (extendsTypes != null) {
 			this.extendsTypes = extendsTypes;
 		}
@@ -76,7 +74,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		}
 
 		if (enumConstants != null) {
-			Assert.isTrue(physicalTypeCategory == PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
+			Assert.isTrue(physicalTypeCategory != PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
 			this.enumConstants = enumConstants;
 		}
 	}
@@ -153,5 +151,4 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
-
 }

@@ -1,5 +1,10 @@
 package org.springframework.roo.classpath.details;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -8,10 +13,8 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadataBuilder<MethodMetadata> {
-
 	private JavaSymbolName methodName;
 	private JavaType returnType;
 	
@@ -25,6 +28,20 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		this.returnType = existing.getReturnType();
 	}
 	
+	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
+		this(declaredbyMetadataId);
+		setModifier(modifier);
+		setParameterTypes(parameterTypes);
+		setParameterNames(parameterNames);
+		this.methodName = methodName;
+		this.returnType = returnType;
+		setBodyBuilder(bodyBuilder);
+	}
+
+	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, InvocableMemberBodyBuilder bodyBuilder) {
+		this(declaredbyMetadataId, modifier, methodName, returnType, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+	}
+
 	public MethodMetadata build() {
 		return new DefaultMethodMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getMethodName(), getReturnType(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
 	}
@@ -44,5 +61,4 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 	public void setReturnType(JavaType returnType) {
 		this.returnType = returnType;
 	}
-	
 }

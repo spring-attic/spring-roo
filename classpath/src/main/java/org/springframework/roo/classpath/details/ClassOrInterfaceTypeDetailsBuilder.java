@@ -12,10 +12,8 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHoldingTypeDetailsBuilder<ClassOrInterfaceTypeDetails> {
-
 	private JavaType name;
 	private PhysicalTypeCategory physicalTypeCategory;
 	private ClassOrInterfaceTypeDetailsBuilder superclass;
@@ -24,7 +22,7 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
-	
+
 	public ClassOrInterfaceTypeDetailsBuilder(ClassOrInterfaceTypeDetails existing) {
 		super(existing);
 		this.name = existing.getName();
@@ -34,7 +32,7 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		}
 		enumConstants.addAll(existing.getEnumConstants());
 	}
-	
+
 	public JavaType getName() {
 		return name;
 	}
@@ -47,8 +45,7 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		return physicalTypeCategory;
 	}
 
-	public void setPhysicalTypeCategory(
-			PhysicalTypeCategory physicalTypeCategory) {
+	public void setPhysicalTypeCategory(PhysicalTypeCategory physicalTypeCategory) {
 		this.physicalTypeCategory = physicalTypeCategory;
 	}
 
@@ -79,5 +76,4 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		}
 		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants());
 	}
-
 }

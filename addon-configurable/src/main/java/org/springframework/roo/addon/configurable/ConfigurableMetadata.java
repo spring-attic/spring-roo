@@ -1,13 +1,10 @@
 package org.springframework.roo.addon.configurable;
 
-import java.util.ArrayList;
-
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
@@ -20,58 +17,56 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = ConfigurableMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
+
 	public ConfigurableMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		
+
 		if (!isValid()) {
 			return;
 		}
 
 		if (isConfigurableAnnotationIntroduced()) {
-			builder.addTypeAnnotation(getConfigurableAnnotation());
+			builder.addAnnotation(getConfigurableAnnotation());
 		}
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * Adds the @org.springframework.beans.factory.annotation.Configurable annotation to the type, unless
 	 * it already exists.
-	 *  
+	 * 
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
 	public AnnotationMetadata getConfigurableAnnotation() {
 		JavaType javaType = new JavaType("org.springframework.beans.factory.annotation.Configurable");
-		
+
 		if (isConfigurableAnnotationIntroduced()) {
-			return new DefaultAnnotationMetadata(javaType, new ArrayList<AnnotationAttributeValue<?>>());
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(javaType);
+			return annotationBuilder.build();
 		}
-		
+
 		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
 	}
-	
+
 	/**
 	 * Indicates whether the @org.springframework.beans.factory.annotation.Configurable annotation will
 	 * be introduced via this ITD.
-	 *  
+	 * 
 	 * @return true if it will be introduced, false otherwise
 	 */
 	public boolean isConfigurableAnnotationIntroduced() {
 		JavaType javaType = new JavaType("org.springframework.beans.factory.annotation.Configurable");
 		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
-		
 		return result == null;
 	}
-	
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -87,7 +82,7 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
@@ -103,6 +98,4 @@ public class ConfigurableMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-
-	
 }

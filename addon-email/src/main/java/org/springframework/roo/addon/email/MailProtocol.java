@@ -8,24 +8,22 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class MailProtocol implements Comparable<MailProtocol> {
+	public static final MailProtocol SMTP = new MailProtocol("SMTP", "smtp");
+	public static final MailProtocol POP3 = new MailProtocol("POP3", "pop3");
+	public static final MailProtocol IMAP = new MailProtocol("IMAP", "imap");
 
 	private String protocolLabel;
 	private String protocol;
 
-	public static final MailProtocol SMTP = new MailProtocol("SMTP", "smtp");
-	public static final MailProtocol POP3 = new MailProtocol("POP3", "pop3");
-	public static final MailProtocol IMAP = new MailProtocol("IMAP", "imap");
-	
 	public MailProtocol(String protocolLabel, String protocol) {
 		Assert.notNull(protocolLabel, "Protocol label required");
 		Assert.notNull(protocol, "protocol required");
 		this.protocolLabel = protocolLabel;
 		this.protocol = protocol;
 	}
-	
+
 	public String getProtocol() {
 		return protocol;
 	}
@@ -35,8 +33,7 @@ public class MailProtocol implements Comparable<MailProtocol> {
 	}
 
 	public final int compareTo(MailProtocol o) {
-		if (o == null)
-			return -1;
+		if (o == null) return -1;
 		int result = this.protocolLabel.compareTo(o.protocolLabel);
 
 		return result;

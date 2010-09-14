@@ -171,7 +171,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 				return cachedIntrospections.get(schema);
 			}
 
-			// Read the dbre XML file, and see if it is for this schema
+			// Read the dbre.xml file, and see if it is for this schema
 			Database database = deserializeDatabaseMetadataIfPossible();
 			if (database != null && database.getSchema().equals(schema)) {
 				// The deserialized from disk database is the one we want, so cache it and get out of here....

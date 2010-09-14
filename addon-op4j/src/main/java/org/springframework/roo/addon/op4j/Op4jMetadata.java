@@ -8,10 +8,8 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
@@ -27,53 +25,52 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = Op4jMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 
 	public Op4jMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		
+
 		if (!isValid()) {
 			return;
 		}
-				
+
 		builder.addInnerType(getInnerType());
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-		
+
 	private ClassOrInterfaceTypeDetails getInnerType() {
-		
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		
+		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 		int fieldModifier = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
-		
 		String targetName = super.destination.getSimpleTypeName();
-		
+
 		ImportRegistrationResolver imports = builder.getImportRegistrationResolver();
 		imports.addImport(new JavaType("org.op4j.functions.Get"));
 		imports.addImport(new JavaType("org.javaruntype.type.Types"));
 		String initializer = "Get.attrOf(Types.forClass(" + targetName + ".class),\"" + targetName.toLowerCase() + "\")";
-		
+
 		List<JavaType> parameters = new ArrayList<JavaType>();
 		parameters.add(new JavaType(Object.class.getName()));
 		parameters.add(super.destination);
-		
+
 		JavaType function = new JavaType("org.op4j.functions.Function", 0, DataType.TYPE, null, parameters);
-			
-		fields.add(new DefaultFieldMetadata(getId(), fieldModifier, new JavaSymbolName(targetName.toUpperCase()), function, initializer, new ArrayList<AnnotationMetadata>()));
-		
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		
-		return new DefaultClassOrInterfaceTypeDetails(getId(), new JavaType("Keys"), modifier, PhysicalTypeCategory.CLASS, null, fields, null, null, null, null, null, null);
+
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), fieldModifier, new JavaSymbolName(targetName.toUpperCase()), function, initializer);
+		fields.add(fieldBuilder);
+
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(getId());
+		typeDetailsBuilder.setModifier(Modifier.PUBLIC | Modifier.STATIC);
+		typeDetailsBuilder.setName(new JavaType("Keys"));
+		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setDeclaredFields(fields);
+		return typeDetailsBuilder.build();
 	}
-	
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());
@@ -88,7 +85,7 @@ public class Op4jMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}

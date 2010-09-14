@@ -19,7 +19,6 @@ import org.springframework.roo.project.Path;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 @Component(immediate = true)
 @Service
@@ -54,5 +53,4 @@ public final class ToStringMetadataProvider extends AbstractItdMetadataProvider 
 	public String getProvidesType() {
 		return ToStringMetadata.getMetadataIdentiferType();
 	}
-
 }

@@ -13,7 +13,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractInvocableMemberMetadataBuilder<T extends InvocableMemberMetadata> extends AbstractIdentifiableAnnotatedJavaStructureBuilder<T> {
 	private List<JavaSymbolName> parameterNames =  new ArrayList<JavaSymbolName>();
@@ -83,5 +82,4 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 	public void setBodyBuilder(InvocableMemberBodyBuilder bodyBuilder) {
 		this.bodyBuilder = bodyBuilder;
 	}
-
 }

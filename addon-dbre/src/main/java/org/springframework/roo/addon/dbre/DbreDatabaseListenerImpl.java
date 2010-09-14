@@ -24,14 +24,14 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -133,12 +133,12 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		JavaType javaType = dbreTypeResolutionService.suggestTypeNameForNewTable(table.getName(), javaPackage);
 
 		// Create type annotations for new entity
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Entity"), new ArrayList<AnnotationAttributeValue<?>>()));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"), new ArrayList<AnnotationAttributeValue<?>>()));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.roo.addon.tostring.RooToString"), new ArrayList<AnnotationAttributeValue<?>>()));
-
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Entity")));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+		
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
 		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		manageEntityIdentifier(javaType, entityAttributes, new HashSet<JavaSymbolName>(), table);
@@ -147,13 +147,12 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			entityAttributes.add(new StringAttributeValue(VERSION_FIELD, ""));
 		}
 
-		AnnotationMetadata entityAnnotation = new DefaultAnnotationMetadata(new JavaType(RooEntity.class.getName()), entityAttributes);
-		annotations.add(entityAnnotation);
+		annotations.add(new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()), entityAttributes));
 
 		// Add @RooDbManaged
 		List<AnnotationAttributeValue<?>> dbManagedAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		dbManagedAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyDelete"), true));
-		annotations.add(new DefaultAnnotationMetadata(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
 
 		JavaType superclass = new JavaType("java.lang.Object");
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -167,12 +166,19 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
 			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("schema"), table.getSchema().getName()));
 		}
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("javax.persistence.Table"), tableAttrs));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"), tableAttrs));
 
 		// Create entity class
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetails details = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, javaType, Modifier.PUBLIC, PhysicalTypeCategory.CLASS, null, null, null, classpathOperations.getSuperclass(superclass), extendsTypes, null, annotations, null);
-		classpathOperations.generateClassFile(details);
+		
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		typeDetailsBuilder.setModifier(Modifier.PUBLIC);
+		typeDetailsBuilder.setName(javaType);
+		typeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setExtendsTypes(extendsTypes);
+		typeDetailsBuilder.setAnnotations(annotations);
+	
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
@@ -212,8 +218,8 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		}
 				
 		// Update the annotation on disk
-		AnnotationMetadata annotation = new DefaultAnnotationMetadata(entityAnnotationType, entityAttributes);
-		mutableTypeDetails.updateTypeAnnotation(annotation, attributesToDeleteIfPresent);
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(entityAnnotationType, entityAttributes);
+		mutableTypeDetails.updateTypeAnnotation(annotationBuilder.build(), attributesToDeleteIfPresent);
 	}
 
 	private boolean hasVersionField(Table table) {
@@ -271,18 +277,22 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 	}
 
 	private void createIdentifierClass(JavaType identifierType) {
-		List<AnnotationMetadata> identifierAnnotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> identifierAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		List<AnnotationAttributeValue<?>> dbManagedAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		dbManagedAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyDelete"), true));
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
+		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
 
-		identifierAnnotations.add(new DefaultAnnotationMetadata(new JavaType(RooIdentifier.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
+		identifierAnnotations.add(new AnnotationMetadataBuilder(new JavaType(RooIdentifier.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
 
 		// Produce identifier itself
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-		ClassOrInterfaceTypeDetails idClassDetails = new DefaultClassOrInterfaceTypeDetails(declaredByMetadataId, identifierType, Modifier.PUBLIC | Modifier.FINAL, PhysicalTypeCategory.CLASS, null, null, null, null, null, null, identifierAnnotations, null);
-		classpathOperations.generateClassFile(idClassDetails);
+		ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId);
+		idTypeDetailsBuilder.setModifier(Modifier.PUBLIC | Modifier.FINAL);
+		idTypeDetailsBuilder.setName(identifierType);
+		idTypeDetailsBuilder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
+		classpathOperations.generateClassFile(idTypeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

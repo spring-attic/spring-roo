@@ -18,15 +18,14 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
-
 	private JavaType annotationType;
 	private List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-	
-	public AnnotationMetadataBuilder() {}
-	
+
+	public AnnotationMetadataBuilder() {
+	}
+
 	public AnnotationMetadataBuilder(AnnotationMetadata existing) {
 		Assert.notNull(existing);
 		this.annotationType = existing.getAnnotationType();
@@ -34,7 +33,16 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 			attributes.add(existing.getAttribute(attributeName));
 		}
 	}
-	
+
+	public AnnotationMetadataBuilder(JavaType annotationType) {
+		this.annotationType = annotationType;
+	}
+
+	public AnnotationMetadataBuilder(JavaType annotationType, List<AnnotationAttributeValue<?>> attributes) {
+		this.annotationType = annotationType;
+		this.attributes = attributes;
+	}
+
 	public void addBooleanAttribute(String key, boolean value) {
 		addAttribute(new BooleanAttributeValue(new JavaSymbolName(key), value));
 	}
@@ -99,17 +107,17 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 			}
 		}
 		if (foundAt == -1) {
-			// not found
+			// Not found
 			attributes.add(value);
 		} else {
-			// found
-			// remove the existing element
+			// Found
+			// Remove the existing element
 			attributes.remove(foundAt);
-			// put this element in its place
+			// Put this element in its place
 			attributes.add(foundAt, value);
 		}
 	}
-	
+
 	public JavaType getAnnotationType() {
 		return annotationType;
 	}
@@ -117,7 +125,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public void setAnnotationType(JavaType annotationType) {
 		this.annotationType = annotationType;
 	}
-	
+
 	public List<AnnotationAttributeValue<?>> getAttributes() {
 		return attributes;
 	}
@@ -129,5 +137,4 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public AnnotationMetadata build() {
 		return new DefaultAnnotationMetadata(getAnnotationType(), getAttributes(), true);
 	}
-
 }

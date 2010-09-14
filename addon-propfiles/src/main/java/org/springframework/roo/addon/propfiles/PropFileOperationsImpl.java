@@ -26,66 +26,65 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides property file configuration operations.
- *
+ * 
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component
-@Service
+@Component 
+@Service 
 public class PropFileOperationsImpl implements PropFileOperations {
-	
+	private static final boolean SORTED = true;
+	private static final boolean CHANGE_EXISTING = true;
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
-	
-	private static final boolean SORTED = true;
-	private static final boolean CHANGE_EXISTING = true;
-	
+
 	public boolean isPropertiesCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
-	
+
 	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value) {
 		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, !CHANGE_EXISTING);
 	}
-	
+
 	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, !CHANGE_EXISTING);
 	}
-	
+
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
 		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, CHANGE_EXISTING);
 	}
-	
+
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
 		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, CHANGE_EXISTING);
 	}
-	
+
 	private void manageProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted, boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
 		Assert.hasText(value, "Value required");
-		
+
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
-		
+
 		Properties props;
 		if (sorted) {
 			props = new Properties() {
 				private static final long serialVersionUID = 1L;
-				
-				//override the keys() method to order the keys alphabetically
-				@SuppressWarnings("unchecked")
-				public synchronized Enumeration keys() {
+
+				// override the keys() method to order the keys alphabetically
+				@SuppressWarnings("unchecked") public synchronized Enumeration keys() {
 					final Object[] keys = keySet().toArray();
 					return new Enumeration() {
 						int i = 0;
-						public boolean hasMoreElements() { 
-							return i < keys.length; 
+
+						public boolean hasMoreElements() {
+							return i < keys.length;
 						}
-						public Object nextElement() { 
+
+						public Object nextElement() {
 							return keys[i++];
 						}
 					};
@@ -108,12 +107,12 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 		}
 	}
-	
+
 	public void removeProperty(Path propertyFilePath, String propertyFilename, String key) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
-		
+
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
@@ -126,7 +125,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		}
 
 		props.remove(key);
-		
+
 		storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 	}
 
@@ -134,28 +133,28 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
-		
+
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
-		
+
 		if (fileManager.exists(filePath)) {
 			mutableFile = fileManager.updateFile(filePath);
 			loadProps(props, mutableFile.getInputStream());
 		} else {
 			return null;
 		}
-		
+
 		return props.getProperty(key);
 	}
 
 	public SortedSet<String> getPropertyKeys(Path propertyFilePath, String propertyFilename, boolean includeValues) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
-		
+
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		Properties props = new Properties();
-		
+
 		try {
 			if (fileManager.exists(filePath)) {
 				loadProps(props, new FileInputStream(filePath));
@@ -165,7 +164,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-		
+
 		SortedSet<String> result = new TreeSet<String>();
 		for (Object key : props.keySet()) {
 			String info;
@@ -182,10 +181,10 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	public Map<String, String> getProperties(Path propertyFilePath, String propertyFilename) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
-		
+
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		Properties props = new Properties();
-		
+
 		try {
 			if (fileManager.exists(filePath)) {
 				loadProps(props, new FileInputStream(filePath));
@@ -195,14 +194,14 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-		
+
 		Map<String, String> result = new HashMap<String, String>();
 		for (Object key : props.keySet()) {
 			result.put(key.toString(), props.getProperty(key.toString()));
 		}
 		return Collections.unmodifiableMap(result);
 	}
-	
+
 	private void loadProps(Properties props, InputStream is) {
 		try {
 			props.load(is);
@@ -211,10 +210,11 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} finally {
 			try {
 				is.close();
-			} catch (IOException ignore) {}
+			} catch (IOException ignore) {
+			}
 		}
 	}
-	
+
 	private void storeProps(Properties props, OutputStream os, String comment) {
 		try {
 			props.store(os, comment);
@@ -223,7 +223,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} finally {
 			try {
 				os.close();
-			} catch (IOException ignore) {}
+			} catch (IOException ignore) {
+			}
 		}
 	}
 }

@@ -15,10 +15,9 @@ import org.springframework.roo.project.Path;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
-@Service
+@Component(immediate = true) 
+@Service 
 public final class PluralMetadataProviderImpl extends AbstractItdMetadataProvider implements PluralMetadataProvider {
 
 	protected void activate(ComponentContext context) {
@@ -27,11 +26,11 @@ public final class PluralMetadataProviderImpl extends AbstractItdMetadataProvide
 		setIgnoreTriggerAnnotations(true);
 		setDependsOnGovernorBeingAClass(false);
 	}
-	
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		return new PluralMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}
-	
+
 	public String getItdUniquenessFilenameSuffix() {
 		return "Plural";
 	}
@@ -50,5 +49,4 @@ public final class PluralMetadataProviderImpl extends AbstractItdMetadataProvide
 	public String getProvidesType() {
 		return PluralMetadata.getMetadataIdentiferType();
 	}
-	
 }

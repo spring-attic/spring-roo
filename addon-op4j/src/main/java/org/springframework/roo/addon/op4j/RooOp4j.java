@@ -10,7 +10,6 @@ import java.lang.annotation.Target;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)

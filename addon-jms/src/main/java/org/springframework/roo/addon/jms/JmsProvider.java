@@ -8,22 +8,19 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class JmsProvider implements Comparable<JmsProvider> {
-
+	public static final JmsProvider ACTIVEMQ_IN_MEMORY = new JmsProvider("ACTIVEMQ_IN_MEMORY", "org.apache.activemq.store.memory.MemoryPersistenceAdapter");
 	private String provider;
 	private String adapter;
 
-	public static final JmsProvider ACTIVEMQ_IN_MEMORY = new JmsProvider("ACTIVEMQ_IN_MEMORY", "org.apache.activemq.store.memory.MemoryPersistenceAdapter");
-	
 	public JmsProvider(String provider, String adapter) {
 		Assert.notNull(provider, "Provider required");
 		Assert.notNull(adapter, "Adapter required");
 		this.provider = provider;
 		this.adapter = adapter;
 	}
-	
+
 	public String getAdapter() {
 		return adapter;
 	}
@@ -33,8 +30,7 @@ public class JmsProvider implements Comparable<JmsProvider> {
 	}
 
 	public final int compareTo(JmsProvider o) {
-		if (o == null)
-			return -1;
+		if (o == null) return -1;
 		int result = this.provider.compareTo(o.provider);
 
 		return result;

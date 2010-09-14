@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.json;
 
-import java.util.ArrayList;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,8 +9,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
@@ -20,14 +17,13 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of addon-json operations interface.
- *
+ * 
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component
-@Service
+@Component 
+@Service 
 public class JsonOperationsImpl implements JsonOperations {
-
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 
@@ -52,9 +48,10 @@ public class JsonOperationsImpl implements JsonOperations {
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooJson.class.getName()))) {
-			JavaType rooSolrSearchable = new JavaType(RooJson.class.getName());
-			if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
-				mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
+			JavaType rooJson = new JavaType(RooJson.class.getName());
+			if (!mutableTypeDetails.getAnnotations().contains(rooJson)) {
+				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooJson);
+				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
 		}
 	}

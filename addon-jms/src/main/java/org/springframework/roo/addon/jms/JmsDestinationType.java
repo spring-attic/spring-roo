@@ -8,21 +8,18 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class JmsDestinationType implements Comparable<JmsDestinationType> {
-
-	private String type;
-
 	public static final JmsDestinationType TOPIC = new JmsDestinationType("TOPIC");
 	public static final JmsDestinationType DURABLE_TOPIC = new JmsDestinationType("DURABLE_TOPIC");
 	public static final JmsDestinationType QUEUE = new JmsDestinationType("QUEUE");
-	
+	private String type;
+
 	public JmsDestinationType(String type) {
 		Assert.notNull(type, "Type required");
 		this.type = type;
 	}
-	
+
 	public String getType() {
 		return type;
 	}
@@ -32,8 +29,7 @@ public class JmsDestinationType implements Comparable<JmsDestinationType> {
 	}
 
 	public final int compareTo(JmsDestinationType o) {
-		if (o == null)
-			return -1;
+		if (o == null) return -1;
 		int result = this.type.compareTo(o.type);
 
 		return result;

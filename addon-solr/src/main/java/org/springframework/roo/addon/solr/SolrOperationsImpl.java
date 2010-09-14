@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -21,9 +20,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
@@ -49,17 +47,15 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component
-@Service
+@Component 
+@Service 
 public class SolrOperationsImpl implements SolrOperations {
-
+	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.0");
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
-
-	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.0");
 
 	public boolean isInstallSearchAvailable() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -117,13 +113,12 @@ public class SolrOperationsImpl implements SolrOperations {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), "SolrSearchAsyncTaskExecutor.aj-template"), fileManager.createFile(aspectLocation).getOutputStream());
 				String contents = FileCopyUtils.copyToString(new FileReader(aspectLocation));
 				contents = StringUtils.replace(contents, "<TO_BE_REPLACED_BY_ADDON>", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
-			    Writer output = new BufferedWriter(new FileWriter(aspectLocation));
-			    try {
-			      output.write(contents.toString());
-			    }
-			    finally {
-			      output.close();
-			    }
+				Writer output = new BufferedWriter(new FileWriter(aspectLocation));
+				try {
+					output.write(contents.toString());
+				} finally {
+					output.close();
+				}
 			} catch (IOException e) {
 				new IllegalStateException("Could not copy SolrSearchAsyncTaskExecutor.aj into project", e);
 			}
@@ -156,7 +151,7 @@ public class SolrOperationsImpl implements SolrOperations {
 			throw new IllegalStateException(ioe);
 		}
 	}
-	
+
 	public void addAll() {
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
@@ -172,7 +167,7 @@ public class SolrOperationsImpl implements SolrOperations {
 				if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 					continue;
 				}
-				
+
 				ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
 				if (Modifier.isAbstract(cid.getModifier())) {
 					continue;
@@ -181,15 +176,15 @@ public class SolrOperationsImpl implements SolrOperations {
 				if (ptd == null || !(ptd instanceof MutableClassOrInterfaceTypeDetails)) {
 					continue;
 				}
-				
+
 				MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 				for (AnnotationMetadata annotation : mutableTypeDetails.getAnnotations()) {
 					if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Entity"))) {
 						addSolrSearchableAnnotation(mutableTypeDetails, javaType, id);
-					} 
-//					else if (annotation.getAnnotationType().equals(new JavaType("org.springframework.stereotype.Controller"))) {
-//						addSearchToController(mutableTypeDetails);
-//					}
+					}
+					// else if (annotation.getAnnotationType().equals(new JavaType("org.springframework.stereotype.Controller"))) {
+					// addSearchToController(mutableTypeDetails);
+					// }
 				}
 			}
 		}
@@ -218,22 +213,23 @@ public class SolrOperationsImpl implements SolrOperations {
 		for (AnnotationMetadata annotation : mutableTypeDetails.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Entity"))) {
 				addSolrSearchableAnnotation(mutableTypeDetails, javaType, id);
-			} 
-//			else if (annotation.getAnnotationType().equals(new JavaType("org.springframework.stereotype.Controller"))) {
-//				addSearchToController(mutableTypeDetails);
-//			}
+			}
+			// else if (annotation.getAnnotationType().equals(new JavaType("org.springframework.stereotype.Controller"))) {
+			// addSearchToController(mutableTypeDetails);
+			// }
 		}
 	}
 
-//	private void addSearchToController(MutableClassOrInterfaceTypeDetails mutableTypeDetails) {
-//		mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType(RooSolrWebSearchable.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
-//	}
+	// private void addSearchToController(MutableClassOrInterfaceTypeDetails mutableTypeDetails) {
+	// mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(new JavaType(RooSolrWebSearchable.class.getName()), new ArrayList<AnnotationAttributeValue<?>>()));
+	// }
 
 	private void addSolrSearchableAnnotation(MutableClassOrInterfaceTypeDetails mutableTypeDetails, JavaType javaType, String id) {
-		// first add the @RooSolrSearchable annotation to type
+		// First add the @RooSolrSearchable annotation to type
 		JavaType rooSolrSearchable = new JavaType(RooSolrSearchable.class.getName());
 		if (!mutableTypeDetails.getAnnotations().contains(rooSolrSearchable)) {
-			mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooSolrSearchable);
+			mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 		}
 	}
 }

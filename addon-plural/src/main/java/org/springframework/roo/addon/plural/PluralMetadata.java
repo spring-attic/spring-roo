@@ -26,24 +26,22 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = PluralMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType PLURAL_ANNOTATION_TYPE = new JavaType(RooPlural.class.getName());
-	
+
 	// From annotation
 	@AutoPopulate private String value = "";
-	
+
 	// Cache
 	private Map<String, String> cache;
-	
+
 	public PluralMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		
+
 		if (!isValid()) {
 			return;
 		}
@@ -58,14 +56,13 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("".equals(this.value)) {
 			value = getInflectorPlural(governorTypeDetails.getName().getSimpleTypeName(), Locale.ENGLISH);
 		}
-		
+
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	/**
 	 * This method returns the plural term as per inflector.
-	 * 
 	 * ATTENTION: this method does NOT take @RooPlural into account. Use getPlural(..) instead!
 	 * 
 	 * @param term The term to be pluralized
@@ -80,14 +77,14 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return term;
 		}
 	}
-	
+
 	/**
 	 * @return the plural of the type name
 	 */
 	public String getPlural() {
 		return value;
 	}
-	
+
 	/**
 	 * @param field the field to obtain plural details for (required)
 	 * @return a guaranteed plural, computed via an annotation or Inflector (never returns null or an empty string)
@@ -99,7 +96,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (cache != null && cache.containsKey(symbolName)) {
 			return cache.get(symbolName);
 		}
-		
+
 		// We need to build the plural
 		String thePlural = "";
 		AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), PLURAL_ANNOTATION_TYPE);
@@ -139,7 +136,7 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
@@ -155,5 +152,4 @@ public class PluralMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-	
 }

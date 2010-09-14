@@ -111,7 +111,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		
 		// Determine the canonical filename
 		String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(details.getDeclaredByMetadataId());
-		
+	
 		// Check the file doesn't already exist
 		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 		

@@ -11,7 +11,6 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class IntegrationTestAnnotationValues extends AbstractAnnotationValues {
 	

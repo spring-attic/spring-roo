@@ -12,7 +12,6 @@ import org.springframework.roo.model.Builder;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extends IdentifiableAnnotatedJavaStructure> extends AbstractIdentifiableJavaStructureBuilder<T> {
 	private List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -28,18 +27,18 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		}
 	}
 	
-	public final boolean addAnnotation(AnnotationMetadata e) {
-		if (e == null) return false;
-		return addAnnotation(new AnnotationMetadataBuilder(e));
+	public final boolean addAnnotation(AnnotationMetadata annotationMetadata) {
+		if (annotationMetadata == null) return false;
+		return addAnnotation(new AnnotationMetadataBuilder(annotationMetadata));
 	}
 
-	public final boolean addAnnotation(AnnotationMetadataBuilder e) {
-		if (e == null) return false;
-		onAddAnnotation(e);
-		return annotations.add(e);
+	public final boolean addAnnotation(AnnotationMetadataBuilder annotationMetadata) {
+		if (annotationMetadata == null) return false;
+		onAddAnnotation(annotationMetadata);
+		return annotations.add(annotationMetadata);
 	}
 
-	protected void onAddAnnotation(AnnotationMetadataBuilder e) {}
+	protected void onAddAnnotation(AnnotationMetadataBuilder annotationMetadata) {}
 	
 	public final List<AnnotationMetadataBuilder> getAnnotations() {
 		return annotations;
@@ -56,5 +55,4 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 	public final void setAnnotations(List<AnnotationMetadataBuilder> annotations) {
 		this.annotations = annotations;
 	}
-
 }

@@ -13,14 +13,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.DefaultFieldMetadata;
-import org.springframework.roo.classpath.details.DefaultMethodMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
@@ -43,8 +41,8 @@ import org.w3c.dom.Element;
  * @author Stefan Schmidt
  * @since 1.0
  */
-@Component
-@Service
+@Component 
+@Service 
 public class MailOperationsImpl implements MailOperations {
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
@@ -268,22 +266,21 @@ public class MailOperationsImpl implements MailOperations {
 		Assert.notNull(targetType, "Java type required");
 		Assert.notNull(fieldName, "Field name required");
 
-		int modifier = Modifier.PRIVATE;
-		modifier |= Modifier.TRANSIENT;
-
-		List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
-		annotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));
-		FieldMetadata fieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, fieldName, new JavaType("org.springframework.mail.MailSender"), null, annotations);
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
 
 		// Obtain the physical type and itd mutable details
-		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(fieldMetadata.getDeclaredByMetadataId());
-		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
 		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
-		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
-		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
+		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
+		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		mutableTypeDetails.addField(fieldMetadata);
+		int modifier = Modifier.PRIVATE | Modifier.TRANSIENT;
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, annotations, fieldName, new JavaType("org.springframework.mail.MailSender"));
+		mutableTypeDetails.addField(fieldBuilder.build());
 
 		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
@@ -306,16 +303,15 @@ public class MailOperationsImpl implements MailOperations {
 
 		// Create some method content to get the user started
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA);
-		List<AnnotationMetadata> smmAnnotations = new ArrayList<AnnotationMetadata>();
+		List<AnnotationMetadataBuilder> smmAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 
 		if (smmBean != null) {
-			smmAnnotations.add(new DefaultAnnotationMetadata(new JavaType("org.springframework.beans.factory.annotation.Autowired"), new ArrayList<AnnotationAttributeValue<?>>()));
-			FieldMetadata smmFieldMetadata = new DefaultFieldMetadata(PhysicalTypeIdentifier.createIdentifier(targetType, Path.SRC_MAIN_JAVA), modifier, new JavaSymbolName("simpleMailMessage"), new JavaType("org.springframework.mail.SimpleMailMessage"), null, smmAnnotations);
-			mutableTypeDetails.addField(smmFieldMetadata);
+			smmAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+			FieldMetadataBuilder smmFieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, smmAnnotations, new JavaSymbolName("simpleMailMessage"), new JavaType("org.springframework.mail.SimpleMailMessage"));
+			mutableTypeDetails.addField(smmFieldBuilder.build());
 		} else {
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
 			paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
@@ -338,7 +334,8 @@ public class MailOperationsImpl implements MailOperations {
 		bodyBuilder.newLine();
 		bodyBuilder.appendFormalLine(fieldName + ".send(simpleMailMessage);");
 
-		mutableTypeDetails.addMethod(new DefaultMethodMetadata(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, new ArrayList<AnnotationMetadata>(), new ArrayList<JavaType>(), bodyBuilder.getOutput()));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		mutableTypeDetails.addMethod(methodBuilder.build());
 	}
 
 	private void updateConfiguration() {
