@@ -320,6 +320,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				} else {
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + initializer + ");");
 				}
+			} else if (field.getFieldType().equals(JavaType.CHAR_OBJECT) || field.getFieldType().equals(JavaType.CHAR_PRIMITIVE)) {
+				bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "('X');");
 			} else if (isNumericFieldType(field)) {
 				// Check for @Min and @Max
 				AnnotationMetadata minAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN);
