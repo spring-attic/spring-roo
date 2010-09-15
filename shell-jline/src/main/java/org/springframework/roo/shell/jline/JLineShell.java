@@ -38,10 +38,9 @@ import org.springframework.roo.support.util.ClassUtils;
  * 
  * <p>
  * Due to Windows' lack of color ANSI services out-of-the-box, this implementation automatically detects the classpath
- * presence of <a href="http://jansi.fusesource.org/">Jansi</a> and uses it if present. If in addition to Jansi, the
- * ANSI support will include colour if <a href="https://jna.dev.java.net/">JNA</a> library is also available. Neither
- * of these libraries are necessary for *nix machines, which support colour ANSI without any special effort. This
- * implementation has been written to use reflection in order to avoid hard dependencies on Jansi or JNA.
+ * presence of <a href="http://jansi.fusesource.org/">Jansi</a> and uses it if present. This library is not necessary 
+ * for *nix machines, which support colour ANSI without any special effort. This implementation has been written to 
+ * use reflection in order to avoid hard dependencies on Jansi.
  * 
  * @author Ben Alex
  * @since 1.0
