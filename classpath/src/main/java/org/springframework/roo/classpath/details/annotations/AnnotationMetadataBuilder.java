@@ -135,6 +135,6 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	}
 
 	public AnnotationMetadata build() {
-		return new DefaultAnnotationMetadata(getAnnotationType(), getAttributes(), true);
+		return new DefaultAnnotationMetadata(getAnnotationType(), getAttributes());
 	}
 }
