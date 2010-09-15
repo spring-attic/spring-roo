@@ -64,7 +64,8 @@ public class AnnotationParser {
 	 * @param input for a valid class file (required)
 	 * @return a list of zero or more elements (never returns null)
 	 */
-	@SuppressWarnings("unchecked") public static List<CommandInfo> parseShellAnnotationsInClassFile(InputStream input) {
+	@SuppressWarnings("unchecked") 
+	public static List<CommandInfo> parseShellAnnotationsInClassFile(InputStream input) {
 		if (input == null) throw new IllegalArgumentException("Input stream must be bytecode for a valid class file");
 		List<CommandInfo> result = new ArrayList<CommandInfo>();
 
@@ -93,13 +94,13 @@ public class AnnotationParser {
 								String key = null;
 								for (Object value : values) {
 									if (key == null) {
-										// this is a key
+										// This is a key
 										key = value.toString();
 									} else {
-										// this is a @CliCommand value
+										// This is a @CliCommand value
 										if ("value".equals(key)) {
 											if (value instanceof Collection) {
-												for (Object element : (Collection) value) {
+												for (Object element : (Collection<?>) value) {
 													if (element instanceof String) {
 														builder.addCommandName(element.toString());
 													}
@@ -116,7 +117,7 @@ public class AnnotationParser {
 							}
 
 							// Next let's check for @CliOption values on the individual parameters
-							List[] parameterAnnotations = mn.visibleParameterAnnotations;
+							List<AnnotationNode>[] parameterAnnotations = mn.visibleParameterAnnotations;
 							if (parameterAnnotations != null) {
 								for (List<AnnotationNode> list : parameterAnnotations) {
 									for (AnnotationNode element : list) {
@@ -133,13 +134,13 @@ public class AnnotationParser {
 												String key = null;
 												for (Object value : optionValues) {
 													if (key == null) {
-														// this is a key
+														// This is a key
 														key = value.toString();
 													} else {
-														// this is a @CliOption value
+														// This is a @CliOption value
 														if ("key".equals(key)) {
 															if (value instanceof Collection) {
-																for (Object e : (Collection) value) {
+																for (Object e : (Collection<?>) value) {
 																	if (e instanceof String) {
 																		keys.add(e.toString());
 																	}

@@ -1,5 +1,7 @@
+package org.springframework.roo.support.util;
+
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2010 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +16,12 @@
  * limitations under the License.
  */
 
-package org.springframework.roo.support.util;
-
 import java.beans.Introspector;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -30,28 +29,34 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Miscellaneous class utility methods. Mainly for internal use within the
- * framework; consider Jakarta's Commons Lang for a more comprehensive suite
- * of class utilities.
+ * framework; consider
+ * <a href="http://commons.apache.org/lang/" target="_blank">Apache Commons Lang</a>
+ * for a more comprehensive suite of class utilities.
  *
+ * @author Juergen Hoeller
  * @author Keith Donald
  * @author Rob Harrop
- * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.1
+ * @see TypeUtils
  * @see ReflectionUtils
  */
+@SuppressWarnings("unchecked")
 public abstract class ClassUtils {
 
 	/** Suffix for array class names: "[]" */
 	public static final String ARRAY_SUFFIX = "[]";
 
-	/** Prefix for internal array class names: "[L" */
-	private static final String INTERNAL_ARRAY_PREFIX = "[L";
+	/** Prefix for internal array class names: "[" */
+	private static final String INTERNAL_ARRAY_PREFIX = "[";
+
+	/** Prefix for internal non-primitive array class names: "[L" */
+	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
 	/** The package separator character '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
@@ -70,13 +75,25 @@ public abstract class ClassUtils {
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
 	 */
-	private static final Map<Class, Class> primitiveWrapperTypeMap = new HashMap<Class, Class>(8);
+	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new HashMap<Class<?>, Class<?>>(8);
+
+	/**
+	 * Map with primitive type as key and corresponding wrapper
+	 * type as value, for example: int.class -> Integer.class.
+	 */
+	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new HashMap<Class<?>, Class<?>>(8);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
 	 */
-	private static final Map<String, Class> primitiveTypeNameMap = new HashMap<String, Class>(16);
+	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<String, Class<?>>(32);
+
+	/**
+	 * Map with common "java.lang" class name as key and corresponding Class as value.
+	 * Primarily for efficient deserialization of remote invocations.
+	 */
+	private static final Map<String, Class<?>> commonClassCache = new HashMap<String, Class<?>>(32);
 
 
 	static {
@@ -89,16 +106,38 @@ public abstract class ClassUtils {
 		primitiveWrapperTypeMap.put(Long.class, long.class);
 		primitiveWrapperTypeMap.put(Short.class, short.class);
 
-		Set<Class> primitiveTypes = new HashSet<Class>(16);
+		for (Map.Entry<Class<?>, Class<?>> entry : primitiveWrapperTypeMap.entrySet()) {
+			primitiveTypeToWrapperMap.put(entry.getValue(), entry.getKey());
+			registerCommonClasses(entry.getKey());
+		}
+
+		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(32);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
 		primitiveTypes.addAll(Arrays.asList(
 				boolean[].class, byte[].class, char[].class, double[].class,
 				float[].class, int[].class, long[].class, short[].class));
-		for (Class primitiveType : primitiveTypes) {
+		primitiveTypes.add(void.class);
+		for (Class<?> primitiveType : primitiveTypes) {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
 		}
+
+		registerCommonClasses(Boolean[].class, Byte[].class, Character[].class, Double[].class,
+				Float[].class, Integer[].class, Long[].class, Short[].class);
+		registerCommonClasses(Number.class, Number[].class, String.class, String[].class,
+				Object.class, Object[].class, Class.class, Class[].class);
+		registerCommonClasses(Throwable.class, Exception.class, RuntimeException.class,
+				Error.class, StackTraceElement.class, StackTraceElement[].class);
 	}
 
+
+	/**
+	 * Register the given common classes with the ClassUtils cache.
+	 */
+	private static void registerCommonClasses(Class<?>... commonClasses) {
+		for (Class<?> clazz : commonClasses) {
+			commonClassCache.put(clazz.getName(), clazz);
+		}
+	}
 
 	/**
 	 * Return the default ClassLoader to use: typically the thread context
@@ -157,14 +196,19 @@ public abstract class ClassUtils {
 	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 * @see #getDefaultClassLoader()
+	 * @deprecated as of Spring 3.0, in favor of specifying a ClassLoader explicitly:
+	 * see {@link #forName(String, ClassLoader)}
 	 */
-	public static Class forName(String name) throws ClassNotFoundException, LinkageError {
+	@Deprecated
+	public static Class<?> forName(String name) throws ClassNotFoundException, LinkageError {
 		return forName(name, getDefaultClassLoader());
 	}
 
 	/**
 	 * Replacement for <code>Class.forName()</code> that also returns Class instances
-	 * for primitives (like "int") and array class names (like "String[]").
+	 * for primitives (e.g."int") and array class names (e.g. "String[]").
+	 * Furthermore, it is also capable of resolving inner class names in Java source
+	 * style (e.g. "java.lang.Thread.State" instead of "java.lang.Thread$State").
 	 * @param name the name of the Class
 	 * @param classLoader the class loader to use
 	 * (may be <code>null</code>, which indicates the default class loader)
@@ -173,10 +217,13 @@ public abstract class ClassUtils {
 	 * @throws LinkageError if the class file could not be loaded
 	 * @see Class#forName(String, boolean, ClassLoader)
 	 */
-	public static Class forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
+	public static Class<?> forName(String name, ClassLoader classLoader) throws ClassNotFoundException, LinkageError {
 		Assert.notNull(name, "Name must not be null");
 
-		Class clazz = resolvePrimitiveClassName(name);
+		Class<?> clazz = resolvePrimitiveClassName(name);
+		if (clazz == null) {
+			clazz = commonClassCache.get(name);
+		}
 		if (clazz != null) {
 			return clazz;
 		}
@@ -184,21 +231,21 @@ public abstract class ClassUtils {
 		// "java.lang.String[]" style arrays
 		if (name.endsWith(ARRAY_SUFFIX)) {
 			String elementClassName = name.substring(0, name.length() - ARRAY_SUFFIX.length());
-			Class elementClass = forName(elementClassName, classLoader);
+			Class<?> elementClass = forName(elementClassName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
 		// "[Ljava.lang.String;" style arrays
-		int internalArrayMarker = name.indexOf(INTERNAL_ARRAY_PREFIX);
-		if (internalArrayMarker != -1 && name.endsWith(";")) {
-			String elementClassName = null;
-			if (internalArrayMarker == 0) {
-				elementClassName = name.substring(INTERNAL_ARRAY_PREFIX.length(), name.length() - 1);
-			}
-			else if (name.startsWith("[")) {
-				elementClassName = name.substring(1);
-			}
-			Class elementClass = forName(elementClassName, classLoader);
+		if (name.startsWith(NON_PRIMITIVE_ARRAY_PREFIX) && name.endsWith(";")) {
+			String elementName = name.substring(NON_PRIMITIVE_ARRAY_PREFIX.length(), name.length() - 1);
+			Class<?> elementClass = forName(elementName, classLoader);
+			return Array.newInstance(elementClass, 0).getClass();
+		}
+
+		// "[[I" or "[[Ljava.lang.String;" style arrays
+		if (name.startsWith(INTERNAL_ARRAY_PREFIX)) {
+			String elementName = name.substring(INTERNAL_ARRAY_PREFIX.length());
+			Class<?> elementClass = forName(elementName, classLoader);
 			return Array.newInstance(elementClass, 0).getClass();
 		}
 
@@ -206,7 +253,22 @@ public abstract class ClassUtils {
 		if (classLoaderToUse == null) {
 			classLoaderToUse = getDefaultClassLoader();
 		}
-		return classLoaderToUse.loadClass(name);
+		try {
+			return classLoaderToUse.loadClass(name);
+		}
+		catch (ClassNotFoundException ex) {
+			int lastDotIndex = name.lastIndexOf('.');
+			if (lastDotIndex != -1) {
+				String innerClassName = name.substring(0, lastDotIndex) + '$' + name.substring(lastDotIndex + 1);
+				try {
+					return classLoaderToUse.loadClass(innerClassName);
+				}
+				catch (ClassNotFoundException ex2) {
+					// swallow - let original exception get through
+				}
+			}
+			throw ex;
+		}
 	}
 
 	/**
@@ -223,7 +285,7 @@ public abstract class ClassUtils {
 	 * (that is, the class could not be found or the class file could not be loaded)
 	 * @see #forName(String, ClassLoader)
 	 */
-	public static Class resolveClassName(String className, ClassLoader classLoader) throws IllegalArgumentException {
+	public static Class<?> resolveClassName(String className, ClassLoader classLoader) throws IllegalArgumentException {
 		try {
 			return forName(className, classLoader);
 		}
@@ -241,13 +303,13 @@ public abstract class ClassUtils {
 	 * according to the JVM's naming rules for primitive classes.
 	 * <p>Also supports the JVM's internal class names for primitive arrays.
 	 * Does <i>not</i> support the "[]" suffix notation for primitive arrays;
-	 * this is only supported by {@link #forName}.
+	 * this is only supported by {@link #forName(String, ClassLoader)}.
 	 * @param name the name of the potentially primitive class
 	 * @return the primitive class, or <code>null</code> if the name does not denote
 	 * a primitive class or primitive array class
 	 */
-	public static Class resolvePrimitiveClassName(String name) {
-		Class result = null;
+	public static Class<?> resolvePrimitiveClassName(String name) {
+		Class<?> result = null;
 		// Most class names will be quite long, considering that they
 		// SHOULD sit in a package, so a length check is worthwhile.
 		if (name != null && name.length() <= 8) {
@@ -297,7 +359,7 @@ public abstract class ClassUtils {
 	 * @param instance the instance to check
 	 * @return the user-defined class
 	 */
-	public static Class getUserClass(Object instance) {
+	public static Class<?> getUserClass(Object instance) {
 		Assert.notNull(instance, "Instance must not be null");
 		return getUserClass(instance.getClass());
 	}
@@ -308,9 +370,14 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the user-defined class
 	 */
-	public static Class getUserClass(Class clazz) {
-		return (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR) ?
-				clazz.getSuperclass() : clazz);
+	public static Class<?> getUserClass(Class<?> clazz) {
+		if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
+			Class<?> superClass = clazz.getSuperclass();
+			if (superClass != null && !Object.class.equals(superClass)) {
+				return superClass;
+			}
+		}
+		return clazz;
 	}
 
 	/**
@@ -319,7 +386,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to analyze
 	 * @param classLoader the ClassLoader to potentially cache metadata in
 	 */
-	public static boolean isCacheSafe(Class clazz, ClassLoader classLoader) {
+	public static boolean isCacheSafe(Class<?> clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
 		ClassLoader target = clazz.getClassLoader();
 		if (target == null) {
@@ -362,18 +429,18 @@ public abstract class ClassUtils {
 	 * @param clazz the class to get the short name for
 	 * @return the class name of the class without the package name
 	 */
-	public static String getShortName(Class clazz) {
+	public static String getShortName(Class<?> clazz) {
 		return getShortName(getQualifiedName(clazz));
 	}
 
 	/**
-	 * Return the short string name of a Java class in decapitalized JavaBeans
+	 * Return the short string name of a Java class in uncapitalized JavaBeans
 	 * property format. Strips the outer class name in case of an inner class.
 	 * @param clazz the class
 	 * @return the short name rendered in a standard JavaBeans property format
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
-	public static String getShortNameAsProperty(Class clazz) {
+	public static String getShortNameAsProperty(Class<?> clazz) {
 		String shortName = ClassUtils.getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf('.');
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
@@ -386,7 +453,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class
 	 * @return the file name of the ".class" file
 	 */
-	public static String getClassFileName(Class clazz) {
+	public static String getClassFileName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		String className = clazz.getName();
 		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
@@ -400,7 +467,7 @@ public abstract class ClassUtils {
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
 	 */
-	public static String getPackageName(Class clazz) {
+	public static String getPackageName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		String className = clazz.getName();
 		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
@@ -413,7 +480,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class
 	 * @return the qualified name of the class
 	 */
-	public static String getQualifiedName(Class clazz) {
+	public static String getQualifiedName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isArray()) {
 			return getQualifiedNameForArray(clazz);
@@ -429,7 +496,7 @@ public abstract class ClassUtils {
 	 * @param clazz the array class
 	 * @return a qualified name for the array class
 	 */
-	private static String getQualifiedNameForArray(Class clazz) {
+	private static String getQualifiedNameForArray(Class<?> clazz) {
 		StringBuilder result = new StringBuilder();
 		while (clazz.isArray()) {
 			clazz = clazz.getComponentType();
@@ -461,11 +528,11 @@ public abstract class ClassUtils {
 		if (value == null) {
 			return null;
 		}
-		Class clazz = value.getClass();
+		Class<?> clazz = value.getClass();
 		if (Proxy.isProxyClass(clazz)) {
 			StringBuilder result = new StringBuilder(clazz.getName());
 			result.append(" implementing ");
-			Class[] ifcs = clazz.getInterfaces();
+			Class<?>[] ifcs = clazz.getInterfaces();
 			for (int i = 0; i < ifcs.length; i++) {
 				result.append(ifcs[i].getName());
 				if (i < ifcs.length - 1) {
@@ -482,21 +549,32 @@ public abstract class ClassUtils {
 		}
 	}
 
+	/**
+	 * Check whether the given class matches the user-specified type name.
+	 * @param clazz the class to check
+	 * @param typeName the type name to match
+	 */
+	public static boolean matchesTypeName(Class<?> clazz, String typeName) {
+		return (typeName != null &&
+				(typeName.equals(clazz.getName()) || typeName.equals(clazz.getSimpleName()) ||
+				(clazz.isArray() && typeName.equals(getQualifiedNameForArray(clazz)))));
+	}
+
 
 	/**
-	 * Determine whether the given class has a constructor with the given signature.
+	 * Determine whether the given class has a public constructor with the given signature.
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to "false".
 	 * @param clazz	the clazz to analyze
 	 * @param paramTypes the parameter types of the method
 	 * @return whether the class has a corresponding constructor
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasConstructor(Class clazz, Class... paramTypes) {
+	public static boolean hasConstructor(Class<?> clazz, Class<?>... paramTypes) {
 		return (getConstructorIfAvailable(clazz, paramTypes) != null);
 	}
 
 	/**
-	 * Determine whether the given class has a constructor with the given signature,
+	 * Determine whether the given class has a public constructor with the given signature,
 	 * and return it if available (else return <code>null</code>).
 	 * <p>Essentially translates <code>NoSuchMethodException</code> to <code>null</code>.
 	 * @param clazz	the clazz to analyze
@@ -504,7 +582,7 @@ public abstract class ClassUtils {
 	 * @return the constructor, or <code>null</code> if not found
 	 * @see java.lang.Class#getConstructor
 	 */
-	public static Constructor getConstructorIfAvailable(Class clazz, Class... paramTypes) {
+	public static <T> Constructor<T> getConstructorIfAvailable(Class<T> clazz, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			return clazz.getConstructor(paramTypes);
@@ -523,7 +601,7 @@ public abstract class ClassUtils {
 	 * @return whether the class has a corresponding method
 	 * @see java.lang.Class#getMethod
 	 */
-	public static boolean hasMethod(Class clazz, String methodName, Class... paramTypes) {
+	public static boolean hasMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		return (getMethodIfAvailable(clazz, methodName, paramTypes) != null);
 	}
 
@@ -537,7 +615,7 @@ public abstract class ClassUtils {
 	 * @return the method, or <code>null</code> if not found
 	 * @see java.lang.Class#getMethod
 	 */
-	public static Method getMethodIfAvailable(Class clazz, String methodName, Class... paramTypes) {
+	public static Method getMethodIfAvailable(Class<?> clazz, String methodName, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
@@ -555,7 +633,7 @@ public abstract class ClassUtils {
 	 * @param methodName the name of the method
 	 * @return the number of methods with the given name
 	 */
-	public static int getMethodCountForName(Class clazz, String methodName) {
+	public static int getMethodCountForName(Class<?> clazz, String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		int count = 0;
@@ -565,8 +643,8 @@ public abstract class ClassUtils {
 				count++;
 			}
 		}
-		Class[] ifcs = clazz.getInterfaces();
-		for (Class ifc : ifcs) {
+		Class<?>[] ifcs = clazz.getInterfaces();
+		for (Class<?> ifc : ifcs) {
 			count += getMethodCountForName(ifc, methodName);
 		}
 		if (clazz.getSuperclass() != null) {
@@ -576,13 +654,14 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Does the given class and/or its superclasses at least have one or more
-	 * methods (with any argument types)? Includes non-public methods.
+	 * Does the given class or one of its superclasses at least have one or more
+	 * methods with the supplied name (with any argument types)?
+	 * Includes non-public methods.
 	 * @param clazz	the clazz to check
 	 * @param methodName the name of the method
 	 * @return whether there is at least one method with the given name
 	 */
-	public static boolean hasAtLeastOneMethodWithName(Class clazz, String methodName) {
+	public static boolean hasAtLeastOneMethodWithName(Class<?> clazz, String methodName) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		Method[] declaredMethods = clazz.getDeclaredMethods();
@@ -591,8 +670,8 @@ public abstract class ClassUtils {
 				return true;
 			}
 		}
-		Class[] ifcs = clazz.getInterfaces();
-		for (Class ifc : ifcs) {
+		Class<?>[] ifcs = clazz.getInterfaces();
+		for (Class<?> ifc : ifcs) {
 			if (hasAtLeastOneMethodWithName(ifc, methodName)) {
 				return true;
 			}
@@ -616,44 +695,50 @@ public abstract class ClassUtils {
 	 * May be <code>null</code> or may not even implement the method.
 	 * @return the specific target method, or the original method if the
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
-	 * @see org.springframework.aop.support.AopUtils#getMostSpecificMethod
 	 */
-	public static Method getMostSpecificMethod(Method method, Class targetClass) {
-		if (method != null && targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
-			try {
-				method = targetClass.getMethod(method.getName(), method.getParameterTypes());
-			}
-			catch (NoSuchMethodException ex) {
-				// Perhaps the target class doesn't implement this method:
-				// that's fine, just use the original method.
-			}
+	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
+		Method specificMethod = null;
+		if (method != null && isOverridable(method, targetClass) &&
+				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+			specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
 		}
-		return method;
+		return (specificMethod != null ? specificMethod : method);
 	}
 
 	/**
-	 * Return a static method of a class.
+	 * Determine whether the given method is overridable in the given target class.
+	 * @param method the method to check
+	 * @param targetClass the target class to check against
+	 */
+	private static boolean isOverridable(Method method, Class<?> targetClass) {
+		if (Modifier.isPrivate(method.getModifiers())) {
+			return false;
+		}
+		if (Modifier.isPublic(method.getModifiers()) || Modifier.isProtected(method.getModifiers())) {
+			return true;
+		}
+		return getPackageName(method.getDeclaringClass()).equals(getPackageName(targetClass));
+	}
+
+	/**
+	 * Return a public static method of a class.
 	 * @param methodName the static method name
 	 * @param clazz	the class which defines the method
 	 * @param args the parameter types to the method
 	 * @return the static method, or <code>null</code> if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
 	 */
-	public static Method getStaticMethod(Class clazz, String methodName, Class... args) {
+	public static Method getStaticMethod(Class<?> clazz, String methodName, Class<?>... args) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(methodName, "Method name must not be null");
 		try {
-			Method method = clazz.getDeclaredMethod(methodName, args);
-			if ((method.getModifiers() & Modifier.STATIC) != 0) {
-				return method;
-			}
+			Method method = clazz.getMethod(methodName, args);
+			return Modifier.isStatic(method.getModifiers()) ? method : null;
 		}
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
-		return null;
 	}
-
 
 	/**
 	 * Check if the given class represents a primitive wrapper,
@@ -661,7 +746,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return whether the given class is a primitive wrapper class
 	 */
-	public static boolean isPrimitiveWrapper(Class clazz) {
+	public static boolean isPrimitiveWrapper(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return primitiveWrapperTypeMap.containsKey(clazz);
 	}
@@ -673,7 +758,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return whether the given class is a primitive or primitive wrapper class
 	 */
-	public static boolean isPrimitiveOrWrapper(Class clazz) {
+	public static boolean isPrimitiveOrWrapper(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isPrimitive() || isPrimitiveWrapper(clazz));
 	}
@@ -684,7 +769,7 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return whether the given class is a primitive array class
 	 */
-	public static boolean isPrimitiveArray(Class clazz) {
+	public static boolean isPrimitiveArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isArray() && clazz.getComponentType().isPrimitive());
 	}
@@ -695,9 +780,20 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return whether the given class is a primitive wrapper array class
 	 */
-	public static boolean isPrimitiveWrapperArray(Class clazz) {
+	public static boolean isPrimitiveWrapperArray(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isArray() && isPrimitiveWrapper(clazz.getComponentType()));
+	}
+
+	/**
+	 * Resolve the given class if it is a primitive class,
+	 * returning the corresponding primitive wrapper type instead.
+	 * @param clazz the class to check
+	 * @return the original class, or a primitive wrapper for the original primitive type
+	 */
+	public static Class<?> resolvePrimitiveIfNecessary(Class<?> clazz) {
+		Assert.notNull(clazz, "Class must not be null");
+		return (clazz.isPrimitive() && clazz != void.class? primitiveTypeToWrapperMap.get(clazz) : clazz);
 	}
 
 	/**
@@ -705,11 +801,11 @@ public abstract class ClassUtils {
 	 * type, assuming setting by reflection. Considers primitive wrapper
 	 * classes as assignable to the corresponding primitive types.
 	 * @param lhsType the target type
-	 * @param rhsType	the value type that should be assigned to the target type
+	 * @param rhsType the value type that should be assigned to the target type
 	 * @return if the target type is assignable from the value type
 	 * @see TypeUtils#isAssignable
 	 */
-	public static boolean isAssignable(Class lhsType, Class rhsType) {
+	public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
 		Assert.notNull(lhsType, "Left-hand side type must not be null");
 		Assert.notNull(rhsType, "Right-hand side type must not be null");
 		return (lhsType.isAssignableFrom(rhsType) ||
@@ -724,7 +820,7 @@ public abstract class ClassUtils {
 	 * @param value the value that should be assigned to the type
 	 * @return if the type is assignable from the value
 	 */
-	public static boolean isAssignableValue(Class type, Object value) {
+	public static boolean isAssignableValue(Class<?> type, Object value) {
 		Assert.notNull(type, "Type must not be null");
 		return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
 	}
@@ -736,6 +832,7 @@ public abstract class ClassUtils {
 	 * @return the corresponding fully qualified class name
 	 */
 	public static String convertResourcePathToClassName(String resourcePath) {
+		Assert.notNull(resourcePath, "Resource path must not be null");
 		return resourcePath.replace('/', '.');
 	}
 
@@ -745,15 +842,16 @@ public abstract class ClassUtils {
 	 * @return the corresponding resource path, pointing to the class
 	 */
 	public static String convertClassNameToResourcePath(String className) {
+		Assert.notNull(className, "Class name must not be null");
 		return className.replace('.', '/');
 	}
 
 	/**
 	 * Return a path suitable for use with <code>ClassLoader.getResource</code>
 	 * (also suitable for use with <code>Class.getResource</code> by prepending a
-	 * slash ('/') to the return value. Built by taking the package of the specified
+	 * slash ('/') to the return value). Built by taking the package of the specified
 	 * class file, converting all dots ('.') to slashes ('/'), adding a trailing slash
-	 * if necesssary, and concatenating the specified resource name to this.
+	 * if necessary, and concatenating the specified resource name to this.
 	 * <br/>As such, this function may be used to build a path suitable for
 	 * loading a resource file that is in the same package as a class file,
 	 * although {@link org.springframework.core.io.ClassPathResource} is usually
@@ -764,7 +862,7 @@ public abstract class ClassUtils {
 	 * @see java.lang.ClassLoader#getResource
 	 * @see java.lang.Class#getResource
 	 */
-	public static String addResourcePathToPackagePath(Class clazz, String resourceName) {
+	public static String addResourcePathToPackagePath(Class<?> clazz, String resourceName) {
 		Assert.notNull(resourceName, "Resource name must not be null");
 		if (!resourceName.startsWith("/")) {
 			return classPackageAsResourcePath(clazz) + "/" + resourceName;
@@ -776,7 +874,7 @@ public abstract class ClassUtils {
 	 * Given an input class object, return a string which consists of the
 	 * class's package name as a pathname, i.e., all dots ('.') are replaced by
 	 * slashes ('/'). Neither a leading nor trailing slash is added. The result
-	 * could be concatenated with a slash and the name of a resource, and fed
+	 * could be concatenated with a slash and the name of a resource and fed
 	 * directly to <code>ClassLoader.getResource()</code>. For it to be fed to
 	 * <code>Class.getResource</code> instead, a leading slash would also have
 	 * to be prepended to the returned value.
@@ -786,7 +884,7 @@ public abstract class ClassUtils {
 	 * @see ClassLoader#getResource
 	 * @see Class#getResource
 	 */
-	public static String classPackageAsResourcePath(Class clazz) {
+	public static String classPackageAsResourcePath(Class<?> clazz) {
 		if (clazz == null) {
 			return "";
 		}
@@ -808,7 +906,7 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Class... classes) {
+	public static String classNamesToString(Class<?>... classes) {
 		return classNamesToString(Arrays.asList(classes));
 	}
 
@@ -821,13 +919,13 @@ public abstract class ClassUtils {
 	 * @return a String of form "[com.foo.Bar, com.foo.Baz]"
 	 * @see java.util.AbstractCollection#toString()
 	 */
-	public static String classNamesToString(Collection<Class> classes) {
+	public static String classNamesToString(Collection<Class<?>> classes) {
 		if (CollectionUtils.isEmpty(classes)) {
 			return "[]";
 		}
 		StringBuilder sb = new StringBuilder("[");
-		for (Iterator<Class> it = classes.iterator(); it.hasNext(); ) {
-			Class clazz = it.next();
+		for (Iterator<Class<?>> it = classes.iterator(); it.hasNext(); ) {
+			Class<?> clazz = it.next();
 			sb.append(clazz.getName());
 			if (it.hasNext()) {
 				sb.append(", ");
@@ -841,7 +939,7 @@ public abstract class ClassUtils {
 	/**
 	 * Return all interfaces that the given instance implements as array,
 	 * including ones implemented by superclasses.
-	 * @param instance the instance to analyse for interfaces
+	 * @param instance the instance to analyze for interfaces
 	 * @return all interfaces that the given instance implements as array
 	 */
 	public static Class[] getAllInterfaces(Object instance) {
@@ -853,10 +951,10 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as array,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 * @param clazz the class to analyse for interfaces
+	 * @param clazz the class to analyze for interfaces
 	 * @return all interfaces that the given object implements as array
 	 */
-	public static Class[] getAllInterfacesForClass(Class clazz) {
+	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz) {
 		return getAllInterfacesForClass(clazz, null);
 	}
 
@@ -864,33 +962,20 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as array,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 * @param clazz the class to analyse for interfaces
+	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
 	 * (may be <code>null</code> when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as array
 	 */
-	public static Class[] getAllInterfacesForClass(Class clazz, ClassLoader classLoader) {
-		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.isInterface()) {
-			return new Class[] {clazz};
-		}
-		List<Class> interfaces = new ArrayList<Class>();
-		while (clazz != null) {
-			Class[] ifcs = clazz.getInterfaces();
-			for (Class ifc : ifcs) {
-				if (!interfaces.contains(ifc) && (classLoader == null || isVisible(ifc, classLoader))) {
-					interfaces.add(ifc);
-				}
-			}
-			clazz = clazz.getSuperclass();
-		}
-		return interfaces.toArray(new Class[interfaces.size()]);
+	public static Class<?>[] getAllInterfacesForClass(Class<?> clazz, ClassLoader classLoader) {
+		Set<Class> ifcs = getAllInterfacesForClassAsSet(clazz, classLoader);
+		return ifcs.toArray(new Class[ifcs.size()]);
 	}
 
 	/**
 	 * Return all interfaces that the given instance implements as Set,
 	 * including ones implemented by superclasses.
-	 * @param instance the instance to analyse for interfaces
+	 * @param instance the instance to analyze for interfaces
 	 * @return all interfaces that the given instance implements as Set
 	 */
 	public static Set<Class> getAllInterfacesAsSet(Object instance) {
@@ -902,7 +987,7 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 * @param clazz the class to analyse for interfaces
+	 * @param clazz the class to analyze for interfaces
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz) {
@@ -913,23 +998,21 @@ public abstract class ClassUtils {
 	 * Return all interfaces that the given class implements as Set,
 	 * including ones implemented by superclasses.
 	 * <p>If the class itself is an interface, it gets returned as sole interface.
-	 * @param clazz the class to analyse for interfaces
+	 * @param clazz the class to analyze for interfaces
 	 * @param classLoader the ClassLoader that the interfaces need to be visible in
 	 * (may be <code>null</code> when accepting all declared interfaces)
 	 * @return all interfaces that the given object implements as Set
 	 */
 	public static Set<Class> getAllInterfacesForClassAsSet(Class clazz, ClassLoader classLoader) {
 		Assert.notNull(clazz, "Class must not be null");
-		if (clazz.isInterface()) {
+		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
 			return Collections.singleton(clazz);
 		}
 		Set<Class> interfaces = new LinkedHashSet<Class>();
 		while (clazz != null) {
-			for (int i = 0; i < clazz.getInterfaces().length; i++) {
-				Class ifc = clazz.getInterfaces()[i];
-				if (classLoader == null || isVisible(ifc, classLoader)) {
-					interfaces.add(ifc);
-				}
+			Class<?>[] ifcs = clazz.getInterfaces();
+			for (Class<?> ifc : ifcs) {
+				interfaces.addAll(getAllInterfacesForClassAsSet(ifc, classLoader));
 			}
 			clazz = clazz.getSuperclass();
 		}
@@ -945,7 +1028,7 @@ public abstract class ClassUtils {
 	 * @return the merged interface as Class
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	public static Class createCompositeInterface(Class[] interfaces, ClassLoader classLoader) {
+	public static Class<?> createCompositeInterface(Class<?>[] interfaces, ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interfaces must not be empty");
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		return Proxy.getProxyClass(classLoader, interfaces);
@@ -957,12 +1040,12 @@ public abstract class ClassUtils {
 	 * @param classLoader the ClassLoader to check against (may be <code>null</code>,
 	 * in which case this method will always return <code>true</code>)
 	 */
-	public static boolean isVisible(Class clazz, ClassLoader classLoader) {
+	public static boolean isVisible(Class<?> clazz, ClassLoader classLoader) {
 		if (classLoader == null) {
 			return true;
 		}
 		try {
-			Class actualClass = classLoader.loadClass(clazz.getName());
+			Class<?> actualClass = classLoader.loadClass(clazz.getName());
 			return (clazz == actualClass);
 			// Else: different interface class found...
 		}
@@ -971,5 +1054,4 @@ public abstract class ClassUtils {
 			return false;
 		}
 	}
-
 }

@@ -65,7 +65,7 @@ public abstract class ObjectUtils {
 	 * @param declaredExceptions the exceptions declared in the throws clause
 	 * @return whether the given exception is compatible
 	 */
-	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class[] declaredExceptions) {
+	public static boolean isCompatibleWithThrowsClause(Throwable ex, Class<?>[] declaredExceptions) {
 		if (!isCheckedException(ex)) {
 			return true;
 		}
@@ -118,7 +118,7 @@ public abstract class ObjectUtils {
 	 * @return the new array (of the same component type; never <code>null</code>)
 	 */
 	public static Object[] addObjectToArray(Object[] array, Object obj) {
-		Class compType = Object.class;
+		Class<?> compType = Object.class;
 		if (array != null) {
 			compType = array.getClass().getComponentType();
 		}
@@ -157,7 +157,7 @@ public abstract class ObjectUtils {
 		if (length == 0) {
 			return new Object[0];
 		}
-		Class wrapperType = Array.get(source, 0).getClass();
+		Class<?> wrapperType = Array.get(source, 0).getClass();
 		Object[] newArray = (Object[]) Array.newInstance(wrapperType, length);
 		for (int i = 0; i < length; i++) {
 			newArray[i] = Array.get(source, i);

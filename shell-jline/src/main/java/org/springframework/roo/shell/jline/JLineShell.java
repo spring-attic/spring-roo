@@ -45,10 +45,8 @@ import org.springframework.roo.support.util.ClassUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class JLineShell extends AbstractShell implements CommandMarker, Shell, Runnable {
-
 	private static final String ANSI_CONSOLE_CLASSNAME = "org.fusesource.jansi.AnsiConsole";
 	private static final boolean JANSI_AVAILABLE = ClassUtils.isPresent(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader());
 	private static final boolean FLASH_MESSAGE_DISABLED = Boolean.getBoolean("flash.message.disabled");
@@ -69,7 +67,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 				try {
 					reader = createAnsiWindowsReader();
 				} catch (Exception e) {
-					// try again using default ConsoleReader constructor 
+					// Try again using default ConsoleReader constructor 
 					logger.warning("Can't initialize jansi AnsiConsole, falling back to default: " + e);
 				}
 			}
@@ -132,33 +130,34 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	
 	public void stop() {}
 	
-	@Override
+	@Override 
 	public void setPromptPath(String path) {
-        if (reader.getTerminal().isANSISupported()) {
-        	ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
-            if ("".equals(path) || path == null) {
-            	shellPrompt = ansi.yellow("roo> ").toString();
-    		} else {
-    			shellPrompt = ansi.cyan(path).yellow(" roo> ").toString();
-    		}
-        } else {
-        	// the superclass will do for this non-ANSI terminal
-        	super.setPromptPath(path);
-        }
-        
+		if (reader.getTerminal().isANSISupported()) {
+			ANSIBuffer ansi = JLineLogHandler.getANSIBuffer();
+			if ("".equals(path) || path == null) {
+				shellPrompt = ansi.yellow("roo> ").toString();
+			} else {
+				shellPrompt = ansi.cyan(path).yellow(" roo> ").toString();
+			}
+		} else {
+			// the superclass will do for this non-ANSI terminal
+			super.setPromptPath(path);
+		}
+
 		// the shellPrompt is now correct; let's ensure it now gets used
-        reader.setDefaultPrompt(JLineShell.shellPrompt);
+		reader.setDefaultPrompt(JLineShell.shellPrompt);
 	}
 
 	private ConsoleReader createAnsiWindowsReader() throws Exception {
-		// get decorated OutputStream that parses ANSI-codes
-		@SuppressWarnings("unchecked")
+		// Get decorated OutputStream that parses ANSI-codes
 		final PrintStream ansiOut = (PrintStream) ClassUtils.forName(ANSI_CONSOLE_CLASSNAME, JLineShell.class.getClassLoader()).getMethod("out").invoke(null);
 		WindowsTerminal ansiTerminal = new WindowsTerminal() {
-		public boolean isANSISupported() { return true; }
+			public boolean isANSISupported() {
+				return true;
+			}
 		};
 		ansiTerminal.initializeTerminal();
-		// make sure to reset the original shell's colors on shutdown by closing the stream
+		// Make sure to reset the original shell's colors on shutdown by closing the stream
 		statusListener = new ShellStatusListener() {
 			public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
 				if (newStatus == ShellStatus.SHUTTING_DOWN) {
@@ -171,7 +170,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			new FileInputStream(FileDescriptor.in),
         	new PrintWriter(
         		new OutputStreamWriter(ansiOut,
-        			// default to Cp850 encoding for Windows console output (ROO-439)
+        			// Default to Cp850 encoding for Windows console output (ROO-439)
         			System.getProperty("jline.WindowsTerminal.output.encoding", "Cp850"))),
     		null,
 			ansiTerminal
@@ -187,7 +186,6 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			public void run() {
 				while (shellStatus != ShellStatus.SHUTTING_DOWN) {
 					synchronized (flashInfoMap) {
-						
 						long now = System.currentTimeMillis();
 						
 						Set<String> toRemove = new HashSet<String>();
@@ -345,7 +343,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private void openFileLogIfPossible() {
 		try {
 			fileLog = new FileWriter("log.roo", true);
-			// first write, so let's record the date and time of the first user command
+			// First write, so let's record the date and time of the first user command
 			fileLog.write("// Spring Roo " + versionInfo() + " log opened at " + df.format(new Date()) + "\n");
 			fileLog.flush();
 		} catch (IOException ignoreIt) {}
@@ -361,10 +359,10 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			}
 		}
 		try {
-			fileLog.write(processedLine + "\n"); // unix line endings only from Roo
-			fileLog.flush(); // so tail -f will show it's working
+			fileLog.write(processedLine + "\n"); // Unix line endings only from Roo
+			fileLog.flush(); // So tail -f will show it's working
 			if (getExitShellRequest() != null) {
-				// shutting down, so close our file (we can always reopen it later if needed)
+				// Shutting down, so close our file (we can always reopen it later if needed)
 				fileLog.write("// Spring Roo " + versionInfo() + " log closed at " + df.format(new Date()) + "\n");
 				fileLog.flush();
 				fileLog.close();
@@ -400,5 +398,4 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Level flashLevel;
 		int rowNumber;
 	}
-
 }

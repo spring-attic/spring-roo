@@ -48,7 +48,7 @@ public abstract class ReflectionUtils {
 	 * @param name the name of the field
 	 * @return the corresponding Field object, or <code>null</code> if not found
 	 */
-	public static Field findField(Class clazz, String name) {
+	public static Field findField(Class<?> clazz, String name) {
 		return findField(clazz, name, null);
 	}
 
@@ -61,10 +61,10 @@ public abstract class ReflectionUtils {
 	 * @param type the type of the field (may be <code>null</code> if name is specified)
 	 * @return the corresponding Field object, or <code>null</code> if not found
 	 */
-	public static Field findField(Class clazz, String name, Class type) {
+	public static Field findField(Class<?> clazz, String name, Class<?> type) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
-		Class searchType = clazz;
+		Class<?> searchType = clazz;
 		while (!Object.class.equals(searchType) && searchType != null) {
 			Field[] fields = searchType.getDeclaredFields();
 			for (Field field : fields) {
@@ -131,7 +131,7 @@ public abstract class ReflectionUtils {
 	 * @param name the name of the method
 	 * @return the Method object, or <code>null</code> if none found
 	 */
-	public static Method findMethod(Class clazz, String name) {
+	public static Method findMethod(Class<?> clazz, String name) {
 		return findMethod(clazz, name, new Class[0]);
 	}
 
@@ -145,10 +145,10 @@ public abstract class ReflectionUtils {
 	 * (may be <code>null</code> to indicate any signature)
 	 * @return the Method object, or <code>null</code> if none found
 	 */
-	public static Method findMethod(Class clazz, String name, Class[] paramTypes) {
+	public static Method findMethod(Class<?> clazz, String name, Class<?>[] paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.notNull(name, "Method name must not be null");
-		Class searchType = clazz;
+		Class<?> searchType = clazz;
 		while (!Object.class.equals(searchType) && searchType != null) {
 			Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
 			for (Method method : methods) {
@@ -329,10 +329,10 @@ public abstract class ReflectionUtils {
 	 * @return <code>true</code> if the exception can be thrown as-is;
 	 * <code>false</code> if it needs to be wrapped
 	 */
-	public static boolean declaresException(Method method, Class exceptionType) {
+	public static boolean declaresException(Method method, Class<?> exceptionType) {
 		Assert.notNull(method, "Method must not be null");
-		Class[] declaredExceptions = method.getExceptionTypes();
-		for (Class declaredException : declaredExceptions) {
+		Class<?>[] declaredExceptions = method.getExceptionTypes();
+		for (Class<?> declaredException : declaredExceptions) {
 			if (declaredException.isAssignableFrom(exceptionType)) {
 				return true;
 			}
@@ -358,7 +358,7 @@ public abstract class ReflectionUtils {
 		if (method == null || !method.getName().equals("equals")) {
 			return false;
 		}
-		Class[] paramTypes = method.getParameterTypes();
+		Class<?>[] paramTypes = method.getParameterTypes();
 		return (paramTypes.length == 1 && paramTypes[0] == Object.class);
 	}
 
@@ -416,7 +416,7 @@ public abstract class ReflectionUtils {
 	 * @param ctor the constructor to make accessible
 	 * @see java.lang.reflect.Constructor#setAccessible
 	 */
-	public static void makeAccessible(Constructor ctor) {
+	public static void makeAccessible(Constructor<?> ctor) {
 		if (!Modifier.isPublic(ctor.getModifiers()) ||
 				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) {
 			ctor.setAccessible(true);
@@ -433,7 +433,7 @@ public abstract class ReflectionUtils {
 	 * @param mc the callback to invoke for each method
 	 * @see #doWithMethods(Class, MethodCallback, MethodFilter)
 	 */
-	public static void doWithMethods(Class targetClass, MethodCallback mc) throws IllegalArgumentException {
+	public static void doWithMethods(Class<?> targetClass, MethodCallback mc) throws IllegalArgumentException {
 		doWithMethods(targetClass, mc, null);
 	}
 
@@ -446,7 +446,7 @@ public abstract class ReflectionUtils {
 	 * @param mc the callback to invoke for each method
 	 * @param mf the filter that determines the methods to apply the callback to
 	 */
-	public static void doWithMethods(Class targetClass, MethodCallback mc, MethodFilter mf)
+	public static void doWithMethods(Class<?> targetClass, MethodCallback mc, MethodFilter mf)
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
@@ -473,7 +473,7 @@ public abstract class ReflectionUtils {
 	 * Get all declared methods on the leaf class and all superclasses.
 	 * Leaf class methods are included first.
 	 */
-	public static Method[] getAllDeclaredMethods(Class leafClass) throws IllegalArgumentException {
+	public static Method[] getAllDeclaredMethods(Class<?> leafClass) throws IllegalArgumentException {
 		final List<Method> methods = new ArrayList<Method>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			public void doWith(Method method) {
@@ -490,7 +490,7 @@ public abstract class ReflectionUtils {
 	 * @param targetClass the target class to analyze
 	 * @param fc the callback to invoke for each field
 	 */
-	public static void doWithFields(Class targetClass, FieldCallback fc) throws IllegalArgumentException {
+	public static void doWithFields(Class<?> targetClass, FieldCallback fc) throws IllegalArgumentException {
 		doWithFields(targetClass, fc, null);
 	}
 
@@ -501,7 +501,7 @@ public abstract class ReflectionUtils {
 	 * @param fc the callback to invoke for each field
 	 * @param ff the filter that determines the fields to apply the callback to
 	 */
-	public static void doWithFields(Class targetClass, FieldCallback fc, FieldFilter ff)
+	public static void doWithFields(Class<?> targetClass, FieldCallback fc, FieldFilter ff)
 			throws IllegalArgumentException {
 
 		// Keep backing up the inheritance hierarchy.
