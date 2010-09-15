@@ -86,7 +86,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 
 	private MethodMetadata getGetAsTextMethod() {
-		JavaType returnType = new JavaType(String.class.getName());
+		JavaType returnType = JavaType.STRING_OBJECT;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -113,7 +113,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private MethodMetadata getSetAsTextMethod() {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), null));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("text"));

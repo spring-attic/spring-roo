@@ -314,20 +314,20 @@ public class MailOperationsImpl implements MailOperations {
 			mutableTypeDetails.addField(smmFieldBuilder.build());
 		} else {
 			bodyBuilder.appendFormalLine("org.springframework.mail.SimpleMailMessage simpleMailMessage = new org.springframework.mail.SimpleMailMessage();");
-			paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
 			paramNames.add(new JavaSymbolName("mailFrom"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setFrom(mailFrom);");
 
-			paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+			paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
 			paramNames.add(new JavaSymbolName("subject"));
 			bodyBuilder.appendFormalLine("simpleMailMessage.setSubject(subject);");
 		}
 
-		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
 		paramNames.add(new JavaSymbolName("mailTo"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setTo(mailTo);");
 
-		paramTypes.add(new AnnotatedJavaType(new JavaType(String.class.getName()), new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
 		paramNames.add(new JavaSymbolName("message"));
 		bodyBuilder.appendFormalLine("simpleMailMessage.setText(message);");
 

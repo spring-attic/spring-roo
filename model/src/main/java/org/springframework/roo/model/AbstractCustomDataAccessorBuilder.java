@@ -7,7 +7,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAccessor> implements Builder<T> {
 	private CustomDataBuilder customData = new CustomDataBuilder();
@@ -29,6 +28,5 @@ public abstract class AbstractCustomDataAccessorBuilder<T extends CustomDataAcce
 
 	public void setCustomData(CustomDataBuilder customData) {
 		this.customData = customData;
-	}
-	
+	}	
 }

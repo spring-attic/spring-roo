@@ -23,10 +23,9 @@ import org.springframework.roo.shell.model.CommandInfo.CommandInfoBuilder;
  * converting these into {@link CommandInfo} objects.
  * 
  * @author Ben Alex
- *
  */
 public class AnnotationParser {
-	
+
 	/**
 	 * Scans a particular directory, including all sub-directories, for .class files.
 	 * For each class file, checks for shell annotations and builds a consolidated
@@ -40,7 +39,7 @@ public class AnnotationParser {
 		locateAllClassResources(soFar, new File(directory));
 		return soFar;
 	}
-	
+
 	private static void locateAllClassResources(List<CommandInfo> soFar, File file) {
 		if (!file.exists() || !file.isDirectory()) return;
 		for (File f : file.listFiles()) {
@@ -52,11 +51,12 @@ public class AnnotationParser {
 					fis = new FileInputStream(f);
 					List<CommandInfo> data = parseShellAnnotationsInClassFile(fis);
 					soFar.addAll(data);
-				} catch (FileNotFoundException skipAndIgnore) {}
+				} catch (FileNotFoundException skipAndIgnore) {
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Parses the presented bytecode and locates all Roo @CliCommand and @CliOption annotations. These are then converted
 	 * into a list of {@link CommandInfo} instances for easier handling.
@@ -64,11 +64,10 @@ public class AnnotationParser {
 	 * @param input for a valid class file (required)
 	 * @return a list of zero or more elements (never returns null)
 	 */
-	@SuppressWarnings("unchecked")
-	public static List<CommandInfo> parseShellAnnotationsInClassFile(InputStream input) {
+	@SuppressWarnings("unchecked") public static List<CommandInfo> parseShellAnnotationsInClassFile(InputStream input) {
 		if (input == null) throw new IllegalArgumentException("Input stream must be bytecode for a valid class file");
 		List<CommandInfo> result = new ArrayList<CommandInfo>();
-		
+
 		ClassReader cr;
 		try {
 			cr = new ClassReader(input);
@@ -87,7 +86,7 @@ public class AnnotationParser {
 						if ("org/springframework/roo/shell/CliCommand".equals(annotationType)) {
 							// We have a @CliCommand
 							CommandInfoBuilder builder = CommandInfo.builder();
-							
+
 							// Start by producing the CommandInfo details first (ie command names, help text)
 							List<Object> values = annotation.values;
 							if (values != null) {
@@ -100,7 +99,7 @@ public class AnnotationParser {
 										// this is a @CliCommand value
 										if ("value".equals(key)) {
 											if (value instanceof Collection) {
-												for (Object element : (Collection)value) {
+												for (Object element : (Collection) value) {
 													if (element instanceof String) {
 														builder.addCommandName(element.toString());
 													}
@@ -115,7 +114,7 @@ public class AnnotationParser {
 									}
 								}
 							}
-							
+
 							// Next let's check for @CliOption values on the individual parameters
 							List[] parameterAnnotations = mn.visibleParameterAnnotations;
 							if (parameterAnnotations != null) {
@@ -128,7 +127,7 @@ public class AnnotationParser {
 											String unspecifiedDefaultValue = "__NULL__";
 											String specifiedDefaultValue = "__NULL__";
 											String help = "";
-											
+
 											List<Object> optionValues = element.values;
 											if (optionValues != null) {
 												String key = null;
@@ -140,7 +139,7 @@ public class AnnotationParser {
 														// this is a @CliOption value
 														if ("key".equals(key)) {
 															if (value instanceof Collection) {
-																for (Object e : (Collection)value) {
+																for (Object e : (Collection) value) {
 																	if (e instanceof String) {
 																		keys.add(e.toString());
 																	}
@@ -152,7 +151,7 @@ public class AnnotationParser {
 															}
 														} else if ("mandatory".equals(key)) {
 															if (value instanceof Boolean) {
-																mandatory = ((Boolean)value).booleanValue();
+																mandatory = ((Boolean) value).booleanValue();
 															}
 														} else if ("unspecifiedDefaultValue".equals(key)) {
 															if (value instanceof String) {
@@ -173,15 +172,14 @@ public class AnnotationParser {
 									}
 								}
 							}
-							
+
 							result.add(builder.build());
 						}
 					}
 				}
 			}
 		}
-		
+
 		return result;
 	}
-	
 }

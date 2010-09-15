@@ -1,13 +1,11 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -25,11 +23,6 @@ public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata 
 		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 	}
 
-//	@Deprecated
-//	public DefaultConstructorMetadata(String declaredByMetadataId, int modifier, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, String body) {
-//		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), parameters, parameterNames, new ArrayList<JavaType>(), body);
-//	}
-
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());
@@ -41,5 +34,4 @@ public class DefaultConstructorMetadata extends AbstractInvocableMemberMetadata 
 		tsc.append("body", getBody());
 		return tsc.toString();
 	}
-
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -21,8 +20,8 @@ import org.springframework.roo.support.util.Assert;
 public final class DefaultMethodMetadata extends AbstractInvocableMemberMetadata implements MethodMetadata {
 	private JavaSymbolName methodName;
 	private JavaType returnType;
-	
-	// package protected to mandate the use of MethodMetadataBuilder
+
+	// Package protected to mandate the use of MethodMetadataBuilder
 	DefaultMethodMetadata(CustomData customData, String declaredByMetadataId, int modifier, List<AnnotationMetadata> annotations, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, List<JavaType> throwsTypes, String body) {
 		super(customData, declaredByMetadataId, modifier, annotations, parameterTypes, parameterNames, throwsTypes, body);
 		Assert.notNull(methodName, "Method name required");
@@ -31,11 +30,6 @@ public final class DefaultMethodMetadata extends AbstractInvocableMemberMetadata
 		this.returnType = returnType;
 	}
 
-	@Deprecated
-	public DefaultMethodMetadata(String declaredByMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameters, List<JavaSymbolName> parameterNames, List<AnnotationMetadata> annotations, List<JavaType> throwsTypes, String body) {
-		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), methodName, returnType, parameters, parameterNames, throwsTypes, body);
-	}
-	
 	public JavaSymbolName getMethodName() {
 		return methodName;
 	}

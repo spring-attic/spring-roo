@@ -8,7 +8,6 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -31,7 +30,7 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
 	
-	// package protected to mandate the use of ClassOrInterfaceTypeDetailsBuilder
+	// Package protected to mandate the use of ClassOrInterfaceTypeDetailsBuilder
 	DefaultClassOrInterfaceTypeDetails(CustomData customData, 
 			String declaredByMetadataId, 
 			int modifier, 
@@ -73,29 +72,9 @@ public class DefaultClassOrInterfaceTypeDetails extends AbstractIdentifiableAnno
 			this.implementsTypes = implementsTypes;
 		}
 
-		if (enumConstants != null) {
-			// Assert.isTrue(physicalTypeCategory != PhysicalTypeCategory.ENUMERATION, "Cannot assign enum constants except against an enum");
+		if (enumConstants != null && physicalTypeCategory == PhysicalTypeCategory.ENUMERATION) {
 			this.enumConstants = enumConstants;
 		}
-	}
-
-	@Deprecated
-	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier, PhysicalTypeCategory physicalTypeCategory, List<AnnotationMetadata> annotations) {
-		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), name, physicalTypeCategory, null, null, null, null, null, null, null);
-	}
-
-	@Deprecated
-	public DefaultClassOrInterfaceTypeDetails(String declaredByMetadataId, JavaType name, int modifier,
-			PhysicalTypeCategory physicalTypeCategory,
-			List<ConstructorMetadata> declaredConstructors,
-			List<FieldMetadata> declaredFields,
-			List<MethodMetadata> declaredMethods,
-			ClassOrInterfaceTypeDetails superclass,
-			List<JavaType> extendsTypes,
-			List<JavaType> implementsTypes,
-			List<AnnotationMetadata> annotations,
-			List<JavaSymbolName> enumConstants) {
-		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), name, physicalTypeCategory, declaredConstructors, declaredFields, declaredMethods, superclass, extendsTypes, implementsTypes, enumConstants);
 	}
 
 	public PhysicalTypeCategory getPhysicalTypeCategory() {

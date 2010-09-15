@@ -330,7 +330,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		short index = 1;
 		if (field.getFieldName().getSymbolName().contains("email") || field.getFieldName().getSymbolName().contains("Email")) {
 			initializer = "some@email.com";
-		} else if (field.getFieldType().equals(new JavaType(String.class.getName()))) {
+		} else if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
 			initializer = "some" + field.getFieldName().getSymbolNameCapitalisedFirstLetter() + index;
 		} else if (field.getFieldType().equals(new JavaType(Date.class.getName())) ||
 				field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {

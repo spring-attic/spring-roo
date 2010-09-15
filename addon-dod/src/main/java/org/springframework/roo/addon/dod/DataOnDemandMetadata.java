@@ -289,7 +289,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-			if (field.getFieldType().equals(new JavaType(String.class.getName())) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
+			if (field.getFieldType().equals(JavaType.STRING_OBJECT) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null) {
 				// Check for @Size or @Column with length attribute
 				AnnotationMetadata sizeAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE);
 				AnnotationMetadata columnAnnotationMetadata = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), COLUMN);
