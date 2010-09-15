@@ -132,15 +132,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		for (JoinTable joinTable : database.getJoinTables()) {
 			String fieldSuffix = manyToManyCount > 0 ? String.valueOf(manyToManyCount) : "";
 
-			if (joinTable.getOwningSideTable().equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
+			Table owningSideTable = joinTable.getOwningSideTable();
+			Assert.notNull(owningSideTable, "Owning-side table in many-to-many relationship for " + table.getName() + " could not be found");
+			
+			Table inverseSideTable = joinTable.getInverseSideTable();
+			Assert.notNull(inverseSideTable, "Inverse-side table in many-to-many relationship for " + table.getName() + " could not be found");
+			
+			if (owningSideTable.equals(table)) {
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + fieldSuffix);
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
 
-			if (joinTable.getInverseSideTable().equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getOwningSideTable().getName())) + fieldSuffix);
-				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(joinTable.getInverseSideTable().getName())) + fieldSuffix);
+			if (inverseSideTable.equals(table)) {
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(owningSideTable.getName())) + fieldSuffix);
+				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + fieldSuffix);
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
