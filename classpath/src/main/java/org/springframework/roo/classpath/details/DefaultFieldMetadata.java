@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.model.CustomDataImpl;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
@@ -31,11 +30,6 @@ public class DefaultFieldMetadata extends AbstractIdentifiableAnnotatedJavaStruc
 		this.fieldName = fieldName;
 		this.fieldType = fieldType;
 		this.fieldInitializer = fieldInitializer;
-	}
-	
-	@Deprecated
-	public DefaultFieldMetadata(String declaredByMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer, List<AnnotationMetadata> annotations) {
-		this(CustomDataImpl.NONE, declaredByMetadataId, modifier, wrapIfNeeded(annotations), fieldName, fieldType, fieldInitializer);
 	}
 	
 	public String getFieldInitializer() {
