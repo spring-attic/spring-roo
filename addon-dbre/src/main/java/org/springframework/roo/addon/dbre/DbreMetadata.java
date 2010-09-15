@@ -11,6 +11,7 @@ import java.util.SortedSet;
 
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.ColumnType;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.JoinTable;
@@ -548,6 +549,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			List<AnnotationAttributeValue<?>> dateTimeFormatAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			dateTimeFormatAttributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatAttributes));
+		}
+		
+		// Add @Lob for CLOB fields if applicable
+		if (column.getType() == ColumnType.CLOB) {
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);

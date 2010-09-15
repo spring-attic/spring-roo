@@ -24,7 +24,7 @@ public enum ColumnType {
 	REAL(Types.REAL, JavaType.FLOAT_OBJECT), 
 	NUMERIC(Types.NUMERIC, new JavaType(BigDecimal.class.getName())), 
 	DECIMAL(Types.DECIMAL, new JavaType(BigDecimal.class.getName())), 
-	CHAR(Types.CHAR, JavaType.STRING_OBJECT), 
+	CHAR(Types.CHAR, JavaType.CHAR_OBJECT), 
 	VARCHAR(Types.VARCHAR, JavaType.STRING_OBJECT), 
 	LONGVARCHAR(Types.LONGVARCHAR, JavaType.STRING_OBJECT), 
 	DATE(Types.DATE, new JavaType(Date.class.getName())), 
@@ -39,7 +39,7 @@ public enum ColumnType {
 	STRUCT(Types.STRUCT, new JavaType(HashMap.class.getName())), 
 	ARRAY(Types.ARRAY, new JavaType("java.sql.Array")), 
 	BLOB(Types.BLOB, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
-	CLOB(Types.CLOB, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
+	CLOB(Types.CLOB, JavaType.STRING_OBJECT), 
 	REF(Types.REF, new JavaType("java.sql.Ref")), 
 	DOUBLE(Types.DOUBLE, JavaType.DOUBLE_PRIMITIVE);
 
