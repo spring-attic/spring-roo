@@ -18,14 +18,12 @@ import org.springframework.roo.shell.CommandMarker;
  * like to emit messages of different severity (and therefore different colours on 
  * non-Windows systems).
  * 
- * @since 1.1.0-M2
+ * @since 1.1
  */
 @Component
 @Service
 public class __APP_NAME__Commands implements CommandMarker {
-	
 	private static Logger logger = Logger.getLogger(__APP_NAME__Commands.class.getName());
-
 	@Reference private __APP_NAME__Operations operations;
 	
 	@CliAvailabilityIndicator({"__APP_NAME__ setup", "__APP_NAME__ add"})

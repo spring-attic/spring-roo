@@ -15,7 +15,6 @@ import org.springframework.roo.project.Path;
  * Provides {@link __APP_NAME__Metadata}.
  * 
  * @since 1.1
- *
  */
 @Component
 @Service

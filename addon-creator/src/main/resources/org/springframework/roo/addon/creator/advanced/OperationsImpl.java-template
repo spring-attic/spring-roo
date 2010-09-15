@@ -13,14 +13,13 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.DefaultAnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Dependency;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
@@ -28,14 +27,12 @@ import org.w3c.dom.Element;
 /**
  * Implementation of commands that are available via the Roo shell.
  *
- * @since 1.1.0M2
+ * @since 1.1
  */
 @Component
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
-
 	private static Logger logger = Logger.getLogger(__APP_NAME__Operations.class.getName());
-
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
@@ -60,10 +57,11 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getTypeAnnotations(), new JavaType(Roo__APP_NAME__.class.getName()))) {
-			JavaType rooSolrSearchable = new JavaType(Roo__APP_NAME__.class.getName());
-			if (!mutableTypeDetails.getTypeAnnotations().contains(rooSolrSearchable)) {
-				mutableTypeDetails.addTypeAnnotation(new DefaultAnnotationMetadata(rooSolrSearchable, new ArrayList<AnnotationAttributeValue<?>>()));
+		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooBar.class.getName()))) {
+			JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
+			if (!mutableTypeDetails.getAnnotations().contains(rooRoo__APP_NAME__)) {
+				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
+				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
 		}
 	}

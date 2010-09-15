@@ -8,7 +8,6 @@ import java.lang.annotation.Target;
 /**
  * Trigger annotation
  * @since 1.1
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
