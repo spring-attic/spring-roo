@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
+import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -28,6 +30,7 @@ import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -178,6 +181,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		for (FieldMetadata field : uniqueFields.values()) {
 			addToBuilder(field);
+			
+			// Exclude these fields in @RooToString to avoid circular references - ROO-1399
+			excludeFieldsInToStringAnnotation(field.getFieldName().getSymbolName());
 		}
 
 		// Add one-to-one mapped-by fields
@@ -342,6 +348,55 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
+	}
+
+	private void excludeFieldsInToStringAnnotation(String fieldName) {
+		PhysicalTypeDetails ptd = governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
+		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
+
+		JavaType toStringType = new JavaType("org.springframework.roo.addon.tostring.RooToString");
+		AnnotationMetadata toStringAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, toStringType);
+		if (toStringAnnotation != null) {
+			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+			List<StringAttributeValue> ignoreFields = new ArrayList<StringAttributeValue>();
+
+			// Copy the existing attributes, excluding the "ignoreFields" attribute
+			boolean alreadyAdded = false;
+			for (JavaSymbolName attributeName : toStringAnnotation.getAttributeNames()) {
+				AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(attributeName);
+				if ("ignoreFields".equals(attributeName.getSymbolName())) {
+					// Ensure we have an array of strings
+					if (!(value instanceof ArrayAttributeValue<?>)) {
+						throw new IllegalStateException("Annotation RooToString attribute 'ignoreFields' must be an array of strings");
+					}
+					
+					ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
+					for (Object obj : arrayVal.getValue()) {
+						if (!(obj instanceof StringAttributeValue)) {
+							throw new IllegalStateException("Annotation RooToString attribute 'ignoreFields' must be an array of strings");							
+						}
+						
+						StringAttributeValue sv = (StringAttributeValue) obj;
+						if (sv.getValue().equals(fieldName)) {
+							alreadyAdded = true;
+						}
+						ignoreFields.add(sv);
+					}
+					continue;
+				}
+				attributes.add(value);
+			}
+			
+			// Add the desired field to ignore to the end
+			if (!alreadyAdded) {
+				ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
+			}
+			
+			attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("ignoreFields"), ignoreFields));
+			AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(toStringType, attributes);
+			mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
+		}	
 	}
 
 	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, JavaPackage javaPackage) {

@@ -30,14 +30,14 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * entirely replace the existing attribute.
 	 * 
 	 * <p>
-	 * For example, if an annotation of @RooFoo(a=1, b=2, c=3) is currently present, and the
-	 * annotation metadata passed to this method is for @RooFoo(c=12, d=4), the final annotation
-	 * after this method completes will be @RooFoo(a=1, b=2, c=12, d=4_).
+	 * For example, if an annotation of @RooFoo(a = 1, b = 2, c = 3) is currently present, and the
+	 * annotation metadata passed to this method is for @RooFoo(c = 12, d = 4), the final annotation
+	 * after this method completes will be @RooFoo(a = 1, b = 2, c = 12, d = 4).
 	 * 
 	 * <p>
 	 * This method avoids changing the disk if there is no net change to the annotation already
-	 * present. For example, if the existing annotation is @RooFoo(a=1, b=2, c=3), and the new
-	 * annotation metadata is @RooFoo(b=2), there is no net change and thus the java source on disk
+	 * present. For example, if the existing annotation is @RooFoo(a = 1, b = 2, c = 3), and the new
+	 * annotation metadata is @RooFoo(b = 2), there is no net change and thus the java source on disk
 	 * remains unchanged.
 	 * 
 	 * <p>
