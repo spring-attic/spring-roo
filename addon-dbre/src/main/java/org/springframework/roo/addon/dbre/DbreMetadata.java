@@ -363,40 +363,36 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			// Copy the existing attributes, excluding the "ignoreFields" attribute
 			boolean alreadyAdded = false;
-			for (JavaSymbolName attributeName : toStringAnnotation.getAttributeNames()) {
-				AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(attributeName);
-				if ("excludeFields".equals(attributeName.getSymbolName())) {
-					// Ensure we have an array of strings
-					if (!(value instanceof ArrayAttributeValue<?>)) {
+			AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(new JavaSymbolName("excludeFields"));
+			if (value != null) {
+				// Ensure we have an array of strings
+				if (!(value instanceof ArrayAttributeValue<?>)) {
+					throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");
+				}
+
+				ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
+				for (Object obj : arrayVal.getValue()) {
+					if (!(obj instanceof StringAttributeValue)) {
 						throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");
 					}
-					
-					ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
-					for (Object obj : arrayVal.getValue()) {
-						if (!(obj instanceof StringAttributeValue)) {
-							throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");							
-						}
-						
-						StringAttributeValue sv = (StringAttributeValue) obj;
-						if (sv.getValue().equals(fieldName)) {
-							alreadyAdded = true;
-						}
-						ignoreFields.add(sv);
+
+					StringAttributeValue sv = (StringAttributeValue) obj;
+					if (sv.getValue().equals(fieldName)) {
+						alreadyAdded = true;
 					}
-					continue;
+					ignoreFields.add(sv);
 				}
-				attributes.add(value);
 			}
-			
+
 			// Add the desired field to ignore to the end
 			if (!alreadyAdded) {
 				ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
 			}
-			
+
 			attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
 			AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(toStringType, attributes);
 			mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
-		}	
+		}
 	}
 
 	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName, JavaPackage javaPackage) {
