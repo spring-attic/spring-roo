@@ -44,7 +44,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
-	@AutoPopulate private String[] ignoreFields;
+	@AutoPopulate private String[] excludeFields;
 
 	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MemberHoldingTypeDetails> memberHoldingTypeDetails) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -123,15 +123,15 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			/** field names */
 			List<String> order = new ArrayList<String>();
 
-			Set<String> ignoreFieldsSet = new LinkedHashSet<String>();
-			if (ignoreFields != null && ignoreFields.length > 0) {
-				Collections.addAll(ignoreFieldsSet, ignoreFields);
+			Set<String> excludeFieldsSet = new LinkedHashSet<String>();
+			if (excludeFields != null && excludeFields.length > 0) {
+				Collections.addAll(excludeFieldsSet, excludeFields);
 			}
 
 			for (MethodMetadata accessor : getPublicAccessors(false)) {
 				String accessorName = accessor.getMethodName().getSymbolName();
 				String fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
-				if (!ignoreFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
+				if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
 					String accessorText = accessorName + "()";
 					if (accessor.getReturnType().isCommonCollectionType()) {
 						accessorText = accessorName + "() == null ? \"null\" : " + accessorName + "().size()";

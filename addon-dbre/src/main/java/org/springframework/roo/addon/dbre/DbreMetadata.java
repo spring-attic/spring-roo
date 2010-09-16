@@ -365,16 +365,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			boolean alreadyAdded = false;
 			for (JavaSymbolName attributeName : toStringAnnotation.getAttributeNames()) {
 				AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(attributeName);
-				if ("ignoreFields".equals(attributeName.getSymbolName())) {
+				if ("excludeFields".equals(attributeName.getSymbolName())) {
 					// Ensure we have an array of strings
 					if (!(value instanceof ArrayAttributeValue<?>)) {
-						throw new IllegalStateException("Annotation RooToString attribute 'ignoreFields' must be an array of strings");
+						throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");
 					}
 					
 					ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
 					for (Object obj : arrayVal.getValue()) {
 						if (!(obj instanceof StringAttributeValue)) {
-							throw new IllegalStateException("Annotation RooToString attribute 'ignoreFields' must be an array of strings");							
+							throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");							
 						}
 						
 						StringAttributeValue sv = (StringAttributeValue) obj;
@@ -393,7 +393,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
 			}
 			
-			attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("ignoreFields"), ignoreFields));
+			attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
 			AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(toStringType, attributes);
 			mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
 		}	

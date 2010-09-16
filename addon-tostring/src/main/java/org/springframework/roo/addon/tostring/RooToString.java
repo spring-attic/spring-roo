@@ -28,7 +28,7 @@ public @interface RooToString {
 	String toStringMethod() default "toString";
 	
 	/**
-	 * @return an array of fields to ignore in the toString method
+	 * @return an array of fields to exclude in the toString method
 	 */
-	String[] ignoreFields() default "";
+	String[] excludeFields() default "";
 }
