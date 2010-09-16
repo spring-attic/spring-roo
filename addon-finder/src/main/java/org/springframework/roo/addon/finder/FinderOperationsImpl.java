@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.finder;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -103,34 +104,34 @@ public class FinderOperationsImpl implements FinderOperations {
 		return result;
 	}
 	
- 	public void installFinder(JavaType typeName, JavaSymbolName finderName) {
- 		Assert.notNull(typeName, "Java type required");
- 		Assert.notNull(finderName, "Finer name required");
- 		
+	public void installFinder(JavaType typeName, JavaSymbolName finderName) {
+		Assert.notNull(typeName, "Java type required");
+		Assert.notNull(finderName, "Finer name required");
+
 		String id = physicalTypeMetadataProvider.findIdentifier(typeName);
 		if (id == null) {
 			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
-		
+
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		Path path = PhysicalTypeIdentifier.getPath(id);
 		String entityMid = EntityMetadata.createIdentifier(javaType, path);
-		
+
 		// Get the entity metadata
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMid);
 		if (entityMetadata == null) {
 			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not a entity");
 			return;
 		}
-		
+
 		// We also need the Bean Info metadata
 		String beanInfoMid = BeanInfoMetadata.createIdentifier(javaType, path);
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMid);
-		Assert.notNull(beanInfoMetadata, "Bean info ('" + beanInfoMid +"') was unexpectedly unavailable when entity metadata was available for '" + entityMetadata + "'");
+		Assert.notNull(beanInfoMetadata, "Bean info ('" + beanInfoMid + "') was unexpectedly unavailable when entity metadata was available for '" + entityMetadata + "'");
 
-		// We know the file exists, as there's already entity metadata for it		
+		// We know the file exists, as there's already entity metadata for it
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(id);
 		if (physicalTypeMetadata == null) {
 			// For some reason we found the source file a few lines ago, but suddenly it has gone away
@@ -140,7 +141,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
 		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
-		
+
 		// We know there should be an existing Entity annotation
 		List<? extends AnnotationMetadata> annotations = mutable.getAnnotations();
 		AnnotationMetadata found = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType(RooEntity.class.getName()));
@@ -158,38 +159,32 @@ public class FinderOperationsImpl implements FinderOperations {
 			logger.warning("The finder name '" + finderName.getSymbolName() + "' contains an error");
 			throw ex;
 		}
-		
+
 		// Make a destination list to store our final attributes
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> desiredFinders = new ArrayList<StringAttributeValue>();
-		
+
 		// Copy the existing attributes, excluding the "finder" attribute
 		boolean alreadyAdded = false;
-		for (JavaSymbolName attributeName : found.getAttributeNames()) {
-			AnnotationAttributeValue<?> val = found.getAttribute(attributeName);
-
-			if ("finders".equals(attributeName.getSymbolName())) {
-				// Ensure we have an array of strings
-				if (!(val instanceof ArrayAttributeValue<?>)) {
+		AnnotationAttributeValue<?> val = found.getAttribute(new JavaSymbolName("finders"));
+		if (val != null) {
+			// Ensure we have an array of strings
+			if (!(val instanceof ArrayAttributeValue<?>)) {
+				logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
+				return;
+			}
+			ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) val;
+			for (Object o : arrayVal.getValue()) {
+				if (!(o instanceof StringAttributeValue)) {
 					logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
 					return;
 				}
-				ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) val;
-				for (Object o : arrayVal.getValue()) {
-					if (!(o instanceof StringAttributeValue)) {
-						logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
-						return;
-					}
-					StringAttributeValue sv = (StringAttributeValue) o;
-					if (sv.getValue().equals(finderName.getSymbolName())) {
-						alreadyAdded = true;
-					}
-					desiredFinders.add(sv);
+				StringAttributeValue sv = (StringAttributeValue) o;
+				if (sv.getValue().equals(finderName.getSymbolName())) {
+					alreadyAdded = true;
 				}
-				continue;
+				desiredFinders.add(sv);
 			}
-			
-			attributes.add(val);
 		}
 
 		// Add the desired finder to the end
@@ -199,9 +194,8 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Now let's add the "finder" attribute
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
-		
+
 		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()), attributes);
-		mutable.removeTypeAnnotation(new JavaType(RooEntity.class.getName()));
-		mutable.addTypeAnnotation(annotation.build());
- 	}
+		mutable.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
+	}
 }
