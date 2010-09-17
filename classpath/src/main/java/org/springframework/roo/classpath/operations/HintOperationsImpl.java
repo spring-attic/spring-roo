@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.operations;
 
 import java.io.File;
+import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
@@ -26,13 +27,11 @@ import org.springframework.roo.shell.AbstractShell;
  * 
  * @author Ben Alex
  * @since 1.1
- *
  */
 @Service
 @Component
 public class HintOperationsImpl implements HintOperations {
-
-	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator; 
+	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator;
 	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
@@ -56,29 +55,32 @@ public class HintOperationsImpl implements HintOperations {
 		}
 		return metadata.getPathResolver();
 	}
-	
+
 	public SortedSet<String> getCurrentTopics() {
 		SortedSet<String> result = new TreeSet<String>();
 		String topic = determineTopic();
 		if ("general".equals(topic)) {
-			result.addAll(bundle.keySet());
+			for (Enumeration<String> keys = bundle.getKeys(); keys.hasMoreElements();) {
+				result.add(keys.nextElement());
+			}
+			// result.addAll(bundle.keySet()); ResourceBundle.keySet() method in JDK 6+
 		} else {
 			result.add(topic);
 		}
 		return result;
 	}
-	
+
 	private String determineTopic() {
 		PathResolver pathResolver = getPathResolver();
-		
+
 		if (pathResolver == null) {
 			return "start";
 		}
-		
+
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			return "jpa";
 		}
-		
+
 		int entityCount = fileManager.findMatchingAntPath(pathResolver.getRoot(Path.SRC_MAIN_JAVA) + ANT_MATCH_DIRECTORY_PATTERN + "*_Roo_Entity.aj").size();
 		if (entityCount == 0) {
 			return "entities";
@@ -88,8 +90,7 @@ public class HintOperationsImpl implements HintOperations {
 		if (javaBeanCount == 0) {
 			return "fields";
 		}
-		
+
 		return "general";
 	}
-
 }
