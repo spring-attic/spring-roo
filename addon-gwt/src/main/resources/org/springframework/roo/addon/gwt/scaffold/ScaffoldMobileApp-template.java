@@ -5,7 +5,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.UserInformationProxy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
@@ -13,7 +12,6 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Set;
 
 /**
  * Mobile application for browsing entities.
@@ -51,7 +49,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
         });
 
         Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-            public void onSuccess(UserInformationProxy userInformationProxy, Set<SyncResult> syncResults) {
+            public void onSuccess(UserInformationProxy userInformationProxy) {
                 shell.getLoginWidget().setUserInformation(userInformationProxy);
             }
         };
@@ -74,12 +72,13 @@ public class ScaffoldMobileApp extends ScaffoldApp {
         final ActivityManager activityManager = new ActivityManager(scaffoldMobileActivities, eventBus);
 
         activityManager.setDisplay(shell.getBody());
-
+        
         /* Browser history integration */
-        ScaffoldPlaceHistoryHandler placeHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
-        placeHistoryHandler.setFactory(placeHistoryFactory);
-        placeHistoryHandler.register(placeController, eventBus, 
-        		getTopPlaces().iterator().next()); /* defaultPlace */
+        ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
+        mapper.setFactory(placeHistoryFactory);
+        PlaceHistoryHandler placeHistoryHandler = new PlaceHistoryHandler(mapper);
+        ProxyListPlace defaultPlace = getTopPlaces().iterator().next();
+        placeHistoryHandler.register(placeController, eventBus, defaultPlace);
         placeHistoryHandler.handleCurrentHistory();
     }
 

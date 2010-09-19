@@ -32,8 +32,8 @@
       <h3 class='{style.header}'><ui:msg><span ui:field='displayRenderer' /></ui:msg></h3>
     </div>
 
-    <table class='{style.fields}'>{{#props3}}
-	    {{=prop}}{{/props3}}
+    <table class='{style.fields}'>{{#detailsUiXmlProps}}
+	    {{=prop}}{{/detailsUiXmlProps}}
 	</table>
 
   <div class="{style.bar}">

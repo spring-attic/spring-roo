@@ -1,15 +1,18 @@
 package {{=packageName}};
 
-import com.google.gwt.app.client.EditorSupport;
 import com.google.gwt.app.client.DoubleBox;
-import com.google.gwt.app.client.IntegerBox;
-import com.google.gwt.app.client.LongBox;
 import com.google.gwt.app.place.ProxyEditView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.requestfactory.client.RequestFactoryEditorDriver;
+import com.google.gwt.requestfactory.shared.RequestFactory;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -17,33 +20,32 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
-import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.requestfactory.shared.Property;
-import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.user.datepicker.client.DateBox;
 
 {{#imports}}import {{=import}};
 {{/imports}}
-import java.util.Map;
-import java.util.Set;
+
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Edit view for {{=name}} proxys.
  */
-public class {{=className}} extends Composite implements ProxyEditView<{{=proxy}}> {
+public class {{=className}} extends Composite implements 
+    ProxyEditView<{{=proxy}}, {{=className}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
-	interface DataBinder extends EditorSupport<{{=proxy}}, {{=className}}> {
+	interface Driver extends
+      RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
-	private static final DataBinder DATA_BINDER = GWT.create(DataBinder.class);
-	{{#props2}}
-	{{=prop}};{{/props2}}	
+
+	{{#editViewProps}}
+	{{=prop}};{{/editViewProps}}	
 	@UiField Button cancel;
 	@UiField Button save;
 	@UiField InlineLabel id;
@@ -54,35 +56,25 @@ public class {{=className}} extends Composite implements ProxyEditView<{{=proxy}
 	@UiField Element createTitle;
 
 	private Delegate delegate;
-	private {{=proxy}} proxy;
 
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
-		DATA_BINDER.init(this);
 	}
 
-	public {{=className}} asWidget() {
-		return this;
-	}	
+  @Override
+  public RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> createEditorDriver(
+      EventBus eventBus, RequestFactory requestFactory) {
+    RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> driver = GWT.create(Driver.class);
+    driver.initialize(eventBus, requestFactory, this);
+    return driver;
+  }
 
-	public String[] getPaths() {
-		return DATA_BINDER.getPaths();
-	}
+  {{#setEnumValuePickers}}
+  {{=setValuePicker}}{{/setEnumValuePickers}}
 
-	public {{=proxy}} getValue() {
-		return proxy;
-	}
-
-	public boolean isChanged() {
-		return DATA_BINDER.isChanged(this);
-	}
-
-    {{#setEnumValuePickers}}
-    {{=setValuePicker}}{{/setEnumValuePickers}}
-
-    {{#setProxyValuePickers}}
-    {{=setValuePicker}}{{/setProxyValuePickers}}
-    
+  {{#setProxyValuePickers}}
+  {{=setValuePicker}}{{/setProxyValuePickers}}
+   
 	public void setCreating(boolean creating) {
 		if (creating) {
 			editTitle.getStyle().setDisplay(Display.NONE);
@@ -98,18 +90,16 @@ public class {{=className}} extends Composite implements ProxyEditView<{{=proxy}
 	}
 
 	public void setEnabled(boolean enabled) {
-		DATA_BINDER.setEnabled(this, enabled);
 		save.setEnabled(enabled);
 	}
 
-	public void setValue({{=proxy}} value) {
-		this.proxy = value;
-		DATA_BINDER.setValue(this, value);
-	}
-
-	public void showErrors(Map<String, String> errorMap) {
-		DATA_BINDER.showErrors(this, errorMap);
-	}
+  public void showErrors(List<EditorError> errors) {
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    for (EditorError error : errors) {
+      b.appendEscaped(error.getMessage()).appendHtmlConstant("<br>");
+    }
+    this.errors.setInnerHTML(b.toSafeHtml().asString());
+  }
 
 	@UiHandler("cancel")
 	void onCancel(ClickEvent event) {

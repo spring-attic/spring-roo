@@ -62,7 +62,6 @@ public class {{=className}} extends AbstractGinModule {
 
         @Override
         public PlaceController get() {
-
             return new PlaceController(eventBus);
         }
     }
@@ -79,11 +78,8 @@ public class {{=className}} extends AbstractGinModule {
         @Override
         public {{=requestFactory}} get() {
             {{=requestFactory}} requestFactory = GWT.create({{=requestFactory}}.class);
-            requestFactory.init(eventBus);
-
+            requestFactory.initialize(eventBus);
             return requestFactory;
         }
     }
 }
-
-	

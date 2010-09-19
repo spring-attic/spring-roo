@@ -36,8 +36,8 @@ public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
 		// TODO These should be <g:col> elements in a <g:table> in the ui.xml file
 
 		List<PropertyColumn<{{=proxy}}, ?>> columns = new ArrayList<PropertyColumn<{{=proxy}}, ?>>();
-		{{#props4}}
-	    {{=prop}}{{/props4}}		
+		{{#listViewProps}}
+	    {{=prop}}{{/listViewProps}}		
 	    return columns;
 	}
 }

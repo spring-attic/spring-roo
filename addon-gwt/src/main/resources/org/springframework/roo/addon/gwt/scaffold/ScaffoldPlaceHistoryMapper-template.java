@@ -1,14 +1,13 @@
 package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
 
-import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
+import com.google.gwt.app.place.PlaceHistoryMapperWithFactory;
 
 /**
  * This interface is the hub of your application's navigation system. It links
  * the {@link com.google.gwt.app.place.Place Place}s your user navigates to with
  * the browser history system &mdash; that is, it makes the browser's back and
  * forth buttons work for you, and also makes each spot in your app
- * bookmarkable. The instance used by this app is available via
- * {@link PlaceHistoryFactory#getPlaceHistoryHandler()}.
+ * bookmarkable.
  * 
  * <p>
  * The simplest way to make new {@link com.google.gwt.app.place.Place Place}
@@ -28,5 +27,5 @@ import com.google.gwt.app.place.PlaceHistoryHandlerWithFactory;
  * an individual entity).
  */
 // @WithTokenizers({MyNewPlace.Tokenizer, MyOtherNewPlace.Tokenizer})
-public interface ScaffoldPlaceHistoryHandler extends PlaceHistoryHandlerWithFactory<PlaceHistoryFactory> {
+public interface ScaffoldPlaceHistoryMapper extends PlaceHistoryMapperWithFactory<PlaceHistoryFactory> {
 }

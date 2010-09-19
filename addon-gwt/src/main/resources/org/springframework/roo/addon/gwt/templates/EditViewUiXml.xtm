@@ -38,8 +38,8 @@
     </div>
     <div ui:field='errors' style='background-color: red;'></div>
 
-    <table class="{style.fields}">{{#props5}}
-	    {{=prop}}{{/props5}}
+    <table class="{style.fields}">{{#editUiXmlProps}}
+	    {{=prop}}{{/editUiXmlProps}}
     </table>
 
     <div class='{style.bar}'>

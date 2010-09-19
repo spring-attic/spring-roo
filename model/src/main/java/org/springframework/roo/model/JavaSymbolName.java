@@ -52,18 +52,25 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	}
 	
 	/**
-	 * 
 	 * @return the symbol name in human readable form
 	 */
 	public String getReadableSymbolName() {
-		Pattern p = Pattern.compile("[A-Z][^A-Z]*");
-        Matcher m = p.matcher(StringUtils.capitalize(symbolName));
-		StringBuilder string = new StringBuilder();
-        while (m.find()) {
-            string.append(m.group()).append(" ");
-        }
-		return string.toString().trim();
+		String camelCase = symbolName;
+		return getReadableSymbolName(camelCase);
 	}
+
+	/**
+	 * @return a camel case string in human readable form
+	 */
+	public static String getReadableSymbolName(String camelCase) {
+	  Pattern p = Pattern.compile("[A-Z][^A-Z]*");
+		Matcher m = p.matcher(StringUtils.capitalize(camelCase));
+		StringBuilder string = new StringBuilder();
+		while (m.find()) {
+			string.append(m.group()).append(" ");
+		}
+		return string.toString().trim();
+  }
 	
 	public final int hashCode() {
 		return this.symbolName.hashCode();

@@ -12,10 +12,8 @@ import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -29,8 +27,6 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.DefaultClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -90,10 +86,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private ClassOrInterfaceTypeDetails details;
 	private ClassOrInterfaceTypeDetails listView;
 
-	private DefaultClassOrInterfaceTypeDetails listViewBinder;
-	private DefaultClassOrInterfaceTypeDetails detailsViewBinder;
-	private DefaultClassOrInterfaceTypeDetails editViewBinder;
-
 	public GwtMetadata(String identifier, MirrorTypeNamingStrategy mirrorTypeNamingStrategy, ProjectMetadata projectMetadata, ClassOrInterfaceTypeDetails governorTypeDetails, Path mirrorTypePath, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FileManager fileManager, MetadataService metadataService) {
 		super(identifier);
 		this.mirrorTypeNamingStrategy = mirrorTypeNamingStrategy;
@@ -109,10 +101,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		resolveEntityInformation();
 		buildProxy();
 		buildActivitiesMapper();
-		// TODO (cromwellian) Argh! Why must I make this an outer class!
-		listViewBinder = buildListViewBinder(MirrorType.LIST_VIEW_BINDER, MirrorType.LIST_VIEW);
-		detailsViewBinder = buildListViewBinder(MirrorType.DETAILS_VIEW_BINDER, MirrorType.DETAILS_VIEW);
-		editViewBinder = buildListViewBinder(MirrorType.EDIT_VIEW_BINDER, MirrorType.EDIT_VIEW);
+
 		buildEditActivity();
 		buildDetailsActivity();
 		buildListActivity();
@@ -129,9 +118,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	public List<ClassOrInterfaceTypeDetails> getAllTypes() {
 		List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
 		result.add(proxy);
-		result.add(listViewBinder);
-		result.add(detailsViewBinder);
-		result.add(editViewBinder);
 		result.add(request);
 		return result;
 	}
@@ -178,7 +164,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		// @ProxyFor(Employee.class)
 		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ProxyFor")));
 		List<ConstructorMetadataBuilder> constructors = new ArrayList<ConstructorMetadataBuilder>();
-		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		List<JavaType> implementsTypes = new ArrayList<JavaType>();
@@ -192,24 +177,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		// Decide fields we'll be mapping
 		SortedMap<JavaSymbolName, JavaType> propToGwtSideType = new TreeMap<JavaSymbolName, JavaType>();
-		Map<JavaSymbolName, JavaType> propToWrapperType = new HashMap<JavaSymbolName, JavaType>();
 		if (beanInfoMetadata != null) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
 
 				JavaType gwtSideType = null;
-				JavaType wrapperType = new JavaType("com.google.gwt.requestfactory.shared.Property");
-				JavaType enumWrapperType = new JavaType("com.google.gwt.requestfactory.shared.EnumProperty");
-				// TODO id and version excluded as they specified in the Proxy interface. Revisit later
-				if ("id".equals(propertyName.getSymbolName()) || "version".equals(propertyName.getSymbolName())) {
-					wrapperType = null;
-				}
 
 				JavaType returnType = accessor.getReturnType();
 				PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
-				boolean isEnum = ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 
-				boolean isDomainObject = !isEnum && !isShared(returnType) && !(returnType.equals(JavaType.BOOLEAN_OBJECT) || returnType.equals(JavaType.INT_OBJECT) || returnType.isPrimitive() || returnType.equals(JavaType.LONG_OBJECT) || returnType.equals(JavaType.STRING_OBJECT) || returnType.equals(JavaType.DOUBLE_OBJECT) || returnType.equals(JavaType.FLOAT_OBJECT) || returnType.equals(new JavaType("java.util.Date")));
+				boolean isDomainObject = isDomainObject(returnType, ptmd);
 				if (isDomainObject) {
 					gwtSideType = getDestinationJavaType(returnType, MirrorType.PROXY);
 				} else {
@@ -242,34 +219,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 					}
 				}
 
-				if (isEnum) {
-					wrapperType = enumWrapperType;
-				}
-				if (wrapperType == null) {
+				if ("id".equals(propertyName.getSymbolName()) || "version".equals(propertyName.getSymbolName())) {
 					// This field won't be supported
 					continue;
 				}
 
 				// Store in the maps
 				propToGwtSideType.put(propertyName, gwtSideType);
-				propToWrapperType.put(propertyName, wrapperType);
 			}
-		}
-
-		fields.add(new FieldMetadataBuilder(destinationMetadataId, Modifier.PUBLIC, new JavaSymbolName("TOKEN"), JavaType.STRING_OBJECT, "\"" + name.getSimpleTypeName() + "\""));
-
-		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
-			JavaSymbolName fieldName = propertyName;
-			List<JavaType> fieldArgs = new ArrayList<JavaType>();
-			fieldArgs.add(propToGwtSideType.get(propertyName));
-
-			JavaType fieldType = new JavaType(new JavaType("com.google.gwt.requestfactory.shared.Property").getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
-			JavaType rhsType = new JavaType(propToWrapperType.get(propertyName).getFullyQualifiedTypeName(), 0, DataType.TYPE, null, fieldArgs);
-
-			String clazz = propToGwtSideType.get(propertyName).getFullyQualifiedTypeName();
-			boolean isEnumProp = rhsType.getSimpleTypeName().equals("EnumProperty");
-			String fieldInitializer = "new " + rhsType + "(\"" + propertyName.getSymbolName() + ("\", " + (isEnumProp ? "" : "\"" + propertyName.getReadableSymbolName() + "\", ") + clazz + ".class" + (isEnumProp ? ", " + clazz + ".values())" : ")"));
-			fields.add(new FieldMetadataBuilder(destinationMetadataId, Modifier.INTERFACE, fieldName, fieldType, fieldInitializer));
 		}
 
 		// Getter methods for EmployeeProxy
@@ -297,12 +254,34 @@ public class GwtMetadata extends AbstractMetadataItem {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
 		typeDetailsBuilder.setDeclaredConstructors(constructors);
 		typeDetailsBuilder.setDeclaredMethods(methods);
-		typeDetailsBuilder.setDeclaredFields(fields);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setImplementsTypes(implementsTypes);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
 		this.proxy = typeDetailsBuilder.build();
 	}
+
+  private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
+    boolean isEnum = ptmd != null 
+      && ptmd.getPhysicalTypeDetails() != null 
+      && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+
+    boolean isDomainObject = !isEnum 
+      && !isShared(returnType) 
+      && !(isRequestFactoryPrimitive(returnType));
+
+    return isDomainObject;
+  }
+
+  private boolean isRequestFactoryPrimitive(JavaType returnType) {
+    return returnType.equals(JavaType.BOOLEAN_OBJECT) 
+         || returnType.equals(JavaType.INT_OBJECT) 
+         || returnType.isPrimitive() 
+         || returnType.equals(JavaType.LONG_OBJECT) 
+         || returnType.equals(JavaType.STRING_OBJECT) 
+         || returnType.equals(JavaType.DOUBLE_OBJECT) 
+         || returnType.equals(JavaType.FLOAT_OBJECT) 
+         || returnType.equals(new JavaType("java.util.Date"));
+  }
 
 	private void addReference(TemplateDataDictionary dataDictionary, MirrorType type) {
 		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
@@ -414,25 +393,20 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 
-		for (FieldMetadata field : proxy.getDeclaredFields()) {
-			if (field.getFieldName().getSymbolName().equals("TOKEN")) {
-				continue;
-			}
-			dataDictionary.addSection("fields").setVariable("field", field.getFieldName().getSymbolName());
-		}
 		String displayFields = null, displayFieldGetter = null;
 		Set<String> importSet = new HashSet<String>();
 		for (MethodMetadata method : proxy.getDeclaredMethods()) {
-			if (!method.getMethodName().getSymbolName().startsWith("get")) {
+			if (!GwtProxyProperty.isAccessor(method)) {
 				continue;
 			}
-			String getter = method.getMethodName().getSymbolName();
-			PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
-			Property property = new Property(getter, StringUtils.uncapitalize(getter.substring(3)), "set" + getter.substring(3), method.getReturnType(), ptmd);
+
+      PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
+			GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
 
 			if (property.isString()) {
 				displayFieldGetter = property.getGetter();
 			}
+
 			if (property.isProxy()) {
 				if (displayFields != null) {
 					displayFields += ", ";
@@ -442,11 +416,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 				displayFields += "\"" + property.getName() + "\"";
 			}
 
-			dataDictionary.addSection("props1").setVariable("prop", property.forDetailsView());
-			dataDictionary.addSection("props2").setVariable("prop", property.forEditView());
-			dataDictionary.addSection("props3").setVariable("prop", property.forDetailsUIXml());
-			dataDictionary.addSection("props4").setVariable("prop", property.forListView(proxyType.getSimpleTypeName()));
-			dataDictionary.addSection("props5").setVariable("prop", property.forEditUiXml());
+			dataDictionary.addSection("fields").setVariable("field", property.getName());
+			dataDictionary.addSection("detailViewProps").setVariable("prop", property.forDetailsView());
+			dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
+			dataDictionary.addSection("detailsUiXmlProps").setVariable("prop", property.forDetailsUIXml());
+			dataDictionary.addSection("listViewProps").setVariable("prop", property.forListView(proxyType.getSimpleTypeName()));
+			dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
@@ -563,34 +538,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	private DefaultClassOrInterfaceTypeDetails buildListViewBinder(MirrorType binderMirrorType, MirrorType viewType) {
-		String destinationMetadataId = getDestinationMetadataId(binderMirrorType);
-		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
-
-		List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
-		List<ConstructorMetadataBuilder> constructors = new ArrayList<ConstructorMetadataBuilder>();
-		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
-		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
-		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
-		// private static final Binder BINDER = GWT.create(Binder.class)
-		List<JavaType> binderParams = new ArrayList<JavaType>();
-		binderParams.add(new JavaType("com.google.gwt.user.client.ui.HTMLPanel"));
-		binderParams.add(getDestinationJavaType(viewType));
-		JavaType binderType = new JavaType("com.google.gwt.uibinder.client.UiBinder", 0, DataType.TYPE, null, binderParams);
-		extendsTypes.add(binderType);
- 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
-		typeDetailsBuilder.setAnnotations(typeAnnotations);
-		typeDetailsBuilder.setDeclaredConstructors(constructors);
-		typeDetailsBuilder.setDeclaredFields(fields);
-		typeDetailsBuilder.setDeclaredMethods(methods);
-		typeDetailsBuilder.setExtendsTypes(extendsTypes);
-		typeDetailsBuilder.setImplementsTypes(implementsTypes);
-		return (DefaultClassOrInterfaceTypeDetails) typeDetailsBuilder.build();
-	}
-
 	private void buildRequest() {
 		String destinationMetadataId = getDestinationMetadataId(MirrorType.REQUEST);
 		JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
@@ -613,7 +560,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		for (MethodMetadata metadata : new MethodMetadata[] { entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod() }) {
 			List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(getDestinationJavaType(MirrorType.PROXY), null));
 			List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName("proxy"));
-			List<AnnotationMetadataBuilder> annotations = Collections.singletonList((AnnotationMetadataBuilder) new AnnotationMetadataBuilder(new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>> emptyList()));
+			List<AnnotationMetadataBuilder> annotations = Collections.singletonList(new AnnotationMetadataBuilder(new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>> emptyList()));
 			MethodMetadataBuilder method1Builder = new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(), methodReturnType, parameterTypes, parameterNames, new InvocableMemberBodyBuilder());
 			method1Builder.setAnnotations(annotations);
 			methods.add(method1Builder);
@@ -648,173 +595,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 				jtype = JavaType.LONG_OBJECT;
 			}
 			typeParams.add(jtype);
-			JavaType propRef = new JavaType("com.google.gwt.requestfactory.shared.PropertyReference", 0, DataType.TYPE, null, typeParams);
-			method1ParameterTypes.add(jtype.isPrimitive() ? jtype : propRef);
+			method1ParameterTypes.add(jtype);
 		}
 
 		methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, new InvocableMemberBodyBuilder()));
-	}
-
-	// TODO (cromwellian): class is getting ugly, clean this up
-	public class Property {
-		private String name;
-		private String getter;
-		private String setter;
-		private JavaType type;
-
-		private PhysicalTypeMetadata ptmd;
-
-		public Property(String getter, String name, String setter) {
-			this.getter = getter;
-			this.name = name;
-			this.setter = setter;
-		}
-
-		public Property(String getter, String name, String setting, JavaType returnType, PhysicalTypeMetadata ptmd) {
-			this(getter, name, setting);
-			this.type = returnType;
-			this.ptmd = ptmd;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getSetter() {
-			return setter;
-		}
-
-		public String getGetter() {
-			return getter;
-		}
-
-		public String getType() {
-			return type.getFullyQualifiedTypeName();
-		}
-
-		public JavaType getPropertyType() {
-			return type;
-		}
-
-		public void setGetter(String getter) {
-			this.getter = getter;
-		}
-
-		public boolean isBoolean() {
-			return type != null && type.equals(JavaType.BOOLEAN_OBJECT);
-		}
-
-		public boolean isDate() {
-			return type != null && type.equals(new JavaType("java.util.Date"));
-		}
-
-		public boolean isPrimitive() {
-			return type.isPrimitive() || isDate() || isString() || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT) || isBoolean();
-		}
-
-		public boolean isString() {
-			return type != null && type.equals(new JavaType("java.lang.String"));
-		}
-
-		public String getBinder() {
-			if (type.equals(JavaType.DOUBLE_OBJECT)) {
-				return "app:DoubleBox";
-			}
-			if (type.equals(JavaType.LONG_OBJECT)) {
-				return "app:LongBox";
-			}
-			if (type.equals(JavaType.INT_OBJECT)) {
-				return "app:IntegerBox";
-			}
-			return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
-		}
-
-		public String getEditor() {
-			if (type.equals(JavaType.DOUBLE_OBJECT)) {
-				return "DoubleBox";
-			}
-			if (type.equals(JavaType.LONG_OBJECT)) {
-				return "LongBox";
-			}
-			if (type.equals(JavaType.INT_OBJECT)) {
-				return "IntegerBox";
-			}
-			if (isBoolean()) {
-				return "(provided = true) CheckBox";
-			}
-			return isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
-		}
-
-		public String getFormatter() {
-			return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : isProxy() ? getRendererType() + ".instance().render(" : "String.valueOf(";
-		}
-
-		public String getRenderer() {
-			return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return obj == null ? \"\" : String.valueOf(obj);\n      }    \n}" : getRendererType() + ".instance()";
-		}
-
-		private String getRendererType() {
-			return MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + type.getSimpleTypeName() + "Renderer";
-		}
-
-		public String getCheckboxSubtype() {
-			// TODO: Ugly hack, fix in M4
-			return "new CheckBox() { public void setValue(Boolean value) { super.setValue(value == null ? Boolean.FALSE : value); } }";
-		}
-
-		public String getReadableName() {
-			return new JavaSymbolName(name).getReadableSymbolName();
-		}
-
-		public String forDetailsView() {
-			return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("proxy.").append(getGetter()).append("()));").toString();
-		}
-
-		public String forEditView() {
-			String initializer = "";
-
-			if (isBoolean()) {
-				initializer = " = " + getCheckboxSubtype();
-			}
-
-			if (isEnum()) {
-				initializer = String.format(" = new ValueListBox<%s>(%s)", type.getFullyQualifiedTypeName(), getRenderer());
-			}
-
-			if (isProxy()) {
-				initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), " + "new com.google.gwt.app.place.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getRendererType());
-			}
-
-			return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
-		}
-
-		public String forDetailsUIXml() {
-			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><span ui:field='").append(getName()).append("'></span></td></tr>").toString();
-		}
-
-		public String forListView(String proxy) {
-			return new StringBuilder("columns.add(new PropertyColumn<").append(proxy).append(", ").append(getType()).append(">(").append(proxy).append(".").append(getName()).append(", ").append(getRenderer()).append("));").toString();
-		}
-
-		public String forEditUiXml() {
-			return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();
-		}
-
-		public boolean isProxy() {
-			return !isDate() && !isString() && !isPrimitive() && !isEnum();
-		}
-
-		private boolean isEnum() {
-			return ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
-		}
-
-		public String getSetValuePickerMethod() {
-			return "\tpublic void " + getSetValuePickerMethodName() + "(Collection<" + type.getSimpleTypeName() + "> values) {\n" + "\t\t" + getName() + ".setAcceptableValues(values);\n" + "\t}\n";
-		}
-
-		private String getSetValuePickerMethodName() {
-			return "set" + StringUtils.capitalize(getName()) + "PickerValues";
-		}
 	}
 
 	class ExportedMethod {

@@ -6,10 +6,11 @@ import com.google.gwt.app.place.ProxyPlace;
 import com.google.gwt.app.place.ProxyDetailsView;
 import com.google.gwt.app.place.ProxyPlace.Operation;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.requestfactory.shared.EntityProxy;
+import com.google.gwt.requestfactory.shared.EntityProxyId;
+import com.google.gwt.requestfactory.shared.ProxyRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestObject;
-import com.google.gwt.requestfactory.shared.SyncResult;
-import com.google.gwt.requestfactory.shared.Value;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 {{#imports}}import {{=import}};
 {{/imports}}
@@ -32,22 +33,22 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 	private final ApplicationRequestFactory requests;
 	private final PlaceController placeController;
 	private final ProxyDetailsView<{{=proxy}}> view;
-	private {{=proxy}} proxy;
+        private final EntityProxyId proxyId;
 	private AcceptsOneWidget display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public {{=className}}({{=proxy}} proxy, ApplicationRequestFactory requests, PlaceController placeController) {
-		this(proxy, requests, placeController, getDefaultView());
+	public {{=className}}(EntityProxyId proxyId, ApplicationRequestFactory requests, PlaceController placeController) {
+		this(proxyId, requests, placeController, getDefaultView());
 	}
 
 	/**
    * Creates an activity that uses its own view instance.
  	 */
-	public {{=className}}({{=proxy}} proxy, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
+	public {{=className}}(EntityProxyId proxyId, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
 		this.placeController = placeController;
-		this.proxy = proxy;
+		this.proxyId = proxyId;
 		this.requests = requests;
 		view.setDelegate(this);
 		this.view = view;
@@ -60,7 +61,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
    		
 		RequestObject<Void> deleteRequest = requests.{{=nameUncapitalized}}Request().remove(view.getValue());
 		deleteRequest.fire(new Receiver<Void>() {
-			public void onSuccess(Void ignore, Set<SyncResult> response) {
+			public void onSuccess(Void ignore) {
 				if (display == null) {
 					// This activity is dead
 					return;
@@ -72,7 +73,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 	}
 
 	public void editClicked() {
-		placeController.goTo(new ProxyPlace(view.getValue(), Operation.EDIT));
+		placeController.goTo(new ProxyPlace(view.getValue().stableId(), Operation.EDIT));
 	}
 
 	public void onCancel() {
@@ -85,16 +86,16 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 
 	public void start(AcceptsOneWidget displayIn, EventBus eventBus) {
     	this.display = displayIn;
-    	Receiver<{{=proxy}}> callback = new Receiver<{{=proxy}}>() {
-			public void onSuccess({{=proxy}} proxy, Set<SyncResult> syncResults) {
+    	Receiver<EntityProxy> callback = new Receiver<EntityProxy>() {
+			public void onSuccess(EntityProxy proxy) {
         		if (display == null) {
           			return;
        			}
-				view.setValue(proxy);
+				view.setValue(({{=proxy}}) proxy);
 				display.setWidget(view);
 			}
 		};
 
-		requests.{{=nameUncapitalized}}Request().find{{=name}}(Value.of(proxy.getId())).with({{=displayFields}}).fire(callback);
+		requests.find(proxyId).with({{=displayFields}}).fire(callback);
 	}
 }

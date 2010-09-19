@@ -20,11 +20,11 @@ public class {{=className}} {
 	public Activity getActivity(ProxyPlace place) {
 		switch (place.getOperation()) {
 			case DETAILS:
-				return new {{=detailsActivity}}(({{=proxy}}) place.getProxy(), requests, placeController);
+				return new {{=detailsActivity}}(place.getProxyId(), requests, placeController);
 			case EDIT:
-				return new {{=editActivity}}(({{=proxy}}) place.getProxy(), requests, placeController, false);
+				return new {{=editActivity}}(place.getProxyId(), requests, placeController, false);
 			case CREATE:
-      			return new {{=editActivity}}(({{=proxy}}) place.getProxy(), requests, placeController, true);
+      			return new {{=editActivity}}(place.getProxyId(), requests, placeController, true);
 		}
 
 		throw new IllegalArgumentException("Unknown operation " + place.getOperation());

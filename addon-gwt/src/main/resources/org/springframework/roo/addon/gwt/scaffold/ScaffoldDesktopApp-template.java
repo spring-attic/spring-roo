@@ -7,7 +7,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestEvent;
-import com.google.gwt.requestfactory.shared.SyncResult;
 import com.google.gwt.requestfactory.shared.UserInformationProxy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
@@ -15,7 +14,6 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Set;
 
 /**
  * Application for browsing entities.
@@ -52,7 +50,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
         });
 
         Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-            public void onSuccess(UserInformationProxy userInformationProxy, Set<SyncResult> syncResults) {
+            public void onSuccess(UserInformationProxy userInformationProxy) {
                 shell.getLoginWidget().setUserInformation(userInformationProxy);
             }
         };
@@ -91,10 +89,12 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
 
         detailsActivityManager.setDisplay(shell.getDetailsPanel());
 
-        ScaffoldPlaceHistoryHandler placeHistoryHandler = GWT.create(ScaffoldPlaceHistoryHandler.class);
-        placeHistoryHandler.setFactory(placeHistoryFactory);
-        placeHistoryHandler.register(placeController, eventBus,
-	      getTopPlaces().iterator().next()); /* defaultPlace */
+        /* Browser history integration */
+        ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
+        mapper.setFactory(placeHistoryFactory);
+        PlaceHistoryHandler placeHistoryHandler = new PlaceHistoryHandler(mapper);
+        ProxyListPlace defaultPlace = getTopPlaces().iterator().next();
+        placeHistoryHandler.register(placeController, eventBus, defaultPlace);
         placeHistoryHandler.handleCurrentHistory();
     }
 }
