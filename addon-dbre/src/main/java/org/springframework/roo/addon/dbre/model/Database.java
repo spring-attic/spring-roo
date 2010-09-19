@@ -207,8 +207,12 @@ public class Database implements Serializable {
 	}
 
 	public String toString() {
-		OutputStream outputStream = new ByteArrayOutputStream();
-		DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
-		return outputStream.toString();
+		if (hasTables()) {
+			OutputStream outputStream = new ByteArrayOutputStream();
+			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
+			return outputStream.toString();
+		} else {
+			return "Schema " + schema.getName() + " does not have any tables (note the schema names of some databases are case-sensitive)";
+		}
 	}
 }

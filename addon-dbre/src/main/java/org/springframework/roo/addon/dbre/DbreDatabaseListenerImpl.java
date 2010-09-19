@@ -234,9 +234,8 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		
 		// Process primary keys and add 'identifierType' attribute
 		int pkCount = table.getPrimaryKeyCount();
-		List<Identifier> identifiers = getIdentifiersFromColumns(table.getPrimaryKeys());
-
 		if (pkCount == 1) {
+			// Table has one primary key
 			// Check for redundant, managed identifier class and delete if found
 			if (isIdentifierDeletable(identifierType)) {
 				deleteManagedType(identifierType);
@@ -245,9 +244,10 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			attributesToDeleteIfPresent.add(IDENTIFIER_TYPE);
 			
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
+			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table.getPrimaryKeys());
 			identifierResults.put(javaType, identifiers);
-		} else if (pkCount > 1) {
-			// Table has a composite key
+		} else if (pkCount == 0 || pkCount > 1) {
+			// Table has either no primary keys or more than one primary key so create a composite key
 
 			// Check if identifier class already exists and if not, create it
 			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
@@ -257,6 +257,8 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			entityAttributes.add(new ClassAttributeValue(IDENTIFIER_TYPE, identifierType));
 
 			// We need a PK class, so we tell the IdentifierMetadataProvider via IdentifierService the various column names, field types and field names to use
+			// For tables with no primary keys, create a composite key using all the table's columns
+			List<Identifier> identifiers = pkCount == 0 ? getIdentifiersFromColumns(table.getColumns()) : getIdentifiersFromPrimaryKeys(table.getPrimaryKeys());
 			identifierResults.put(identifierType, identifiers);
 		}
 	}
@@ -291,23 +293,25 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 	}
+	
+	private List<Identifier> getIdentifiersFromPrimaryKeys(Set<Column> primaryKeys) {
+		return getIdentifiersFromColumns(primaryKeys);
+	}
 
 	private List<Identifier> getIdentifiersFromColumns(Set<Column> columns) {
 		List<Identifier> result = new ArrayList<Identifier>();
 
-		// Add primary key fields to the identifier class
+		// Add fields to the identifier class
 		for (Column column : columns) {
-			if (column.isPrimaryKey()) {
-				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
-				JavaType fieldType = column.getType().getJavaType();
-				String columnName = column.getName();
-				result.add(new Identifier(fieldName, fieldType, columnName));
-			}
+			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
+			JavaType fieldType = column.getType().getJavaType();
+			String columnName = column.getName();
+			result.add(new Identifier(fieldName, fieldType, columnName));
 		}
 
 		return result;
 	}
-
+	
 	private void deleteManagedTypes() {
 		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getDatabaseManagedIdentifiers();
 		for (JavaType javaType : dbreTypeResolutionService.getDatabaseManagedEntities()) {

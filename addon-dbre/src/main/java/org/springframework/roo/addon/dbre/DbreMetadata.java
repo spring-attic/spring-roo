@@ -250,7 +250,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
-				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences(), isCompositeKeyColumn(column.getName(), fieldType));
+				boolean notNullable = isCompositeKeyColumn(column.getName(), fieldType);
+				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences(), notNullable);
 				uniqueFields.put(fieldName, field);
 			}
 		}
@@ -318,7 +319,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return fieldBuilder.build();
 	}
 
-	private FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column, boolean nullable) {
+	private FieldMetadata getOneToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, Column column, boolean notNullable) {
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
@@ -329,11 +330,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			// Add @JoinColumn annotation
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttributes.add(new StringAttributeValue(NAME, column.getName()));
-			addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
+			addOtherJoinColumnAttributes(notNullable, joinColumnAttributes);
 			annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes));
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references, nullable));
+			annotations.add(getJoinColumnsAnnotation(references, notNullable));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
@@ -414,7 +415,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return fieldBuilder.build();
 	}
 
-	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, boolean nullable) {
+	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, boolean notNullable) {
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
@@ -424,35 +425,35 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (references.size() == 1) {
 			// Add @JoinColumn annotation
 			Reference reference = references.first();
-			annotations.add(getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), nullable));
+			annotations.add(getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), notNullable));
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references, nullable));
+			annotations.add(getJoinColumnsAnnotation(references, notNullable));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
 	}
 
-	private AnnotationMetadataBuilder getJoinColumnAnnotation(String localColumnName, String foreignColumnName, boolean nullable) {
+	private AnnotationMetadataBuilder getJoinColumnAnnotation(String localColumnName, String foreignColumnName, boolean notNullable) {
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		joinColumnAttributes.add(new StringAttributeValue(NAME, localColumnName));
 		joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, foreignColumnName));
-		addOtherJoinColumnAttributes(nullable, joinColumnAttributes);
+		addOtherJoinColumnAttributes(notNullable, joinColumnAttributes);
 		return new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
 	}
 
-	private void addOtherJoinColumnAttributes(boolean nullable, List<AnnotationAttributeValue<?>> joinColumnAttributes) {
-		if (nullable) {
+	private void addOtherJoinColumnAttributes(boolean notNullable, List<AnnotationAttributeValue<?>> joinColumnAttributes) {
+		if (notNullable) {
 			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("insertable"), false));
 			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("updatable"), false));
 		}
 	}
 
-	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, boolean nullable) {
+	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, boolean notNullable) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		for (Reference reference : references) {
-			AnnotationMetadataBuilder joinColumnAnnotation = getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), nullable);
+			AnnotationMetadataBuilder joinColumnAnnotation = getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), notNullable);
 			arrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation.build()));
 		}
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
