@@ -41,10 +41,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider implements MethodMetadata {
-
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 	private List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 	private List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
@@ -321,7 +319,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			if (bd instanceof MethodDeclaration) {
 				// Next method should appear after this current method
 				MethodDeclaration md = (MethodDeclaration) bd;
-				if (md.getName().equals(d.getName()) && md.getParameters().size() == d.getParameters().size()) {
+				if (md.getName().equals(d.getName()) && md.getParameters() != null && md.getParameters().size() == d.getParameters().size()) {
 					// Possible match, we need to consider parameter types as well now
 					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
 					boolean matchesFully = true;
