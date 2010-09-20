@@ -47,6 +47,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private UrlInputStreamService httpService;
 	
+	private char separator = File.separatorChar;
+	
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
 	}
@@ -87,7 +89,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		if (language == null || language.length() == 0) {
 			language = "";
-			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  File.separator + "iso3166.txt"));
+			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  separator + "iso3166.txt"));
 			BufferedReader br = new BufferedReader(is);
 			String line;
 			try {
@@ -121,7 +123,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 		String languageName = b.toString();
 		
-		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', File.separatorChar);
+		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', separator);
 		
 		if (description == null || description.length() == 0) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
@@ -132,9 +134,9 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		installIfNeeded("assembly.xml", topLevelPackage, Type.I18N);
 		
 		try {
-			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + messageBundle.getName())).getOutputStream());
+			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + messageBundle.getName())).getOutputStream());
 			if (flagGraphic != null) {
-				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + flagGraphic.getName())).getOutputStream());
+				FileCopyUtils.copy(new FileInputStream(flagGraphic), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + flagGraphic.getName())).getOutputStream());
 			} else {
 				installFlagGraphic(locale, packagePath);
 			} 
@@ -142,10 +144,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			throw new IllegalStateException("Could not copy addon resources into project", e);
 		}
 		
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + languageName + "Language.java");
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + languageName + "Language.java");
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  File.separator + "Language.java-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  separator + "Language.java-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -174,7 +176,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		Document pom;
 		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + File.separator + "roo-addon-" + type.name().toLowerCase() + "-template.xml"));
+			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + separator + "roo-addon-" + type.name().toLowerCase() + "-template.xml"));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -194,34 +196,34 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 
 		writeTextFile("readme.txt", "welcome to my addon!", projectMetadata);
-		writeTextFile("legal" + File.separator + "LICENSE.TXT", "Your license goes here", projectMetadata);
+		writeTextFile("legal" + separator + "LICENSE.TXT", "Your license goes here", projectMetadata);
 
 		fileManager.scan();
 	}
 	
 	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Type type) {
 		String tlp = topLevelPackage.getFullyQualifiedPackageName();
-		String packagePath = tlp.replace('.', File.separatorChar);
+		String packagePath = tlp.replace('.', separator);
 		String fileName = StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + targetFilename;
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + fileName);
+		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + fileName);
 		
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src" + File.separator + "main" + File.separator + "assembly" + File.separator + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src" + separator + "main" + separator + "assembly" + separator + targetFilename);
 		}
 		
 		// Different destination for configuration.xml
 		else if ("configuration.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + targetFilename);
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + targetFilename);
 		}
 		
 		// Adjust name for Roo Annotation
 		else if (targetFilename.startsWith("RooAnnotation")) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + File.separator + "Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + "Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
 		}
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + File.separator + targetFilename + "-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + separator + targetFilename + "-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -269,12 +271,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			bis = new BufferedInputStream(httpService.openConnection(new URL("http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip")));
 			zis = new ZipInputStream(bis);
 			ZipEntry entry;
-			String expectedEntryName = "png" + File.separator + countryCode + ".png";
+			String expectedEntryName = "png" + separator + countryCode + ".png";
 			while ((entry = zis.getNextEntry()) != null) {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + File.separator + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + countryCode + ".png"));
 					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
 					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
 						bos.write(buffer, 0, size);
