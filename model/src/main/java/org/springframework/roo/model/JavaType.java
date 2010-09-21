@@ -29,13 +29,6 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.0
  */
 public final class JavaType implements Comparable<JavaType>, Cloneable {
-	private List<JavaType> parameters = new ArrayList<JavaType>();
-	private JavaSymbolName argName = null;
-	private int array = 0;
-	private boolean defaultPackage;
-	private DataType dataType;
-	private String fullyQualifiedTypeName;
-	private String simpleTypeName;
 	public static final JavaType BOOLEAN_OBJECT = new JavaType("java.lang.Boolean", 0, DataType.TYPE, null, null);
 	public static final JavaType CHAR_OBJECT = new JavaType("java.lang.Character", 0, DataType.TYPE, null, null);
 	public static final JavaType STRING_OBJECT = new JavaType("java.lang.String", 0, DataType.TYPE, null, null);
@@ -56,6 +49,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
 
+	private List<JavaType> parameters = new ArrayList<JavaType>();
+	private JavaSymbolName argName = null;
+	private int array = 0;
+	private boolean defaultPackage;
+	private DataType dataType;
+	private String fullyQualifiedTypeName;
+	private String simpleTypeName;
 	private static final Set<String> commonCollectionTypes = new HashSet<String>();
 
 	static {
@@ -72,15 +72,12 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 	/**
 	 * Construct a JavaType.
-	 * 
 	 * <p>
 	 * The fully qualified type name will be enforced as follows:
-	 * 
 	 * <ul>
-	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}}
+	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}
 	 * <li>First letter of simple type name must be uppercase</li>
 	 * </ul>
-	 * 
 	 * <p>
 	 * A fully qualified type name may include or exclude a package designator.
 	 * 
@@ -143,9 +140,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	}
 
 	// Used for wildcard type parameters; it must be one or the other
-	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_");  // List<? extends YY>
-	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_");      // List<? super XXXX>
-	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_");  // List<?>
+	public static final JavaSymbolName WILDCARD_EXTENDS = new JavaSymbolName("_ROO_WILDCARD_EXTENDS_"); // List<? extends YY>
+	public static final JavaSymbolName WILDCARD_SUPER = new JavaSymbolName("_ROO_WILDCARD_SUPER_"); // List<? super XXXX>
+	public static final JavaSymbolName WILDCARD_NEITHER = new JavaSymbolName("_ROO_WILDCARD_NEITHER_"); // List<?>
 
 	/**
 	 * Obtains the name of this type, including type parameters. It will be formatted in a manner compatible with non-static use.
@@ -169,7 +166,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver) {
 		return getNameIncludingTypeParameters(staticForm, resolver, new HashMap<String, String>());
 	}
-	
+
 	private String getNameIncludingTypeParameters(boolean staticForm, ImportRegistrationResolver resolver, Map<String, String> types) {
 		if (DataType.PRIMITIVE == dataType) {
 			Assert.isTrue(parameters.size() == 0, "A primitive cannot have parameters");
@@ -247,7 +244,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 		return sb.toString();
 	}
-	
+
 	/**
 	 * @return the package name (never null)
 	 */
@@ -293,11 +290,11 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		}
 		return null;
 	}
-	
+
 	public boolean isDefaultPackage() {
 		return defaultPackage;
 	}
-	
+
 	public final int hashCode() {
 		return this.fullyQualifiedTypeName.hashCode();
 	}
@@ -313,11 +310,11 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public List<JavaType> getParameters() {
 		return Collections.unmodifiableList(this.parameters);
 	}
-	
+
 	public boolean isArray() {
 		return array > 0;
 	}
-	
+
 	public int getArray() {
 		return array;
 	}
@@ -335,15 +332,15 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && this.fullyQualifiedTypeName.equals(((JavaType)obj).fullyQualifiedTypeName) && this.dataType == ((JavaType)obj).dataType;
+		return obj != null && obj instanceof JavaType && this.fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType;
 	}
 
 	public final int compareTo(JavaType o) {
-		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly 
+		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
 		return this.fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
 	}
-	
+
 	public final String toString() {
 		return getNameIncludingTypeParameters();
 	}
@@ -356,11 +353,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return dataType;
 	}
 
-	
-// Shouldn't be required given JavaType is immutable!
-//	@Override
-//	public JavaType clone() throws CloneNotSupportedException {
-//		return new JavaType(this.fullyQualifiedTypeName, this.array, this.primitive);
-//	}
-	
+	// Shouldn't be required given JavaType is immutable!
+	// @Override
+	// public JavaType clone() throws CloneNotSupportedException {
+	// return new JavaType(this.fullyQualifiedTypeName, this.array, this.primitive);
+	// }
 }
