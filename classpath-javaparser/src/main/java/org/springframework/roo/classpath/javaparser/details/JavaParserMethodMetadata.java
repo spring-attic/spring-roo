@@ -319,21 +319,25 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			if (bd instanceof MethodDeclaration) {
 				// Next method should appear after this current method
 				MethodDeclaration md = (MethodDeclaration) bd;
-				if (md.getName().equals(d.getName()) && md.getParameters() != null && md.getParameters().size() == d.getParameters().size()) {
-					// Possible match, we need to consider parameter types as well now
-					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
-					boolean matchesFully = true;
-					index = -1;
-					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
-						index++;						
-						AnnotatedJavaType parameterType = method.getParameterTypes().get(index);
-						if (!existingParameter.getJavaType().equals(parameterType.getJavaType())) {
-							matchesFully = false;
-							break;
+				if (md.getName().equals(d.getName())) {
+					if ((md.getParameters() == null || md.getParameters().isEmpty()) && (d.getParameters() == null || d.getParameters().isEmpty())) {
+						throw new IllegalStateException("Method '" + method.getMethodName().getSymbolName() + "' already exists");
+					} else if (md.getParameters() != null && md.getParameters().size() == d.getParameters().size()) {
+						// Possible match, we need to consider parameter types as well now
+						JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
+						boolean matchesFully = true;
+						index = -1;
+						for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
+							index++;
+							AnnotatedJavaType parameterType = method.getParameterTypes().get(index);
+							if (!existingParameter.getJavaType().equals(parameterType.getJavaType())) {
+								matchesFully = false;
+								break;
+							}
 						}
-					}
-					if (matchesFully) {
-						throw new IllegalStateException("Method '" + method.getMethodName().getSymbolName() + "' already exists with identical parameters");
+						if (matchesFully) {
+							throw new IllegalStateException("Method '" + method.getMethodName().getSymbolName() + "' already exists with identical parameters");
+						}
 					}
 				}
 			}
