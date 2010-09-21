@@ -35,6 +35,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Java Parser implementation of {@link MethodMetadata}.
@@ -114,7 +115,6 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				this.annotations.add(new JavaParserAnnotationMetadata(annotation, compilationUnitServices));
 			}
 		}
-		
 	}
 
 	public int getModifier() {
@@ -189,8 +189,8 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				List<Type> typeArgs = new ArrayList<Type>();
 				cit.setTypeArgs(typeArgs);
 				for (JavaType parameter : method.getReturnType().getParameters()) {
-					//NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-					//typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+					// NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+					// typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 					typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 				}
 			}
@@ -274,7 +274,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		}
 		
 		// Set the body
-		if (method.getBody() == null || method.getBody().length() == 0) {
+		if (!StringUtils.hasText(method.getBody())) {
 			// Never set the body if an abstract method
 			if (!Modifier.isAbstract(method.getModifier())) {
 				d.setBody(new BlockStmt());
@@ -323,8 +323,11 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 					// Possible match, we need to consider parameter types as well now
 					JavaParserMethodMetadata jpmm = new JavaParserMethodMetadata(method.getDeclaredByMetadataId(), md, compilationUnitServices, typeParameters);
 					boolean matchesFully = true;
+					index = -1;
 					for (AnnotatedJavaType existingParameter : jpmm.getParameterTypes()) {
-						if (!existingParameter.getJavaType().equals(method.getParameterTypes().get(index))) {
+						index++;						
+						AnnotatedJavaType parameterType = method.getParameterTypes().get(index);
+						if (!existingParameter.getJavaType().equals(parameterType.getJavaType())) {
 							matchesFully = false;
 							break;
 						}
