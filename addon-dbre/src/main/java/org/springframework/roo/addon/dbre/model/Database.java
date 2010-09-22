@@ -212,7 +212,7 @@ public class Database implements Serializable {
 			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
 			return outputStream.toString();
 		} else {
-			return "Schema " + schema.getName() + " does not have any tables (note the schema names of some databases are case-sensitive)";
+			return "Schema " + schema.getName() + " does not have any tables. Note that the schema names of some databases are case-sensitive";
 		}
 	}
 }

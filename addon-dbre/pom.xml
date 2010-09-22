@@ -44,6 +44,18 @@
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.plural</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.configurable</artifactId>
+            <version>${roo.version}</version>
+            <type>bundle</type>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.propfiles</artifactId>
@@ -104,5 +116,11 @@
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
+		<!-- External modules -->
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
+            <version>0.7.0.0001</version>
+        </dependency>
 	</dependencies>
 </project>

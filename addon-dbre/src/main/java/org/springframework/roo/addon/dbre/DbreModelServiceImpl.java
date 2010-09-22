@@ -123,12 +123,8 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 			return lastSchema;
 		}
 		// Otherwise fallback to compute it via a file load (note this does NOT change the last schema field, as a getter is side effect free)
-		Database database = deserializeDatabaseMetadataIfPossible();
-		if (database != null) {
-			return database.getSchema();
-		}
-		// We don't know what the last schema is
-		return null;
+		Schema schema = deserializeSchemaMetadataIfPossible();
+		return schema != null ? schema : null;
 	}
 
 	public Database getDatabase(Schema schema) {
@@ -239,6 +235,28 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	/**
+	 * Reads the database schema information from XML if possible.
+	 * 
+	 * <p>
+	 * NOTE: the XML file can only store one database.
+	 * 
+	 * @return the database schema if it could be parsed, otherwise null if unavailable for any reason
+	 */
+	private Schema deserializeSchemaMetadataIfPossible() {
+		String dbreXmlPath = getDbreXmlPath();
+		if (!fileManager.exists(dbreXmlPath)) {
+			return null;
+		}
+		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
+		try {
+			InputStream inputStream = new FileInputStream(fileDetails.getFile());
+			return DatabaseXmlUtils.readSchemaUsingSaxFromInputStream(inputStream);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
 	 * Reads the database information from XML if possible.
 	 * 
 	 * <p>
@@ -254,8 +272,9 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
-			return DatabaseXmlUtils.readDatabaseStructureFromInputStream(inputStream);
+			return DatabaseXmlUtils.readDatabaseStructureUsingSaxFromInputStream(inputStream);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}

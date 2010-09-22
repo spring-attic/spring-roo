@@ -473,6 +473,7 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	 * @param result to append located files into (required)
 	 */
 	private void recursiveAntMatch(String antPath, File currentDirectory, SortedSet<FileDetails> result) {
+		Assert.notNull(currentDirectory, "Current directory required");
 		Assert.isTrue(currentDirectory.exists() && currentDirectory.isDirectory(), "Path '" + currentDirectory + "' does not exist or is not a directory");
 		Assert.hasText(antPath, "Ant path required");
 		Assert.notNull(result, "Result required");

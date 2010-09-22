@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -14,21 +16,21 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Assists converting a {@link Database} to and from XML.
+ * Assists converting a {@link Database} to and from XML using DOM or SAX.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 public abstract class DatabaseXmlUtils {
-	private static final String NAME = "name";
-	private static final String LOCAL = "local";
-	private static final String FOREIGN = "foreign";
-	private static final String FOREIGN_TABLE = "foreignTable";
-	private static final String DESCRIPTION = "description";
-	private static final String REFERENCE = "reference";
-	private static final String SEQUENCE_NUMBER = "sequenceNumber";
-	private static final String ON_UPDATE = "onUpdate";
-	private static final String ON_DELETE = "onDelete";
+	static final String NAME = "name";
+	static final String LOCAL = "local";
+	static final String FOREIGN = "foreign";
+	static final String FOREIGN_TABLE = "foreignTable";
+	static final String DESCRIPTION = "description";
+	static final String REFERENCE = "reference";
+	static final String SEQUENCE_NUMBER = "sequenceNumber";
+	static final String ON_UPDATE = "onUpdate";
+	static final String ON_DELETE = "onDelete";
 
 	static enum IndexType {
 		INDEX, UNIQUE
@@ -125,10 +127,28 @@ public abstract class DatabaseXmlUtils {
 			}
 			databaseElement.appendChild(sequencesElement);
 		}
-		
+
 		document.appendChild(databaseElement);
 
 		XmlUtils.writeXml(outputStream, document);
+	}
+
+	public static Schema readSchemaFromInputStream(InputStream inputStream) {
+		Document document = getDocument(inputStream);
+		Element databaseElement = document.getDocumentElement();
+		return new Schema(databaseElement.getAttribute("schema"));
+	}
+
+	public static Schema readSchemaUsingSaxFromInputStream(InputStream inputStream) {
+		try {
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			SAXParser parser = spf.newSAXParser();
+			SchemaContentHandler contentHandler = new SchemaContentHandler();
+			parser.parse(inputStream, contentHandler);
+			return contentHandler.getSchema();
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	public static Database readDatabaseStructureFromInputStream(InputStream inputStream) {
@@ -197,7 +217,7 @@ public abstract class DatabaseXmlUtils {
 
 			tables.add(table);
 		}
-		
+
 		Set<Sequence> sequences = new LinkedHashSet<Sequence>();
 		List<Element> sequenceElements = XmlUtils.findElements("sequences/sequence", databaseElement);
 		for (Element sequenceElement : sequenceElements) {
@@ -213,6 +233,21 @@ public abstract class DatabaseXmlUtils {
 		return database;
 	}
 
+	private static void addIndices(Table table, Element tableElement, IndexType indexType) {
+		List<Element> elements = XmlUtils.findElements(indexType.name().toLowerCase(), tableElement);
+		for (Element element : elements) {
+			Index index = new Index(element.getAttribute(NAME));
+			index.setUnique(indexType == IndexType.UNIQUE);
+			List<Element> indexColumnElements = XmlUtils.findElements(indexType.name().toLowerCase() + "-column", element);
+			for (Element indexColumnElement : indexColumnElements) {
+				IndexColumn indexColumn = new IndexColumn(indexColumnElement.getAttribute(NAME));
+				indexColumn.setOrdinalPosition(new Short(indexColumnElement.getAttribute(SEQUENCE_NUMBER)));
+				index.addColumn(indexColumn);
+			}
+			table.addIndex(index);
+		}
+	}
+
 	private static Document getDocument(InputStream inputStream) {
 		try {
 			DocumentBuilder builder = XmlUtils.getDocumentBuilder();
@@ -223,19 +258,15 @@ public abstract class DatabaseXmlUtils {
 		}
 	}
 
-	private static void addIndices(Table table, Element tableElement, IndexType indexType) {
-		List<Element> elements = XmlUtils.findElements(indexType.name().toLowerCase(), tableElement);
-		for (Element element : elements) {
-			Index index = new Index(element.getAttribute(NAME));
-			index.setUnique(indexType == IndexType.UNIQUE);
-			index.setTable(table);
-			List<Element> indexColumnElements = XmlUtils.findElements(indexType.name().toLowerCase() + "-column", element);
-			for (Element indexColumnElement : indexColumnElements) {
-				IndexColumn indexColumn = new IndexColumn(indexColumnElement.getAttribute(NAME));
-				indexColumn.setOrdinalPosition(new Short(indexColumnElement.getAttribute(SEQUENCE_NUMBER)));
-				index.addColumn(indexColumn);
-			}
-			table.addIndex(index);
+	public static Database readDatabaseStructureUsingSaxFromInputStream(InputStream inputStream) {
+		try {
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			SAXParser parser = spf.newSAXParser();
+			DatabaseContentHandler contentHandler = new DatabaseContentHandler();
+			parser.parse(inputStream, contentHandler);
+			return contentHandler.getDatabase();
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 }
