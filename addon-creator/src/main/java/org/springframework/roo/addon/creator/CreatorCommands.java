@@ -35,27 +35,30 @@ public class CreatorCommands implements CommandMarker {
 		@CliOption(key = "messageBundle", mandatory = true, help = "Fully qualified path to the messages_xx.properties file") File messageBundle, 
 		@CliOption(key = "language", mandatory = false, help = "The full name of the language (used as a label for the UI)") String language, 
 		@CliOption(key = "flagGraphic", mandatory = false, help = "Fully qualified path to flag xx.png file") File flagGraphic, 
-		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description) {
+		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
+		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
 		if (locale == null) {
 			throw new IllegalStateException("Could not read provided locale. Please use correct format (ie: en, or more specific like en_AU, or de_DE)");
 		}
-		generatorOperations.createI18nAddon(tlp, language, locale, messageBundle, flagGraphic, description);
+		generatorOperations.createI18nAddon(tlp, language, locale, messageBundle, flagGraphic, description, projectName);
 	}
 	
 	@CliCommand(value = "addon create simple", help = "Create a new simple add-on for Spring Roo (commands + operations)")
 	public void simple(
 		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") JavaPackage tlp, 
-		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description) {
+		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
+		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
-		generatorOperations.createSimpleAddon(tlp, description);
+		generatorOperations.createSimpleAddon(tlp, description, projectName);
 	}
 	
 	@CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies")
 	public void advanced(
 		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") JavaPackage tlp, 
-		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description) {
+		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
+		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
-		generatorOperations.createAdvancedAddon(tlp, description);
+		generatorOperations.createAdvancedAddon(tlp, description, projectName);
 	}
 }

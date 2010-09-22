@@ -14,9 +14,9 @@ public interface CreatorOperations {
 	
 	boolean isCommandAvailable();
 
-	void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description);
+	void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName);
 	
-	void createSimpleAddon(JavaPackage topLevelPackage, String description);
+	void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName);
 	
-	void createAdvancedAddon(JavaPackage topLevelPackage, String description);
+	void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName);
 }

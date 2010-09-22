@@ -55,10 +55,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	
 	private enum Type {SIMPLE, ADVANCED, I18N};
 	
-	public void createAdvancedAddon(JavaPackage topLevelPackage, String description) {
+	public void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		
-		createProject(topLevelPackage, Type.ADVANCED, description);
+		createProject(topLevelPackage, Type.ADVANCED, description, projectName);
 		
 		installIfNeeded("Commands.java", topLevelPackage, Type.ADVANCED);
 		installIfNeeded("Operations.java", topLevelPackage, Type.ADVANCED);
@@ -70,10 +70,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		installIfNeeded("configuration.xml", topLevelPackage, Type.ADVANCED);
 	}
 	
-	public void createSimpleAddon(JavaPackage topLevelPackage, String description) {
+	public void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		
-		createProject(topLevelPackage, Type.SIMPLE, description);
+		createProject(topLevelPackage, Type.SIMPLE, description, projectName);
 		
 		installIfNeeded("Commands.java", topLevelPackage, Type.SIMPLE);
 		installIfNeeded("Operations.java", topLevelPackage, Type.SIMPLE);
@@ -82,7 +82,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		installIfNeeded("assembly.xml", topLevelPackage, Type.SIMPLE);
 	}
 	
-	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description) {
+	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
@@ -129,7 +129,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
 		}
 		
-		createProject(topLevelPackage, Type.I18N, description);
+		createProject(topLevelPackage, Type.I18N, description, projectName);
 
 		installIfNeeded("assembly.xml", topLevelPackage, Type.I18N);
 		
@@ -171,8 +171,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}		
 	}
 	
-	private void createProject(JavaPackage topLevelPackage, Type type, String description) {
-		String projectName = topLevelPackage.getFullyQualifiedPackageName();
+	private void createProject(JavaPackage topLevelPackage, Type type, String description, String projectName) {
+		if (projectName == null || projectName.length() == 0) {
+			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
+		}
 		
 		Document pom;
 		try {
@@ -182,8 +184,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 
 		Element rootElement = pom.getDocumentElement();
-		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
 		if (description != null && description.length() != 0) {
 			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);

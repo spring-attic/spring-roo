@@ -57,7 +57,7 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooBar.class.getName()))) {
+		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName()))) {
 			JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
 			if (!mutableTypeDetails.getAnnotations().contains(rooRoo__APP_NAME__)) {
 				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
