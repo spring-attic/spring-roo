@@ -61,10 +61,10 @@ public abstract class DatabaseXmlUtils {
 				columnElement.setAttribute("primaryKey", String.valueOf(column.isPrimaryKey()));
 				columnElement.setAttribute("required", String.valueOf(column.isRequired()));
 				
-				if (column.getPrecision() > 0 && column.getScale() > 0) {
-					columnElement.setAttribute("size", String.valueOf(column.getPrecision() + "," + String.valueOf(column.getScale())));
-				} else {
+				if (column.getLength() > 0) {
 					columnElement.setAttribute("size", String.valueOf(column.getLength()));
+				} else {
+					columnElement.setAttribute("size", String.valueOf(column.getPrecision() + "," + String.valueOf(column.getScale())));
 				}
 				
 				columnElement.setAttribute("type", column.getType().name());
