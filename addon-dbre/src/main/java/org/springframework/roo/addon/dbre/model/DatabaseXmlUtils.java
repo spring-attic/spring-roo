@@ -60,7 +60,13 @@ public abstract class DatabaseXmlUtils {
 				}
 				columnElement.setAttribute("primaryKey", String.valueOf(column.isPrimaryKey()));
 				columnElement.setAttribute("required", String.valueOf(column.isRequired()));
-				columnElement.setAttribute("size", String.valueOf(column.getSize()));
+				
+				if (column.getPrecision() > 0 && column.getScale() > 0) {
+					columnElement.setAttribute("size", String.valueOf(column.getPrecision() + "," + String.valueOf(column.getScale())));
+				} else {
+					columnElement.setAttribute("size", String.valueOf(column.getLength()));
+				}
+				
 				columnElement.setAttribute("type", column.getType().name());
 				columnElement.setAttribute("index", String.valueOf(column.getOrdinalPosition()));
 				tableElement.appendChild(columnElement);
@@ -172,7 +178,16 @@ public abstract class DatabaseXmlUtils {
 				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
 				column.setJavaType(columnElement.getAttribute("javaType"));
 				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
-				column.setSize(Integer.parseInt(columnElement.getAttribute("size")));
+				
+				String size = columnElement.getAttribute("size");
+				if (size.contains(",")) {
+					String[] precisionScale = StringUtils.split(size, ",");
+					column.setPrecision(Integer.parseInt(precisionScale[0]));
+					column.setScale(Integer.parseInt(precisionScale[1]));
+				} else {
+					column.setLength(Integer.parseInt(size));
+				}
+				
 				column.setType(ColumnType.valueOf(columnElement.getAttribute("type")));
 				column.setOrdinalPosition(Integer.parseInt(columnElement.getAttribute("index")));
 				table.addColumn(column);

@@ -40,6 +40,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
+import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -115,7 +116,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (table == null) {
 			return;
 		}
-		
+
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(database, table);
 
@@ -142,10 +143,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 			Table owningSideTable = joinTable.getOwningSideTable();
 			Assert.notNull(owningSideTable, "Owning-side table in many-to-many relationship for " + table.getName() + " could not be found");
-			
+
 			Table inverseSideTable = joinTable.getInverseSideTable();
 			Assert.notNull(inverseSideTable, "Inverse-side table in many-to-many relationship for " + table.getName() + " could not be found");
-			
+
 			if (owningSideTable.equals(table)) {
 				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + fieldSuffix);
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
@@ -189,7 +190,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		for (FieldMetadata field : uniqueFields.values()) {
 			addToBuilder(field);
-			
+
 			// Exclude these fields in @RooToString to avoid circular references - ROO-1399
 			excludeFieldsInToStringAnnotation(field.getFieldName().getSymbolName());
 		}
@@ -243,8 +244,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private void addManyToOneFields(Database database, Table table) {
 		// Add unique many-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
-		Set<String> uniqueColumns = new LinkedHashSet<String>();
-		
+
 		for (Column column : table.getColumns()) {
 			String columnName = column.getName();
 			ForeignKey foreignKey = table.findForeignKeyByLocalColumnName(columnName);
@@ -260,20 +260,12 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
 				boolean isCompositeKeyColumn = isCompositeKeyColumn(columnName, fieldType);
-				boolean uniqueColumn = uniqueColumns.add(columnName);
-				if (table.getName().equalsIgnoreCase("entityz")) {
-					//		System.out.println("adding " + columnName + " to " + table.getName() + ":" + uniqueColumns.size());
-				}
-				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences(), isCompositeKeyColumn, uniqueColumn);
+				FieldMetadata field = getManyToOneField(fieldName, fieldType, foreignKey.getReferences(), isCompositeKeyColumn);
 				uniqueFields.put(fieldName, field);
 			}
 		}
 
 		for (FieldMetadata field : uniqueFields.values()) {
-			if (table.getName().equalsIgnoreCase("entityz")) {
-				
-			System.out.println("adding field " + field.getFieldName().getSymbolName());
-			}
 			addToBuilder(field);
 		}
 	}
@@ -347,11 +339,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			// Add @JoinColumn annotation
 			List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttributes.add(new StringAttributeValue(NAME, column.getName()));
-			addOtherJoinColumnAttributes(joinColumnAttributes, isCompositeKeyColumn, uniqueColumn);
+			addOtherJoinColumnAttributes(joinColumnAttributes, isCompositeKeyColumn);
 			annotations.add(new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes));
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references, isCompositeKeyColumn, uniqueColumn));
+			annotations.add(getJoinColumnsAnnotation(references, isCompositeKeyColumn));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
@@ -432,7 +424,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return fieldBuilder.build();
 	}
 
-	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, boolean isCompositeKeyColumn, boolean uniqueColumn) {
+	private FieldMetadata getManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, boolean isCompositeKeyColumn) {
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
@@ -442,35 +434,35 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (references.size() == 1) {
 			// Add @JoinColumn annotation
 			Reference reference = references.first();
-			annotations.add(getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), isCompositeKeyColumn, uniqueColumn));
+			annotations.add(getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), isCompositeKeyColumn));
 		} else {
 			// Add @JoinColumns annotation
-			annotations.add(getJoinColumnsAnnotation(references, isCompositeKeyColumn, uniqueColumn));
+			annotations.add(getJoinColumnsAnnotation(references, isCompositeKeyColumn));
 		}
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
 	}
 
-	private AnnotationMetadataBuilder getJoinColumnAnnotation(String localColumnName, String foreignColumnName, boolean isCompositeKeyColumn, boolean uniqueColumn) {
+	private AnnotationMetadataBuilder getJoinColumnAnnotation(String localColumnName, String foreignColumnName, boolean isCompositeKeyColumn) {
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		joinColumnAttributes.add(new StringAttributeValue(NAME, localColumnName));
 		joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, foreignColumnName));
-		addOtherJoinColumnAttributes(joinColumnAttributes, isCompositeKeyColumn, uniqueColumn);
+		addOtherJoinColumnAttributes(joinColumnAttributes, isCompositeKeyColumn);
 		return new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
 	}
 
-	private void addOtherJoinColumnAttributes(List<AnnotationAttributeValue<?>> joinColumnAttributes, boolean isCompositeKeyColumn, boolean uniqueColumn) {
-		if (isCompositeKeyColumn || !uniqueColumn) {
+	private void addOtherJoinColumnAttributes(List<AnnotationAttributeValue<?>> joinColumnAttributes, boolean isCompositeKeyColumn) {
+		if (isCompositeKeyColumn) {
 			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("insertable"), false));
 			joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("updatable"), false));
 		}
 	}
 
-	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, boolean isCompositeKeyColumn, boolean uniqueColumn) {
+	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, boolean isCompositeKeyColumn) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		for (Reference reference : references) {
-			AnnotationMetadataBuilder joinColumnAnnotation = getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), isCompositeKeyColumn, uniqueColumn);
+			AnnotationMetadataBuilder joinColumnAnnotation = getJoinColumnAnnotation(reference.getLocalColumnName(), reference.getForeignColumnName(), isCompositeKeyColumn);
 			arrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation.build()));
 		}
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
@@ -604,9 +596,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		columnAttributes.add(new StringAttributeValue(NAME, column.getName()));
 
 		// Add length attribute for Strings
-		// if (fieldType.equals(JavaType.STRING_OBJECT)) {
-		// columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getSize()));
-		// }
+		if (column.getLength() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
+			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getLength()));
+		}
+
+		// Add precision and scale attributes for numeric fields
+		if (column.getPrecision() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(new JavaType("java.math.BigDecimal")))) {
+			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("precision"), column.getPrecision()));
+			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("scale"), column.getScale()));
+		}
 
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"), columnAttributes));
 
@@ -625,7 +623,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			dateTimeFormatAttributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatAttributes));
 		}
-		
+
 		// Add @Lob for CLOB fields if applicable
 		if (column.getType() == ColumnType.CLOB) {
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));

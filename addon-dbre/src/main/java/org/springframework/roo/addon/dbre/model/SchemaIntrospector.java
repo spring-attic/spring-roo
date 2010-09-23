@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
@@ -170,8 +171,15 @@ public class SchemaIntrospector {
 				Column column = new Column(rs.getString("COLUMN_NAME"));
 				column.setDescription(rs.getString("REMARKS"));
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
-				column.setSize(rs.getInt("COLUMN_SIZE"));
-				column.setScale(rs.getInt("DECIMAL_DIGITS"));
+				
+				int decimalDigits = rs.getInt("DECIMAL_DIGITS");
+				if (decimalDigits > 0) {
+					column.setPrecision(rs.getInt("COLUMN_SIZE"));
+					column.setScale(decimalDigits);
+				} else {
+					column.setLength(rs.getInt("COLUMN_SIZE"));
+				}
+				
 				column.setTypeCode(rs.getInt("DATA_TYPE"));
 				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));

@@ -106,7 +106,16 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		column.setPrimaryKey(Boolean.parseBoolean(attributes.getValue("primaryKey")));
 		column.setJavaType(attributes.getValue("javaType"));
 		column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
-		column.setSize(Integer.parseInt(attributes.getValue("size")));
+		
+		String size = attributes.getValue("size");
+		if (size.contains(",")) {
+			String[] precisionScale = StringUtils.split(size, ",");
+			column.setPrecision(Integer.parseInt(precisionScale[0]));
+			column.setScale(Integer.parseInt(precisionScale[1]));
+		} else {
+			column.setLength(Integer.parseInt(size));
+		}
+
 		column.setType(ColumnType.valueOf(attributes.getValue("type")));
 		column.setOrdinalPosition(Integer.parseInt(attributes.getValue("index")));
 	}

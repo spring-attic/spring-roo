@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @since 1.1
  */
 public class Column implements Serializable {
-	private static final long serialVersionUID = -4826133462002775388L;
+	private static final long serialVersionUID = 4749709246713636728L;
 	private String name;
 	private String description;
 	private Table table;
@@ -18,7 +18,8 @@ public class Column implements Serializable {
 	private boolean autoIncrement;
 	private int typeCode;
 	private ColumnType type;
-	private int size;
+	private int length;
+	private int precision;
 	private int scale;
 	private String defaultValue;
 	private String javaType;
@@ -92,12 +93,20 @@ public class Column implements Serializable {
 		this.type = type;
 	}
 
-	public int getSize() {
-		return size;
+	public int getLength() {
+		return length;
 	}
 
-	public void setSize(int size) {
-		this.size = size;
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public int getPrecision() {
+		return precision;
+	}
+
+	public void setPrecision(int precision) {
+		this.precision = precision;
 	}
 
 	public int getScale() {
@@ -161,6 +170,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, size=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, primaryKey, required, autoIncrement, typeCode, type, size, scale, defaultValue, javaType, ordinalPosition);
+		return String.format("Column [name=%s, description=%s, table=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, length=%s, precision=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, table, primaryKey, required, autoIncrement, typeCode, type, length, precision, scale, defaultValue, javaType, ordinalPosition);
 	}
 }
