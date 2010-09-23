@@ -89,7 +89,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 
 		if (language == null || language.length() == 0) {
 			language = "";
-			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  separator + "iso3166.txt"));
+			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/iso3166.txt"));
 			BufferedReader br = new BufferedReader(is);
 			String line;
 			try {
@@ -147,7 +147,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + languageName + "Language.java");
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  separator + "Language.java-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/Language.java-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -178,7 +178,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		Document pom;
 		try {
-			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + separator + "roo-addon-" + type.name().toLowerCase() + "-template.xml"));
+			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/roo-addon-" + type.name().toLowerCase() + "-template.xml"));
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
@@ -225,7 +225,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 		
 		if (!fileManager.exists(destinationFile)) {
-			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + separator + targetFilename + "-template");
+			InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), type.name().toLowerCase() + "/" + targetFilename + "-template");
 			try {
 				// Read template and insert the user's package
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
@@ -273,12 +273,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			bis = new BufferedInputStream(httpService.openConnection(new URL("http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip")));
 			zis = new ZipInputStream(bis);
 			ZipEntry entry;
-			String expectedEntryName = "png" + separator + countryCode + ".png";
+			String expectedEntryName = "png/" + countryCode + ".png";
 			while ((entry = zis.getNextEntry()) != null) {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
 					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
 					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
 						bos.write(buffer, 0, size);
