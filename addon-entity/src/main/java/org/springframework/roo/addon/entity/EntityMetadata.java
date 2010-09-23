@@ -455,7 +455,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Try to locate an existing field with @javax.persistence.Version
 		List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Version"));
 		if (found.size() > 0) {
-			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @javax.persistence.Version in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			FieldMetadata field = found.get(0);
 			return field;
 		}
@@ -529,8 +529,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
-			Assert.notNull(method, "User provided @javax.persistence.Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.notNull(method, "User provided @Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		
@@ -566,7 +566,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// User is required to provide one
 			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
 			Assert.notNull(method, "User provided @javax.persistence.Version field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @javax.persistence.Version field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @Version field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return method;
 		}
 		

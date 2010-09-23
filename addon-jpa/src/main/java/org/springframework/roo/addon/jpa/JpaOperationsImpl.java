@@ -84,6 +84,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
+		// Parse the configuration.xml file
+		Element configuration = XmlUtils.getConfiguration(getClass());
+
+		// Remove unnecessary artifacts not specific to current database and JPA provider
+		cleanup(configuration, ormProvider, database);
+
 		updateApplicationContext(ormProvider, database, jndi);
 		updatePersistenceXml(ormProvider, database, databaseName, userName, password);
 		updateGaeXml(ormProvider, database, applicationId);
@@ -92,18 +98,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 
 		updateLog4j(ormProvider);
-
-		// Parse the configuration.xml file
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
 		updatePomProperties(configuration, ormProvider, database);
 		updateDependencies(configuration, ormProvider, database);
 		updateRepositories(configuration, ormProvider, database);
 		updatePluginRepositories(configuration, ormProvider, database);
 		updateBuildPlugins(configuration, ormProvider, database);
-
-		// Remove unnecessary artifacts not specific to current database and JPA provider
-		cleanup(configuration, ormProvider, database);
 	}
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
@@ -128,7 +127,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element dataSource = XmlUtils.findFirstElement("/beans/bean[@id = 'dataSource']", root);
 		Element dataSourceJndi = XmlUtils.findFirstElement("/beans/jndi-lookup[@id = 'dataSource']", root);
 
-		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
+		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 			if (dataSource != null) {
 				root.removeChild(dataSource);
 			}
@@ -202,7 +201,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
 		} else {
 			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-			if (ormProvider == OrmProvider.DATANUCLEUS) {
+			if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", PERSISTENCE_UNIT_NAME, appCtx));
 			} else {
 				entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
@@ -251,22 +250,28 @@ public class JpaOperationsImpl implements JpaOperations {
 			persistenceUnit.removeChild(persistenceUnit.getFirstChild());
 		}
 
-		// Set attributes for GAE-specific requirements
-		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+		// Set attributes for DataNuclueus 1.1.x and GAE-specific requirements
+		if (ormProvider == OrmProvider.DATANUCLEUS) {
 			persistenceElement.setAttribute("version", "1.0");
-			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");
-			persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
-			persistenceUnit.removeAttribute("transaction-type");
+			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd");			
 		} else {
 			persistenceElement.setAttribute("version", "2.0");
 			persistenceElement.setAttribute("xsi:schemaLocation", "http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd");
+		}
+		
+		Element provider = persistence.createElement("provider");
+
+		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
+			persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
+			persistenceUnit.removeAttribute("transaction-type");
+			provider.setTextContent(ormProvider.getAlternateAdapter());
+		} else {
 			persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
 			persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
+			provider.setTextContent(ormProvider.getAdapter());
 		}
 
 		// Add provider element
-		Element provider = persistence.createElement("provider");
-		provider.setTextContent(database == JdbcDatabase.GOOGLE_APP_ENGINE ? ormProvider.getAlternateAdapter() : ormProvider.getAdapter());
 		persistenceUnit.appendChild(provider);
 
 		// Add properties
@@ -296,6 +301,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			properties.appendChild(createPropertyElement("eclipselink.weaving", "static", persistence));
 			break;
 		case DATANUCLEUS:
+		case DATANUCLEUS_2:
 			if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
 				properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
@@ -329,6 +335,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.validateTables", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.validateConstraints", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.jpa.addClassTransformer", "false", persistence));
+				properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
 			}
 			break;
 		}
@@ -389,7 +396,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		String databasePath = getDatabasePropertiesPath();
 		boolean databaseExists = fileManager.exists(databasePath);
 
-		if (database == JdbcDatabase.GOOGLE_APP_ENGINE || ormProvider == OrmProvider.DATANUCLEUS) {
+		if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
 			if (databaseExists) {
 				fileManager.delete(databasePath);
 			}
