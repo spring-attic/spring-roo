@@ -12,7 +12,6 @@ import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
