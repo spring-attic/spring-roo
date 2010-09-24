@@ -32,7 +32,7 @@
   <g:HTMLPanel>
     <div class='{style.underline}'>    
       <h3 class='{style.header}' ui:field="editTitle">
-        <ui:msg>Edit {{name}} <g:InlineLabel ui:field='id'></g:InlineLabel> (v<g:InlineLabel ui:field='version'/>)</ui:msg>
+        <ui:msg>Edit {{name}}</ui:msg>
       </h3>
       <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New {{=name}}</ui:msg></h3>
     </div>

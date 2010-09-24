@@ -74,7 +74,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
         RequestEvent.register(eventBus, new AuthenticationFailureHandler());
 
         CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
-        ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace(requestFactory);
+        ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
         ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);
         final ActivityManager masterActivityManager = new ActivityManager(masterActivityMap, eventBus);
 

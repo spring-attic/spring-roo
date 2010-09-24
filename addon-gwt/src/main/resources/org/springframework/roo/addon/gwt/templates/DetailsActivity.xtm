@@ -10,7 +10,7 @@ import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.gwt.requestfactory.shared.EntityProxyId;
 import com.google.gwt.requestfactory.shared.ProxyRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.RequestObject;
+import com.google.gwt.requestfactory.shared.Request;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 {{#imports}}import {{=import}};
 {{/imports}}
@@ -33,20 +33,20 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 	private final ApplicationRequestFactory requests;
 	private final PlaceController placeController;
 	private final ProxyDetailsView<{{=proxy}}> view;
-        private final EntityProxyId proxyId;
+        private final EntityProxyId<{{=proxy}}> proxyId;
 	private AcceptsOneWidget display;
 
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public {{=className}}(EntityProxyId proxyId, ApplicationRequestFactory requests, PlaceController placeController) {
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory requests, PlaceController placeController) {
 		this(proxyId, requests, placeController, getDefaultView());
 	}
 
 	/**
    * Creates an activity that uses its own view instance.
  	 */
-	public {{=className}}(EntityProxyId proxyId, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, ApplicationRequestFactory requests, PlaceController placeController, ProxyDetailsView<{{=proxy}}> view) {
 		this.placeController = placeController;
 		this.proxyId = proxyId;
 		this.requests = requests;
@@ -59,7 +59,7 @@ public class {{=className}} extends AbstractActivity implements ProxyDetailsView
 			return;
 		}
    		
-		RequestObject<Void> deleteRequest = requests.{{=nameUncapitalized}}Request().remove(view.getValue());
+		Request<Void> deleteRequest = requests.{{=nameUncapitalized}}Request().remove(view.getValue());
 		deleteRequest.fire(new Receiver<Void>() {
 			public void onSuccess(Void ignore) {
 				if (display == null) {

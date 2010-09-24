@@ -6,7 +6,7 @@ import com.google.gwt.app.place.ProxyEditView;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.EntityProxyId;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.RequestObject;
+import com.google.gwt.requestfactory.shared.Request;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 
 {{#imports}}import {{=import}};
@@ -37,19 +37,18 @@ public class {{=className}} extends
 	/**
 	 * Creates an activity that uses the default singleton view instance.
 	 */
-	public {{=className}}(EntityProxyId proxyId, 
-	    ApplicationRequestFactory requests, PlaceController placeController, 
-	    boolean creating) {
-		this(getDefaultView(), proxyId, requests, placeController, creating);
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, 
+      ApplicationRequestFactory requests, PlaceController placeController) {
+    this(proxyId, requests, placeController, getDefaultView()); 
 	}
 
 	/**
    * Creates an activity that uses a given view instance.
 	 */
-	public {{=className}}(ProxyEditView<{{=proxy}}, ?> view, 
-	    EntityProxyId proxyId, ApplicationRequestFactory requests, 
-	    PlaceController placeController, boolean creating) {
-		super(view, proxyId, {{=proxy}}.class, creating, requests, placeController);
+	public {{=className}}(EntityProxyId<{{=proxy}}> proxyId, 
+      ApplicationRequestFactory requests, PlaceController placeController, 
+      ProxyEditView<{{=proxy}}, ?> view) {
+    super(proxyId, {{=proxy}}.class, requests, placeController, view);
 		this.requests = requests;
 	}
 
@@ -76,7 +75,7 @@ public class {{=className}} extends
     super.start(display, eventBus);
   }
 
-	protected RequestObject<? extends Object> getPersistRequest({{=proxy}} proxy) {
+	protected Request<?> getPersistRequest({{=proxy}} proxy) {
 	    return requests.{{=nameUncapitalized}}Request().persist(proxy);
 	}
 

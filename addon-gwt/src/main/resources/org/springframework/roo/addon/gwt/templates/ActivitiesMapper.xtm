@@ -3,6 +3,7 @@ package {{=packageName}};
 import com.google.gwt.app.place.Activity;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyPlace;
+import com.google.gwt.requestfactory.shared.EntityProxyId;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
@@ -20,11 +21,11 @@ public class {{=className}} {
 	public Activity getActivity(ProxyPlace place) {
 		switch (place.getOperation()) {
 			case DETAILS:
-				return new {{=detailsActivity}}(place.getProxyId(), requests, placeController);
+				return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
 			case EDIT:
-				return new {{=editActivity}}(place.getProxyId(), requests, placeController, false);
+				return new {{=editActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
 			case CREATE:
-      			return new {{=editActivity}}(place.getProxyId(), requests, placeController, true);
+      			return new {{=editActivity}}(null, requests, placeController);
 		}
 
 		throw new IllegalArgumentException("Unknown operation " + place.getOperation());

@@ -31,6 +31,6 @@ public class ApplicationDetailsActivities implements ActivityMapper {
 		return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
 			@Override
 {{=entity}}{{/entities}}
-		}.process(proxyPlace.getProxyId());
+		}.process(proxyPlace.getProxyId().getProxyClass());
 	}
 }

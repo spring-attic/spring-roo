@@ -80,8 +80,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private ClassOrInterfaceTypeDetails proxy;
 	private JavaSymbolName idPropertyName;
 	private JavaSymbolName versionPropertyName;
-	private boolean versionIntegerOnServerSide = true;
-	private boolean idLongOnServerSide = false;
 
 	private ClassOrInterfaceTypeDetails details;
 	private ClassOrInterfaceTypeDetails listView;
@@ -126,20 +124,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		if (entityMetadata != null && entityMetadata.isValid()) {
 			// Lookup special fields
 			versionPropertyName = entityMetadata.getVersionField().getFieldName();
-			if (entityMetadata.getVersionField().getFieldType().equals(JavaType.INT_OBJECT)) {
-				versionIntegerOnServerSide = true;
-			}
 			idPropertyName = entityMetadata.getIdentifierField().getFieldName();
-			if (entityMetadata.getIdentifierField().getFieldType().equals(JavaType.LONG_OBJECT)) {
-				idLongOnServerSide = true;
-			}
 
 			// Lookup the "find all" method and store it
 			findAllMethod = entityMetadata.getFindAllMethod();
 			findMethod = entityMetadata.getFindMethod();
 			findEntriesMethod = entityMetadata.getFindEntriesMethod();
 			countMethod = entityMetadata.getCountMethod();
-			Assert.notNull(findAllMethod, "Find all method unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
+      Assert.notNull(findAllMethod, "Find all method unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
+      Assert.isTrue("id".equals(idPropertyName.getSymbolName()), "Id property must be named \"id\" (found \""+ idPropertyName + "\") for " + governorTypeDetails.getName() + " - required for GWT support");
+      Assert.isTrue("version".equals(versionPropertyName.getSymbolName()), "Version property must be named \"version\" (found \""+ versionPropertyName + "\") for " + governorTypeDetails.getName() + " - required for GWT support");
+      Assert.notNull(findAllMethod, "Find all method unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
 		}
 	}
 
@@ -198,30 +193,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 						if (returnType.equals(JavaType.INT_PRIMITIVE)) {
 							gwtSideType = JavaType.INT_OBJECT;
 						}
-						if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-							gwtSideType = JavaType.DOUBLE_OBJECT;
-						}
-						if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
-							gwtSideType = JavaType.LONG_OBJECT;
-						}
+            if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
+              gwtSideType = JavaType.BYTE_OBJECT;
+            }
+            if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
+              gwtSideType = JavaType.SHORT_OBJECT;
+            }
+            if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
+              gwtSideType = JavaType.FLOAT_OBJECT;
+            }
+            if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+              gwtSideType = JavaType.DOUBLE_OBJECT;
+            }
+            if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
+              gwtSideType = JavaType.CHAR_OBJECT;
+            }
+            if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
+              gwtSideType = JavaType.LONG_OBJECT;
+            }
 					}
-					// Handle the identifier special case
-					if (idPropertyName.equals(propertyName) && idLongOnServerSide) {
-						gwtSideType = JavaType.LONG_OBJECT;
-					}
-					// Handle the version special case
-					if (versionPropertyName.equals(propertyName) && versionIntegerOnServerSide) {
-						gwtSideType = JavaType.INT_OBJECT;
-					}
-					// TODO: (cromwellian) HACK! handle foreign-id refs, we assume java.lang.Long is an id
-					if (gwtSideType.getFullyQualifiedTypeName().equals("java.lang.Long") && idLongOnServerSide) {
-						gwtSideType = JavaType.LONG_OBJECT;
-					}
-				}
-
-				if ("id".equals(propertyName.getSymbolName()) || "version".equals(propertyName.getSymbolName())) {
-					// This field won't be supported
-					continue;
 				}
 
 				// Store in the maps
@@ -418,10 +408,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 			dataDictionary.addSection("fields").setVariable("field", property.getName());
 			dataDictionary.addSection("detailViewProps").setVariable("prop", property.forDetailsView());
-			dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
+			if (!isReadOnly(property.getName())) dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
 			dataDictionary.addSection("detailsUiXmlProps").setVariable("prop", property.forDetailsUIXml());
 			dataDictionary.addSection("listViewProps").setVariable("prop", property.forListView(proxyType.getSimpleTypeName()));
-			dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
+			if (!isReadOnly(property.getName())) dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
@@ -452,7 +442,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 		return dataDictionary;
 	}
 
-	private void buildListViewUiXml() {
+  private boolean isReadOnly(String name) {
+    return name.equals(idPropertyName.getSymbolName()) || name.equals(versionPropertyName.getSymbolName());
+  }
+
+  private void buildListViewUiXml() {
 		try {
 			MirrorType destType = MirrorType.LIST_VIEW;
 			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
@@ -556,7 +550,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildRequestMethod(destinationMetadataId, methods, findEntriesMethod);
 
 		// remove(EmployeeProxy proxy) and persist(EmployeeProxy proxy) methods.
-		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.RequestObject", 0, DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
+		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
 		for (MethodMetadata metadata : new MethodMetadata[] { entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod() }) {
 			List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(getDestinationJavaType(MirrorType.PROXY), null));
 			List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName("proxy"));
@@ -582,7 +576,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
 		boolean isList = methodMetaData.getReturnType().getFullyQualifiedTypeName().equals("java.util.List");
 		method1ReturnTypeArgs0.add(method1Name.getSymbolName().startsWith("count") ? JavaType.LONG_OBJECT : getDestinationJavaType(MirrorType.PROXY));
-		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.RequestObject" : (isList ? "com.google.gwt.requestfactory.shared.ProxyListRequest" : "com.google.gwt.requestfactory.shared.ProxyRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
+		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.Request" : (isList ? "com.google.gwt.requestfactory.shared.ProxyListRequest" : "com.google.gwt.requestfactory.shared.ProxyRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
 		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
 		method1ParameterNames.addAll(methodMetaData.getParameterNames());

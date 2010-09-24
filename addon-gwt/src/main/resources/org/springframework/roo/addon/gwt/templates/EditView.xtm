@@ -1,5 +1,7 @@
 package {{=packageName}};
 
+import com.google.gwt.app.client.IntegerBox;
+import com.google.gwt.app.client.LongBox;
 import com.google.gwt.app.client.DoubleBox;
 import com.google.gwt.app.place.ProxyEditView;
 import com.google.gwt.core.client.GWT;
@@ -19,7 +21,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -48,8 +49,6 @@ public class {{=className}} extends Composite implements
 	{{=prop}};{{/editViewProps}}	
 	@UiField Button cancel;
 	@UiField Button save;
-	@UiField InlineLabel id;
-	@UiField InlineLabel version;
 	@UiField DivElement errors;
 
 	@UiField Element editTitle;

@@ -30,7 +30,7 @@ class GwtProxyProperty {
 	private final String getter;
 	private final JavaType type;
 
-	private PhysicalTypeMetadata ptmd;
+  private PhysicalTypeMetadata ptmd;
 
 	public GwtProxyProperty(ProjectMetadata projectMetadata, MethodMetadata getterMethod, PhysicalTypeMetadata ptmd) {
 	  this.projectMetadata = projectMetadata;
@@ -101,7 +101,7 @@ class GwtProxyProperty {
 		return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 	}
 
-	public String getEditor() {
+	private String getEditor() {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
 			return "DoubleBox";
 		}

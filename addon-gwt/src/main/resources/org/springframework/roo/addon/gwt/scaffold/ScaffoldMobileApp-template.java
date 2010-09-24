@@ -59,7 +59,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 
         /* Left side lets us pick from all the types of entities */
 
-        ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace(requestFactory);
+        ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
         ProxyListPlacePicker proxyListPlacePicker = new ProxyListPlacePicker(placeController, proxyPlaceToListPlace);
         HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
         placePickerView.setAcceptableValues(getTopPlaces());
