@@ -94,98 +94,122 @@ public class Database implements Serializable {
 	 */
 	private void initialize() {
 		for (Table table : tables) {
-			for (Column column : table.getColumns()) {
-				column.setTable(table);
-			}
-
-			Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
-			Short keySequence;
-			for (ForeignKey foreignKey : table.getForeignKeys()) {
-				foreignKey.setTable(table);
-
-				if (foreignKey.getForeignTable() == null) {
-					String foreignTableName = foreignKey.getForeignTableName();
-					Table targetTable = findTable(foreignTableName);
-					if (targetTable != null) {
-						keySequence = keySequenceMap.get(foreignTableName);
-						if (keySequence == null) {
-							keySequence = 0;
-							keySequenceMap.put(foreignTableName, keySequence);
-						}
-						foreignKey.setForeignTable(targetTable);
-						if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
-							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
-						}
-						foreignKey.setKeySequence(keySequence);
-					}
-				}
-
-				for (Reference reference : foreignKey.getReferences()) {
-					if (reference.getLocalColumn() == null) {
-						Column localColumn = table.findColumn(reference.getLocalColumnName());
-						if (localColumn != null) {
-							reference.setLocalColumn(localColumn);
-						}
-					}
-					if (reference.getForeignColumn() == null && foreignKey.getForeignTable() != null) {
-						Column foreignColumn = foreignKey.getForeignTable().findColumn(reference.getForeignColumnName());
-						if (foreignColumn != null) {
-							reference.setForeignColumn(foreignColumn);
-						}
-					}
-				}
-			}
-
-			keySequenceMap = new LinkedHashMap<String, Short>();
-			keySequence = null;
-			for (ForeignKey exportedKey : table.getExportedKeys()) {
-				exportedKey.setTable(table);
-
-				if (exportedKey.getForeignTable() == null) {
-					String foreignTableName = exportedKey.getForeignTableName();
-					Table targetTable = findTable(foreignTableName);
-					if (targetTable != null) {
-						exportedKey.setForeignTable(targetTable);
-						keySequence = keySequenceMap.get(foreignTableName);
-						if (keySequence == null) {
-							keySequence = 0;
-							keySequenceMap.put(foreignTableName, keySequence);
-						}
-						if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
-							keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
-						}
-						exportedKey.setKeySequence(keySequence);
-					}
-				}
-
-				for (Reference reference : exportedKey.getReferences()) {
-					if (reference.getLocalColumn() == null) {
-						Column localColumn = table.findColumn(reference.getLocalColumnName());
-						if (localColumn != null) {
-							reference.setLocalColumn(localColumn);
-						}
-					}
-					if (reference.getForeignColumn() == null && exportedKey.getForeignTable() != null) {
-						Column foreignColumn = exportedKey.getForeignTable().findColumn(reference.getForeignColumnName());
-						if (foreignColumn != null) {
-							reference.setForeignColumn(foreignColumn);
-						}
-					}
-				}
-			}
-
-			for (Index index : table.getIndices()) {
-				index.setTable(table);
-
-				for (IndexColumn indexColumn : index.getColumns()) {
-					Column column = table.findColumn(indexColumn.getName());
-					if (column != null) {
-						indexColumn.setColumn(column);
-					}
-				}
-			}
-
+			initializeColumns(table);
+			initializeForeignKeys(table);
+			initializeExportedKeys(table);
+			initializeIndices(table);
 			addJoinTables(table);
+		}
+	}
+
+	private void initializeColumns(Table table) {
+		for (Column column : table.getColumns()) {
+			column.setTable(table);
+		}
+	}
+
+	private void initializeForeignKeys(Table table) {
+		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
+		Short keySequence = null;
+		Map<Column, Integer> localColumnMap = new LinkedHashMap<Column, Integer>();
+
+		for (ForeignKey foreignKey : table.getForeignKeys()) {
+			foreignKey.setTable(table);
+
+			if (foreignKey.getForeignTable() == null) {
+				String foreignTableName = foreignKey.getForeignTableName();
+				Table targetTable = findTable(foreignTableName);
+				if (targetTable != null) {
+					keySequence = keySequenceMap.get(foreignTableName);
+					if (keySequence == null) {
+						keySequence = 0;
+						keySequenceMap.put(foreignTableName, keySequence);
+					}
+					foreignKey.setForeignTable(targetTable);
+					if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
+						keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+					}
+					foreignKey.setKeySequence(keySequence);
+				}
+			}
+
+			for (Reference reference : foreignKey.getReferences()) {
+				if (reference.getLocalColumn() == null) {
+					Column localColumn = table.findColumn(reference.getLocalColumnName());
+					if (localColumn != null) {
+						reference.setLocalColumn(localColumn);
+						Integer columnCount = localColumnMap.get(localColumn);
+						if (columnCount == null) {
+							columnCount = 0;
+							localColumnMap.put(localColumn, columnCount);
+						}
+						localColumnMap.put(localColumn, columnCount + 1);
+						if (localColumnMap.get(localColumn) > 1) {
+							reference.setInsertableOrUpdatable(false);
+						}
+					}
+				}
+				if (reference.getForeignColumn() == null && foreignKey.getForeignTable() != null) {
+					Column foreignColumn = foreignKey.getForeignTable().findColumn(reference.getForeignColumnName());
+					if (foreignColumn != null) {
+						reference.setForeignColumn(foreignColumn);
+					}
+				}
+			}
+		}
+	}
+
+	private void initializeExportedKeys(Table table) {
+		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
+		Short keySequence = null;
+
+		for (ForeignKey exportedKey : table.getExportedKeys()) {
+			exportedKey.setTable(table);
+
+			if (exportedKey.getForeignTable() == null) {
+				String foreignTableName = exportedKey.getForeignTableName();
+				Table targetTable = findTable(foreignTableName);
+				if (targetTable != null) {
+					exportedKey.setForeignTable(targetTable);
+					keySequence = keySequenceMap.get(foreignTableName);
+					if (keySequence == null) {
+						keySequence = 0;
+						keySequenceMap.put(foreignTableName, keySequence);
+					}
+					if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
+						keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+					}
+					exportedKey.setKeySequence(keySequence);
+				}
+			}
+
+			for (Reference reference : exportedKey.getReferences()) {
+				if (reference.getLocalColumn() == null) {
+					Column localColumn = table.findColumn(reference.getLocalColumnName());
+					if (localColumn != null) {
+						reference.setLocalColumn(localColumn);
+					}
+				}
+				if (reference.getForeignColumn() == null && exportedKey.getForeignTable() != null) {
+					Column foreignColumn = exportedKey.getForeignTable().findColumn(reference.getForeignColumnName());
+					if (foreignColumn != null) {
+						reference.setForeignColumn(foreignColumn);
+					}
+				}
+			}
+		}
+	}
+
+	private void initializeIndices(Table table) {
+		for (Index index : table.getIndices()) {
+			index.setTable(table);
+
+			for (IndexColumn indexColumn : index.getColumns()) {
+				Column column = table.findColumn(indexColumn.getName());
+				if (column != null) {
+					indexColumn.setColumn(column);
+				}
+			}
 		}
 	}
 
@@ -212,7 +236,7 @@ public class Database implements Serializable {
 			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
 			return outputStream.toString();
 		} else {
-			return "Schema " + schema.getName() + " does not have any tables. Note that the schema names of some databases are case-sensitive";
+			return "Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive";
 		}
 	}
 }

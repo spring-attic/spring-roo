@@ -6,7 +6,6 @@ import java.util.TreeSet;
 
 /**
  * Represents a database foreign key.
- * 
  * <p>
  * A foreign key is modelled from the {@link java.sql.DatabaseMetaData#getImportedKeys(String, String, String)} or {@link java.sql.DatabaseMetaData#getExportedKeys(String, String, String)} methods.
  * 
@@ -14,7 +13,7 @@ import java.util.TreeSet;
  * @since 1.1
  */
 public class ForeignKey implements Serializable {
-	private static final long serialVersionUID = -7679438879219261466L;
+	private static final long serialVersionUID = 8452469736391851653L;
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;

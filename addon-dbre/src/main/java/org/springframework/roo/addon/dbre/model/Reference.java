@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @since 1.1
  */
 public class Reference implements Serializable {
-	private static final long serialVersionUID = 7930959797342530749L;
+	private static final long serialVersionUID = 6681088509378301559L;
 
 	/** The sequence value within the key. */
 	private Short sequenceNumber;
@@ -25,6 +25,8 @@ public class Reference implements Serializable {
 
 	/** The name of the foreign column. */
 	private String foreignColumnName;
+	
+	private boolean insertableOrUpdatable = true;
 
 	/**
 	 * Creates a new, empty reference.
@@ -83,6 +85,14 @@ public class Reference implements Serializable {
 
 	public void setForeignColumnName(String foreignColumnName) {
 		this.foreignColumnName = foreignColumnName;
+	}
+
+	public boolean isInsertableOrUpdatable() {
+		return insertableOrUpdatable;
+	}
+
+	public void setInsertableOrUpdatable(boolean insertableOrUpdatable) {
+		this.insertableOrUpdatable = insertableOrUpdatable;
 	}
 
 	public int hashCode() {

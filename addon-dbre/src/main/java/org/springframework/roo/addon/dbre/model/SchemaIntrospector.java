@@ -234,23 +234,23 @@ public class SchemaIntrospector {
 	private CascadeAction getCascadeAction(Short actionValue) {
 		CascadeAction cascadeAction;
 		switch (actionValue.intValue()) {
-		case DatabaseMetaData.importedKeyCascade:
-			cascadeAction = CascadeAction.CASCADE;
-			break;
-		case DatabaseMetaData.importedKeySetNull:
-			cascadeAction = CascadeAction.SET_NULL;
-			break;
-		case DatabaseMetaData.importedKeySetDefault:
-			cascadeAction = CascadeAction.SET_DEFAULT;
-			break;
-		case DatabaseMetaData.importedKeyRestrict:
-			cascadeAction = CascadeAction.RESTRICT;
-			break;
-		case DatabaseMetaData.importedKeyNoAction:
-			cascadeAction = CascadeAction.NONE;
-			break;
-		default:
-			cascadeAction = CascadeAction.NONE;
+			case DatabaseMetaData.importedKeyCascade:
+				cascadeAction = CascadeAction.CASCADE;
+				break;
+			case DatabaseMetaData.importedKeySetNull:
+				cascadeAction = CascadeAction.SET_NULL;
+				break;
+			case DatabaseMetaData.importedKeySetDefault:
+				cascadeAction = CascadeAction.SET_DEFAULT;
+				break;
+			case DatabaseMetaData.importedKeyRestrict:
+				cascadeAction = CascadeAction.RESTRICT;
+				break;
+			case DatabaseMetaData.importedKeyNoAction:
+				cascadeAction = CascadeAction.NONE;
+				break;
+			default:
+				cascadeAction = CascadeAction.NONE;
 		}
 		return cascadeAction;
 	}
