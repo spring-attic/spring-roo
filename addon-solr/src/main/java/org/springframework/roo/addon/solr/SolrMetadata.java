@@ -30,6 +30,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
@@ -56,6 +57,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private MetadataService metadataService;
 	private PathResolver pathResolver;
 	private FileManager fileManager;
+	private String javaBeanFieldName;
 
 	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, BeanInfoMetadata beanInfoMetadata, ToStringMetadata toStringMetadata, MetadataService metadataService, PathResolver pathResolver, FileManager fileManager) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -69,6 +71,10 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		if (!isValid()) {
 			return;
+		}
+		this.javaBeanFieldName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(javaBeanFieldName)) {
+			this.javaBeanFieldName = "_" + javaBeanFieldName;
 		}
 		this.entityMetadata = entityMetadata;
 		this.beanInfoMetadata = beanInfoMetadata;
@@ -185,13 +191,13 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(beanInfoMetadata.getJavaBean());
 		bodyBuilder.appendFormalLine(getSimleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, typeParams)) + " " + beanPlural.toLowerCase() + " = new " + getSimleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, typeParams)) + "();");
-		bodyBuilder.appendFormalLine(beanPlural.toLowerCase() + ".add(" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + ");");
+		bodyBuilder.appendFormalLine(beanPlural.toLowerCase() + ".add(" + javaBeanFieldName + ");");
 		bodyBuilder.appendFormalLine(annotationValues.getIndexMethod() + beanPlural + "(" + beanPlural.toLowerCase() + ");");
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
+		paramNames.add(new JavaSymbolName(javaBeanFieldName));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		return methodBuilder.build();
@@ -205,14 +211,13 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		JavaType solrInputDocument = new JavaType("org.apache.solr.common.SolrInputDocument");
 		String sid = getSimleName(solrInputDocument);
-		String simpleBeanName = beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase();
 		List<JavaType> sidTypeParams = new ArrayList<JavaType>();
 		sidTypeParams.add(solrInputDocument);
 		bodyBuilder.appendFormalLine(getSimleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + " documents = new " + getSimleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + "();");
-		bodyBuilder.appendFormalLine("for (" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " " + simpleBeanName + " : " + beanPlural.toLowerCase() + ") {");
+		bodyBuilder.appendFormalLine("for (" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " " + javaBeanFieldName + " : " + beanPlural.toLowerCase() + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(sid + " sid = new " + sid + "();");
-		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + simpleBeanName + "_\" + " + simpleBeanName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors()) {
@@ -225,8 +230,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			if (!textField.toString().endsWith("StringBuilder()")) {
 				textField.append(".append(\" \")");
 			}
-			textField.append(".append(").append(simpleBeanName).append(".").append(method.getMethodName()).append("()").append(")");
-			String fieldName = simpleBeanName + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType());
+			textField.append(".append(").append(javaBeanFieldName).append(".").append(method.getMethodName()).append("()").append(")");
+			String fieldName = javaBeanFieldName + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType());
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				if (annotation.getAnnotationType().equals(new JavaType("org.apache.solr.client.solrj.beans.Field"))) {
 					AnnotationAttributeValue<?> value = annotation.getAttribute(new JavaSymbolName("value"));
@@ -235,10 +240,10 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					}
 				}
 			}
-			bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + simpleBeanName + "." + method.getMethodName().getSymbolName() + "());");
+			bodyBuilder.appendFormalLine("sid.addField(\"" + fieldName + "\", " + javaBeanFieldName + "." + method.getMethodName().getSymbolName() + "());");
 		}
 		bodyBuilder.appendFormalLine("// Add summary field to allow searching documents for objects of this type");
-		bodyBuilder.appendFormalLine("sid.addField(\"" + simpleBeanName + "_solrsummary_t\", " + textField.toString() + ");");
+		bodyBuilder.appendFormalLine("sid.addField(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_solrsummary_t\", " + textField.toString() + ");");
 		bodyBuilder.appendFormalLine("documents.add(sid);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
@@ -274,7 +279,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine(getSimleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_\" + " + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("solrServer.commit();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (Exception e) {");
@@ -286,7 +291,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
+		paramNames.add(new JavaSymbolName(javaBeanFieldName));
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		return methodBuilder.build();
