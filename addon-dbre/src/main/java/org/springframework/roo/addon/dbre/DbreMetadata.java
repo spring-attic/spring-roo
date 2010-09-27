@@ -36,9 +36,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
-import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.IntegerAttributeValue;
 import org.springframework.roo.classpath.details.annotations.NestedAnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
@@ -82,10 +79,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
 	private static final JavaType MANY_TO_MANY = new JavaType("javax.persistence.ManyToMany");
 	private static final JavaType JOIN_COLUMN = new JavaType("javax.persistence.JoinColumn");
-	private static final JavaSymbolName NAME = new JavaSymbolName("name");
-	private static final JavaSymbolName VALUE = new JavaSymbolName("value");
-	private static final JavaSymbolName MAPPED_BY = new JavaSymbolName("mappedBy");
-	private static final JavaSymbolName REFERENCED_COLUMN = new JavaSymbolName("referencedColumnName");
+	private static final JavaType JOIN_COLUMNS = new JavaType("javax.persistence.JoinColumns");
+	private static final String NAME = "name";
+	private static final String VALUE = "value";
+	private static final String MAPPED_BY = "mappedBy";
+	private static final String REFERENCED_COLUMN = "referencedColumnName";
 
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
@@ -281,22 +279,22 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @JoinTable annotation
 		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinTableAnnotationAttributes.add(new StringAttributeValue(NAME, joinTable.getTable().getName()));
+		joinTableAnnotationAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getTable().getName()));
 
 		// Add joinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfOwningSideTable()));
+		joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getPrimaryKeyOfOwningSideTable()));
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
-		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnBuilder.build()));
+		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
 
 		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		inverseJoinColumnAttributes.add(new StringAttributeValue(NAME, joinTable.getPrimaryKeyOfInverseSideTable()));
+		inverseJoinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getPrimaryKeyOfInverseSideTable()));
 		AnnotationMetadataBuilder inverseJoinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, inverseJoinColumnAttributes);
-		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(VALUE, inverseJoinColumnBuilder.build()));
+		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), inverseJoinColumnBuilder.build()));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
 
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinTable"), joinTableAnnotationAttributes));
@@ -315,9 +313,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
-		annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY, attributes));
+		AnnotationMetadataBuilder manyToManyBuilder = new AnnotationMetadataBuilder(MANY_TO_MANY);
+		manyToManyBuilder.addStringAttribute(MAPPED_BY, mappedByFieldName.getSymbolName());
+		annotations.add(manyToManyBuilder);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		return fieldBuilder.build();
@@ -325,9 +323,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private FieldMetadata getOneToOneMappedByField(JavaSymbolName fieldName, JavaType fieldType, JavaSymbolName mappedByFieldName) {
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
-		annotations.add(new AnnotationMetadataBuilder(ONE_TO_ONE, attributes));
+		AnnotationMetadataBuilder oneToOneBuilder = new AnnotationMetadataBuilder(ONE_TO_ONE);
+		oneToOneBuilder.addStringAttribute(MAPPED_BY, mappedByFieldName.getSymbolName());
+		annotations.add(oneToOneBuilder);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldName, fieldType);
 		return fieldBuilder.build();
@@ -409,40 +407,40 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @OneToMany annotation
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(MAPPED_BY, mappedByFieldName.getSymbolName()));
-		annotations.add(new AnnotationMetadataBuilder(ONE_TO_MANY, attributes));
+		AnnotationMetadataBuilder oneToManyBuilder = new AnnotationMetadataBuilder(ONE_TO_MANY);
+		oneToManyBuilder.addStringAttribute(MAPPED_BY, mappedByFieldName.getSymbolName());
+		annotations.add(oneToManyBuilder);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		return fieldBuilder.build();
 	}
 
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn, boolean isCompositeKeyColumn) {
-		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(NAME, reference.getLocalColumn().getName()));
+		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
+		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getName());
 		if (referencedColumn) {
-			joinColumnAttributes.add(new StringAttributeValue(REFERENCED_COLUMN, reference.getForeignColumn().getName()));
+			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getLocalColumn().getName());
 		}
 		if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
-			addOtherJoinColumnAttributes(joinColumnAttributes);
+			addOtherJoinColumnAttributes(joinColumnBuilder);
 		}
-		return new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
+		return joinColumnBuilder;
 	}
 
-	private void addOtherJoinColumnAttributes(List<AnnotationAttributeValue<?>> joinColumnAttributes) {
-		joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("insertable"), false));
-		joinColumnAttributes.add(new BooleanAttributeValue(new JavaSymbolName("updatable"), false));
+	private void addOtherJoinColumnAttributes(AnnotationMetadataBuilder joinColumnBuilder) {
+		joinColumnBuilder.addBooleanAttribute("insertable", false);
+		joinColumnBuilder.addBooleanAttribute("updatable", false);
 	}
 
 	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, boolean isCompositeKeyColumn) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		for (Reference reference : references) {
 			AnnotationMetadataBuilder joinColumnAnnotation = getJoinColumnAnnotation(reference, true, isCompositeKeyColumn);
-			arrayValues.add(new NestedAnnotationAttributeValue(VALUE, joinColumnAnnotation.build()));
+			arrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnAnnotation.build()));
 		}
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(VALUE, arrayValues));
-		return new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumns"), attributes);
+		attributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName(VALUE), arrayValues));
+		return new AnnotationMetadataBuilder(JOIN_COLUMNS, attributes);
 	}
 
 	private boolean isOneToOne(Table table, ForeignKey foreignKey) {
@@ -497,7 +495,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		for (FieldMetadata field : identifierFields) {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
 				if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Column"))) {
-					AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(NAME);
+					AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName(NAME));
 					if (nameAttribute != null) {
 						String name = (String) nameAttribute.getValue();
 						if (column.getName().equals(name)) {
@@ -569,21 +567,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Add @Column annotation
-		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(NAME, column.getName()));
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"));
+		columnBuilder.addStringAttribute(NAME, column.getName());		
 
 		// Add length attribute for Strings
 		if (column.getLength() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
-			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("length"), column.getLength()));
+			columnBuilder.addIntegerAttribute("length", column.getLength());
 		}
 
 		// Add precision and scale attributes for numeric fields
 		if (column.getPrecision() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(new JavaType("java.math.BigDecimal")))) {
-			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("precision"), column.getPrecision()));
-			columnAttributes.add(new IntegerAttributeValue(new JavaSymbolName("scale"), column.getScale()));
+			columnBuilder.addIntegerAttribute("precision", column.getPrecision());
+			columnBuilder.addIntegerAttribute("scale", column.getScale());
 		}
 
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"), columnAttributes));
+		annotations.add(columnBuilder);
 
 		// Add @NotNull if applicable
 		if (column.isRequired()) {
@@ -592,13 +590,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(new JavaType("java.util.Date"))) {
-			List<AnnotationAttributeValue<?>> temporalAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			temporalAttributes.add(new EnumAttributeValue(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name()))));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"), temporalAttributes));
+			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
+			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name())));
+			annotations.add(temporalBuilder);
 
-			List<AnnotationAttributeValue<?>> dateTimeFormatAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			dateTimeFormatAttributes.add(new StringAttributeValue(new JavaSymbolName("style"), "S-"));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), dateTimeFormatAttributes));
+			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+			dateTimeFormatBuilder.addStringAttribute("style", "S-");
+			annotations.add(dateTimeFormatBuilder);
 		}
 
 		// Add @Lob for CLOB fields if applicable

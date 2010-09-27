@@ -31,8 +31,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
@@ -54,8 +52,8 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
-	private static final JavaSymbolName IDENTIFIER_TYPE = new JavaSymbolName("identifierType");
-	private static final JavaSymbolName VERSION_FIELD = new JavaSymbolName("versionField");
+	private static final String IDENTIFIER_TYPE = "identifierType";
+	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private ClasspathOperations classpathOperations;
@@ -140,33 +138,33 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
 		
 		// Find primary key from db metadata and add identifier attributes to @RooEntity
-		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		manageEntityIdentifier(javaType, entityAttributes, new HashSet<JavaSymbolName>(), table);
+		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()));
+		manageEntityIdentifier(javaType, rooEntityBuilder, new HashSet<JavaSymbolName>(), table);
 
 		if (!hasVersionField(table)) {
-			entityAttributes.add(new StringAttributeValue(VERSION_FIELD, ""));
+			rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
 		}
 
-		annotations.add(new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()), entityAttributes));
+		annotations.add(rooEntityBuilder);
 
 		// Add @RooDbManaged
-		List<AnnotationAttributeValue<?>> dbManagedAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		dbManagedAttributes.add(new BooleanAttributeValue(new JavaSymbolName("automaticallyDelete"), true));
-		annotations.add(new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()), dbManagedAttributes));
+		AnnotationMetadataBuilder rooDbManagedBuilder = new AnnotationMetadataBuilder(new JavaType(RooDbManaged.class.getName()));
+		rooDbManagedBuilder.addBooleanAttribute("automaticallyDelete", true);
+		annotations.add(rooDbManagedBuilder);
 
 		JavaType superclass = new JavaType("java.lang.Object");
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
-		List<AnnotationAttributeValue<?>> tableAttrs = new ArrayList<AnnotationAttributeValue<?>>();
-		tableAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), table.getName()));
+		AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"));
+		tableBuilder.addStringAttribute("name", table.getName());
 		if (StringUtils.hasText(table.getCatalog())) {
-			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("catalog"), table.getCatalog()));
+			tableBuilder.addStringAttribute("catalog", table.getCatalog());
 		}
 		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
-			tableAttrs.add(new StringAttributeValue(new JavaSymbolName("schema"), table.getSchema().getName()));
+			tableBuilder.addStringAttribute("schema", table.getSchema().getName());
 		}
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"), tableAttrs));
+		annotations.add(tableBuilder);
 
 		// Create entity class
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
@@ -189,34 +187,32 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			return;
 		}
 
-		JavaType entityAnnotationType = new JavaType(RooEntity.class.getName());
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, entityAnnotationType);
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, new JavaType(RooEntity.class.getName()));
 		Assert.notNull(entityAnnotation, "@RooEntity annotation not found on " + javaType.getFullyQualifiedTypeName());
-		List<AnnotationAttributeValue<?>> entityAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(entityAnnotation);
 
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new HashSet<JavaSymbolName>();
 
-		manageEntityIdentifier(javaType, entityAttributes, attributesToDeleteIfPresent, table);
+		manageEntityIdentifier(javaType, rooEntityBuilder, attributesToDeleteIfPresent, table);
 
 		// Manage versionField attribute
-		AnnotationAttributeValue<?> versionFieldAttribute = entityAnnotation.getAttribute(VERSION_FIELD);
+		AnnotationAttributeValue<?> versionFieldAttribute = entityAnnotation.getAttribute(new JavaSymbolName(VERSION_FIELD));
 		if (versionFieldAttribute != null) {
 			String versionFieldValue = (String) versionFieldAttribute.getValue();
 			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
-				attributesToDeleteIfPresent.add(VERSION_FIELD);
+				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
 			}
 		} else {
 			if (hasVersionField(table)) {
-				attributesToDeleteIfPresent.add(VERSION_FIELD);
+				attributesToDeleteIfPresent.add(new JavaSymbolName(VERSION_FIELD));
 			} else {
-				entityAttributes.add(new StringAttributeValue(VERSION_FIELD, ""));
+				rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
 			}
 		}
 				
 		// Update the annotation on disk
-		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(entityAnnotationType, entityAttributes);
-		mutableTypeDetails.updateTypeAnnotation(annotationBuilder.build(), attributesToDeleteIfPresent);
+		mutableTypeDetails.updateTypeAnnotation(rooEntityBuilder.build(), attributesToDeleteIfPresent);
 	}
 
 	private boolean hasVersionField(Table table) {
@@ -228,7 +224,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		return false;
 	}
 	
-	private void manageEntityIdentifier(JavaType javaType, List<AnnotationAttributeValue<?>> entityAttributes, Set<JavaSymbolName> attributesToDeleteIfPresent, Table table) {
+	private void manageEntityIdentifier(JavaType javaType, AnnotationMetadataBuilder rooEntityBuilder, Set<JavaSymbolName> attributesToDeleteIfPresent, Table table) {
 		JavaType identifierType = getIdentifierType(javaType);
 		PhysicalTypeMetadata identifierPhysicalTypeMetadata = getPhysicalTypeMetadata(identifierType);
 		
@@ -241,7 +237,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 				deleteManagedType(identifierType);
 			}
 			
-			attributesToDeleteIfPresent.add(IDENTIFIER_TYPE);
+			attributesToDeleteIfPresent.add(new JavaSymbolName(IDENTIFIER_TYPE));
 			
 			// We don't need a PK class, so we just tell the EntityMetadataProvider via IdentifierService the column name, field type and field name to use
 			List<Identifier> identifiers = getIdentifiersFromPrimaryKeys(table.getPrimaryKeys());
@@ -254,7 +250,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 				createIdentifierClass(identifierType);
 			}
 
-			entityAttributes.add(new ClassAttributeValue(IDENTIFIER_TYPE, identifierType));
+			rooEntityBuilder.addClassAttribute(IDENTIFIER_TYPE, identifierType);
 
 			// We need a PK class, so we tell the IdentifierMetadataProvider via IdentifierService the various column names, field types and field names to use
 			// For tables with no primary keys, create a composite key using all the table's columns
@@ -431,7 +427,7 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 			AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 			if (entityAnnotation != null) {
-				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(IDENTIFIER_TYPE);
+				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
 				if (identifierTypeAttribute != null) {
 					// Attribute identifierType exists so get the value
 					JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
