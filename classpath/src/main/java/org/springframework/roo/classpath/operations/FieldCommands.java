@@ -87,7 +87,7 @@ public class FieldCommands implements CommandMarker {
 		return classpathOperations.isProjectAvailable();
 	}
 
-	@CliCommand(value="field other", help="Inserts a private field into the specified file")
+	@CliCommand(value = "field other", help = "Inserts a private field into the specified file")	
 	public void insertField(
 		@CliOption(key = "fieldName", mandatory = true, help = "The name of the field") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, help = "The Java type of this field") JavaType fieldType, 
@@ -104,6 +104,7 @@ public class FieldCommands implements CommandMarker {
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (comment != null) fieldDetails.setComment(comment);
+		
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
@@ -122,14 +123,15 @@ public class FieldCommands implements CommandMarker {
 			CollectionField collectionField = (CollectionField) fieldDetails;
 			initializer = "new " + collectionField.getInitializer() + "()";
 		}
-		int mod = Modifier.PRIVATE;
-		if (transientModifier) mod += Modifier.TRANSIENT;
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), mod, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
+		int modifier = Modifier.PRIVATE;
+		if (transientModifier) modifier += Modifier.TRANSIENT;
+		
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		fieldBuilder.setFieldInitializer(initializer);
 		classpathOperations.addField(fieldBuilder.build());
 	}
 	
-	@CliCommand(value="field number", help="Adds a private numeric field to an existing Java source file")
+	@CliCommand(value = "field number", help = "Adds a private numeric field to an existing Java source file")	
 	public void addFieldNumber(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, optionContext = "java-number", help = "The Java type of the entity") JavaType fieldType, 
@@ -146,7 +148,8 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible") boolean primitive, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		JavaType useType = fieldType;
@@ -164,11 +167,14 @@ public class FieldCommands implements CommandMarker {
 		if (max != null) fieldDetails.setMax(max);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+		if (unique) fieldDetails.setUnique(true);
+
 		Assert.isTrue(fieldDetails.isDigitsSetCorrectly(), "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
+		
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field string", help="Adds a private string field to an existing Java source file")
+	@CliCommand(value = "field string", help = "Adds a private string field to an existing Java source file")	
 	public void addFieldString(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
@@ -182,7 +188,8 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		StringField fieldDetails = new StringField(physicalTypeIdentifier, new JavaType("java.lang.String"), fieldName);
@@ -195,10 +202,12 @@ public class FieldCommands implements CommandMarker {
 		if (regexp != null) fieldDetails.setRegexp(regexp.replace("\\", "\\\\"));
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+		if (unique) fieldDetails.setUnique(true);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field date", help="Adds a private date field to an existing Java source file")
+	@CliCommand(value = "field date", help = "Adds a private date field to an existing Java source file")	
 	public void addFieldDateJpa(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, optionContext = "java-date", help = "The Java type of the entity") JavaType fieldType, 
@@ -227,10 +236,11 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
 		if (timeFormat != null) fieldDetails.setTimeFormat(timeFormat);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field boolean", help="Adds a private boolean field to an existing Java source file")
+	@CliCommand(value = "field boolean", help = "Adds a private boolean field to an existing Java source file")	
 	public void addFieldBoolean(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
@@ -252,10 +262,11 @@ public class FieldCommands implements CommandMarker {
 		if (assertTrue != null) fieldDetails.setAssertTrue(assertTrue);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field reference", help="Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)")
+	@CliCommand(value = "field reference", help = "Adds a private reference field to an existing Java source file (eg the 'many' side of a many-to-one)")	
 	public void addFieldReferenceJpa(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, optionContext = "project", help = "The Java type of the entity to reference") JavaType fieldType, 
@@ -292,10 +303,11 @@ public class FieldCommands implements CommandMarker {
 		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);
 		if (fetch != null) fieldDetails.setFetch(fetch);
 		if (comment != null) fieldDetails.setComment(comment);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field set", help="Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")
+	@CliCommand(value = "field set", help = "Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")	
 	public void addFieldSetJpa(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "element", mandatory = true, help = "The entity which will be contained within the Set") JavaType element, 
@@ -340,10 +352,11 @@ public class FieldCommands implements CommandMarker {
 		if (mappedBy != null) fieldDetails.setMappedBy(mappedBy);
 		if (fetch != null) fieldDetails.setFetch(fetch);
 		if (comment != null) fieldDetails.setComment(comment);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 
-	@CliCommand(value="field enum", help="Adds a private enum field to an existing Java source file")
+	@CliCommand(value = "field enum", help = "Adds a private enum field to an existing Java source file")	
 	public void addFieldEnum(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, help = "The enum type of this field") JavaType fieldType, 
@@ -361,6 +374,7 @@ public class FieldCommands implements CommandMarker {
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (enumType != null) fieldDetails.setEnumType(enumType);
 		if (comment != null) fieldDetails.setComment(comment);
+	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -18,6 +19,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class FieldDetails {
+	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	/** The JPA @Column value */
 	private String column = null;
@@ -39,6 +41,9 @@ public class FieldDetails {
 
 	/** Any JavaDoc comments (reserved for future expansion) */
 	protected String comment = "";
+	
+	/** Whether unique = true is added to the @Column annotation */
+	private boolean unique = false;
 
 	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
@@ -57,13 +62,26 @@ public class FieldDetails {
 		if (nullRequired) {
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Null")));
 		}
+		AnnotationMetadataBuilder columnBuilder = null;
 		if (column != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
 			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), column));
-			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"), attrs));
+			columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
+		}
+		if (unique) {
+			if (columnBuilder != null) {
+				columnBuilder.addBooleanAttribute("unique", true);
+			} else {
+				List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+				attrs.add(new BooleanAttributeValue(new JavaSymbolName("unique"), true));
+				columnBuilder = new AnnotationMetadataBuilder(COLUMN, attrs);
+			}
+		}
+		if (columnBuilder != null) {
+			annotations.add(columnBuilder);
 		}
 	}
-
+	
 	public boolean isNotNull() {
 		return notNull;
 	}
@@ -108,5 +126,13 @@ public class FieldDetails {
 
 	public JavaSymbolName getFieldName() {
 		return fieldName;
+	}
+
+	public boolean isUnique() {
+		return unique;
+	}
+
+	public void setUnique(boolean unique) {
+		this.unique = unique;
 	}
 }
