@@ -163,10 +163,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		List<JavaType> implementsTypes = new ArrayList<JavaType>();
 
-		// attribs.add(new ClassAttributeValue(new JavaSymbolName("type"), beanInfoMetadata.getJavaBean()));
-		// attribs.add(new StringAttributeValue(new JavaSymbolName("token"), governorTypeDetails.getName().getSimpleTypeName()));
-		// typeAnnotations.add(new DefaultAnnotationMetadata(new JavaType("com.google.gwt.requestfactory.shared.ServerType"), attribs));
-
 		// extends Proxy
 		extendsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"));
 
@@ -227,9 +223,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
 			methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder()));
 		}
-
-		// isChanged method
-		methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, new JavaSymbolName("isChanged"), JavaType.BOOLEAN_PRIMITIVE, new InvocableMemberBodyBuilder()));
 
 		// Setter methods for EmployeeProxy
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {

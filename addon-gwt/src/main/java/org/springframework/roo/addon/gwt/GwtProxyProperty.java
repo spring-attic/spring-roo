@@ -39,13 +39,7 @@ class GwtProxyProperty {
     this.ptmd = ptmd;
     
     String prefix = null;
-    // Boolean properties are still not working, *and* for some reason
-    // every entity thinks it has an isChanged method
-//    if (getter.startsWith("is")) {
-//      prefix = "is";
-//    } else {
-      prefix = "get";
-//    }
+    prefix = "get";
     
     this.name = getter.substring(prefix.length(), prefix.length() +1).toLowerCase() + getter.substring(prefix.length() + 1);
     this.displayName = JavaSymbolName.getReadableSymbolName(name);
