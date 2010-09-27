@@ -13,7 +13,7 @@ field string --fieldName department
 field string --fieldName displayName
 field reference --type Employee supervisor
 field enum --fieldName gender --type ~.gwt.shared.Gender
-
+field boolean --fieldName admin --notNull
 
 entity --class ~.server.domain.Report --testAutomatically
 // field date --fieldName created --type java.util.Date --past --notNull
@@ -37,8 +37,6 @@ field reference --type Report report
 
 //field string --fieldName password --sizeMin 2 --sizeMax 30
 //field reference --fieldName supervisor --type ~.server.domain.Employee
-//field boolean --fieldName accountant --notNull
-//field boolean --fieldName administrator --notNull
 
 // you can have normal MVC controllers in your app, but we don't need them here
 //controller all --package ~.web
