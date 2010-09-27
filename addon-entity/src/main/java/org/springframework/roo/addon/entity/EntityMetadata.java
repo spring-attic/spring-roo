@@ -77,6 +77,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String findMethod = "find";
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
+	@AutoPopulate private String persistenceUnit = "";
+	
 
 	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -206,6 +208,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			// Candidate not found, so let's create one
 			List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(PERSISTENCE_CONTEXT);
+			if (StringUtils.hasText(persistenceUnit)) {
+				annotationBuilder.addStringAttribute("unitName", persistenceUnit);
+			}
 			annotations.add(annotationBuilder);
 			
 			FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, annotations, fieldSymbolName, ENTITY_MANAGER);

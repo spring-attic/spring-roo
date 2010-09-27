@@ -49,20 +49,21 @@ public class JpaCommands implements CommandMarker {
 	
 	@CliCommand(value = "persistence setup", help = "Install or updates a JPA persistence provider in your project")
 	public void installJpa(
-		@CliOption(key = { "provider" }, mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
-		@CliOption(key = { "database" }, mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
-		@CliOption(key = { "applicationId" }, mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") String applicationId, 
-		@CliOption(key = { "jndiDataSource" }, mandatory = false, help = "The JNDI datasource to use") String jndi, 
-		@CliOption(key = { "databaseName" }, mandatory = false, help = "The database name to use") String databaseName, 
-		@CliOption(key = { "userName" }, mandatory = false, help = "The username to use") String userName, 
-		@CliOption(key = { "password" }, mandatory = false, help = "The password to use") String password) {
+		@CliOption(key = "provider", mandatory = true, help = "The persistence provider to support") OrmProvider ormProvider, 
+		@CliOption(key = "database", mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
+		@CliOption(key = "applicationId", mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") String applicationId, 
+		@CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") String jndi, 
+		@CliOption(key = "databaseName", mandatory = false, help = "The database name to use") String databaseName, 
+		@CliOption(key = "userName", mandatory = false, help = "The username to use") String userName, 
+		@CliOption(key = "password", mandatory = false, help = "The password to use") String password,
+		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit) {
 
 		if (jdbcDatabase == JdbcDatabase.GOOGLE_APP_ENGINE && ormProvider != OrmProvider.DATANUCLEUS) {
 			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS.name() + " for the Google App Engine");
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, databaseName, userName, password);
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, databaseName, userName, password, persistenceUnit);
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")

@@ -118,4 +118,9 @@ public @interface RooEntity {
 	 * an additional add-on that can provide implementations of such methods (optional)
 	 */
 	String[] finders() default "";
+	
+	/**
+	 * @return the name of the persistence unit defined in the persistence.xml file (optional)
+	 */
+	String persistenceUnit() default "";
 }

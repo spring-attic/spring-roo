@@ -11,11 +11,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
-import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -194,7 +190,8 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
+		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit) {
 
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 
@@ -223,22 +220,25 @@ public class ClasspathCommands implements CommandMarker {
 		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
 		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
 
-		List<AnnotationAttributeValue<?>> entityAttrs = new ArrayList<AnnotationAttributeValue<?>>();
+		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 		if (identifierField != null) {
-			entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierField"), identifierField));
+			rooEntityBuilder.addStringAttribute("identifierField", identifierField);
 		}
 		if (identifierColumn != null) {
-			entityAttrs.add(new StringAttributeValue(new JavaSymbolName("identifierColumn"), identifierColumn));
+			rooEntityBuilder.addStringAttribute("identifierColumn", identifierColumn);
 		}
 		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
-			entityAttrs.add(new ClassAttributeValue(new JavaSymbolName("identifierType"), identifierType));
+			rooEntityBuilder.addClassAttribute("identifierType", identifierType);
 		} 
-		entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.entity.RooEntity"), entityAttrs));
+		if (persistenceUnit != null) {
+			rooEntityBuilder.addStringAttribute("persistenceUnit", persistenceUnit);			
+		}
+		entityAnnotations.add(rooEntityBuilder);
 
 		if (table != null) {
-			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new StringAttributeValue(new JavaSymbolName("name"), table));
-			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"), attrs));
+			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"));
+			tableBuilder.addStringAttribute("name", table);
+			entityAnnotations.add(tableBuilder);
 		}
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
@@ -250,12 +250,12 @@ public class ClasspathCommands implements CommandMarker {
 			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Entity")));
 		}
 		if (serializable) {
-			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable"), entityAttrs));
+			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
 		}
 		if (inheritanceType != null) {
-			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
-			attrs.add(new EnumAttributeValue(new JavaSymbolName("strategy"), new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.name()))));
-			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Inheritance"), attrs));
+			AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Inheritance"));
+			inheritanceBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.name())));
+			entityAnnotations.add(inheritanceBuilder);
 			if (inheritanceType == InheritanceType.SINGLE_TABLE) {
 				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
 				entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.DiscriminatorColumn")));

@@ -80,7 +80,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password) {
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password, String persistenceUnit) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
@@ -91,7 +91,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		cleanup(configuration, ormProvider, database);
 
 		updateApplicationContext(ormProvider, database, jndi);
-		updatePersistenceXml(ormProvider, database, databaseName, userName, password);
+		updatePersistenceXml(ormProvider, database, databaseName, userName, password, persistenceUnit);
 		updateGaeXml(ormProvider, database, applicationId);
 		if (!StringUtils.hasText(jndi)) {
 			updateDatabaseProperties(ormProvider, database, databaseName, userName, password);
@@ -214,7 +214,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
 
-	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password) {
+	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password, String persistenceUnit) {
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
 
@@ -244,10 +244,25 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		Element root = persistence.getDocumentElement();
 		Element persistenceElement = XmlUtils.findFirstElement("/persistence", root);
-		Element persistenceUnit = XmlUtils.findFirstElement("persistence-unit", persistenceElement);
-
-		while (persistenceUnit.getFirstChild() != null) {
-			persistenceUnit.removeChild(persistenceUnit.getFirstChild());
+		Assert.notNull(persistenceElement, "No persistence element found");
+		
+		Element persistenceUnitElement;
+		if (StringUtils.hasText(persistenceUnit)) {
+			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + persistenceUnit + "']", persistenceElement);
+			if (persistenceUnitElement == null) {
+				persistenceUnitElement = persistence.createElement("persistence-unit");
+				persistenceElement.appendChild(persistenceUnitElement);
+			}
+		} else {
+			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + PERSISTENCE_UNIT_NAME + "']", persistenceElement);
+			if (persistenceUnitElement == null) {
+				persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit", persistenceElement);				
+			}
+		}
+		Assert.notNull(persistenceUnitElement, "No persistence-unit elements found");
+		
+		while (persistenceUnitElement.getFirstChild() != null) {
+			persistenceUnitElement.removeChild(persistenceUnitElement.getFirstChild());
 		}
 
 		// Set attributes for DataNuclueus 1.1.x and GAE-specific requirements
@@ -262,17 +277,17 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element provider = persistence.createElement("provider");
 
 		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
-			persistenceUnit.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
-			persistenceUnit.removeAttribute("transaction-type");
+			persistenceUnitElement.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
+			persistenceUnitElement.removeAttribute("transaction-type");
 			provider.setTextContent(ormProvider.getAlternateAdapter());
 		} else {
-			persistenceUnit.setAttribute("name", PERSISTENCE_UNIT_NAME);
-			persistenceUnit.setAttribute("transaction-type", "RESOURCE_LOCAL");
+			persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
+			persistenceUnitElement.setAttribute("transaction-type", "RESOURCE_LOCAL");
 			provider.setTextContent(ormProvider.getAdapter());
 		}
 
 		// Add provider element
-		persistenceUnit.appendChild(provider);
+		persistenceUnitElement.appendChild(provider);
 
 		// Add properties
 		Element properties = persistence.createElement("properties");
@@ -340,7 +355,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			break;
 		}
 
-		persistenceUnit.appendChild(properties);
+		persistenceUnitElement.appendChild(properties);
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
 	}
 
