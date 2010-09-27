@@ -47,6 +47,7 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -90,6 +91,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
+			this.entityName = "_" + entityName;
+		}
 		this.controllerPath = annotationValues.getPath();
 		this.metadataService = metadataService;
 
@@ -656,9 +660,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(beanInfoMetadata.getJavaBean());
-		bodyBuilder.appendFormalLine("for (" + beanName + " " + beanName.toLowerCase() + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
+		bodyBuilder.appendFormalLine("for (" + beanName + " " + entityName + ": " + beanName + "." + fromJsonArrayMethodName.getSymbolName() + "(json)) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(beanName.toLowerCase() + "." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
