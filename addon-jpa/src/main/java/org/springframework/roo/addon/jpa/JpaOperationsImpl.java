@@ -254,7 +254,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				persistenceElement.appendChild(persistenceUnitElement);
 			}
 		} else {
-			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + PERSISTENCE_UNIT_NAME + "']", persistenceElement);
+			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + (database == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME : PERSISTENCE_UNIT_NAME) + "']", persistenceElement);
 			if (persistenceUnitElement == null) {
 				persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit", persistenceElement);				
 			}
