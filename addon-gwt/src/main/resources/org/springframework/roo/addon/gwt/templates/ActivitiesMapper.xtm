@@ -24,8 +24,8 @@ public class {{=className}} {
 				return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
 			case EDIT:
 				return new {{=editActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
-			case PERSIST:
-      			return new {{=editActivity}}(null, requests, placeController);
+			case CREATE:
+      			        return new {{=editActivity}}(null, requests, placeController);
 		}
 
 		throw new IllegalArgumentException("Unknown operation " + place.getOperation());
