@@ -97,6 +97,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
@@ -148,6 +149,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "max", mandatory = false, help = "The maximum value") Long max, 
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
+		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible") boolean primitive, 
 		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique,
@@ -169,6 +171,7 @@ public class FieldCommands implements CommandMarker {
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
 		if (unique) fieldDetails.setUnique(true);
+		if (value != null) fieldDetails.setValue(value);
 
 		Assert.isTrue(fieldDetails.isDigitsSetCorrectly(), "Must specify both --digitsInteger and --digitsFractional for @Digits to be added");
 		
@@ -187,6 +190,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "sizeMax", mandatory = false, help = "The maximum string length") Integer sizeMax, 
 		@CliOption(key = "regexp", mandatory = false, help = "The required regular expression pattern") String regexp, 
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique,
@@ -204,6 +208,7 @@ public class FieldCommands implements CommandMarker {
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
 		if (unique) fieldDetails.setUnique(true);
+		if (value != null) fieldDetails.setValue(value);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
@@ -220,6 +225,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "past", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be in the past") Boolean past, 
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
+		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords, 
 		@CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "SHORT", specifiedDefaultValue = "SHORT", help = "Indicates the style of the date format") DateTime dateFormat, 
@@ -237,6 +243,7 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
 		if (timeFormat != null) fieldDetails.setTimeFormat(timeFormat);
+		if (value != null) fieldDetails.setValue(value);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
@@ -250,6 +257,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "assertFalse", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must assert false") Boolean assertFalse, 
 		@CliOption(key = "assertTrue", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must assert true") Boolean assertTrue, 
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type") boolean primitive, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
@@ -263,6 +271,7 @@ public class FieldCommands implements CommandMarker {
 		if (assertTrue != null) fieldDetails.setAssertTrue(assertTrue);
 		if (column != null) fieldDetails.setColumn(column);
 		if (comment != null) fieldDetails.setComment(comment);
+		if (value != null) fieldDetails.setValue(value);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}

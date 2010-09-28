@@ -20,6 +20,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class FieldDetails {
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
+	
+	private static final JavaType VALUE = new JavaType("org.springframework.beans.factory.annotation.Value");
 
 	/** The JPA @Column value */
 	private String column = null;
@@ -44,6 +46,9 @@ public class FieldDetails {
 	
 	/** Whether unique = true is added to the @Column annotation */
 	private boolean unique = false;
+	
+	/** The Spring @Value value **/
+	private String value = null;
 	
 	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
@@ -82,6 +87,12 @@ public class FieldDetails {
 		}
 		if (columnBuilder != null) {
 			annotations.add(columnBuilder);
+		}
+		
+		if (value != null) {
+			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();
+			attrs.add(new StringAttributeValue(new JavaSymbolName("value"), value));
+			annotations.add(new AnnotationMetadataBuilder(VALUE, attrs));
 		}
 	}
 	
@@ -137,5 +148,13 @@ public class FieldDetails {
 
 	public void setUnique(boolean unique) {
 		this.unique = unique;
+	}
+	
+	public void setValue(String value) {
+		this.value = value;
+	}
+	
+	public String getValue() {
+		return value;
 	}
 }
