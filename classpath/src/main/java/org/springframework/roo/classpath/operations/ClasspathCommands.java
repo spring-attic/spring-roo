@@ -50,13 +50,14 @@ public class ClasspathCommands implements CommandMarker {
 		return classpathOperations.isProjectAvailable();
 	}
 
-	@CliAvailabilityIndicator( { "entity" })
+	@CliAvailabilityIndicator( { "entity", "embeddable" })
 	public boolean isPersistentClassAvailable() {
 		return classpathOperations.isPersistentClassAvailable();
 	}
 
-	@CliCommand(value="focus", help="Changes focus to a different type")
-	public void focus(@CliOption(key="class", mandatory=true, optionContext="update,project", help="The type to focus on") JavaType typeName) {
+	@CliCommand(value = "focus", help = "Changes focus to a different type") 
+	public void focus(
+		@CliOption(key = "class", mandatory = true, optionContext = "update,project", help = "The type to focus on") JavaType typeName) {
 	}
 	
 	@CliCommand(value = "class", help = "Creates a new Java class source file in any project path")
@@ -89,8 +90,37 @@ public class ClasspathCommands implements CommandMarker {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(classpathOperations.getSuperclass(superclass)));
+		if (classpathOperations.getSuperclass(superclass) != null) {
+			typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(classpathOperations.getSuperclass(superclass)));
+		}
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
+		typeDetailsBuilder.setAnnotations(annotations);
+		classpathOperations.generateClassFile(typeDetailsBuilder.build());
+	}
+
+	@CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in any project path")
+	public void createEmbeddedClass(
+		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
+		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the class in") Path path,
+		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+		
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(name);
+		}
+
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
+
+		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
+		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Embeddable")));
+		if (serializable) {
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
+		}
+
+		int modifier = Modifier.PUBLIC;
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
@@ -190,8 +220,8 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
-		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit) {
+		@CliOption(key = "persistenceUnit", mandatory = false, help = "The persistence unit name to be used in the persistence.xml file") String persistenceUnit,
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		Assert.isTrue(!identifierType.isPrimitive(), "Identifier type cannot be a primitive");
 

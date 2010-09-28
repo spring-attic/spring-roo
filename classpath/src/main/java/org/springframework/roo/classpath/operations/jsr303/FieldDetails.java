@@ -44,7 +44,7 @@ public class FieldDetails {
 	
 	/** Whether unique = true is added to the @Column annotation */
 	private boolean unique = false;
-
+	
 	public FieldDetails(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Destination physical type identifier is invalid");
 		Assert.notNull(fieldType, "Field type required");
@@ -56,12 +56,15 @@ public class FieldDetails {
 
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		Assert.notNull(annotations);
+		
 		if (notNull) {
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.NotNull")));
 		}
+		
 		if (nullRequired) {
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.validation.constraints.Null")));
 		}
+		
 		AnnotationMetadataBuilder columnBuilder = null;
 		if (column != null) {
 			List<AnnotationAttributeValue<?>> attrs = new ArrayList<AnnotationAttributeValue<?>>();

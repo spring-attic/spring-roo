@@ -13,12 +13,10 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
 /**
- * <p>
  * This field can optionally provide the mandatory JSR 220 temporal annotation.
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DateField extends FieldDetails {
 	
@@ -61,7 +59,7 @@ public class DateField extends FieldDetails {
 			attrs.add(new EnumAttributeValue(new JavaSymbolName("value"), new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(value))));
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"), attrs));
 		}
-		//always add a DateTimeFormat annotation
+		// Always add a DateTimeFormat annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
 		attributes.add(new StringAttributeValue(new JavaSymbolName("style"), (null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "S") + (null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));

@@ -22,6 +22,7 @@ import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
 import org.springframework.roo.classpath.operations.jsr303.DateField;
 import org.springframework.roo.classpath.operations.jsr303.DateFieldPersistenceType;
+import org.springframework.roo.classpath.operations.jsr303.EmbeddedField;
 import org.springframework.roo.classpath.operations.jsr303.EnumField;
 import org.springframework.roo.classpath.operations.jsr303.FieldDetails;
 import org.springframework.roo.classpath.operations.jsr303.NumericField;
@@ -76,7 +77,7 @@ public class FieldCommands implements CommandMarker {
 		staticFieldConverter.remove(DateTime.class);
 	}
 
-	@CliAvailabilityIndicator({"field other", "field number", "field string", "field date", "field boolean", "field enum"})
+	@CliAvailabilityIndicator({ "field other", "field number", "field string", "field date", "field boolean", "field enum", "field embedded" })	
 	public boolean isJdkFieldManagementAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}
@@ -99,8 +100,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		JavaType useType = fieldType;
-		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, useType, fieldName);
+		FieldDetails fieldDetails = new FieldDetails(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (comment != null) fieldDetails.setComment(comment);
@@ -148,15 +148,14 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type if possible") boolean primitive, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
-		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique) {
+		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique,
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		JavaType useType = fieldType;
 		if (primitive && this.legalNumericPrimitives.contains(fieldType.getFullyQualifiedTypeName())) {
-			useType = new JavaType(fieldType.getFullyQualifiedTypeName(), 0, DataType.PRIMITIVE, null, null);
+			fieldType = new JavaType(fieldType.getFullyQualifiedTypeName(), 0, DataType.PRIMITIVE, null, null);
 		}
-		NumericField fieldDetails = new NumericField(physicalTypeIdentifier, useType, fieldName);
+		NumericField fieldDetails = new NumericField(physicalTypeIdentifier, fieldType, fieldName);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (decimalMin != null) fieldDetails.setDecimalMin(decimalMin);
@@ -188,8 +187,8 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
-		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords,
-		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique) {
+		@CliOption(key = "unique", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether to mark the field with a unique constraint") boolean unique,
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		StringField fieldDetails = new StringField(physicalTypeIdentifier, new JavaType("java.lang.String"), fieldName);
@@ -280,23 +279,17 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
-		
-		// Check if the target type is a JPA @Entity
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
-			throw new IllegalStateException("The specified target '--type' does not exist or can not be found. Please create this type first.");
-		}
+		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
-		if (null == MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails)ptd, new JavaType("javax.persistence.Entity"))) {
-			throw new IllegalStateException("The field reference command is only applicable to JPA @Entity target types.");
-		}
+		
+		// Check if the target type is a JPA @Entity
+		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Entity")), "The field reference command is only applicable to JPA @Entity target types.");
 
-		if (!(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE)) {
-			throw new IllegalStateException("Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
-		}
+		Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE, "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
 
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		ReferenceField fieldDetails = new ReferenceField(physicalTypeIdentifier, fieldType, fieldName, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
@@ -324,17 +317,13 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
-			throw new IllegalStateException("The specified target '--element' does not exist or can not be found. Please create this type first.");
-		}
-		
-		// Check if the target type is a JPA @Entity
+		Assert.notNull(physicalTypeMetadata, "The specified target '--element' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+	
+		// Check if the target type is a JPA @Entity
 		if (MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Entity")) != null) {
-			if (!(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY)) {
-				throw new IllegalStateException("Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
-			}
+			Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY, "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
 		} else if (ptd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
 			cardinality = null;
 		} else {
@@ -376,5 +365,33 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
+	}
+	
+	@CliCommand(value = "field embedded", help = "Adds a private @Embedded field to an existing Java source file ")	
+	public void addFieldEmbeddedJpa(
+		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
+		@CliOption(key = "type", mandatory = true, optionContext = "project", help = "The Java type of the @Embeddable class") JavaType fieldType, 
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the @Entity class to receive this field") JavaType typeName, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
+		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+		
+		// Check if the field type is a JPA @Embeddable class
+		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Embeddable")), "The field embedded command is only applicable to JPA @Embeddable field types.");
+		
+		// Check if the target type is a JPA @Entity
+		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
+		PhysicalTypeMetadata targetTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
+		Assert.notNull(targetTypeMetadata, "The specified target '--class' does not exist or can not be found. Please create this type first.");
+		PhysicalTypeDetails targetPtd = targetTypeMetadata.getPhysicalTypeDetails();
+		Assert.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
+		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) targetPtd, new JavaType("javax.persistence.Entity")), "The field embedded command is only applicable to JPA @Entity target types.");
+
+		EmbeddedField fieldDetails = new EmbeddedField(physicalTypeIdentifier, fieldType, fieldName);
+	
+		insertField(fieldDetails, permitReservedWords, false);
 	}
 }
