@@ -21,7 +21,7 @@
     <c:if test="${empty list}">
       <c:set var="list" value="true" />
     </c:if>
-    
+
     <c:if test="${empty create}">
       <c:set var="create" value="true" />
     </c:if>
@@ -48,7 +48,12 @@
                 <spring:url value="/resources/images/delete.png" var="delete_image_url" />
                 <form:form action="${fn:escapeXml(delete_form_url)}" method="DELETE">
                   <spring:message arguments="${typeName}" code="entity_delete" var="delete_label" />
-                  <input alt="${fn:escapeXml(delete_label)}" class="image" src="${fn:escapeXml(delete_image_url)}" title="${fn:escapeXml(delete_label)}" type="image" value="${fn:escapeXml(delete_label)}" />
+                  <c:set var="delete_confirm_msg">
+                    <spring:escapeBody javaScriptEscape="true">
+                      <spring:message code="entity_delete_confirm" />
+                    </spring:escapeBody>
+                  </c:set>
+                  <input alt="${fn:escapeXml(delete_label)}" class="image" src="${fn:escapeXml(delete_image_url)}" title="${fn:escapeXml(delete_label)}" type="image" value="${fn:escapeXml(delete_label)}" onclick="return confirm('${fn:escapeXml(delete_confirm_msg)}');" />
                 </form:form>
               </c:if>
             </span>

@@ -57,15 +57,15 @@
           <c:forTokens items="${columnProperties}" delims="," var="column" varStatus="num">
             <c:set var="columnMaxLength" value="${lengths[num.count-1]}" scope="request" />
             <td>
-            <c:choose>
-              <c:when test="${columnMaxLength lt 0}">
-                <spring:eval expression="item[column]" />
-              </c:when>
-              <c:otherwise>
-                <spring:eval expression="item[column]" var="colTxt"/>
-                <c:out value="${fn:substring(colTxt, 0, columnMaxLength)}" />
-              </c:otherwise>
-            </c:choose>			   
+              <c:choose>
+                <c:when test="${columnMaxLength lt 0}">
+                  <spring:eval expression="item[column]" />
+                </c:when>
+                <c:otherwise>
+                  <spring:eval expression="item[column]" var="colTxt" />
+                  <c:out value="${fn:substring(colTxt, 0, columnMaxLength)}" />
+                </c:otherwise>
+              </c:choose>
             </td>
           </c:forTokens>
           <td>
@@ -94,7 +94,12 @@
               <spring:url value="/resources/images/delete.png" var="delete_image_url" />
               <form:form action="${fn:escapeXml(delete_form_url)}" method="DELETE">
                 <spring:message arguments="${typeName}" code="entity_delete" var="delete_label" />
-                <input alt="${fn:escapeXml(delete_label)}" class="image" src="${fn:escapeXml(delete_image_url)}" title="${fn:escapeXml(delete_label)}" type="image" value="${fn:escapeXml(delete_label)}" />
+                <c:set var="delete_confirm_msg">
+                  <spring:escapeBody javaScriptEscape="true">
+                    <spring:message code="entity_delete_confirm" />
+                  </spring:escapeBody>
+                </c:set>
+                <input alt="${fn:escapeXml(delete_label)}" class="image" src="${fn:escapeXml(delete_image_url)}" title="${fn:escapeXml(delete_label)}" type="image" value="${fn:escapeXml(delete_label)}" onclick="return confirm('${delete_confirm_msg}');" />
                 <c:if test="${not empty param.page}">
                   <input name="page" type="hidden" value="${fn:escapeXml(param.page)}" />
                 </c:if>
