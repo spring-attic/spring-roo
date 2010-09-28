@@ -96,6 +96,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 
@@ -104,6 +105,7 @@ public class FieldCommands implements CommandMarker {
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (comment != null) fieldDetails.setComment(comment);
+		if (column != null) fieldDetails.setColumn(column);
 		
 		insertField(fieldDetails, permitReservedWords, transientModifier);
 	}
