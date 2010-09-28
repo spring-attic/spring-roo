@@ -22,7 +22,7 @@ import org.springframework.roo.support.util.Assert;
 public final class AnnotationMetadataBuilder implements Builder<AnnotationMetadata> {
 	private JavaType annotationType;
 	private List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-
+	
 	public AnnotationMetadataBuilder() {
 	}
 
@@ -93,7 +93,7 @@ public final class AnnotationMetadataBuilder implements Builder<AnnotationMetada
 	public void addStringAttribute(String key, String value) {
 		addAttribute(new StringAttributeValue(new JavaSymbolName(key), value));
 	}
-
+	
 	public void addAttribute(AnnotationAttributeValue<?> value) {
 		// Locate existing attribute with this key and replace it
 		int foundAt = -1;

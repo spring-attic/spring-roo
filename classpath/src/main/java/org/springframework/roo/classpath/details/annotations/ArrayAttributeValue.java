@@ -16,7 +16,6 @@ import org.springframework.roo.support.util.StringUtils;
  * @param <Y> the contents of the array
  */
 public class ArrayAttributeValue<Y extends AnnotationAttributeValue<? extends Object>> extends AbstractAnnotationAttributeValue<List<Y>> {
-
 	private List<Y> value;
 	
 	public ArrayAttributeValue(JavaSymbolName name, List<Y> value) {
@@ -32,5 +31,4 @@ public class ArrayAttributeValue<Y extends AnnotationAttributeValue<? extends Ob
 	public String toString() {
 		return getName() + " -> {" + StringUtils.collectionToCommaDelimitedString(value) + "}";
 	}
-
 }

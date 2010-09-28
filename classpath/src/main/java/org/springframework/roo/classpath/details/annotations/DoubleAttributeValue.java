@@ -8,10 +8,8 @@ import org.springframework.roo.model.JavaSymbolName;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public class DoubleAttributeValue extends AbstractAnnotationAttributeValue<Double> {
-
 	private double value;
 	private boolean floatingPrecisionOnly = false;
 	

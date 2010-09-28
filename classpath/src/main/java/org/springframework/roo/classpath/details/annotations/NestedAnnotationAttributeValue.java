@@ -10,7 +10,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class NestedAnnotationAttributeValue extends AbstractAnnotationAttributeValue<AnnotationMetadata> {
-
 	private AnnotationMetadata value;
 
 	public NestedAnnotationAttributeValue(JavaSymbolName name, AnnotationMetadata value) {

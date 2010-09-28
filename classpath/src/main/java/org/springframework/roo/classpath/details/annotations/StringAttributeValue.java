@@ -11,10 +11,8 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public class StringAttributeValue extends AbstractAnnotationAttributeValue<String> {
-
 	private String value;
 	
 	public StringAttributeValue(JavaSymbolName name, String value) {
@@ -30,5 +28,4 @@ public class StringAttributeValue extends AbstractAnnotationAttributeValue<Strin
 	public String toString() {
 		return getName() + " -> " + value;
 	}
-
 }

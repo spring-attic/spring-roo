@@ -8,10 +8,8 @@ import org.springframework.roo.model.JavaSymbolName;
  * 
  * @author Ben Alex
  * @since 1.0
- * 
  */
 public class BooleanAttributeValue extends AbstractAnnotationAttributeValue<Boolean> {
-
 	private boolean value;
 	
 	public BooleanAttributeValue(JavaSymbolName name, boolean value) {
@@ -26,5 +24,4 @@ public class BooleanAttributeValue extends AbstractAnnotationAttributeValue<Bool
 	public String toString() {
 		return getName() + " -> " + new Boolean(value).toString();
 	}
-	
 }

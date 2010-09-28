@@ -4,9 +4,8 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.util.Assert;
 
 public abstract class AbstractAnnotationAttributeValue<T extends Object> implements AnnotationAttributeValue<T> {
-
 	private JavaSymbolName name;
-	
+
 	public AbstractAnnotationAttributeValue(JavaSymbolName name) {
 		Assert.notNull(name, "Annotation attribute name required");
 		this.name = name;
@@ -16,7 +15,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		return name;
 	}
 
-	@Override
+	@Override 
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -25,7 +24,7 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		return result;
 	}
 
-	@Override
+	@Override 
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -53,8 +52,4 @@ public abstract class AbstractAnnotationAttributeValue<T extends Object> impleme
 		}
 		return true;
 	}
-	
-	
-	
-	
 }
