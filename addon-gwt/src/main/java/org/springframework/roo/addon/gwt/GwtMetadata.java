@@ -172,43 +172,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
 
-				JavaType gwtSideType = null;
-
 				JavaType returnType = accessor.getReturnType();
 				PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 
-				boolean isDomainObject = isDomainObject(returnType, ptmd);
-				if (isDomainObject) {
-					gwtSideType = getDestinationJavaType(returnType, MirrorType.PROXY);
-				} else {
-					gwtSideType = returnType;
-					if (returnType.isPrimitive()) {
-						if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
-							gwtSideType = JavaType.BOOLEAN_OBJECT;
-						}
-						if (returnType.equals(JavaType.INT_PRIMITIVE)) {
-							gwtSideType = JavaType.INT_OBJECT;
-						}
-            if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
-              gwtSideType = JavaType.BYTE_OBJECT;
-            }
-            if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
-              gwtSideType = JavaType.SHORT_OBJECT;
-            }
-            if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
-              gwtSideType = JavaType.FLOAT_OBJECT;
-            }
-            if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-              gwtSideType = JavaType.DOUBLE_OBJECT;
-            }
-            if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
-              gwtSideType = JavaType.CHAR_OBJECT;
-            }
-            if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
-              gwtSideType = JavaType.LONG_OBJECT;
-            }
-					}
-				}
+				JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
 
 				// Store in the maps
 				propToGwtSideType.put(propertyName, gwtSideType);
@@ -242,6 +209,40 @@ public class GwtMetadata extends AbstractMetadataItem {
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
 		this.proxy = typeDetailsBuilder.build();
 	}
+
+  private JavaType getGwtSideLeafType(JavaType returnType, PhysicalTypeMetadata ptmd) {
+    boolean isDomainObject = isDomainObject(returnType, ptmd);
+    if (isDomainObject) {
+      return getDestinationJavaType(returnType, MirrorType.PROXY);
+    }
+    if (returnType.isPrimitive()) {
+      if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+        return JavaType.BOOLEAN_OBJECT;
+      }
+      if (returnType.equals(JavaType.INT_PRIMITIVE)) {
+        return JavaType.INT_OBJECT;
+      }
+      if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
+        return JavaType.BYTE_OBJECT;
+      }
+      if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
+        return JavaType.SHORT_OBJECT;
+      }
+      if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
+        return JavaType.FLOAT_OBJECT;
+      }
+      if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+        return JavaType.DOUBLE_OBJECT;
+      }
+      if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
+        return JavaType.CHAR_OBJECT;
+      }
+      if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
+        return JavaType.LONG_OBJECT;
+      }
+    }
+    return returnType;
+  }
 
   private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
     boolean isEnum = ptmd != null 
@@ -564,12 +565,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 	}
 
 	private void buildRequestMethod(String destinationMetadataId, List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
-		// com.google.gwt.requestfactory.shared.EntityListRequest<EmployeeKey> findAllEmployees();
+		// com.google.gwt.requestfactory.shared.Request<List<EmployeeProxy>> findAllEmployees();
 		JavaSymbolName method1Name = methodMetaData.getMethodName();
-		List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
-		boolean isList = methodMetaData.getReturnType().getFullyQualifiedTypeName().equals("java.util.List");
-		method1ReturnTypeArgs0.add(method1Name.getSymbolName().startsWith("count") ? JavaType.LONG_OBJECT : getDestinationJavaType(MirrorType.PROXY));
-		JavaType method1ReturnType = new JavaType(method1Name.getSymbolName().startsWith("count") ? "com.google.gwt.requestfactory.shared.Request" : (isList ? "com.google.gwt.requestfactory.shared.ProxyListRequest" : "com.google.gwt.requestfactory.shared.ProxyRequest"), 0, DataType.TYPE, null, method1ReturnTypeArgs0);
+    List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
+    method1ReturnTypeArgs0.add(getGwtSideMethodType(methodMetaData.getReturnType()));
+		JavaType method1ReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, method1ReturnTypeArgs0);
 		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
 		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
 		method1ParameterNames.addAll(methodMetaData.getParameterNames());
@@ -588,7 +588,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 		methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, new InvocableMemberBodyBuilder()));
 	}
 
-	class ExportedMethod {
+	/**
+	 * Return the type arg for the client side method, given the domain method return type.
+	 * if domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
+	 * if domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
+	 */
+	private JavaType getGwtSideMethodType(JavaType domainMethodReturnType) {
+	  List<JavaType> typeParameters = domainMethodReturnType.getParameters();
+	  if (typeParameters == null || typeParameters.size() == 0) {
+	    PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(domainMethodReturnType, Path.SRC_MAIN_JAVA));
+	    return getGwtSideLeafType(domainMethodReturnType, ptmd);
+	  }
+    List<JavaType> clientMethodTypeParameters = new ArrayList<JavaType>();
+    for (JavaType domainSideType : typeParameters) {
+      clientMethodTypeParameters.add(getGwtSideMethodType(domainSideType));
+    }
+	  return new JavaType(domainMethodReturnType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, clientMethodTypeParameters);
+  }
+
+  class ExportedMethod {
 		JavaSymbolName operationName; // Mandatory
 		JavaSymbolName methodName; // Mandatory
 		JavaType returns; // Mandatory
