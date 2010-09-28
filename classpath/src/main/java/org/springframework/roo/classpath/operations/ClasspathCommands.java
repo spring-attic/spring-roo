@@ -98,10 +98,9 @@ public class ClasspathCommands implements CommandMarker {
 		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 	}
 
-	@CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in any project path")
+	@CliCommand(value = "embeddable", help = "Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA")
 	public void createEmbeddedClass(
 		@CliOption(key = "class", optionContext = "update,project", mandatory = true, help = "The name of the class to create") JavaType name,
-		@CliOption(key = "path", mandatory = false, unspecifiedDefaultValue = "SRC_MAIN_JAVA", specifiedDefaultValue = "SRC_MAIN_JAVA", help = "Source directory to create the class in") Path path,
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
@@ -109,7 +108,7 @@ public class ClasspathCommands implements CommandMarker {
 			ReservedWords.verifyReservedWordsNotPresent(name);
 		}
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, Path.SRC_MAIN_JAVA);
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
