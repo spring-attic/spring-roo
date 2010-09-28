@@ -14,10 +14,15 @@
   <jsp:directive.attribute name="decimalMin" type="java.lang.String" required="false" description="Specify the minimum size of the input contents" />
   <jsp:directive.attribute name="decimalMax" type="java.lang.String" required="false" description="Specify the maximum size of the input contents" />
   <jsp:directive.attribute name="disableFormBinding" type="java.lang.Boolean" required="false" description="Set to true to disable Spring form binding" />
+  <jsp:directive.attribute name="type" type="java.lang.String" required="false" description="Set field type (default 'text', or 'password')" />
   <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
 
   <c:if test="${empty render or render}">
+  
+    <c:if test="${empty type}">
+      <c:set value="text" var="type" />
+    </c:if>
 
     <c:if test="${empty disabled}">
       <c:set value="false" var="disabled" />
@@ -42,10 +47,17 @@
       </label>
       <c:choose>
         <c:when test="${disableFormBinding}">
-          <input id="_${sec_field}_id" name="${sec_field}" />
+          <input id="_${sec_field}_id" name="${sec_field}" type="${fn:escapeXml(type)}" />
         </c:when>
         <c:otherwise>
-          <form:input id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
+          <c:choose>
+            <c:when test="${type eq 'password'}">
+              <form:password id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
+            </c:when>
+            <c:otherwise>
+              <form:input id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
+            </c:otherwise>
+          </c:choose>
           <br />
           <form:errors cssClass="errors" id="_${sec_field}_error_id" path="${sec_field}" />
         </c:otherwise>
