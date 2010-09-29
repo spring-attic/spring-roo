@@ -27,6 +27,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -100,6 +101,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		specialDomainTypes = getSpecialDomainTypes(beanInfoMetadata.getJavaBean());
 		dateTypes = getDatePatterns();
 
+		if (annotationValues.isRegisterConverters()) {
+			builder.addField(getConversionServiceField());
+		}
 		if (annotationValues.create) {
 			builder.addMethod(getCreateMethod());
 			builder.addMethod(getCreateFormMethod());
@@ -157,6 +161,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	public WebScaffoldAnnotationValues getAnnotationValues() {
 		return annotationValues;
+	}
+	
+	private FieldMetadataBuilder getConversionServiceField() {
+		FieldMetadataBuilder builder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("conversionService"), new JavaType("org.springframework.core.convert.support.GenericConversionService"), null);
+		builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
+		return builder;
 	}
 
 	private MethodMetadata getDeleteMethod() {
@@ -841,22 +851,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		MethodMetadata registerConvertersMethod = methodExists(registerConvertersMethodName);
 		if (registerConvertersMethod != null) return registerConvertersMethod;
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.web.bind.WebDataBinder"), new ArrayList<AnnotationMetadata>()));
-
-		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		paramNames.add(new JavaSymbolName("binder"));
-
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.InitBinder")));
-
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-
-		JavaType conversionService = new JavaType("org.springframework.core.convert.support.GenericConversionService");
-		String conversionServiceSimpleName = conversionService.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		bodyBuilder.appendFormalLine("if (binder.getConversionService() instanceof " + conversionServiceSimpleName + ") {");
-		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(conversionServiceSimpleName + " conversionService = (" + conversionServiceSimpleName + ") binder.getConversionService();");
 
 		Set<JavaType> typesForConversion = specialDomainTypes;
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
@@ -933,11 +928,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			}
 		}
 
-		bodyBuilder.indentRemove();
-		bodyBuilder.appendFormalLine("}");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
+		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
 		return methodBuilder.build();
 	}
 
