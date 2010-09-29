@@ -16,21 +16,19 @@
       <spring:escapeBody javaScriptEscape="true">${field}</spring:escapeBody>
     </c:set>
    
+   <script type="text/javascript">dojo.require("dijit.form.CheckBox");</script>
     <div id="_${sec_id}_id">
       <label for="_${sec_field}_id">
         <c:out value="${fn:escapeXml(label)}" />:
       </label>
       <c:choose>
         <c:when test="${disableFormBinding}">
-          <input id="_${sec_field}_id" name="${sec_field}" type="checkbox" value="true" />
+          <input id="_${sec_field}_id" name="${sec_field}" type="checkbox"/>
         </c:when>
         <c:otherwise>
-          <form:checkbox id="_${sec_field}_id" path="${sec_field}" />
+          <form:checkbox id="_${sec_field}_id" path="${sec_field}"/>
         </c:otherwise>
       </c:choose>
-      <script type="text/javascript">
-        Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id', widgetType : 'dijit.form.CheckBox'})); 
-      </script>
     </div>
     <br />
   </c:if>
