@@ -6,7 +6,6 @@ package org.springframework.roo.project;
  * 
  * @author Stefan Schmidt
  * @since 1.1
- *
  */
 public interface RepositoryListener {
 

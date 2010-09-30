@@ -19,7 +19,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.0
  */
-@Component(componentAbstract=true)
+@Component(componentAbstract = true)
 public abstract class AbstractProjectOperations implements ProjectOperations {
 	@Reference protected MetadataService metadataService;
 	@Reference protected ProjectMetadataProvider projectMetadataProvider;
@@ -29,6 +29,8 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	private Set<RepositoryListener> pluginRepositoryListeners = new HashSet<RepositoryListener>();
 	private Set<PluginListener> pluginListeners = new HashSet<PluginListener>();
 	private Set<PropertyListener> propertyListeners = new HashSet<PropertyListener>();
+	private Set<FilterListener> filterListeners = new HashSet<FilterListener>();
+	private Set<ResourceListener> resourceListeners = new HashSet<ResourceListener>();
 
 	public final boolean isDependencyModificationAllowed() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -135,6 +137,46 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	private void sendPropertyRemovalNotifications(Property property) {
 		for (PropertyListener listener : propertyListeners) {
 			listener.propertyRemoved(property);
+		}
+	}
+
+	public void addFilterListener(FilterListener listener) {
+		this.filterListeners.add(listener);
+	}
+	
+	public void removeFilterListener(FilterListener listener) {
+		this.filterListeners.remove(listener);
+	}
+	
+	private void sendFilterAdditionNotifications(Filter filter) {
+		for (FilterListener listener : filterListeners) {
+			listener.filterAdded(filter);
+		}
+	}
+	
+	private void sendFilterRemovalNotifications(Filter filter) {
+		for (FilterListener listener : filterListeners) {
+			listener.filterRemoved(filter);
+		}
+	}
+
+	public void addResourceListener(ResourceListener listener) {
+		this.resourceListeners.add(listener);
+	}
+	
+	public void removeResourceListener(ResourceListener listener) {
+		this.resourceListeners.remove(listener);
+	}
+	
+	private void sendResourceAdditionNotifications(Resource resource) {
+		for (ResourceListener listener : resourceListeners) {
+			listener.resourceAdded(resource);
+		}
+	}
+	
+	private void sendResourceRemovalNotifications(Resource resource) {
+		for (ResourceListener listener : resourceListeners) {
+			listener.resourceRemoved(resource);
 		}
 	}
 
@@ -275,5 +317,33 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		Assert.notNull(property, "Property required");		
 		projectMetadataProvider.removeProperty(property);
 		sendPropertyRemovalNotifications(property);
+	}
+	
+	public final void addFilter(Filter filter) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Filter modification prohibited at this time");
+		Assert.notNull(filter, "Filter required");
+		projectMetadataProvider.addFilter(filter);
+		sendFilterAdditionNotifications(filter);
+	}
+
+	public final void removeFilter(Filter filter) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Filter modification prohibited at this time");
+		Assert.notNull(filter, "Filter required");
+		projectMetadataProvider.removeFilter(filter);
+		sendFilterRemovalNotifications(filter);
+	}
+	
+	public final void addResource(Resource resource) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Resource modification prohibited at this time");
+		Assert.notNull(resource, "Resource required");
+		projectMetadataProvider.addResource(resource);
+		sendResourceAdditionNotifications(resource);
+	}
+
+	public final void removeResource(Resource resource) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Resource modification prohibited at this time");
+		Assert.notNull(resource, "Resource required");
+		projectMetadataProvider.removeResource(resource);
+		sendResourceRemovalNotifications(resource);
 	}
 }

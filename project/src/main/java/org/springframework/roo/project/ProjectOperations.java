@@ -243,4 +243,48 @@ public interface ProjectOperations {
 	 * @param property POM property to remove (required)
 	 */
 	void removeProperty(Property property);
+	
+	/**
+	 * Allows addition of a filter to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param filter filter to add (required)
+	 */
+	void addFilter(Filter filter);
+	
+	/**
+	 * Allows remove of an existing filter from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * filter from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param filter filter to remove (required)
+	 */
+	void removeFilter(Filter filter);
+
+	/**
+	 * Allows addition of a resource to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param resource resource to add (required)
+	 */
+	void addResource(Resource resource);
+	
+	/**
+	 * Allows remove of an existing resource from the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
+	 * resource from their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param resource resource to remove (required)
+	 */
+	void removeResource(Resource resource);
 }

@@ -135,22 +135,22 @@
 					<version>0.0.1-SNAPSHOT</version>
 				</dependency>
 			</dependencies>
+			<filters>
+				<filter>${basedir}/src/main/resources/config.properties</filter>
+			</filters>
+			<resources>
+				<resource>
+					<directory>src/main/resources</directory>
+					<filtering>true</filtering>
+					<includes>
+						<include>**/persistence.xml</include>
+					</includes>
+				</resource>
+				<resource>
+					<directory>src/main/resources</directory>
+				</resource>
+			</resources>
 		</database>
-		<filters>
-			<filter>${basedir}/src/main/resources/config.properties</filter>
-		</filters>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>**/persistence.xml</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
 	</databases>
 	<ormProviders>
 		<provider id="HIBERNATE">

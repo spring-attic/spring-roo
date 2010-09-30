@@ -30,7 +30,6 @@ import org.springframework.roo.support.util.Assert;
  * @author Stefan Schmidt
  * @author Alan Stewart
  * @since 1.0
- *
  */
 public class ProjectMetadata extends AbstractMetadataItem {
 	// MID:org.springframework.roo.project.ProjectMetadata#the_project
@@ -43,9 +42,11 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	private Set<Repository> repositories;
 	private Set<Repository> pluginRepositories;
 	private Set<Property> pomProperties;
+	private Set<Filter> filters;
+	private Set<Resource> resources;
 	private PathResolver pathResolver;
 	
-	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<Repository> pluginRepositories, Set<Property> pomProperties, PathResolver pathResolver) {
+	public ProjectMetadata(JavaPackage topLevelPackage, String projectName, Set<Dependency> dependencies, Set<Plugin> buildPlugins, Set<Repository> repositories, Set<Repository> pluginRepositories, Set<Property> pomProperties, Set<Filter> filters, Set<Resource> resources, PathResolver pathResolver) {
 		super(PROJECT_IDENTIFIER);
 		Assert.notNull(topLevelPackage, "Top level package required");
 		Assert.notNull(projectName, "Project name required");
@@ -54,15 +55,19 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(repositories, "Repositories required");
 		Assert.notNull(pluginRepositories, "Plugin repositories required");
 		Assert.notNull(pomProperties, "POM properties required");
+		Assert.notNull(filters, "Filters required");
+		Assert.notNull(resources, "Resources required");
 		Assert.notNull(pathResolver, "Path resolver required");
 		this.topLevelPackage = topLevelPackage;
 		this.projectName = projectName;
 		this.dependencies = dependencies;
 		this.buildPlugins = buildPlugins;
-		this.pathResolver = pathResolver;
 		this.repositories = repositories;
 		this.pomProperties = pomProperties;
+		this.filters = filters;
+		this.resources = resources;
 		this.pluginRepositories = pluginRepositories;
+		this.pathResolver = pathResolver;
 	}
 
 	public static final String getProjectIdentifier() {
@@ -115,6 +120,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		Assert.notNull(plugin, "Plugin to check is required");
 		return buildPlugins.contains(plugin);
 	}
+	
 	/**
 	 * Convenience method for determining whether a particular pom property
 	 * is registered.
@@ -127,6 +133,30 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return pomProperties.contains(property);
 	}
 	
+	/**
+	 * Convenience method for determining whether a particular filter
+	 * is registered.
+	 * 
+	 * @param filter to check (required)
+	 * @return whether the filter is currently registered or not
+	 */
+	public boolean isFilterRegistered(Filter filter) {
+		Assert.notNull(filter, "Filter to check is required");
+		return filters.contains(filter);
+	}
+	
+	/**
+	 * Convenience method for determining whether a particular resource
+	 * is registered.
+	 * 
+	 * @param resource to check (required)
+	 * @return whether the resource is currently registered or not
+	 */
+	public boolean isResourceRegistered(Resource resource) {
+		Assert.notNull(resource, "Resource to check is required");
+		return resources.contains(resource);
+	}
+
 	public JavaPackage getTopLevelPackage() {
 		return topLevelPackage;
 	}
@@ -212,6 +242,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
+	 * @return an unmodifiable representation of the filters (never null, but may be empty)
+	 */
+	public Set<Filter> getFilters() {
+		return Collections.unmodifiableSet(filters);
+	}
+	
+	/**
+	 * @return an unmodifiable representation of the resources (never null, but may be empty)
+	 */
+	public Set<Resource> getResources() {
+		return Collections.unmodifiableSet(resources);
+	}
+
+	/**
 	 * Determines whether the Google App Engine maven plugin exists in the pom.
 	 * 
 	 * @return true if the maven-gae-plugin is present in the pom.xml, otherwise false
@@ -264,6 +308,8 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		tsc.append("repositories", repositories);
 		tsc.append("pluginRepositories", pluginRepositories);
 		tsc.append("pomProperties", pomProperties);
+		tsc.append("filters", filters);
+		tsc.append("resources", resources);
 		tsc.append("pathResolver", pathResolver);
 		return tsc.toString();
 	}

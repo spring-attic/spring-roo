@@ -143,6 +143,58 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void removeProperty(Property property);
 
 	/**
+	 * Attempts to add the specified filter. If the filter already exists according
+	 * to {@link ProjectMetadata#isFilterRegistered(Filter)}, the method silently returns.
+	 * Otherwise the filter is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param filter to add (required)
+	 */
+	void addFilter(Filter filter);
+	
+	/**
+	 * Attempts to remove the specified filter. If the filter does not 
+	 * exist according to {@link ProjectMetadata#isFilterRegistered(Filter)},
+	 * the method silently returns. Otherwise the located filter is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param filter to remove (required)
+	 */
+	void removeFilter(Filter filter);
+
+	/**
+	 * Attempts to add the specified resource. If the resource already exists according
+	 * to {@link ProjectMetadata#isResourceRegistered(Resource)}, the method silently returns.
+	 * Otherwise the resource is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param resource to add (required)
+	 */
+	void addResource(Resource resource);
+	
+	/**
+	 * Attempts to remove the specified resource. If the resource does not 
+	 * exist according to {@link ProjectMetadata#isResourceRegistered(Resource)},
+	 * the method silently returns. Otherwise the located resource is removed.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param resource to remove (required)
+	 */
+	void removeResource(Resource resource);
+
+	/**
 	 * Attempts to update the project packaging type as defined via {@link ProjectType}. If the 
 	 * project packaging is not defined it will create a new definition.
 	 * 

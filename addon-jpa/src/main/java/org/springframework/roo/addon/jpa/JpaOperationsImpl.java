@@ -21,6 +21,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.Filter;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.Plugin;
@@ -28,6 +29,7 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.Resource;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -103,6 +105,8 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateDependencies(configuration, ormProvider, database);
 		updateRepositories(configuration, ormProvider, database);
 		updatePluginRepositories(configuration, ormProvider, database);
+		updateFilters(configuration, ormProvider, database);
+		updateResources(configuration, ormProvider, database);
 		updateBuildPlugins(configuration, ormProvider, database);
 	}
 
@@ -556,6 +560,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element property : databaseProperties) {
 			projectOperations.addProperty(new Property(property));
 		}
+	
 		List<Element> providerProperties = XmlUtils.findElements(getProviderXPath(ormProvider) + "/properties/*", configuration);
 		for (Element property : providerProperties) {
 			projectOperations.addProperty(new Property(property));
@@ -598,10 +603,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element repositoryElement : databaseRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
+	
 		List<Element> ormRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/repositories/repository", configuration);
 		for (Element repositoryElement : ormRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
 		}
+	
 		List<Element> jpaRepositories = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/repositories/repository", configuration);
 		for (Element repositoryElement : jpaRepositories) {
 			projectOperations.addRepository(new Repository(repositoryElement));
@@ -613,9 +620,34 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
 		}
+		
 		List<Element> ormPluginRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : ormPluginRepositories) {
 			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
+		}
+	}
+
+	private void updateFilters(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Element> databaseFilters = XmlUtils.findElements(getDbXPath(database) + "/filters/filter", configuration);
+		for (Element filterElement : databaseFilters) {
+			projectOperations.addFilter(new Filter(filterElement));
+		}
+	
+		List<Element> ormFilters = XmlUtils.findElements(getProviderXPath(ormProvider) + "/filters/filter", configuration);
+		for (Element filterElement : ormFilters) {
+			projectOperations.addFilter(new Filter(filterElement));
+		}
+	}
+
+	private void updateResources(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Element> databaseResources = XmlUtils.findElements(getDbXPath(database) + "/resources/resource", configuration);
+		for (Element resourceElement : databaseResources) {
+			projectOperations.addResource(new Resource(resourceElement));
+		}
+	
+		List<Element> ormResources = XmlUtils.findElements(getProviderXPath(ormProvider) + "/resources/resource", configuration);
+		for (Element resourceElement : ormResources) {
+			projectOperations.addResource(new Resource(resourceElement));
 		}
 	}
 
@@ -624,6 +656,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		for (Element pluginElement : databasePlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
 		}
+	
 		List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (Element pluginElement : ormPlugins) {
 			projectOperations.addBuildPlugin(new Plugin(pluginElement));
@@ -674,12 +707,18 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey()) && !jdbcDatabase.getDriverClassName().equals(database.getDriverClassName())) {
-				List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
-				for (Element dependencyElement : databaseDependencies) {
+				List<Element> dependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
+				for (Element dependencyElement : dependencies) {
 					projectOperations.removeDependency(new Dependency(dependencyElement));
 				}
-				List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
-				for (Element pluginElement : databasePlugins) {
+				
+				List<Element> filters = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/filters/filter", configuration);
+				for (Element filterElement : filters) {
+					projectOperations.removeFilter(new Filter(filterElement));
+				}
+				
+				List<Element> plugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
+				for (Element pluginElement : plugins) {
 					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 				}
 			}
@@ -690,12 +729,18 @@ public class JpaOperationsImpl implements JpaOperations {
 				// for (Element propertyElement : pomProperties) {
 				// projectOperations.removeProperty(new Property(propertyElement));
 				// }
-				List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(provider) + "/dependencies/dependency", configuration);
-				for (Element dependencyElement : ormDependencies) {
+				List<Element> dependencies = XmlUtils.findElements(getProviderXPath(provider) + "/dependencies/dependency", configuration);
+				for (Element dependencyElement : dependencies) {
 					projectOperations.removeDependency(new Dependency(dependencyElement));
 				}
-				List<Element> providerPlugins = XmlUtils.findElements(getProviderXPath(provider) + "/plugins/plugin", configuration);
-				for (Element pluginElement : providerPlugins) {
+				
+				List<Element> filters = XmlUtils.findElements(getProviderXPath(provider) + "/filters/filter", configuration);
+				for (Element filterElement : filters) {
+					projectOperations.removeFilter(new Filter(filterElement));
+				}
+				
+				List<Element> plugins = XmlUtils.findElements(getProviderXPath(provider) + "/plugins/plugin", configuration);
+				for (Element pluginElement : plugins) {
 					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
 				}
 			}
