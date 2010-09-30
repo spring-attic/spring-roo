@@ -57,6 +57,20 @@
 				<gae-test.version>1.3.4</gae-test.version>
 				<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 			</properties>
+			<repositories>
+				<repository>
+					<id>maven-gae-plugin-repo</id>
+					<url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
+					<name>maven-gae-plugin repository</name>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>maven-gae-plugin-repo</id>
+					<url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
+					<name>maven-gae-plugin repository</name>
+				</pluginRepository>
+			</pluginRepositories>
 			<dependencies>
 				<dependency>
 					<groupId>com.google.appengine.orm</groupId>
@@ -87,20 +101,6 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
-			<repositories>
-				<repository>
-					<id>maven-gae-plugin-repo</id>
-					<url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
-					<name>maven-gae-plugin repository</name>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>maven-gae-plugin-repo</id>
-					<url>http://maven-gae-plugin.googlecode.com/svn/repository</url>
-					<name>maven-gae-plugin repository</name>
-				</pluginRepository>
-			</pluginRepositories>
 			<plugins>
 				<plugin>
 					<groupId>net.kindleit</groupId>
@@ -120,6 +120,37 @@
 				</plugin>
 			</plugins>
 		</database>
+		<database id="VMFORCE">
+			<repositories>
+				<repository>
+					<id>vmforce-snapshots</id>
+					<url>http://maven.springsource.com/snapshot</url>
+					<name>VMForce Repo</name>
+				</repository>
+			</repositories>
+			<dependencies>
+				<dependency>
+					<groupId>com.salesforce.sdk.persistence</groupId>
+					<artifactId>datanucleus-sfdc</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
+			</dependencies>
+		</database>
+		<filters>
+			<filter>${basedir}/src/main/resources/config.properties</filter>
+		</filters>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/persistence.xml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 	</databases>
 	<ormProviders>
 		<provider id="HIBERNATE">
@@ -218,10 +249,6 @@
 			</plugins>
 		</provider>
 		<provider id="ECLIPSELINK">
-			<dependencies>
-				<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.1.0" />
-				<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.1" />
-			</dependencies>
 			<repositories>
 				<repository>
 					<id>EclipseLink Repo</id>
@@ -229,11 +256,28 @@
 					<url>http://mirrors.ibiblio.org/pub/mirrors/eclipse/rt/eclipselink/maven.repo</url>
 				</repository>
 			</repositories>
+			<dependencies>
+				<dependency org="org.eclipse.persistence" name="eclipselink" rev="2.1.0" />
+				<dependency org="org.eclipse.persistence" name="javax.persistence" rev="2.0.1" />
+			</dependencies>
 		</provider>
 		<provider id="DATANUCLEUS">
 			<properties>
 				<datanucleus.version>1.1.6</datanucleus.version>
 			</properties>
+			<repositories>
+				<repository>
+					<id>DataNucleus_2</id>
+					<name>DataNucleus</name>
+					<url>http://www.datanucleus.org/downloads/maven2/</url>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>DataNucleus_2</id>
+					<url>http://www.datanucleus.org/downloads/maven2/</url>
+				</pluginRepository>
+			</pluginRepositories>
 			<dependencies>
 				<dependency org="javax.persistence" name="persistence-api" rev="1.0" />
 				<dependency>
@@ -275,19 +319,6 @@
 					</exclusions>
 				</dependency>
 			</dependencies>
-			<repositories>
-				<repository>
-					<id>DataNucleus_2</id>
-					<name>DataNucleus</name>
-					<url>http://www.datanucleus.org/downloads/maven2/</url>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>DataNucleus_2</id>
-					<url>http://www.datanucleus.org/downloads/maven2/</url>
-				</pluginRepository>
-			</pluginRepositories>
 			<plugins>
 				<plugin>
 					<groupId>org.datanucleus</groupId>
@@ -339,6 +370,19 @@
 			<properties>
 				<datanucleus.version>2.1.1</datanucleus.version>
 			</properties>
+			<repositories>
+				<repository>
+					<id>DataNucleus_2</id>
+					<name>DataNucleus</name>
+					<url>http://www.datanucleus.org/downloads/maven2/</url>
+				</repository>
+			</repositories>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>DataNucleus_2</id>
+					<url>http://www.datanucleus.org/downloads/maven2/</url>
+				</pluginRepository>
+			</pluginRepositories>
 			<dependencies>
 				<dependency>
 					<groupId>org.apache.geronimo.specs</groupId>
@@ -383,19 +427,6 @@
 					</exclusions>
 				</dependency>
 			</dependencies>
-			<repositories>
-				<repository>
-					<id>DataNucleus_2</id>
-					<name>DataNucleus</name>
-					<url>http://www.datanucleus.org/downloads/maven2/</url>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>DataNucleus_2</id>
-					<url>http://www.datanucleus.org/downloads/maven2/</url>
-				</pluginRepository>
-			</pluginRepositories>
 			<plugins>
 				<plugin>
 					<groupId>org.datanucleus</groupId>
@@ -446,6 +477,13 @@
 	</ormProviders>
 	<persistence>
 		<provider id="JPA">
+			<repositories>
+				<repository>
+					<id>JBoss Repo</id>
+					<name>JBoss Repo</name>
+					<url>https://repository.jboss.org/nexus/content/repositories/releases</url>
+				</repository>
+			</repositories>
 			<dependencies>
 				<dependency>
 					<groupId>org.hibernate</groupId>
@@ -464,13 +502,6 @@
 				</dependency>
 				<dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" />
 			</dependencies>
-			<repositories>
-				<repository>
-					<id>JBoss Repo</id>
-					<name>JBoss Repo</name>
-					<url>https://repository.jboss.org/nexus/content/repositories/releases</url>
-				</repository>
-			</repositories>
 		</provider>
 	</persistence>
 	<spring>

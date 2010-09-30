@@ -61,12 +61,13 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private String plural;
 	private boolean isGaeEnabled;
 	private boolean isDataNucleusEnabled;
+	private boolean isVMforceEnabled;
 	
 	// From annotation
-	@AutoPopulate private JavaType identifierType = new JavaType(Long.class.getName());
+	@AutoPopulate private JavaType identifierType = JavaType.LONG_OBJECT;
 	@AutoPopulate private String identifierField = "id";
 	@AutoPopulate private String identifierColumn = "";
-	@AutoPopulate private JavaType versionType = new JavaType(Integer.class.getName());
+	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 	@AutoPopulate private String versionField = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
@@ -94,6 +95,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		this.plural = StringUtils.capitalize(plural);
 		isGaeEnabled = projectMetadata.isGaeEnabled();
 		isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
+		isVMforceEnabled = projectMetadata.isVMforceEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -332,7 +334,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Compute the column name, as required
 		if (!hasIdClass) {
 			List<AnnotationAttributeValue<?>> generatedValueAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-			String generationType = isGaeEnabled ? "IDENTITY" : "AUTO";
+			String generationType = isGaeEnabled || isVMforceEnabled ? "IDENTITY" : "AUTO";
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
@@ -363,6 +365,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 			columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), columnName));
 			annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
+		}
+		
+		if (isVMforceEnabled) {
+			identifierType = JavaType.STRING_OBJECT;
 		}
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, idField, identifierType);

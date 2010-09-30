@@ -61,7 +61,7 @@ public class Property implements Comparable<Property> {
 	/**
 	 * The value of a property
 	 * 
-	 * @return the url
+	 * @return the value
 	 */
 	public String getValue() {
 		return value;

@@ -239,6 +239,20 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return false;
 	}
 	
+	/**
+	 * Determines whether the VMforce maven dependency exists in the pom.
+	 * 
+	 * @return true if the com.salesforce.sdk.persistence is present in the pom.xml, otherwise false
+	 */
+	public boolean isVMforceEnabled() {
+		for (Dependency dependency : dependencies) {
+			if ("com.salesforce.sdk.persistence".equals(dependency.getGroupId().getFullyQualifiedPackageName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

@@ -63,6 +63,11 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
+		if (jdbcDatabase == JdbcDatabase.VMFORCE && ormProvider != OrmProvider.DATANUCLEUS_2) {
+			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS_2.name() + " for VMforce");
+			return;
+		}
+
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, databaseName, userName, password, persistenceUnit);
 	}
 
