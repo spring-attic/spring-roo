@@ -187,6 +187,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
 		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/properties/repo.folder", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
 		if (description != null && description.length() != 0) {
 			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);
 		}

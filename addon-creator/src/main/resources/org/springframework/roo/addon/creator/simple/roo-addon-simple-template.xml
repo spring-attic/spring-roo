@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>TO_BE_CHANGED_BY_LISTENER</groupId>
-  <artifactId>TO_BE_CHANGED_BY_LISTENER</artifactId>
+  <groupId>TO_BE_CHANGED_BY_ADDON</groupId>
+  <artifactId>TO_BE_CHANGED_BY_ADDON</artifactId>
   <packaging>bundle</packaging>
   <version>0.1.0.BUILD-SNAPSHOT</version>
-  <name>TO_BE_CHANGED_BY_LISTENER</name>
+  <name>TO_BE_CHANGED_BY_ADDON</name>
   <organization>
     <name>Your project/company name goes here (used in copyright and vendor information in the manifest)</name>
   </organization>
@@ -22,6 +22,7 @@
     <roo.version>1.1.0.M4</roo.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <google.code.project.name>${project.name}</google.code.project.name>
+    <repo.folder>TO_BE_CHANGED_BY_ADDON</repo.folder>
   </properties>
   <repositories>
     <repository>
@@ -178,6 +179,7 @@
             <Bundle-DocURL>${project.url}</Bundle-DocURL>
           </instructions>
           <remoteOBR>true</remoteOBR>
+          <bundleUrl>httppgp://${google.code.project.name}.googlecode.com/svn/repo/${repo.folder}/${project.artifactId}/${project.version}/${project.artifactId}-${project.version}.jar</bundleUrl>
         </configuration>
       </plugin>
       <plugin>
