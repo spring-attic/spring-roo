@@ -1,6 +1,7 @@
 package org.springframework.roo.shell.jline;
 
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -371,14 +372,20 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	}
 
 	/**
-	 * Obtains the "roo.home" from the system property, throwing an exception if missing.
+	 * Obtains the "roo.home" from the system property, falling back to the current working directory if missing.
 	 *
 	 * @return the 'roo.home' system property
 	 */
 	@Override
 	protected String getHomeAsString() {
 		String rooHome = System.getProperty("roo.home");
-		Assert.hasText(rooHome, "roo.home system property is not set");
+		if (rooHome == null) {
+			try {
+				rooHome = new File(".").getCanonicalPath();
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+		}
 		return rooHome;
 	}
 	

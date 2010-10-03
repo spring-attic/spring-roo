@@ -16,22 +16,25 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class FileConverter implements Converter {
+public abstract class FileConverter implements Converter {
 
 	private static final String home = System.getProperty("user.home");
 
+	/**
+	 * @return the "current working directory" this {@link FileConverter} should use if the user fails to provide
+	 * an explicit directory in their input (required)
+	 */
+	protected abstract File getWorkingDirectory();
+	
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
-		return new File(removeTildeIfNeeded(value));
+		return new File(convertUserInputIntoAFullyQualifiedPath(value));
 	}
 	
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String originalUserInput, String optionContext, MethodTarget target) {
-		String adjustedUserInput = removeTildeIfNeeded(originalUserInput);
+		String adjustedUserInput = convertUserInputIntoAFullyQualifiedPath(originalUserInput);
 
-		String directoryData = "";
-		if (adjustedUserInput != null && adjustedUserInput.contains(File.separator)) {
-			directoryData = adjustedUserInput.substring(0, adjustedUserInput.lastIndexOf(File.separator) + 1);
-			adjustedUserInput = adjustedUserInput.substring(adjustedUserInput.lastIndexOf(File.separator) + 1);
-		}
+		String directoryData = adjustedUserInput.substring(0, adjustedUserInput.lastIndexOf(File.separator) + 1);
+		adjustedUserInput = adjustedUserInput.substring(adjustedUserInput.lastIndexOf(File.separator) + 1);
 		
 		populate(completions, adjustedUserInput, originalUserInput, directoryData);
 
@@ -39,7 +42,7 @@ public class FileConverter implements Converter {
 	}
 
 	protected void populate(List<String> completions, String adjustedUserInput, String originalUserInput, String directoryData) {
-		File directory = new File(directoryData.length() > 0 ? directoryData : ".");
+		File directory = new File(directoryData);
 		
 		if (!directory.isDirectory()) {
 			return;
@@ -54,7 +57,7 @@ public class FileConverter implements Converter {
 					completion += directoryData;
 				completion += file.getName();
 
-				completion = addTildeIfNeeded(originalUserInput, completion);
+				completion = convertCompletionBackIntoUserInputStyle(originalUserInput, completion);
 				
 				if (file.isDirectory()) {
 					completions.add(completion + File.separator);
@@ -69,27 +72,51 @@ public class FileConverter implements Converter {
 		return File.class.isAssignableFrom(requiredType);
 	}
 	
-	private String addTildeIfNeeded(String originalUserInput, String completion) {
-		if (!originalUserInput.startsWith("~")) {
+	private String convertCompletionBackIntoUserInputStyle(String originalUserInput, String completion) {
+		if (originalUserInput.startsWith(File.separator)) {
+			// Input was originally as a fully-qualified path, so we just keep the completion in that form
 			return completion;
 		}
-		Assert.notNull(home, "Home directory could not be determined from system properties");
-		if (!completion.startsWith(home)) {
-			// this completion isn't even under the home directory (which is a bit weird given it started with ~, but anyway...)
-			return completion;
+		if (originalUserInput.startsWith("~")) {
+			// Input originally started with a ~, so replace the user's home directory with a ~ again
+			Assert.notNull(home, "Home directory could not be determined from system properties");
+			return "~" + completion.substring(home.length());
 		}
-		return "~" + completion.substring(home.length());
+		// The path was working directory specific, so strip the working directory given the user never typed it
+		return completion.substring(getWorkingDirectoryAsString().length());
 	}
 
-	private String removeTildeIfNeeded(String userInput) {
-		if (!userInput.startsWith("~")) {
+	/**
+	 * If the user input starts with a tilde character (~), replace the tilde character with the
+	 * user's home directory. If the user input does not start with a tilde, simply return the original
+	 * user input without any changes.
+	 * 
+	 * @param userInput the user input, which may commence with a tilde (required)
+	 * @return a string that is guaranteed to no longer contain a tilde as the first character (never null)
+	 */
+	private String convertUserInputIntoAFullyQualifiedPath(String userInput) {
+		if (userInput.startsWith(File.separator)) {
+			// Input is already in a fully-qualified path form
 			return userInput;
 		}
-		Assert.notNull(home, "Home directory could not be determined from system properties");
-		if (userInput.length() > 1) {
-			return home + userInput.substring(1);
+		if (userInput.startsWith("~")) {
+			// Input starts with a ~, so replace with the user's home directory
+			Assert.notNull(home, "Home directory could not be determined from system properties");
+			if (userInput.length() > 1) {
+				return home + userInput.substring(1);
+			}
 		}
-		return home;
+		// The path is working directory specific, so prepend the working directory
+		String fullPath = getWorkingDirectoryAsString() + userInput;
+		return fullPath;
+	}
+	
+	private String getWorkingDirectoryAsString() {
+		try {
+			return getWorkingDirectory().getCanonicalPath() + File.separator;
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 }
