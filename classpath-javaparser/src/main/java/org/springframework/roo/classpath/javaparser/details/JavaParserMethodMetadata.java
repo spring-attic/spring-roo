@@ -106,7 +106,8 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		
 		if (methodDeclaration.getThrows() != null) {
 			for (NameExpr throwsType: methodDeclaration.getThrows()) {
-				throwsTypes.add(new JavaType(JavaParserUtils.getClassOrInterfaceType(throwsType).getName()));
+				JavaType throwing = JavaParserUtils.getJavaType(compilationUnitServices, throwsType, fullTypeParameters);
+				throwsTypes.add(throwing);
 			}
 		}
 		
@@ -161,6 +162,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		tsc.append("parameterTypes", parameterTypes);
 		tsc.append("parameterNames", parameterNames);
 		tsc.append("returnType", returnType);
+		tsc.append("throwsTypes", throwsTypes);
 		tsc.append("annotations", annotations);
 		tsc.append("customData", getCustomData());
 		tsc.append("body", body);
