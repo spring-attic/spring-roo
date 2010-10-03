@@ -259,20 +259,20 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				parameterType = cit;
 			}
 
-			// Add exceptions which the method my throw
-			if (method.getThrowsTypes().size() > 0) {
-				List<NameExpr> throwsTypes = new ArrayList<NameExpr>();
-				for (JavaType javaType: method.getThrowsTypes()) {
-					NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), javaType);
-					throwsTypes.add(importedType);
-				}
-				d.setThrows(throwsTypes);
-			}
-			
 			// Create a Java Parser method parameter and add it to the list of parameters
 			Parameter p = new Parameter(parameterType, new VariableDeclaratorId(parameterName));
 			p.setAnnotations(parameterAnnotations);
 			parameters.add(p);
+		}
+		
+		// Add exceptions which the method my throw
+		if (method.getThrowsTypes().size() > 0) {
+			List<NameExpr> throwsTypes = new ArrayList<NameExpr>();
+			for (JavaType javaType: method.getThrowsTypes()) {
+				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), javaType);
+				throwsTypes.add(importedType);
+			}
+			d.setThrows(throwsTypes);
 		}
 		
 		// Set the body
