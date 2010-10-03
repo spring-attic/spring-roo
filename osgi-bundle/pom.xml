@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.springframework.roo</groupId>
 		<artifactId>org.springframework.roo.root</artifactId>
-		<version>1.1.0.M4</version>
+		<version>1.1.0.RC1</version>
 	</parent>
     <artifactId>org.springframework.roo.osgi.bundle</artifactId>
     <packaging>pom</packaging>
