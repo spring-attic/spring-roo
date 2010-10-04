@@ -1,33 +1,81 @@
 package {{=packageName}};
 
 import com.google.gwt.app.place.Activity;
+import com.google.gwt.app.place.CreateAndEditProxy;
+import com.google.gwt.app.place.FindAndEditProxy;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyPlace;
 import com.google.gwt.requestfactory.shared.EntityProxyId;
+import com.google.gwt.requestfactory.shared.RequestContext;
+
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
  * Maps {@link ProxyPlace} instances to the {@link Activity} to run.
  */
 public class {{=className}} {
-	private final {{=requestFactory}} requests;
-	private final PlaceController placeController;
+  private final {{=requestFactory}} requests;
+  private final PlaceController placeController;
 
-	public {{=className}}({{=requestFactory}} requests, PlaceController placeController) {
-		this.requests = requests;
-		this.placeController = placeController;
-	}
+  public {{=className}}({{=requestFactory}} requests, PlaceController placeController) {
+    this.requests = requests;
+    this.placeController = placeController;
+  }
 
-	public Activity getActivity(ProxyPlace place) {
-		switch (place.getOperation()) {
-			case DETAILS:
-				return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
-			case EDIT:
-				return new {{=editActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, placeController);
-			case CREATE:
-      			        return new {{=editActivity}}(null, requests, placeController);
-		}
+  public Activity getActivity(ProxyPlace place) {
+    switch (place.getOperation()) {
+      case DETAILS:
+        return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, 
+          placeController, {{=detailsView}}.instance());
 
-		throw new IllegalArgumentException("Unknown operation " + place.getOperation());
-	}
+      case EDIT:
+        return makeEditActivity(place);
+
+      case CREATE:
+        return makeCreateActivity();
+    }
+
+    throw new IllegalArgumentException("Unknown operation "
+        + place.getOperation());
+  }
+
+  @SuppressWarnings("unchecked")
+  private EntityProxyId<{{=proxy}}> coerceId(ProxyPlace place) {
+    return (EntityProxyId<{{=proxy}}>) place.getProxyId();
+  }
+
+  private Activity makeCreateActivity() {
+    {{=editView}}.instance().setCreating(true);
+    final {{=request}} request = requests.{{=nameUncapitalized}}Request();
+    Activity activity = new CreateAndEditProxy<{{=proxy}}>(
+        {{=proxy}}.class, request, {{=editView}}.instance(),
+        placeController) {
+      
+      @Override
+      protected RequestContext createSaveRequest({{=proxy}} proxy) {
+        request.persist().using(proxy);
+        return request;
+      }
+    };
+
+    return new {{=editActivityWrapper}}(requests, {{=editView}}.instance(),
+        activity);
+  }
+
+  private Activity makeEditActivity(ProxyPlace place) {
+    {{=editView}}.instance().setCreating(false);
+    Activity activity = new FindAndEditProxy<{{=proxy}}>(coerceId(place),
+        requests, {{=editView}}.instance(), placeController) {
+      
+      @Override
+      protected RequestContext createSaveRequest({{=proxy}} proxy) {
+        {{=request}} request = requests.{{=nameUncapitalized}}Request();
+        request.persist().using(proxy);
+        return request;
+      }
+    };
+
+    return new {{=editActivityWrapper}}(requests, {{=editView}}.instance(),
+        activity);
+  }
 }

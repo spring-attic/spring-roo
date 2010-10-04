@@ -16,21 +16,32 @@ import com.google.gwt.user.client.ui.Widget;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
- * Details view for {{=name}} proxys.
+ * Details view for {{=proxy}}.
  */
 public class {{=className}} extends Composite implements ProxyDetailsView<{{=proxy}}> {
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+  private static {{=className}} instance;
+
 	{{=proxy}} proxy;
 	{{#fields}}
 	@UiField SpanElement {{=field}};{{/fields}}	
+	
 	@UiField SpanElement displayRenderer;
 	@UiField HasClickHandlers edit;
 	@UiField HasClickHandlers delete;
 
 	private Delegate delegate;
+
+  public static {{=className}} instance() {
+    if (instance == null) {
+      instance = new {{=className}}();
+    }
+    
+    return instance;
+  }
 
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));

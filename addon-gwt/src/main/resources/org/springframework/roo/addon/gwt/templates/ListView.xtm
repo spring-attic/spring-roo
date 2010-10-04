@@ -1,20 +1,23 @@
 package {{=packageName}};
 
 import com.google.gwt.app.place.AbstractProxyListView;
-import com.google.gwt.app.place.PropertyColumn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormatRenderer;
 import com.google.gwt.text.shared.AbstractRenderer;
+import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
-{{#imports}}import {{=import}};
-{{/imports}}
-import java.util.ArrayList;
-import java.util.List;
+
+{{#imports}}
+import {{=import}};{{/imports}}
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@link AbstractProxyListView} specialized to {@link {{=name}}Key}} values.
@@ -24,20 +27,37 @@ public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
 	}
 
 	private static final Binder BINDER = GWT.create(Binder.class);
+  
+  private static {{=className}} instance;
 
 	@UiField CellTable<{{=proxy}}> table;
 	@UiField Button newButton;
   
+  private Set<String> paths = new HashSet<String>();
+
+  public static {{=className}} instance() {
+    if (instance == null) {
+      instance = new {{=className}}();
+    }
+    
+    return instance;
+  }
+  
 	public {{=className}}() {
-		init(BINDER.createAndBindUi(this), table, newButton, getColumns());
-	}
+		init(BINDER.createAndBindUi(this), table, newButton);
+    {{#properties}}
+    paths.add("{{=prop}}");
+    table.addColumn(new TextColumn<{{=proxy}}>() {
+      Renderer<{{=propType}}> renderer = {{=propRenderer}};
+      
+      @Override
+      public String getValue({{=proxy}} object) {
+        return renderer.render(object.{{=propGetter}}());
+      }
+    }, "{{=propReadable}}");{{/properties}}
+ 	}
 
-	protected List<PropertyColumn<{{=proxy}}, ?>> getColumns() {
-		// TODO These should be <g:col> elements in a <g:table> in the ui.xml file
-
-		List<PropertyColumn<{{=proxy}}, ?>> columns = new ArrayList<PropertyColumn<{{=proxy}}, ?>>();
-		{{#listViewProps}}
-	    {{=prop}}{{/listViewProps}}		
-	    return columns;
-	}
+  public String[] getPaths() {
+    return paths.toArray(new String[paths.size()]);
+  }
 }

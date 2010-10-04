@@ -26,7 +26,6 @@ import org.springframework.roo.support.util.StringUtils;
 class GwtProxyProperty {
   private final ProjectMetadata projectMetadata;
 	private final String name;
-	private final String displayName;
 	private final String getter;
 	private final JavaType type;
 
@@ -42,7 +41,6 @@ class GwtProxyProperty {
     prefix = "get";
     
     this.name = getter.substring(prefix.length(), prefix.length() +1).toLowerCase() + getter.substring(prefix.length() + 1);
-    this.displayName = JavaSymbolName.getReadableSymbolName(name);
 	}
 
   public static boolean isAccessor(MethodMetadata method) {
@@ -112,14 +110,14 @@ class GwtProxyProperty {
 	}
 
 	public String getFormatter() {
-		return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : isProxy() ? getRendererType() + ".instance().render(" : "String.valueOf(";
+		return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : isProxy() ? getProxyRendererType() + ".instance().render(" : "String.valueOf(";
 	}
 
 	public String getRenderer() {
-		return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n      public String render(" + getType() + " obj) {\n        return obj == null ? \"\" : String.valueOf(obj);\n      }    \n}" : getRendererType() + ".instance()";
+		return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
-	String getRendererType() {
+	String getProxyRendererType() {
 		return MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + type.getSimpleTypeName() + "Renderer";
 	}
 
@@ -148,7 +146,7 @@ class GwtProxyProperty {
 		}
 
 		if (isProxy()) {
-			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), " + "new com.google.gwt.app.place.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getRendererType());
+			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), " + "new com.google.gwt.app.place.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getProxyRendererType());
 		}
 
 		return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
@@ -157,14 +155,6 @@ class GwtProxyProperty {
 	public String forDetailsUIXml() {
 		return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><span ui:field='").append(getName()).append("'></span></td></tr>").toString();
 	}
-
-	public String forListView(String proxy) {
-	  return String.format("columns.add(new PropertyColumn<%s, %s>(\"%s\", \"%s\", %s.class, %s));", proxy, getType(), getName(), getDisplayName(), getType(), getRenderer());
-	}
-
-	public String getDisplayName() {
-	  return displayName;
-  }
 
   public String forEditUiXml() {
 		return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();

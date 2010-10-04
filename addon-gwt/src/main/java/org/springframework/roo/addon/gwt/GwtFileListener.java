@@ -181,8 +181,9 @@ public class GwtFileListener implements FileEventListener {
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" isNull) {\n").append("\t\t\t\tsetResult(\"").append(simpleName).append("s\");\n\t\t\t}").toString();
-			dataDictionary.addSection("entities").setVariable("entity", entity);
+      TemplateDataDictionary section = dataDictionary.addSection("entities");
+      section.setVariable("entitySimpleName", simpleName);
+      section.setVariable("entityFullPath", fullPath);
 			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
 		}
 
@@ -265,10 +266,12 @@ public class GwtFileListener implements FileEventListener {
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
 			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
 			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" isNull) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ListActivity(requests, placeController));\n\t\t\t}").toString();
-			dataDictionary.addSection("entities").setVariable("entity", entity);
-			addImport(dataDictionary, MirrorType.LIST_ACTIVITY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.LIST_ACTIVITY.getSuffix());
-			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
+      TemplateDataDictionary section = dataDictionary.addSection("entities");
+      section.setVariable("entitySimpleName", simpleName);
+      section.setVariable("entityFullPath", fullPath);
+      addImport(dataDictionary, simpleName, MirrorType.LIST_ACTIVITY);
+      addImport(dataDictionary, simpleName, MirrorType.PROXY);
+      addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
 		}
 
 		try {
@@ -277,6 +280,11 @@ public class GwtFileListener implements FileEventListener {
 			throw new IllegalStateException(e);
 		}
 	}
+
+  private void addImport(TemplateDataDictionary dataDictionary,
+      String simpleName, MirrorType mirrorType) {
+    addImport(dataDictionary, mirrorType.getPath().packageName(projectMetadata) + "." + simpleName + mirrorType.getSuffix());
+  }
 
 	public void updateDetailsActivities() {
 		SharedType type = SharedType.DETAILS_ACTIVITIES;

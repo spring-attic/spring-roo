@@ -6,31 +6,32 @@ import com.google.gwt.app.place.Place;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyPlace;
 import com.google.inject.Inject;
+
 {{#imports}}import {{=import}};
 {{/imports}}
 /**
  * Instantiates detail activities.
  */
 public class ApplicationDetailsActivities implements ActivityMapper {
-	private final {{=requestFactory}} requests;
-	private final PlaceController placeController;
+  private final {{=requestFactory}} requests;
+  private final PlaceController placeController;
 
-	@Inject
-	public ApplicationDetailsActivities({{=requestFactory}} requestFactory, PlaceController placeController) {
-		this.requests = requestFactory;
-		this.placeController = placeController;
-	}
+  @Inject
+  public ApplicationDetailsActivities({{=requestFactory}} requestFactory, PlaceController placeController) {
+    this.requests = requestFactory;
+    this.placeController = placeController;
+  }
 
-	public Activity getActivity(Place place) {
-		if (!(place instanceof ProxyPlace)) {
-			return null;
-		}
+  public Activity getActivity(Place place) {
+    if (!(place instanceof ProxyPlace)) {
+      return null;
+    }
 
-		final ProxyPlace proxyPlace = (ProxyPlace) place;
+    final ProxyPlace proxyPlace = (ProxyPlace) place;
 
-		return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
-			@Override
+    return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
+      @Override
 {{=entity}}{{/entities}}
-		}.process(proxyPlace.getProxyId().getProxyClass());
-	}
+    }.process(proxyPlace.getProxyClass());
+  }
 }

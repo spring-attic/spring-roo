@@ -26,17 +26,18 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-{{#imports}}import {{=import}};
-{{/imports}}
+{{#imports}}
+import {{=import}};{{/imports}}
 
 import java.util.Collection;
 import java.util.List;
 
 /**
- * Edit view for {{=name}} proxys.
+ * Edit view for {{=proxy}}.
  */
 public class {{=className}} extends Composite implements 
     ProxyEditView<{{=proxy}}, {{=className}}> {
+    
 	interface Binder extends UiBinder<HTMLPanel, {{=className}}> {
 	}
 
@@ -46,8 +47,11 @@ public class {{=className}} extends Composite implements
 
 	private static final Binder BINDER = GWT.create(Binder.class);
 
+  private static {{=className}} instance;
+  
 	{{#editViewProps}}
 	{{=prop}};{{/editViewProps}}	
+
 	@UiField Button cancel;
 	@UiField Button save;
 	@UiField DivElement errors;
@@ -57,24 +61,29 @@ public class {{=className}} extends Composite implements
 
 	private Delegate delegate;
 
+  public static {{=className}} instance() {
+    if (instance == null) {
+      instance = new {{=className}}();
+    }
+    
+    return instance;
+  }
+  
 	public {{=className}}() {
 		initWidget(BINDER.createAndBindUi(this));
 	}
 
   @Override
-  public RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> createEditorDriver(
-      EventBus eventBus, RequestFactory requestFactory) {
+  public RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> createEditorDriver() {
     RequestFactoryEditorDriver<{{=proxy}}, {{=className}}> driver = GWT.create(Driver.class);
-    driver.initialize(eventBus, requestFactory, this);
+    driver.initialize(this);
     return driver;
   }
 
-  {{#setEnumValuePickers}}
-  {{=setValuePicker}}{{/setEnumValuePickers}}
-
-  {{#setProxyValuePickers}}
-  {{=setValuePicker}}{{/setProxyValuePickers}}
-   
+{{#setEnumValuePickers}}{{=setValuePicker}}
+{{/setEnumValuePickers}}
+{{#setProxyValuePickers}}{{=setValuePicker}}
+{{/setProxyValuePickers}}
 	public void setCreating(boolean creating) {
 		if (creating) {
 			editTitle.getStyle().setDisplay(Display.NONE);

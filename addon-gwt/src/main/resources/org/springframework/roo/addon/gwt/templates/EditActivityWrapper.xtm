@@ -1,0 +1,65 @@
+package {{=packageName}};
+
+import com.google.gwt.app.place.Activity;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+
+{{#imports}}
+import {{=import}};{{/imports}}
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Wraps {{=proxy}} edit and create activities to manage extra portions of their
+ * views, like value pickers.
+ */
+public class {{=className}} implements Activity {
+  private final ApplicationRequestFactory requests;
+  private final {{=editView}} view;
+  private final Activity wrapped;
+
+  public {{=className}}(ApplicationRequestFactory requests,
+      {{=editView}} view, Activity activity) {
+    this.requests = requests;
+    this.view = view;
+    this.wrapped = activity;
+  }
+
+  @Override
+  public String mayStop() {
+    return wrapped.mayStop();
+  }
+
+  @Override
+  public void onCancel() {
+    wrapped.onCancel();
+  }
+
+  @Override
+  public void onStop() {
+    wrapped.onStop();
+  }
+
+  @Override
+  public void start(AcceptsOneWidget display, EventBus eventBus) {{{#setEnumValuePickers}}
+    view.{{=setValuePickerName}}(Arrays.asList({{=valueType}}.values()));{{/setEnumValuePickers}}
+
+    {{#setProxyValuePickers}}view.{{=setValuePickerName}}(Collections.<{{=valueType}}> emptyList());
+    requests.{{=requestInterface}}().{{=findMethod}}.with(
+        {{=rendererType}}.instance().getPaths()).fire(
+            new Receiver<List<{{=valueType}}>>() {
+                public void onSuccess(List<{{=valueType}}> response) {
+                    List<{{=valueType}}> values = new ArrayList<{{=valueType}}>();
+                    values.add(null);
+                    values.addAll(response);
+                    view.{{=setValuePickerName}}(values);
+            }
+    });
+    {{/setProxyValuePickers}}
+    wrapped.start(display, eventBus);
+  }
+}

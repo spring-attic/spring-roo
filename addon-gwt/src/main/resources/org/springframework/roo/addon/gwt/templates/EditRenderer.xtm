@@ -7,7 +7,7 @@ import com.google.gwt.app.place.ProxyRenderer;
 
 /**
  * Renders {@link {{=proxy}} for display to the user. Requires the
- * {{=displayField}} property to have been fetched.
+ * {{=displayFields}} properties to have been fetched.
  */
 public class {{=className}} extends ProxyRenderer<{{=proxy}}> {
   private static {{=className}} INSTANCE;
@@ -21,7 +21,7 @@ public class {{=className}} extends ProxyRenderer<{{=proxy}}> {
   }
 
   protected {{=className}}() {
-    super(new String[] { {{=displayFields}}} );
+    super(new String[] {"{{=displayField}}"});
   }
 
   public String render({{=proxy}} object) {

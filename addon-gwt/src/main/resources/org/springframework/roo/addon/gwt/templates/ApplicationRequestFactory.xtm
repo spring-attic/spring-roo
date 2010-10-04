@@ -7,5 +7,5 @@ public interface ApplicationRequestFactory extends RequestFactory {
 {{#entities}}
 {{=entity}}
 {{/entities}} 	
-    UserInformationRequest userInformationRequest();
+  UserInformationRequest userInformationRequest();
 }

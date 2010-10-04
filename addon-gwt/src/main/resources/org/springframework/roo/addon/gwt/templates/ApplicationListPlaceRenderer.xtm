@@ -2,19 +2,21 @@ package {{=packageName}};
 
 import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.text.shared.AbstractRenderer;
-{{#imports}}import {{=import}};
-{{/imports}}
+{{#imports}}
+import {{=import}};{{/imports}}
+
 /**
  * Renders {@link ProxyListPlace}s for display to users.
  */
-//TODO i18n
 public class ApplicationListPlaceRenderer extends AbstractRenderer<ProxyListPlace> {
 
 	public String render(ProxyListPlace object) {
 		return new ApplicationEntityTypesProcessor<String>() {
 {{#entities}}
 			@Override
-{{=entity}}{{/entities}}
+      public void handle{{=entitySimpleName}}({{=entityFullPath}} isNull) {
+        setResult("{{=entitySimpleName}}s");
+      }{{/entities}}
 		}.process(object.getProxyClass());
 	}
 }

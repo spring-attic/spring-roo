@@ -6,8 +6,10 @@ import com.google.gwt.app.place.Place;
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyListPlace;
 import com.google.inject.Inject;
-{{#imports}}import {{=import}};
-{{/imports}}
+
+{{#imports}}
+import {{=import}};{{/imports}}
+
 /**
  * Instantiates master activities.
  */
@@ -17,7 +19,7 @@ public final class ApplicationMasterActivities implements ActivityMapper {
 
 	@Inject
 	public ApplicationMasterActivities({{=requestFactory}} requests, PlaceController placeController) {
-  		this.requests = requests;
+ 		this.requests = requests;
 		this.placeController = placeController;
 	}
 
@@ -30,7 +32,10 @@ public final class ApplicationMasterActivities implements ActivityMapper {
 
 		return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
 			@Override
-{{=entity}}{{/entities}}
+      public void handle{{=entitySimpleName}}({{=entityFullPath}} isNull) {
+        setResult(new {{=entitySimpleName}}ListActivity(requests, {{=entitySimpleName}}ListView.instance(), placeController));
+      }
+      {{/entities}}
 		}.process(listPlace.getProxyClass());
 	}
 }

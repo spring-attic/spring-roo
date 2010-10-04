@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +101,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildProxy();
 		buildActivitiesMapper();
 
-		buildEditActivity();
+		buildEditActivityWrapper();
 		buildDetailsActivity();
 		buildListActivity();
 		buildListView();
@@ -144,7 +145,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
 			addReference(dataDictionary, MirrorType.DETAIL_ACTIVITY);
-			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY);
+			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY_WRAPPER);
+      addReference(dataDictionary, MirrorType.LIST_VIEW);
+      addReference(dataDictionary, MirrorType.DETAILS_VIEW);
+      addReference(dataDictionary, MirrorType.EDIT_VIEW);
+      addReference(dataDictionary, MirrorType.REQUEST);
 			writeWithTemplate(type, dataDictionary, type.getTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -281,12 +286,13 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
 	}
 
-	private void buildEditActivity() {
+	private void buildEditActivityWrapper() {
 		try {
-			MirrorType type = MirrorType.EDIT_ACTIVITY;
+			MirrorType type = MirrorType.EDIT_ACTIVITY_WRAPPER;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-			addReference(dataDictionary, MirrorType.EDIT_VIEW);
+      addReference(dataDictionary, MirrorType.REQUEST);
+      addReference(dataDictionary, MirrorType.EDIT_VIEW);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -298,7 +304,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType type = MirrorType.DETAIL_ACTIVITY;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-			addReference(dataDictionary, MirrorType.DETAILS_VIEW);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -310,7 +315,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType type = MirrorType.LIST_ACTIVITY;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-			addReference(dataDictionary, MirrorType.LIST_VIEW);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -374,10 +378,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
-		dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
+    dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 
-		String displayFields = null, displayFieldGetter = null;
+		String proxyFields = null;
+		String displayField = null;
+		String displayFieldGetter = null;
 		Set<String> importSet = new HashSet<String>();
 		for (MethodMetadata method : proxy.getDeclaredMethods()) {
 			if (!GwtProxyProperty.isAccessor(method)) {
@@ -388,24 +394,32 @@ public class GwtMetadata extends AbstractMetadataItem {
 			GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
 
 			if (property.isString()) {
+			  displayField = property.getName();
 				displayFieldGetter = property.getGetter();
 			}
 
 			if (property.isProxy()) {
-				if (displayFields != null) {
-					displayFields += ", ";
+				if (proxyFields != null) {
+					proxyFields += ", ";
 				} else {
-					displayFields = "";
+					proxyFields = "";
 				}
-				displayFields += "\"" + property.getName() + "\"";
+				proxyFields += "\"" + property.getName() + "\"";
 			}
 
 			dataDictionary.addSection("fields").setVariable("field", property.getName());
 			dataDictionary.addSection("detailViewProps").setVariable("prop", property.forDetailsView());
 			if (!isReadOnly(property.getName())) dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
 			dataDictionary.addSection("detailsUiXmlProps").setVariable("prop", property.forDetailsUIXml());
-			dataDictionary.addSection("listViewProps").setVariable("prop", property.forListView(proxyType.getSimpleTypeName()));
-			if (!isReadOnly(property.getName())) dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
+
+			TemplateDataDictionary propertiesSection = dataDictionary.addSection("properties");
+      propertiesSection.setVariable("prop", property.getName());
+      propertiesSection.setVariable("propGetter", property.getGetter());
+      propertiesSection.setVariable("propType", property.getType());
+      propertiesSection.setVariable("propRenderer", property.getRenderer());
+      propertiesSection.setVariable("propReadable", property.getReadableName());
+
+      if (!isReadOnly(property.getName())) dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
@@ -414,7 +428,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 				section.setVariable("setValuePicker", property.getSetValuePickerMethod());
 				section.setVariable("setValuePickerName", property.getSetValuePickerMethodName());
 				section.setVariable("valueType", property.getPropertyType().getSimpleTypeName());
-				section.setVariable("rendererType", property.getRendererType());
+				section.setVariable("rendererType", property.getProxyRendererType());
 				if (property.isProxy()) {
 					String propTypeName = StringUtils.uncapitalize(method.getReturnType().getSimpleTypeName());
 					propTypeName = propTypeName.substring(0, propTypeName.indexOf("Proxy"));
@@ -429,10 +443,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 		}
 		if (displayFieldGetter == null) {
+		  displayField = "id";
 			displayFieldGetter = "getId";
 		}
-		dataDictionary.setVariable("displayFields", displayFields);
-		dataDictionary.setVariable("displayFieldGetter", displayFieldGetter);
+		dataDictionary.setVariable("proxyFields", proxyFields);
+    dataDictionary.setVariable("displayField", displayField);
+    dataDictionary.setVariable("displayFieldGetter", displayFieldGetter);
 		return dataDictionary;
 	}
 
@@ -533,26 +549,20 @@ public class GwtMetadata extends AbstractMetadataItem {
 		List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
 		// @Service(Employee.class)
 		typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.Service")));
+		
 		List<ConstructorMetadataBuilder> constructors = new ArrayList<ConstructorMetadataBuilder>();
 		List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
 		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-		List<JavaType> extendsTypes = new ArrayList<JavaType>();
+		List<JavaType> extendsTypes = Collections.singletonList(new JavaType("com.google.gwt.requestfactory.shared.RequestContext"));
 		List<JavaType> implementsTypes = new ArrayList<JavaType>();
-		buildRequestMethod(destinationMetadataId, methods, findAllMethod);
-		buildRequestMethod(destinationMetadataId, methods, findMethod);
-		buildRequestMethod(destinationMetadataId, methods, countMethod);
-		buildRequestMethod(destinationMetadataId, methods, findEntriesMethod);
 
-		// remove(EmployeeProxy proxy) and persist(EmployeeProxy proxy) methods.
-		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, Collections.singletonList(JavaType.VOID_OBJECT));
-		for (MethodMetadata metadata : new MethodMetadata[] { entityMetadata.getRemoveMethod(), entityMetadata.getPersistMethod() }) {
-			List<AnnotatedJavaType> parameterTypes = Collections.singletonList(new AnnotatedJavaType(getDestinationJavaType(MirrorType.PROXY), null));
-			List<JavaSymbolName> parameterNames = Collections.singletonList(new JavaSymbolName("proxy"));
-			List<AnnotationMetadataBuilder> annotations = Collections.singletonList(new AnnotationMetadataBuilder(new JavaType("com.google.gwt.requestfactory.shared.Instance"), Collections.<AnnotationAttributeValue<?>> emptyList()));
-			MethodMetadataBuilder method1Builder = new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, metadata.getMethodName(), methodReturnType, parameterTypes, parameterNames, new InvocableMemberBodyBuilder());
-			method1Builder.setAnnotations(annotations);
-			methods.add(method1Builder);
-		}
+		buildStaticRequestMethod(destinationMetadataId, methods, countMethod);
+		buildStaticRequestMethod(destinationMetadataId, methods, findAllMethod);
+		buildStaticRequestMethod(destinationMetadataId, methods, findEntriesMethod);
+		buildStaticRequestMethod(destinationMetadataId, methods, findMethod);
+
+		buildInstanceRequestMethod(destinationMetadataId, methods, entityMetadata.getRemoveMethod());
+    buildInstanceRequestMethod(destinationMetadataId, methods, entityMetadata.getPersistMethod());
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
@@ -564,29 +574,43 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.request = typeDetailsBuilder.build();
 	}
 
-	private void buildRequestMethod(String destinationMetadataId, List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
-		// com.google.gwt.requestfactory.shared.Request<List<EmployeeProxy>> findAllEmployees();
-		JavaSymbolName method1Name = methodMetaData.getMethodName();
-    List<JavaType> method1ReturnTypeArgs0 = new ArrayList<JavaType>();
-    method1ReturnTypeArgs0.add(getGwtSideMethodType(methodMetaData.getReturnType()));
-		JavaType method1ReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, method1ReturnTypeArgs0);
-		List<JavaType> method1ParameterTypes = new ArrayList<JavaType>();
-		List<JavaSymbolName> method1ParameterNames = new ArrayList<JavaSymbolName>();
-		method1ParameterNames.addAll(methodMetaData.getParameterNames());
+  private void buildInstanceRequestMethod(String destinationMetadataId,
+      List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
+    // com.google.gwt.requestfactory.shared.InstanceRequest remove()
+    List<JavaType> methodReturnTypeArgs = Arrays.asList(new JavaType[] { getDestinationJavaType(MirrorType.PROXY), JavaType.VOID_OBJECT });
+    JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
+
+    buildRequestMethod(destinationMetadataId, methods, methodMetaData, methodReturnType);
+  }
+
+	private void buildStaticRequestMethod(String destinationMetadataId, List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
+	  // com.google.gwt.requestfactory.shared.Request<List<EmployeeProxy>> findAllEmployees();
+	  List<JavaType> methodReturnTypeArgs = Collections.singletonList(getGwtSideMethodType(methodMetaData.getReturnType()));
+	  JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.Request", 0, DataType.TYPE, null, methodReturnTypeArgs);
+	  
+		buildRequestMethod(destinationMetadataId, methods, methodMetaData, methodReturnType);
+	}
+
+  private void buildRequestMethod(String destinationMetadataId,
+      List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData,
+      JavaType methodReturnType) {
+    JavaSymbolName methodName = methodMetaData.getMethodName();
+
+    List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
+		List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>(methodMetaData.getParameterNames());
+
 		List<AnnotatedJavaType> paramTypes = methodMetaData.getParameterTypes();
 
-		for (int i = 0; i < paramTypes.size(); i++) {
-			List<JavaType> typeParams = new ArrayList<JavaType>();
-			JavaType jtype = paramTypes.get(i).getJavaType();
-			if (method1Name.equals(findMethod.getMethodName())) {
-				jtype = JavaType.LONG_OBJECT;
+		for (AnnotatedJavaType paramType : paramTypes) {
+			JavaType jtype = paramType.getJavaType();
+			if (methodName.equals(findMethod.getMethodName())) {
+				jtype = entityMetadata.getIdentifierField().getFieldType();
 			}
-			typeParams.add(jtype);
-			method1ParameterTypes.add(jtype);
+			methodParameterTypes.add(jtype);
 		}
 
-		methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, method1Name, method1ReturnType, AnnotatedJavaType.convertFromJavaTypes(method1ParameterTypes), method1ParameterNames, new InvocableMemberBodyBuilder()));
-	}
+		methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder()));
+  }
 
 	/**
 	 * Return the type arg for the client side method, given the domain method return type.
