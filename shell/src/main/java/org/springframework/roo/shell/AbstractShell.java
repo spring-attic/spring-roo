@@ -14,9 +14,11 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
 
 import org.springframework.roo.shell.event.AbstractShellStatusPublisher;
 import org.springframework.roo.shell.event.ShellStatus;
@@ -348,16 +350,26 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		// Try to determine the bundle version
 		String bundleVersion = null;
 		String gitCommitHash = null;
+		JarFile jarFile = null;
 		try {
-			String classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation().toString();
-			if (classContainer.endsWith(".jar")) {
+			URL classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation();
+			if (classContainer.toString().endsWith(".jar")) {
 				// Attempt to obtain the "Bundle-Version" version from the manifest
-				URL manifestUrl = new URL("jar:" + classContainer + "!/META-INF/MANIFEST.MF");
-				Manifest manifest = new Manifest(manifestUrl.openStream());
+				jarFile = new JarFile(classContainer.getFile(), false);
+				ZipEntry manifestEntry = jarFile.getEntry("META-INF/MANIFEST.MF");
+				Manifest manifest = new Manifest(jarFile.getInputStream(manifestEntry));
 				bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
 				gitCommitHash = manifest.getMainAttributes().getValue("Git-Commit-Hash");
 			}
-		} catch (Exception ignoreAndMoveOn) {}
+		} catch (Exception ignoreAndMoveOn) { }
+		finally {
+			if (jarFile != null) {
+				try {
+					jarFile.close();
+				}
+				catch (IOException e) {}
+			}
+		}
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -428,4 +440,5 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			logger.log(level, message);
 		}
 	}
+	
 }
