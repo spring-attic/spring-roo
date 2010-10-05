@@ -23,6 +23,12 @@
   <set-property name="gwt.logging.popupHandler" value="DISABLED" />
   <set-property name="gwt.logging.systemHandler" value="ENABLED" />
   <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
+
+  <!-- Uncomment if you are enabling server side deobfuscation of StackTraces
+  <set-property name="compiler.emulatedStack" value="true" />
+  <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
+  <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
+  -->
   
   <define-property name="mobile.user.agent" values="mobilesafari, none"/>
   
