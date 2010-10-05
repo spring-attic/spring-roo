@@ -361,7 +361,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					Assert.isTrue(maxValue >= minValue, "The value of @Max must be greater or equal to the value of @Min for field " + field.getFieldName().getSymbolName());
 
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
-					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + suffix + " || " + field.getFieldName().getSymbolName() + " > " + suffix + maxValue + ") {");
+					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + suffix + " || " + field.getFieldName().getSymbolName() + " > " + maxValue + suffix + ") {");
 					bodyBuilder.indent();
 					bodyBuilder.appendFormalLine(field.getFieldName().getSymbolName() + " = " + maxValue + suffix + ";");
 					bodyBuilder.indentRemove();
