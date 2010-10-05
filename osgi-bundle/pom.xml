@@ -5,6 +5,7 @@
 		<groupId>org.springframework.roo</groupId>
 		<artifactId>org.springframework.roo.root</artifactId>
 		<version>1.1.0.RC1</version>
+		<relativePath>..</relativePath>
 	</parent>
     <artifactId>org.springframework.roo.osgi.bundle</artifactId>
     <packaging>pom</packaging>
