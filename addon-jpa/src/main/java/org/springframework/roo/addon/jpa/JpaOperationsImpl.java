@@ -291,7 +291,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
 			case VMFORCE:
-				persistenceUnitElement.setAttribute("name", "DefaultSFDCDatabase");
+				persistenceUnitElement.setAttribute("name", "PERSISTENCE_UNIT_NAME");
 				persistenceUnitElement.removeAttribute("transaction-type");
 				provider.setTextContent(ormProvider.getAdapter());
 				break;
