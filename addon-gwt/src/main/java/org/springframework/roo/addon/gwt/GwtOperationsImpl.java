@@ -172,6 +172,7 @@ public class GwtOperationsImpl implements GwtOperations {
 						// Read template and insert the user's package
 						String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
 						input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+						input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());
 						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
 						
 						// Output the file for the user

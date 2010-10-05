@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.app.client.NotificationMole;
 import com.google.gwt.app.place.ProxyListPlace;

@@ -5,16 +5,13 @@
   <inherits name="com.google.gwt.user.theme.standard.Standard" />
   <inherits name='com.google.gwt.app.App' />
   <inherits name='com.google.gwt.requestfactory.RequestFactory'/>
-  <inherits name='__TOP_LEVEL_PACKAGE__.gwt.style.Style'/>
   <inherits name="com.google.gwt.user.cellview.CellView" />
   <inherits name='com.google.gwt.logging.Logging'/>
   <inherits name="com.google.gwt.inject.Inject"/>
 
-  <source path='scaffold'/>
-  <source path='request'/>
-  <source path='place'/>
-  <source path='ui'/>
-  <source path='shared'/>
+  <source path='client'/>
+  
+  <public path="public"/>
 
   <!-- Logging Configuration -->
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
@@ -64,14 +61,14 @@
   
   </property-provider>
   
-  <replace-with class="com.springsource.extrack.gwt.scaffold.ScaffoldMobileApp">
-  		<when-type-is class="com.springsource.extrack.gwt.scaffold.ScaffoldDesktopApp"/>
+  <replace-with class="__TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldMobileApp">
+  		<when-type-is class="__TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldDesktopApp"/>
   		<all>
   			<when-property-is name="mobile.user.agent" value="mobilesafari"/>
         </all>
   </replace-with>
   
   <source path="scaffold" />
-  <entry-point class="__TOP_LEVEL_PACKAGE__.gwt.scaffold.Scaffold" />
+  <entry-point class="__TOP_LEVEL_PACKAGE__.client.scaffold.Scaffold" />
   	
 </module>

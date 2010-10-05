@@ -1,12 +1,12 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.inject.Inject;
-import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationEntityTypesProcessor;
-import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.request.ApplicationEntityTypesProcessor;
+import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
 
 import java.util.HashSet;
 import java.util.Set;

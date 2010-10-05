@@ -1,10 +1,10 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.app.place.PlaceTokenizer;
 import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.app.place.ProxyPlace;
 import com.google.inject.Inject;
-import __TOP_LEVEL_PACKAGE__.gwt.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
 
 public class PlaceHistoryFactory {
 	

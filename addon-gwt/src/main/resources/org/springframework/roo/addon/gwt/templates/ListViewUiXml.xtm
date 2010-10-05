@@ -3,7 +3,7 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:app='urn:import:com.google.gwt.app.client'
   xmlns:b='urn:import:com.google.gwt.user.cellview.client'>
-<ui:image field="createButton" resource="createButton.png" />
+<ui:image field="createButton" src="../../../public/images/createButton.png"/>
 
 <ui:style>
   .controls {

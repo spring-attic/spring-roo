@@ -1,9 +1,9 @@
-project --topLevelPackage com.springsource.extrack
+project --topLevelPackage org.springsource.roo.extrack
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 // persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 
-enum type --class ~.gwt.shared.Gender
+enum type --class ~.client.shared.Gender
 enum constant --name MALE
 enum constant --name FEMALE
 
@@ -12,7 +12,7 @@ field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
 field string --fieldName displayName
 field reference --type Employee supervisor
-field enum --fieldName gender --type ~.gwt.shared.Gender
+field enum --fieldName gender --type ~.client.shared.Gender
 field boolean --fieldName admin --notNull
 
 entity --class ~.server.domain.Report --testAutomatically

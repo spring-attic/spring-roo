@@ -3,7 +3,7 @@
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:r='urn:import:com.google.gwt.requestfactory.client'>
 
-  <ui:style field='mobile' src='mobile.css'/>
+  <ui:style field='mobile' src='../../public/mobile.css'/>
 
   <g:HTMLPanel>
     <div class='{mobile.bar}'>

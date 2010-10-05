@@ -1,10 +1,12 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.app.place.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
 import com.google.gwt.requestfactory.shared.Receiver;
+import com.google.gwt.requestfactory.shared.RequestEvent;
 import com.google.gwt.requestfactory.shared.UserInformationProxy;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
@@ -14,14 +16,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Mobile application for browsing entities.
- * 
- * TODO (jgw): Make this actually mobile-friendly.
+ * Application for browsing entities.
  */
-public class ScaffoldMobileApp extends ScaffoldApp {
+public class ScaffoldDesktopApp extends ScaffoldApp {
     private static final Logger log = Logger.getLogger(Scaffold.class.getName());
 
-    private final ScaffoldMobileShell shell = new ScaffoldMobileShell();
+    private final ScaffoldDesktopShell shell = new ScaffoldDesktopShell();
 
     public void run() {
 
@@ -30,6 +30,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
         init();
 
         /* Hide the loading message */
+
         Element loading = Document.get().getElementById("loading");
         loading.getParentElement().removeChild(loading);
 
@@ -53,26 +54,41 @@ public class ScaffoldMobileApp extends ScaffoldApp {
                 shell.getLoginWidget().setUserInformation(userInformationProxy);
             }
         };
-
         requestFactory.userInformationRequest().getCurrentUserInformation(Window.Location.getHref()).fire(receiver);
 
+        RequestEvent.register(eventBus, new RequestEvent.Handler() {
+            // Only show loading status if a request isn't serviced in 250ms.
+            private static final int LOADING_TIMEOUT = 250;
 
-        /* Left side lets us pick from all the types of entities */
+            public void onRequestEvent(RequestEvent requestEvent) {
+                if (requestEvent.getState() == RequestEvent.State.SENT) {
+                    shell.getMole().showDelayed(LOADING_TIMEOUT);
+                } else {
+                    shell.getMole().hide();
+                }
+            }
+        });
 
+        /* Check for Authentication failures or mismatches */
+
+        RequestEvent.register(eventBus, new AuthenticationFailureHandler());
+
+        CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
         ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
+        ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);
+        final ActivityManager masterActivityManager = new ActivityManager(masterActivityMap, eventBus);
+
+        masterActivityManager.setDisplay(shell.getMasterPanel());
+
         ProxyListPlacePicker proxyListPlacePicker = new ProxyListPlacePicker(placeController, proxyPlaceToListPlace);
-        HasConstrainedValue<ProxyListPlace> placePickerView = shell.getPlacesBox();
-        placePickerView.setAcceptableValues(getTopPlaces());
-        proxyListPlacePicker.register(eventBus, placePickerView);
+        HasConstrainedValue<ProxyListPlace> listPlacePickerView = shell.getPlacesBox();
+        listPlacePickerView.setAcceptableValues(getTopPlaces());
+        proxyListPlacePicker.register(eventBus, listPlacePickerView);
 
-        /*
-       * The body is run by an ActivityManager that listens for PlaceChange events and finds the corresponding Activity to run
-       */
+        final ActivityManager detailsActivityManager = new ActivityManager(applicationDetailsActivities, eventBus);
 
-        final ActivityManager activityManager = new ActivityManager(scaffoldMobileActivities, eventBus);
+        detailsActivityManager.setDisplay(shell.getDetailsPanel());
 
-        activityManager.setDisplay(shell.getBody());
-        
         /* Browser history integration */
         ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
         mapper.setFactory(placeHistoryFactory);
@@ -81,5 +97,4 @@ public class ScaffoldMobileApp extends ScaffoldApp {
         placeHistoryHandler.register(placeController, eventBus, defaultPlace);
         placeHistoryHandler.handleCurrentHistory();
     }
-
 }

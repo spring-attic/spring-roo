@@ -1,8 +1,8 @@
-package __TOP_LEVEL_PACKAGE__.gwt.scaffold;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import __TOP_LEVEL_PACKAGE__.gwt.scaffold.ioc.ScaffoldInjector;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ioc.ScaffoldInjector;
 
 /**
  * Application for browsing entities.

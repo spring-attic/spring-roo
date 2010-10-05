@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE_.gwt.style.client;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ClientBundle;

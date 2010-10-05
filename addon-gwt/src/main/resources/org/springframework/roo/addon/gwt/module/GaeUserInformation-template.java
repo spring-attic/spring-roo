@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.gwt;
+package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;

@@ -2,7 +2,7 @@ package {{=packageName}};
 
 import com.google.gwt.inject.client.GinModules;
 import com.google.gwt.inject.client.Ginjector;
-import com.springsource.extrack.gwt.scaffold.ScaffoldApp;
+import org.springsource.roo.extrack.client.scaffold.ScaffoldApp;
 {{#imports}}import {{=import}};
 {{/imports}}
 

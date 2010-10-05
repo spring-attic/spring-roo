@@ -4,8 +4,8 @@
   xmlns:r='urn:import:com.google.gwt.requestfactory.client'
   xmlns:a='urn:import:com.google.gwt.app.client'>
 
-  <ui:image field='gwtLogo'></ui:image>
-  <ui:image field='rooLogo'></ui:image>
+  <ui:image field='gwtLogo' src="../../public/images/gwtLogo.png"/>
+  <ui:image field='rooLogo' src="../../public/images/rooLogo.png"/>
   <ui:style>
     @def contentWidth 850px;
 
