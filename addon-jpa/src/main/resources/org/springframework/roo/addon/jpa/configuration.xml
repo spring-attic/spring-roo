@@ -8,7 +8,7 @@
 		</database>
 		<database id="HYPERSONIC">
 			<dependencies>
-				<dependency org="org.hsqldb" name="hsqldb" rev="2.0.0" />
+				<dependency org="org.hsqldb" name="hsqldb" rev="1.8.0.10" />
 			</dependencies>
 		</database>
 		<database id="POSTGRES">
