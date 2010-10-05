@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>wrapping</artifactId>
+		<version>1.1.0.RC1</version>
+	</parent>
+    <groupId>org.springframework.roo.wrapping</groupId>
+	<artifactId>${pom.groupId}.${pkgArtifactId}</artifactId>
+    <version>${osgiVersion}</version>
+	<packaging>bundle</packaging>
+	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
+    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+
+    <properties>
+        <pkgArtifactId>mysql-connector-java</pkgArtifactId>
+        <pkgVersion>5.1.13</pkgVersion>
+        <osgiVersion>${pkgVersion}.0001</osgiVersion>
+        <pkgVendor>MySQL</pkgVendor>
+        <pkgDocUrl>http://www.mysql.com/</pkgDocUrl>
+        <pkgLicense>http://www.mysql.com/about/legal/licensing/oem/</pkgLicense> <!-- Based on GPL license -->
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>${pkgArtifactId}</artifactId>
+            <version>${pkgVersion}</version>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>javax.xml.transform.stax.*;resolution:=optional,javax.xml.stream.*;resolution:=optional,org.apache.commons.logging.*;resolution:=optional,org.apache.log4j.*;resolution:=optional,org.jboss.*;resolution:=optional,com.mchange.*;resolution:=optional,*</Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

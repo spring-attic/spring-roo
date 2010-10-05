@@ -24,6 +24,7 @@
 		<module>jtds</module>
 		<module>jtopen</module>
  		<module>hapax</module>
+		<module>mysql</module>
 	</modules>
 
     <repositories>
