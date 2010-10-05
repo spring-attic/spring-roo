@@ -167,7 +167,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 				return cachedIntrospections.get(schema);
 			}
 
-			// Read the dbre.xml file, and see if it is for this schema
+			// Read the dbre xml file, and see if it is for this schema
 			Database database = deserializeDatabaseMetadataIfPossible();
 			if (database != null && database.getSchema().equals(schema)) {
 				// The deserialized from disk database is the one we want, so cache it and get out of here....
@@ -335,6 +335,6 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	private String getDbreXmlPath() {
-		return pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "/META-INF/spring/dbre.xml");
+		return pathResolver.getIdentifier(Path.ROOT, DbreModelService.DBRE_FILE);
 	}
 }

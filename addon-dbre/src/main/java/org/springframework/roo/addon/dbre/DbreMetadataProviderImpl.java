@@ -57,7 +57,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		// Abort if the database couldn't be deserialized. This can occur if the dbre.xml file has been deleted or is empty.
+		// Abort if the database couldn't be deserialized. This can occur if the dbre xml file has been deleted or is empty.
 		Database database = dbreModelService.getDatabase(null);
 		if (database == null) {
 			return null;

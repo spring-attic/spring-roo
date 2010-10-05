@@ -11,7 +11,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * {@link ContentHandler} implementation for converting the dbre.xml file into a {@link Database} object.
+ * {@link ContentHandler} implementation for converting the dbre xml file into a {@link Database} object.
  * 
  * @author Alan Stewart
  * @since 1.1

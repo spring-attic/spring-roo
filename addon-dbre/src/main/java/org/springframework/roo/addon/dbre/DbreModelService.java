@@ -17,6 +17,11 @@ import org.springframework.roo.addon.dbre.model.Schema;
  * @since 1.1
  */
 public interface DbreModelService {
+	
+	/**
+	 * The name of the DBRE XML file.
+	 */
+	String DBRE_FILE = ".roo-dbre";
 
 	/**
 	 * Returns a Set of available database {@link Schema schemas}. 
