@@ -858,6 +858,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (registerConvertersMethod != null) return registerConvertersMethod;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		boolean converterPresent = false;
 
 		Set<JavaType> typesForConversion = specialDomainTypes;
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
@@ -894,7 +895,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
 					if (null == methodExists(converterMethodName)) {
 						bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
-
+						converterPresent = true;
+						
 						// Register the converter method
 						InvocableMemberBodyBuilder converterBodyBuilder = new InvocableMemberBodyBuilder();
 						converterBodyBuilder.appendFormalLine("return new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
@@ -933,10 +935,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				}
 			}
 		}
+		
+		if (converterPresent) {
+			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
+			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
-		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
-		return methodBuilder.build();
+			return methodBuilder.build();
+		}
+		return null; //no converter to register
 	}
 
 	private MethodMetadata getDateTimeFormatHelperMethod() {
