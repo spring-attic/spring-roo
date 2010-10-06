@@ -294,10 +294,7 @@ public class GwtOperationsImpl implements GwtOperations {
 			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		}
 		
-		removeIfFound("/web-app/welcome-file-list/welcome-file", webXmlRoot);
 		removeIfFound("/web-app/error-page", webXmlRoot);
-		WebXmlUtils.addWelcomeFile("/", webXmlDoc, "Changed by 'gwt setup' command");
-
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
 
