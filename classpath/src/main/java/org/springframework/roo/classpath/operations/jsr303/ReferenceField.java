@@ -82,8 +82,8 @@ public class ReferenceField extends FieldDetails {
 				break;
 		}
 		
-		List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 		if (joinColumnName != null) {
+			List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), joinColumnAttrs));
 		}
