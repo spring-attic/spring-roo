@@ -15,6 +15,7 @@ import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.shell.event.ShellStatus;
+import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.support.logging.LoggingOutputStream;
 
@@ -222,7 +223,7 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 	}
 
 	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
-		if (newStatus.equals(ShellStatus.SHUTTING_DOWN)) {
+		if (newStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
 			try {
 				if (rooShell != null && rooShell.getExitShellRequest() != null) {
 					// ROO-836
