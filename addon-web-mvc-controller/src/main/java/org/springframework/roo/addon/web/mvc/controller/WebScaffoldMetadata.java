@@ -134,7 +134,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
 		}
-
 		if (annotationValues.isExposeJson()) {
 			// Decide if we want to build json support
 			this.jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
@@ -145,7 +144,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				builder.addMethod(getCreateFromJsonArrayMethod());
 			}
 		}
-
+		if (annotationValues.isCreate() || annotationValues.isUpdate()) {
+			builder.addMethod(getEncodeUrlPathSegmentMethod());
+		}
+		
 		itdTypeDetails = builder.build();
 
 		new ItdSourceFileComposer(itdTypeDetails);
@@ -360,11 +362,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), noAnnotations));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
 		paramNames.add(new JavaSymbolName("model"));
+		paramNames.add(new JavaSymbolName("request"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
@@ -383,7 +387,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getPersistMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + " + entityName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + entityName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "().toString(), request);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -472,11 +476,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), typeAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.validation.BindingResult"), noAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), noAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), noAnnotations));
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(entityName));
 		paramNames.add(new JavaSymbolName("result"));
 		paramNames.add(new JavaSymbolName("model"));
+		paramNames.add(new JavaSymbolName("request"));
 
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("PUT"))));
@@ -495,7 +501,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getMergeMethod().getMethodName() + "();");
-		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + " + entityName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "();");
+		bodyBuilder.appendFormalLine("return \"redirect:/" + controllerPath + "/\" + encodeUrlPathSegment(" + entityName + "." +  entityMetadata.getIdentifierAccessor().getMethodName() + "().toString(), request);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
@@ -999,6 +1005,37 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			methods.add(methodBuilder.build());
 		}
 		return methods;
+	}
+	
+	private MethodMetadata getEncodeUrlPathSegmentMethod() {
+		JavaSymbolName encodeUrlPathSegment = new JavaSymbolName("encodeUrlPathSegment");
+		MethodMetadata encodeUrlPathSegmentMethod = methodExists(encodeUrlPathSegment);
+		if (encodeUrlPathSegmentMethod != null) return encodeUrlPathSegmentMethod;
+		
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+		paramTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), new ArrayList<AnnotationMetadata>()));
+		
+		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
+		paramNames.add(new JavaSymbolName("pathSegment"));
+		paramNames.add(new JavaSymbolName("request"));
+		
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("String enc = request.getCharacterEncoding();");
+		bodyBuilder.appendFormalLine("if (enc == null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("enc = " + new JavaType("org.springframework.web.util.WebUtils").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".DEFAULT_CHARACTER_ENCODING;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("try {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("pathSegment = " + new JavaType("org.springframework.web.util.UriUtils").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".encodePathSegment(pathSegment, enc);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("catch (" + new JavaType("java.io.UnsupportedEncodingException").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
+		bodyBuilder.appendFormalLine("return pathSegment;");
+		
+		return new MethodMetadataBuilder(getId(), Modifier.PRIVATE, encodeUrlPathSegment, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
