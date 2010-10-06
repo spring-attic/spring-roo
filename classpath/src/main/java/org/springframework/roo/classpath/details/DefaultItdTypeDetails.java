@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -8,13 +9,20 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.model.CustomData;
+import org.springframework.roo.model.CustomDataAccessor;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
  * Default representation of an {@link ItdTypeDetails}.
+ * 
+ * <p>
+ * Provides a basic {@link #hashCode()} that is used for detecting significant changes in {@link AbstractItdMetadataProvider} and avoiding
+ * downstream notifications accordingly.
  * 
  * @author Ben Alex
  * @author Stefan Schmidt
@@ -151,6 +159,24 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 		return Collections.unmodifiableList(innerTypes);
 	}
 	
+	@Override
+	public int hashCode() {
+		int hash = aspect.hashCode() * governor.getName().hashCode() * governor.getModifier() * governor.getCustomData().hashCode() * physicalTypeCategory.hashCode() * (privilegedAspect ? 2 : 3);
+		hash = hash * includeCustomDataHash(declaredConstructors);
+		hash = hash * includeCustomDataHash(declaredFields);
+		hash = hash * includeCustomDataHash(declaredMethods);
+		hash = hash * new ItdSourceFileComposer(this).getOutput().hashCode();
+		return hash;
+	}
+	
+	private int includeCustomDataHash(Collection<? extends CustomDataAccessor> coll) {
+		int result = 1;
+		for (CustomDataAccessor accessor : coll) {
+			result = result * accessor.getCustomData().hashCode();
+		}
+		return result;
+	}
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("declaredByMetadataId", getDeclaredByMetadataId());

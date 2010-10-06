@@ -19,7 +19,7 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 
 	private LinkedHashMap<String,MetadataItem> map;
 	private static final float hashTableLoadFactor = 0.75f;
-	private int maxCapacity = 1000;
+	private int maxCapacity = 100000;
 	
 	protected AbstractMetadataCache() {
 		initialize();

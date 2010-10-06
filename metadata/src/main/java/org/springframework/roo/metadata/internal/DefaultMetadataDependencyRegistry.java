@@ -220,10 +220,10 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		try {
 			notificationNumber++;
 			
-			long now = System.currentTimeMillis();
+			long now = System.nanoTime();
 
 			if (level > 0) {
-				long duration = now - started;
+				long duration = (now - started)/1000000;
 				stopCounting(duration);
 			}
 			
@@ -279,8 +279,8 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			level--;
 			
 			if (level == 0) {
-				long now = System.currentTimeMillis();
-				long duration = now - started;
+				long now = System.nanoTime();
+				long duration = (now - started)/1000000;
 				stopCounting(duration);
 				started = 0;
 			}
@@ -297,6 +297,10 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			result.add(new StandardMetadataTimingStatistic(key, timings.get(key)));
 		}
 		return result;
+	}
+
+	public int getNotificationCount() {
+		return notificationNumber;
 	}
 
 }

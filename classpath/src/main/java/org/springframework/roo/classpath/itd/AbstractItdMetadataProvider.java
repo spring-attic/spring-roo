@@ -13,7 +13,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataNotificationListener;
@@ -50,12 +50,10 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 @Component(componentAbstract = true)
-public abstract class AbstractItdMetadataProvider implements ItdMetadataProvider, MetadataNotificationListener {
-	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
 	@Reference protected FileManager fileManager;
 	@Reference protected MetadataService metadataService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
-
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	private boolean dependsOnGovernorBeingAClass = true;
 
@@ -96,9 +94,9 @@ public abstract class AbstractItdMetadataProvider implements ItdMetadataProvider
 			}
 			
 			for (String mid : allMids) {
-				metadataService.evict(mid);
-				if (get(mid) != null) {
-					metadataDependencyRegistry.notifyDownstream(mid);
+				MetadataItem metadataItem = metadataService.get(mid, true);
+				if (metadataItem != null) {
+					notifyIfRequired(metadataItem);
 				}
 			}
 	
@@ -123,12 +121,12 @@ public abstract class AbstractItdMetadataProvider implements ItdMetadataProvider
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 		
-		metadataService.evict(downstreamDependency);
-		if (get(downstreamDependency) != null) {
-			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
+		MetadataItem metadataItem = metadataService.get(downstreamDependency, true);
+		if (metadataItem != null) {
+			notifyIfRequired(metadataItem);
 		}
 	}
-
+	
 	/**
 	 * Called whenever there is a requirement to produce a local identifier (ie an instance identifier consistent with
 	 * {@link #getProvidesType()}) for the indicated {@link JavaType} and {@link Path}.
@@ -256,7 +254,7 @@ public abstract class AbstractItdMetadataProvider implements ItdMetadataProvider
 			// TODO: DETERMINE IF THIS IS REALLY NECESSARY, AS IT SHOULD FILTER DOWN VIA PTM (BPA 6 Sep 10)
 			metadataDependencyRegistry.registerDependency(governorPhysicalTypeMetadata.getId(), metadataIdentificationString);
 			
-			// Quit if the subclass returned null; it might not have experienced issues parsing etc
+			// Quit if the subclass returned null; it might have experienced issues parsing etc
 			if (metadata == null) {
 				return null;
 			}

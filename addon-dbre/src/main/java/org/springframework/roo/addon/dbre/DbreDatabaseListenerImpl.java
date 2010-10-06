@@ -32,7 +32,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
+import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -51,14 +52,13 @@ import org.springframework.roo.support.util.StringUtils;
  */
 @Component
 @Service
-public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
+public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNotifier implements DbreDatabaseListener {
 	private static final String IDENTIFIER_TYPE = "identifierType";
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
 	@Reference private DbreModelService dbreModelService;
 	@Reference private DbreTypeResolutionService dbreTypeResolutionService;
@@ -118,12 +118,12 @@ public class DbreDatabaseListenerImpl implements DbreDatabaseListener {
 		
 		deleteManagedTypesNotInModel(tables);
 
-		// Fields may have changed so ensure metadata providers get a chance to refresh themselves
-		metadataService.evictAll();
 		for (JavaType managedType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
 			String dbreMid = DbreMetadata.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
-			metadataService.get(dbreMid, true);
-			metadataDependencyRegistry.notifyDownstream(dbreMid);
+			MetadataItem metadataItem = metadataService.get(dbreMid, true);
+			if (metadataItem != null) {
+				notifyIfRequired(metadataItem);
+			}
 		}
 	}
 

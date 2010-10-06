@@ -45,6 +45,11 @@ public interface MetadataDependencyRegistry {
 	public SortedSet<MetadataTimingStatistic> getTimings();
 	
 	/**
+	 * @return how many notifications have taken place so far
+	 */
+	public int getNotificationCount();
+	
+	/**
 	 * Enable low-level tracing of event delivery information. Defaults to level 0 (none).
 	 * 
 	 * @param trace the level (0 = none, 1 = major events, 2 = all events)

@@ -15,6 +15,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.util.Assert;
 
 @Component
 @Service
@@ -32,6 +33,7 @@ public class MetadataCommands implements CommandMarker {
 	@CliCommand(value="metadata status", help="Shows metadata statistics")
 	public String metadataTimings() {
 		StringBuilder sb = new StringBuilder();
+		sb.append("Notification count: ").append(metadataDependencyRegistry.getNotificationCount()).append(System.getProperty("line.separator"));
 		for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
 			sb.append(stat.toString()).append(System.getProperty("line.separator"));
 		}
@@ -101,4 +103,13 @@ public class MetadataCommands implements CommandMarker {
 		sb.append(metadataForId(id));
 		return sb.toString();
 	}
+
+	@CliCommand(value="metadata cache", help="Shows detailed metadata for the indicated type")
+	public String metadataCacheMaximum(@CliOption(key={"maximumCapacity"}, mandatory=true, help="The maximum number of metadata items to cache") int maxCapacity) {
+		Assert.isTrue(maxCapacity >= 100, "Maximum capacity must be 100 or greater");
+		metadataService.setMaxCapacity(maxCapacity);
+		// show them that the change has taken place
+		return metadataTimings();
+	}
+
 }

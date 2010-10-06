@@ -1,11 +1,12 @@
 package org.springframework.roo.classpath.javaparser;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -51,27 +52,38 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	private PathResolver pathResolver = null;
+	private Map<JavaType, String> cache = new HashMap<JavaType, String>();
 	
-	protected void activate(ComponentContext context) {
-	}
-
 	private PathResolver getPathResolver() {
+		if (pathResolver != null) {
+			return pathResolver;
+		}
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata unavailable");
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.notNull(pathResolver, "Path resolver unavailable because valid project metadata not currently available");
+		this.pathResolver = pathResolver;
 		return pathResolver;
 	}
 	
 	public String findIdentifier(JavaType javaType) {
 		Assert.notNull(javaType, "Java type to locate is required");
+		String result = cache.get(javaType);
+		
+		if (result != null) {
+			return result;
+		}
+		
 		PathResolver pathResolver = getPathResolver();
 		for (Path sourcePath : pathResolver.getSourcePaths()) {
 			String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
 			String fileIdentifier = pathResolver.getIdentifier(sourcePath, relativePath);
 			if (fileManager.exists(fileIdentifier)) {
 				// found the file, so use this one
-				return PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
+				String mid = PhysicalTypeIdentifier.createIdentifier(javaType, sourcePath);
+				cache.put(javaType, mid);
+				return mid;
 			}
 		}
 		return null;
@@ -92,6 +104,8 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 		
 		if (fileIdentifier.endsWith(".java") && fileEvent.getOperation() != FileOperation.MONITORING_FINISH && !fileIdentifier.endsWith("package-info.java")) {
 			// file is of interest
+			// start by evicting the cache
+			cache.clear();
 			
 			// figure out the JavaType this should be
 			PathResolver pathResolver = getPathResolver();

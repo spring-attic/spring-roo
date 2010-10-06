@@ -477,7 +477,12 @@ public class PollingFileMonitorService implements NotifiableFileMonitorService {
 		Assert.isTrue(currentDirectory.exists() && currentDirectory.isDirectory(), "Path '" + currentDirectory + "' does not exist or is not a directory");
 		Assert.hasText(antPath, "Ant path required");
 		Assert.notNull(result, "Result required");
-		for (File f : currentDirectory.listFiles()) {
+		
+		File[] listFiles = currentDirectory.listFiles();
+		if (listFiles == null || listFiles.length == 0) {
+			return;
+		}
+		for (File f : listFiles) {
 			if (f.isFile()) {
 				try {
 					if (FileDetails.matchesAntPath(antPath, f.getCanonicalPath())) {

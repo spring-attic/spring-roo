@@ -73,6 +73,11 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		return itdTypeDetails;
 	}
 
+	@Override
+	public int hashCode() {
+		return builder.build().hashCode();
+	}
+
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("identifier", getId());

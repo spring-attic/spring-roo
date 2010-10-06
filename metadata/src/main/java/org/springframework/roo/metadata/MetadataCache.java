@@ -39,4 +39,11 @@ public interface MetadataCache {
 	 * 
 	 */
 	void evictAll();
+	
+	/**
+	 * Modifies the metadata cache maximum capacity.
+	 * 
+	 * @param maxCapacity the new maximum capacity
+	 */
+	void setMaxCapacity(int maxCapacity);
 }

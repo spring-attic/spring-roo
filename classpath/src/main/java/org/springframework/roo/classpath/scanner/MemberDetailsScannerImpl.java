@@ -85,6 +85,11 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 						continue;
 					}
 					
+					// Skip myself
+					if (mp.getClass().equals(metadataProvider.getClass())) {
+						continue;
+					}
+					
 					// Determine the key the ITD provider uses for this particular type
 					String key = ((ItdMetadataProvider)mp).getIdForPhysicalJavaType(currentClass.getDeclaredByMetadataId());
 					Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(key), "ITD metadata provider '" + mp + "' returned an illegal key ('" + key + "'");

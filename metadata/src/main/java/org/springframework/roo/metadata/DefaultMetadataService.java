@@ -194,14 +194,6 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			// Clear my own cache (which also verifies the argument is valid at the same time)
 			super.evict(metadataIdentificationString);
 			
-			// Delegate to the relevant metadata provider, if available
-			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
-			MetadataProvider p = getRegisteredProvider(mdClassId);
-			
-			if (p != null && p instanceof MetadataCache) {
-				((MetadataCache)p).evict(metadataIdentificationString);
-			}
-			
 			// Finally, evict downstream dependencies (ie metadata that previously depended on this now-evicted metadata)
 			for (String downstream : metadataDependencyRegistry.getDownstream(metadataIdentificationString)) {
 				// We only need to evict if it is an instance, as only an instance will ever go into the cache

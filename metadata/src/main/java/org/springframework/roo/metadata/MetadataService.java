@@ -20,20 +20,7 @@ import java.util.SortedSet;
  * 
  * <p>
  * As indicated by the {@link MetadataService} interface extending {@link MetadataCache},
- * all implementations must provide caching support. At bare minimum, an incoming request
- * to methods defined by the {@link MetadataCache} interface must be delegated through to
- * registered {@link MetadataProvider}s that also implement {@link MetadataCache}. The
- * {@link MetadataCache#evictAll()} method must be delegated to all such providers,
- * whereas {@link MetadataCache#evict(String)} need only be delegated to the provider
- * applicable for that metadata identification string (and then only if it implements
- * {@link MetadataCache}. 
- * 
- * <p>
- * Note that a {@link MetadataService} implementation itself may elect to cache metadata. Indeed
- * it is recommended that any metadata returned by a {@link MetadataProvider} that does NOT
- * implement {@link MetadataCache} be cached directly by a {@link MetadataService}. Please
- * refer to the previous paragraph concerning mandatory delegation behaviour for provider
- * caching, which applies irrespective of whether the implementation itself performs caching.
+ * all implementations must provide caching support.
  * 
  * <p>
  * Also as indicated by {@link MetadataService} extending {@link MetadataNotificationListener},

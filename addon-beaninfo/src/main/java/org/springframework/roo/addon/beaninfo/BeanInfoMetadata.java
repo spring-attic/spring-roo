@@ -52,6 +52,15 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		itdTypeDetails = builder.build();
 	}
 	
+	@Override
+	public int hashCode() {
+		// TODO This eliminates the desired notification optimisations as part of ROO-1506 but is necessary in the interim until we
+		// delete BeanInfoMetadata from Roo and require all add-ons to directly use MemberDetailsScanner (at which point everything will work well)
+		return System.identityHashCode(this);
+	}
+
+
+
 	/**
 	 * Obtains the property name for the specified JavaBean accessor or mutator method. This is determined by
 	 * discarding the first 2 or 3 letters of the method name (depending whether it is a "get", "set" or "is" method).
