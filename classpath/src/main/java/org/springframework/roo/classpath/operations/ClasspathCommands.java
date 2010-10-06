@@ -296,7 +296,7 @@ public class ClasspathCommands implements CommandMarker {
 			modifier = modifier |= Modifier.ABSTRACT;
 		}
 		
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, modifier, name, PhysicalTypeCategory.CLASS);
 		if (classpathOperations.getSuperclass(superclass) != null) {
 			typeDetailsBuilder.setSuperclass(new ClassOrInterfaceTypeDetailsBuilder(classpathOperations.getSuperclass(superclass)));
 		}

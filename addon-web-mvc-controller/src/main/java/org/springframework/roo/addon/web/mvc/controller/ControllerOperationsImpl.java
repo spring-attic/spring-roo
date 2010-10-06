@@ -52,7 +52,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private TypeLocationService typeLocationService;
 
 	public void generateAll(final JavaPackage javaPackage) {
-		// TODO Will need to revisit this as a result of ROO-1372
 		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
 		each_file: for (ClassOrInterfaceTypeDetails cid : cids) {
 			if (Modifier.isAbstract(cid.getModifier())) {
