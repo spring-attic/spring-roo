@@ -190,7 +190,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(beanInfoMetadata.getJavaBean());
-		bodyBuilder.appendFormalLine(getSimleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, typeParams)) + " " + beanPlural.toLowerCase() + " = new " + getSimleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, typeParams)) + "();");
+		bodyBuilder.appendFormalLine(getSimpleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, typeParams)) + " " + beanPlural.toLowerCase() + " = new " + getSimpleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, typeParams)) + "();");
 		bodyBuilder.appendFormalLine(beanPlural.toLowerCase() + ".add(" + javaBeanFieldName + ");");
 		bodyBuilder.appendFormalLine(annotationValues.getIndexMethod() + beanPlural + "(" + beanPlural.toLowerCase() + ");");
 
@@ -210,10 +210,10 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		JavaType solrInputDocument = new JavaType("org.apache.solr.common.SolrInputDocument");
-		String sid = getSimleName(solrInputDocument);
+		String sid = getSimpleName(solrInputDocument);
 		List<JavaType> sidTypeParams = new ArrayList<JavaType>();
 		sidTypeParams.add(solrInputDocument);
-		bodyBuilder.appendFormalLine(getSimleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + " documents = new " + getSimleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + "();");
+		bodyBuilder.appendFormalLine(getSimpleName(new JavaType(List.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + " documents = new " + getSimpleName(new JavaType(ArrayList.class.getName(), 0, DataType.TYPE, null, sidTypeParams)) + "();");
 		bodyBuilder.appendFormalLine("for (" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " " + javaBeanFieldName + " : " + beanPlural.toLowerCase() + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(sid + " sid = new " + sid + "();");
@@ -249,7 +249,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(getSimleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
+		bodyBuilder.appendFormalLine(getSimpleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
 		bodyBuilder.appendFormalLine("solrServer.add(documents);");
 		bodyBuilder.appendFormalLine("solrServer.commit();");
 		bodyBuilder.indentRemove();
@@ -276,7 +276,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (deleteIndex != null) return deleteIndex;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(getSimleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
+		bodyBuilder.appendFormalLine(getSimpleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
@@ -369,7 +369,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		JavaType solrServer = new JavaType("org.apache.solr.client.solrj.SolrServer");
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(getSimleName(solrServer) + " _solrServer = new " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "().solrServer;");
+		bodyBuilder.appendFormalLine(getSimpleName(solrServer) + " _solrServer = new " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "().solrServer;");
 		bodyBuilder.appendFormalLine("if (_solrServer == null) throw new IllegalStateException(\"Solr server has not been injected (is the Spring Aspects JAR configured as an AJC/AJDT aspects library?)\");");
 		bodyBuilder.appendFormalLine("return _solrServer;");
 
@@ -389,7 +389,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return null;
 	}
 
-	private String getSimleName(JavaType type) {
+	private String getSimpleName(JavaType type) {
 		return type.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 	}
 
