@@ -23,4 +23,9 @@ public interface JsonOperations {
 	 * @param type The type to annotate
 	 */
 	void annotateType(JavaType type);
+	
+	/**
+	 * Annotate all types in the project which are annotated with @{@link RooJavaBean}.
+	 */
+	void annotateAll();
 }

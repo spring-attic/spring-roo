@@ -7,6 +7,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -24,8 +25,10 @@ import org.springframework.roo.support.util.Assert;
 @Component 
 @Service 
 public class JsonOperationsImpl implements JsonOperations {
+	
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
@@ -53,6 +56,12 @@ public class JsonOperationsImpl implements JsonOperations {
 				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooJson);
 				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
 			}
+		}
+	}
+	
+	public void annotateAll() {
+		for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
+			annotateType(type);
 		}
 	}
 }

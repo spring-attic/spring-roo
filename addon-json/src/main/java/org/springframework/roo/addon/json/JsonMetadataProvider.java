@@ -25,14 +25,12 @@ public final class JsonMetadataProvider extends AbstractItdMetadataProvider {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooJson.class.getName()));
 		addMetadataTrigger(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"));
-		addMetadataTrigger(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"));
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooJson.class.getName()));
 		removeMetadataTrigger(new JavaType("org.springframework.roo.addon.entity.RooIdentifier"));
-		removeMetadataTrigger(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"));
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {

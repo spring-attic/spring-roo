@@ -31,4 +31,9 @@ public class JsonCommands implements CommandMarker {
 		
 		operations.annotateType(target);
 	}
+	
+	@CliCommand(value = "json all", help = "Adds @RooJson annotation to all types annotated with @RooJavaBean") 
+	public void all() {
+		operations.annotateAll();
+	}
 }
