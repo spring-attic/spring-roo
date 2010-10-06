@@ -92,7 +92,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		// Remove unnecessary artifacts not specific to current database and JPA provider
 		cleanup(configuration, ormProvider, database);
 
-		updateApplicationContext(ormProvider, database, jndi);
+		updateApplicationContext(ormProvider, database, jndi, persistenceUnit);
 		updatePersistenceXml(ormProvider, database, databaseName, userName, password, persistenceUnit);
 		updateGaeXml(ormProvider, database, applicationId);
 		updateVMforceConfigProperties(ormProvider, database, userName, password);
@@ -110,7 +110,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateBuildPlugins(configuration, ormProvider, database);
 	}
 
-	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase database, String jndi) {
+	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase database, String jndi, String persistenceUnit) {
 		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
@@ -201,16 +201,23 @@ public class JpaOperationsImpl implements JpaOperations {
 		entityManagerFactory = appCtx.createElement("bean");
 		entityManagerFactory.setAttribute("id", "entityManagerFactory");
 
-		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
-			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-			entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
-		} else {
-			entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
-			if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", PERSISTENCE_UNIT_NAME, appCtx));
-			} else {
-				entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
-			}
+		switch (database) {
+			case GOOGLE_APP_ENGINE:
+				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
+				break;
+			default:
+				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
+				switch (ormProvider) {
+					case DATANUCLEUS:
+					case DATANUCLEUS_2:
+						entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME), appCtx));
+						break;
+					default:
+						entityManagerFactory.appendChild(createRefElement("dataSource", "dataSource", appCtx));
+						break;
+				}
+				break;
 		}
 
 		root.appendChild(entityManagerFactory);
@@ -291,7 +298,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
 			case VMFORCE:
-				persistenceUnitElement.setAttribute("name", PERSISTENCE_UNIT_NAME);
+				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
 				persistenceUnitElement.removeAttribute("transaction-type");
 				provider.setTextContent(ormProvider.getAdapter());
 				break;
