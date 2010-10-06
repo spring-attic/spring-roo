@@ -27,6 +27,7 @@ import org.springframework.roo.project.PathResolver;
 
 /**
  * Implementation of {@link TypeLocationService}.
+ * 
  * <p>
  * For performance reasons automatically caches the queries, invalidating the cache 
  * when any {@link PhysicalTypeMetadata} notification is received.
@@ -106,7 +107,6 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
 			callback.process(located);
 		}
-
 	}
 
 	public Set<JavaType> findTypesWithAnnotation(List<JavaType> annotationsToDetect) {
