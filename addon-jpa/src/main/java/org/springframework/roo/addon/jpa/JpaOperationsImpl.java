@@ -204,7 +204,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		switch (database) {
 			case GOOGLE_APP_ENGINE:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalEntityManagerFactoryBean");
-				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", GAE_PERSISTENCE_UNIT_NAME, appCtx));
+				entityManagerFactory.appendChild(createPropertyElement("persistenceUnitName", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME), appCtx));
 				break;
 			default:
 				entityManagerFactory.setAttribute("class", "org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean");
@@ -293,7 +293,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		Element provider = persistence.createElement("provider");
 		switch (database) {
 			case GOOGLE_APP_ENGINE:
-				persistenceUnitElement.setAttribute("name", GAE_PERSISTENCE_UNIT_NAME);
+				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : GAE_PERSISTENCE_UNIT_NAME));
 				persistenceUnitElement.removeAttribute("transaction-type");
 				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
