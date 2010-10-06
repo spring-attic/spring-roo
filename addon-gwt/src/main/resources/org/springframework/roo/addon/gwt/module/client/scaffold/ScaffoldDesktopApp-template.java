@@ -1,18 +1,23 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
-import com.google.gwt.app.place.*;
+import com.google.gwt.activity.shared.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.requestfactory.client.AuthenticationFailureHandler;
+import com.google.gwt.place.shared.*;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.RequestEvent;
 import com.google.gwt.requestfactory.shared.UserInformationProxy;
+import com.google.gwt.requestfactory.ui.client.AuthenticationFailureHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlacePicker;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyPlaceToListPlace;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -22,7 +27,7 @@ import java.util.logging.Logger;
  * Application for browsing entities.
  */
 public class ScaffoldDesktopApp extends ScaffoldApp {
-    private static final Logger log = Logger.getLogger(Scaffold.class.getName());
+  private static final Logger log = Logger.getLogger(Scaffold.class.getName());
 
     private final ScaffoldDesktopShell shell = new ScaffoldDesktopShell();
 

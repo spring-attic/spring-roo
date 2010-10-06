@@ -1,10 +1,10 @@
 package __TOP_LEVEL_PACKAGE__.client.scaffold.ioc;
 
-import com.google.gwt.app.place.PlaceController;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.inject.client.AbstractGinModule;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;

@@ -1,8 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:r='urn:import:com.google.gwt.requestfactory.client'
-  xmlns:a='urn:import:com.google.gwt.app.client'>
+  xmlns:r='urn:import:com.google.gwt.requestfactory.ui.client'>
 
   <ui:image field='gwtLogo' src="../../public/images/gwtLogo.png"/>
   <ui:image field='rooLogo' src="../../public/images/rooLogo.png"/>
@@ -142,7 +141,7 @@
           <g:ValuePicker styleName="{style.entitiesList}" width='100%' pageSize='100' ui:field='placesBox'/>
         </g:SimplePanel>
         <g:FlowPanel>
-           <a:NotificationMole animationDuration='0' message='loading...' ui:field='mole'></a:NotificationMole>
+           <g:NotificationMole animationDuration='0' message='loading...' ui:field='mole'></g:NotificationMole>
         <g:SimplePanel styleName="{style.entityDetails}" ui:field='master'></g:SimplePanel>
 	</g:FlowPanel>
         <g:SimplePanel styleName="{style.entityDetails}" ui:field='details'></g:SimplePanel>

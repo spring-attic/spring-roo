@@ -246,6 +246,21 @@ public class GwtMetadata extends AbstractMetadataItem {
         return JavaType.LONG_OBJECT;
       }
     }
+    if (isCollectionType(returnType)) {
+      List<JavaType> args = returnType.getParameters();
+      if (args != null && args.size() == 1) {
+        JavaType elementType = args.get(0);
+        if (isDomainObject(elementType, (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(elementType, Path.SRC_MAIN_JAVA)))) {
+          return new JavaType(returnType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(getDestinationJavaType(elementType, MirrorType.PROXY)));
+        }
+        else {
+          return new JavaType(returnType.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(elementType));
+        }
+
+      }
+      return returnType;
+
+    }
     return returnType;
   }
 
@@ -256,9 +271,15 @@ public class GwtMetadata extends AbstractMetadataItem {
 
     boolean isDomainObject = !isEnum 
       && !isShared(returnType) 
-      && !(isRequestFactoryPrimitive(returnType));
+      && !(isRequestFactoryPrimitive(returnType))
+      && !(isCollectionType(returnType));
 
     return isDomainObject;
+  }
+
+  private boolean isCollectionType(JavaType returnType) {
+    return returnType.equals(new JavaType("java.util.List"))
+         || returnType.equals(new JavaType("java.util.Set"));
   }
 
   private boolean isRequestFactoryPrimitive(JavaType returnType) {
@@ -375,6 +396,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		addImport(dataDictionary, proxyType.getFullyQualifiedTypeName());
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+		dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
@@ -389,8 +411,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (!GwtProxyProperty.isAccessor(method)) {
 				continue;
 			}
-
-      PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
+                        if ((destType.isUI()  && isCollectionType(method.getReturnType()))) {
+                          continue;
+                        }
+                PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
 			GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
 
 			if (property.isString()) {

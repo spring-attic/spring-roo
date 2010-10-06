@@ -1,9 +1,8 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.AbstractProxyListView;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormatRenderer;
+import com.google.gwt.text.client.DateTimeFormatRenderer;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,8 +12,9 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 
-{{#imports}}
-import {{=import}};{{/imports}}
+import {{=placePackage}}.AbstractProxyListView;
+{{#imports}}import {{=import}};
+{{/imports}}
 
 import java.util.HashSet;
 import java.util.Set;

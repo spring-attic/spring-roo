@@ -299,6 +299,7 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+    dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
 		return dataDictionary;
 	}
 

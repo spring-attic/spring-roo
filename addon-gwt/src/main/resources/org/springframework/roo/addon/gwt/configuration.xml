@@ -71,21 +71,7 @@
 			</plugin>
 		</plugins>
 		<gae-dependencies>
-			<!-- Needed for gwt:run with gae -->
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-local-runtime</artifactId>
-				<version>${gae.version}</version>
-				<scope>system</scope>
-				<systemPath>${gae.home}/lib/impl/appengine-local-runtime.jar</systemPath>
-			</dependency>
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-tools-api</artifactId>
-				<version>${gae.version}</version>
-				<scope>system</scope>
-				<systemPath>${gae.home}/lib/appengine-tools-api.jar</systemPath>
-			</dependency>
+		
 		</gae-dependencies>
 		<gae-plugins>
 			<plugin>

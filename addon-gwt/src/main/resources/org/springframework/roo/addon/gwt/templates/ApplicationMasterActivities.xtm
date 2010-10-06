@@ -1,15 +1,14 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.Activity;
-import com.google.gwt.app.place.ActivityMapper;
-import com.google.gwt.app.place.Place;
-import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.ProxyListPlace;
+import com.google.gwt.activity.shared.Activity;
+import com.google.gwt.activity.shared.ActivityMapper;
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.inject.Inject;
 
-{{#imports}}
-import {{=import}};{{/imports}}
-
+import {{=placePackage}}.ProxyListPlace;
+{{#imports}}import {{=import}};
+{{/imports}}
 /**
  * Instantiates master activities.
  */

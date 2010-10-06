@@ -1,10 +1,9 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.ProxyRenderer;
+import com.google.gwt.requestfactory.ui.client.ProxyRenderer;
 
 {{#imports}}import {{=import}};
 {{/imports}}
-
 /**
  * Renders {@link {{=proxy}} for display to the user. Requires the
  * {{=displayFields}} properties to have been fetched.

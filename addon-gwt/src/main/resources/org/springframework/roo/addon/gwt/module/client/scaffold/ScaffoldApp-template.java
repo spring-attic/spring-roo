@@ -1,16 +1,16 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
-import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.inject.Inject;
+
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 import __TOP_LEVEL_PACKAGE__.client.request.ApplicationEntityTypesProcessor;
 import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
 
 import java.util.HashSet;
 import java.util.Set;
-
 
 public class ScaffoldApp {
 

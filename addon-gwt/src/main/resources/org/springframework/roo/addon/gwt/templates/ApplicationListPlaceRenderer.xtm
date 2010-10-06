@@ -1,10 +1,10 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.text.shared.AbstractRenderer;
-{{#imports}}
-import {{=import}};{{/imports}}
 
+import {{=placePackage}}.ProxyListPlace;
+{{#imports}}import {{=import}};
+{{/imports}}
 /**
  * Renders {@link ProxyListPlace}s for display to users.
  */

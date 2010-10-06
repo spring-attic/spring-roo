@@ -58,4 +58,12 @@ public enum MirrorType {
 	public String getTemplate() {
 		return template;
 	}
+
+        public boolean isList() {
+                return this == LIST_ACTIVITY || this == LIST_VIEW || this == LIST_VIEW_BINDER;
+        }
+
+        public boolean isUI() {
+          return getPath() != GwtPath.GWT_REQUEST;
+        }
 }

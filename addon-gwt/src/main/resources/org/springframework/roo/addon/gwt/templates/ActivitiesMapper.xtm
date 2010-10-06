@@ -1,13 +1,13 @@
 package {{=packageName}};
 
-import com.google.gwt.app.place.Activity;
-import com.google.gwt.app.place.CreateAndEditProxy;
-import com.google.gwt.app.place.FindAndEditProxy;
-import com.google.gwt.app.place.PlaceController;
-import com.google.gwt.app.place.ProxyPlace;
+import com.google.gwt.activity.shared.Activity;
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.requestfactory.shared.EntityProxyId;
 import com.google.gwt.requestfactory.shared.RequestContext;
 
+import {{=placePackage}}.ProxyPlace;
+import {{=placePackage}}.CreateAndEditProxy;
+import {{=placePackage}}.FindAndEditProxy;
 {{#imports}}import {{=import}};
 {{/imports}}
 /**

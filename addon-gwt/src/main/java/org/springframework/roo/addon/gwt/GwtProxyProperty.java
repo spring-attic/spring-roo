@@ -82,13 +82,13 @@ class GwtProxyProperty {
 
 	public String getBinder() {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
-			return "app:DoubleBox";
+			return "g:DoubleBox";
 		}
 		if (type.equals(JavaType.LONG_OBJECT)) {
-			return "app:LongBox";
+			return "g:LongBox";
 		}
 		if (type.equals(JavaType.INT_OBJECT)) {
-			return "app:IntegerBox";
+			return "g:IntegerBox";
 		}
 		return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 	}
@@ -146,7 +146,7 @@ class GwtProxyProperty {
 		}
 
 		if (isProxy()) {
-			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), " + "new com.google.gwt.app.place.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getProxyRendererType());
+			initializer = String.format(" = new ValueListBox<%1$s>(%2$s.instance(), new com.google.gwt.requestfactory.ui.client.EntityProxyKeyProvider<%1$s>())", type.getFullyQualifiedTypeName(), getProxyRendererType());
 		}
 
 		return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
@@ -161,10 +161,14 @@ class GwtProxyProperty {
 	}
 
 	public boolean isProxy() {
-		return !isDate() && !isString() && !isPrimitive() && !isEnum();
+		return !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection();
 	}
 
-	boolean isEnum() {
+  private boolean isCollection() {
+    return type != null && (type.equals(new JavaType("java.util.List")) || type.equals(new JavaType("java.util.Set")));
+  }
+
+  boolean isEnum() {
 		return ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 	}
 

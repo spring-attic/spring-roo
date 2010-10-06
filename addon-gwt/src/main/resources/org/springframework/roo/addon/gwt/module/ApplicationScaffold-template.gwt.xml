@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.1/distro-source/core/src/gwt-module.dtd">
 <module rename-to="applicationScaffold">
+  <inherits name='com.google.gwt.activity.Activity' />
+  <inherits name='com.google.gwt.place.Place' />
   <inherits name="com.google.gwt.user.User" />
   <inherits name="com.google.gwt.user.theme.standard.Standard" />
-  <inherits name='com.google.gwt.app.App' />
   <inherits name='com.google.gwt.requestfactory.RequestFactory'/>
   <inherits name="com.google.gwt.user.cellview.CellView" />
   <inherits name='com.google.gwt.logging.Logging'/>
   <inherits name="com.google.gwt.inject.Inject"/>
+  <inherits name="com.google.gwt.text.Text"/>
 
   <source path='client'/>
   

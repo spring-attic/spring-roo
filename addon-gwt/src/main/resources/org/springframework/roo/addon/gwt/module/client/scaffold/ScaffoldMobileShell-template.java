@@ -1,9 +1,8 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
-import com.google.gwt.app.place.ProxyListPlace;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.requestfactory.client.LoginWidget;
+import com.google.gwt.requestfactory.ui.client.LoginWidget;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -11,6 +10,8 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.ValuePicker;
 import com.google.gwt.user.client.ui.Widget;
+
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 
 /**
  * Top level UI for the mobile version of the application.

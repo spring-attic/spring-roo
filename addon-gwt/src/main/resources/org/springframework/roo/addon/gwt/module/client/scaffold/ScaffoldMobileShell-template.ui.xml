@@ -1,7 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:r='urn:import:com.google.gwt.requestfactory.client'>
+  xmlns:r='urn:import:com.google.gwt.requestfactory.ui.client'>
 
   <ui:style field='mobile' src='../../public/mobile.css'/>
 

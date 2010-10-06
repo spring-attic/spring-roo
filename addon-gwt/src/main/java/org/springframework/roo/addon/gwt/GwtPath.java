@@ -4,7 +4,6 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 
 public enum GwtPath {
-
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
 	GWT_ROOT("/", "module/" + GwtPath.templateSelector),
 	GWT_REQUEST("/client/request", "module/client/request/" + GwtPath.templateSelector),
@@ -15,6 +14,7 @@ public enum GwtPath {
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
 	SHARED("/client/shared", "module/client/shared/" + GwtPath.templateSelector),
 	IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector),
+	PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector),
 	PUBLIC("/public", "module/public/" + GwtPath.wildCardSelector),
 	IMAGES("/public/images", "module/public/images/" + GwtPath.wildCardSelector),
 	WEB("", "webapp/" + GwtPath.wildCardSelector);
