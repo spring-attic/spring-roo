@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.Cardinality;
@@ -31,14 +30,12 @@ import org.springframework.roo.model.JavaType;
  * @since 1.0
  */
 public class ReferenceField extends FieldDetails {
-	private JavaType fieldType;
 	private String joinColumnName;
 	private Fetch fetch = null;
 	private Cardinality cardinality = null;
 
 	public ReferenceField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName, Cardinality cardinality) {		
 		super(physicalTypeIdentifier, fieldType, fieldName);
-		this.fieldType = fieldType;
 		this.cardinality = cardinality;
 	}
 
@@ -61,7 +58,6 @@ public class ReferenceField extends FieldDetails {
 	public void decorateAnnotationsList(List<AnnotationMetadataBuilder> annotations) {
 		super.decorateAnnotationsList(annotations);
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new ClassAttributeValue(new JavaSymbolName("targetEntity"), fieldType));
 		
 		if (fetch != null) {
 			JavaSymbolName value = new JavaSymbolName("EAGER");
@@ -86,10 +82,10 @@ public class ReferenceField extends FieldDetails {
 				break;
 		}
 		
-		List<AnnotationAttributeValue<?>> jcAttrs = new ArrayList<AnnotationAttributeValue<?>>();
+		List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 		if (joinColumnName != null) {
-			jcAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
+			joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
+			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), joinColumnAttrs));
 		}
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), jcAttrs));
 	}
 }
