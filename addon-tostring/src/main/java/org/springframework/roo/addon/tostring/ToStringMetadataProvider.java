@@ -32,6 +32,9 @@ public final class ToStringMetadataProvider extends AbstractItdMetadataProvider 
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(this, (ClassOrInterfaceTypeDetails)governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getDetails();
+		for (MemberHoldingTypeDetails memberHolder : memberHoldingTypeDetails) {
+			metadataDependencyRegistry.registerDependency(memberHolder.getDeclaredByMetadataId(), metadataIdentificationString);
+		}
 		return new ToStringMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, memberHoldingTypeDetails);
 	}
 
