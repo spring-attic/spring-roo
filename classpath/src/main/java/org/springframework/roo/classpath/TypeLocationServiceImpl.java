@@ -27,16 +27,16 @@ import org.springframework.roo.project.PathResolver;
 
 /**
  * Implementation of {@link TypeLocationService}.
- * 
  * <p>
- * For performance reasons automatically caches the queries, invalidating the cache when any {@link PhysicalTypeMetadata} notification is received.
+ * For performance reasons automatically caches the queries, invalidating the cache 
+ * when any {@link PhysicalTypeMetadata} notification is received.
  * 
  * @author Alan Stewart
  * @author Ben Alex
  * @since 1.1
  */
-@Component(immediate=true)
-@Service
+@Component(immediate = true) 
+@Service 
 public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
 	@Reference private PathResolver pathResolver;
 	@Reference private FileManager fileManager;
@@ -44,11 +44,11 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	private Map<List<JavaType>, List<String>> cache = new HashMap<List<JavaType>, List<String>>();
-	
+
 	protected void activate(ComponentContext context) {
 		dependencyRegistry.addNotificationListener(this);
 	}
-	
+
 	protected void deactivate(ComponentContext context) {
 		dependencyRegistry.removeNotificationListener(this);
 	}
@@ -62,12 +62,12 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {
 		List<String> locatedPhysicalTypeMids = cache.get(annotationsToDetect);
-		
+
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
 			FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 			String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
-			
+
 			SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
 			for (FileDetails file : entries) {
 				String fullPath = srcRoot.getRelativeSegment(file.getCanonicalPath());
@@ -78,7 +78,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 				} catch (RuntimeException e) { // ROO-1022
 					continue;
 				}
-				
+
 				String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 				if (id != null) {
 					// Now I've found it, let's work out the Path it is from
@@ -86,7 +86,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 					String physicalTypeMid = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 					ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(physicalTypeMid);
 					if (located != null) {
-						annotation : for (JavaType annotation : annotationsToDetect) {
+						annotation: for (JavaType annotation : annotationsToDetect) {
 							if (MemberFindingUtils.getTypeAnnotation(located, annotation) != null) {
 								locatedPhysicalTypeMids.add(physicalTypeMid);
 								break annotation;
@@ -95,19 +95,18 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 					}
 				}
 			}
-			
+
 			// Store in cache if anything was found
 			if (locatedPhysicalTypeMids.size() > 0) {
 				cache.put(annotationsToDetect, locatedPhysicalTypeMids);
 			}
 		}
-		
+
 		for (String locatedPhysicalTypeMid : locatedPhysicalTypeMids) {
 			ClassOrInterfaceTypeDetails located = getClassOrInterfaceTypeDetails(locatedPhysicalTypeMid);
 			callback.process(located);
 		}
-		
-		
+
 	}
 
 	public Set<JavaType> findTypesWithAnnotation(List<JavaType> annotationsToDetect) {
@@ -133,7 +132,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		});
 		return types;
 	}
-	
+
 	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
 		if (physicalTypeMetadata != null && physicalTypeMetadata.getPhysicalTypeDetails() != null && physicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
