@@ -50,6 +50,7 @@ import org.w3c.dom.Element;
 @Service
 public class JpaOperationsImpl implements JpaOperations {
 	private static final Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
+	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
 	@Reference private FileManager fileManager;
@@ -260,21 +261,18 @@ public class JpaOperationsImpl implements JpaOperations {
 		
 		Element persistenceUnitElement;
 		if (StringUtils.hasText(persistenceUnit)) {
-			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + persistenceUnit + "']", persistenceElement);
-			if (persistenceUnitElement == null) {
-				persistenceUnitElement = persistence.createElement("persistence-unit");
-				persistenceElement.appendChild(persistenceUnitElement);
+			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + persistenceUnit + "']", persistenceElement);
+		} else {
+			persistenceUnitElement = XmlUtils.findFirstElement(PERSISTENCE_UNIT + "[@name = '" + (database == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME : PERSISTENCE_UNIT_NAME) + "']", persistenceElement);
+		}
+
+		if (persistenceUnitElement != null) {
+			while (persistenceUnitElement.getFirstChild() != null) {
+				persistenceUnitElement.removeChild(persistenceUnitElement.getFirstChild());
 			}
 		} else {
-			persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit[@name = '" + (database == JdbcDatabase.GOOGLE_APP_ENGINE ? GAE_PERSISTENCE_UNIT_NAME : PERSISTENCE_UNIT_NAME) + "']", persistenceElement);
-			if (persistenceUnitElement == null) {
-				persistenceUnitElement = XmlUtils.findFirstElement("persistence-unit", persistenceElement);				
-			}
-		}
-		Assert.notNull(persistenceUnitElement, "No persistence-unit elements found");
-		
-		while (persistenceUnitElement.getFirstChild() != null) {
-			persistenceUnitElement.removeChild(persistenceUnitElement.getFirstChild());
+			persistenceUnitElement = persistence.createElement(PERSISTENCE_UNIT);
+			persistenceElement.appendChild(persistenceUnitElement);
 		}
 
 		// Set attributes for DataNuclueus 1.1.x/GAE-specific requirements
