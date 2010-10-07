@@ -88,7 +88,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Lookup the relevant destination package if not explicitly given
 		JavaPackage destinationToUse = this.destinationPackage;
 		if (destinationToUse == null) {
-			SortedSet<JavaType> managedEntities = dbreTypeResolutionService.getDatabaseManagedEntities();
+			SortedSet<JavaType> managedEntities = dbreTypeResolutionService.getManagedEntities();
 			if (!managedEntities.isEmpty()) {
 				// Take the package of the first one
 				destinationToUse = managedEntities.first().getPackage();
@@ -118,7 +118,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		
 		deleteManagedTypesNotInModel(tables);
 
-		for (JavaType managedType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
+		for (JavaType managedType : dbreTypeResolutionService.getManagedEntities()) {
 			String dbreMid = DbreMetadata.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
 			MetadataItem metadataItem = metadataService.get(dbreMid, true);
 			if (metadataItem != null) {
@@ -309,15 +309,15 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	}
 	
 	private void deleteManagedTypes() {
-		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getManagedIdentifiers();
+		for (JavaType javaType : dbreTypeResolutionService.getManagedEntities()) {
 			deleteManagedTypes(javaType, managedIdentifierTypes);
 		}
 	}
 
 	private void deleteManagedTypesNotInModel(Set<Table> tables) {
-		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getDatabaseManagedIdentifiers();
-		for (JavaType javaType : dbreTypeResolutionService.getDatabaseManagedEntities()) {
+		Set<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getManagedIdentifiers();
+		for (JavaType javaType : dbreTypeResolutionService.getManagedEntities()) {
 			// Check for existence of entity from table model and delete if not in database model
 			if (!isDetectedEntityInModel(javaType, tables)) {
 				deleteManagedTypes(javaType, managedIdentifierTypes);

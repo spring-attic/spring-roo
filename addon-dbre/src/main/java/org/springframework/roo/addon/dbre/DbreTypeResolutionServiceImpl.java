@@ -31,9 +31,10 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
 
-	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
+	public JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage) {
+		Assert.notNull(managedEntities, "Managed entities required");
 		JavaType javaType = null;
-		for (JavaType managedEntity : getDatabaseManagedEntities()) {
+		for (JavaType managedEntity : managedEntities) {
 			if (managedEntity.getSimpleTypeName().equals(getName(tableNamePattern, false))) {
 				return managedEntity;
 			}
@@ -47,6 +48,10 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		}
 
 		return null;
+	}
+
+	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
+		return findTypeForTableName(getManagedEntities(), tableNamePattern, javaPackage);
 	}
 
 	public String suggestTableNameForNewType(JavaType javaType) {
@@ -116,13 +121,13 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		return result.toString();
 	}
 
-	public SortedSet<JavaType> getDatabaseManagedEntities() {
+	public SortedSet<JavaType> getManagedEntities() {
 		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new ManagedTypesComparator());
 		managedEntities.addAll(typeLocationService.findTypesWithAnnotation(new JavaType(RooDbManaged.class.getName())));
 		return Collections.unmodifiableSortedSet(managedEntities);
 	}
 
-	public SortedSet<JavaType> getDatabaseManagedIdentifiers() {
+	public SortedSet<JavaType> getManagedIdentifiers() {
 		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new ManagedTypesComparator());
 		managedIdentifiers.addAll(typeLocationService.findTypesWithAnnotation(new JavaType(RooIdentifier.class.getName())));
 		return Collections.unmodifiableSortedSet(managedIdentifiers);

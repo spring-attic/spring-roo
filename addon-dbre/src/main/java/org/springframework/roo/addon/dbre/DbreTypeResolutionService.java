@@ -20,7 +20,17 @@ public interface DbreTypeResolutionService {
 	/**
 	 * Locates the type associated with the presented table name.
 	 * 
-	 * @param tableNamePattern the table to locate (required)
+	 * @param managedEntities a set of database-managed entities to search.
+	 * @param tableNamePattern the table to locate (required).
+	 * @param javaPackage the Java package to use for the type.
+	 * @return the type (if known) or null (if not found).
+	 */
+	JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage);
+
+	/**
+	 * Locates the type associated with the presented table name.
+	 * 
+	 * @param tableNamePattern the table to locate (required).
 	 * @param javaPackage the Java package to use for the type.
 	 * @return the type (if known) or null (if not found).
 	 */
@@ -59,12 +69,12 @@ public interface DbreTypeResolutionService {
 	 * 
 	 * @return An unmodifiable {@link Set} of all database-managed entities.
 	 */
-	SortedSet<JavaType> getDatabaseManagedEntities();
+	SortedSet<JavaType> getManagedEntities();
 
 	/**
 	 * Returns all {@link RooDbManaged} {@link RooIdentifier identifiers}.
 	 * 
 	 * @return An unmodifiable {@link Set} of all database-managed identifiers.
 	 */
-	SortedSet<JavaType> getDatabaseManagedIdentifiers();
+	SortedSet<JavaType> getManagedIdentifiers();
 }
