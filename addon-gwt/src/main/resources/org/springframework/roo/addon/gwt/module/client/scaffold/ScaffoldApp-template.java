@@ -9,6 +9,12 @@ import java.util.Set;
 
 public class ScaffoldApp {
 
+    static boolean isMobile = false;
+
+    public static boolean isMobile() {
+      return isMobile; 
+    }
+
     public void run() {}
 
     protected HashSet<ProxyListPlace> getTopPlaces() {

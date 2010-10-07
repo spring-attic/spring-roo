@@ -1,7 +1,13 @@
 package {{=packageName}};
 
-import com.google.gwt.place.shared.Place;
+<<<<<<< HEAD
+import com.google.gwt.app.place.AbstractProxyListActivity;
+import com.google.gwt.app.place.Place;
+import com.google.gwt.app.place.PlaceController;
+import com.google.gwt.app.place.ProxyListView;
+=======
 import com.google.gwt.place.shared.PlaceController;
+>>>>>>> d70b9f907d0668d91c941b88514eb9e43f1f321e
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.shared.Request;
 import com.google.gwt.view.client.Range;

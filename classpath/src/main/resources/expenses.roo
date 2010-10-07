@@ -8,31 +8,31 @@ enum constant --name MALE
 enum constant --name FEMALE
 
 entity --class ~.server.domain.Employee --testAutomatically
+field string --fieldName displayName
 field string --fieldName userName --sizeMin 3 --sizeMax 30
 field string --fieldName department
-field string --fieldName displayName
 field reference --type Employee supervisor
 field enum --fieldName gender --type ~.client.shared.Gender
 field boolean --fieldName admin --notNull
 
 entity --class ~.server.domain.Report --testAutomatically
 // field date --fieldName created --type java.util.Date --past --notNull
+field string --fieldName purpose
+field string --fieldName notes
 field date --fieldName created --type java.util.Date
 field string --fieldName department
-field string --fieldName notes
-field string --fieldName purpose
 field reference --type Employee reporter
 field reference --type Employee approvedSupervisor
 
 entity --class ~.server.domain.Expense --testAutomatically
 field number --type java.lang.Double amount
+field string --fieldName description
+field reference --type Report report
 field string --fieldName approval
 field string --fieldName category
 // field date --fieldName date --type java.util.Date --past
 field date --fieldName created --type java.util.Date
-field string --fieldName description
 field string --fieldName reasonDenied
-field reference --type Report report
 
 
 //field string --fieldName password --sizeMin 2 --sizeMax 30

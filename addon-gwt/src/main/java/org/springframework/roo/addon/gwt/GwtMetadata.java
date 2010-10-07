@@ -13,8 +13,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -71,6 +73,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private ClassOrInterfaceTypeDetails request;
 
 	private ClassOrInterfaceTypeDetails proxy;
+	private List<MethodMetadata> proxyDeclaredMethods;
 	private JavaSymbolName idPropertyName;
 	private JavaSymbolName versionPropertyName;
 
@@ -96,12 +99,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildEditActivityWrapper();
 		buildDetailsActivity();
 		buildListActivity();
+		buildMobileListView();
 		buildListView();
 		buildListViewUiXml();
 		buildDetailsView();
 		buildDetailsViewUiXml();
+		buildMobileDetailsView();
+		buildMobileDetailsViewUiXml();
 		buildEditView();
 		buildEditViewUiXml();
+		buildMobileEditView();
+		buildMobileEditViewUiXml();
 		buildEditRenderer();
 		buildRequest();
 	}
@@ -136,11 +144,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType type = MirrorType.ACTIVITIES_MAPPER;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, SharedType.SCAFFOLD_APP);
 			addReference(dataDictionary, MirrorType.DETAIL_ACTIVITY);
 			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY_WRAPPER);
       addReference(dataDictionary, MirrorType.LIST_VIEW);
       addReference(dataDictionary, MirrorType.DETAILS_VIEW);
+      addReference(dataDictionary, MirrorType.MOBILE_DETAILS_VIEW);
       addReference(dataDictionary, MirrorType.EDIT_VIEW);
+      addReference(dataDictionary, MirrorType.MOBILE_EDIT_VIEW);
       addReference(dataDictionary, MirrorType.REQUEST);
 			writeWithTemplate(type, dataDictionary, type.getTemplate());
 		} catch (Exception e) {
@@ -163,11 +174,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 		// extends Proxy
 		extendsTypes.add(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"));
 
-		// Decide fields we'll be mapping
+		/*
+		 * Decide which fields we'll be mapping. Remember the natural ordering for
+		 * processing, but order proxy getters alphabetically by name. 
+		 */
+		List<JavaSymbolName> propertyNames = new ArrayList<JavaSymbolName>();
 		SortedMap<JavaSymbolName, JavaType> propToGwtSideType = new TreeMap<JavaSymbolName, JavaType>();
 		if (beanInfoMetadata != null) {
-			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
+			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+				propertyNames.add(propertyName);
                 FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
                 
                 boolean serverOnly = false;
@@ -191,11 +207,13 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		// Getter methods for EmployeeProxy
+		Map<JavaSymbolName, JavaSymbolName> propertyToMethod = new HashMap<JavaSymbolName, JavaSymbolName>();
 		for (JavaSymbolName propertyName : propToGwtSideType.keySet()) {
 			JavaType methodReturnType = propToGwtSideType.get(propertyName);
 			JavaSymbolName methodName = new JavaSymbolName("get" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
 			List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
 			List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
+			propertyToMethod.put(propertyName, methodName);
 			methods.add(new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder()));
 		}
 
@@ -216,6 +234,24 @@ public class GwtMetadata extends AbstractMetadataItem {
 		typeDetailsBuilder.setImplementsTypes(implementsTypes);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);
 		this.proxy = typeDetailsBuilder.build();
+
+		/*
+		 * The methods in the proxy will be sorted alphabetically, which makes sense
+		 * for the Java type. However, we want to process them in the order the
+		 * fields are declared, such that the first database field is the first
+		 * field we add to the dataDictionary. This affects the order of the
+		 * properties in the desktop client, as well as the primary/secondary
+		 * properties in the mobile client.
+		 */
+		Map<JavaSymbolName, MethodMetadata> methodNameToMethod = new HashMap<JavaSymbolName, MethodMetadata>();
+		for (MethodMetadata method : proxy.getDeclaredMethods()) {
+			methodNameToMethod.put(method.getMethodName(), method);
+		}
+		proxyDeclaredMethods = new ArrayList<MethodMetadata>();
+		for (JavaSymbolName propertyName : propertyNames) {
+			JavaSymbolName methodName = propertyToMethod.get(propertyName);
+			proxyDeclaredMethods.add(methodNameToMethod.get(methodName));
+		}
 	}
 
   private JavaType getGwtSideLeafType(JavaType returnType, PhysicalTypeMetadata ptmd) {
@@ -318,8 +354,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType type = MirrorType.EDIT_ACTIVITY_WRAPPER;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-      addReference(dataDictionary, MirrorType.REQUEST);
-      addReference(dataDictionary, MirrorType.EDIT_VIEW);
+			addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -331,6 +366,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType type = MirrorType.DETAIL_ACTIVITY;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -341,7 +377,21 @@ public class GwtMetadata extends AbstractMetadataItem {
 		try {
 			MirrorType type = MirrorType.LIST_ACTIVITY;
 			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.SCAFFOLD_MOBILE_APP);
+			addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
 			addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+			writeWithTemplate(type, dataDictionary);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void buildMobileListView() {
+		try {
+			MirrorType type = MirrorType.MOBILE_LIST_VIEW;
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, SharedType.MOBILE_PROXY_LIST_VIEW);
+			addReference(dataDictionary, SharedType.SCAFFOLD_MOBILE_APP);
 			writeWithTemplate(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -411,10 +461,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 
 		String proxyFields = null;
-		String displayField = null;
-		String displayFieldGetter = null;
+		GwtProxyProperty primaryProp = null;
+		GwtProxyProperty secondaryProp = null;
+		GwtProxyProperty dateProp = null;
 		Set<String> importSet = new HashSet<String>();
-		for (MethodMetadata method : proxy.getDeclaredMethods()) {
+		for (MethodMetadata method : proxyDeclaredMethods) {
 			if (!GwtProxyProperty.isAccessor(method)) {
 				continue;
 			}
@@ -424,9 +475,25 @@ public class GwtMetadata extends AbstractMetadataItem {
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
 			GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
 
-			if (property.isString()) {
-			  displayField = property.getName();
-				displayFieldGetter = property.getGetter();
+			// Determine if this is the primary property.
+			if (primaryProp == null) {
+				// Choose the first available field.
+				primaryProp = property;
+			} else if (property.isString() && !primaryProp.isString()) {
+				// Favor String properties over other types.
+				secondaryProp = primaryProp;
+				primaryProp = property;
+			} else if (secondaryProp == null) {
+				// Choose the next available property.
+				secondaryProp = property;
+			} else if (property.isString() && !secondaryProp.isString()) {
+				// Favor String properties over other types.
+				secondaryProp = property;
+			}
+
+			// Determine if this is the first date property.
+			if (dateProp == null && property.isDate()) {
+				dateProp = property;
 			}
 
 			if (property.isProxy()) {
@@ -439,18 +506,26 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 
 			dataDictionary.addSection("fields").setVariable("field", property.getName());
-			dataDictionary.addSection("detailViewProps").setVariable("prop", property.forDetailsView());
 			if (!isReadOnly(property.getName())) dataDictionary.addSection("editViewProps").setVariable("prop", property.forEditView());
-			dataDictionary.addSection("detailsUiXmlProps").setVariable("prop", property.forDetailsUIXml());
 
 			TemplateDataDictionary propertiesSection = dataDictionary.addSection("properties");
-      propertiesSection.setVariable("prop", property.getName());
-      propertiesSection.setVariable("propGetter", property.getGetter());
-      propertiesSection.setVariable("propType", property.getType());
-      propertiesSection.setVariable("propRenderer", property.getRenderer());
-      propertiesSection.setVariable("propReadable", property.getReadableName());
+			propertiesSection.setVariable("prop", property.getName());
+			propertiesSection.setVariable("propGetter", property.getGetter());
+			propertiesSection.setVariable("propType", property.getType());
+			propertiesSection.setVariable("propFormatter", property.getFormatter());
+			propertiesSection.setVariable("propRenderer", property.getRenderer());
+			propertiesSection.setVariable("propReadable", property.getReadableName());
 
-      if (!isReadOnly(property.getName())) dataDictionary.addSection("editUiXmlProps").setVariable("prop", property.forEditUiXml());
+			if (!isReadOnly(property.getName())) {
+				TemplateDataDictionary editableSection = dataDictionary.addSection("editableProperties");
+				editableSection.setVariable("prop", property.getName());
+				editableSection.setVariable("propGetter", property.getGetter());
+				editableSection.setVariable("propType", property.getType());
+				editableSection.setVariable("propFormatter", property.getFormatter());
+				editableSection.setVariable("propRenderer", property.getRenderer());
+				editableSection.setVariable("propBinder", property.getBinder());
+				editableSection.setVariable("propReadable", property.getReadableName());	       
+			}
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
@@ -473,13 +548,47 @@ public class GwtMetadata extends AbstractMetadataItem {
 			}
 
 		}
-		if (displayFieldGetter == null) {
-		  displayField = "id";
-			displayFieldGetter = "getId";
-		}
+
 		dataDictionary.setVariable("proxyFields", proxyFields);
-    dataDictionary.setVariable("displayField", displayField);
-    dataDictionary.setVariable("displayFieldGetter", displayFieldGetter);
+
+		// Add a section for the mobile properties.
+		if (primaryProp != null) {
+			dataDictionary.setVariable("primaryProp", primaryProp.getName());
+			dataDictionary.setVariable("primaryPropGetter", primaryProp.getGetter());
+			dataDictionary.setVariable("primaryPropBuilder", primaryProp.forMobileListView("primaryRenderer"));
+			TemplateDataDictionary section = dataDictionary.addSection("mobileProperties");
+			section.setVariable("prop", primaryProp.getName());
+			section.setVariable("propGetter", primaryProp.getGetter());
+			section.setVariable("propType", primaryProp.getType());
+			section.setVariable("propRenderer", primaryProp.getRenderer());
+			section.setVariable("propRendererName", "primaryRenderer");
+		} else {
+			dataDictionary.setVariable("primaryProp", "id");
+			dataDictionary.setVariable("primaryPropGetter", "getId");
+			dataDictionary.setVariable("primaryPropBuilder", "");
+		}
+		if (secondaryProp != null) {
+			dataDictionary.setVariable("secondaryPropBuilder", secondaryProp.forMobileListView("secondaryRenderer"));
+			TemplateDataDictionary section = dataDictionary.addSection("mobileProperties");
+			section.setVariable("prop", secondaryProp.getName());
+			section.setVariable("propGetter", secondaryProp.getGetter());
+			section.setVariable("propType", secondaryProp.getType());
+			section.setVariable("propRenderer", secondaryProp.getRenderer());
+			section.setVariable("propRendererName", "secondaryRenderer");
+		} else {
+			dataDictionary.setVariable("secondaryPropBuilder", "");
+		}
+		if (dateProp != null) {
+			dataDictionary.setVariable("datePropBuilder", dateProp.forMobileListView("dateRenderer"));
+			TemplateDataDictionary section = dataDictionary.addSection("mobileProperties");
+			section.setVariable("prop", dateProp.getName());
+			section.setVariable("propGetter", dateProp.getGetter());
+			section.setVariable("propType", dateProp.getType());
+			section.setVariable("propRenderer", dateProp.getRenderer());
+			section.setVariable("propRendererName", "dateRenderer");
+		} else {
+			dataDictionary.setVariable("datePropBuilder", "");
+		}
 		return dataDictionary;
 	}
 
@@ -492,6 +601,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType destType = MirrorType.LIST_VIEW;
 			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
 			writeWithTemplate(destFile, destType, "ListViewUiXml");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void buildMobileDetailsView() {
+		try {
+			MirrorType destType = MirrorType.MOBILE_DETAILS_VIEW;
+			writeWithTemplate(destType);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void buildMobileDetailsViewUiXml() {
+		try {
+			MirrorType destType = MirrorType.MOBILE_DETAILS_VIEW;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "MobileDetailsViewUiXml");
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -527,7 +655,20 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void buildEditView() {
 		try {
 			MirrorType type = MirrorType.EDIT_VIEW;
-			writeWithTemplate(type, type.getTemplate());
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY_WRAPPER);
+			writeWithTemplate(type, dataDictionary, type.getTemplate());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void buildMobileEditView() {
+		try {
+			MirrorType type = MirrorType.MOBILE_EDIT_VIEW;
+			TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+			addReference(dataDictionary, MirrorType.EDIT_ACTIVITY_WRAPPER);
+			writeWithTemplate(type, dataDictionary, type.getTemplate());
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -538,6 +679,16 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType destType = MirrorType.EDIT_VIEW;
 			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
 			writeWithTemplate(destFile, destType, "EditViewUiXml");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private void buildMobileEditViewUiXml() {
+		try {
+			MirrorType destType = MirrorType.MOBILE_EDIT_VIEW;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "MobileEditViewUiXml");
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

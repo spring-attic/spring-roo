@@ -8,14 +8,19 @@ import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HTMLPanel;
 
+<<<<<<< HEAD
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+{{#imports}}
+import {{=import}};{{/imports}}
+=======
 import {{=placePackage}}.AbstractProxyListView;
 {{#imports}}import {{=import}};
 {{/imports}}
+>>>>>>> d70b9f907d0668d91c941b88514eb9e43f1f321e
 
 import java.util.HashSet;
 import java.util.Set;

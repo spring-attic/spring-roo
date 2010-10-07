@@ -25,10 +25,13 @@ public enum MirrorType {
 	LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity", "listActivity", "ListActivity"), 
 	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView", "listView", "ListView"), 
 	LIST_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "ListViewBinder", "listViewBinder", null), 
+	MOBILE_LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileListView", "mobileListView", "MobileListView"),
 	DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder", "detailsViewBinder", null), 
 	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView"),
+	MOBILE_DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileDetailsView", "mobileDetailsView", "MobileDetailsView"),
 	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", null), 
 	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView"),
+	MOBILE_EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileEditView", "mobileEditView", "MobileEditView"),
 	EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "ProxyRenderer", "renderer", "EditRenderer");
 
 	private GwtPath path;

@@ -31,9 +31,9 @@
       <h3 class='{style.header}'><ui:msg><span ui:field='displayRenderer' /></ui:msg></h3>
     </div>
 
-    <table class='{style.fields}'>{{#detailsUiXmlProps}}
-	    {{=prop}}{{/detailsUiXmlProps}}
-	</table>
+    <table class='{style.fields}'>{{#properties}}
+      <tr><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><span ui:field='{{=prop}}'></span></td></tr>{{/properties}}
+    </table>
 
   <div class="{style.bar}">
     <g:Button addStyleNames='{style.button}' ui:field='edit'>Edit</g:Button>

@@ -1,8 +1,13 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.core.client.GWT;
+<<<<<<< HEAD
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.requestfactory.client.LoginWidget;
+=======
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.requestfactory.ui.client.LoginWidget;
+>>>>>>> d70b9f907d0668d91c941b88514eb9e43f1f321e
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -86,5 +91,5 @@ public class ScaffoldMobileShell extends Composite {
 	 */
 	public void setTitleText(String text) {
 	  title.setInnerText(text);
-}
+	}
 }

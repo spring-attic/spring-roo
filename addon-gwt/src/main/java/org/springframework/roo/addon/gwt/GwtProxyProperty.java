@@ -144,11 +144,11 @@ class GwtProxyProperty {
 	}
 
 	public String getFormatter() {
-		return isDate() ? "DateTimeFormat.getShortDateFormat().format(" : isProxy() ? getProxyRendererType() + ".instance().render(" : "String.valueOf(";
+		return isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
 	}
 
 	public String getRenderer() {
-		return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getShortDateFormat())" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+		return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
 	String getProxyRendererType() {
@@ -162,10 +162,6 @@ class GwtProxyProperty {
 
 	public String getReadableName() {
 		return new JavaSymbolName(name).getReadableSymbolName();
-	}
-
-	public String forDetailsView() {
-		return new StringBuilder(getName()).append(".setInnerText(").append(getFormatter()).append("proxy.").append(getGetter()).append("()));").toString();
 	}
 
 	public String forEditView() {
@@ -186,12 +182,8 @@ class GwtProxyProperty {
 		return String.format("@UiField %s %s %s", getEditor(), getName(), initializer);
 	}
 
-	public String forDetailsUIXml() {
-		return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><span ui:field='").append(getName()).append("'></span></td></tr>").toString();
-	}
-
-  public String forEditUiXml() {
-		return new StringBuilder("<tr><td><div class='{style.label}'>").append(getReadableName()).append(":</div></td><td><").append(getBinder()).append(" ui:field='").append(getName()).append("'></").append(getBinder()).append("></td></tr>").toString();
+	public String forMobileListView(String rendererName) {
+		return new StringBuilder("if (value.").append(getGetter()).append("() != null) {\n\t\t\t\tsb.appendEscaped(").append(rendererName).append(".render(value.").append(getGetter()).append("()));\n\t\t\t}").toString();
 	}
 
 	public boolean isProxy() {

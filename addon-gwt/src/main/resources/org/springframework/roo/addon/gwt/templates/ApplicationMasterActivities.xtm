@@ -32,7 +32,9 @@ public final class ApplicationMasterActivities implements ActivityMapper {
 		return new ApplicationEntityTypesProcessor<Activity>() {{{#entities}}
 			@Override
       public void handle{{=entitySimpleName}}({{=entityFullPath}} isNull) {
-        setResult(new {{=entitySimpleName}}ListActivity(requests, {{=entitySimpleName}}ListView.instance(), placeController));
+        setResult(new {{=entitySimpleName}}ListActivity(requests,
+          ScaffoldApp.isMobile() ? {{=entitySimpleName}}MobileListView.instance() : {{=entitySimpleName}}ListView.instance(),
+          placeController));
       }
       {{/entities}}
 		}.process(listPlace.getProxyClass());

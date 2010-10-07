@@ -73,12 +73,17 @@ public class GwtFileListener implements FileEventListener {
 						return;
 					}
 				}
+
+				// A suffix could be inclusive of another suffix, so we need to find the best (longest) match,
+				// not necessarily the first match.
+				String bestMatch = "";
 				for (MirrorType t : MirrorType.values()) {
-					if (name.endsWith(t.getSuffix())) {
+					String suffix = t.getSuffix();
+					if (name.endsWith(suffix) && suffix.length() > bestMatch.length()) {
 						// Drop the part of the filename with the suffix, as well as the extension
-						String entityName = name.substring(0, name.lastIndexOf(t.getSuffix()));
+						bestMatch = suffix;
+						String entityName = name.substring(0, name.lastIndexOf(suffix));
 						proxyFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
-						break;
 					}
 				}
 			}
@@ -245,6 +250,7 @@ public class GwtFileListener implements FileEventListener {
       addImport(dataDictionary, simpleName, MirrorType.LIST_ACTIVITY);
       addImport(dataDictionary, simpleName, MirrorType.PROXY);
       addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
+      addImport(dataDictionary, simpleName, MirrorType.MOBILE_LIST_VIEW);
 		}
 
 		try {

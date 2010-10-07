@@ -20,13 +20,13 @@ public class {{=className}} extends ProxyRenderer<{{=proxy}}> {
   }
 
   protected {{=className}}() {
-    super(new String[] {"{{=displayField}}"});
+    super(new String[] {"{{=primaryProp}}"});
   }
 
   public String render({{=proxy}} object) {
     if (object == null) {
       return "";
     }
-    return object.{{=displayFieldGetter}}() + " (" + object.getId() + ")";
+    return object.{{=primaryPropGetter}}() + " (" + object.getId() + ")";
   }
 }

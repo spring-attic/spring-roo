@@ -26,7 +26,7 @@ public class {{=className}} {
     switch (place.getOperation()) {
       case DETAILS:
         return new {{=detailsActivity}}((EntityProxyId<{{=proxy}}>)place.getProxyId(), requests, 
-          placeController, {{=detailsView}}.instance());
+          placeController, ScaffoldApp.isMobile() ? {{=mobileDetailsView}}.instance() : {{=detailsView}}.instance());
 
       case EDIT:
         return makeEditActivity(place);
@@ -48,7 +48,8 @@ public class {{=className}} {
     {{=editView}}.instance().setCreating(true);
     final {{=request}} request = requests.{{=nameUncapitalized}}Request();
     Activity activity = new CreateAndEditProxy<{{=proxy}}>(
-        {{=proxy}}.class, request, {{=editView}}.instance(),
+        {{=proxy}}.class, request,
+        ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editView}}.instance(),
         placeController) {
       
       @Override
@@ -58,14 +59,18 @@ public class {{=className}} {
       }
     };
 
-    return new {{=editActivityWrapper}}(requests, {{=editView}}.instance(),
-        activity);
+    return new {{=editActivityWrapper}}(requests,
+        ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editView}}.instance(),
+        activity, null);
   }
 
   private Activity makeEditActivity(ProxyPlace place) {
     {{=editView}}.instance().setCreating(false);
-    Activity activity = new FindAndEditProxy<{{=proxy}}>(coerceId(place),
-        requests, {{=editView}}.instance(), placeController) {
+    EntityProxyId<{{=proxy}}> proxyId = coerceId(place);
+    Activity activity = new FindAndEditProxy<{{=proxy}}>(proxyId,
+        requests,
+        ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editView}}.instance(),
+        placeController) {
       
       @Override
       protected RequestContext createSaveRequest({{=proxy}} proxy) {
@@ -75,7 +80,8 @@ public class {{=className}} {
       }
     };
 
-    return new {{=editActivityWrapper}}(requests, {{=editView}}.instance(),
-        activity);
+    return new {{=editActivityWrapper}}(requests,
+        ScaffoldApp.isMobile() ? {{=mobileEditView}}.instance() : {{=editView}}.instance(),
+        activity, proxyId);
   }
 }
