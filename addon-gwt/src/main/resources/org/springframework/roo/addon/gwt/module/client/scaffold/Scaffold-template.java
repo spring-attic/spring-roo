@@ -2,17 +2,20 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ioc.DesktopInjector;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ioc.DesktopInjectorWrapper;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ioc.InjectorWrapper;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.ioc.ScaffoldInjector;
 
 /**
  * Application for browsing entities.
  */
 public class Scaffold implements EntryPoint {
-    final private ScaffoldInjector injector = GWT.create(ScaffoldInjector.class);
+    final private InjectorWrapper injectorWrapper = GWT.create(DesktopInjectorWrapper.class);
 
     public void onModuleLoad() {
         /* Get and run platform specific app */
 
-        injector.getScaffoldApp().run();
+        injectorWrapper.getInjector().getScaffoldApp().run();
     }
 }

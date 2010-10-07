@@ -69,14 +69,13 @@
   
   </property-provider>
   
-  <replace-with class="__TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldMobileApp">
-  		<when-type-is class="__TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldDesktopApp"/>
+  <replace-with class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.MobileInjectorWrapper">
+  		<when-type-is class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.DesktopInjectorWrapper"/>
   		<all>
   			<when-property-is name="mobile.user.agent" value="mobilesafari"/>
         </all>
   </replace-with>
   
-  <source path="scaffold" />
   <entry-point class="__TOP_LEVEL_PACKAGE__.client.scaffold.Scaffold" />
   	
 </module>

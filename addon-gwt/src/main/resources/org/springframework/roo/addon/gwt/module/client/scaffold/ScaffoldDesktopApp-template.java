@@ -4,6 +4,7 @@ import com.google.gwt.activity.shared.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.*;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
@@ -14,7 +15,8 @@ import com.google.gwt.requestfactory.ui.client.AuthenticationFailureHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-
+import com.google.inject.Inject;
+import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlacePicker;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyPlaceToListPlace;
@@ -27,9 +29,30 @@ import java.util.logging.Logger;
  * Application for browsing entities.
  */
 public class ScaffoldDesktopApp extends ScaffoldApp {
-  private static final Logger log = Logger.getLogger(Scaffold.class.getName());
 
-    private final ScaffoldDesktopShell shell = new ScaffoldDesktopShell();
+    private static final Logger log = Logger.getLogger(Scaffold.class.getName());
+
+    private final ScaffoldDesktopShell shell;
+    private final ApplicationRequestFactory requestFactory;
+    private final EventBus eventBus;
+    private final PlaceController placeController;
+    private final PlaceHistoryFactory placeHistoryFactory;
+    private final ApplicationMasterActivities applicationMasterActivities;
+    private final ApplicationDetailsActivities applicationDetailsActivities;
+
+    @Inject
+    public ScaffoldDesktopApp(ScaffoldDesktopShell shell, ApplicationRequestFactory requestFactory, EventBus eventBus,
+                              PlaceController placeController, PlaceHistoryFactory placeHistoryFactory,
+                              ApplicationMasterActivities applicationMasterActivities,
+                              ApplicationDetailsActivities applicationDetailsActivities) {
+        this.shell = shell;
+        this.requestFactory = requestFactory;
+        this.eventBus = eventBus;
+        this.placeController = placeController;
+        this.placeHistoryFactory = placeHistoryFactory;
+        this.applicationMasterActivities = applicationMasterActivities;
+        this.applicationDetailsActivities = applicationDetailsActivities;
+    }
 
     public void run() {
 
