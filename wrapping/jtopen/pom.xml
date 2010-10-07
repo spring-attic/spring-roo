@@ -12,7 +12,7 @@
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
     <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
-
+ 
     <properties>
         <pkgArtifactId>jtopen</pkgArtifactId>
         <pkgVersion>6.7</pkgVersion>
@@ -39,10 +39,11 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>com.ibm.*;resolution:=optional,javax.servlet.*;resolution:=optional,sun.misc.*;resolution:=optional,*</Import-Package>
+                        <Import-Package>com.ibm.sslight.*;resolution:=optional,com.ibm.gsk.ikeyman.basic.*;resolution:=optional,com.ibm.as400.ui.framework.*;resolution:=optional,javax.servlet.*;resolution:=optional,sun.misc.*;resolution:=optional,com.ibm.db2.jdbc.app.*;resolution:=optional,com.ibm.cfwk.pki.*;resolution:=optional,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

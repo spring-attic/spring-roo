@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.jdbc.polling.internal;
 
 import java.sql.Driver;
+import java.sql.DriverManager;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -25,6 +26,10 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 			return null;
 		}
 		try {
+			// Special case for DB2/400 - driver must be registered with DriverManager (ROO-1479)
+			if ("com.ibm.as400.access.AS400JDBCDriver".equals(driverClassName)) {
+				DriverManager.registerDriver(new com.ibm.as400.access.AS400JDBCDriver());
+			}
 			return (Driver) ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader()).newInstance();
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
