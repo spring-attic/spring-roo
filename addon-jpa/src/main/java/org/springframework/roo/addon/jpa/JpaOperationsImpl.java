@@ -575,23 +575,23 @@ public class JpaOperationsImpl implements JpaOperations {
 	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
 		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+			projectOperations.addDependency(new Dependency(dependencyElement));
 		}
 
 		List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : ormDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+			projectOperations.addDependency(new Dependency(dependencyElement));
 		}
 
 		// Hard coded to JPA & Hibernate Validator for now
 		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id = 'JPA']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jpaDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+			projectOperations.addDependency(new Dependency(dependencyElement));
 		}
 
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+			projectOperations.addDependency(new Dependency(dependencyElement));
 		}
 
 		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
@@ -730,7 +730,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
-				// List<Element> pomProperties = XmlUtils.findElements("/configuration/ormProviders/provider[@id = '" + provider.name() + "']/properties/*", configuration);
+				// List<Element> pomProperties = XmlUtils.findElements(getProviderXPath(provider) + "/properties/*", configuration);
 				// for (Element propertyElement : pomProperties) {
 				// projectOperations.removeProperty(new Property(propertyElement));
 				// }
