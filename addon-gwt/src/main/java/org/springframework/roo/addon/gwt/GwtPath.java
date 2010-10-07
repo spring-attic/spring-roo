@@ -9,6 +9,7 @@ public enum GwtPath {
 	GWT_REQUEST("/client/request", "module/client/request/" + GwtPath.templateSelector),
 	GWT_SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector),
 	GWT_SCAFFOLD_GENERATED("/client/scaffold/generated", "module/client/scaffold/generated/" + GwtPath.templateSelector),
+	GWT_SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector),
 	GWT_UI("/client/ui", "module/client/ui/" + GwtPath.templateSelector),
 	SERVER("/server", "module/server/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),

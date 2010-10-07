@@ -73,7 +73,17 @@ class GwtProxyProperty {
 	}
 
 	public boolean isPrimitive() {
-		return type.isPrimitive() || isDate() || isString() || type.equals(JavaType.DOUBLE_OBJECT) || type.equals(JavaType.LONG_OBJECT) || type.equals(JavaType.INT_OBJECT) || isBoolean();
+		return type.isPrimitive() 
+			|| isDate() 
+			|| isString() 
+			|| isBoolean() 
+			|| type.equals(JavaType.DOUBLE_OBJECT) 
+			|| type.equals(JavaType.LONG_OBJECT) 
+			|| type.equals(JavaType.INT_OBJECT) 
+			|| type.equals(JavaType.FLOAT_OBJECT)
+         	|| type.equals(JavaType.BYTE_OBJECT)
+         	|| type.equals(JavaType.SHORT_OBJECT)
+         	|| type.equals(JavaType.CHAR_OBJECT);
 	}
 
 	public boolean isString() {
@@ -90,6 +100,18 @@ class GwtProxyProperty {
 		if (type.equals(JavaType.INT_OBJECT)) {
 			return "g:IntegerBox";
 		}
+		if (type.equals(JavaType.FLOAT_OBJECT)) {
+			return "r:FloatBox";
+		}
+		if (type.equals(JavaType.BYTE_OBJECT)) {
+			return "r:ByteBox";
+		}
+		if (type.equals(JavaType.SHORT_OBJECT)) {
+			return "r:ShortBox";
+		}
+		if (type.equals(JavaType.CHAR_OBJECT)) {
+			return "r:CharBox";
+		}
 		return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 	}
 
@@ -102,6 +124,18 @@ class GwtProxyProperty {
 		}
 		if (type.equals(JavaType.INT_OBJECT)) {
 			return "IntegerBox";
+		}
+		if (type.equals(JavaType.FLOAT_OBJECT)) {
+			return "FloatBox";
+		}
+		if (type.equals(JavaType.BYTE_OBJECT)) {
+			return "ByteBox";
+		}
+		if (type.equals(JavaType.SHORT_OBJECT)) {
+			return "ShortBox";
+		}
+		if (type.equals(JavaType.CHAR_OBJECT)) {
+			return "CharBox";
 		}
 		if (isBoolean()) {
 			return "(provided = true) CheckBox";

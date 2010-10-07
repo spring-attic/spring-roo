@@ -25,16 +25,8 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
-import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
-import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.details.MethodMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -176,14 +168,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 		if (beanInfoMetadata != null) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+                FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
+                
+                boolean serverOnly = false;
+                for (AnnotationMetadata annotation : field.getAnnotations()) {
+                    if (annotation.getAnnotationType().getSimpleTypeName().equals("RooServerOnly")) {
+                        serverOnly = true;
+                        break;
+                    }
+                }
+                
+                if (!serverOnly) {                    
+                    JavaType returnType = accessor.getReturnType();
+                    PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 
-				JavaType returnType = accessor.getReturnType();
-				PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
+                    JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
 
-				JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
-
-				// Store in the maps
-				propToGwtSideType.put(propertyName, gwtSideType);
+                    // Store in the maps
+                    propToGwtSideType.put(propertyName, gwtSideType);
+                }
 			}
 		}
 
@@ -289,7 +292,10 @@ public class GwtMetadata extends AbstractMetadataItem {
          || returnType.equals(JavaType.LONG_OBJECT) 
          || returnType.equals(JavaType.STRING_OBJECT) 
          || returnType.equals(JavaType.DOUBLE_OBJECT) 
-         || returnType.equals(JavaType.FLOAT_OBJECT) 
+         || returnType.equals(JavaType.FLOAT_OBJECT)
+         || returnType.equals(JavaType.CHAR_OBJECT)
+         || returnType.equals(JavaType.BYTE_OBJECT)
+         || returnType.equals(JavaType.SHORT_OBJECT)
          || returnType.equals(new JavaType("java.util.Date"));
   }
 
@@ -397,6 +403,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
+		dataDictionary.setVariable("uiPackage", GwtPath.GWT_SCAFFOLD_UI.packageName(projectMetadata));
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
