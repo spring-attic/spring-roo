@@ -7,7 +7,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.EntityMetadataProvider;
-import org.springframework.roo.addon.tostring.ToStringMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -48,7 +47,6 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 		Path path = SolrMetadata.getPath(metadataIdentificationString);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
-		String toStringMetadataKey = ToStringMetadata.createIdentifier(javaType, path);
 
 		// We need to parse the annotation, which we expect to be present
 		SolrSearchAnnotationValues annotationValues = new SolrSearchAnnotationValues(governorPhysicalTypeMetadata);
@@ -59,17 +57,15 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 		// We want to be notified if the getter info changes in any way 
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
-		metadataDependencyRegistry.registerDependency(toStringMetadataKey, metadataIdentificationString);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
-		ToStringMetadata toStringMetadata = (ToStringMetadata) metadataService.get(toStringMetadataKey);
 		
 		// Abort if we don't have getter information available
 		if (entityMetadata == null || beanInfoMetadata == null) {
 			return null;
 		}
 		// Otherwise go off and create the to Solr metadata
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, beanInfoMetadata, toStringMetadata, metadataService, pathResolver, fileManager);
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, beanInfoMetadata, metadataService, pathResolver, fileManager);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

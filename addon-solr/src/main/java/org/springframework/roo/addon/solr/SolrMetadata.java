@@ -12,7 +12,6 @@ import java.util.List;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
-import org.springframework.roo.addon.tostring.ToStringMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -59,7 +58,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private FileManager fileManager;
 	private String javaBeanFieldName;
 
-	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, BeanInfoMetadata beanInfoMetadata, ToStringMetadata toStringMetadata, MetadataService metadataService, PathResolver pathResolver, FileManager fileManager) {
+	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, BeanInfoMetadata beanInfoMetadata, MetadataService metadataService, PathResolver pathResolver, FileManager fileManager) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Solr search annotation values required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
