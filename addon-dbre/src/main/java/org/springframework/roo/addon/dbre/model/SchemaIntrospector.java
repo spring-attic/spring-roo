@@ -138,7 +138,10 @@ public class SchemaIntrospector {
 				table.addIndices(readIndices());
 
 				for (String columnName : readPrimaryKeyNames()) {
-					table.findColumn(columnName).setPrimaryKey(true);
+					Column column = table.findColumn(columnName);
+					if (column != null) {
+						column.setPrimaryKey(true);
+					}
 				}
 
 				tables.add(table);
