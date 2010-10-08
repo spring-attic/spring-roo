@@ -132,8 +132,7 @@ class GwtProxyProperty {
     if (typeName.endsWith(MirrorType.PROXY.getSuffix())) {
       typeName = typeName.substring(0, typeName.length() - MirrorType.PROXY.getSuffix().length());
     }
-    return typeName + MirrorType
-        .SET_EDITOR.getSuffix();
+    return typeName + (type.getSimpleTypeName().equals("Set") ? MirrorType.SET_EDITOR.getSuffix() : MirrorType.LIST_EDITOR.getSuffix());
   }
 
   public JavaType getSetEditorType() {

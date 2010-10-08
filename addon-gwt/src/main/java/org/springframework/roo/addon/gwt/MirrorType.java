@@ -33,7 +33,8 @@ public enum MirrorType {
 	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView"),
 	MOBILE_EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileEditView", "mobileEditView", "MobileEditView"),
 	EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "ProxyRenderer", "renderer", "EditRenderer"),
-        SET_EDITOR(GwtPath.GWT_UI, "SetEditor", "setEditor", "SetEditor");
+        SET_EDITOR(GwtPath.GWT_UI, "SetEditor", "setEditor", "SetEditor"),
+        LIST_EDITOR(GwtPath.GWT_UI, "ListEditor", "listEditor", "ListEditor");
 
 	private GwtPath path;
 	private String suffix;

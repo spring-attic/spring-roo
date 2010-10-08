@@ -113,6 +113,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildEditRenderer();
                 buildSetEditor();
                 buildSetEditorUiXml();
+                buildListEditor();
+                buildListEditorUiXml();
 		buildRequest();
 	}
 
@@ -770,6 +772,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 			MirrorType destType = MirrorType.SET_EDITOR;
 			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
 			writeWithTemplate(destFile, destType, "SetEditorUiXml");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+        private void buildListEditor() {
+		try {
+			MirrorType type = MirrorType.LIST_EDITOR;
+			writeWithTemplate(type, type.getTemplate());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+        private void buildListEditorUiXml() {
+		try {
+			MirrorType destType = MirrorType.LIST_EDITOR;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "ListEditorUiXml");
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
