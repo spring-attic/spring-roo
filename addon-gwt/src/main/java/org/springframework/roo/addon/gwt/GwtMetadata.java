@@ -124,8 +124,12 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private void resolveEntityInformation() {
 		if (entityMetadata != null && entityMetadata.isValid()) {
 			// Lookup special fields
-			versionPropertyName = entityMetadata.getVersionField().getFieldName();
-			idPropertyName = entityMetadata.getIdentifierField().getFieldName();
+		  FieldMetadata versionField = entityMetadata.getVersionField();
+		  FieldMetadata idField = entityMetadata.getIdentifierField();
+		  Assert.notNull(versionField, "Version unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
+		  Assert.notNull(idField, "Id unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
+			versionPropertyName = versionField.getFieldName();
+			idPropertyName = idField.getFieldName();
 
 			// Lookup the "find all" method and store it
 			findAllMethod = entityMetadata.getFindAllMethod();
