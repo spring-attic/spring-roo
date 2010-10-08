@@ -423,7 +423,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
 		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
 		if (referencedColumn) {
-			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getLocalColumn().getEscapedName());
+			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getForeignColumn().getEscapedName());
 		}
 		if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
 			addOtherJoinColumnAttributes(joinColumnBuilder);
