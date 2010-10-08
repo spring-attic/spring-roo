@@ -32,16 +32,24 @@ class GwtProxyProperty {
   private PhysicalTypeMetadata ptmd;
 
 	public GwtProxyProperty(ProjectMetadata projectMetadata, MethodMetadata getterMethod, PhysicalTypeMetadata ptmd) {
-	  this.projectMetadata = projectMetadata;
+          this.projectMetadata = projectMetadata;
+          this.type = getterMethod.getReturnType();
+          this.ptmd = ptmd;
     this.getter = getterMethod.getMethodName().getSymbolName();
-    this.type = getterMethod.getReturnType();
-    this.ptmd = ptmd;
     
     String prefix = null;
     prefix = "get";
     
     this.name = getter.substring(prefix.length(), prefix.length() +1).toLowerCase() + getter.substring(prefix.length() + 1);
 	}
+
+  public GwtProxyProperty(ProjectMetadata projectMetadata, JavaType type, PhysicalTypeMetadata ptmd) {
+	  this.projectMetadata = projectMetadata;
+          this.type = type;
+          this.ptmd = ptmd;
+          this.getter = null;
+          this.name = null;
+  }
 
   public static boolean isAccessor(MethodMetadata method) {
     String symbolName = method.getMethodName().getSymbolName();
@@ -116,10 +124,23 @@ class GwtProxyProperty {
 		if (type.equals(new JavaType("java.math.BigDecimal"))) {
 			return "r:BigDecimalBox";
 		}
-		return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
+		return isCollection() ? "a:" + getSetEditor() : isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 	}
 
-	private String getEditor() {
+  private String getSetEditor() {
+    String typeName = type.getParameters().get(0).getSimpleTypeName();
+    if (typeName.endsWith(MirrorType.PROXY.getSuffix())) {
+      typeName = typeName.substring(0, typeName.length() - MirrorType.PROXY.getSuffix().length());
+    }
+    return typeName + MirrorType
+        .SET_EDITOR.getSuffix();
+  }
+
+  public JavaType getSetEditorType() {
+    return new JavaType(MirrorType.SET_EDITOR.getPath().packageName(projectMetadata) + "." + getSetEditor());
+  }
+
+  private String getEditor() {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
 			return "DoubleBox";
 		}
@@ -147,19 +168,28 @@ class GwtProxyProperty {
 		if (isBoolean()) {
 			return "(provided = true) CheckBox";
 		}
-		return isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
+		return isCollection() ? getSetEditor() : isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
 	}
 
+        public String getCollectionRenderer() {
+           JavaType arg = type.getParameters().get(0);
+           return GwtPath.PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, arg, ptmd).getRenderer() + ")";
+        }
+
 	public String getFormatter() {
-		return isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
+		return isCollectionOfProxy() ? getCollectionRenderer()+".render(" : isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
 	}
 
 	public String getRenderer() {
-		return isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
 	String getProxyRendererType() {
-		return MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + type.getSimpleTypeName() + "Renderer";
+               return getProxyRendererType(projectMetadata, isCollectionOfProxy() ? type.getParameters().get(0) : type);
+        }
+  
+        public static String getProxyRendererType(ProjectMetadata pmd, JavaType javaType) {
+		return MirrorType.EDIT_RENDERER.getPath().packageName(pmd)+ "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 
 	public String getCheckboxSubtype() {
@@ -206,10 +236,21 @@ class GwtProxyProperty {
 	}
 
 	public String getSetValuePickerMethod() {
-		return "\tpublic void " + getSetValuePickerMethodName() + "(Collection<" + type.getSimpleTypeName() + "> values) {\n" + "\t\t" + getName() + ".setAcceptableValues(values);\n" + "\t}\n";
+		return "\tpublic void " + getSetValuePickerMethodName() + "(Collection<" + (isCollection() ? type.getParameters().get(0).getSimpleTypeName() : type.getSimpleTypeName()) + "> values) {\n" + "\t\t" + getName() + ".setAcceptableValues(values);\n" + "\t}\n";
 	}
 
 	String getSetValuePickerMethodName() {
 		return "set" + StringUtils.capitalize(getName()) + "PickerValues";
 	}
+
+  public boolean isCollectionOfProxy() {
+    return isCollection() && new GwtProxyProperty(projectMetadata, type.getParameters().get(0), ptmd).isProxy();
+  }
+
+  public JavaType getValueType() {
+    if (isCollection()) {
+      return type.getParameters().get(0);
+    }
+    return type;
+  }
 }

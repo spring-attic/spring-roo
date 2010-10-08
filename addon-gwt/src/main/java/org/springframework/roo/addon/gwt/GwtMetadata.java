@@ -111,6 +111,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildMobileEditView();
 		buildMobileEditViewUiXml();
 		buildEditRenderer();
+                buildSetEditor();
+                buildSetEditorUiXml();
 		buildRequest();
 	}
 
@@ -503,13 +505,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
 		dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
-		dataDictionary.setVariable("uiPackage", GwtPath.GWT_SCAFFOLD_UI.packageName(projectMetadata));
+		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.GWT_SCAFFOLD_UI.packageName(projectMetadata));
+                dataDictionary.setVariable("uiPackage", GwtPath.GWT_UI.packageName(projectMetadata));
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));
-    dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
+                dataDictionary.setVariable("proxy", proxyType.getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
-
+                dataDictionary.setVariable("proxyRenderer", GwtProxyProperty.getProxyRendererType(projectMetadata, proxyType));
 		String proxyFields = null;
 		GwtProxyProperty primaryProp = null;
 		GwtProxyProperty secondaryProp = null;
@@ -519,9 +522,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 			if (!GwtProxyProperty.isAccessor(method)) {
 				continue;
 			}
-                        if ((destType.isUI()  && isCollectionType(method.getReturnType()))) {
-                          continue;
-                        }
+                      
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
 			GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
 
@@ -579,23 +580,26 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
 
-			if (property.isProxy() || property.isEnum()) {
+			if (property.isProxy() || property.isEnum() || property.isCollectionOfProxy()) {
 				TemplateDataDictionary section = dataDictionary.addSection(property.isEnum() ? "setEnumValuePickers" : "setProxyValuePickers");
 				section.setVariable("setValuePicker", property.getSetValuePickerMethod());
 				section.setVariable("setValuePickerName", property.getSetValuePickerMethodName());
-				section.setVariable("valueType", property.getPropertyType().getSimpleTypeName());
+				section.setVariable("valueType", property.getValueType().getSimpleTypeName());
 				section.setVariable("rendererType", property.getProxyRendererType());
-				if (property.isProxy()) {
-					String propTypeName = StringUtils.uncapitalize(method.getReturnType().getSimpleTypeName());
+				if (property.isProxy() || property.isCollectionOfProxy()) {
+					String propTypeName = StringUtils.uncapitalize(property.isCollectionOfProxy() ? method.getReturnType().getParameters().get(0).getSimpleTypeName() : method.getReturnType().getSimpleTypeName());
 					propTypeName = propTypeName.substring(0, propTypeName.indexOf("Proxy"));
 					section.setVariable("requestInterface", propTypeName + "Request");
 					section.setVariable("findMethod", "find" + StringUtils.capitalize(propTypeName) + "Entries(0, 50)");
 				}
-				if (!importSet.contains(property.getType())) {
-					addImport(dataDictionary, property.getType());
-					importSet.add(property.getType());
-				}
-			}
+                          maybeAddImport(dataDictionary, importSet, property.getPropertyType());
+                          if (property.isCollectionOfProxy()) {
+                             maybeAddImport(dataDictionary, importSet,
+                                 property.getPropertyType().getParameters().get(0));
+                             maybeAddImport(dataDictionary, importSet, property.getSetEditorType());
+                          }
+
+                        }
 
 		}
 
@@ -641,6 +645,14 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 		return dataDictionary;
 	}
+
+  private void maybeAddImport(TemplateDataDictionary dataDictionary,
+      Set<String> importSet, JavaType type) {
+    if (!importSet.contains(type.getFullyQualifiedTypeName())) {
+            addImport(dataDictionary, type.getFullyQualifiedTypeName());
+            importSet.add(type.getFullyQualifiedTypeName());
+    }
+  }
 
   private boolean isReadOnly(String name) {
     return name.equals(idPropertyName.getSymbolName()) || name.equals(versionPropertyName.getSymbolName());
@@ -744,6 +756,25 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
+        private void buildSetEditor() {
+		try {
+			MirrorType type = MirrorType.SET_EDITOR;
+			writeWithTemplate(type, type.getTemplate());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+        private void buildSetEditorUiXml() {
+		try {
+			MirrorType destType = MirrorType.SET_EDITOR;
+			String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
+			writeWithTemplate(destFile, destType, "SetEditorUiXml");
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 	private void write(String destFile, String newContents, FileManager fileManager) {
 		// Write to disk, or update a file if it is already present
 		MutableFile mutableFile = null;
@@ -794,7 +825,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildStaticRequestMethod(destinationMetadataId, methods, findMethod);
 
 		buildInstanceRequestMethod(destinationMetadataId, methods, entityMetadata.getRemoveMethod());
-    buildInstanceRequestMethod(destinationMetadataId, methods, entityMetadata.getPersistMethod());
+                buildInstanceRequestMethod(destinationMetadataId, methods, entityMetadata.getPersistMethod());
 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(destinationMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.INTERFACE);
 		typeDetailsBuilder.setAnnotations(typeAnnotations);

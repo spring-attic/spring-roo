@@ -2,7 +2,9 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
-  xmlns:r='urn:import:{{=uiPackage}}'> 
+  xmlns:r='urn:import:{{=scaffoldUiPackage}}'
+  xmlns:a='urn:import:{{=uiPackage}}'>
+
   <ui:style>
     .fields {
       margin-top: 0.5em;

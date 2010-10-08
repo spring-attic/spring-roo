@@ -29,7 +29,7 @@ public abstract class FindAndEditProxy<P extends EntityProxy> extends
 
   @Override
   public void start(final AcceptsOneWidget display, final EventBus eventBus) {
-    factory.find(proxyId).fire(new Receiver<P>() {
+    factory.find(proxyId).with(view.createEditorDriver().getPaths()).fire(new Receiver<P>() {
       @Override
       public void onSuccess(P response) {
         proxy = response;
