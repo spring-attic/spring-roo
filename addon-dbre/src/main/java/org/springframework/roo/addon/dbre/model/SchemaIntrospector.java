@@ -170,9 +170,7 @@ public class SchemaIntrospector {
 		ResultSet rs = databaseMetaData.getColumns(catalog, getSchemaPattern(), tableNamePattern, columnNamePattern);
 		try {
 			while (rs.next()) {
-				String columnName = rs.getString("COLUMN_NAME");
-				columnName = columnName.replaceAll("\\\\", "\\\\\\\\");
-				Column column = new Column(columnName);
+				Column column = new Column(rs.getString("COLUMN_NAME"));
 				column.setDescription(rs.getString("REMARKS"));
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
 				column.setTypeCode(rs.getInt("DATA_TYPE"));

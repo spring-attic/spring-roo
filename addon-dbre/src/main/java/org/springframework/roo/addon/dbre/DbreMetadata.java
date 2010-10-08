@@ -421,9 +421,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn, boolean isCompositeKeyColumn) {
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
-		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getName());
+		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
 		if (referencedColumn) {
-			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getLocalColumn().getName());
+			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getLocalColumn().getEscapedName());
 		}
 		if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
 			addOtherJoinColumnAttributes(joinColumnBuilder);
@@ -572,7 +572,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add @Column annotation
 		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"));
-		columnBuilder.addStringAttribute(NAME, column.getName());		
+		columnBuilder.addStringAttribute(NAME, column.getEscapedName());		
 
 		// Add length attribute for Strings
 		if (column.getLength() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {

@@ -2,6 +2,8 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
 
+import org.springframework.roo.support.util.Assert;
+
 /**
  * Represents a column in the database model.
  * 
@@ -32,8 +34,13 @@ public class Column implements Serializable {
 	public String getName() {
 		return name;
 	}
+	
+	public String getEscapedName() {
+		return name.replaceAll("\\\\", "\\\\\\\\");
+	}
 
 	public void setName(String name) {
+		Assert.hasText(name, "Column name required");
 		this.name = name;
 	}
 
