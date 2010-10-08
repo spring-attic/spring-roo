@@ -177,7 +177,7 @@ class GwtProxyProperty {
         }
 
 	public String getFormatter() {
-		return isCollectionOfProxy() ? getCollectionRenderer()+".render(" : isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
+		return isCollectionOfProxy() ? getCollectionRenderer()+".render" : isDate() ? "DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT).format" : isProxy() ? getProxyRendererType() + ".instance().render" : "String.valueOf";
 	}
 
 	public String getRenderer() {
