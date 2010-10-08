@@ -4,7 +4,7 @@ import com.google.gwt.text.shared.Parser;
 import java.text.ParseException;
 
 /**
- * Simple parser of Byte that wraps {@link Byte#valueOf(String)}.
+ * Simple parser of Character.
  */
 public class CharParser implements Parser<Character> {
 

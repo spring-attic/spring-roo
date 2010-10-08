@@ -4,7 +4,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.text.shared.Renderer;
 
 /**
- * A simple renderer of Byte values.
+ * A simple renderer of Short values.
  */
 public class ShortRenderer extends AbstractRenderer<Short> {
   private static ShortRenderer INSTANCE;

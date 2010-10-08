@@ -381,7 +381,8 @@ public class GwtMetadata extends AbstractMetadataItem {
          || returnType.equals(JavaType.CHAR_OBJECT)
          || returnType.equals(JavaType.BYTE_OBJECT)
          || returnType.equals(JavaType.SHORT_OBJECT)
-         || returnType.equals(new JavaType("java.util.Date"));
+         || returnType.equals(new JavaType("java.util.Date"))
+         || returnType.equals(new JavaType("java.math.BigDecimal"));
   }
 
 	private void addReference(TemplateDataDictionary dataDictionary, MirrorType type) {

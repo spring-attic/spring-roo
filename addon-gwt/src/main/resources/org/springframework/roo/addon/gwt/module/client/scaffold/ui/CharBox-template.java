@@ -4,7 +4,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.ui.ValueBox;
 
 /**
- * A ValueBox that uses {@link ShortParser} and {@link ShortRenderer}.
+ * A ValueBox that uses {@link CharParser} and {@link CharRenderer}.
  */
 public class CharBox extends ValueBox<Character> {
 

@@ -83,7 +83,8 @@ class GwtProxyProperty {
 			|| type.equals(JavaType.FLOAT_OBJECT)
          	|| type.equals(JavaType.BYTE_OBJECT)
          	|| type.equals(JavaType.SHORT_OBJECT)
-         	|| type.equals(JavaType.CHAR_OBJECT);
+         	|| type.equals(JavaType.CHAR_OBJECT)
+         	|| type.equals(new JavaType("java.math.BigDecimal"));
 	}
 
 	public boolean isString() {
@@ -112,6 +113,9 @@ class GwtProxyProperty {
 		if (type.equals(JavaType.CHAR_OBJECT)) {
 			return "r:CharBox";
 		}
+		if (type.equals(new JavaType("java.math.BigDecimal"))) {
+			return "r:BigDecimalBox";
+		}
 		return isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
 	}
 
@@ -136,6 +140,9 @@ class GwtProxyProperty {
 		}
 		if (type.equals(JavaType.CHAR_OBJECT)) {
 			return "CharBox";
+		}
+		if (type.equals(new JavaType("java.math.BigDecimal"))) {
+			return "BigDecimalBox";
 		}
 		if (isBoolean()) {
 			return "(provided = true) CheckBox";
