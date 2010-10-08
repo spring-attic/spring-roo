@@ -51,14 +51,14 @@ public class {{=className}} extends Composite
 
   class NameLabel extends Composite implements ValueAwareEditor<{{=proxy}}> {
 
-    final Label {{=displayField}}Editor = new Label();
+    final Label {{=primaryProp}}Editor = new Label();
 
     public NameLabel() {
       this(null);
     }
 
     public NameLabel(final EventBus eventBus) {
-      initWidget({{=displayField}}Editor);
+      initWidget({{=primaryProp}}Editor);
     }
 
     public void flush() {

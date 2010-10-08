@@ -14,6 +14,7 @@ field string --fieldName department
 field reference --type Employee supervisor
 field enum --fieldName gender --type ~.client.shared.Gender
 field boolean --fieldName admin --notNull
+field set --fieldName friends --element ~.server.domain.Employee 
 
 entity --class ~.server.domain.Report --testAutomatically
 // field date --fieldName created --type java.util.Date --past --notNull

@@ -12,7 +12,8 @@
   <inherits name="com.google.gwt.text.Text"/>
 
   <source path='client'/>
-  
+  <source path='shared'/>
+   
   <public path="public"/>
 
   <!-- Logging Configuration -->

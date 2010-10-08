@@ -13,7 +13,7 @@ public enum GwtPath {
 	GWT_UI("/client/ui", "module/client/ui/" + GwtPath.templateSelector),
 	SERVER("/server", "module/server/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
-	SHARED("/client/shared", "module/client/shared/" + GwtPath.templateSelector),
+	SHARED("/shared", "module/shared/" + GwtPath.templateSelector),
 	IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector),
 	PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector),
 	PUBLIC("/public", "module/public/" + GwtPath.wildCardSelector),
