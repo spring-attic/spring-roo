@@ -196,6 +196,8 @@ public class GwtMetadata extends AbstractMetadataItem {
                 
                 if (!serverOnly) {                    
                     JavaType returnType = accessor.getReturnType();
+                    checkPrimitive(returnType);
+                    
                     PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 
                     JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
@@ -253,6 +255,47 @@ public class GwtMetadata extends AbstractMetadataItem {
 			proxyDeclaredMethods.add(methodNameToMethod.get(methodName));
 		}
 	}
+	
+	private void checkPrimitive(JavaType returnType) {
+		if (returnType.isPrimitive()) {
+        	String to = "";
+        	String from = "";
+        	if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+	            from = "boolean";
+    	        to = "Boolean";
+    	    }
+        	if (returnType.equals(JavaType.INT_PRIMITIVE)) {
+            	from = "int";
+            	to = "Integer";
+        	}
+        	if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
+        	    from = "byte";
+        	    to = "Byte";
+        	}
+        	if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
+        	    from = "short";
+        	    to = "Short";
+        	}
+        	if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
+        	    from = "float";
+        	    to = "Float";
+        	}
+        	if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+        	    from = "double";
+        	    to = "Double";
+        	}
+        	if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
+        	    from = "char";
+        	    to = "Character";
+        	}
+        	if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
+        	    from = "long";
+        	    to = "Long";
+        	}
+
+        	throw new IllegalStateException("GWT does not currently support primitive types in an entity. Please change any '" + from + "' entity property types to 'java.lang." + to + "'.");
+    	}
+    }
 
   private JavaType getGwtSideLeafType(JavaType returnType, PhysicalTypeMetadata ptmd) {
     boolean isDomainObject = isDomainObject(returnType, ptmd);
@@ -260,31 +303,33 @@ public class GwtMetadata extends AbstractMetadataItem {
       return getDestinationJavaType(returnType, MirrorType.PROXY);
     }
     if (returnType.isPrimitive()) {
-      if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
-        return JavaType.BOOLEAN_OBJECT;
-      }
-      if (returnType.equals(JavaType.INT_PRIMITIVE)) {
-        return JavaType.INT_OBJECT;
-      }
-      if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
-        return JavaType.BYTE_OBJECT;
-      }
-      if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
-        return JavaType.SHORT_OBJECT;
-      }
-      if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
-        return JavaType.FLOAT_OBJECT;
-      }
-      if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
-        return JavaType.DOUBLE_OBJECT;
-      }
-      if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
-        return JavaType.CHAR_OBJECT;
-      }
-      if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
-        return JavaType.LONG_OBJECT;
-      }
+      	if (returnType.equals(JavaType.BOOLEAN_PRIMITIVE)) {
+        	return JavaType.BOOLEAN_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.INT_PRIMITIVE)) {
+      		  return JavaType.INT_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.BYTE_PRIMITIVE)) {
+        	return JavaType.BYTE_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.SHORT_PRIMITIVE)) {
+        	return JavaType.SHORT_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.FLOAT_PRIMITIVE)) {
+      	  	return JavaType.FLOAT_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.DOUBLE_PRIMITIVE)) {
+      	  	return JavaType.DOUBLE_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.CHAR_PRIMITIVE)) {
+        	return JavaType.CHAR_OBJECT;
+      	}
+      	if (returnType.equals(JavaType.LONG_PRIMITIVE)) {
+        	return JavaType.LONG_OBJECT;
+      	}    	
+    	return returnType;
     }
+    
     if (isCollectionType(returnType)) {
       List<JavaType> args = returnType.getParameters();
       if (args != null && args.size() == 1) {
