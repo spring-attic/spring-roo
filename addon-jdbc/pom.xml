@@ -156,7 +156,7 @@
           <artifactId>maven-bundle-plugin</artifactId>
           <configuration>
             <instructions>
-               <Import-Package>*,net.sourceforge.jtds.jdbc;resolution:=optional,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional</Import-Package>
+               <Import-Package>*,com.mysql.jdbc;resolution:=optional,org.apache.derby.jdbc;resolution:=optional,oracle.jdbc;resolution:=optional,org.h2;resolution:=optional,org.hsqldb;resolution:=optional,org.postgresql;resolution:=optional,com.ibm.as400.access;resolution:=optional</Import-Package>
             </instructions>
           </configuration>
         </plugin>
