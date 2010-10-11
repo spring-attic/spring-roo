@@ -2,7 +2,8 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
   xmlns:app='urn:import:com.google.gwt.app.client'
-  xmlns:d='urn:import:com.google.gwt.user.datepicker.client'>
+  xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
+  xmlns:a='urn:import:{{=uiPackage}}'>
   <ui:style>
     .outer {
       padding: 10px;

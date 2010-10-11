@@ -549,7 +549,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 				dateProp = property;
 			}
 
-			if (property.isProxy()) {
+			if (property.isProxy() || property.isCollectionOfProxy()) {
 				if (proxyFields != null) {
 					proxyFields += ", ";
 				} else {
