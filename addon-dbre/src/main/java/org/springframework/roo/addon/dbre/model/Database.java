@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -139,7 +138,6 @@ public class Database implements Serializable {
 					Column localColumn = table.findColumn(reference.getLocalColumnName());
 					if (localColumn != null) {
 						reference.setLocalColumn(localColumn);
-						
 						Set<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedHashSet<ForeignKey>();
 						fkSet.add(foreignKey);
 						repeatedColumns.put(localColumn, fkSet);
