@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__;
+package __TOP_LEVEL_PACKAGE__.server;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;

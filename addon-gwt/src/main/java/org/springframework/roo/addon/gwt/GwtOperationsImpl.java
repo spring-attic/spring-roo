@@ -287,7 +287,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		WebXmlUtils.WebXmlParam initParams = null;
 		if (isGaeEnabled()) {
-			String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".gwt.GaeUserInformation";
+			String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".server.GaeUserInformation";
 			initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
 			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
 		} else {
