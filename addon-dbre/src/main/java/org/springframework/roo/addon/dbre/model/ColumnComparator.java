@@ -5,6 +5,9 @@ import java.util.Comparator;
 /**
  * Sorts {@link Column column}s by the ordinal position.
  * 
+ * <p>
+ * Note: this comparator imposes orderings that are inconsistent with equals.
+ * 
  * @author Alan Stewart.
  * @since 1.1
  */

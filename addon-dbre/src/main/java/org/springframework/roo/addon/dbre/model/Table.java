@@ -21,7 +21,7 @@ public class Table implements Serializable {
 	private String name;
 	private String description;
 	private SortedSet<Column> columns = new TreeSet<Column>(new ColumnComparator());
-	private Set<ForeignKey> foreignKeys = new LinkedHashSet<ForeignKey>();
+	private SortedSet<ForeignKey> foreignKeys = new TreeSet<ForeignKey>(new ForeignKeyComparator());
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
 
