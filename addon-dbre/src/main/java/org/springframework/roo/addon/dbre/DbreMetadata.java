@@ -182,7 +182,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				FieldMetadata field = getOneToOneOrManyToOneField(fieldName, fieldType, foreignKey.getReferences(), ONE_TO_ONE, false);
 				uniqueFields.put(fieldName, field);
 			}
-
 		}
 
 		for (FieldMetadata field : uniqueFields.values()) {
