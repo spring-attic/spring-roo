@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -111,7 +112,7 @@ public class Database implements Serializable {
 	private void initializeForeignKeys(Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
-		Map<Column, Integer> localColumnMap = new LinkedHashMap<Column, Integer>();
+		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
 
 		for (ForeignKey foreignKey : table.getForeignKeys()) {
 			foreignKey.setTable(table);
@@ -138,21 +139,36 @@ public class Database implements Serializable {
 					Column localColumn = table.findColumn(reference.getLocalColumnName());
 					if (localColumn != null) {
 						reference.setLocalColumn(localColumn);
-						Integer columnCount = localColumnMap.get(localColumn);
-						if (columnCount == null) {
-							columnCount = 0;
-							localColumnMap.put(localColumn, columnCount);
-						}
-						localColumnMap.put(localColumn, columnCount + 1);
-						if (localColumnMap.get(localColumn) > 1) {
-							reference.setInsertableOrUpdatable(false);
-						}
+						
+						Set<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedHashSet<ForeignKey>();
+						fkSet.add(foreignKey);
+						repeatedColumns.put(localColumn, fkSet);
+						
 					}
 				}
 				if (reference.getForeignColumn() == null && foreignKey.getForeignTable() != null) {
 					Column foreignColumn = foreignKey.getForeignTable().findColumn(reference.getForeignColumnName());
 					if (foreignColumn != null) {
 						reference.setForeignColumn(foreignColumn);
+					}
+				}
+			}
+		}
+		
+		// Mark repeated columns with insertable = false and updatable = false
+		for (Map.Entry<Column, Set<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
+			Set<ForeignKey> foreignKeys = entrySet.getValue();
+			if (foreignKeys.size() > 1) {
+				fkLabel: for (ForeignKey fk : foreignKeys) {
+					if (fk.getReferenceCount() == 1) {
+						Reference reference = fk.getReferences().first();
+						reference.setInsertableOrUpdatable(false);
+						break fkLabel;
+					} else {
+						for (Reference reference : fk.getReferences()) {
+							reference.setInsertableOrUpdatable(false);
+						}
+						break fkLabel;
 					}
 				}
 			}
