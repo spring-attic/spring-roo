@@ -12,21 +12,19 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
-@Component
-@Service
-public class BackupCommands implements CommandMarker {	
-
+@Component 
+@Service 
+public class BackupCommands implements CommandMarker {
 	@Reference private BackupOperations backupOperations;
 
-	@CliAvailabilityIndicator("backup")
-	public boolean isBackupCommandAvailable() {		
+	@CliAvailabilityIndicator("backup") 
+	public boolean isBackupCommandAvailable() {
 		return backupOperations.isBackupAvailable();
 	}
-	
-	@CliCommand(value="backup", help="Backup your project to a zip file")
+
+	@CliCommand(value = "backup", help = "Backup your project to a zip file") 
 	public String backup() {
 		return backupOperations.backup();
-	}	
+	}
 }

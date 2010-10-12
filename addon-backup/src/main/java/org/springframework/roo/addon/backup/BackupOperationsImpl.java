@@ -30,17 +30,15 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Stefan Schmidt
  * @author Ben Alex
+ * @author Alan Stewart
  * @since 1.0
- *
  */
-@Component
-@Service
+@Component 
+@Service 
 public class BackupOperationsImpl implements BackupOperations {
-
+	private static Logger logger = HandlerUtils.getLogger(BackupOperationsImpl.class);
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
-	
-	private static Logger logger = HandlerUtils.getLogger(BackupOperationsImpl.class);
 
 	public boolean isBackupAvailable() {
 		return getPathResolver() != null;
@@ -49,47 +47,54 @@ public class BackupOperationsImpl implements BackupOperations {
 	public String backup() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
-		
+
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-		
+
 		if (File.separatorChar == '\\') {
 			// Windows, so make a date format that can legally form part of a filename (ROO-277)
 			df = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss");
 		}
-		
+
 		long start = System.nanoTime();
 		try {
 			File projectDirectory = new File(getPathResolver().getIdentifier(Path.ROOT, "."));
-			
+
 			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectMetadata.getProjectName() + "_" + df.format(new Date()) + ".zip")));
 			ZipOutputStream zos = new ZipOutputStream(file.getOutputStream());
-			
+
 			zip(projectDirectory, projectDirectory, zos);
-			zos.close();			
+			zos.close();
 		} catch (FileNotFoundException e) {
 			logger.fine("Could not determine project directory");
 		} catch (IOException e) {
 			logger.fine("Could not create backup archive");
 		}
-		long milliseconds = (System.nanoTime() - start)/1000000;
+		long milliseconds = (System.nanoTime() - start) / 1000000;
 		return "Backup completed in " + milliseconds + " ms";
 	}
 
 	private void zip(File directory, final File base, ZipOutputStream zos) throws IOException {
 		File[] files = directory.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				// don't use this directory if it's "target" under base
+				// Don't use this directory if it's "target" under base
 				if (dir.equals(base) && name.equals("target")) {
 					return false;
 				}
-				// skip existing backup files
+				// Skip existing backup files
 				if (dir.equals(base) && name.endsWith(".zip")) {
 					return false;
 				}
-				// skip files that start with "."
+				
+				// Include dbre xml if present
+				if (name.equals(".roo-dbre")) {
+					return true;
+				}
+				
+				// Skip files that start with "."
 				return !name.startsWith(".");
 			}
 		});
+		
 		byte[] buffer = new byte[8192];
 		int read = 0;
 		for (int i = 0, n = files.length; i < n; i++) {
@@ -112,8 +117,7 @@ public class BackupOperationsImpl implements BackupOperations {
 	}
 
 	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService
-				.get(ProjectMetadata.getProjectIdentifier());
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		if (projectMetadata == null) {
 			return null;
 		}
