@@ -10,16 +10,16 @@ import org.springframework.roo.project.ProjectMetadata;
  * @since 1.1
  */
 public enum SharedType {
-	APP_ENTITY_TYPES_PROCESSOR(GwtPath.GWT_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor"), 
-	APP_REQUEST_FACTORY(GwtPath.GWT_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory"),
-	LIST_PLACE_RENDERER(GwtPath.GWT_SCAFFOLD, "ApplicationListPlaceRenderer", "listPlaceRenderer", "ApplicationListPlaceRenderer"), 
-	SCAFFOLD_APP(GwtPath.GWT_SCAFFOLD, "ScaffoldApp", "scaffoldApp", "ScaffoldApp"),
-	SCAFFOLD_MOBILE_APP(GwtPath.GWT_SCAFFOLD, "ScaffoldMobileApp", "scaffoldMobileApp", "ScaffoldMobileApp"),
-	IS_SCAFFOLD_MOBILE_ACTIVITY(GwtPath.GWT_SCAFFOLD, "IsScaffoldMobileActivity", "isScaffoldMobileActivity", "IsScaffoldMobileActivity"),
-	MOBILE_PROXY_LIST_VIEW(GwtPath.GWT_SCAFFOLD, "MobileProxyListView", "mobileProxyListView", "MobileProxyListView"),
-	MASTER_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationMasterActivities", "masterActivities", "ApplicationMasterActivities"), 
-	DETAILS_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ApplicationDetailsActivities", "detailsActivities", "ApplicationDetailsActivities"), 
-	MOBILE_ACTIVITIES(GwtPath.GWT_SCAFFOLD, "ScaffoldMobileActivities", "mobileActivities", "ScaffoldMobileActivities");    
+	APP_ENTITY_TYPES_PROCESSOR(GwtPath.MANAGED_REQUEST, "ApplicationEntityTypesProcessor", "entityTypes", "ApplicationEntityTypesProcessor"), 
+	APP_REQUEST_FACTORY(GwtPath.MANAGED_REQUEST, "ApplicationRequestFactory", "requestFactory", "ApplicationRequestFactory"),
+	LIST_PLACE_RENDERER(GwtPath.MANAGED_UI, "ApplicationListPlaceRenderer", "listPlaceRenderer", "ApplicationListPlaceRenderer"), 
+	SCAFFOLD_APP(GwtPath.SCAFFOLD, "ScaffoldApp", "scaffoldApp", "ScaffoldApp"),
+	SCAFFOLD_MOBILE_APP(GwtPath.SCAFFOLD, "ScaffoldMobileApp", "scaffoldMobileApp", "ScaffoldMobileApp"),
+	IS_SCAFFOLD_MOBILE_ACTIVITY(GwtPath.SCAFFOLD_ACTIVITY, "IsScaffoldMobileActivity", "isScaffoldMobileActivity", "IsScaffoldMobileActivity"),
+	MOBILE_PROXY_LIST_VIEW(GwtPath.SCAFFOLD_UI, "MobileProxyListView", "mobileProxyListView", "MobileProxyListView"),
+	MASTER_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, "ApplicationMasterActivities", "masterActivities", "ApplicationMasterActivities"), 
+	DETAILS_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, "ApplicationDetailsActivities", "detailsActivities", "ApplicationDetailsActivities"), 
+	MOBILE_ACTIVITIES(GwtPath.MANAGED_ACTIVITY, "ScaffoldMobileActivities", "mobileActivities", "ScaffoldMobileActivities");    
 
 	private GwtPath path;
 	private String fullName;

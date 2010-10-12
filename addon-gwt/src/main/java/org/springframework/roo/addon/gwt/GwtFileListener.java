@@ -53,8 +53,8 @@ public class GwtFileListener implements FileEventListener {
 		if (!eventPath.endsWith(".java")) {
 			return;
 		}
-		boolean isMaintainedByRoo = eventPath.startsWith(GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata)) || eventPath.startsWith(GwtPath.GWT_SCAFFOLD_GENERATED.canonicalFileSystemPath(projectMetadata));
-		if (!isMaintainedByRoo && (processedApplicationFiles || !eventPath.startsWith(GwtPath.GWT_SCAFFOLD.canonicalFileSystemPath(projectMetadata)))) {
+		boolean isMaintainedByRoo = eventPath.startsWith(GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata)) || eventPath.startsWith(GwtPath.MANAGED.canonicalFileSystemPath(projectMetadata));
+		if (!isMaintainedByRoo && (processedApplicationFiles || !eventPath.startsWith(GwtPath.SCAFFOLD.canonicalFileSystemPath(projectMetadata)))) {
 			return;
 		}
 
@@ -83,7 +83,7 @@ public class GwtFileListener implements FileEventListener {
 						// Drop the part of the filename with the suffix, as well as the extension
 						bestMatch = suffix;
 						String entityName = name.substring(0, name.lastIndexOf(suffix));
-						proxyFile = GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
+						proxyFile = GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
 					}
 				}
 			}
@@ -238,6 +238,7 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
 		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+		addReference(dataDictionary, SharedType.SCAFFOLD_APP);
 
 		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
@@ -251,6 +252,7 @@ public class GwtFileListener implements FileEventListener {
       addImport(dataDictionary, simpleName, MirrorType.PROXY);
       addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
       addImport(dataDictionary, simpleName, MirrorType.MOBILE_LIST_VIEW);
+      
 		}
 
 		try {
@@ -305,7 +307,7 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-    dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
+    dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
 		return dataDictionary;
 	}
 

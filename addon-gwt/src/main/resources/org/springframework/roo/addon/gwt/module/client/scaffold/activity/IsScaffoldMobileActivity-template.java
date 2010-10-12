@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.client.scaffold;
+package __TOP_LEVEL_PACKAGE__.client.scaffold.activity;
 
 import com.google.gwt.place.shared.Place;
 

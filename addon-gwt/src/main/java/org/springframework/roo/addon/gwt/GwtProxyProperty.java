@@ -172,7 +172,7 @@ class GwtProxyProperty {
 
         public String getCollectionRenderer() {
            JavaType arg = type.getParameters().get(0);
-           return GwtPath.PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, arg, ptmd).getRenderer() + ")";
+           return GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, arg, ptmd).getRenderer() + ")";
         }
 
 	public String getFormatter() {

@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.ValuePicker;
 import com.google.gwt.user.client.ui.Widget;
 
+import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
 
 /**

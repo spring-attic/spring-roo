@@ -16,10 +16,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
-import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlacePicker;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyPlaceToListPlace;
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;

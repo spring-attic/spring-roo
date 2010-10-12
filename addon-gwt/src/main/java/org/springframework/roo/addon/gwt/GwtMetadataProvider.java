@@ -66,7 +66,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		if (projectMetadata == null) {
 			return null;
 		}
-		if (!fileManager.exists(GwtPath.GWT_REQUEST.canonicalFileSystemPath(projectMetadata))) {
+		if (!fileManager.exists(GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata))) {
 			return null;
 		}
 

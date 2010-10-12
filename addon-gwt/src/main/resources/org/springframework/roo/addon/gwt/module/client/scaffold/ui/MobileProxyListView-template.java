@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.client.scaffold;
+package __TOP_LEVEL_PACKAGE__.client.scaffold.ui;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -11,8 +11,10 @@ import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
 
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ScaffoldMobileApp;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.AbstractProxyListView;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListView;
+
 
 /**
  * An implementation of {@link ProxyListView} used in mobile applications

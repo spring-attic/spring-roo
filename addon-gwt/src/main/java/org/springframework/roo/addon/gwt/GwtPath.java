@@ -6,20 +6,22 @@ import org.springframework.roo.project.ProjectMetadata;
 public enum GwtPath {
 	CLIENT("/client", "module/client/" + GwtPath.templateSelector),
 	GWT_ROOT("/", "module/" + GwtPath.templateSelector),
-	GWT_REQUEST("/client/request", "module/client/request/" + GwtPath.templateSelector),
-	GWT_SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector),
-	GWT_SCAFFOLD_GENERATED("/client/scaffold/generated", "module/client/scaffold/generated/" + GwtPath.templateSelector),
-	GWT_SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector),
-	GWT_UI("/client/ui", "module/client/ui/" + GwtPath.templateSelector),
+	MANAGED_REQUEST("/client/managed/request", "module/client/request/" + GwtPath.templateSelector), //GWT_REQUEST
+	SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD
+	MANAGED("/client/managed", "module/client/managed/" + GwtPath.templateSelector), //GWT_SCAFFOLD_GENERATED
+	SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+	MANAGED_UI("/client/managed/ui", "module/client/managed/ui/" + GwtPath.templateSelector),
 	SERVER("/server", "module/server/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
 	SHARED("/shared", "module/shared/" + GwtPath.templateSelector),
-	IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector),
-	PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector),
-	PUBLIC("/public", "module/public/" + GwtPath.wildCardSelector),
-	IMAGES("/public/images", "module/public/images/" + GwtPath.wildCardSelector),
-	WEB("", "webapp/" + GwtPath.wildCardSelector);
-        
+	SCAFFOLD_IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector), //IOC
+	SCAFFOLD_PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector), //PLACE
+	IMAGES("/client/style/images", "module/client/style/images/" + GwtPath.wildCardSelector),
+	WEB("", "webapp/" + GwtPath.wildCardSelector),
+	//MOBILE("/client/managed/mobile", "module/client/mobile/" + GwtPath.templateSelector),//MOBILE
+	MANAGED_ACTIVITY("/client/managed/activity", "module/client/managed/activity/" + GwtPath.templateSelector),
+	SCAFFOLD_ACTIVITY("/client/scaffold/activity", "module/client/scaffold/activity/" + GwtPath.templateSelector);
+	
     private static final String wildCardSelector = "*";
     private static final String templateSelector = "*-template.*";
     private final String segmentName;

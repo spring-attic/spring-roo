@@ -72,7 +72,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		
 		// Do not permit installation if they have a gwt package already in their project shared is allowed
 		for (GwtPath path : GwtPath.values()) {
-			if (path == GwtPath.GWT_REQUEST || path == GwtPath.GWT_SCAFFOLD || path == GwtPath.GWT_SCAFFOLD_GENERATED || path == GwtPath.GWT_UI) {
+			if (path == GwtPath.MANAGED_REQUEST || path == GwtPath.SCAFFOLD || path == GwtPath.MANAGED || path == GwtPath.MANAGED_UI) {
 				String fPath = path.canonicalFileSystemPath(projectMetadata);
 				if (fileManager.exists(fPath)) {
 					return false;

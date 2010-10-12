@@ -506,9 +506,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 		addImport(dataDictionary, proxyType.getFullyQualifiedTypeName());
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-		dataDictionary.setVariable("placePackage", GwtPath.PLACE.packageName(projectMetadata));
-		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.GWT_SCAFFOLD_UI.packageName(projectMetadata));
-                dataDictionary.setVariable("uiPackage", GwtPath.GWT_UI.packageName(projectMetadata));
+		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
+		dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
+                dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(projectMetadata));
 		dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
 		dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
 		dataDictionary.setVariable("nameUncapitalized", StringUtils.uncapitalize(governorTypeDetails.getName().getSimpleTypeName()));

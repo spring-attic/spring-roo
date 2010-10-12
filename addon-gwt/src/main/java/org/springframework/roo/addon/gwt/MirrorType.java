@@ -17,24 +17,24 @@ package org.springframework.roo.addon.gwt;
  * @since 1.1
  */
 public enum MirrorType {
-	PROXY(GwtPath.GWT_REQUEST, "Proxy", "proxy", null), 
-	REQUEST(GwtPath.GWT_REQUEST, "Request", "request", null), 
-	ACTIVITIES_MAPPER(GwtPath.GWT_UI, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"), 
-	DETAIL_ACTIVITY(GwtPath.GWT_UI, "DetailsActivity", "detailsActivity", "DetailsActivity"), 
-	EDIT_ACTIVITY_WRAPPER(GwtPath.GWT_UI, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper"), 
-	LIST_ACTIVITY(GwtPath.GWT_UI, "ListActivity", "listActivity", "ListActivity"), 
-	LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "ListView", "listView", "ListView"), 
-	LIST_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "ListViewBinder", "listViewBinder", null), 
-	MOBILE_LIST_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileListView", "mobileListView", "MobileListView"),
-	DETAILS_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsViewBinder", "detailsViewBinder", null), 
-	DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "DetailsView", "detailsView", "DetailsView"),
-	MOBILE_DETAILS_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileDetailsView", "mobileDetailsView", "MobileDetailsView"),
-	EDIT_VIEW_BINDER(GwtPath.GWT_SCAFFOLD_GENERATED, "EditViewBinder", "editViewBinder", null), 
-	EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "EditView", "editView", "EditView"),
-	MOBILE_EDIT_VIEW(GwtPath.GWT_SCAFFOLD_GENERATED, "MobileEditView", "mobileEditView", "MobileEditView"),
-	EDIT_RENDERER(GwtPath.GWT_SCAFFOLD_GENERATED, "ProxyRenderer", "renderer", "EditRenderer"),
-        SET_EDITOR(GwtPath.GWT_UI, "SetEditor", "setEditor", "SetEditor"),
-        LIST_EDITOR(GwtPath.GWT_UI, "ListEditor", "listEditor", "ListEditor");
+	PROXY(GwtPath.MANAGED_REQUEST, "Proxy", "proxy", null), 
+	REQUEST(GwtPath.MANAGED_REQUEST, "Request", "request", null), 
+	ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"), 
+	DETAIL_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "DetailsActivity", "detailsActivity", "DetailsActivity"), 
+	EDIT_ACTIVITY_WRAPPER(GwtPath.MANAGED_ACTIVITY, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper"), 
+	LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "ListActivity", "listActivity", "ListActivity"), 
+	LIST_VIEW(GwtPath.MANAGED_UI, "ListView", "listView", "ListView"), 
+	LIST_VIEW_BINDER(GwtPath.MANAGED_UI, "ListViewBinder", "listViewBinder", null), 
+	MOBILE_LIST_VIEW(GwtPath.MANAGED_UI, "MobileListView", "mobileListView", "MobileListView"),
+	DETAILS_VIEW_BINDER(GwtPath.MANAGED_UI, "DetailsViewBinder", "detailsViewBinder", null), 
+	DETAILS_VIEW(GwtPath.MANAGED_UI, "DetailsView", "detailsView", "DetailsView"),
+	MOBILE_DETAILS_VIEW(GwtPath.MANAGED_UI, "MobileDetailsView", "mobileDetailsView", "MobileDetailsView"),
+	EDIT_VIEW_BINDER(GwtPath.MANAGED_UI, "EditViewBinder", "editViewBinder", null), 
+	EDIT_VIEW(GwtPath.MANAGED_UI, "EditView", "editView", "EditView"),
+	MOBILE_EDIT_VIEW(GwtPath.MANAGED_UI, "MobileEditView", "mobileEditView", "MobileEditView"),
+	EDIT_RENDERER(GwtPath.MANAGED_UI, "ProxyRenderer", "renderer", "EditRenderer"),
+        SET_EDITOR(GwtPath.MANAGED_UI, "SetEditor", "setEditor", "SetEditor"),
+        LIST_EDITOR(GwtPath.MANAGED_UI, "ListEditor", "listEditor", "ListEditor");
 
 	private GwtPath path;
 	private String suffix;
@@ -69,6 +69,6 @@ public enum MirrorType {
         }
 
         public boolean isUI() {
-          return getPath() != GwtPath.GWT_REQUEST;
+          return getPath() != GwtPath.MANAGED_REQUEST;
         }
 }

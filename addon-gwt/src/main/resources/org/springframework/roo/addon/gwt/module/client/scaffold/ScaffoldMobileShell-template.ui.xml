@@ -6,11 +6,11 @@
 
   <ui:image
     field='titleGradient'
-    src='titleGradient.png'
+    src='../style/images/titleGradient.png'
     repeatStyle='Horizontal' />
   <ui:image
     field='backButtonImage'
-    src='backButton.png' />
+    src='../style/images/backButton.png' />
 
   <ui:style>
     @sprite .titlebar {

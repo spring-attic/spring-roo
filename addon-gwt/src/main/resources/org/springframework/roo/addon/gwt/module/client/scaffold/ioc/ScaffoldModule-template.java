@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.*;
-import __TOP_LEVEL_PACKAGE__.client.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 
 public class ScaffoldModule extends AbstractGinModule {
 

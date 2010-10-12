@@ -1,4 +1,4 @@
-package __TOP_LEVEL_PACKAGE__.client.scaffold;
+package __TOP_LEVEL_PACKAGE__.client.style;
 
 import com.google.gwt.resources.client.CssResource.NotStrict;
 import com.google.gwt.user.cellview.client.CellList;
