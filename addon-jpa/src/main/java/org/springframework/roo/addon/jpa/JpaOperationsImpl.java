@@ -474,7 +474,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		if (!StringUtils.hasText(hostName)) {
 			hostName = "localhost";
 		}
-		connectionString = connectionString.replace("HOST", hostName);
+		connectionString = connectionString.replace("HOST_NAME", hostName);
 		props.put("database.url", connectionString);
 
 		String dbPropsMsg = "Please enter your database details in src/main/resources/META-INF/spring/database.properties.";
