@@ -86,7 +86,7 @@ public class BackupOperationsImpl implements BackupOperations {
 				}
 				
 				// Include dbre xml if present
-				if (name.equals(".roo-dbre")) {
+				if (dir.equals(base) && name.equals(".roo-dbre")) {
 					return true;
 				}
 				
