@@ -53,6 +53,7 @@ public class JpaCommands implements CommandMarker {
 		@CliOption(key = "database", mandatory = true, help = "The database to support") JdbcDatabase jdbcDatabase, 
 		@CliOption(key = "applicationId", mandatory = false, unspecifiedDefaultValue = "the project's name", help = "The Google App Engine application identifier to use") String applicationId, 
 		@CliOption(key = "jndiDataSource", mandatory = false, help = "The JNDI datasource to use") String jndi, 
+		@CliOption(key = "hostName", mandatory = false, help = "The host name to use") String hostName, 
 		@CliOption(key = "databaseName", mandatory = false, help = "The database name to use") String databaseName, 
 		@CliOption(key = "userName", mandatory = false, help = "The username to use") String userName, 
 		@CliOption(key = "password", mandatory = false, help = "The password to use") String password,
@@ -68,7 +69,7 @@ public class JpaCommands implements CommandMarker {
 			return;
 		}
 
-		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, databaseName, userName, password, persistenceUnit);
+		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, persistenceUnit);
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")

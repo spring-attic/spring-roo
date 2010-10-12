@@ -23,12 +23,14 @@ public interface JpaOperations {
 	 * @param database the database (HSQL, H2, MySql, etc)
 	 * @param jndi the JNDI datasource
 	 * @param applicationId the Google App Engine application identifier. Defaults to the project's name if not specified.
+	 * @param hostName the host name where the database is
 	 * @param databaseName the name of the database
 	 * @param userName the username to connect to the database
 	 * @param password the password to connect to the database
 	 * @param persistenceUnit the name of the persistence unit defined in the persistence.xml file
+	 * @param persistenceUnit2 
 	 */
-	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password, String persistenceUnit);
+	void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit);
 	
 	SortedSet<String> getDatabaseProperties();
 }

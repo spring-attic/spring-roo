@@ -83,7 +83,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		return pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
-	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String databaseName, String userName, String password, String persistenceUnit) {
+	public void configureJpa(OrmProvider ormProvider, JdbcDatabase database, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
 		Assert.notNull(ormProvider, "ORM provider required");
 		Assert.notNull(database, "JDBC database required");
 
@@ -98,7 +98,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updateGaeXml(ormProvider, database, applicationId);
 		updateVMforceConfigProperties(ormProvider, database, userName, password);
 		if (!StringUtils.hasText(jndi)) {
-			updateDatabaseProperties(ormProvider, database, databaseName, userName, password);
+			updateDatabaseProperties(ormProvider, database, hostName, databaseName, userName, password);
 		}
 
 		updateLog4j(ormProvider);
@@ -433,7 +433,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
-	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password) {
+	private void updateDatabaseProperties(OrmProvider ormProvider, JdbcDatabase database, String hostName, String databaseName, String userName, String password) {
 		String databasePath = getDatabasePropertiesPath();
 		boolean databaseExists = fileManager.exists(databasePath);
 
@@ -471,6 +471,10 @@ public class JpaOperationsImpl implements JpaOperations {
 			String dbDelimiter = database == JdbcDatabase.ORACLE ? ":" : "/";
 			connectionString += databaseName.startsWith(dbDelimiter) ? databaseName : dbDelimiter + databaseName;
 		}
+		if (!StringUtils.hasText(hostName)) {
+			hostName = "localhost";
+		}
+		connectionString = connectionString.replace("HOST", hostName);
 		props.put("database.url", connectionString);
 
 		String dbPropsMsg = "Please enter your database details in src/main/resources/META-INF/spring/database.properties.";
