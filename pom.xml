@@ -59,18 +59,19 @@
         <module>addon-backup</module>
         <module>addon-serializable</module>
         <module>addon-web-mvc-controller</module>
-	    <module>addon-web-mvc-embedded</module>
+	<module>addon-web-mvc-embedded</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-security</module>
-	    <module>addon-solr</module>
+	<module>addon-solr</module>
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
-	    <module>addon-gwt</module>
-	    <module>addon-jdbc</module> 
-	    <module>addon-dbre</module> 
-	    <module>addon-creator</module>
-	    <module>addon-json</module>
-	    <module>addon-op4j</module>
+	<module>addon-gwt</module>
+	<module>addon-jdbc</module> 
+	<module>addon-dbre</module> 
+	<module>addon-creator</module>
+        <module>addon-roobot-client</module>
+	<module>addon-json</module>
+	<module>addon-op4j</module>
 <!--	    <module>addon-git</module>  -->
         <module>annotations</module>
     </modules>

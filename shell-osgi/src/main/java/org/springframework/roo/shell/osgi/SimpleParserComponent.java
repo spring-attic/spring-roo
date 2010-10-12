@@ -84,7 +84,7 @@ public class SimpleParserComponent extends SimpleParser implements CommandMarker
 	@Override
 	protected void commandNotFound(Logger logger, String buffer) {
 		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
-		addOnSearchManager.completeAddOnSearch(buffer, this);
+		addOnSearchManager.completeAddOnSearch(buffer);
 	}
 
 	protected void bindConverter(Converter c) {

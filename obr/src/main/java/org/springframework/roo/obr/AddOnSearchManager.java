@@ -1,13 +1,24 @@
 package org.springframework.roo.obr;
 
 /**
- * Performs an add-on search using a given {@link AddOnFinder}, displaying the results to the user.
+ * Performs an add-on search using all available {@link AddOnFinder}, displaying the results to the user.
  *
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.1
  */
 public interface AddOnSearchManager {
 
+	/**
+	 * Performs the search, displaying matching add-ons to the user along with installation instructions.
+	 * 
+	 * This method will use all finders it can find in the bundle classpath.
+	 * 
+	 * @param criteria to search (the exact meaning varies as per {@link AddOnFinder}; required)
+	 * @return the number of matches
+	 */
+	int completeAddOnSearch(String criteria);
+	
 	/**
 	 * Performs the search, displaying matching add-ons to the user along with installation instructions.
 	 * 
