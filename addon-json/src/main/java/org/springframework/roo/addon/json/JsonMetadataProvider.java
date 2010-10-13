@@ -17,7 +17,7 @@ import org.springframework.roo.project.Path;
  * @author Stefan Schmidt
  * @since 1.1
  */
-@Component 
+@Component(immediate=true)
 @Service 
 public final class JsonMetadataProvider extends AbstractItdMetadataProvider {
 
