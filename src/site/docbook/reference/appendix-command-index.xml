@@ -1,8 +1,51 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.0.M3 [rev d2fc92d].</para>
+    <para>This appendix was automatically built from Roo 1.1.0.RC1 [rev a3291c3].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
+    <section xml:id="command-index-add-on-commands">
+        <title>Add On Commands</title>
+        <para>Add On Commands are contained in org.springframework.roo.addon.roobot.client.AddOnCommands.</para>
+        <section xml:id="command-index-addon-info">
+            <title>addon info</title>
+            <para>Provide information about Spring Roo addons</para>
+            <programlisting><![CDATA[addon info --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-install">
+            <title>addon install</title>
+            <para>Install Roo Addon</para>
+            <programlisting><![CDATA[addon install --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-list">
+            <title>addon list</title>
+            <para>List all known Spring Roo addons</para>
+            <programlisting><![CDATA[addon list]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--refresh</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the addon of interest; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
     <section xml:id="command-index-backup-commands">
         <title>Backup Commands</title>
         <para>Backup Commands are contained in org.springframework.roo.addon.backup.BackupCommands.</para>
@@ -84,6 +127,31 @@
                 </varlistentry>
             </variablelist>
         </section>
+        <section xml:id="command-index-embeddable">
+            <title>embeddable</title>
+            <para>Creates a new Java class source file with the JPA @Embeddable annotation in SRC_MAIN_JAVA</para>
+            <programlisting><![CDATA[embeddable --class]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the class to create; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--serializable</term>
+                    <listitem>
+                        <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-entity">
             <title>entity</title>
             <para>Creates a new JPA persistent entity in SRC_MAIN_JAVA</para>
@@ -153,6 +221,12 @@
                     <term>--serializable</term>
                     <listitem>
                         <para>Whether the generated class should implement java.io.Serializable; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--persistenceUnit</term>
+                    <listitem>
+                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -324,7 +398,7 @@
         <para>Creator Commands are contained in org.springframework.roo.addon.creator.CreatorCommands.</para>
         <section xml:id="command-index-addon-create-advanced">
             <title>addon create advanced</title>
-            <para>Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + depedencies</para>
+            <para>Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies</para>
             <programlisting><![CDATA[addon create advanced --topLevelPackage]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -337,6 +411,12 @@
                     <term>--description</term>
                     <listitem>
                         <para>Description of your addon (surround text with double quotes); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--projectName</term>
+                    <listitem>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -382,6 +462,12 @@
                         <para>Description of your addon (surround text with double quotes); no default value</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--projectName</term>
+                    <listitem>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-addon-create-simple">
@@ -399,6 +485,12 @@
                     <term>--description</term>
                     <listitem>
                         <para>Description of your addon (surround text with double quotes); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--projectName</term>
+                    <listitem>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1002,6 +1094,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--comment</term>
                     <listitem>
                         <para>An optional comment for JavaDocs; no default value</para>
@@ -1093,6 +1191,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--transient</term>
                     <listitem>
                         <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
@@ -1114,6 +1218,37 @@
                     <term>--timeFormat</term>
                     <listitem>
                         <para>Indicates the style of the time format; default: 'NONE'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-field-embedded">
+            <title>field embedded</title>
+            <para>Adds a private @Embedded field to an existing Java source file </para>
+            <programlisting><![CDATA[field embedded --fieldName --type]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--fieldName</term>
+                    <listitem>
+                        <para>The name of the field to add; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--type</term>
+                    <listitem>
+                        <para>The Java type of the @Embeddable class; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The name of the @Entity class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1263,6 +1398,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--transient</term>
                     <listitem>
                         <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
@@ -1272,6 +1413,12 @@
                     <term>--primitive</term>
                     <listitem>
                         <para>Indicates to use a primitive type if possible; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--unique</term>
+                    <listitem>
+                        <para>Indicates whether to mark the field with a unique constraint; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1321,6 +1468,18 @@
                     <term>--comment</term>
                     <listitem>
                         <para>An optional comment for JavaDocs; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA column name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1561,6 +1720,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--value</term>
+                    <listitem>
+                        <para>Inserts an optional Spring @Value annotation with the given content; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--comment</term>
                     <listitem>
                         <para>An optional comment for JavaDocs; no default value</para>
@@ -1570,6 +1735,12 @@
                     <term>--transient</term>
                     <listitem>
                         <para>Indicates to mark the field as transient; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--unique</term>
+                    <listitem>
+                        <para>Indicates whether to mark the field with a unique constraint; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1895,6 +2066,12 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
+                    <term>--hostName</term>
+                    <listitem>
+                        <para>The host name to use; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
                     <term>--databaseName</term>
                     <listitem>
                         <para>The database name to use; no default value</para>
@@ -1910,6 +2087,12 @@
                     <term>--password</term>
                     <listitem>
                         <para>The password to use; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--persistenceUnit</term>
+                    <listitem>
+                        <para>The persistence unit name to be used in the persistence.xml file; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1930,6 +2113,12 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+        <section xml:id="command-index-json-all">
+            <title>json all</title>
+            <para>Adds @RooJson annotation to all types annotated with @RooJavaBean</para>
+            <programlisting><![CDATA[json all]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-jsp-commands">
@@ -2226,6 +2415,19 @@
     <section xml:id="command-index-metadata-commands">
         <title>Metadata Commands</title>
         <para>Metadata Commands are contained in org.springframework.roo.classpath.MetadataCommands.</para>
+        <section xml:id="command-index-metadata-cache">
+            <title>metadata cache</title>
+            <para>Shows detailed metadata for the indicated type</para>
+            <programlisting><![CDATA[metadata cache --maximumCapacity]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--maximumCapacity</term>
+                    <listitem>
+                        <para>The maximum number of metadata items to cache; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
         <section xml:id="command-index-metadata-for-id">
             <title>metadata for id</title>
             <para>Shows detailed information about the metadata item</para>
@@ -2270,6 +2472,29 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-op4j-commands">
+        <title>Op4j Commands</title>
+        <para>Op4j Commands are contained in org.springframework.roo.addon.op4j.Op4jCommands.</para>
+        <section xml:id="command-index-op4j-add">
+            <title>op4j add</title>
+            <para>Some helpful description</para>
+            <programlisting><![CDATA[op4j add]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The java type to apply the RooOp4j annotation to; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-op4j-setup">
+            <title>op4j setup</title>
+            <para>Setup Op4j addon</para>
+            <programlisting><![CDATA[op4j setup]]></programlisting>
+            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-pgp-commands">

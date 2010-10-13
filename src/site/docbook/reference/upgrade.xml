@@ -129,6 +129,22 @@
         issue. Please be aware that this has not been tested by the Roo team
         and Tomcat 5.5 does officially support the JSP 2.0 API.</para>
       </listitem>
+
+      <listitem>
+        <para>Applications with a scaffolded Spring MVC UI are currently not
+        deployable to Google App Engine due to incompatibilities in the JSP
+        support and JSTL. See <link
+        xlink:href="https://jira.springframework.org/browse/ROO-1006">ROO-1006</link>
+        for details.</para>
+      </listitem>
+
+      <listitem>
+        <para>Applications with a scaffolded GWT UI require a manual
+        adjustment in src/main/webapp/WEB-INF/spring/webmvc-config.xml (this
+        will not be required when using Spring Framework 3.0.5):</para>
+
+        <programlisting>&lt;mvc:default-servlet-handler <emphasis role="bold">default-servlet-name="_ah_default"</emphasis> /&gt;</programlisting>
+      </listitem>
     </itemizedlist>
   </section>
 
@@ -232,6 +248,31 @@
     <para>If you experience any difficulty with upgrading your projects,
     please use the <link linkend="resources-forums">community support
     forum</link> for assistance.</para>
+  </section>
+
+  <section>
+    <title>Upgrading to 1.1.0.RC1</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.0.M3 to Spring Roo 1.1.0.RC1 are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+    </itemizedlist>
+
+    <itemizedlist>
+      <listitem>
+        <para>There have been changes made to the <code>web.xml</code>
+        configuration to allow deployment of GWT scaffolded applications to
+        GAE. Please compare a <code>web.xml</code>produced in a new Spring Roo
+        project with your current project's <code>web.xml</code> to identify
+        differences.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="upgrade-1.1.0.M3">
