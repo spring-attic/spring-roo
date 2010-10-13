@@ -60,6 +60,12 @@
       </dependency>
       <!-- dependency org="org.apache.el" name="jasper-el" rev="6.0.20" / -->
       <dependency org="joda-time" name="joda-time" rev="1.6" />
+      <dependency>
+        <groupId>javax.servlet.jsp</groupId>
+        <artifactId>jsp-api</artifactId>
+        <version>2.1</version>
+        <scope>provided</scope>
+      </dependency>
     </dependencies>
   </springWebMvc>
 </configuration>
