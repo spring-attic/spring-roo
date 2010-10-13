@@ -4,7 +4,7 @@
     <groupId>org.springframework.roo</groupId>
     <artifactId>org.springframework.roo.root</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0.M4</version>
+    <version>1.1.0.RC1</version>
     <name>Spring Roo</name>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
@@ -483,7 +483,7 @@
     </reporting>
 
     <properties>
-        <roo.version>1.1.0.M4</roo.version>
+        <roo.version>1.1.0.RC1</roo.version>
     </properties>
 
 </project>
