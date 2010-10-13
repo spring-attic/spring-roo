@@ -85,7 +85,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	protected void bindDatabaseListener(DatabaseListener listener) {
 		synchronized (listeners) {
 			listeners.add(listener);
-			if (startupCompleted) {
+			if (startupCompleted && lastSchema != null) {
 				// This listener missed that startup event, so we should share it with them now they're online
 				// We use "safe mode" to avoid telling everybody else about the database (they would already know separately)
 				Database database = getDatabase(lastSchema, false, true);
