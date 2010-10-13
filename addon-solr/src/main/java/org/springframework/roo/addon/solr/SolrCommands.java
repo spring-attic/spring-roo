@@ -22,7 +22,7 @@ public class SolrCommands implements CommandMarker {
 	
 	@Reference private SolrOperations searchOperations;
 	
-	@CliAvailabilityIndicator({"solr setup","solr add"})
+	@CliAvailabilityIndicator({"solr setup","solr add","solr all"})
 	public boolean isInstallJmsAvailable() {
 		return searchOperations.isInstallSearchAvailable();
 	}

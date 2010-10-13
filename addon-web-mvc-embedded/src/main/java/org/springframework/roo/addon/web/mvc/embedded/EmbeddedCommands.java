@@ -44,7 +44,7 @@ public class EmbeddedCommands implements CommandMarker {
 		fieldConverter.remove(PhotoProvider.class);
 	}
 	
-	@CliAvailabilityIndicator({"web mvc embed generic", "web mvc embed wave", "web mvc embed document", "web mvc embed video", "web mvc embed photos", "web mvc embed stream video", "web mvc embed finances", "web mvc embed twitter"})
+	@CliAvailabilityIndicator({"web mvc embed generic", "web mvc embed wave", "web mvc embed map", "web mvc embed document", "web mvc embed video", "web mvc embed photos", "web mvc embed stream video", "web mvc embed finances", "web mvc embed twitter"})
 	public boolean isPropertyAvailable() {
 		 return operations.isCommandAvailable();
 	}
