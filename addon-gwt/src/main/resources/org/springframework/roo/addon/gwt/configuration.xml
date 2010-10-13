@@ -5,14 +5,14 @@
 			<repository>
 				<id>gwt-repo</id>
 				<name>Google Web Toolkit Repository</name>
-				<url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven</url>
+				<url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
 			</repository>
 		</repositories>
 		<pluginRepositories>
 			<pluginRepository>
 				<id>gwt-plugin-repo</id>
 				<name>Google Web Toolkit Plugin Repository</name>
-				<url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven</url>
+				<url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven/</url>
 			</pluginRepository>
 		</pluginRepositories>
 		<dependencies>
