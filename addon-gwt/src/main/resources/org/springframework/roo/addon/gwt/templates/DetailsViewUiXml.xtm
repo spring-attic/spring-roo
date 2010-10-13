@@ -32,7 +32,7 @@
     </div>
 
     <table class='{style.fields}'>{{#properties}}
-      <tr><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><span ui:field='{{=prop}}'></span></td></tr>{{/properties}}
+      <tr><td><span class='{style.label}'>{{=propReadable}}:</span></td><td><span ui:field='{{=prop}}'></span></td></tr>{{/properties}}
     </table>
 
   <div class="{style.bar}">

@@ -220,6 +220,11 @@ public class {{=className}} extends Composite
   @Override
   public void setValue(List<{{=proxy}}> values) {
     this.values = values;
+    makeEditable(editing = false);
+    if (displayedList != null) {
+      displayedList.clear();
+    }
+    
     if (values != null) {
       for ({{=proxy}} e : values) {
         displayedList.add(e);
