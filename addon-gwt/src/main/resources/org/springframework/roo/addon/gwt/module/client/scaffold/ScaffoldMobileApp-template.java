@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.place.shared.*;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
@@ -160,15 +161,17 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		requestFactory.userInformationRequest().getCurrentUserInformation(
 				Window.Location.getHref()).fire(receiver);
 
-        /* Add remote logging handler */
-        RequestFactoryLogHandler.LoggingRequestProvider provider = new RequestFactoryLogHandler.LoggingRequestProvider() {
-            public LoggingRequest getLoggingRequest() {
-              return requestFactory.loggingRequest();
-            }
-        };
-        Logger.getLogger("").addHandler(
-            new RequestFactoryLogHandler(provider, Level.WARNING,
-                                         new ArrayList<String>()));
+        if (LogConfiguration.loggingIsEnabled()) {
+          /* Add remote logging handler */
+          RequestFactoryLogHandler.LoggingRequestProvider provider = new RequestFactoryLogHandler.LoggingRequestProvider() {
+              public LoggingRequest getLoggingRequest() {
+                return requestFactory.loggingRequest();
+              }
+            };
+          Logger.getLogger("").addHandler(
+              new RequestFactoryLogHandler(provider, Level.WARNING,
+                                           new ArrayList<String>()));
+        }
 
         /* Left side lets us pick from all the types of entities */
 
