@@ -272,6 +272,13 @@
         project with your current project's <code>web.xml</code> to identify
         differences.</para>
       </listitem>
+
+      <listitem>
+        <para>The GWT maven artifacts in your local maven repository should be
+        removed so they can be replaced with the latest versions. Make sure to
+        delete ~/.m2/repository/com/google/gwt and
+        org/codehaus/mojo/gwt-maven-plugin.</para>
+      </listitem>
     </itemizedlist>
   </section>
 
