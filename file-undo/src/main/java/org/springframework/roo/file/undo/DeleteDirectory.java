@@ -43,7 +43,16 @@ public class DeleteDirectory implements UndoableOperation {
 		logger.fine("Deleted " + filenameResolver.getMeaningfulName(actual));
 	}
 	
-	public void reset() {}
+	public void reset() {
+		// fix for ROO-1555
+		try {
+			FileUtils.deleteRecursively(backup);
+			logger.fine("Reset manage " + filenameResolver.getMeaningfulName(backup));
+		}
+		catch (Throwable ignore) {
+			logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+		}
+	}
 
 	public boolean undo() {
 		boolean success = FileUtils.copyRecursively(backup, actual, false);

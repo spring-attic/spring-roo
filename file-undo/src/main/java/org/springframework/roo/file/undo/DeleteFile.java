@@ -42,7 +42,17 @@ public class DeleteFile implements UndoableOperation {
 		logger.fine("Deleted " + filenameResolver.getMeaningfulName(actual));
 	}
 	
-	public void reset() {}
+	public void reset() {
+		// fix for ROO-1555
+		try {
+			backup.delete();
+			logger.fine("Reset manage " + filenameResolver.getMeaningfulName(backup));
+		}
+		catch (Throwable e) {
+			backup.deleteOnExit();
+			logger.fine("Reset failed " + filenameResolver.getMeaningfulName(backup));
+		}
+	}
 
 	public boolean undo() {
 		try {
