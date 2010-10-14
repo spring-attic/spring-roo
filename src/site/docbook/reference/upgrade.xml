@@ -251,10 +251,10 @@
   </section>
 
   <section>
-    <title>Upgrading to 1.1.0.RC1</title>
+    <title>Upgrading to 1.1.0.RELEASE</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
-    Roo 1.1.0.M3 to Spring Roo 1.1.0.RC1 are as follows:</para>
+    Roo 1.1.0.M3 to Spring Roo 1.1.0.RELEASE are as follows:</para>
 
     <itemizedlist>
       <listitem>
