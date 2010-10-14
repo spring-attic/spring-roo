@@ -357,7 +357,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			URL classContainer = AbstractShell.class.getProtectionDomain().getCodeSource().getLocation();
 			if (classContainer.toString().endsWith(".jar")) {
 				// Attempt to obtain the "Bundle-Version" version from the manifest
-				jarFile = new JarFile(classContainer.getFile(), false);
+				jarFile = new JarFile(new File(classContainer.toURI()), false);
 				ZipEntry manifestEntry = jarFile.getEntry("META-INF/MANIFEST.MF");
 				Manifest manifest = new Manifest(jarFile.getInputStream(manifestEntry));
 				bundleVersion = manifest.getMainAttributes().getValue("Bundle-Version");
