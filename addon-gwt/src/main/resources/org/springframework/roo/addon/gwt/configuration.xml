@@ -12,7 +12,7 @@
 			<pluginRepository>
 				<id>gwt-plugin-repo</id>
 				<name>Google Web Toolkit Plugin Repository</name>
-				<url>http://google-web-toolkit.googlecode.com/svn/2.1.0.M3/gwt/maven/</url>
+				<url>http://google-web-toolkit.googlecode.com/svn/2.1.0/gwt/maven/</url>
 			</pluginRepository>
 		</pluginRepositories>
 		<dependencies>
