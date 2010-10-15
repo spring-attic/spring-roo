@@ -59,6 +59,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	/** The "persist():void" instance method for the entity we are to create (required) */
 	private MethodMetadata persistMethod;
+	
+	/** The "flush():void" instance method for the entity we are to create (required) */
+	private MethodMetadata flushMethod;
 
 	/** Mandatory methods, in order of discovery (so we can guarantee the ITD is generated in a consistent manner for SCM compatibility) */
 	private List<MethodMetadata> mandatoryMutators = new ArrayList<MethodMetadata>();
@@ -73,7 +76,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private MetadataService metadataService;
 	private MetadataDependencyRegistry metadataDependencyRegistry;
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -82,6 +85,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.notNull(findMethod, "Find method required");
 		Assert.notNull(findEntriesMethod, "Find entries method required");
 		Assert.notNull(persistMethod, "Persist method required");
+		Assert.notNull(flushMethod, "Flush method required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
 
@@ -94,6 +98,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.identifierAccessorMethod = identifierAccessor;
 		this.findMethod = findMethod;
 		this.persistMethod = persistMethod;
+		this.flushMethod = flushMethod;
 		this.metadataService = metadataService;
 		this.metadataDependencyRegistry = metadataDependencyRegistry;
 
@@ -498,6 +503,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + " obj = " + getNewTransientEntityMethod().getMethodName() + "(i);");
 		bodyBuilder.appendFormalLine("obj." + persistMethod.getMethodName().getSymbolName() + "();");
+		bodyBuilder.appendFormalLine("obj." + flushMethod.getMethodName().getSymbolName() + "();");
 		bodyBuilder.appendFormalLine(dataField + ".add(obj);");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");

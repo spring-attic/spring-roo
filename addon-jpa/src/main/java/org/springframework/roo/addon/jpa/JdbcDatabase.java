@@ -12,7 +12,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 public enum JdbcDatabase {
 	H2_IN_MEMORY("H2", "org.h2.Driver", "jdbc:h2:mem:TO_BE_CHANGED_BY_ADDON;DB_CLOSE_DELAY=-1"), 
 	HYPERSONIC_IN_MEMORY("HYPERSONIC", "org.hsqldb.jdbcDriver", "jdbc:hsqldb:mem:TO_BE_CHANGED_BY_ADDON"), 
-	HYPERSONIC_PERSISTENT("HYPERSONIC", "org.hsqldb.jdbcDriver", "jdbc:hsqldb:${user.home}/TO_BE_CHANGED_BY_ADDON;shutdown=true"), 
+	HYPERSONIC_PERSISTENT("HYPERSONIC", "org.hsqldb.jdbcDriver", "jdbc:hsqldb:file:TO_BE_CHANGED_BY_ADDON;shutdown=true"), 
 	POSTGRES("POSTGRES", "org.postgresql.Driver", "jdbc:postgresql://HOST_NAME:5432"), 
 	MYSQL("MYSQL", "com.mysql.jdbc.Driver", "jdbc:mysql://HOST_NAME:3306"), 
 	ORACLE("ORACLE", "oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@HOST_NAME:1521"), 
