@@ -386,10 +386,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		return methodBuilder.build();
 	}
 
-	private boolean isNumericFieldType(FieldMetadata field) {
-		return field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || field.getFieldType().equals(JavaType.SHORT_OBJECT) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE);
-	}
-
 	/**
 	 * @return the "modifyEntity(Entity):boolean" method (never returns null)
 	 */
@@ -560,8 +556,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 			} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null) {
 				initializer = "true";
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX) != null || hasManyToOne || field.getAnnotations().size() == 0) {
-				// Only include the field if it's really required (ie marked with JSR 303 NotNull) or it has no annotations and is therefore probably simple to invoke
+			} else if (isNumericPrimitive(field) || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX) != null || hasManyToOne || field.getAnnotations().size() == 0) {
+				// Only include the field if it's really required (ie marked with JSR 303 NotNull), is a numeric primitive field, or it has no annotations and is therefore probably simple to invoke
 				if (field.getFieldType().equals(JavaType.STRING_OBJECT)) {
 					initializer = field.getFieldName().getSymbolName();
 
@@ -597,7 +593,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						initializer = "java.util.Calendar.getInstance()";
 					}
 				} else if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-					initializer = "new Boolean(true)";
+					initializer = "Boolean.TRUE";
 				} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
 					initializer = "true";
 				} else if (field.getFieldType().equals(JavaType.INT_OBJECT)) {
@@ -664,6 +660,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			mandatoryMutators.add(mutatorMethod);
 			mutatorArguments.put(mutatorMethod, initializer);
 		}
+	}
+	
+	private boolean isNumericFieldType(FieldMetadata field) {
+		return isNumericPrimitive(field) || field.getFieldType().equals(JavaType.INT_OBJECT) || field.getFieldType().equals(JavaType.DOUBLE_OBJECT) || field.getFieldType().equals(JavaType.FLOAT_OBJECT) || field.getFieldType().equals(JavaType.LONG_OBJECT) || field.getFieldType().equals(JavaType.SHORT_OBJECT);
+	}
+
+	private boolean isNumericPrimitive(FieldMetadata field) {
+		return field.getFieldType().equals(JavaType.INT_PRIMITIVE) || field.getFieldType().equals(JavaType.FLOAT_PRIMITIVE) || field.getFieldType().equals(JavaType.DOUBLE_PRIMITIVE) || field.getFieldType().equals(JavaType.LONG_PRIMITIVE) || field.getFieldType().equals(JavaType.SHORT_PRIMITIVE);
 	}
 
 	private JavaSymbolName getCollaboratingFieldName(JavaType entity) {
