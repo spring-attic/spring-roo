@@ -176,19 +176,26 @@ public class SchemaIntrospector {
 				column.setTypeCode(rs.getInt("DATA_TYPE"));
 				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
 				
+				int columnSize = rs.getInt("COLUMN_SIZE");
 				switch (column.getType()) {
 					case DECIMAL:
 					case DOUBLE:
 					case NUMERIC:
-						column.setPrecision(rs.getInt("COLUMN_SIZE"));
+						column.setPrecision(columnSize);
 						column.setScale(rs.getInt("DECIMAL_DIGITS"));
 						column.setLength(0);
 						break;
+					case CHAR:
+						if (columnSize > 1) {
+							column.setType(ColumnType.VARCHAR);
+							column.setLength(columnSize);
+						}
+						break;
 					default:
-						column.setLength(rs.getInt("COLUMN_SIZE"));
+						column.setLength(columnSize);
 						break;
 				}
-
+				
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 				column.setOrdinalPosition(rs.getInt("ORDINAL_POSITION"));
 
