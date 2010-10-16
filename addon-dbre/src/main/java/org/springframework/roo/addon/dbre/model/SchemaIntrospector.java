@@ -185,12 +185,6 @@ public class SchemaIntrospector {
 						column.setScale(rs.getInt("DECIMAL_DIGITS"));
 						column.setLength(0);
 						break;
-					case CHAR:
-						if (columnSize > 1) {
-							column.setType(ColumnType.VARCHAR);
-							column.setLength(columnSize);
-						}
-						break;
 					default:
 						column.setLength(columnSize);
 						break;
