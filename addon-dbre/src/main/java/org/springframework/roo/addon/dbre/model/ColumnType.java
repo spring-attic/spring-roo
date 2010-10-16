@@ -20,7 +20,7 @@ public enum ColumnType {
 	SMALLINT(Types.SMALLINT, JavaType.SHORT_OBJECT), 
 	INTEGER(Types.INTEGER, JavaType.INT_OBJECT), 
 	BIGINT(Types.BIGINT, JavaType.LONG_OBJECT), 
-	FLOAT(Types.FLOAT, JavaType.DOUBLE_OBJECT), 
+	FLOAT(Types.FLOAT, JavaType.FLOAT_OBJECT), 
 	REAL(Types.REAL, JavaType.FLOAT_OBJECT), 
 	NUMERIC(Types.NUMERIC, new JavaType(BigDecimal.class.getName())), 
 	DECIMAL(Types.DECIMAL, new JavaType(BigDecimal.class.getName())), 
@@ -42,7 +42,7 @@ public enum ColumnType {
 	BLOB(Types.BLOB, new JavaType("java.lang.Byte", 1, DataType.PRIMITIVE, null, null)), 
 	CLOB(Types.CLOB, JavaType.STRING_OBJECT), 
 	REF(Types.REF, new JavaType("java.sql.Ref")), 
-	DOUBLE(Types.DOUBLE, JavaType.DOUBLE_PRIMITIVE);
+	DOUBLE(Types.DOUBLE, JavaType.DOUBLE_OBJECT);
 
 	private int typeCode;
 	private JavaType javaType;
