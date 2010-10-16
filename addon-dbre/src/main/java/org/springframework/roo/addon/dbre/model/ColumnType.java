@@ -20,7 +20,7 @@ public enum ColumnType {
 	SMALLINT(Types.SMALLINT, JavaType.SHORT_OBJECT), 
 	INTEGER(Types.INTEGER, JavaType.INT_OBJECT), 
 	BIGINT(Types.BIGINT, JavaType.LONG_OBJECT), 
-	FLOAT(Types.FLOAT, JavaType.FLOAT_OBJECT), 
+	FLOAT(Types.FLOAT, JavaType.DOUBLE_OBJECT), 
 	REAL(Types.REAL, JavaType.FLOAT_OBJECT), 
 	NUMERIC(Types.NUMERIC, new JavaType(BigDecimal.class.getName())), 
 	DECIMAL(Types.DECIMAL, new JavaType(BigDecimal.class.getName())), 
