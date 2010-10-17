@@ -75,6 +75,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 	}
+	
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
+	}
 
 	public MetadataItem get(String metadataIdentificationString) {
 		// Work out the MIDs of the other metadata we depend on
@@ -100,6 +104,10 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		
+		// We need to be informed if our dependent metadata changes
+		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
+		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
