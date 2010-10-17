@@ -208,6 +208,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
+		
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
 						addToBuilder(field);
 					}
@@ -228,7 +229,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(foreignTableName)) + fieldSuffix);
-						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
+						JavaSymbolName mappedByFieldName = null;
+						if (foreignTableName.equals(table.getName()) && exportedKey.getReferenceCount() == 1) {
+							Reference reference = exportedKey.getReferences().first();
+							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getForeignColumnName()));
+						} else {
+							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
+						}
+						
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
 						addToBuilder(field);
 					}
@@ -244,10 +252,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		for (ForeignKey foreignKey : table.getForeignKeys()) {
 			if (!isOneToOne(table, foreignKey)) {
 				// Assume many-to-one multiplicity
-				Short keySequence = foreignKey.getKeySequence();
-				String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
+				JavaSymbolName fieldName = null;
 				String foreignTableName = foreignKey.getForeignTableName();
-				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
+				if (foreignTableName.equals(table.getName()) && foreignKey.getReferenceCount() == 1) {
+					Reference reference = foreignKey.getReferences().first();
+					fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getLocalColumnName()));
+				} else {
+					Short keySequence = foreignKey.getKeySequence();
+					String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
+					fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
+				}
 				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(managedEntities, foreignTableName, governorTypeDetails.getName().getPackage());
 				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
@@ -512,8 +526,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private List<FieldMetadata> getIdentifierFields(JavaType javaType) {
 		List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
 		// Check for identifier class and exclude fields that are part of the composite primary key
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
-		AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+		AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
 		if (identifierTypeAttribute != null) {
 			// Attribute identifierType exists so get the value
 			JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
