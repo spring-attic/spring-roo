@@ -52,7 +52,7 @@ public class I18nComponent implements I18nSupport {
 	public I18n getLanguage(Locale locale) {
 		synchronized (mutex) {
 			for (I18n lang: Collections.unmodifiableSet(i18nSet)) {
-				if (lang.getLocale().equals(locale)) {
+				if (lang.getLocale().toString().equalsIgnoreCase(locale.toString())) {
 					return lang;
 				}
 			}

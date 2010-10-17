@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -19,6 +21,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Component 
 @Service 
 public class JspCommands implements CommandMarker {
+	private Logger log = Logger.getLogger(getClass().getName());
 	@Reference private JspOperations jspOperations;
 
 	@CliAvailabilityIndicator({ "controller class" }) 
@@ -42,7 +45,10 @@ public class JspCommands implements CommandMarker {
 	@CliCommand(value = "web mvc install language", help = "Create a new manual Controller (ie where you write the methods)") 
 	public void lang(
 		@CliOption(key = { "", "code" }, mandatory = true, help = "The path and name of the controller object to be created") I18n i18n) {
-		
+		if (i18n == null) {
+			log.warning("Could not parse language code");
+			return;
+		}
 		jspOperations.installI18n(i18n);
 	}
 

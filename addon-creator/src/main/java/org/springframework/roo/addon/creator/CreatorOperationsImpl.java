@@ -153,7 +153,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
 				input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
 				input = input.replace("__APP_NAME__", languageName);
-				input = input.replace("__LOCALE__", locale.toString());
+//				input = input.replace("__LOCALE__", locale.toString());
+				input = input.replace("__LOCALE__", locale.getLanguage());
 				input = input.replace("__LANGUAGE__", StringUtils.capitalize(language));
 				if (flagGraphic != null) {
 					input = input.replace("__FLAG_FILE__", flagGraphic.getName());

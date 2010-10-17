@@ -414,9 +414,16 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		String targetDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "");
-
+		
+		//country locale parts currently not supported due to default lowercasing of all files in Roo shell
+		
+//		String country = "";
+//		if (i18n.getLocale().getCountry() != null && i18n.getLocale().getCountry().length() > 0) {
+//			country = "_" + i18n.getLocale().getCountry().toUpperCase();
+//		}
+		
 		// Install message bundle
-		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale() + ".properties";
+		String messageBundle = targetDirectory + "/WEB-INF/i18n/messages_" + i18n.getLocale().getLanguage() /*+ country*/ + ".properties";
 		// Special case for english locale (default)
 		if (i18n.getLocale().equals(Locale.ENGLISH)) {
 			messageBundle = targetDirectory + "/WEB-INF/i18n/messages.properties";
@@ -430,7 +437,7 @@ public class JspOperationsImpl implements JspOperations {
 		}
 
 		// Install flag
-		String flagGraphic = targetDirectory + "/images/" + i18n.getLocale() + ".png";
+		String flagGraphic = targetDirectory + "/images/" + i18n.getLocale().getLanguage() /*+ country*/ + ".png";
 		if (!fileManager.exists(flagGraphic)) {
 			try {
 				FileCopyUtils.copy(i18n.getFlagGraphic(), fileManager.createFile(flagGraphic).getOutputStream());
@@ -455,9 +462,11 @@ public class JspOperationsImpl implements JspOperations {
 			throw new IllegalStateException(e);
 		}
 
-		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().toString() + "']", footer.getDocumentElement())) {
+//		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().toString() + "']", footer.getDocumentElement())) {
+		if (null == XmlUtils.findFirstElement("//span[@id='language']/language[@locale='" + i18n.getLocale().getLanguage() + "']", footer.getDocumentElement())) {
 			Element span = XmlUtils.findRequiredElement("//span[@id='language']", footer.getDocumentElement());
-			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
+//			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
+			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().getLanguage()).addAttribute("label", i18n.getLanguage()).build());
 			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
 		}
 	}

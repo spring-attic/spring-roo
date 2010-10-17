@@ -16,7 +16,7 @@ import org.springframework.roo.shell.MethodTarget;
  * @since 1.0
  *
  */
-@Component
+@Component(immediate=true)
 @Service
 public class I18nConverter implements Converter {
 	
@@ -25,9 +25,10 @@ public class I18nConverter implements Converter {
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value.length() == 2) {
 			return i18nSupport.getLanguage(new Locale(value,"","")); 
-		} else if (value.length() == 5) {
-			String[] split = value.split("_");
-			return i18nSupport.getLanguage(new Locale(split[0], split[1]));
+			// disabled due to ROO-1584
+//		} else if (value.length() == 5) {
+//			String[] split = value.split("_");
+//			return i18nSupport.getLanguage(new Locale(split[0], split[1].toUpperCase(), ""));
 		} else {
 			return null;
 		}
@@ -38,7 +39,7 @@ public class I18nConverter implements Converter {
 			Locale locale = i18n.getLocale();
 			StringBuffer localeString = new StringBuffer(locale.getLanguage());
 			if (locale.getCountry() == null || locale.getCountry().length() > 0) {
-				localeString.append("_").append(locale.getCountry());
+				localeString.append("_").append(locale.getCountry().toUpperCase());
 			}
 			completions.add(localeString.toString());
 		}
