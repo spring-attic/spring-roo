@@ -56,6 +56,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private BeanInfoMetadata beanInfoMetadata;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata findMethod;
+	
+	/** The "findEntityEntries(Integer,Integer):List<Entity>" static method for the entity (required) */
+	private MethodMetadata findEntriesMethod;
 
 	/** The "persist():void" instance method for the entity we are to create (required) */
 	private MethodMetadata persistMethod;
@@ -97,6 +100,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.identifierAccessorMethod = identifierAccessor;
 		this.findMethod = findMethod;
+		this.findEntriesMethod = findEntriesMethod;
 		this.persistMethod = persistMethod;
 		this.flushMethod = flushMethod;
 		this.metadataService = metadataService;
@@ -494,6 +498,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		// Create the body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
+		bodyBuilder.appendFormalLine(dataField + " = " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
+		bodyBuilder.appendFormalLine("if (data == null) throw new IllegalStateException(\"Find entries implementation for '" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "' illegally returned null\");");
+		bodyBuilder.appendFormalLine("if (!" + dataField + ".isEmpty()) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("return;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("");
 		bodyBuilder.appendFormalLine(dataField + " = new java.util.ArrayList<" + getDataField().getFieldType().getParameters().get(0).getNameIncludingTypeParameters() + ">();");
 		bodyBuilder.appendFormalLine("for (int i = 0; i < " + annotationValues.getQuantity() + "; i++) {");
 		bodyBuilder.indent();
