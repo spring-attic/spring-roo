@@ -85,7 +85,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		} else {
 			String url = bundle.getUrl();
 			if (url != null && url.length() > 0) {
-				url = url.replace("httppgp", "http");
+//				url = url.replace("httppgp", "http"); // don't do this, so the user has to accept the pgp key first
 				success = shell.executeCommand("felix shell start " + url); 
 			}
 			if (success) {
