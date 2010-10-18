@@ -410,7 +410,7 @@ public class Main {
 
 	            try
 	            {
-	                propURL = new File(confDir, SYSTEM_PROPERTIES_FILE_VALUE).toURL();
+	                propURL = new File(confDir, SYSTEM_PROPERTIES_FILE_VALUE).toURI().toURL();
 	            }
 	            catch (MalformedURLException ex)
 	            {
@@ -521,7 +521,7 @@ public class Main {
 
 	            try
 	            {
-	                propURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURL();
+	                propURL = new File(confDir, CONFIG_PROPERTIES_FILE_VALUE).toURI().toURL();
 	            }
 	            catch (MalformedURLException ex)
 	            {
