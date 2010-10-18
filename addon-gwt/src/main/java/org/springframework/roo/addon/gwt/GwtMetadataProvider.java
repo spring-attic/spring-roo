@@ -190,11 +190,11 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 	}
 
-	protected void activate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
-	protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
+	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 

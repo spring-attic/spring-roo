@@ -37,6 +37,7 @@ import org.springframework.roo.support.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
+@SuppressWarnings("unchecked")
 public class DefaultValueStyler implements ValueStyler {
 	private static final String EMPTY = "[empty]";
 	private static final String NULL = "[null]";
