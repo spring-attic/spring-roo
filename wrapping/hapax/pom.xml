@@ -15,7 +15,7 @@
 
     <properties>
         <pkgArtifactId>hapax</pkgArtifactId>
-        <pkgVersion>2.3.4</pkgVersion>
+        <pkgVersion>2.3.4.A</pkgVersion>
         <osgiVersion>${pkgVersion}.0001</osgiVersion>
         <pkgVendor>The Hapax2 Project</pkgVendor>
         <pkgDocUrl>http://code.google.com/p/hapax2/</pkgDocUrl>
