@@ -98,7 +98,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 			if (fileManager.exists(webXml)) {
 				MutableFile mutableWebXml = fileManager.updateFile(webXml);
 				Document webXmlDoc = XmlUtils.getDocumentBuilder().parse(mutableWebXml.getInputStream());
-				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BEFORE, null, WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, null);
+				WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BETWEEN, WebMvcOperations.HTTP_METHOD_FILTER_NAME, WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, SecurityOperations.SECURITY_FILTER_NAME, "org.springframework.web.filter.DelegatingFilterProxy", "/*", webXmlDoc, null);
 				XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 			} else {
 				throw new IllegalStateException("Could not acquire " + webXml);

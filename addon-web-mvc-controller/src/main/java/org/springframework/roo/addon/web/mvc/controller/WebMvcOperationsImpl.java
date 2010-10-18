@@ -1,11 +1,11 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -107,12 +107,12 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.FIRST, null, null, WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", webXml, null);
 		}
-		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addFilter(WebMvcOperations.HTTP_METHOD_FILTER_NAME, "org.springframework.web.filter.HiddenHttpMethodFilter", "/*", webXml, null);
+		WebXmlUtils.addFilter(WebMvcOperations.CHARACTER_ENCODING_FILTER_NAME, "org.springframework.web.filter.CharacterEncodingFilter", "/*", webXml, null, new WebXmlUtils.WebXmlParam("encoding", "UTF-8"), new WebXmlUtils.WebXmlParam("forceEncoding", "true"));
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
 		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
 		WebXmlUtils.setSessionTimeout(new Integer(10), webXml, null);
-//		WebXmlUtils.addWelcomeFile("/", webXml, null);
+		// WebXmlUtils.addWelcomeFile("/", webXml, null);
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
 		WebXmlUtils.addErrorCode(new Integer(404), "/resourceNotFound", webXml, null);
 
@@ -128,7 +128,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"))) {
-			// this file already exists, nothing to do
+			// This file already exists, nothing to do
 			return;
 		}
 
