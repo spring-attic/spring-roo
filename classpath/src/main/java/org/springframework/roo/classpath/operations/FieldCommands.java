@@ -14,9 +14,11 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.operations.jsr303.BooleanField;
 import org.springframework.roo.classpath.operations.jsr303.CollectionField;
@@ -29,6 +31,8 @@ import org.springframework.roo.classpath.operations.jsr303.NumericField;
 import org.springframework.roo.classpath.operations.jsr303.ReferenceField;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.classpath.operations.jsr303.StringField;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
@@ -55,6 +59,7 @@ public class FieldCommands implements CommandMarker {
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private MetadataService metadataService;
 	@Reference private StaticFieldConverter staticFieldConverter;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
 	protected void activate(ComponentContext context) {
@@ -294,9 +299,11 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 		
-		// Check if the target type is a JPA @Entity
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Entity")), "The field reference command is only applicable to JPA @Entity target types.");
+		// Check if the requested entity is a JPA @Entity
+		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		Assert.notNull(entityAnnotation, "The field reference command is only applicable to JPA @Entity target types.");
 
 		Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE, "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
 
@@ -331,9 +338,11 @@ public class FieldCommands implements CommandMarker {
 		Assert.notNull(physicalTypeMetadata, "The specified target '--element' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
+		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 	
-		// Check if the target type is a JPA @Entity
-		if (MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Entity")) != null) {
+		// Check if the requested entity is a JPA @Entity
+		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		if (entityAnnotation != null) {
 			Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY, "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
 		} else if (ptd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
 			cardinality = null;
@@ -354,6 +363,24 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
+	}
+
+	private AnnotationMetadata findEntityAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		JavaType entityType = new JavaType("javax.persistence.Entity");
+		
+		// Check for annotation on .java file
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, entityType);
+		if (entityAnnotation == null) {
+			// Check for annotation on ITD
+			MemberDetails memberDetails =  memberDetailsScanner.getMemberDetails("org.springframework.roo.addon.entity.EntityMetadataProvider", classOrInterfaceTypeDetails);
+			for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
+				entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, entityType);
+				if (entityAnnotation != null) {
+					break;
+				}
+			}
+		}
+		return entityAnnotation;
 	}
 
 	@CliCommand(value = "field enum", help = "Adds a private enum field to an existing Java source file")	

@@ -18,6 +18,7 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -25,6 +26,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -50,6 +53,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	
 	private PathResolver getPathResolver() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -211,8 +215,11 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		// Verify the requested entity actually exists as a class and is not abstract
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = getEntity(entity);
 		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
-		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Entity")), "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
-		
+
+		// Check if the requested entity is a JPA @Entity
+		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		Assert.notNull(entityAnnotation, "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
+
 		// Everything is OK to proceed
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(name, path);
 
@@ -229,6 +236,24 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		generateClassFile(typeDetailsBuilder.build());
+	}
+
+	private AnnotationMetadata findEntityAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		JavaType entityType = new JavaType("javax.persistence.Entity");
+		
+		// Check for annotation on .java file
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, entityType);
+		if (entityAnnotation == null) {
+			// Check for annotation on ITD
+			MemberDetails memberDetails =  memberDetailsScanner.getMemberDetails("org.springframework.roo.addon.entity.EntityMetadataProvider", classOrInterfaceTypeDetails);
+			for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
+				entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, entityType);
+				if (entityAnnotation != null) {
+					break;
+				}
+			}
+		}
+		return entityAnnotation;
 	}
 		
 	/**

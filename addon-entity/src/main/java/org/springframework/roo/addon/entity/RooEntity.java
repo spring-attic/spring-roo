@@ -16,7 +16,6 @@ import org.springframework.roo.addon.beaninfo.RooBeanInfo;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
@@ -79,8 +78,7 @@ public @interface RooEntity {
 	String flushMethod() default "flush";
 
 	/**
-	 * @return the name of the "merge" method to gener
-	 * ate (defaults to "merge"; mandatory)
+	 * @return the name of the "merge" method to generate (defaults to "merge"; mandatory)
 	 */
 	String mergeMethod() default "merge";
 
@@ -123,4 +121,37 @@ public @interface RooEntity {
 	 * @return the name of the persistence unit defined in the persistence.xml file (optional)
 	 */
 	String persistenceUnit() default "";
+	
+	/**
+	 * @return whether to generated a @MappedSuperclass type annotation instead of @Entity (defaults to false).
+	 */
+	boolean mappedSuperclass() default false;
+
+	/**
+	 * Specifies the table name that should be used for the entity. 
+	 * 
+	 * @return the name of the table to use (default to "")
+	 */
+	String table() default "";
+	
+	/**
+	 * Specifies the database schema name that should be used for the entity. 
+	 * 
+	 * @return the name of the schema to use (default to "")
+	 */
+	String schema() default "";
+	
+	/**
+	 * Specifies the database catalog name that should be used for the entity. 
+	 * 
+	 * @return the name of the catalog to use (default to "")
+	 */
+	String catalog() default "";
+	
+	/**
+	 * Specifies the JPA inheritance type that should be used for the entity. 
+	 * 
+	 * @return the inheritance type to use (default to "")
+	 */
+	String inheritanceType() default "";
 }

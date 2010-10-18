@@ -12,7 +12,6 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
@@ -213,6 +212,8 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "abstract", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Whether the generated class should be marked as abstract") boolean createAbstract, 
 		@CliOption(key = "testAutomatically", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Create automatic integration tests for this entity") boolean testAutomatically, 
 		@CliOption(key = "table", mandatory = false, help = "The JPA table name to use for this entity") String table, 
+		@CliOption(key = "schema", mandatory = false, help = "The JPA table schema name to use for this entity") String schema, 
+		@CliOption(key = "catalog", mandatory = false, help = "The JPA table catalog name to use for this entity") String catalog, 
 		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
 		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
 		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
@@ -262,33 +263,28 @@ public class ClasspathCommands implements CommandMarker {
 		if (persistenceUnit != null) {
 			rooEntityBuilder.addStringAttribute("persistenceUnit", persistenceUnit);			
 		}
-		entityAnnotations.add(rooEntityBuilder);
-
-		if (table != null) {
-			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"));
-			tableBuilder.addStringAttribute("name", table);
-			entityAnnotations.add(tableBuilder);
+		if (mappedSuperclass) {
+			rooEntityBuilder.addBooleanAttribute("mappedSuperclass", mappedSuperclass);
 		}
+		if (table != null) {
+			rooEntityBuilder.addStringAttribute("table", table);	
+		}
+		if (schema != null) {
+			rooEntityBuilder.addStringAttribute("schema", schema);	
+		}
+		if (catalog != null) {
+			rooEntityBuilder.addStringAttribute("catalog", catalog);	
+		}
+		if (inheritanceType != null) {
+			rooEntityBuilder.addStringAttribute("inheritanceType", inheritanceType.name());
+		}
+		entityAnnotations.add(rooEntityBuilder);
 
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
 
-		if (mappedSuperclass) {
-			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.MappedSuperclass")));
-		} else {
-			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Entity")));
-		}
 		if (serializable) {
 			entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.serializable.RooSerializable")));
-		}
-		if (inheritanceType != null) {
-			AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Inheritance"));
-			inheritanceBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType.name())));
-			entityAnnotations.add(inheritanceBuilder);
-			if (inheritanceType == InheritanceType.SINGLE_TABLE) {
-				// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
-				entityAnnotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.DiscriminatorColumn")));
-			}
 		}
 		
 		int modifier = Modifier.PUBLIC;

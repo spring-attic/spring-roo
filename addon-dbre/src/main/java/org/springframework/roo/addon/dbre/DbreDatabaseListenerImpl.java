@@ -132,8 +132,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Create type annotations for new entity
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
-
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Entity")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean")));
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.roo.addon.tostring.RooToString")));
 		
@@ -143,6 +141,16 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		if (!hasVersionField(table)) {
 			rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
+		}
+		
+		if (StringUtils.hasText(table.getName())) {
+			rooEntityBuilder.addStringAttribute("table", table.getName());
+		}
+		if (StringUtils.hasText(table.getCatalog())) {
+			rooEntityBuilder.addStringAttribute("catalog", table.getCatalog());
+		}
+		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
+			rooEntityBuilder.addStringAttribute("schema", table.getSchema().getName());
 		}
 
 		annotations.add(rooEntityBuilder);
@@ -155,16 +163,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		JavaType superclass = new JavaType("java.lang.Object");
 		List<JavaType> extendsTypes = new ArrayList<JavaType>();
 		extendsTypes.add(superclass);
-
-		AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Table"));
-		tableBuilder.addStringAttribute("name", table.getName());
-		if (StringUtils.hasText(table.getCatalog())) {
-			tableBuilder.addStringAttribute("catalog", table.getCatalog());
-		}
-		if (table.getSchema() != null && StringUtils.hasText(table.getSchema().getName())) {
-			tableBuilder.addStringAttribute("schema", table.getSchema().getName());
-		}
-		annotations.add(tableBuilder);
 
 		// Create entity class
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
@@ -187,9 +185,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			return;
 		}
 
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, new JavaType(RooEntity.class.getName()));
-		Assert.notNull(entityAnnotation, "@RooEntity annotation not found on " + javaType.getFullyQualifiedTypeName());
-		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(entityAnnotation);
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(mutableTypeDetails, new JavaType(RooEntity.class.getName()));
+		Assert.notNull(rooEntityAnnotation, "@RooEntity annotation not found on " + javaType.getFullyQualifiedTypeName());
+		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(rooEntityAnnotation);
 
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new HashSet<JavaSymbolName>();
@@ -197,7 +195,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		manageEntityIdentifier(javaType, rooEntityBuilder, attributesToDeleteIfPresent, table);
 
 		// Manage versionField attribute
-		AnnotationAttributeValue<?> versionFieldAttribute = entityAnnotation.getAttribute(new JavaSymbolName(VERSION_FIELD));
+		AnnotationAttributeValue<?> versionFieldAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(VERSION_FIELD));
 		if (versionFieldAttribute != null) {
 			String versionFieldValue = (String) versionFieldAttribute.getValue();
 			if (hasVersionField(table) && (!StringUtils.hasText(versionFieldValue) || VERSION.equals(versionFieldValue))) {
@@ -366,10 +364,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		Iterator<? extends AnnotationMetadata> typeAnnotationIterator = typeAnnotations.iterator();
 		while (hasRequiredAnnotations && typeAnnotationIterator.hasNext()) {
 			JavaType annotationType = typeAnnotationIterator.next().getAnnotationType();
-			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("javax.persistence.Entity") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.getFullyQualifiedTypeName().equals("javax.persistence.Table") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity"));
+			hasRequiredAnnotations &= (annotationType.getFullyQualifiedTypeName().equals(RooDbManaged.class.getName()) || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.javabean.RooJavaBean") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.tostring.RooToString") || annotationType.getFullyQualifiedTypeName().equals("org.springframework.roo.addon.entity.RooEntity"));
 		}
 
-		if (!hasRequiredAnnotations || typeAnnotations.size() != 6) {
+		if (!hasRequiredAnnotations || typeAnnotations.size() != 4) {
 			return false;
 		}
 
@@ -425,9 +423,9 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-			AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
-			if (entityAnnotation != null) {
-				AnnotationAttributeValue<?> identifierTypeAttribute = entityAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
+			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+			if (rooEntityAnnotation != null) {
+				AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));
 				if (identifierTypeAttribute != null) {
 					// Attribute identifierType exists so get the value
 					JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();

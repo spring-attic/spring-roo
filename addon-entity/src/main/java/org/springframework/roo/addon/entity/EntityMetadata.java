@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.operations.InheritanceType;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
@@ -79,8 +80,12 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String findEntriesMethod = "find";
 	@AutoPopulate private String[] finders;
 	@AutoPopulate private String persistenceUnit = "";
-	
-
+	@AutoPopulate private boolean mappedSuperclass = false;
+	@AutoPopulate private String table = "";
+	@AutoPopulate private String schema = "";
+	@AutoPopulate private String catalog = "";
+	@AutoPopulate private String inheritanceType = "";
+		
 	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
@@ -117,6 +122,18 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}			
 		}
 		
+		// Add @Entity or @MappedSuperclass annotation
+		builder.addAnnotation(mappedSuperclass ? getMappedSuperclassAnnotation() : getEntityAnnotation());
+		
+		// Add @Table annotation if required
+		builder.addAnnotation(getTableAnnotation());
+		
+		// Add @Inheritance annotation if required
+		builder.addAnnotation(getInheritanceAnnotation());
+		
+		// Add @DiscriminatorColumn if required
+		builder.addAnnotation(getDiscriminatorColumnAnnotation());
+
 		// Determine the "entityManager" field we have access to. This is guaranteed to be accessible to the ITD.
 		builder.addField(getEntityManagerField());
 		
@@ -149,7 +166,65 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-		
+
+	public AnnotationMetadata getEntityAnnotation() {
+		return getTypeAnnotation(new JavaType("javax.persistence.Entity"));
+	}
+
+	public AnnotationMetadata getMappedSuperclassAnnotation() {
+		return getTypeAnnotation(new JavaType("javax.persistence.MappedSuperclass"));
+	}
+
+	private AnnotationMetadata getTypeAnnotation(JavaType annotationType) {
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, annotationType) != null) {
+			return null;
+		}
+		AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(annotationType);
+		return annotationBuilder.build();
+	}
+
+	public AnnotationMetadata getTableAnnotation() {
+		JavaType tableType = new JavaType("javax.persistence.Table");
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, tableType) != null) {
+			return null;
+		}
+		if (StringUtils.hasText(table) || StringUtils.hasText(schema) || StringUtils.hasText(catalog)) {
+			AnnotationMetadataBuilder tableBuilder = new AnnotationMetadataBuilder(tableType);
+			if (StringUtils.hasText(table)) {
+				tableBuilder.addStringAttribute("name", table);
+			}
+			if (StringUtils.hasText(schema)) {
+				tableBuilder.addStringAttribute("schema", schema);
+			}
+			if (StringUtils.hasText(catalog)) {
+				tableBuilder.addStringAttribute("catalog", catalog);
+			}
+			return tableBuilder.build();
+		}
+		return null;
+	}
+
+	private AnnotationMetadata getInheritanceAnnotation() {
+		JavaType inheritanceJavaType = new JavaType("javax.persistence.Inheritance");
+		if (MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, inheritanceJavaType) != null) {
+			return null;
+		}
+		if (StringUtils.hasText(inheritanceType)) {
+			AnnotationMetadataBuilder inheritanceBuilder = new AnnotationMetadataBuilder(inheritanceJavaType);
+			inheritanceBuilder.addEnumAttribute("strategy", new EnumDetails(new JavaType("javax.persistence.InheritanceType"), new JavaSymbolName(inheritanceType)));
+			return inheritanceBuilder.build();
+		}
+		return null;
+	}
+
+	public AnnotationMetadata getDiscriminatorColumnAnnotation() {
+		if ((StringUtils.hasText(inheritanceType) && InheritanceType.SINGLE_TABLE.name().equals(inheritanceType))) {
+			// Theoretically not required based on @DiscriminatorColumn JavaDocs, but Hibernate appears to fail if it's missing
+			return getTypeAnnotation(new JavaType("javax.persistence.DiscriminatorColumn"));
+		}
+		return null;
+	}
+
 	/**
 	 * Locates the entity manager field that should be used.
 	 * 
