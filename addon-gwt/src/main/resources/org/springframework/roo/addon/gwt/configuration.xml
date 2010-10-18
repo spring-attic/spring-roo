@@ -86,7 +86,7 @@
 				<configuration>
 					<logLevel>INFO</logLevel>
 					<style>PRETTY</style>
-					<gwtVersion>2.1-SNAPSHOT</gwtVersion>
+					<gwtVersion>2.1.0</gwtVersion>
 					<runTarget>/ApplicationScaffold.html</runTarget>
 					<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
 					<modules>
