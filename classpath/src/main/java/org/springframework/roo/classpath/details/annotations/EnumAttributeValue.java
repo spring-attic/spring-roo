@@ -25,7 +25,7 @@ public class EnumAttributeValue extends AbstractAnnotationAttributeValue<EnumDet
 		this.value = value;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("all")
 	public Enum<?> getAsEnum() throws ClassNotFoundException {
 		Class<?> enumType = getClass().getClassLoader().loadClass(this.value.getType().getFullyQualifiedTypeName());
 		Assert.isTrue(enumType.isEnum(), "Should have obtained an Enum but failed for type '" + enumType.getName() + "'");

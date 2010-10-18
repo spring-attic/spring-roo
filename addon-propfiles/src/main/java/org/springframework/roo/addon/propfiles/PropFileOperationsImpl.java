@@ -75,7 +75,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 				private static final long serialVersionUID = 1L;
 
 				// override the keys() method to order the keys alphabetically
-				@SuppressWarnings("unchecked") public synchronized Enumeration keys() {
+				@SuppressWarnings({ "unchecked", "rawtypes" })
+				public synchronized Enumeration keys() {
 					final Object[] keys = keySet().toArray();
 					return new Enumeration() {
 						int i = 0;

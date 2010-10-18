@@ -11,17 +11,16 @@ import org.springframework.roo.shell.MethodTarget;
  * @author Ben Alex
  * @author Alan Stewart
  * @since 1.0
- *
  */
 public class EnumConverter implements Converter {
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("all")
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
 		Class<Enum> enumClass = (Class<Enum>) requiredType;
 		return Enum.valueOf(enumClass, value);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("all")
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
 		Class<Enum> enumClass = (Class<Enum>) requiredType;
 		for (Enum enumValue : enumClass.getEnumConstants()) {

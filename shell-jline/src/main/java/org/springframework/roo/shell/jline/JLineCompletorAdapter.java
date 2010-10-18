@@ -23,7 +23,7 @@ public class JLineCompletorAdapter implements Completor {
 		this.simpleParser = simpleParser;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("all")
 	public int complete(String buffer, int cursor, List candidates) {
 		int result;
 		try {

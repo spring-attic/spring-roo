@@ -37,7 +37,6 @@ import org.springframework.roo.support.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
-@SuppressWarnings("unchecked")
 public class DefaultValueStyler implements ValueStyler {
 	private static final String EMPTY = "[empty]";
 	private static final String NULL = "[null]";
@@ -110,11 +109,9 @@ public class DefaultValueStyler implements ValueStyler {
 	private String getCollectionTypeString(Collection<?> value) {
 		if (value instanceof List) {
 			return LIST;
-		}
-		else if (value instanceof Set) {
+		} else if (value instanceof Set) {
 			return SET;
-		}
-		else {
+		} else {
 			return COLLECTION;
 		}
 	}
@@ -128,8 +125,7 @@ public class DefaultValueStyler implements ValueStyler {
 		}
 		if (array.length > 0) {
 			result.append(style(array[array.length - 1]));
-		}
-		else {
+		} else {
 			result.append(EMPTY);
 		}
 		result.append("]");

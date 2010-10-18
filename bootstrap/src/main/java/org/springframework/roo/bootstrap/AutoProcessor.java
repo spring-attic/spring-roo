@@ -24,7 +24,7 @@ import org.osgi.service.startlevel.StartLevel;
  * 
  * @author Ben Alex
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("all")
 public class AutoProcessor {
 	
 	/**

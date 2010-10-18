@@ -46,7 +46,7 @@ import java.util.Set;
  * @see TypeUtils
  * @see ReflectionUtils
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("all")
 public abstract class ClassUtils {
 
 	/** Suffix for array class names: "[]" */
@@ -113,9 +113,7 @@ public abstract class ClassUtils {
 
 		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(32);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
-		primitiveTypes.addAll(Arrays.asList(
-				boolean[].class, byte[].class, char[].class, double[].class,
-				float[].class, int[].class, long[].class, short[].class));
+		primitiveTypes.addAll(Arrays.asList(boolean[].class, byte[].class, char[].class, double[].class, float[].class, int[].class, long[].class, short[].class));
 		primitiveTypes.add(void.class);
 		for (Class<?> primitiveType : primitiveTypes) {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);
@@ -1048,8 +1046,7 @@ public abstract class ClassUtils {
 			Class<?> actualClass = classLoader.loadClass(clazz.getName());
 			return (clazz == actualClass);
 			// Else: different interface class found...
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			// No interface class found...
 			return false;
 		}

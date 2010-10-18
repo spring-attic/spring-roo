@@ -31,7 +31,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @since 1.1.0
  *
  */
-@SuppressWarnings("unchecked") // **** CHANGE FROM ORIGINAL FELIX VERSION ****
+@SuppressWarnings("all") // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 public class Main {
 	    /**
 	     * Switch for specifying bundle directory.
