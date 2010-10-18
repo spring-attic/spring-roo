@@ -2,8 +2,8 @@ package org.springframework.roo.classpath.scanner;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.CustomDataAccessor;
+import org.springframework.roo.model.JavaType;
 
 /**
  * Service that automatically builds a {@link MemberDetails} instance for a given class or interface type. 
@@ -23,7 +23,7 @@ import org.springframework.roo.model.CustomDataAccessor;
  * <li>The discovery and collation of multiple compilation units is delegated to a specialized, well-defined service
  * ({@link MemberDetailsScanner})</li>
  * <li>A {@link MemberDetailsDecorator} facility permits customization of the visible member information on
- * a per-{@link MetadataProvider} basis, thus offering a way to customize the information seen by a provider</li>
+ * a per-caller basis, thus offering a way to customize the information seen by a given caller</li>
  * <li>{@link MemberDetailsDecorator}s can use the {@link CustomDataAccessor} facility to associate custom information
  * with members and compilation units in an easy manne.</li>
  * </ul>
@@ -51,10 +51,15 @@ public interface MemberDetailsScanner {
 	 * regarded as complete. This manages any issues with respect to the order in which {@link MemberDetailsDecorator}s
 	 * are invoked.
 	 * 
-	 * @param metadataProvider the metadata provider requesting the member details (required; may be used for result customization)
+	 * <p>
+	 * The requesting class is presented as a String as per normal OSGi conventions. This avoids issues that may occur if a
+	 * {@link Class} was used and the bundle owning that class was being deactivated. A {@link JavaType} was not used because
+	 * of its comparatively heavier weight and is primarily used to represent user project-specific types (not internal types).
+	 * 
+	 * @param requestingClass the fully-qualified class name requesting the member details (required; may be used for result customization)
 	 * @param cid the class or interface to build member information for (required)
 	 * @return the discovered member details (never null)
 	 */
-	public MemberDetails getMemberDetails(MetadataProvider metadataProvider, ClassOrInterfaceTypeDetails cid);
+	public MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid);
 
 }

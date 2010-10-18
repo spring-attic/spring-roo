@@ -62,7 +62,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 		synchronized (metadataService) {}
 	}
 
-	public final MemberDetails getMemberDetails(MetadataProvider metadataProvider, ClassOrInterfaceTypeDetails cid) {
+	public final MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid) {
 		synchronized (metadataService) {
 			// Create a list of discovered members
 			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new ArrayList<MemberHoldingTypeDetails>();
@@ -86,7 +86,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 					}
 					
 					// Skip myself
-					if (mp.getClass().equals(metadataProvider.getClass())) {
+					if (mp.getClass().equals(requestingClass.getClass())) {
 						continue;
 					}
 					
@@ -119,7 +119,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 				while (additionalLoopRequired) {
 					additionalLoopRequired = false;
 					for (MemberDetailsDecorator decorator : decorators) {
-						MemberDetails newResult = decorator.decorate(metadataProvider, result);
+						MemberDetails newResult = decorator.decorate(requestingClass, result);
 						Assert.isTrue(newResult != null, "Decorator '" + decorator.getClass().getName() + "' returned an illegal result");
 						if (!newResult.equals(result)) {
 							additionalLoopRequired = true;

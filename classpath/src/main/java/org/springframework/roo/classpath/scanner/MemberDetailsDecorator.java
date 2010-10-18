@@ -1,11 +1,10 @@
 package org.springframework.roo.classpath.scanner;
 
-import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.CustomDataAccessor;
 
 /**
  * Provides the ability to modify or log the result of a {@link MemberDetailsScanner} operation
- * before the method returns. This is useful to customize the results for a particular {@link MetadataProvider}.
+ * before the method returns. This is useful to customize the results for a particular requesting class.
  * 
  * @author Ben Alex
  * @since 1.1
@@ -27,9 +26,9 @@ public interface MemberDetailsDecorator {
 	 * can be executed in any order whatsoever, as they need only look for the expected data and return the same
 	 * {@link MemberDetails} if it is not found.
 	 * 
-	 * @param provider (required)
+	 * @param requestingClass the fully-qualified class name requesting the member details (required)
 	 * @param memberDetails the current member holders (required)
 	 * @return the originally-passed details (where possible) or a replacement details (never returns null)
 	 */
-	MemberDetails decorate(MetadataProvider provider, MemberDetails memberDetails);
+	MemberDetails decorate(String requestingClass, MemberDetails memberDetails);
 }
