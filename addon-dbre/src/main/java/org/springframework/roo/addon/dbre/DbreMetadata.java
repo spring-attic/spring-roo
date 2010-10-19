@@ -474,15 +474,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Assert.notNull(table, "Table must not be null in determining a one-to-one relationship");
 		Assert.notNull(foreignKey, "Foreign key must not be null in determining a one-to-one relationship");
 		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
-		if (table.getName().equals("connor")) {
-			System.out.println("1 one-to-one " + equals);
-		}
 		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
 		while (equals && primaryKeyIterator.hasNext()) {
 			equals &= foreignKey.hasLocalColumn(primaryKeyIterator.next());
-		}
-		if (table.getName().equals("connor")) {
-			System.out.println("2 one-to-one " + equals);
 		}
 		return equals;
 	}
