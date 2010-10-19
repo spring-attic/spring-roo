@@ -293,26 +293,31 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		annotations.add(new AnnotationMetadataBuilder(MANY_TO_MANY));
 
 		// Add @JoinTable annotation
+		AnnotationMetadataBuilder joinTableBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinTable"));
 		List<AnnotationAttributeValue<?>> joinTableAnnotationAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		joinTableAnnotationAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getTable().getName()));
 
-		// Add joinColumns attribute containing nested @JoinColumn annotation
+		// Add "joinColumns" attribute containing nested @JoinColumn annotations
 		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getLocalColumnReferenceOfOwningSideTable()));
-		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
-		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
+		SortedSet<Reference> firstKeyReferences = joinTable.getTable().getForeignKeys().first().getReferences();
+		for (Reference reference : firstKeyReferences) {
+			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (firstKeyReferences.size() > 1));
+			joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
+		}
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
 
-		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
+		// Add "inverseJoinColumns" attribute containing nested @JoinColumn annotations
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		inverseJoinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getLocalColumnReferenceOfInverseSideTable()));
-		AnnotationMetadataBuilder inverseJoinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, inverseJoinColumnAttributes);
-		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), inverseJoinColumnBuilder.build()));
+		SortedSet<Reference> lastLastReferences = joinTable.getTable().getForeignKeys().last().getReferences();
+		for (Reference reference : lastLastReferences) {
+			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (lastLastReferences.size() > 1));
+			inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
+		}
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
-
-		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinTable"), joinTableAnnotationAttributes));
+		
+		// Add attributes to a @JoinTable annotation builder
+		joinTableBuilder.setAttributes(joinTableAnnotationAttributes);
+		annotations.add(joinTableBuilder);
 
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		return fieldBuilder.build();
@@ -429,15 +434,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return fieldBuilder.build();
 	}
 
+	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn) {
+		return getJoinColumnAnnotation(reference, referencedColumn, null);
+	}
+
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn, JavaType fieldType) {
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
 		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
 		if (referencedColumn) {
 			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getForeignColumn().getEscapedName());
 		}
-		boolean isCompositeKeyColumn = isCompositeKeyColumn(reference.getLocalColumn(), fieldType);
-		if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
-			addOtherJoinColumnAttributes(joinColumnBuilder);
+		if (fieldType != null) {
+			boolean isCompositeKeyColumn = isCompositeKeyColumn(reference.getLocalColumn(), fieldType);
+			if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
+				addOtherJoinColumnAttributes(joinColumnBuilder);
+			}
 		}
 		return joinColumnBuilder;
 	}
@@ -463,9 +474,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Assert.notNull(table, "Table must not be null in determining a one-to-one relationship");
 		Assert.notNull(foreignKey, "Foreign key must not be null in determining a one-to-one relationship");
 		boolean equals = table.getPrimaryKeyCount() == foreignKey.getReferenceCount();
+		if (table.getName().equals("connor")) {
+			System.out.println("1 one-to-one " + equals);
+		}
 		Iterator<Column> primaryKeyIterator = table.getPrimaryKeys().iterator();
 		while (equals && primaryKeyIterator.hasNext()) {
 			equals &= foreignKey.hasLocalColumn(primaryKeyIterator.next());
+		}
+		if (table.getName().equals("connor")) {
+			System.out.println("2 one-to-one " + equals);
 		}
 		return equals;
 	}
