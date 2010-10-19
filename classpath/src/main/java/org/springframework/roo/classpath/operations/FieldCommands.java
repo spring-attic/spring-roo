@@ -366,18 +366,12 @@ public class FieldCommands implements CommandMarker {
 	}
 
 	private AnnotationMetadata findEntityAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		JavaType entityType = new JavaType("javax.persistence.Entity");
-		
-		// Check for annotation on .java file
-		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(classOrInterfaceTypeDetails, entityType);
-		if (entityAnnotation == null) {
-			// Check for annotation on ITD
-			MemberDetails memberDetails =  memberDetailsScanner.getMemberDetails("org.springframework.roo.addon.entity.EntityMetadataProvider", classOrInterfaceTypeDetails);
-			for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
-				entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, entityType);
-				if (entityAnnotation != null) {
-					break;
-				}
+		AnnotationMetadata entityAnnotation = null;
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(FieldCommands.class.getName(), classOrInterfaceTypeDetails);
+		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
+			entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, new JavaType("javax.persistence.Entity"));
+			if (entityAnnotation != null) {
+				break;
 			}
 		}
 		return entityAnnotation;
