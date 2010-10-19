@@ -18,6 +18,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
@@ -40,8 +42,10 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private @Reference Shell shell;
 	private Logger log = Logger.getLogger(getClass().getName());
 	private Properties props;
+	private ComponentContext context;
 	
 	protected void activate(ComponentContext context) {
+		this.context = context;
 		bundleCache = new HashMap<String, AddOnBundleInfo>();
 		Thread t = new Thread(new Runnable() {
 			public void run() {
@@ -67,7 +71,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.info("Ranking: " + bundle.getRanking());
 			log.info("Description: " + bundle.getDescription());
 			log.info("Version: " + bundle.getVersion());
-			log.info("Last updated: " + bundle.getLastUpdated());
+//			log.info("Last updated: " + bundle.getLastUpdated());
 			log.info("Size: " + bundle.getSize());
 			log.info("Pgp Key '" + bundle.getPgpKey() + "' signed by: " + bundle.getSignedBy());
 			Map<String, String> commands = bundle.getCommands();
@@ -85,8 +89,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		} else {
 			String url = bundle.getUrl();
 			if (url != null && url.length() > 0) {
-//				url = url.replace("httppgp", "http"); // don't do this, so the user has to accept the pgp key first
+				int count = countBundles();
 				success = shell.executeCommand("felix shell start " + url); 
+				if (count == countBundles()) {
+					return; // most likely PgP verification required before the bundle can be installed, no log needed 
+				}
 			}
 			if (success) {
 				log.info("Successfully installed add-on: " + bsn.getKey());
@@ -118,9 +125,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		if (bundleCache == null) {
 			populateBsnMap();
 		}
-		log.info("bundle cache size");
 		if (bundleCache != null && bundleCache.size() > 0) {
-			log.info("addon bsn set size: " + bundleCache.size());
 			return bundleCache.keySet();
 		}
 		return new HashSet<String>();
@@ -206,5 +211,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			} catch (IOException ignored) {}
 		}	
 		return success;
+	}
+	
+	private int countBundles() {
+		BundleContext bc = context.getBundleContext();
+		if (bc != null) {
+			Bundle[] bundles = bc.getBundles();
+			if (bundles != null) {
+				return bundles.length;
+			}
+		}
+		return 0;
 	}
 }
