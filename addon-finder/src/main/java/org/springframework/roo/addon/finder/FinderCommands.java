@@ -14,6 +14,7 @@ import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -38,6 +39,7 @@ public class FinderCommands implements CommandMarker {
 	public SortedSet<String> listFinders(@CliOption(key="class", mandatory=false, unspecifiedDefaultValue="*", optionContext="update,project", help="The controller or entity for which the finders are generated") JavaType typeName,
 			@CliOption(key={"","depth"}, mandatory=false, unspecifiedDefaultValue="1", specifiedDefaultValue="1", help="The depth of attribute combinations to be generated for the finders") Integer depth,
 			@CliOption(key="filter", mandatory=false, help="A comma separated list of strings that must be present in a filter to be included") String filter) {
+		Assert.isTrue(depth >= 1, "Depth must be at least 1");
 		Set<String> requiredEntries = new HashSet<String>();
 		if (!"".equals(filter)) {
 			for (String requiredString : StringUtils.commaDelimitedListToSet(filter)) {
