@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuil
 import org.springframework.roo.classpath.details.DefaultPhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -217,7 +216,8 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
 
 		// Check if the requested entity is a JPA @Entity
-		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Entity"));
 		Assert.notNull(entityAnnotation, "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
 
 		// Everything is OK to proceed
@@ -236,18 +236,6 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		generateClassFile(typeDetailsBuilder.build());
-	}
-
-	private AnnotationMetadata findEntityAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		AnnotationMetadata entityAnnotation = null;
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ClasspathOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
-		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
-			entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, new JavaType("javax.persistence.Entity"));
-			if (entityAnnotation != null) {
-				break;
-			}
-		}
-		return entityAnnotation;
 	}
 		
 	/**

@@ -302,7 +302,8 @@ public class FieldCommands implements CommandMarker {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 		
 		// Check if the requested entity is a JPA @Entity
-		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Entity"));
 		Assert.notNull(entityAnnotation, "The field reference command is only applicable to JPA @Entity target types.");
 
 		Assert.isTrue(cardinality == Cardinality.MANY_TO_ONE || cardinality == Cardinality.ONE_TO_ONE, "Cardinality must be MANY_TO_ONE or ONE_TO_ONE for the field reference command");
@@ -341,7 +342,8 @@ public class FieldCommands implements CommandMarker {
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 	
 		// Check if the requested entity is a JPA @Entity
-		AnnotationMetadata entityAnnotation = findEntityAnnotation(classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
+		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Entity"));
 		if (entityAnnotation != null) {
 			Assert.isTrue(cardinality == Cardinality.ONE_TO_MANY || cardinality == Cardinality.MANY_TO_MANY, "Cardinality must be ONE_TO_MANY or MANY_TO_MANY for the field set command");
 		} else if (ptd.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
@@ -363,18 +365,6 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);
-	}
-
-	private AnnotationMetadata findEntityAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
-		AnnotationMetadata entityAnnotation = null;
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(FieldCommands.class.getName(), classOrInterfaceTypeDetails);
-		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
-			entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberHolder, new JavaType("javax.persistence.Entity"));
-			if (entityAnnotation != null) {
-				break;
-			}
-		}
-		return entityAnnotation;
 	}
 
 	@CliCommand(value = "field enum", help = "Adds a private enum field to an existing Java source file")	
