@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -33,6 +34,7 @@ import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
+import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
@@ -59,6 +61,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private Shell shell;
 	private String pom;
 
 	protected void activate(ComponentContext context) {
@@ -146,6 +149,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		for (Element resource : XmlUtils.findElements("/project/build/resources/resource/*", rootElement)) {
 			resources.add(new Resource(resource));
 		}
+
+		shell.flash(Level.FINE, "Spring Roo: " + topLevelPackage, Shell.WINDOW_TITLE_SLOT);
 
 		return new ProjectMetadata(topLevelPackage, projectName, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources, pathResolver);
 	}
