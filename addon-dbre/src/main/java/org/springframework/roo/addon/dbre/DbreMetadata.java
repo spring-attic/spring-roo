@@ -137,7 +137,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addManyToManyFields(Database database, Table table) {
-		int manyToManyCount = database.getJoinTables().size() > 1 ? 1 : 0;
+		Map<Table, Integer> processedTables = new LinkedHashMap<Table, Integer>();
 		for (JoinTable joinTable : database.getJoinTables()) {
 			Table owningSideTable = joinTable.getOwningSideTable();
 			Assert.notNull(owningSideTable, "Owning-side table in many-to-many relationship for " + table.getName() + " could not be found");
@@ -145,7 +145,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			Table inverseSideTable = joinTable.getInverseSideTable();
 			Assert.notNull(inverseSideTable, "Inverse-side table in many-to-many relationship for " + table.getName() + " could not be found");
 
-			String fieldSuffix = manyToManyCount > 0 ? String.valueOf(manyToManyCount) : "";
+			Integer tableCount = processedTables.containsKey(owningSideTable) ? processedTables.get(owningSideTable) + 1 : 0;
+			processedTables.put(owningSideTable, tableCount);
+			String fieldSuffix = processedTables.get(owningSideTable) > 0 ? String.valueOf(processedTables.get(owningSideTable)) : "";
+			
 			boolean sameTable = joinTable.isOwningSideSameAsInverseSide();
 			
 			if (owningSideTable.equals(table)) {
@@ -160,8 +163,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
-
-			manyToManyCount++;
 		}
 	}
 
