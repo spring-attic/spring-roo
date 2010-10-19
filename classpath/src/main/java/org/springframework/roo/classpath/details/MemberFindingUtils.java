@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -14,7 +15,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class MemberFindingUtils {
 
@@ -35,7 +35,7 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Locates the specified method.
 	 * 
@@ -59,7 +59,7 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Locates the specified constructor.
 	 * 
@@ -97,13 +97,32 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Locates the specified type-level annotation.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @param type to locate (required)
+	 * @return the annotation, or null if not found
+	 */
+	public static final AnnotationMetadata getDeclaredTypeAnnotation(MemberDetails memberDetails, JavaType type) {
+		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(type, "Annotation type to locate required");
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			AnnotationMetadata md = getDeclaredTypeAnnotation(memberHoldingTypeDetails, type);
+			if (md != null) {
+				return md;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Locates an annotation with the specified type from a list of annotations.
 	 * 
 	 * @param annotations to search (required)
 	 * @param type to locate (required)
-	 * @return the annotation, or null if not found 
+	 * @return the annotation, or null if not found
 	 */
 	public static final AnnotationMetadata getAnnotationOfType(List<? extends AnnotationMetadata> annotations, JavaType type) {
 		Assert.notNull(annotations, "Annotations to search required");
@@ -115,7 +134,7 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Locates an annotation on this class and its superclasses.
 	 * 
@@ -154,7 +173,7 @@ public abstract class MemberFindingUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Searches up the inheritance hierarchy until the first field with the specified name is located.
 	 * 
@@ -175,7 +194,7 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Searches up the inheritance hierarchy and locates all declared fields which are annotated with the specified annotation.
 	 * 
@@ -198,7 +217,6 @@ public abstract class MemberFindingUtils {
 		return result;
 	}
 
-
 	/**
 	 * Searches up the inheritance hierarchy until the first method with the specified name and parameters is located.
 	 * 
@@ -213,7 +231,7 @@ public abstract class MemberFindingUtils {
 		if (parameters == null) {
 			parameters = new ArrayList<JavaType>();
 		}
-		
+
 		ClassOrInterfaceTypeDetails current = classOrInterfaceTypeDetails;
 		while (current != null) {
 			MethodMetadata result = getDeclaredMethod(current, methodName, parameters);
@@ -224,5 +242,4 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
-
 }
