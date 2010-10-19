@@ -101,7 +101,7 @@ public class Table implements Serializable {
 		return getPrimaryKeys().size();
 	}
 
-	public Set<ForeignKey> getForeignKeys() {
+	public SortedSet<ForeignKey> getForeignKeys() {
 		return foreignKeys;
 	}
 

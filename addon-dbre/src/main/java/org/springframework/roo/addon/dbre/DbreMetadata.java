@@ -139,23 +139,24 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private void addManyToManyFields(Database database, Table table) {
 		int manyToManyCount = database.getJoinTables().size() > 1 ? 1 : 0;
 		for (JoinTable joinTable : database.getJoinTables()) {
-			String fieldSuffix = manyToManyCount > 0 ? String.valueOf(manyToManyCount) : "";
-
 			Table owningSideTable = joinTable.getOwningSideTable();
 			Assert.notNull(owningSideTable, "Owning-side table in many-to-many relationship for " + table.getName() + " could not be found");
 
 			Table inverseSideTable = joinTable.getInverseSideTable();
 			Assert.notNull(inverseSideTable, "Inverse-side table in many-to-many relationship for " + table.getName() + " could not be found");
 
+			String fieldSuffix = manyToManyCount > 0 ? String.valueOf(manyToManyCount) : "";
+			boolean sameTable = joinTable.isOwningSideSameAsInverseSide();
+			
 			if (owningSideTable.equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + fieldSuffix);
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + (sameTable ? "1" :fieldSuffix));
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
 
 			if (inverseSideTable.equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(owningSideTable.getName())) + fieldSuffix);
-				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + fieldSuffix);
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(owningSideTable.getName())) + (sameTable ? "2" : fieldSuffix));
+				JavaSymbolName mappedByFieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + (sameTable ? "1" : fieldSuffix));
 				FieldMetadata field = getManyToManyInverseSideField(fieldName, mappedByFieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
@@ -298,7 +299,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add joinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> joinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getPrimaryKeyOfOwningSideTable()));
+		joinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getLocalColumnReferenceOfOwningSideTable()));
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, joinColumnAttributes);
 		joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("joinColumns"), joinColumnArrayValues));
@@ -306,7 +307,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add inverseJoinColumns attribute containing nested @JoinColumn annotation
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 		List<AnnotationAttributeValue<?>> inverseJoinColumnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		inverseJoinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getPrimaryKeyOfInverseSideTable()));
+		inverseJoinColumnAttributes.add(new StringAttributeValue(new JavaSymbolName(NAME), joinTable.getLocalColumnReferenceOfInverseSideTable()));
 		AnnotationMetadataBuilder inverseJoinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN, inverseJoinColumnAttributes);
 		inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), inverseJoinColumnBuilder.build()));
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
