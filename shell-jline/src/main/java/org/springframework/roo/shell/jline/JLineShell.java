@@ -30,8 +30,8 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.ExitShellRequest;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.shell.event.ShellStatus;
-import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.shell.event.ShellStatusListener;
+import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
 
@@ -99,6 +99,9 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		flashMessageRenderer();
 		
         logger.info(version(null));
+
+        flash(Level.FINE, "Spring Roo " + versionInfo(), Shell.WINDOW_TITLE_SLOT);
+        
         logger.info("Welcome to Spring Roo. For assistance press " + completionKeys + " or type \"hint\" then hit ENTER.");
         
         setShellStatus(Status.STARTED);
@@ -219,6 +222,24 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.notNull(level, "Level is required for a flash message");
 		Assert.notNull(message, "Message is required for a flash message");
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
+		
+		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
+        	if (reader != null && reader.getTerminal().isANSISupported() && !FLASH_MESSAGE_DISABLED) {
+            	// We can probably update the window title, as requested
+        		final char esc = (char) 27;
+
+        		ANSIBuffer buff = JLineLogHandler.getANSIBuffer();
+    			buff.append(esc + "]" + 0 + ";").append(message).append(esc +"\\");
+        		String stg = buff.toString();
+        		try {
+        			reader.printString(stg);
+        			reader.flushConsole();
+        		} catch (IOException ignore) {}
+        	}
+			
+    		return;
+		}
+		
 		if ((reader !=null && !reader.getTerminal().isANSISupported()) || FLASH_MESSAGE_DISABLED) {
 			super.flash(level, message, slot);
 			return;
