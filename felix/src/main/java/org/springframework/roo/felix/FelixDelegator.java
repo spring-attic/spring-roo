@@ -101,6 +101,11 @@ public class FelixDelegator implements CommandMarker, ShellStatusListener {
 		perform("install " + url);
 	}
 
+	@CliCommand(value="osgi start", help="Starts a bundle JAR from a given URL")
+	public void start(@CliOption(key="url", mandatory=true, help="The URL to obtain the bundle from") String url) throws Exception {
+		perform("start " + url);
+	}
+
 	@CliCommand(value="osgi uninstall", help="Uninstalls a specific bundle")
 	public void uninstall(@CliOption(key="bundleSymbolicName", mandatory=true, help="The specific bundle to uninstall") BundleSymbolicName bsn) throws Exception {
 		perform("uninstall " + bsn.findBundleIdWithoutFail(context.getBundleContext()));
