@@ -2,6 +2,7 @@ package org.springframework.roo.addon.roobot.client;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -21,7 +23,10 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.felix.BundleSymbolicName;
+import org.springframework.roo.felix.FelixDelegator;
 import org.springframework.roo.shell.Shell;
+import org.springframework.roo.support.logging.LoggingOutputStream;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -82,6 +87,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 	
 	public void installAddOn(AddOnBundleSymbolicName bsn) {
+		Assert.notNull(bsn, "Bundle symbolic name required");
 		boolean success = false;
 		AddOnBundleInfo bundle = bundleCache.get(bsn.getKey());
 		if (bundle == null) {
@@ -90,7 +96,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			String url = bundle.getUrl();
 			if (url != null && url.length() > 0) {
 				int count = countBundles();
-				success = shell.executeCommand("felix shell start " + url); 
+				success = shell.executeCommand("osgi start --url " + url); 
 				if (count == countBundles()) {
 					return; // most likely PgP verification required before the bundle can be installed, no log needed 
 				}
@@ -100,6 +106,18 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			} else {
 				log.warning("Unable to install add-on: " + bsn.getKey());
 			}
+		}
+	}
+	
+	public void removeAddOn(BundleSymbolicName bsn) {
+		Assert.notNull(bsn, "Bundle symbolic name required");
+		boolean success = false;
+		int count = countBundles();
+		success = shell.executeCommand("osgi uninstall --bundleSymbolicName " + bsn.getKey());
+		if (count == countBundles() || !success) {
+			log.warning("Unable to remove add-on: " + bsn.getKey());
+		} else {
+			log.info("Successfully removed add-on: " + bsn.getKey());
 		}
 	}
 

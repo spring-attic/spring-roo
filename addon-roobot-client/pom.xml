@@ -77,5 +77,11 @@
       <version>${roo.version}</version>
       <type>bundle</type>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.felix</artifactId>
+      <version>${roo.version}</version>
+      <type>bundle</type>
+    </dependency>
   </dependencies>
 </project>

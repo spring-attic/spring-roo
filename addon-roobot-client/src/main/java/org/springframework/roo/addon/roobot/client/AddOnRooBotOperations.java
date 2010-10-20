@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.springframework.roo.felix.BundleSymbolicName;
+
 /**
  * Interface for operations offered by this addon.
  *
@@ -39,9 +41,16 @@ public interface AddOnRooBotOperations {
 	/**
 	 * Install addon with given {@link AddOnBundleSymbolicName}.
 	 * 
-	 * @param the bundle symbolic name (required)
+	 * @param bsn the bundle symbolic name (required)
 	 */
 	void installAddOn(AddOnBundleSymbolicName bsn);
+	
+	/**
+	 * Remove addon with given {@link BundleSymbolicName}.
+	 * 
+	 * @param bsn the bundle symbolic name (required)
+	 */
+	void removeAddOn(BundleSymbolicName bsn);
 	
 	/**
 	 * Get a list of all cached addon bundles. 
