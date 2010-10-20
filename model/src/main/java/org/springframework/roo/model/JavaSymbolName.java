@@ -17,6 +17,11 @@ import org.springframework.roo.support.util.StringUtils;
  *
  */
 public final class JavaSymbolName implements Comparable<JavaSymbolName> {
+	/** Constant for keyword "true" */
+	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
+	/** Constant for keyword "false" */
+	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
+	
 	private String symbolName;
 
 	/**
