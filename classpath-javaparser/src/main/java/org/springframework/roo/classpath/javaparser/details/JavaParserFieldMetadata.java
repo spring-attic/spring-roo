@@ -11,6 +11,7 @@ import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
 
@@ -111,18 +112,18 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		
 		// Import the field type into the compilation unit
 		NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
-		ClassOrInterfaceType fieldType = JavaParserUtils.getClassOrInterfaceType(importedType);
+		ClassOrInterfaceType initType = JavaParserUtils.getClassOrInterfaceType(importedType);
 		
-		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), fieldType, field.getFieldName().getSymbolName());
+		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), initType, field.getFieldName().getSymbolName());
 		
 		// Add parameterized types for the field type (not initializer)
 		if (field.getFieldType().getParameters().size() > 0) {
 			List<Type> fieldTypeArgs = new ArrayList<Type>();
-			fieldType.setTypeArgs(fieldTypeArgs);
+			initType.setTypeArgs(fieldTypeArgs);
 			for (JavaType parameter : field.getFieldType().getParameters()) {
-//				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-//				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
-				fieldTypeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
+				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+//				fieldTypeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 			}
 		}
 		
@@ -166,7 +167,24 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 			
 			Expression init = fd.getVariables().get(0).getInit();
 
-			// TODO: resolve imports (?)
+			// Resolve imports (ROO-1505)
+			if (init instanceof ObjectCreationExpr) {
+				ObjectCreationExpr ocr = (ObjectCreationExpr) init;
+				JavaType typeToImport = JavaParserUtils.getJavaTypeNow(compilationUnitServices, ocr.getType(), null);
+				NameExpr nameExpr = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), typeToImport);
+				ClassOrInterfaceType classOrInterfaceType = JavaParserUtils.getClassOrInterfaceType(nameExpr);
+				ocr.setType(classOrInterfaceType);
+				
+				if (typeToImport.getParameters().size() > 0) {
+					List<Type> initTypeArgs = new ArrayList<Type>();
+					initType.setTypeArgs(initTypeArgs);
+					for (JavaType parameter : typeToImport.getParameters()) {
+						NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
+						initTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
+					}
+					classOrInterfaceType.setTypeArgs(initTypeArgs);
+				}
+			}
 
 			vd.setInit(init);
 		}
