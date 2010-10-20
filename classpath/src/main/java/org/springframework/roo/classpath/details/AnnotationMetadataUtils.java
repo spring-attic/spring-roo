@@ -100,7 +100,7 @@ public abstract class AnnotationMetadataUtils {
 			attributeValue = "'" + ((CharAttributeValue) value).getValue().toString() + "'";
 		} else if (value instanceof ClassAttributeValue) {
 			JavaType clazz = ((ClassAttributeValue) value).getValue();
-			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
+			if (resolver == null || resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
 				attributeValue = clazz.getFullyQualifiedTypeName() + ".class";
 			} else {
 				attributeValue = clazz.getSimpleTypeName() + ".class";
@@ -115,7 +115,7 @@ public abstract class AnnotationMetadataUtils {
 		} else if (value instanceof EnumAttributeValue) {
 			EnumDetails enumDetails = ((EnumAttributeValue) value).getValue();
 			JavaType clazz = enumDetails.getType();
-			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
+			if (resolver == null || resolver.isFullyQualifiedFormRequiredAfterAutoImport(clazz)) {
 				attributeValue = clazz.getFullyQualifiedTypeName() + "." + enumDetails.getField().getSymbolName();
 			} else {
 				attributeValue = clazz.getSimpleTypeName() + "." + enumDetails.getField().getSymbolName();
@@ -130,7 +130,7 @@ public abstract class AnnotationMetadataUtils {
 			AnnotationMetadata annotationMetadata = ((NestedAnnotationAttributeValue) value).getValue();
 			StringBuilder data = new StringBuilder("@");
 			JavaType annotationType = annotationMetadata.getAnnotationType();
-			if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(annotationType)) {
+			if (resolver == null || resolver.isFullyQualifiedFormRequiredAfterAutoImport(annotationType)) {
 				data.append(annotationType.getFullyQualifiedTypeName());
 			} else {
 				data.append(annotationType.getSimpleTypeName());
