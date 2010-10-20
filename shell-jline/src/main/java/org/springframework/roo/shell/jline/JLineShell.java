@@ -61,6 +61,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	private Map<String, FlashInfo> flashInfoMap = new HashMap<String, FlashInfo>();
 	/** key: row number, value: eraseLineFromPosition */
 	private Map<Integer,Integer> rowErasureMap = new HashMap<Integer,Integer>();
+	private boolean shutdownHookFired = false; // ROO-1599
 	
 	public void run() {
 		try {
@@ -106,6 +107,14 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
         
         setShellStatus(Status.STARTED);
 
+		// Monitor CTRL+C initiated shutdowns (ROO-1599)
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				shutdownHookFired = true;
+			}
+		});
+        
         // Handle any "execute-then-quit" operation
         String rooArgs = System.getProperty("roo.args");
         if (rooArgs != null && !"".equals(rooArgs)) {
@@ -131,8 +140,6 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			}
 		}
 	}
-	
-	public void stop() {}
 	
 	@Override 
 	public void setPromptPath(String path) {
@@ -188,7 +195,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		// Setup a thread to ensure flash messages are displayed and cleared correctly
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				while (!shellStatus.getStatus().equals(Status.SHUTTING_DOWN)) {
+				while (!shellStatus.getStatus().equals(Status.SHUTTING_DOWN) && !shutdownHookFired) {
 					synchronized (flashInfoMap) {
 						long now = System.currentTimeMillis();
 						
@@ -312,6 +319,9 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 			// Just need to record we no longer care about this line the next time doAnsiFlash is invoked
 			rowErasureMap.remove(row);
 		} else {
+			if (shutdownHookFired) {
+				return; // ROO-1599
+			}
 			// They want some message displayed
 			int startFrom = reader.getTermwidth() - message.length() + 1;
 			if (startFrom < 1) {
