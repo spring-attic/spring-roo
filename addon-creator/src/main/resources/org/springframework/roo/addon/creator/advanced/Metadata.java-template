@@ -62,10 +62,9 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 		List<JavaType> throwsTypes = new ArrayList<JavaType>();
 		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		
-		InvocableMemberBodyBuilder body = new InvocableMemberBodyBuilder();
-		body.appendFormalLine("System.out.println(\"Hello World\");");
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("System.out.println(\"Hello World\");");
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		methodBuilder.setThrowsTypes(throwsTypes);
