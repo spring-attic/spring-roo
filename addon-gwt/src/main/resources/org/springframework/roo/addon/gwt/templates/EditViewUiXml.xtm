@@ -1,11 +1,16 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:e='urn:import:com.google.gwt.editor.ui.client'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
   xmlns:r='urn:import:{{=scaffoldUiPackage}}'
   xmlns:a='urn:import:{{=uiPackage}}'>
 
   <ui:style>
+    .errors {
+       padding-left: 0.5em;
+       background-color: red;
+     }
     .fields {
       margin-top: 0.5em;
       margin-left: 1em;
@@ -38,10 +43,17 @@
       </h3>
       <h3 class='{style.header}' ui:field='createTitle'><ui:msg>New {{=name}}</ui:msg></h3>
     </div>
-    <div ui:field='errors' style='background-color: red;'></div>
+    <div ui:field='errors' class='{style.errors}'></div>
 
     <table class="{style.fields}">{{#editableProperties}}
-      <tr><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><{{=propBinder}} ui:field='{{=prop}}'/></td></tr>{{/editableProperties}}
+      <tr>
+        <td><div class='{style.label}'>{{=propReadable}}:</div></td>
+        {{#isValueBox}}<td><e:ValueBoxEditorDecorator ui:field='{{=prop}}'>
+          <e:valuebox><{{=propBinder}} /></e:valuebox>
+        </e:ValueBoxEditorDecorator></td>{{/isValueBox}}{{#isOther}}
+        <td><{{=propBinder}} ui:field='{{=prop}}'/></td>{{/isOther}}
+      </tr>
+    {{/editableProperties}}
     </table>
 
     <div class='{style.bar}'>

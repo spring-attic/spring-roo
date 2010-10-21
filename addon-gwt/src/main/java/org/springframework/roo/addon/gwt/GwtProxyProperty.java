@@ -99,32 +99,39 @@ class GwtProxyProperty {
 		return type != null && type.equals(new JavaType("java.lang.String"));
 	}
 
-	public String getBinder() {
-		if (type.equals(JavaType.DOUBLE_OBJECT)) {
-			return "g:DoubleBox";
-		}
-		if (type.equals(JavaType.LONG_OBJECT)) {
-			return "g:LongBox";
-		}
-		if (type.equals(JavaType.INT_OBJECT)) {
-			return "g:IntegerBox";
-		}
-		if (type.equals(JavaType.FLOAT_OBJECT)) {
-			return "r:FloatBox";
-		}
-		if (type.equals(JavaType.BYTE_OBJECT)) {
-			return "r:ByteBox";
-		}
-		if (type.equals(JavaType.SHORT_OBJECT)) {
-			return "r:ShortBox";
-		}
-		if (type.equals(JavaType.CHAR_OBJECT)) {
-			return "r:CharBox";
-		}
-		if (type.equals(new JavaType("java.math.BigDecimal"))) {
-			return "r:BigDecimalBox";
-		}
-		return isCollection() ? "a:" + getSetEditor() : isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : isString() ? "g:TextBox" : "g:ValueListBox";
+	public String getBinderAsVaueBox() {
+    if (type.equals(JavaType.DOUBLE_OBJECT)) {
+      return "g:DoubleBox";
+    }
+    if (type.equals(JavaType.LONG_OBJECT)) {
+      return "g:LongBox";
+    }
+    if (type.equals(JavaType.INT_OBJECT)) {
+      return "g:IntegerBox";
+    }
+    if (type.equals(JavaType.FLOAT_OBJECT)) {
+      return "r:FloatBox";
+    }
+    if (type.equals(JavaType.BYTE_OBJECT)) {
+      return "r:ByteBox";
+    }
+    if (type.equals(JavaType.SHORT_OBJECT)) {
+      return "r:ShortBox";
+    }
+    if (type.equals(JavaType.CHAR_OBJECT)) {
+      return "r:CharBox";
+    }
+    if (type.equals(new JavaType("java.math.BigDecimal"))) {
+      return "r:BigDecimalBox";
+    }
+    if (isString()) {
+      return "g:TextBox";
+    }
+    return null;
+	}
+	
+	public String getBinderAsOther() {
+		return isCollection() ? "a:" + getSetEditor() : isDate() ? "d:DateBox" : isBoolean() ? "g:CheckBox" : "g:ValueListBox";
 	}
 
   private String getSetEditor() {
@@ -141,33 +148,36 @@ class GwtProxyProperty {
 
   private String getEditor() {
 		if (type.equals(JavaType.DOUBLE_OBJECT)) {
-			return "DoubleBox";
+			return "ValueBoxEditorDecorator<Double>";
 		}
 		if (type.equals(JavaType.LONG_OBJECT)) {
-			return "LongBox";
+			return "ValueBoxEditorDecorator<Long>";
 		}
 		if (type.equals(JavaType.INT_OBJECT)) {
-			return "IntegerBox";
+			return "ValueBoxEditorDecorator<Integer>";
 		}
 		if (type.equals(JavaType.FLOAT_OBJECT)) {
-			return "FloatBox";
+			return "ValueBoxEditorDecorator<Float>";
 		}
 		if (type.equals(JavaType.BYTE_OBJECT)) {
-			return "ByteBox";
+			return "ValueBoxEditorDecorator<Byte>";
 		}
 		if (type.equals(JavaType.SHORT_OBJECT)) {
-			return "ShortBox";
+			return "ValueBoxEditorDecorator<Short>";
 		}
 		if (type.equals(JavaType.CHAR_OBJECT)) {
-			return "CharBox";
+			return "ValueBoxEditorDecorator<Char>";
 		}
 		if (type.equals(new JavaType("java.math.BigDecimal"))) {
-			return "BigDecimalBox";
+			return "ValueBoxEditorDecorator<BigDecimal>";
+		}
+		if (isString()) {
+		  return "ValueBoxEditorDecorator<String>";
 		}
 		if (isBoolean()) {
 			return "(provided = true) CheckBox";
 		}
-		return isCollection() ? getSetEditor() : isDate() ? "DateBox" : isString() ? "TextBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
+		return isCollection() ? getSetEditor() : isDate() ? "DateBox" : "(provided = true) ValueListBox<" + type.getFullyQualifiedTypeName() + ">";
 	}
 
         public String getCollectionRenderer() {

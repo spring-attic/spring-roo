@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
+  xmlns:e='urn:import:com.google.gwt.editor.ui.client'
   xmlns:d='urn:import:com.google.gwt.user.datepicker.client'
   xmlns:r='urn:import:{{=scaffoldUiPackage}}'
   xmlns:a='urn:import:{{=uiPackage}}'>
@@ -9,6 +10,7 @@
       padding: 10px;
     }
     .error {
+      padding-left: 0.5em;
       background-color: red;
     }
     .label {
@@ -22,7 +24,13 @@
   <g:HTMLPanel styleName='{style.outer}'>
     <div ui:field='errors' class='{style.error}'></div>
     {{#editableProperties}}
-    <div class='{style.label}'>{{=propReadable}}</div><div class='{style.value}'><{{=propBinder}} ui:field='{{=prop}}'/></div>{{/editableProperties}}
+    <div class='{style.label}'>{{=propReadable}}</div>
+    <div class='{style.value}'>
+      {{#isValueBox}}<e:ValueBoxEditorDecorator ui:field='{{=prop}}'>
+          <e:valuebox><{{=propBinder}} /></e:valuebox>
+        </e:ValueBoxEditorDecorator>{{/isValueBox}}
+      {{#isOther}}<{{=propBinder}} ui:field='{{=prop}}'/>{{/isOther}}
+    </div>{{/editableProperties}}
 
     <g:Button ui:field='save'>Save</g:Button>
   </g:HTMLPanel>
