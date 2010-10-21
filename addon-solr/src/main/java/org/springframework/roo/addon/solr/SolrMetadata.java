@@ -166,8 +166,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors()) {
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method));
 			Assert.notNull(field, "Could not determine field '" + method.getMethodName().getSymbolName().substring(3) + "' for method " + method.getMethodName().getSymbolName());
-			if (field.getFieldType().isCommonCollectionType() || // Not interested in collections for now
-					field.getFieldName().equals(entityMetadata.getVersionField().getFieldName())) { // Not interested in the version field
+			FieldMetadata version = entityMetadata.getVersionField();
+			if (version != null && field.getFieldName().equals(version.getFieldName())) {
+				continue;
+			}
+			if (field.getFieldType().isCommonCollectionType()) {
 				continue;
 			}
 			if (!textField.toString().endsWith("StringBuilder()")) {
