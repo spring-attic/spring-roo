@@ -5,7 +5,7 @@
 			<repository>
 				<id>gwt-repo</id>
 				<name>Google Web Toolkit Repository</name>
-				<url>https://oss.sonatype.org/content/repositories/google-snapshots</url>
+                <url>http://google-web-toolkit.googlecode.com/svn/2.1.0/gwt/maven/</url>
 			</repository>
 		</repositories>
 		<pluginRepositories>

@@ -179,8 +179,10 @@ public class {{=className}} extends Composite
 
   @UiHandler("add")
   public void addClicked(ClickEvent e) {
-    displayedList.add(picker.getValue());
-    viewLabel.setText(makeFlatList(displayedList));
+    if (!displayedList.contains(picker.getValue())) {
+      displayedList.add(picker.getValue());
+      viewLabel.setText(makeFlatList(displayedList));
+    }
   }
 
   @UiHandler("clickToEdit")
