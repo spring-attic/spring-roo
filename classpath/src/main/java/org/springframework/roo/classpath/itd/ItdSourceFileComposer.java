@@ -167,6 +167,9 @@ public class ItdSourceFileComposer {
 			this.append(".");
 			this.append(fieldDetails.getFieldMetadata().getFieldName().getSymbolName());
 			this.append(": ");
+			if (fieldDetails.isRemoveAnnotation()) {
+				this.append("-");
+			}
 			outputAnnotation(fieldDetails.getFieldAnnotation());
 			this.append(";");
 			this.newLine(false);
