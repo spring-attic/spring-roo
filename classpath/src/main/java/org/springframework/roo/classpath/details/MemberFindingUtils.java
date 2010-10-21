@@ -116,6 +116,27 @@ public abstract class MemberFindingUtils {
 		}
 		return null;
 	}
+	
+	/**
+	 * Locates a method with the name and parameter signature presented. Searches all {@link MemberDetails} until the first such method is located
+	 * or none can be found.
+	 * 
+	 * @param memberDetails to search (required)
+	 * @param methodName the method name to locate (required)
+	 * @param parameters the method parameter signature to locate (can be null if no parameters are required)
+	 * @return the first located method, or null if such a method cannot be found
+	 */
+	public static final MethodMetadata getMethod(MemberDetails memberDetails, JavaSymbolName methodName, List<JavaType> parameters) {
+		Assert.notNull(memberDetails, "Member details required");
+		Assert.notNull(methodName, "Method name required");
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			MethodMetadata md = getDeclaredMethod(memberHoldingTypeDetails, methodName, parameters);
+			if (md != null) {
+				return md;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Locates an annotation with the specified type from a list of annotations.
