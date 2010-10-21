@@ -13,7 +13,6 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 
 /**
  * Provides {@link SolrMetadata}.
@@ -27,7 +26,6 @@ import org.springframework.roo.project.PathResolver;
 public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
-	@Reference private PathResolver pathResolver;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -65,7 +63,7 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 			return null;
 		}
 		// Otherwise go off and create the to Solr metadata
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, beanInfoMetadata, metadataService, pathResolver, fileManager);
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, beanInfoMetadata, metadataService);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
