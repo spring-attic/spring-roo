@@ -1,18 +1,17 @@
 // Installing OSGi JDBC drivers ...
 // Oracle ...
-osgi install --url http://repository.springsource.com/maven/bundles/external/javax/transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar
-osgi install --url http://repository.springsource.com/maven/bundles/external/javax/resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar
-osgi install --url http://repository.springsource.com/maven/bundles/external/com/oracle/jdbc/com.springsource.oracle.jdbc/10.2.0.2/com.springsource.oracle.jdbc-10.2.0.2.jar
+osgi start --url http://repository.springsource.com/maven/bundles/external/javax/transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar
+osgi start --url http://repository.springsource.com/maven/bundles/external/javax/resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar
+osgi start --url http://repository.springsource.com/maven/bundles/external/com/oracle/jdbc/com.springsource.oracle.jdbc/10.2.0.2/com.springsource.oracle.jdbc-10.2.0.2.jar
 // HSQLDB ...
-osgi install --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.hsqldb/1.8.0.10.0001/org.springframework.roo.wrapping.hsqldb-1.8.0.10.0001.jar
+osgi start --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.hsqldb/1.8.0.10.0001/org.springframework.roo.wrapping.hsqldb-1.8.0.10.0001.jar
 // H2 ...
-osgi install --url http://repo1.maven.org/maven2/com/h2database/h2/1.2.144/h2-1.2.144.jar
+osgi start --url http://repo1.maven.org/maven2/com/h2database/h2/1.2.144/h2-1.2.144.jar
 // JTOpen ...
-osgi install --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.jtopen/6.7.0.0001/org.springframework.roo.wrapping.jtopen-6.7.0.0001.jar
+osgi start --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.jtopen/6.7.0.0001/org.springframework.roo.wrapping.jtopen-6.7.0.0001.jar
 // jTDS ...
-osgi install --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.jtds/1.2.4.0001/org.springframework.roo.wrapping.jtds-1.2.4.0001.jar
+osgi start --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.jtds/1.2.4.0001/org.springframework.roo.wrapping.jtds-1.2.4.0001.jar
 // Derby ...
-osgi install --url http://repo1.maven.org/maven2/org/apache/derby/derby/10.6.2.1/derby-10.6.2.1.jar
-osgi framework command start 70 71 72 73 74 75 76 77 
+osgi start --url http://repo1.maven.org/maven2/org/apache/derby/derby/10.6.2.1/derby-10.6.2.1.jar
 // Drivers installed. Please restart Roo to use the JDBC drivers
 
