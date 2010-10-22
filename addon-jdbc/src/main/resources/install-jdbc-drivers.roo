@@ -3,7 +3,6 @@
 osgi install --url http://repository.springsource.com/maven/bundles/external/javax/transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar
 osgi install --url http://repository.springsource.com/maven/bundles/external/javax/resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar
 osgi install --url http://repository.springsource.com/maven/bundles/external/com/oracle/jdbc/com.springsource.oracle.jdbc/10.2.0.2/com.springsource.oracle.jdbc-10.2.0.2.jar
-osgi install --url http://repository.springsource.com/maven/bundles/external/com/oracle/jdbc/com.springsource.oracle.jdbc/10.2.0.2/com.springsource.oracle.jdbc-10.2.0.2.jar
 // HSQLDB ...
 osgi install --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.hsqldb/1.8.0.10.0001/org.springframework.roo.wrapping.hsqldb-1.8.0.10.0001.jar
 // H2 ...
