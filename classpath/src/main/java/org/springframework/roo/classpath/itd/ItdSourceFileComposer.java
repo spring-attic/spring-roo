@@ -162,14 +162,15 @@ public class ItdSourceFileComposer {
 		
 		for (DeclaredFieldAnnotationDetails fieldDetails : fieldAnnotations) {	
 			this.appendIndent();
-			this.append("declare @field: * ");
+			if (fieldDetails.isRemoveAnnotation()) {
+				this.append("declare @removeFromField: * ");
+			} else {
+				this.append("declare @field: * ");
+			}
 			this.append(introductionTo.getSimpleTypeName());
 			this.append(".");
 			this.append(fieldDetails.getFieldMetadata().getFieldName().getSymbolName());
 			this.append(": ");
-			if (fieldDetails.isRemoveAnnotation()) {
-				this.append("-");
-			}
 			outputAnnotation(fieldDetails.getFieldAnnotation());
 			this.append(";");
 			this.newLine(false);
