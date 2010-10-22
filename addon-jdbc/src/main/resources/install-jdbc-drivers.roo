@@ -13,5 +13,6 @@ osgi install --url http://spring-roo-repository.springsource.org/release/org/spr
 osgi install --url http://spring-roo-repository.springsource.org/release/org/springframework/roo/wrapping/org.springframework.roo.wrapping.jtds/1.2.4.0001/org.springframework.roo.wrapping.jtds-1.2.4.0001.jar
 // Derby ...
 osgi install --url http://repo1.maven.org/maven2/org/apache/derby/derby/10.6.2.1/derby-10.6.2.1.jar
+osgi framework command start 70 71 72 73 74 75 76 77 
 // Drivers installed. Please restart Roo to use the JDBC drivers
 
