@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.0.RELEASE [rev a3291c3].</para>
+    <para>This appendix was automatically built from Roo 1.1.0.RELEASE [rev f40381e].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
         <para>Add On Commands are contained in org.springframework.roo.addon.roobot.client.AddOnCommands.</para>
         <section xml:id="command-index-addon-info">
             <title>addon info</title>
-            <para>Provide information about Spring Roo addons</para>
+            <para>Provide information about a specific Spring Roo Add-on</para>
             <programlisting><![CDATA[addon info --bundleSymbolicName]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -21,7 +21,7 @@
         </section>
         <section xml:id="command-index-addon-install">
             <title>addon install</title>
-            <para>Install Roo Addon</para>
+            <para>Install Spring Roo Add-on</para>
             <programlisting><![CDATA[addon install --bundleSymbolicName]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -34,13 +34,26 @@
         </section>
         <section xml:id="command-index-addon-list">
             <title>addon list</title>
-            <para>List all known Spring Roo addons</para>
+            <para>List all known Spring Roo Add-ons</para>
             <programlisting><![CDATA[addon list]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--refresh</term>
                     <listitem>
                         <para>The bundle symbolic name for the addon of interest; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-remove">
+            <title>addon remove</title>
+            <para>Remove Spring Roo Add-on</para>
+            <programlisting><![CDATA[addon remove --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -185,6 +198,18 @@
                     <term>--table</term>
                     <listitem>
                         <para>The JPA table name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--schema</term>
+                    <listitem>
+                        <para>The JPA table schema name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--catalog</term>
+                    <listitem>
+                        <para>The JPA table catalog name to use for this entity; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -752,19 +777,6 @@
             <programlisting><![CDATA[exit]]></programlisting>
             <para>This command does not accept any options.</para>
         </section>
-        <section xml:id="command-index-felix-shell">
-            <title>felix shell</title>
-            <para>Passes a command directly through to the Felix shell infrastructure</para>
-            <programlisting><![CDATA[felix shell]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--[default]</term>
-                    <listitem>
-                        <para>The command to pass to Felix (WARNING: no validation or security checks are performed); default: 'help'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
         <section xml:id="command-index-osgi-find">
             <title>osgi find</title>
             <para>Finds bundles by name</para>
@@ -774,6 +786,19 @@
                     <term>--bundleSymbolicName</term>
                     <listitem>
                         <para>A bundle symbolic name to find; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-framework-command">
+            <title>osgi framework command</title>
+            <para>Passes a command directly through to the Felix shell infrastructure</para>
+            <programlisting><![CDATA[osgi framework command]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--[default]</term>
+                    <listitem>
+                        <para>The command to pass to Felix (WARNING: no validation or security checks are performed); default: 'help'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1000,6 +1025,19 @@
                     <term>--bundleId</term>
                     <listitem>
                         <para>Limit results to a specific bundle; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-osgi-start">
+            <title>osgi start</title>
+            <para>Starts a bundle JAR from a given URL</para>
+            <programlisting><![CDATA[osgi start --url]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--url</term>
+                    <listitem>
+                        <para>The URL to obtain the bundle from; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2472,29 +2510,6 @@
                     </listitem>
                 </varlistentry>
             </variablelist>
-        </section>
-    </section>
-    <section xml:id="command-index-op4j-commands">
-        <title>Op4j Commands</title>
-        <para>Op4j Commands are contained in org.springframework.roo.addon.op4j.Op4jCommands.</para>
-        <section xml:id="command-index-op4j-add">
-            <title>op4j add</title>
-            <para>Some helpful description</para>
-            <programlisting><![CDATA[op4j add]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--class</term>
-                    <listitem>
-                        <para>The java type to apply the RooOp4j annotation to; default if option not present: '*'</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-        <section xml:id="command-index-op4j-setup">
-            <title>op4j setup</title>
-            <para>Setup Op4j addon</para>
-            <programlisting><![CDATA[op4j setup]]></programlisting>
-            <para>This command does not accept any options.</para>
         </section>
     </section>
     <section xml:id="command-index-pgp-commands">
