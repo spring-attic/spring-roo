@@ -162,11 +162,13 @@
                 <exclude>org.apache.felix.framework-*.jar</exclude>
                 <!--  Ensures EBR-sourced JDBC drivers are not included in the distribution ZIP -->
                 <exclude>com.springsource.*.jar</exclude>
-                <!--  Ensures Derby, HSQLDB and JTOpen (due to large size) is not included in the distribution ZIP -->
+                <!--  Ensures Derby, H2, HSQLDB, jTDS and JTOpen (due to large size) is not included in the distribution ZIP -->
                 <exclude>derby-*.jar</exclude>
+                <exclude>h2-*.jar</exclude>
                 <exclude>org.springframework.roo.wrapping.hsqldb-*.jar</exclude>
                 <exclude>org.springframework.roo.wrapping.jtopen-*.jar</exclude>
-                <!-- temporary excludes until addons are ready for release -->
+                <exclude>org.springframework.roo.wrapping.jtds-*.jar</exclude>
+               <!-- temporary excludes until addons are ready for release -->
                 <exclude>org.springframework.roo.addon.op4j-*.jar</exclude>
                 <exclude>org.springframework.roo.addon.git-*.jar</exclude>
             </excludes>
