@@ -231,7 +231,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 		Assert.hasText(slot, "Slot name must be specified for a flash message");
 		
 		if (Shell.WINDOW_TITLE_SLOT.equals(slot)) {
-        	if (reader != null && reader.getTerminal().isANSISupported() && !FLASH_MESSAGE_DISABLED) {
+        	if (reader != null && reader.getTerminal().isANSISupported() && !FLASH_MESSAGE_DISABLED && !JLineLogHandler.WINDOWS_OS) {
             	// We can probably update the window title, as requested
         		final char esc = (char) 27;
 
