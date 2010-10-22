@@ -576,15 +576,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 				editableSection.setVariable("propType", property.getType());
 				editableSection.setVariable("propFormatter", property.getFormatter());
 				editableSection.setVariable("propRenderer", property.getRenderer());
+				editableSection.setVariable("propBinder", property.getBinder());
 				editableSection.setVariable("propReadable", property.getReadableName());	       
-				String valueBox = property.getBinderAsVaueBox();
-				if (valueBox != null) {
-				  editableSection.setVariable("propBinder", valueBox);
-				  editableSection.showSection("isValueBox");
-				} else {
-          editableSection.setVariable("propBinder", property.getBinderAsOther());
-          editableSection.showSection("isOther");
-				}
 			}
 
 			dataDictionary.setVariable("proxyRendererType", MirrorType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxy.getName().getSimpleTypeName() + "Renderer");
