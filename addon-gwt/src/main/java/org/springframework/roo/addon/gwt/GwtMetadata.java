@@ -90,12 +90,18 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.entityMetadata = entityMetadata;
 		this.fileManager = fileManager;
 		this.metadataService = metadataService;
-
+/*        beanInfoMetadata.getItdTypeDetails().getAnnotations()
         if (entityMetadata.getMappedSuperclassAnnotation() != null) {
             throw new IllegalStateException("GWT does not currently support inheritence in proxied objects. Please remove the 'javax.persistence.MappedSuperclass' annotation from '" + governorTypeDetails.getName().getFullyQualifiedTypeName()  + "' in order to complete 'gwt setup'.");
-        }
+        }*/
 
         if (beanInfoMetadata != null) {
+            for (AnnotationMetadata annotation : entityMetadata.getItdTypeDetails().getAnnotations()) {
+                if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.MappedSuperclass"))) {
+                    throw new IllegalStateException("GWT does not currently support inheritence in proxied objects. Please remove the 'javax.persistence.MappedSuperclass' annotation from '" + governorTypeDetails.getName().getFullyQualifiedTypeName()  + "' in order to complete 'gwt setup'.");
+                }
+            }
+
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
                 JavaType returnType = accessor.getReturnType();
                 checkPrimitive(returnType);
