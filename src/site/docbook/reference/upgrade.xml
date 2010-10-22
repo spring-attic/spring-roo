@@ -250,8 +250,23 @@
     forum</link> for assistance.</para>
   </section>
 
-  <section>
+  <section xml:id="upgrade-1.1.0.RELEASE">
     <title>Upgrading to 1.1.0.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.0.RC1 to Spring Roo 1.1.0.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section xml:id="upgrade-1.1.0.RC1">
+    <title>Upgrading to 1.1.0.RC1</title>
 
     <para>The main changes you need to be aware of when upgrading from Spring
     Roo 1.1.0.M3 to Spring Roo 1.1.0.RELEASE are as follows:</para>
@@ -268,9 +283,9 @@
       <listitem>
         <para>There have been changes made to the <code>web.xml</code>
         configuration to allow deployment of GWT scaffolded applications to
-        GAE. Please compare a <code>web.xml</code>produced in a new Spring Roo
-        project with your current project's <code>web.xml</code> to identify
-        differences.</para>
+        GAE. Please compare a <code>web.xml</code> produced in a new Spring
+        Roo project with your current project's <code>web.xml</code> to
+        identify differences.</para>
       </listitem>
 
       <listitem>
