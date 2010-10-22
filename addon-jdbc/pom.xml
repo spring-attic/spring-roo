@@ -80,7 +80,7 @@
 			<!-- Derby is not included in the user distribution due to an exclusion in assembly.xml -->
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<version>10.6.1.0</version>
+			<version>10.6.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
