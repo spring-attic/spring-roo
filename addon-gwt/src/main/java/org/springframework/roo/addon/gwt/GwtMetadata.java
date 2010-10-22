@@ -91,6 +91,17 @@ public class GwtMetadata extends AbstractMetadataItem {
 		this.fileManager = fileManager;
 		this.metadataService = metadataService;
 
+        if (entityMetadata.getMappedSuperclassAnnotation() != null) {
+            throw new IllegalStateException("GWT does not currently support inheritence in proxied objects. Please remove the 'javax.persistence.MappedSuperclass' annotation from '" + governorTypeDetails.getName().getFullyQualifiedTypeName()  + "' in order to complete 'gwt setup'.");
+        }
+
+        if (beanInfoMetadata != null) {
+			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+                JavaType returnType = accessor.getReturnType();
+                checkPrimitive(returnType);
+            }
+        }
+
 		// We know GwtMetadataProvider already took care of all the necessary checks. So we can just re-create fresh representations of the types we're responsible for
 		resolveEntityInformation();
 		buildProxy();
@@ -111,10 +122,10 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildMobileEditView();
 		buildMobileEditViewUiXml();
 		buildEditRenderer();
-                buildSetEditor();
-                buildSetEditorUiXml();
-                buildListEditor();
-                buildListEditorUiXml();
+        buildSetEditor();
+        buildSetEditorUiXml();
+        buildListEditor();
+        buildListEditorUiXml();
 		buildRequest();
 	}
 
@@ -191,27 +202,20 @@ public class GwtMetadata extends AbstractMetadataItem {
 		if (beanInfoMetadata != null) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
-				propertyNames.add(propertyName);
-                FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-                
-                boolean serverOnly = false;
-                for (AnnotationMetadata annotation : field.getAnnotations()) {
-                    if (annotation.getAnnotationType().getSimpleTypeName().equals("RooServerOnly")) {
-                        serverOnly = true;
-                        break;
-                    }
-                }
-                
-                if (!serverOnly) {                    
+                if (!propertyNames.contains(propertyName)) {
+                    propertyNames.add(propertyName);
+                    FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
+
                     JavaType returnType = accessor.getReturnType();
-                    checkPrimitive(returnType);
-                    
+                    //checkPrimitive(returnType);
+
                     PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 
                     JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
 
                     // Store in the maps
                     propToGwtSideType.put(propertyName, gwtSideType);
+
                 }
 			}
 		}
