@@ -372,6 +372,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, help = "The enum type of this field") JavaType fieldType, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "enumType", mandatory = false, help = "The fetch semantics at a JPA level") EnumType enumType, 
@@ -381,6 +382,7 @@ public class FieldCommands implements CommandMarker {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		EnumField fieldDetails = new EnumField(physicalTypeIdentifier, fieldType, fieldName);
+		if (column != null) fieldDetails.setColumn(column);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (enumType != null) fieldDetails.setEnumType(enumType);
