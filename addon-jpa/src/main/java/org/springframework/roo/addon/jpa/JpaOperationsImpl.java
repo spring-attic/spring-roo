@@ -94,7 +94,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		cleanup(configuration, ormProvider, database);
 
 		updateApplicationContext(ormProvider, database, jndi, persistenceUnit);
-		updatePersistenceXml(ormProvider, database, databaseName, userName, password, persistenceUnit);
+		updatePersistenceXml(ormProvider, database, hostName, databaseName, userName, password, persistenceUnit);
 		updateGaeXml(ormProvider, database, applicationId);
 		updateVMforceConfigProperties(ormProvider, database, userName, password);
 		if (!StringUtils.hasText(jndi)) {
@@ -227,7 +227,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 	}
 
-	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database, String databaseName, String userName, String password, String persistenceUnit) {
+	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase database, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
 		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		MutableFile persistenceMutableFile = null;
 
@@ -339,7 +339,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				break;
 			case DATANUCLEUS:
 			case DATANUCLEUS_2:
-				String connectionString = database.getConnectionString();
+				String connectionString = getConnectionString(database, hostName, databaseName);
 				switch (database) {
 					case GOOGLE_APP_ENGINE:
 						properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
@@ -386,6 +386,21 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		persistenceUnitElement.appendChild(properties);
 		XmlUtils.writeXml(persistenceMutableFile.getOutputStream(), persistence);
+	}
+
+	private String getConnectionString(JdbcDatabase database, String hostName, String databaseName) {
+		String connectionString = database.getConnectionString();
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
+		if (StringUtils.hasText(databaseName)) {
+			// Oracle uses a different connection URL - see ROO-1203
+			String dbDelimiter = database == JdbcDatabase.ORACLE ? ":" : "/";
+			connectionString += databaseName.startsWith(dbDelimiter) ? databaseName : dbDelimiter + databaseName;
+		}
+		if (!StringUtils.hasText(hostName)) {
+			hostName = "localhost";
+		}
+		return connectionString.replace("HOST_NAME", hostName);
 	}
 
 	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase database, String applicationId) {
@@ -466,18 +481,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 		props.put("database.driverClassName", database.getDriverClassName());
 
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		String connectionString = database.getConnectionString();
-		connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-		if (StringUtils.hasText(databaseName)) {
-			// Oracle uses a different connection URL - see ROO-1203
-			String dbDelimiter = database == JdbcDatabase.ORACLE ? ":" : "/";
-			connectionString += databaseName.startsWith(dbDelimiter) ? databaseName : dbDelimiter + databaseName;
-		}
-		if (!StringUtils.hasText(hostName)) {
-			hostName = "localhost";
-		}
-		connectionString = connectionString.replace("HOST_NAME", hostName);
+		String connectionString = getConnectionString(database, hostName, databaseName);
 		props.put("database.url", connectionString);
 
 		String dbPropsMsg = "Please enter your database details in src/main/resources/META-INF/spring/database.properties.";
