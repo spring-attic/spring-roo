@@ -2,6 +2,7 @@ package org.springframework.roo.addon.jdbc.polling.internal;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
@@ -26,13 +27,22 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 			return null;
 		}
 		try {
-			// Special case for DB2/400 - driver must be registered with DriverManager (ROO-1479)
-			if ("com.ibm.as400.access.AS400JDBCDriver".equals(driverClassName)) {
-				DriverManager.registerDriver(new com.ibm.as400.access.AS400JDBCDriver());
-			}
+			registerDriverIfRequired(driverClassName);
 			return (Driver) ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader()).newInstance();
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
+		}
+	}
+
+	private void registerDriverIfRequired(String driverClassName) throws SQLException {
+		// DB2/400 driver must be registered with DriverManager (ROO-1479)
+		if ("com.ibm.as400.access.AS400JDBCDriver".equals(driverClassName)) {
+			DriverManager.registerDriver(new com.ibm.as400.access.AS400JDBCDriver());
+		}
+		
+		// Firebird driver must be registered with DriverManager 
+		if ("org.firebirdsql.jdbc.FBDriver".equals(driverClassName)) {
+			DriverManager.registerDriver(new org.firebirdsql.jdbc.FBDriver());
 		}
 	}
 }

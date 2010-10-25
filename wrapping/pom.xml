@@ -25,6 +25,7 @@
 		<module>jtopen</module>
  		<module>hapax</module>
 		<module>mysql</module>
+		<module>firebird</module>
 	</modules>
 
     <repositories>
