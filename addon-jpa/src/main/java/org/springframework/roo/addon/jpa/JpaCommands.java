@@ -68,6 +68,11 @@ public class JpaCommands implements CommandMarker {
 			logger.warning("Provider must be " + OrmProvider.DATANUCLEUS_2.name() + " for VMforce");
 			return;
 		}
+		
+		if (jdbcDatabase == JdbcDatabase.FIREBIRD && !isJdk6OrHigher()) {
+			logger.warning("JDK must be 1.6 or higher to use Firebird");
+			return;			
+		}
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, persistenceUnit);
 	}
@@ -100,5 +105,10 @@ public class JpaCommands implements CommandMarker {
 	@CliAvailabilityIndicator({ "database properties remove", "database properties set" })
 	public boolean hasDatabaseProperties() {
 		return isJpaInstalled() && jpaOperations.hasDatabaseProperties();
+	}
+	
+	private boolean isJdk6OrHigher() {
+		String ver = System.getProperty("java.version");
+		return ver.indexOf("1.6.") > -1 || ver.indexOf("1.7.") > -1;
 	}
 }
