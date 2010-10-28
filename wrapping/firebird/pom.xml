@@ -28,6 +28,20 @@
             <artifactId>jaybird</artifactId>
             <version>${pkgVersion}</version>
             <optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xalan</groupId>
+					<artifactId>xalan</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>geronimo-spec</groupId>
+					<artifactId>geronimo-spec-j2ee</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
     </dependencies>
 
