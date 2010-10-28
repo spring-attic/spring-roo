@@ -59,7 +59,9 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		Assert.hasText(declaredByMetadataId, "Declared by metadata ID required");
 		Assert.notNull(methodDeclaration, "Method declaration is mandatory");
 		Assert.notNull(compilationUnitServices, "Compilation unit services are required");
-		
+
+        this.declaredByMetadataId = declaredByMetadataId;
+
 		// Convert Java Parser modifier into JDK modifier
 		this.modifier = JavaParserUtils.getJdkModifier(methodDeclaration.getModifiers());
 		
