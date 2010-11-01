@@ -753,7 +753,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		JavaType returnType = JavaType.VOID_PRIMITIVE;
 		if ("flush".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
-			
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
 		} else if ("merge".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
@@ -786,6 +785,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 	private void addTransactionalAnnotation(List<AnnotationMetadataBuilder> annotations, boolean isPersistMethod) {
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		if (StringUtils.hasText(persistenceUnit)) {
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), persistenceUnit));		
+		}
 		if (isGaeEnabled && isPersistMethod) {
 			attributes.add(new EnumAttributeValue(new JavaSymbolName("propagation"), new EnumDetails(new JavaType("org.springframework.transaction.annotation.Propagation"), new JavaSymbolName("REQUIRES_NEW"))));
 		}

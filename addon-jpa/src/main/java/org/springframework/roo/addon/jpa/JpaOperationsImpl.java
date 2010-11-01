@@ -182,6 +182,11 @@ public class JpaOperationsImpl implements JpaOperations {
 			transactionManager = appCtx.createElement("bean");
 			transactionManager.setAttribute("id", "transactionManager");
 			transactionManager.setAttribute("class", "org.springframework.orm.jpa.JpaTransactionManager");
+			if (StringUtils.hasText(persistenceUnit)) {
+				Element qualifier = appCtx.createElement("qualifier");
+				qualifier.setAttribute("value", persistenceUnit);
+				transactionManager.appendChild(qualifier);
+			}
 			transactionManager.appendChild(createRefElement("entityManagerFactory", "entityManagerFactory", appCtx));
 			root.appendChild(transactionManager);
 		}
