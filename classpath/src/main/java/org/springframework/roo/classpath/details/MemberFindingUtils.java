@@ -229,7 +229,7 @@ public abstract class MemberFindingUtils {
 		while (current != null) {
 			for (FieldMetadata field : current.getDeclaredFields()) {
 				if (getAnnotationOfType(field.getAnnotations(), annotation) != null) {
-					// found the annotation on this field
+					// Found the annotation on this field
 					result.add(field);
 				}
 			}

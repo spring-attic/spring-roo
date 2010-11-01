@@ -74,6 +74,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
 	private static final JavaType ONE_TO_MANY = new JavaType("javax.persistence.OneToMany");
 	private static final JavaType MANY_TO_ONE = new JavaType("javax.persistence.ManyToOne");
@@ -387,14 +388,15 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(new JavaSymbolName("excludeFields"));
 			if (value != null) {
 				// Ensure we have an array of strings
+				final String errMsg = "Annotation RooToString attribute 'excludeFields' must be an array of strings";
 				if (!(value instanceof ArrayAttributeValue<?>)) {
-					throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");
+					throw new IllegalStateException(errMsg);
 				}
 
 				ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
 				for (Object obj : arrayVal.getValue()) {
 					if (!(obj instanceof StringAttributeValue)) {
-						throw new IllegalStateException("Annotation RooToString attribute 'excludeFields' must be an array of strings");
+						throw new IllegalStateException(errMsg);
 					}
 
 					StringAttributeValue sv = (StringAttributeValue) obj;
@@ -522,7 +524,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<FieldMetadata> identifierFields = getIdentifierFields(javaType);
 		for (FieldMetadata field : identifierFields) {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
-				if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Column"))) {
+				if (annotation.getAnnotationType().equals(COLUMN)) {
 					AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName(NAME));
 					if (nameAttribute != null) {
 						String name = (String) nameAttribute.getValue();
@@ -561,15 +563,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
 	}
 
-	private boolean isIdField(JavaSymbolName fieldName) {
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
-		if (idFields.size() > 0) {
-			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return idFields.get(0).getFieldName().equals(fieldName);
-		}
-		return false;
-	}
-
 	private JavaSymbolName getIdField() {
 		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
 		if (idFields.size() > 0) {
@@ -579,11 +572,19 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return null;
 	}
 
+	private boolean isIdField(JavaSymbolName fieldName) {
+		return isAnnotatedField(fieldName, new JavaType("javax.persistence.Id"), "@Id");
+	}
+
 	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {
-		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.EmbeddedId"));
-		if (embeddedIdFields.size() > 0) {
-			Assert.isTrue(embeddedIdFields.size() == 1, "More than one field was annotated with @EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return embeddedIdFields.get(0).getFieldName().equals(fieldName);
+		return isAnnotatedField(fieldName, new JavaType("javax.persistence.EmbeddedId"), "@EmbeddedId");
+	}
+	
+	private boolean isAnnotatedField(JavaSymbolName fieldName, JavaType annotationType, String annotationName) {
+		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, annotationType);
+		if (fields.size() > 0) {
+			Assert.isTrue(fields.size() == 1, "More than one field was annotated with " + annotationName + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			return fields.get(0).getFieldName().equals(fieldName);
 		}
 		return false;
 	}
@@ -595,7 +596,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Add @Column annotation
-		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Column"));
+		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute(NAME, column.getEscapedName());
 
 		// Add length attribute for Strings
@@ -696,7 +697,29 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (MemberFindingUtils.getField(governorTypeDetails, field.getFieldName()) != null) {
 			return true;
 		}
-
+		
+		// Check @Column annotation on fields in governor with same 'name' 
+		// attribute as the 'name' attribute in the @JoinColumn for the generated field
+		List<FieldMetadata> governorFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, COLUMN);
+		governorFields.addAll(MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JOIN_COLUMN));
+		for (FieldMetadata governorField : governorFields) {
+			for (AnnotationMetadata governorAnnotation : governorField.getAnnotations()) {
+				if (governorAnnotation.getAnnotationType().equals(COLUMN) || governorAnnotation.getAnnotationType().equals(JOIN_COLUMN)) {
+					AnnotationAttributeValue<?> name = governorAnnotation.getAttribute(new JavaSymbolName(NAME));
+					if (name != null) {
+						for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
+							if (annotationMetadata.getAnnotationType().equals(JOIN_COLUMN)) {
+								AnnotationAttributeValue<?> columnName = annotationMetadata.getAttribute(new JavaSymbolName(NAME));
+								if (columnName != null && columnName.equals(name)) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		// Check entity ITD for field
 		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
 		for (FieldMetadata itdField : itdFields) {
