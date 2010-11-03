@@ -46,10 +46,15 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void displayDatabaseMetadata(Schema schema, File file) {
+		if (schema == null && dbreModelService.supportsSchema()) {
+			throw new IllegalStateException("Schema required");
+		}
+		
 		Database database = dbreModelService.refreshDatabaseSafely(schema);
 		if (database == null) {
 			throw new IllegalStateException("Cannot obtain database information for schema '" + schema + "'");
 		}
+		
 		if (file != null) {
 			try {
 				OutputStream outputStream = new FileOutputStream(file);
@@ -77,7 +82,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 		dbreModelService.setExcludeTables(excludeTables);
 		
-		if (schema == null) {
+		if (schema == null && dbreModelService.supportsSchema()) {
 			// No schema, so try to look it up
 			schema = dbreModelService.getLastSchema();
 			Assert.notNull(schema, "Schema must be specified given no prior database introspection information is available");

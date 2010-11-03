@@ -22,6 +22,16 @@ public interface DbreModelService {
 	 * The name of the DBRE XML file.
 	 */
 	String DBRE_FILE = ".roo-dbre";
+	
+	/**
+	 * Determines if the database uses schemas.
+	 * 
+	 * <p>
+	 * Examples of databases that do not use schemas are MySQL and Firebird.
+	 * 
+	 * @return true if the database supports schema, otherwise false;
+	 */
+	boolean supportsSchema();
 
 	/**
 	 * Returns a Set of available database {@link Schema schemas}. 
@@ -33,7 +43,7 @@ public interface DbreModelService {
 	/**
 	 * Returns the last known schema.
 	 * 
-	 * @return schema the last schema introspected, or null if not introspected.
+	 * @return the last schema introspected, or null if not introspected.
 	 */
 	Schema getLastSchema();
 
@@ -66,7 +76,17 @@ public interface DbreModelService {
 	 */
 	Database refreshDatabaseSafely(Schema schema);
 	
+	/**
+	 * Returns a Set of last known excluded tables.
+	 * 
+	 * @return the last known Set of excluded table names, or null if not known
+	 */
 	Set<String> getExcludeTables();
 	
+	/**
+	 * Specifies the table names to exclude.
+	 *  
+	 * @param excludeTables a Set of table names
+	 */
 	void setExcludeTables(Set<String> excludeTables);
 }

@@ -11,7 +11,7 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
 /**
- * Provides conversion between a space-separated list of table names to an array of table names.
+ * Provides conversion between a space-separated list of table names to a Set of table names.
  * 
  * @author Alan Stewart
  * @since 1.1

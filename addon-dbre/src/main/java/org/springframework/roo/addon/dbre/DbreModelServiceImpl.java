@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -105,6 +107,20 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		}
 	}
 
+	public boolean supportsSchema() {
+		Connection connection = null;
+		try {
+			connection = getConnection();
+			DatabaseMetaData databaseMetaData = connection.getMetaData();
+			String schemaTerm = databaseMetaData.getSchemaTerm();
+			return StringUtils.hasText(schemaTerm) && schemaTerm.equals("schema");
+		} catch (Exception e) {
+			return false;
+		} finally {
+			connectionProvider.closeConnection(connection);
+		}
+	}
+
 	public Set<Schema> getDatabaseSchemas() {
 		Connection connection = null;
 		try {
@@ -124,8 +140,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 			return lastSchema;
 		}
 		// Otherwise fallback to compute it via a file load (note this does NOT change the last schema field, as a getter is side effect free)
-		Schema schema = deserializeSchemaMetadataIfPossible();
-		return schema != null ? schema : null;
+		return deserializeSchemaMetadataIfPossible();
 	}
 
 	public Database getDatabase(Schema schema) {
@@ -271,12 +286,12 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 
 	
 	/**
-	 * Reads the database schema information from XML if possible.
+	 * Reads the excluded tables information from XML if possible.
 	 * 
 	 * <p>
 	 * NOTE: the XML file can only store one database.
 	 * 
-	 * @return the database schema if it could be parsed, otherwise null if unavailable for any reason
+	 * @return the excluded tables if it could be parsed, otherwise null if unavailable for any reason
 	 */
 	private Set<String> deserializeExcludeTablesMetadataIfPossible() {
 		String dbreXmlPath = getDbreXmlPath();

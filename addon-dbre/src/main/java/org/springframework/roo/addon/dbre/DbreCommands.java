@@ -31,7 +31,7 @@ public class DbreCommands implements CommandMarker {
 
 	@CliCommand(value = "database introspect", help = "Displays database metadata")
 	public void displayDatabaseMetadata(
-		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
+		@CliOption(key = "schema", mandatory = false, help = "The database schema name") Schema schema, 
 		@CliOption(key = "file", mandatory = false, help = "The file to save the metadata to") File file) {
 
 		dbreOperations.displayDatabaseMetadata(schema, file);
