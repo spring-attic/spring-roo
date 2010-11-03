@@ -50,7 +50,8 @@ public interface DbreModelService {
 	 * Forces the cache to be refreshed for the indicated schema. Useful if you know a database connection is
 	 * available.
 	 * 
-	 * @param schema to refresh (required)
+	 * @param schema the schema to refresh (required)
+	 * @param excludeTables a set of tables to exclude
 	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabase(Schema schema);
@@ -64,4 +65,8 @@ public interface DbreModelService {
 	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabaseSafely(Schema schema);
+	
+	Set<String> getExcludeTables();
+	
+	void setExcludeTables(Set<String> excludeTables);
 }

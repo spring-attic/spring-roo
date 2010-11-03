@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
 import java.io.File;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -39,8 +40,9 @@ public class DbreCommands implements CommandMarker {
 	@CliCommand(value = "database reverse engineer", help = "Create and updates entities based on the database metadata")
 	public void serializeDatabaseMetadata(
 		@CliOption(key = "schema", mandatory = false, help = "The database schema name") Schema schema, 
-		@CliOption(key = "package", mandatory = false, optionContext = "update", help = "The package in which new entities will be placed") JavaPackage destinationPackage) {
-
-		dbreOperations.reverseEngineerDatabase(schema, destinationPackage);
+		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage,
+		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables) {
+		
+		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, excludeTables);
 	}
 }

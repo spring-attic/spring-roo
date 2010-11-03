@@ -25,9 +25,9 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
 import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DatabaseIntrospector;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
-import org.springframework.roo.addon.dbre.model.SchemaIntrospector;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
@@ -58,6 +58,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
 	private Schema lastSchema = null;
+	private Set<String> excludeTables;
 	private Set<DatabaseListener> listeners = new HashSet<DatabaseListener>();
 	private boolean startupCompleted = false;
 
@@ -108,7 +109,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			SchemaIntrospector introspector = new SchemaIntrospector(connection);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection);
 			return introspector.getSchemas();
 		} catch (Exception e) {
 			return Collections.emptySet();
@@ -139,6 +140,18 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 
 	public Database refreshDatabaseSafely(Schema schema) {
 		return getDatabase(schema, true, true);
+	}
+
+	public Set<String> getExcludeTables() {
+		if (excludeTables != null) {
+			return excludeTables;
+		}
+		
+		return deserializeExcludeTablesMetadataIfPossible();
+	}
+
+	public void setExcludeTables(Set<String> excludeTables) {
+		this.excludeTables = excludeTables;
 	}
 
 	private Database getDatabase(Schema schema, boolean forceReadFromDatabase, boolean safeMode) {
@@ -182,7 +195,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			SchemaIntrospector introspector = new SchemaIntrospector(connection, schema);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, excludeTables);
 			Database database = introspector.getDatabase();
 
 			if (safeMode) {
@@ -251,6 +264,29 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
 			return DatabaseXmlUtils.readSchemaUsingSaxFromInputStream(inputStream);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	
+	/**
+	 * Reads the database schema information from XML if possible.
+	 * 
+	 * <p>
+	 * NOTE: the XML file can only store one database.
+	 * 
+	 * @return the database schema if it could be parsed, otherwise null if unavailable for any reason
+	 */
+	private Set<String> deserializeExcludeTablesMetadataIfPossible() {
+		String dbreXmlPath = getDbreXmlPath();
+		if (!fileManager.exists(dbreXmlPath)) {
+			return null;
+		}
+		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
+		try {
+			InputStream inputStream = new FileInputStream(fileDetails.getFile());
+			return DatabaseXmlUtils.readExcludeTablesUsingSaxFromInputStream(inputStream);
 		} catch (Exception e) {
 			return null;
 		}

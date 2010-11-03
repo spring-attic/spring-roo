@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Creates a {@link Database database} model from a live database using JDBC.
@@ -19,26 +20,28 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1
  */
-public class SchemaIntrospector {
+public class DatabaseIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
 	private Connection connection;
 	private DatabaseMetaData databaseMetaData;
 	private String catalog;
 	private Schema schema;
+	private Set<String> excludeTables;
 	private String tableNamePattern;
 	private String columnNamePattern;
 	private String[] types = TYPES;
 
-	public SchemaIntrospector(Connection connection, Schema schema) throws SQLException {
+	public DatabaseIntrospector(Connection connection, Schema schema, Set<String> excludeTables) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
 		catalog = this.connection.getCatalog();
 		databaseMetaData = this.connection.getMetaData();
 		this.schema = schema;
+		this.excludeTables = excludeTables;
 	}
 
-	public SchemaIntrospector(Connection connection) throws SQLException {
-		this(connection, null);
+	public DatabaseIntrospector(Connection connection) throws SQLException {
+		this(connection, null, null);
 	}
 
 	public Connection getConnection() {
@@ -107,6 +110,7 @@ public class SchemaIntrospector {
 	public Database getDatabase() throws SQLException {
 		Database database = new Database(catalog, schema, readTables());
 		database.setSequences(readSequences());
+		database.setExcludeTables(excludeTables);
 		return database;
 	}
 
@@ -119,32 +123,35 @@ public class SchemaIntrospector {
 			while (rs.next()) {
 				tableNamePattern = rs.getString("TABLE_NAME");
 				catalog = rs.getString("TABLE_CAT");
-				schema = new Schema(rs.getString("TABLE_SCHEM"));
+				String schemaName = rs.getString("TABLE_SCHEM");
+				schema = new Schema(!StringUtils.hasText(schemaName) && StringUtils.hasText(catalog) ? catalog : schemaName);
 
 				// Check for certain tables such as Oracle recycle bin tables, and ignore
 				if (ignoreTables()) {
 					continue;
 				}
 
-				Table table = new Table();
-				table.setName(tableNamePattern);
-				table.setCatalog(catalog);
-				table.setSchema(schema);
-				table.setDescription(rs.getString("REMARKS"));
+				if (excludeTables == null || !excludeTables.contains(tableNamePattern)) {
+					Table table = new Table();
+					table.setName(tableNamePattern);
+					table.setCatalog(catalog);
+					table.setSchema(schema);
+					table.setDescription(rs.getString("REMARKS"));
 
-				table.addColumns(readColumns());
-				table.addForeignKeys(readForeignKeys());
-				table.addExportedKeys(readExportedKeys());
-				table.addIndices(readIndices());
+					table.addColumns(readColumns());
+					table.addForeignKeys(readForeignKeys());
+					table.addExportedKeys(readExportedKeys());
+					table.addIndices(readIndices());
 
-				for (String columnName : readPrimaryKeyNames()) {
-					Column column = table.findColumn(columnName);
-					if (column != null) {
-						column.setPrimaryKey(true);
+					for (String columnName : readPrimaryKeyNames()) {
+						Column column = table.findColumn(columnName);
+						if (column != null) {
+							column.setPrimaryKey(true);
+						}
 					}
-				}
 
-				tables.add(table);
+					tables.add(table);
+				}
 			}
 		} finally {
 			rs.close();
@@ -218,20 +225,22 @@ public class SchemaIntrospector {
 				String foreignTableName = rs.getString("PKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
 
-				ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
-				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
-				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+				if (excludeTables == null || !excludeTables.contains(foreignTableName)) {
+					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
+					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
-				Reference reference = new Reference();
-				reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
-				reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
-				reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
+					Reference reference = new Reference();
+					reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
+					reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
+					reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
 
-				if (foreignKeys.containsKey(key)) {
-					foreignKeys.get(key).addReference(reference);
-				} else {
-					foreignKey.addReference(reference);
-					foreignKeys.put(key, foreignKey);
+					if (foreignKeys.containsKey(key)) {
+						foreignKeys.get(key).addReference(reference);
+					} else {
+						foreignKey.addReference(reference);
+						foreignKeys.put(key, foreignKey);
+					}
 				}
 			}
 		} finally {
@@ -275,20 +284,22 @@ public class SchemaIntrospector {
 				String foreignTableName = rs.getString("FKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
 
-				ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
-				foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
-				foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+				if (excludeTables == null || !excludeTables.contains(foreignTableName)) {
+					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
+					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
+					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
 
-				Reference reference = new Reference();
-				reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
-				reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
-				reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
+					Reference reference = new Reference();
+					reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
+					reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
+					reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
 
-				if (exportedKeys.containsKey(key)) {
-					exportedKeys.get(key).addReference(reference);
-				} else {
-					foreignKey.addReference(reference);
-					exportedKeys.put(key, foreignKey);
+					if (exportedKeys.containsKey(key)) {
+						exportedKeys.get(key).addReference(reference);
+					} else {
+						foreignKey.addReference(reference);
+						exportedKeys.put(key, foreignKey);
+					}
 				}
 			}
 		} finally {

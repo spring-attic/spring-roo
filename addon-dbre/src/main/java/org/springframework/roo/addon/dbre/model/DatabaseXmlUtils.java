@@ -47,7 +47,10 @@ public abstract class DatabaseXmlUtils {
 		if (database.getSchema() != null) {
 			databaseElement.setAttribute("schema", database.getSchema().getName());
 		}
-
+		if (database.getExcludeTables() != null) {
+			databaseElement.setAttribute("excludeTables", StringUtils.collectionToCommaDelimitedString(database.getExcludeTables()));
+		}
+ 
 		for (Table table : database.getTables()) {
 			Element tableElement = document.createElement("table");
 			tableElement.setAttribute(NAME, table.getName());
@@ -159,6 +162,25 @@ public abstract class DatabaseXmlUtils {
 			throw new IllegalStateException(e);
 		}
 	}
+	
+	public static Set<String> readExcludeTablesFromInputStream(InputStream inputStream) {
+		Document document = getDocument(inputStream);
+		Element databaseElement = document.getDocumentElement();
+		return StringUtils.commaDelimitedListToSet(databaseElement.getAttribute("excludeTables"));
+	}
+
+	public static Set<String> readExcludeTablesUsingSaxFromInputStream(InputStream inputStream) {
+		try {
+			SAXParserFactory spf = SAXParserFactory.newInstance();
+			SAXParser parser = spf.newSAXParser();
+			ExcludeTablesContentHandler contentHandler = new ExcludeTablesContentHandler();
+			parser.parse(inputStream, contentHandler);
+			return contentHandler.getExcludeTables();
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
 
 	public static Database readDatabaseStructureFromInputStream(InputStream inputStream) {
 		Document document = getDocument(inputStream);
@@ -248,6 +270,7 @@ public abstract class DatabaseXmlUtils {
 
 		Database database = new Database(name, schema, tables);
 		database.setSequences(sequences);
+		database.setExcludeTables(StringUtils.commaDelimitedListToSet(databaseElement.getAttribute("excludeTables")));
 		return database;
 	}
 

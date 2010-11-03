@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre;
+package org.springframework.roo.addon.dbre.converters;
 
 import java.util.List;
 import java.util.Set;
@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.dbre.DbreModelService;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;

@@ -9,5 +9,4 @@ public interface Converter {
 	Object convertFromText(String value, Class<?> requiredType, String optionContext);
 	
 	boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target);
-	
 }

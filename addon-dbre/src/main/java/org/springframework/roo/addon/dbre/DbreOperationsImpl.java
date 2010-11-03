@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -62,7 +63,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 	}
 
-	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage) {
+	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, Set<String> excludeTables) {
 		if (destinationPackage == null) {
 			// No destination package, so verify that DBRE has run before and thus we know where to put the entities
 			Assert.notNull(dbreDatabaseListener.getDestinationPackage(), "Must specify a destination package given no prior database introspection entities are available");
@@ -70,6 +71,12 @@ public class DbreOperationsImpl implements DbreOperations {
 			// User provided a destination package, so set it for use before we complete the introspection
 			dbreDatabaseListener.setDestinationPackage(destinationPackage);
 		}
+		
+		if (excludeTables == null) {
+			excludeTables = dbreModelService.getExcludeTables();
+		}
+		dbreModelService.setExcludeTables(excludeTables);
+		
 		if (schema == null) {
 			// No schema, so try to look it up
 			schema = dbreModelService.getLastSchema();

@@ -6,12 +6,10 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.shell.SimpleParser;
 
-
 /**
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class AvailableCommandsConverter implements Converter {
 
@@ -26,7 +24,7 @@ public class AvailableCommandsConverter implements Converter {
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
 		if (target.target instanceof SimpleParser) {
 			SimpleParser cmd = (SimpleParser) target.target;
-			
+
 			// Only include the first word of each command
 			for (String s : cmd.getEveryCommand()) {
 				if (s.contains(" ")) {
@@ -38,5 +36,4 @@ public class AvailableCommandsConverter implements Converter {
 		}
 		return true;
 	}
-
 }

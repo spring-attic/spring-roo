@@ -36,6 +36,9 @@ public class Database implements Serializable {
 
 	/** Database sequences */
 	private Set<Sequence> sequences = new LinkedHashSet<Sequence>();
+	
+	/** Excluded tables */
+	private Set<String> excludeTables;
 
 	Database(String name, Schema schema, Set<Table> tables) {
 		Assert.notNull(tables, "tables required");
@@ -63,6 +66,14 @@ public class Database implements Serializable {
 
 	public void setSequences(Set<Sequence> sequences) {
 		this.sequences = sequences;
+	}
+
+	public Set<String> getExcludeTables() {
+		return excludeTables;
+	}
+
+	public void setExcludeTables(Set<String> excludeTables) {
+		this.excludeTables = excludeTables;
 	}
 
 	public boolean hasTables() {

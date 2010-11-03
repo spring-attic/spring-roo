@@ -7,7 +7,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * {@link ContentHandler} implementation for finding the schema attribute of the database
- * element in the dbre.xml file and creating a {@link Schema} object.
+ * element in the .roo-dbre file and creating a {@link Schema} object.
  * 
  * @author Alan Stewart
  * @since 1.1
