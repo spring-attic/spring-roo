@@ -44,9 +44,21 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	protected abstract ExecutionStrategy getExecutionStrategy();
 	protected abstract Parser getParser();
 
-	@CliCommand(value={"script"}, help="Parses the specified resource file and executes its commands")
-	public void script(@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File resource, 
-			@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
+	// 1. Fix it so tab assist works correctly with single argument
+	// 2. Put a second variable into "echo" (color whatever)
+	// 3. Make it an array and add a syntax to support it
+/*	@CliCommand(value = { "echo" }, help = "test")
+	public String script(
+		@CliOption(key = "message", help = "Echo message", mandatory = true) String m, 
+		@CliOption(key = "color", help = "Echo color", mandatory = false) String c) {
+		return m;
+	}
+*/
+	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
+	public void script(
+		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File resource, 
+		@CliOption(key = "lineNumbers", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Display line numbers when executing the script") boolean lineNumbers) {
+		
 		Assert.notNull(resource, "Resource to parser is required");
 		long started = new Date().getTime();
 		InputStream inputStream = null;
@@ -105,7 +117,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	}
 	
 	public boolean executeCommand(String line) {
-		// another command was attempted
+		// Another command was attempted
     	setShellStatus(ShellStatus.Status.PARSING);
 
     	ExecutionStrategy executionStrategy = getExecutionStrategy();
@@ -124,13 +136,13 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			flash(Level.INFO, "", MY_SLOT);
     	}
 
-    	try {
+		try {
 			// We support simple block comments; ie a single pair per line
 			if (!inBlockComment && line.contains("/*")) {
 				blockCommentBegin();
 				String lhs = line.substring(0, line.lastIndexOf("/*"));
 				if (line.contains("*/")) {
-					line = lhs + line.substring(line.lastIndexOf("*/")+2);
+					line = lhs + line.substring(line.lastIndexOf("*/") + 2);
 					blockCommentFinish();
 				} else {
 					line = lhs;
@@ -141,9 +153,9 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 					return true;
 				}
 				blockCommentFinish();
-				line = line.substring(line.lastIndexOf("*/")+2);
+				line = line.substring(line.lastIndexOf("*/") + 2);
 			}
-			// We also support inline comments (but only at start of line, otherwise valid 
+			// We also support inline comments (but only at start of line, otherwise valid
 			// command options like http://www.helloworld.com will fail as per ROO-517)
 			if (!inBlockComment && (line.trim().startsWith("//") || line.trim().startsWith("#"))) { // # support in ROO-1116
 				line = "";
@@ -159,31 +171,31 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				return false;
 			} else {
 				setShellStatus(Status.EXECUTING);
-		    	Object result = executionStrategy.execute(parseResult);
-		    	setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
-		    	if (result != null) {
-		    		if (result instanceof ExitShellRequest) {
-		    			exitShellRequest = (ExitShellRequest) result;
-		    		} else if (result instanceof Iterable<?>) {
-		    			for (Object o : (Iterable<?>)result) {
-		    				logger.info(o.toString());
-		    			}
-		    		} else {
-	    				logger.info(result.toString());
-		    		}
-		    	}
-		    }
+				Object result = executionStrategy.execute(parseResult);
+				setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
+				if (result != null) {
+					if (result instanceof ExitShellRequest) {
+						exitShellRequest = (ExitShellRequest) result;
+					} else if (result instanceof Iterable<?>) {
+						for (Object o : (Iterable<?>) result) {
+							logger.info(o.toString());
+						}
+					} else {
+						logger.info(result.toString());
+					}
+				}
+			}
 			logCommandIfRequired(line, true);
 			setShellStatus(Status.EXECUTION_SUCCESS, line);
 			return true;
-		} catch (RuntimeException ex) {
+		} catch (RuntimeException e) {
 	    	setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
 			// We rely on execution strategy to log it
 			// Throwable root = ExceptionUtils.extractRootCause(ex);
 			// logger.log(Level.FINE, root.getMessage());
 	    	try {
 	    		logCommandIfRequired(line, false);
-	    	} catch (Exception ignoreIt) {}
+	    	} catch (Exception ignored) {}
 			return false;
 		} finally {
 			setShellStatus(Status.EXECUTION_FAILED, line);
@@ -248,22 +260,22 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return exitShellRequest;
 	}
 
-	@CliCommand(value={"//", ";"}, help="Inline comment markers (start of line only)")
+	@CliCommand(value = { "//", ";" }, help = "Inline comment markers (start of line only)")
 	public void inlineComment() {}
 
-	@CliCommand(value={"/*"}, help="Start of block comment")
+	@CliCommand(value = { "/*" }, help = "Start of block comment")
 	public void blockCommentBegin() {
 		Assert.isTrue(!inBlockComment, "Cannot open a new block comment when one already active");
 		inBlockComment = true;
 	}
 
-	@CliCommand(value={"*/"}, help="End of block comment")
+	@CliCommand(value = { "*/" }, help = "End of block comment")
 	public void blockCommentFinish() {
 		Assert.isTrue(inBlockComment, "Cannot close a block comment when it has not been opened");
 		inBlockComment = false;
 	}
 
-	@CliCommand(value={"system properties"}, help="Shows the shell's properties")
+	@CliCommand(value = { "system properties" }, help = "Shows the shell's properties")
 	public String props() {
 		Properties properties = System.getProperties();
 		SortedSet<String> data = new TreeSet<String>();
@@ -279,7 +291,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 		return sb.toString();
 	}
 
-	@CliCommand(value={"date"}, help="Displays the local date and time")
+	@CliCommand(value = { "date" }, help = "Displays the local date and time")
 	public String date() {
 		return DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL).format(new Date());
 	}
@@ -442,5 +454,4 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			logger.log(level, message);
 		}
 	}
-	
 }

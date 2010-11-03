@@ -34,9 +34,14 @@ import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Default implementation of {@link Parser}.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ */
 public class SimpleParser implements Parser {
 	private static final Logger logger = HandlerUtils.getLogger(SimpleParser.class);
-
 	private Object mutex = this;
 	private Set<Converter> converters = new HashSet<Converter>();
 	private Set<CommandMarker> commands = new HashSet<CommandMarker>();
@@ -105,8 +110,8 @@ public class SimpleParser implements Parser {
 			Map<String, String> options = null;
 			try {
 				options = ParserUtils.tokenize(methodTarget.remainingBuffer);
-			} catch (IllegalArgumentException ex) {
-				logger.warning(ExceptionUtils.extractRootCause(ex).getMessage());
+			} catch (IllegalArgumentException e) {
+				logger.warning(ExceptionUtils.extractRootCause(e).getMessage());
 				return null;
 			}
 
@@ -207,10 +212,10 @@ public class SimpleParser implements Parser {
 						result = c.convertFromText(value, requiredType, cliOption.optionContext());
 					}
 					arguments.add(result);
-				} catch (RuntimeException ex) {
+				} catch (RuntimeException e) {
 					logger.warning("Failed to convert '" + value + "' to type " + requiredType.getSimpleName() + " for option '" + StringUtils.arrayToCommaDelimitedString(cliOption.key()) + "'");
-					if (ex.getMessage() != null && ex.getMessage().length() > 0) {
-						logger.warning(ex.getMessage());
+					if (e.getMessage() != null && e.getMessage().length() > 0) {
+						logger.warning(e.getMessage());
 					}
 					return null;
 				} finally {
@@ -350,7 +355,7 @@ public class SimpleParser implements Parser {
 			}
 		}
 
-		return null; // not a match
+		return null; // Not a match
 	}
 
 	public int complete(String buffer, int cursor, List<String> candidates) {
