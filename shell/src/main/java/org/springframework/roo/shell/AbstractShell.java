@@ -44,16 +44,6 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	protected abstract ExecutionStrategy getExecutionStrategy();
 	protected abstract Parser getParser();
 
-	// 1. Fix it so tab assist works correctly with single argument
-	// 2. Put a second variable into "echo" (color whatever)
-	// 3. Make it an array and add a syntax to support it
-/*	@CliCommand(value = { "echo" }, help = "test")
-	public String script(
-		@CliOption(key = "message", help = "Echo message", mandatory = true) String m, 
-		@CliOption(key = "color", help = "Echo color", mandatory = false) String c) {
-		return m;
-	}
-*/
 	@CliCommand(value = { "script" }, help = "Parses the specified resource file and executes its commands")
 	public void script(
 		@CliOption(key = { "", "file" }, help = "The file to locate and execute", mandatory = true) File resource, 
