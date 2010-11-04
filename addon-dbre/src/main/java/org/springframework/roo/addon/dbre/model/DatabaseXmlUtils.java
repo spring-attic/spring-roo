@@ -181,7 +181,6 @@ public abstract class DatabaseXmlUtils {
 		}
 	}
 
-
 	public static Database readDatabaseStructureFromInputStream(InputStream inputStream) {
 		Document document = getDocument(inputStream);
 		Element databaseElement = document.getDocumentElement();

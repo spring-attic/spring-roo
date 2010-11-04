@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
@@ -131,7 +132,7 @@ public class DatabaseIntrospector {
 					continue;
 				}
 
-				if (excludeTables == null || !excludeTables.contains(tableNamePattern)) {
+				if (!hasExcludedTable(tableNamePattern)) {
 					Table table = new Table();
 					table.setName(tableNamePattern);
 					table.setCatalog(catalog);
@@ -225,7 +226,7 @@ public class DatabaseIntrospector {
 				String foreignTableName = rs.getString("PKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
 
-				if (excludeTables == null || !excludeTables.contains(foreignTableName)) {
+				if (!hasExcludedTable(foreignTableName)) {
 					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
@@ -284,7 +285,7 @@ public class DatabaseIntrospector {
 				String foreignTableName = rs.getString("FKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
 
-				if (excludeTables == null || !excludeTables.contains(foreignTableName)) {
+				if (!hasExcludedTable(foreignTableName)) {
 					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
@@ -307,6 +308,18 @@ public class DatabaseIntrospector {
 		}
 
 		return new LinkedHashSet<ForeignKey>(exportedKeys.values());
+	}
+
+	private boolean hasExcludedTable(String tableName) {
+		if (excludeTables != null && StringUtils.hasText(tableName)) {
+			for (String excludedTable : excludeTables) {
+				Pattern pattern = Pattern.compile(excludedTable.replaceAll("\\*", ".*").replaceAll("\\?", ".?"));
+				if (pattern.matcher(tableName).matches()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private Set<Index> readIndices() throws SQLException {
