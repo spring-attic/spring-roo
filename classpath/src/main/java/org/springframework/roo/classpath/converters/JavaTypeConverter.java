@@ -33,12 +33,10 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component
 @Service
 public class JavaTypeConverter implements Converter {
-
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
@@ -47,7 +45,7 @@ public class JavaTypeConverter implements Converter {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
-		
+
 		if ("*".equals(value)) {
 			JavaType result = lastUsed.getJavaType();
 			if (result == null) {
@@ -67,25 +65,21 @@ public class JavaTypeConverter implements Converter {
 		String newValue = value;
 		if (value.startsWith("~") && topLevelPath != null) {
 			if (value.length() > 1) {
-				if (!(value.charAt(1) == '.')) {
-					newValue = topLevelPath + "." + value.substring(1);
-				} else {
-					newValue = topLevelPath + value.substring(1);
-				}
+				newValue = (!(value.charAt(1) == '.') ? topLevelPath + "." : topLevelPath) + value.substring(1);
 			} else {
 				newValue = topLevelPath;
 			}
 		}
-		
+
 		// If the user did not provide a java type name containing a dot, it's taken as relative to the current package directory
 		if (lastUsed.getJavaPackage() != null && !newValue.contains(".")) {
 			newValue = lastUsed.getJavaPackage().getFullyQualifiedPackageName() + "." + newValue;
 		}
-		
+
 		// Automatically capitalize the first letter of the last name segment (ie capitalize the type name, but not the package)
 		int index = newValue.lastIndexOf(".");
 		if (index > -1 && !newValue.endsWith(".")) {
-			String typeName = newValue.substring(index+1);
+			String typeName = newValue.substring(index + 1);
 			typeName = StringUtils.capitalize(typeName);
 			newValue = newValue.substring(0, index).toLowerCase() + "." + typeName;
 		}
@@ -108,11 +102,11 @@ public class JavaTypeConverter implements Converter {
 		if (optionContext == null || "".equals(optionContext) || optionContext.contains("project")) {
 			completeProjectSpecificPaths(completions, existingData);
 		}
-		
+
 		if (optionContext != null && optionContext.contains("java")) {
 			completeJavaSpecificPaths(completions, existingData, optionContext);
 		}
-		
+
 		return false;
 	}
 
@@ -121,7 +115,7 @@ public class JavaTypeConverter implements Converter {
 	 */
 	private void completeJavaSpecificPaths(List<String> completions, String existingData, String optionContext) {
 		SortedSet<String> types = new TreeSet<String>();
-		
+
 		if (optionContext == null || "".equals(optionContext)) {
 			optionContext = "java-all";
 		}
@@ -142,7 +136,7 @@ public class JavaTypeConverter implements Converter {
 			types.add(Float.class.getName());
 			types.add(Double.class.getName());
 		}
-		
+
 		if (optionContext.contains("java-all") || optionContext.contains("java-number")) {
 			// misc
 			types.add(BigDecimal.class.getName());
@@ -158,20 +152,20 @@ public class JavaTypeConverter implements Converter {
 			types.add(SortedSet.class.getName());
 			types.add(Map.class.getName());
 		}
-		
+
 		if (optionContext.contains("java-all") || optionContext.contains("java-util") || optionContext.contains("java-date")) {
 			// util
 			types.add(Date.class.getName());
 			types.add(Calendar.class.getName());
 		}
-		
+
 		for (String type : types) {
 			if (type.startsWith(existingData) || existingData.startsWith(type)) {
 				completions.add(type);
 			}
 		}
 	}
-	
+
 	private void completeProjectSpecificPaths(List<String> completions, String existingData) {
 		String topLevelPath = "";
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -179,26 +173,22 @@ public class JavaTypeConverter implements Converter {
 		if (projectMetadata == null) {
 			return;
 		}
-		
+
 		topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
 
 		String newValue = existingData;
 		if (existingData.startsWith("~")) {
 			if (existingData.length() > 1) {
-				if (existingData.charAt(1) == '.') {
-					newValue = topLevelPath + existingData.substring(1);
-				} else {
-					newValue = topLevelPath + "." + existingData.substring(1);
-				}
+				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
 			} else {
 				newValue = topLevelPath + File.separator;
 			}
 		}
-		
+
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + newValue.replace(".", File.separator) + "*";
 		SortedSet<FileDetails> entries = fileManager.findMatchingAntPath(antPath);
-		
+
 		for (FileDetails fileIdentifier : entries) {
 			String candidate = pathResolver.getRelativeSegment(fileIdentifier.getCanonicalPath()).substring(1); // drop the leading "/"
 			boolean include = false;
@@ -210,24 +200,20 @@ public class JavaTypeConverter implements Converter {
 					directory = true;
 				}
 			} else {
-				// a file
+				// A file
 				if (candidate.endsWith(".java")) {
-					candidate = candidate.substring(0, candidate.length()-5); // drop .java
+					candidate = candidate.substring(0, candidate.length() - 5); // Drop .java
 					include = true;
 				}
 			}
-			
+
 			if (include) {
 				// Convert this path back into something the user would type
 				if (existingData.startsWith("~")) {
 					if (existingData.length() > 1) {
-						if (existingData.charAt(1) == '.') {
-							candidate = "~." + candidate.substring(topLevelPath.length()+1);
-						} else {
-							candidate = "~" + candidate.substring(topLevelPath.length()+1);
-						}
+						candidate = (existingData.charAt(1) == '.' ? "~." : "~") + candidate.substring(topLevelPath.length() + 1);
 					} else {
-						candidate = "~" + candidate.substring(topLevelPath.length()+1);
+						candidate = "~" + candidate.substring(topLevelPath.length() + 1);
 					}
 				}
 				candidate = candidate.replace(File.separator, ".");

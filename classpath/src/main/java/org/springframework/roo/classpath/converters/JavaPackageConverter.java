@@ -43,11 +43,7 @@ public class JavaPackageConverter implements Converter {
 					topLevelPath = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
 				}
 				if (value.length() > 1) {
-					if (!(value.charAt(1) == '.')) {
-						newValue = topLevelPath + "." + value.substring(1);
-					} else {
-						newValue = topLevelPath + value.substring(1);
-					}
+					newValue = (!(value.charAt(1) == '.') ? topLevelPath + "." : topLevelPath) + value.substring(1);
 				} else {
 					newValue = topLevelPath;
 				}
@@ -84,11 +80,7 @@ public class JavaPackageConverter implements Converter {
 		String newValue = existingData;
 		if (existingData.startsWith("~")) {
 			if (existingData.length() > 1) {
-				if (existingData.charAt(1) == '.') {
-					newValue = topLevelPath + existingData.substring(1);
-				} else {
-					newValue = topLevelPath + "." + existingData.substring(1);
-				}
+				newValue = (existingData.charAt(1) == '.' ? topLevelPath : topLevelPath + ".") + existingData.substring(1);
 			} else {
 				newValue = topLevelPath + File.separator;
 			}
@@ -110,11 +102,7 @@ public class JavaPackageConverter implements Converter {
 				// Convert this path back into something the user would type
 				if (existingData.startsWith("~")) {
 					if (existingData.length() > 1) {
-						if (existingData.charAt(1) == '.') {
-							candidate = "~." + candidate.substring(topLevelPath.length() + 1);
-						} else {
-							candidate = "~" + candidate.substring(topLevelPath.length() + 1);
-						}
+						candidate = (existingData.charAt(1) == '.' ? "~." : "~") + candidate.substring(topLevelPath.length() + 1);
 					} else {
 						candidate = "~" + candidate.substring(topLevelPath.length() + 1);
 					}
