@@ -39,7 +39,7 @@ public class ForeignKey implements Serializable {
 	/** The references between local and remote columns. */
 	private SortedSet<Reference> references = new TreeSet<Reference>(new ReferenceComparator());
 
-	ForeignKey(String name, String foreignTableName) {
+	public ForeignKey(String name, String foreignTableName) {
 		this.name = name;
 		this.foreignTableName = foreignTableName;
 	}

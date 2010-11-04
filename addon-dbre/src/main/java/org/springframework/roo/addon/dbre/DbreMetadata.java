@@ -74,6 +74,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType ID = new JavaType("javax.persistence.Id");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 	private static final JavaType ONE_TO_ONE = new JavaType("javax.persistence.OneToOne");
 	private static final JavaType ONE_TO_MANY = new JavaType("javax.persistence.OneToMany");
@@ -564,7 +565,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private JavaSymbolName getIdField() {
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Id"));
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
 		if (idFields.size() > 0) {
 			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return idFields.get(0).getFieldName();
@@ -573,7 +574,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isIdField(JavaSymbolName fieldName) {
-		return isAnnotatedField(fieldName, new JavaType("javax.persistence.Id"), "@Id");
+		return isAnnotatedField(fieldName, ID, "@Id");
 	}
 
 	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {

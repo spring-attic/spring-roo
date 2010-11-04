@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.roo.addon.dbre.util.DatabaseXmlUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -40,7 +41,7 @@ public class Database implements Serializable {
 	/** Excluded tables */
 	private Set<String> excludeTables;
 
-	Database(String name, Schema schema, Set<Table> tables) {
+	public Database(String name, Schema schema, Set<Table> tables) {
 		Assert.notNull(tables, "tables required");
 		this.name = name;
 		this.schema = schema;

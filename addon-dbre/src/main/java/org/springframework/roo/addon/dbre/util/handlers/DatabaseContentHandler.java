@@ -1,9 +1,21 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre.util.handlers;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
+import org.springframework.roo.addon.dbre.model.CascadeAction;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.ColumnType;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.ForeignKey;
+import org.springframework.roo.addon.dbre.model.Index;
+import org.springframework.roo.addon.dbre.model.IndexColumn;
+import org.springframework.roo.addon.dbre.model.Reference;
+import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.Sequence;
+import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.dbre.util.DatabaseXmlUtils;
+import org.springframework.roo.addon.dbre.util.DatabaseXmlUtils.IndexType;
 import org.springframework.roo.support.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -29,7 +41,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private IndexColumn indexColumn;
 	private Set<Sequence> sequences;
 
-	DatabaseContentHandler() {
+	public DatabaseContentHandler() {
 		super();
 	}
 

@@ -1,5 +1,6 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre.util.handlers;
 
+import org.springframework.roo.addon.dbre.model.Schema;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -15,7 +16,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public final class SchemaContentHandler extends DefaultHandler {
 	private Schema schema;
 	
-	SchemaContentHandler() {
+	public SchemaContentHandler() {
 		super();
 	}
 

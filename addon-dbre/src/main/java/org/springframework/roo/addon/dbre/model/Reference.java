@@ -31,7 +31,7 @@ public class Reference implements Serializable {
 	/**
 	 * Creates a new, empty reference.
 	 */
-	Reference() {
+	public Reference() {
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class Reference implements Serializable {
 	 * @param localColumn The local column
 	 * @param foreignColumn The remote column
 	 */
-	Reference(Column localColumn, Column foreignColumn) {
+	public Reference(Column localColumn, Column foreignColumn) {
 		setLocalColumn(localColumn);
 		setForeignColumn(foreignColumn);
 	}

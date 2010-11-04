@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre.util.handlers;
 
 import java.util.Set;
 
@@ -18,7 +18,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public final class ExcludeTablesContentHandler extends DefaultHandler {
 	private Set<String> excludeTables;
 	
-	ExcludeTablesContentHandler() {
+	public ExcludeTablesContentHandler() {
 		super();
 	}
 

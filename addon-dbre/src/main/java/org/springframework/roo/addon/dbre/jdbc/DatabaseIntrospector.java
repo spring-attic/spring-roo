@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -11,6 +11,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.springframework.roo.addon.dbre.model.CascadeAction;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.ColumnType;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.ForeignKey;
+import org.springframework.roo.addon.dbre.model.Index;
+import org.springframework.roo.addon.dbre.model.IndexColumn;
+import org.springframework.roo.addon.dbre.model.Reference;
+import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.Sequence;
+import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.dbre.model.TableType;
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;

@@ -15,7 +15,7 @@ public class IndexColumn implements Serializable {
 	private Column column;
 	private int size;
 
-	IndexColumn(String name) {
+	public IndexColumn(String name) {
 		this.name = name;
 	}
 

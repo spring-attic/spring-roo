@@ -27,7 +27,7 @@ public class Column implements Serializable {
 	private String javaType;
 	private int ordinalPosition;
 
-	Column(String name) {
+	public Column(String name) {
 		setName(name);
 	}
 

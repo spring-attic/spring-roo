@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.dbre.model;
+package org.springframework.roo.addon.dbre.util;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,6 +10,20 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.springframework.roo.addon.dbre.model.CascadeAction;
+import org.springframework.roo.addon.dbre.model.Column;
+import org.springframework.roo.addon.dbre.model.ColumnType;
+import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.ForeignKey;
+import org.springframework.roo.addon.dbre.model.Index;
+import org.springframework.roo.addon.dbre.model.IndexColumn;
+import org.springframework.roo.addon.dbre.model.Reference;
+import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.Sequence;
+import org.springframework.roo.addon.dbre.model.Table;
+import org.springframework.roo.addon.dbre.util.handlers.DatabaseContentHandler;
+import org.springframework.roo.addon.dbre.util.handlers.ExcludeTablesContentHandler;
+import org.springframework.roo.addon.dbre.util.handlers.SchemaContentHandler;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Comment;
@@ -23,17 +37,17 @@ import org.w3c.dom.Element;
  * @since 1.1
  */
 public abstract class DatabaseXmlUtils {
-	static final String NAME = "name";
-	static final String LOCAL = "local";
-	static final String FOREIGN = "foreign";
-	static final String FOREIGN_TABLE = "foreignTable";
-	static final String DESCRIPTION = "description";
-	static final String REFERENCE = "reference";
-	static final String SEQUENCE_NUMBER = "sequenceNumber";
-	static final String ON_UPDATE = "onUpdate";
-	static final String ON_DELETE = "onDelete";
+	public static final String NAME = "name";
+	public static final String LOCAL = "local";
+	public static final String FOREIGN = "foreign";
+	public static final String FOREIGN_TABLE = "foreignTable";
+	public static final String DESCRIPTION = "description";
+	public static final String REFERENCE = "reference";
+	public static final String SEQUENCE_NUMBER = "sequenceNumber";
+	public static final String ON_UPDATE = "onUpdate";
+	public static final String ON_DELETE = "onDelete";
 
-	static enum IndexType {
+	public static enum IndexType {
 		INDEX, UNIQUE
 	}
 
@@ -86,7 +100,7 @@ public abstract class DatabaseXmlUtils {
 				foreignKeyElement.setAttribute(ON_DELETE, foreignKey.getOnDelete().getCode());
 				foreignKeyElement.setAttribute(ON_UPDATE, foreignKey.getOnUpdate().getCode());
 
-				for (org.springframework.roo.addon.dbre.model.Reference reference : foreignKey.getReferences()) {
+				for (Reference reference : foreignKey.getReferences()) {
 					Element referenceElement = document.createElement(REFERENCE);
 					referenceElement.setAttribute(FOREIGN, reference.getForeignColumnName());
 					referenceElement.setAttribute(LOCAL, reference.getLocalColumnName());
@@ -116,7 +130,7 @@ public abstract class DatabaseXmlUtils {
 				exportedKeyElement.setAttribute(ON_DELETE, exportedKey.getOnDelete().getCode());
 				exportedKeyElement.setAttribute(ON_UPDATE, exportedKey.getOnUpdate().getCode());
 
-				for (org.springframework.roo.addon.dbre.model.Reference reference : exportedKey.getReferences()) {
+				for (Reference reference : exportedKey.getReferences()) {
 					Element referenceElement = document.createElement(REFERENCE);
 					referenceElement.setAttribute(FOREIGN, reference.getForeignColumnName());
 					referenceElement.setAttribute(LOCAL, reference.getLocalColumnName());
