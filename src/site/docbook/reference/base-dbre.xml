@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="base-dbre"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/1999/xhtml"
+         xmlns:ns3="http://www.w3.org/2000/svg"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>Incremental Database Reverse Engineering Add-On</title>
+
+  <para>The incremental database reverse engineering (DBRE) add-on allows you
+  to generate an application tier of JPA entities based on the tables in your
+  database. DBRE will also incrementally maintain your application tier if you
+  add or remove tables and columns.</para>
+
+  <section>
+    <title>What are the benefits of Roo's incremental reverse
+    engineering?</title>
+
+    <para>Traditional JPA reverse engineering tools are designed to introspect
+    a database schema and produce a Java application tier once. Roo's
+    incremental database reverse engineering feature differs because it has
+    been designed to enable developers to repeatedly re-introspect a database
+    schema and update their Java application. For example, consider if a
+    column or table has been dropped from the database (or renamed). With Roo
+    the re-introspection process would discover this and helpfully report
+    errors in the Java tier wherever the now-missing field or entity was
+    referenced. In simple terms, incremental database reverse engineering
+    ensures Java type safety and easy application maintenance even if the
+    database schema is constantly evolving. Just as importantly, Roo's
+    incremental reverse engineering is implemented using the same unique
+    design philosophy as the rest of Roo. This means very fast application
+    delivery, clutter-free .java source files, extensive usability features in
+    the shell (such as tab completion and hinting) and so on.</para>
+  </section>
+
+  <section>
+    <title>Getting started</title>
+
+    <para>DBRE supports most of the relational databases that can be
+    configured for Roo-generated projects such as Oracle, PostgreSQL, and
+    MySQL.</para>
+  </section>
+</chapter>
