@@ -116,7 +116,6 @@ public class DatabaseIntrospector {
 	}
 
 	private Set<Table> readTables() throws SQLException {
-		readSequences();
 		Set<Table> tables = new LinkedHashSet<Table>();
 
 		ResultSet rs = databaseMetaData.getTables(catalog, getSchemaPattern(), tableNamePattern, types);
@@ -313,7 +312,8 @@ public class DatabaseIntrospector {
 	private boolean hasExcludedTable(String tableName) {
 		if (excludeTables != null && StringUtils.hasText(tableName)) {
 			for (String excludedTable : excludeTables) {
-				Pattern pattern = Pattern.compile(excludedTable.replaceAll("\\*", ".*").replaceAll("\\?", ".?"));
+				String regex = excludedTable.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
+				Pattern pattern = Pattern.compile(regex);
 				if (pattern.matcher(tableName).matches()) {
 					return true;
 				}
