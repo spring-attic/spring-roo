@@ -70,6 +70,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String identifierColumn = "";
 	@AutoPopulate private JavaType versionType = JavaType.INT_OBJECT;
 	@AutoPopulate private String versionField = "version";
+	@AutoPopulate private String versionColumn = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
 	@AutoPopulate private String mergeMethod = "merge";
@@ -575,7 +576,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Version")));
 		
 		List<AnnotationAttributeValue<?>> columnAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionField.getSymbolName()));
+		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionColumn));
 		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, versionField, versionType);

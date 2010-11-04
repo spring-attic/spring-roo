@@ -217,6 +217,8 @@ public class ClasspathCommands implements CommandMarker {
 		@CliOption(key = "identifierField", mandatory = false, help = "The JPA identifier field name to use for this entity") String identifierField, 
 		@CliOption(key = "identifierColumn", mandatory = false, help = "The JPA identifier field column to use for this entity") String identifierColumn, 
 		@CliOption(key = "identifierType", mandatory = false, optionContext = "java-lang,project", unspecifiedDefaultValue = "java.lang.Long", specifiedDefaultValue = "java.lang.Long", help = "The data type that will be used for the JPA identifier field (defaults to java.lang.Long)") JavaType identifierType, 
+		@CliOption(key = "versionField", mandatory = false, help = "The JPA version field name to use for this entity") String versionField, 
+		@CliOption(key = "versionColumn", mandatory = false, help = "The JPA version field column to use for this entity") String versionColumn, 
 		@CliOption(key = "inheritanceType", mandatory = false, help = "The JPA @Inheritance value") InheritanceType inheritanceType, 
 		@CliOption(key = "mappedSuperclass", mandatory = false, specifiedDefaultValue = "true", unspecifiedDefaultValue = "false", help = "Apply @MappedSuperclass for this entity") boolean mappedSuperclass, 
 		@CliOption(key = "serializable", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Whether the generated class should implement java.io.Serializable") boolean serializable, 
@@ -260,6 +262,12 @@ public class ClasspathCommands implements CommandMarker {
 		if (!JavaType.LONG_OBJECT.equals(identifierType)) {
 			rooEntityBuilder.addClassAttribute("identifierType", identifierType);
 		} 
+		if (versionField != null && !"version".equals(versionField)) {
+			rooEntityBuilder.addStringAttribute("versionField", versionField);
+		}
+		if (versionColumn != null && !"version".equals(versionColumn)) {
+			rooEntityBuilder.addStringAttribute("versionColumn", versionColumn);
+		}
 		if (persistenceUnit != null) {
 			rooEntityBuilder.addStringAttribute("persistenceUnit", persistenceUnit);			
 		}

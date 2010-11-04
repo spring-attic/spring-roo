@@ -63,6 +63,15 @@ public @interface RooEntity {
 	String versionField() default "version";
 	
 	/**
+	 * Specifies the column name that should be used for the version field. By default this is generally
+	 * made identical to the {@link #versionField()}, although it will be made unique as required for
+	 * the particular entity fields present.
+	 * 
+	 * @return the name of the version column to use (default to "version"; in this case it is automatic)
+	 */
+	String versionColumn() default "version";
+
+	/**
 	 * @return the class of version that should be used (defaults to {@link Integer}; must be provided)
 	 */
 	Class<? extends Serializable> versionType() default Integer.class;
