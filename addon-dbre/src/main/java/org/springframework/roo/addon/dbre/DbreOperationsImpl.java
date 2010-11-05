@@ -65,24 +65,12 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, Set<String> excludeTables) {
-		if (destinationPackage == null) {
-			// No destination package, so verify that DBRE has run before and thus we know where to put the entities
-			Assert.notNull(dbreDatabaseListener.getDestinationPackage(), "Must specify a destination package given no prior database introspection entities are available");
-		} else {
-			// User provided a destination package, so set it for use before we complete the introspection
-			dbreDatabaseListener.setDestinationPackage(destinationPackage);
+		dbreDatabaseListener.setDestinationPackage(destinationPackage);
+		
+		if (excludeTables != null) {
+			dbreModelService.setExcludeTables(excludeTables);
 		}
 		
-		if (excludeTables == null) {
-			excludeTables = dbreModelService.getExcludeTables();
-		}
-		dbreModelService.setExcludeTables(excludeTables);
-		
-		if (schema == null) {
-			// No schema, so try to look it up
-			schema = dbreModelService.getLastSchema();
-			Assert.notNull(schema, "Schema must be specified given no prior database introspection information is available");
-		}
 		// Force it to refresh the database from the actual JDBC connection
 		dbreModelService.refreshDatabase(schema);
 

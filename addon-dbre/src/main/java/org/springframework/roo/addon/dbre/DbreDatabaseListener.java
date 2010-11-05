@@ -11,7 +11,5 @@ import org.springframework.roo.model.JavaPackage;
  */
 public interface DbreDatabaseListener extends DatabaseListener, IdentifierService {
 	
-	JavaPackage getDestinationPackage();
-
 	void setDestinationPackage(JavaPackage destinationPackage);
 }

@@ -37,17 +37,6 @@ public interface DbreTypeResolutionService {
 	JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage);
 
 	/**
-	 * Returns a table name given the JavaType.
-	 * 
-	 * <p>
-	 * Rules are applied in the conversion such as converting capital letters into underscores. For example, a table name of abstract_person would be returned as a type called AbstractPerson.
-	 * 
-	 * @param type to convert to a table name.
-	 * @return the table name.
-	 */
-	String suggestTableNameForNewType(JavaType type);
-
-	/**
 	 * Returns a JavaType given a table identity.
 	 * 
 	 * @param tableNamePattern the table name to convert
@@ -69,12 +58,12 @@ public interface DbreTypeResolutionService {
 	 * 
 	 * @return An unmodifiable {@link Set} of all database-managed entities.
 	 */
-	SortedSet<JavaType> getManagedEntities();
+	SortedSet<JavaType> getManagedEntityTypes();
 
 	/**
-	 * Returns all {@link RooDbManaged} {@link RooIdentifier identifiers}.
+	 * Returns all {@link RooIdentifier identifiers} with the dbManaged attribute value equal to true.
 	 * 
-	 * @return An unmodifiable {@link Set} of all database-managed identifiers.
+	 * @return An unmodifiable {@link Set} of database-managed identifiers.
 	 */
-	SortedSet<JavaType> getManagedIdentifiers();
+	SortedSet<JavaType> getManagedIdentifierTypes();
 }

@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -12,8 +13,13 @@ import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
@@ -33,29 +39,22 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 
 	public JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage) {
 		Assert.notNull(managedEntities, "Managed entities required");
-		JavaType javaType = null;
+		JavaType javaType = convertTableNameToType(tableNamePattern, javaPackage);
 		for (JavaType managedEntity : managedEntities) {
-			if (managedEntity.getSimpleTypeName().equals(getName(tableNamePattern, false))) {
+			if (managedEntity.equals(javaType)) {
 				return managedEntity;
 			}
 		}
 
-		if (javaType == null) {
-			javaType = convertTableNameToType(tableNamePattern, javaPackage);
-			if (getPhysicalTypeMetadata(javaType) != null) {
-				return javaType;
-			}
+		if (getPhysicalTypeMetadata(javaType) != null) {
+			return javaType;
 		}
 
 		return null;
 	}
 
 	public JavaType findTypeForTableName(String tableNamePattern, JavaPackage javaPackage) {
-		return findTypeForTableName(getManagedEntities(), tableNamePattern, javaPackage);
-	}
-
-	public String suggestTableNameForNewType(JavaType javaType) {
-		return convertTypeToTableName(javaType);
+		return findTypeForTableName(getManagedEntityTypes(), tableNamePattern, javaPackage);
 	}
 
 	public JavaType suggestTypeNameForNewTable(String tableNamePattern, JavaPackage javaPackage) {
@@ -64,22 +63,6 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 
 	public String suggestFieldName(String columnName) {
 		return getFieldName(columnName);
-	}
-
-	private String convertTypeToTableName(JavaType javaType) {
-		Assert.notNull(javaType, "Type to convert required");
-
-		// Keep it simple for now
-		String simpleName = javaType.getSimpleTypeName();
-		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < simpleName.length(); i++) {
-			Character c = simpleName.charAt(i);
-			if (i > 0 && Character.isUpperCase(c)) {
-				result.append("_");
-			}
-			result.append(Character.toUpperCase(c));
-		}
-		return result.toString();
 	}
 
 	private JavaType convertTableNameToType(String tableNamePattern, JavaPackage javaPackage) {
@@ -121,15 +104,23 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		return result.toString();
 	}
 
-	public SortedSet<JavaType> getManagedEntities() {
+	public SortedSet<JavaType> getManagedEntityTypes() {
 		SortedSet<JavaType> managedEntities = new TreeSet<JavaType>(new ManagedTypesComparator());
 		managedEntities.addAll(typeLocationService.findTypesWithAnnotation(new JavaType(RooDbManaged.class.getName())));
 		return Collections.unmodifiableSortedSet(managedEntities);
 	}
 
-	public SortedSet<JavaType> getManagedIdentifiers() {
+	public SortedSet<JavaType> getManagedIdentifierTypes() {
+		final JavaType identifierType = new JavaType(RooIdentifier.class.getName());
 		SortedSet<JavaType> managedIdentifiers = new TreeSet<JavaType>(new ManagedTypesComparator());
-		managedIdentifiers.addAll(typeLocationService.findTypesWithAnnotation(new JavaType(RooIdentifier.class.getName())));
+		Set<ClassOrInterfaceTypeDetails> identifiers = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(identifierType);
+		for (ClassOrInterfaceTypeDetails identifierTypeDetails : identifiers) {
+			AnnotationMetadata identifierAnnotation = MemberFindingUtils.getTypeAnnotation(identifierTypeDetails, identifierType);
+			AnnotationAttributeValue<?> attrValue = identifierAnnotation.getAttribute(new JavaSymbolName("dbManaged"));
+			if (attrValue != null && (Boolean) attrValue.getValue()) {
+				managedIdentifiers.add(identifierTypeDetails.getName());
+			}
+		}
 		return Collections.unmodifiableSortedSet(managedIdentifiers);
 	}
 

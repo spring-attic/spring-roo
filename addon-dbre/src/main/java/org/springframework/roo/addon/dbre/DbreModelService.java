@@ -75,14 +75,7 @@ public interface DbreModelService {
 	 * @return the database if available (null if cannot connect to the database or the schema is not found)
 	 */
 	Database refreshDatabaseSafely(Schema schema);
-	
-	/**
-	 * Returns a Set of last known excluded tables.
-	 * 
-	 * @return the last known Set of excluded table names, or null if not known
-	 */
-	Set<String> getExcludeTables();
-	
+		
 	/**
 	 * Specifies the table names to exclude.
 	 *  

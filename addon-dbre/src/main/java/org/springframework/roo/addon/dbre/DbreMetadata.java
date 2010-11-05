@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.logging.Logger;
 
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
@@ -51,6 +52,7 @@ import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -72,6 +74,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
+	private static final Logger logger = HandlerUtils.getLogger(DbreMetadata.class);
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ID = new JavaType("javax.persistence.Id");
@@ -111,13 +114,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return;
 		}
 
-		Table table = database.findTable(dbreTypeResolutionService.suggestTableNameForNewType(javaType));
+		Table table = database.findTable(getTableName());
 		if (table == null) {
+			logger.warning("Unable to database manage entity " + javaType.getFullyQualifiedTypeName() + " because its table name was not specified");
 			return;
 		}
 
 		// Retrieve database-managed entities first (related to ROO-1506)
-		managedEntities = dbreTypeResolutionService.getManagedEntities();
+		managedEntities = dbreTypeResolutionService.getManagedEntityTypes();
 
 		// Add fields for many-valued associations with many-to-many multiplicity
 		addManyToManyFields(database, table);
@@ -136,6 +140,21 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+	}
+
+	private String getTableName() {
+		AnnotationMetadata tableAnnotation = entityMetadata.getTableAnnotation();
+		if (tableAnnotation == null) {
+			tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
+		}
+		if (tableAnnotation != null) {
+			AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName(NAME));
+			if (nameAttribute != null) {
+				return (String) nameAttribute.getValue();
+			}
+		}
+
+		return null;
 	}
 
 	private void addManyToManyFields(Database database, Table table) {
@@ -542,21 +561,27 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private List<FieldMetadata> getIdentifierFields(JavaType javaType) {
 		List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
 		// Check for identifier class and exclude fields that are part of the composite primary key
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
-		AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
-		if (identifierTypeAttribute != null) {
-			// Attribute identifierType exists so get the value
-			JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
-			if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
-				// The identifierType is not a simple type, ie not of type 'java.lang', so find the type
-				String identifierMetadataMid = IdentifierMetadata.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-				IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
-				if (identifierMetadata != null) {
-					identifierFields.addAll(identifierMetadata.getFields());
+		AnnotationMetadata rooEntityAnnotation = getRooEntityAnnotation();
+		if (rooEntityAnnotation != null) {
+			AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
+			if (identifierTypeAttribute != null) {
+				// Attribute identifierType exists so get the value
+				JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
+				if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
+					// The identifierType is not a simple type, ie not of type 'java.lang', so find the type
+					String identifierMetadataMid = IdentifierMetadata.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
+					IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
+					if (identifierMetadata != null) {
+						identifierFields.addAll(identifierMetadata.getFields());
+					}
 				}
 			}
 		}
 		return identifierFields;
+	}
+
+	private AnnotationMetadata getRooEntityAnnotation() {
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 	}
 
 	private boolean isVersionField(String columnName) {
