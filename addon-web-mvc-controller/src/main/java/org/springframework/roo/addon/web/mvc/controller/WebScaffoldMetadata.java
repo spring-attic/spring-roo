@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
@@ -74,6 +75,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private Map<JavaSymbolName, String> dateTypes;
 	private Map<JavaType, String> pluralCache;
 	private JsonMetadata jsonMetadata;
+	private Logger log = Logger.getLogger(getClass().getName());
 
 	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -1116,18 +1118,17 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			JavaType type = accessor.getReturnType();
 
 			if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
-				for (AnnotationMetadata annotation : fieldMetadata.getAnnotations()) {
-					if (annotation.getAnnotationType().equals(new JavaType("org.springframework.format.annotation.DateTimeFormat"))) {
-						if (annotation.getAttributeNames().contains(new JavaSymbolName("style"))) {
-							dates.put(fieldMetadata.getFieldName(), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
-							for (String finder : entityMetadata.getDynamicFinders()) {
-								if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
-									dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
-									dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
-								}
-							}
+				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+				if (annotation != null && annotation.getAttributeNames().contains(new JavaSymbolName("style"))) {	
+					dates.put(fieldMetadata.getFieldName(), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+					for (String finder : entityMetadata.getDynamicFinders()) {
+						if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
+							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
 						}
 					}
+				} else {
+					log.warning("It is recommended to use @DateTimeFormat(style=\"S-\") on " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "." + fieldMetadata.getFieldName() + " to use automatic date conversion in Spring MVC");
 				}
 			}
 		}
