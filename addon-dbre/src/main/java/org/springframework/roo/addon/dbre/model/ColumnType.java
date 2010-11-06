@@ -15,6 +15,7 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public enum ColumnType {
+	BOOLEAN(Types.BOOLEAN, JavaType.BOOLEAN_OBJECT),
 	BIT(Types.BIT, JavaType.BOOLEAN_PRIMITIVE), 
 	TINYINT(Types.TINYINT, JavaType.SHORT_OBJECT), 
 	SMALLINT(Types.SMALLINT, JavaType.SHORT_OBJECT), 

@@ -212,7 +212,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 	private boolean hasVersionField(Table table) {
 		for (Column column : table.getColumns()) {
-			if (VERSION.equals(column.getName())) {
+			if (VERSION.equalsIgnoreCase(column.getName())) {
 				return true;
 			}
 		}
