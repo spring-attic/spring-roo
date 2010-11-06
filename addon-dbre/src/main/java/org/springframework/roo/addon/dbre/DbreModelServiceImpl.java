@@ -113,7 +113,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 			connection = getConnection();
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 			String schemaTerm = databaseMetaData.getSchemaTerm();
-			return StringUtils.hasText(schemaTerm) && schemaTerm.equals("schema");
+			return StringUtils.hasText(schemaTerm) && schemaTerm.equalsIgnoreCase("schema");
 		} catch (Exception e) {
 			return false;
 		} finally {
