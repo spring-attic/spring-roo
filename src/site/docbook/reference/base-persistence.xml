@@ -570,7 +570,7 @@ private void Car.preRemove() {
       <listitem>
         <para>The <link linkend="command-index-field-set">field set</link>
         command will allow you to create a many-to-many (default) or a
-        one-to-many relationship:<programlisting>field set --fieldName cars --element com.foo.Car</programlisting></para>
+        one-to-many relationship:<programlisting>field set --fieldName cars --type com.foo.Car</programlisting></para>
 
         <para>The field definition added to the Person type contains the
         appropriate JPA annotation:</para>

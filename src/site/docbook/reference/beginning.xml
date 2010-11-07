@@ -436,7 +436,7 @@ field number --fieldName price --type java.lang.Float </programlisting>After
     linkend="command-index-field-set">field set</link></emphasis>
     command:</para>
 
-    <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field set --fieldName toppings --element ~.domain.Topping</emphasis></programlisting>As
+    <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field set --fieldName toppings --type ~.domain.Topping</emphasis></programlisting>As
     you can see it is easy to define this relationship even without knowing
     about the exact JPA annotations needed to create this mapping in our
     <code>Pizza</code> domain entity. In a similar way you can define the 1:1
@@ -458,7 +458,7 @@ field string --fieldName name --notNull --sizeMin 2
 field string --fieldName address --sizeMax 30
 field number --fieldName total --type java.lang.Float 
 field date --fieldName deliveryDate --type java.util.Date
-field set --fieldName pizzas --element ~.domain.Pizza
+field set --fieldName pizzas --type ~.domain.Pizza
 </programlisting></para>
 
     <para>This concludes this step since the initial version of the domain

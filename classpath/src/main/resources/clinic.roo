@@ -41,7 +41,7 @@ field enum --fieldName type --type ~.reference.PetType --notNull
 field date --fieldName employedSince --type java.util.Calendar --notNull --past --class ~.domain.Vet
 field enum --fieldName specialty --type ~.reference.Specialty --notNull false
 
-field set --class ~.domain.Owner --fieldName pets --element ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
+field set --class ~.domain.Owner --fieldName pets --type ~.domain.Pet --mappedBy owner --notNull false --cardinality ONE_TO_MANY
 
 finder add --finderName findPetsByNameAndWeight --class ~.domain.Pet
 finder add --finderName findPetsByOwner

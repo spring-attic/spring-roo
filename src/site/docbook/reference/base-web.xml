@@ -612,7 +612,7 @@ public class CarController {
     opposite side:</para>
 
     <para><programlisting>
-field set --fieldName students --element com.foo.domain.Person <emphasis
+field set --fieldName students --type com.foo.domain.Person <emphasis
           role="bold"><emphasis>--class com.foo.domain.School </emphasis>--cardinality ONE_TO_MANY</emphasis>
 
 field reference --fieldName school --type com.foo.domain.School --class com.foo.domain.Person <emphasis

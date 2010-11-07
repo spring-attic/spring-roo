@@ -1610,7 +1610,7 @@
         <section xml:id="command-index-field-set">
             <title>field set</title>
             <para>Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)</para>
-            <programlisting><![CDATA[field set --fieldName --element]]></programlisting>
+            <programlisting><![CDATA[field set --fieldName --type]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--fieldName</term>
@@ -1619,7 +1619,7 @@
                     </listitem>
                 </varlistentry>
                 <varlistentry>
-                    <term>--element</term>
+                    <term>--type</term>
                     <listitem>
                         <para>The entity which will be contained within the Set; no default value (mandatory) </para>
                     </listitem>

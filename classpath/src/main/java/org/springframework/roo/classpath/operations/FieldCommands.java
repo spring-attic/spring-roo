@@ -322,7 +322,7 @@ public class FieldCommands implements CommandMarker {
 	@CliCommand(value = "field set", help = "Adds a private Set field to an existing Java source file (eg the 'one' side of a many-to-one)")	
 	public void addFieldSetJpa(
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
-		@CliOption(key = "element", mandatory = true, help = "The entity which will be contained within the Set") JavaType element, 
+		@CliOption(key = "type", mandatory = true, help = "The entity which will be contained within the Set") JavaType type, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
 		@CliOption(key = "mappedBy", mandatory = false, help = "The field name on the referenced type which owns the relationship") JavaSymbolName mappedBy, 
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
@@ -335,8 +335,8 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
 		
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(element, Path.SRC_MAIN_JAVA));
-		Assert.notNull(physicalTypeMetadata, "The specified target '--element' does not exist or can not be found. Please create this type first.");
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
 		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
@@ -354,8 +354,8 @@ public class FieldCommands implements CommandMarker {
 		
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(element);
-		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, element, cardinality);
+		params.add(type);
+		SetField fieldDetails = new SetField(physicalTypeIdentifier, new JavaType("java.util.Set", 0, DataType.TYPE, null, params), fieldName, type, cardinality);
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (sizeMin != null) fieldDetails.setSizeMin(sizeMin);
