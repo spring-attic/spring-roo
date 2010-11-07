@@ -75,6 +75,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// Scan for every .java file in the project and create a MID specific to this subclass for each
 			List<String> allMids = new ArrayList<String>();
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+			Assert.notNull(projectMetadata, "ProjectMetadata required");
 			PathResolver pathResolver = projectMetadata.getPathResolver();
 			for (Path path : pathResolver.getSourcePaths()) {
 				FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(path)), null);
