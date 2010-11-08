@@ -46,13 +46,13 @@
       make live connections to the database configured in your Roo project and
       obtain information about your using the database metadata from the
       standard java.sql.DatabaseMetadata object, which is implemented by the
-      JDBC driver. When the database is reverse engineered, this information
-      is converted to XML and is stored and maintained in the .roo-dbre file
-      in the root directory of your project. DBRE creates JPA entities based
-      on the table names in your database and fields based on the columns in
-      the tables. Relationships between entities are also created using the
-      imported and exported key information obtained from the database
-      metadata.</para>
+      JDBC driver. When the database is reverse engineered, the metadata
+      information is converted to XML and is stored and maintained in the
+      .roo-dbre file in the root directory of your project. DBRE creates JPA
+      entities based on the table names in your database and fields based on
+      the column names in the tables. Relationships between entities are also
+      created using the imported and exported key information obtained from
+      the metadata.</para>
 
       <para>DBRE generates entity classes with names that are derived from the
       associated table name using a simple algorithm. If a table's name
@@ -135,15 +135,15 @@
     <title xml:id="dbre_commands">DBRE Addon commands</title>
 
     <para>After you have installed all the JDBC drivers, you can introspect
-    and reverse engineer the database configured for your project. DBRE has
-    two commands:</para>
+    and reverse engineer the database configured for your project. DBRE
+    contains two commands:</para>
 
     <orderedlist>
       <listitem>
         <para><programlisting>roo&gt; <emphasis role="bold">database introspect --schema</emphasis> --file</programlisting></para>
 
         <para>This command displays the database structure, or schema, in XML
-        format. The --schema is mandatory and for databases which supports
+        format. The --schema is mandatory and for databases which support
         schemas, you can press tab to display a list of schemas from your
         database. You can use the --file option to save the information to the
         specified file.</para>
@@ -152,17 +152,39 @@
         used by all databases, such as MySQL and Firebird, and for these
         databases the target database name is contained in the JDBC URL
         connection string. However the --schema option is still required but
-        Roo's Tab assist feature will display "no-schema-required".</para>
+        Roo's tab assist feature will display "no-schema-required".</para>
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --excludeTables</programlisting></para>
 
         <para>This command creates JPA entiies in your project representing
         the tables and columns in your database. As for the database
         introspect command, the --schema option is required and tab assistance
         is available. You can use the --package option to specify a Java
-        package where your entities will be created.</para>
+        package where your entities will be created. If you do not specify the
+        --package option on second and subsequent executions of the database
+        reverse engineer command, new entities will be created in the same
+        package as they were previously created in.</para>
+
+        <para>You can use the --excludeTables option to specify tables that
+        you do not want reverse engineered. The option can take one or more
+        table names. If more than one table is required, the tables must be
+        enclosed in double quotes and each separated by a space. Wild-card
+        searching is also permited using the asterisk (*) character to match
+        one or more characters or the '?' character to match exactly one
+        character. For example:</para>
+
+        <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --excludeTables "foo* bar?"</programlisting></para>
+
+        <para>This will reverse engineer all tables except any table whose
+        name starts with 'foo' and any table called bar with one extra
+        character, such as 'bar1' or 'bars'.</para>
+
+        <para><emphasis role="bold">Note</emphasis>: excluding tables not only
+        prevent entities from being created but associations are also not
+        created in other entities. This is done to prevent compile errors in
+        the generated source code.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
         engineering, you can execute the command as many times as you want and
@@ -170,11 +192,6 @@
         be added if new columns are added to a table, or fields will be
         removed if columns are deleted. Entities are also deleted in certain
         circumstances if their corresponding tables are dropped.</para>
-
-        <para>If you do not specify the --package option on second and
-        subsequent executions of the database reverse engineer command, new
-        entities will be created in the same package as they were previously
-        created in.</para>
       </listitem>
     </orderedlist>
   </section>
@@ -251,7 +268,8 @@ public class Employee {
     public void Employee.setAge(Integer age) {
         this.age = age;
     }
-...
+
+    ...
 }</programlisting></para>
 
     <para>If you do not want DBRE to manage your entity any more, you can
@@ -323,7 +341,8 @@ public class LineItemPK {
     public void LineItem.setId(LineItemPK id) {
         this.id = id;
     }
-...
+
+    ...
 }</programlisting></para>
 
       <para>and an identifier ITD for the LineItemPK class containing the
@@ -349,7 +368,8 @@ public class LineItemPK {
     private LineItemPK.new() {
         super();
     }
-...
+
+    ...
 }</programlisting></para>
 
       <para>If you decide that your table does not require a composite primary
@@ -393,14 +413,16 @@ public class LineItemPK {
     @ManyToMany
     @JoinTable(name = "product_supplier", joinColumns = { @JoinColumn(name = "prod_id") }, inverseJoinColumns = { @JoinColumn(name = "supp_id") })
     private Set&lt;Supplier&gt; Product.suppliers;
-...
+
+    ...
 }</programlisting>
 
               <programlisting>privileged aspect Supplier_Roo_DbManaged {
     
     @ManyToMany(mappedBy = "suppliers")
     private Set&lt;Product&gt; Supplier.products;
-...
+
+    ...
 }</programlisting>
             </para>
 
@@ -413,9 +435,9 @@ public class LineItemPK {
     @ManyToMany
     @JoinTable(name = "foo_bar", joinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
     private Set&lt;Bar&gt; Foo.bars;
-...
-}
-</programlisting>
+
+    ...
+}</programlisting>
             </para>
           </listitem>
 
@@ -438,14 +460,16 @@ public class LineItemPK {
     @OneToOne
     @JoinColumn(name = "address_id")
     private Party Address.customer;
-...
+
+    ...
 }</programlisting>
 
               <programlisting>privileged aspect Customer_Roo_DbManaged {
     
     @OneToOne(mappedBy = "customer") 
     private Address Party.address;
-...
+
+    ...
 }</programlisting>
             </para>
           </listitem>
@@ -463,7 +487,8 @@ public class LineItemPK {
     
     @OneToMany(mappedBy = "order")
     private Set&lt;LineItem&gt; Order.lineItems;
-...
+
+    ...
 }</programlisting>
             </para>
           </listitem>
@@ -483,7 +508,8 @@ public class LineItemPK {
     @ManyToOne
     @JoinColumn(name = "order_id", referencedColumnName = "order_id")
     private Order LineItem.order;
-...
+    
+    ...
 }</programlisting>
             </para>
           </listitem>
@@ -503,7 +529,8 @@ public class LineItemPK {
     @ManyToMany
     @JoinTable(name = "foo_com", joinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "bar_id2") })
     private Set&lt;Bar&gt; Foo.bars1;
-...
+
+    ...
 }</programlisting></para>
     </section>
 
@@ -512,8 +539,8 @@ public class LineItemPK {
 
       <para>DBRE will detect column types from the database metadata and
       generate fields and field annotations appropriately. Strings, dates,
-      booleans, numeric fields, CLOBs and BLOBs are all supported by
-      DBRE.</para>
+      booleans, numeric fields, CLOBs and BLOBs are all supported by DBRE, as
+      well as the JSR 303 @NotNull validation constraint.</para>
     </section>
   </section>
 </chapter>
