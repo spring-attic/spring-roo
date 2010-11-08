@@ -44,15 +44,14 @@
 
       <para>The DBRE commands (see <xref linkend="dbre_commands" /> below)
       make live connections to the database configured in your Roo project and
-      obtain information about your using the database metadata from the
-      standard java.sql.DatabaseMetadata object, which is implemented by the
-      JDBC driver. When the database is reverse engineered, the metadata
-      information is converted to XML and is stored and maintained in the
-      .roo-dbre file in the root directory of your project. DBRE creates JPA
-      entities based on the table names in your database and fields based on
-      the column names in the tables. Relationships between entities are also
-      created using the imported and exported key information obtained from
-      the metadata.</para>
+      obtains database metadata from the standard java.sql.DatabaseMetadata
+      object, which is implemented by the JDBC driver. When the database is
+      reverse engineered, the metadata information is converted to XML and is
+      stored and maintained in the .roo-dbre file in the root directory of
+      your project. DBRE creates JPA entities based on the table names in your
+      database and fields based on the column names in the tables.
+      Relationships between entities are also created using the imported and
+      exported key information obtained from the metadata.</para>
 
       <para>DBRE generates entity classes with names that are derived from the
       associated table name using a simple algorithm. If a table's name
