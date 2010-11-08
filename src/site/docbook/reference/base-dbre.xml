@@ -7,32 +7,96 @@
          xmlns:ns4="http://www.w3.org/1999/xhtml"
          xmlns:ns3="http://www.w3.org/2000/svg"
          xmlns:ns="http://docbook.org/ns/docbook">
-  <title>Incremental Database Reverse Engineering Add-On</title>
+  <title>Incremental Database Reverse Engineering (DBRE) Add-On</title>
 
   <para>The incremental database reverse engineering (DBRE) add-on allows you
-  to generate an application tier of JPA entities based on the tables in your
-  database. DBRE will also incrementally maintain your application tier if you
-  add or remove tables and columns.</para>
+  to generate an application tier of JPA 2.0 entities based on the tables in
+  your database. DBRE will also incrementally maintain your application tier
+  if you add or remove tables and columns.</para>
 
   <section>
-    <title>What are the benefits of Roo's incremental reverse
-    engineering?</title>
+    <title>Introduction</title>
 
-    <para>Traditional JPA reverse engineering tools are designed to introspect
-    a database schema and produce a Java application tier once. Roo's
-    incremental database reverse engineering feature differs because it has
-    been designed to enable developers to repeatedly re-introspect a database
-    schema and update their Java application. For example, consider if a
-    column or table has been dropped from the database (or renamed). With Roo
-    the re-introspection process would discover this and helpfully report
-    errors in the Java tier wherever the now-missing field or entity was
-    referenced. In simple terms, incremental database reverse engineering
-    ensures Java type safety and easy application maintenance even if the
-    database schema is constantly evolving. Just as importantly, Roo's
-    incremental reverse engineering is implemented using the same unique
-    design philosophy as the rest of Roo. This means very fast application
-    delivery, clutter-free .java source files, extensive usability features in
-    the shell (such as tab completion and hinting) and so on.</para>
+    <section>
+      <title>What are the benefits of Roo's incremental reverse
+      engineering?</title>
+
+      <para>Traditional JPA reverse engineering tools are designed to
+      introspect a database schema and produce a Java application tier once.
+      Roo's incremental database reverse engineering feature differs because
+      it has been designed to enable developers to repeatedly re-introspect a
+      database schema and update their Java application. For example, consider
+      if a column or table has been dropped from the database (or renamed).
+      With Roo the re-introspection process would discover this and helpfully
+      report errors in the Java tier wherever the now-missing field or entity
+      was referenced. In simple terms, incremental database reverse
+      engineering ensures Java type safety and easy application maintenance
+      even if the database schema is constantly evolving. Just as importantly,
+      Roo's incremental reverse engineering is implemented using the same
+      unique design philosophy as the rest of Roo. This means very fast
+      application delivery, clutter-free .java source files, extensive
+      usability features in the shell (such as tab completion and hinting) and
+      so on.</para>
+    </section>
+
+    <section>
+      <title>How does DBRE work?</title>
+
+      <para>The DBRE commands (see <xref linkend="dbre_commands" /> below)
+      make live connections to the database configured in your Roo project and
+      obtain information about your database using the standard
+      java.sql.DatabaseMetadata object, which is implemented by the JDBC
+      driver. When the database is reverse engineerd, this information is
+      converted to XML and is stored and maintained in the .roo-dbre file in
+      the root directory of your project. DBRE creates JPA entities based on
+      the table names in your database and fields based on the columns in the
+      tables. Relationships between entities are also created using the
+      imported and exported key information obtained from the database
+      metadata.</para>
+
+      <para>DBRE generates entity classes with names that are derived from the
+      associated table name using a simple algorithm. If a table's name
+      contains an undercore, hyphen, forward or back slash character, the
+      generated class name will have a mixture of upper case and lower case
+      characters. This is also similar for column and field names. The
+      following table contains some examples.</para>
+
+    
+      <informaltable>
+        <tgroup cols="2">
+          <thead>
+            <row>
+              <entry align="center">Table name</entry>
+
+              <entry align="center">Generated entity class name</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry>order</entry>
+
+              <entry>Order.java</entry>
+            </row>
+
+            <row>
+              <entry>line_item</entry>
+
+              <entry>LineItem.java</entry>
+            </row>
+
+            <row>
+              <entry>EAM_MEASUREMENT_DATA_1H</entry>
+
+              <entry>EamMeasurementData1h.java</entry>
+            </row>
+
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+
+    </section>
   </section>
 
   <section>
@@ -70,7 +134,7 @@
   </section>
 
   <section>
-    <title>DBRE Addon commands</title>
+    <title xml:id="dbre_commands">DBRE Addon commands</title>
 
     <para>After you have installed all the JDBC drivers, you can introspect
     and reverse engineer the database configured for your project. DBRE has
@@ -81,7 +145,9 @@
         <para><programlisting>roo&gt; <emphasis role="bold">database introspect --schema</emphasis> --file</programlisting></para>
 
         <para>This command displays the database structure, or schema, in XML
-        format. You can use the --file option to save the information to the
+        format. The --schema is mandatory and for databases which supports
+        schemas, you can press tab to display a list of schemas from your
+        database. You can use the --file option to save the information to the
         specified file.</para>
 
         <para><emphasis role="bold">Note</emphasis>: the term "schema" is not
@@ -95,9 +161,10 @@
         <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package</programlisting></para>
 
         <para>This command creates JPA entiies in your project representing
-        the tables and columns in your database. You can use the --package
-        option to specify a Java package where your entities will be
-        created.</para>
+        the tables and columns in your database. As for the database
+        introspect command, the --schema option is required and tab assistance
+        is available. You can use the --package option to specify a Java
+        package where your entities will be created.</para>
 
         <para>Since the DBRE Add-on provides incremental database reverse
         engineering, you can execute the command as many times as you want and
@@ -109,7 +176,7 @@
         <para>If you do not specify the --package option on second and
         subsequent executions of the database reverse engineer command, new
         entities will be created in the same package as they were previously
-        created in. </para>
+        created in.</para>
       </listitem>
     </orderedlist>
   </section>
@@ -118,22 +185,178 @@
     <title>The @RooDbManaged annotation</title>
 
     <para>The @RooDbManaged annotation is added to all new entities created by
-    the database reverse engineer command. Other Roo annotations, @RooEntity,
-    @RooJavaBean, and @RooToString are also added to the entity class. The
-    attribute "automaticallyDelete" is added to the @RooDbManaged annotation
-    and is set to "true" so that Roo can delete the entity if the associated
-    table has been dropped. However, if automaticallyDelete is set to false,
-    or if any annotations, fields, constructors, or methods have been added to
-    the entity (ie in the .java file), or if any of the Roo annotations are
-    removed, the entity will not be deleted. </para>
+    executing the database reverse engineer command. Other Roo annotations,
+    @RooEntity, @RooJavaBean, and @RooToString are also added to the entity
+    class. The attribute "automaticallyDelete" is added to the @RooDbManaged
+    annotation and is set to "true" so that Roo can delete the entity if the
+    associated table has been dropped. However, if "automaticallyDelete" is
+    set to "false", or if any annotations, fields, constructors, or methods
+    have been added to the entity (ie in the .java file), or if any of the Roo
+    annotations are removed, the entity will not be deleted.</para>
 
     <para>The presence of the @RooDbmanaged annotation on an entity class
     triggers the creation of an AspectJ inter-type declaration (ITD) ".aj"
     file where fields and their getters and setters are stored matching the
     columns in the table. For example, if an entity called Employee.java is
     created by the database reverse engineer command, a file called
-    Employee_Roo_DbManaged.aj is created and maintained by Roo. All the
+    Employee_Roo_DbManaged.aj is also created and maintained by Roo. All the
     columns of the matching employee table will cause fields to be created in
-    the entity's DbManaged ITD. </para>
+    the entity's DbManaged ITD. An example of a dbre-created entity is as
+    follows:</para>
+
+    <para><programlisting>@RooJavaBean
+@RooToString
+@RooDbManaged(automaticallyDelete = true)
+@RooEntity(table = "employee", schema = "expenses")
+public class Employee {
+}</programlisting></para>
+
+    <para>Along with the standard entity, toString, configurable ITDs, a
+    DbManaged ITD is created if there are more columns in the employee table
+    apart from a primary key column. For example, if the employee table has
+    employee name and employee number columns, the ITD could look like
+    this:</para>
+
+    <para><programlisting>privileged aspect Employee_Roo_DbManaged {
+    
+    @Column(name = "employee_number")
+    private String Employee.employeeNumber;
+    
+    public String Employee.getEmployeeNumber() {
+        return this.employeeNumber;
+    }
+    
+    public void Fork.setEmployeeNumber(String employeeNumber) {
+        this.employeeNumber = employeeNumber;
+    }
+
+    @Column(name = "employee_name")
+    private String Employee.employeeName;
+    
+    public String Employee.getEmployeeName() {
+        return this.employeeName;
+    }
+    
+    public void Fork.setEmployeeName(String employeeName) {
+        this.employeeName = employeeName;
+    }
+}</programlisting></para>
+
+    <para>If you do not want DBRE to manage your entity any more, you can
+    "push-in" refactor the fields and methods in the DbManaged ITD and remove
+    the @RooDbManaged annotation from the .java file.</para>
+  </section>
+
+  <section>
+    <title>Supported JPA 2.0 features</title>
+
+    <para>DBRE will generate and maintain JPA 2.0 primary key fields,
+    including composite keys, entity relationships such as many-valued and
+    single-valued associations, and other fields annotated with the JPA
+    @Column annotation.</para>
+
+    <para>The following sections describe the JPA features currently
+    supported.</para>
+
+    <section>
+      <title>Simple primary keys</title>
+
+      <para>For a table with a single primary key column, DBRE causes an
+      identifier field to be generated in the entity ITD annotated with @Id
+      and @Column. This is similar to executing the entity command by
+      itself.</para>
+    </section>
+
+    <section>
+      <title>Composite primary keys</title>
+
+      <para>For tables with two or more primary key columns, DBRE will
+      generate a primary key class annotated with @RooIdentifier(dbManaged =
+      true) and add the "identifierType" attribute with the identifier class
+      name to the @RooEntity annotation. For example, a line_item table has
+      two primary keys, line_item_id and order_id. DBRE will generate the
+      LineItem entity class and LineItemPK identifier class as follows:</para>
+
+      <para><programlisting>@RooJavaBean
+@RooToString
+@RooDbManaged(automaticallyDelete = true)
+@RooEntity(identifierType = LineItemPK.class, table = "line_item", schema = "order")
+public class LineItem {
+}</programlisting></para>
+
+      <para><programlisting>@RooIdentifier(dbManaged = true)
+public class LineItemPK {
+}</programlisting></para>
+
+      <para>Roo will automatically generate the entity ITD containing a field
+      annotated with @EmbeddedId with type LineItemPK as follows:</para>
+
+      <para><programlisting>privileged aspect LineItem_Roo_Entity {
+    
+    declare @type: LineItem: @Entity;
+    
+    declare @type: LineItem: @Table(name = "line_item", schema = "order");
+    
+    @PersistenceContext
+    transient EntityManager LineItem.entityManager;
+    
+    @EmbeddedId
+    private LineItemPK LineItem.id;
+    
+    public LineItemPK LineItem.getId() {
+        return this.id;
+    }
+    
+    public void LineItem.setId(LineItemPK id) {
+        this.id = id;
+    }
+
+...
+}</programlisting></para>
+
+      <para>and an identifier ITD for the LineItemPK class containing the
+      primary key fields and the type annotation for @Embedded, as
+      follows:</para>
+
+      <para><programlisting>privileged aspect LineItemPK_Roo_Identifier {
+    
+    declare @type: LineItemPK: @Embeddable;
+    
+    @Column(name = "line_item_id", nullable = false)
+    private BigDecimal LineItemPK.lineItemId;
+    
+    @Column(name = "order_id", nullable = false)
+    private BigDecimal LineItemPK.orderId;
+    
+    public LineItemPK.new(BigDecimal lineItemId, BigDecimal orderId) {
+        super();
+        this.lineItemId = lineItemId;
+        this.orderId = orderId;
+    }
+
+    private LineItemPK.new() {
+        super();
+    }
+
+...
+}</programlisting></para>
+
+      <para>If you decide that your table does not require a composite primary
+      key anymore, the next time you execute the database reverse engineer
+      command, Roo will automatically change the entity to use a single
+      primary key and remove the identifier class if it is permitted.</para>
+    </section>
+
+    <section>
+      <title>Entity relationships</title>
+
+      <para>One of the powerful features of DBRE is its ability to create
+      relationships between entities automatically based on the foreign key
+      information in the .roo-dbre XML file. <itemizedlist>
+          <listitem>
+             Many-valued associations with many-to-many multiplicity 
+          </listitem>
+        </itemizedlist></para>
+    </section>
   </section>
 </chapter>
