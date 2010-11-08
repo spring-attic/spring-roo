@@ -44,24 +44,23 @@
 
       <para>The DBRE commands (see <xref linkend="dbre_commands" /> below)
       make live connections to the database configured in your Roo project and
-      obtain information about your database using the standard
-      java.sql.DatabaseMetadata object, which is implemented by the JDBC
-      driver. When the database is reverse engineerd, this information is
-      converted to XML and is stored and maintained in the .roo-dbre file in
-      the root directory of your project. DBRE creates JPA entities based on
-      the table names in your database and fields based on the columns in the
-      tables. Relationships between entities are also created using the
+      obtain information about your using the database metadata from the
+      standard java.sql.DatabaseMetadata object, which is implemented by the
+      JDBC driver. When the database is reverse engineered, this information
+      is converted to XML and is stored and maintained in the .roo-dbre file
+      in the root directory of your project. DBRE creates JPA entities based
+      on the table names in your database and fields based on the columns in
+      the tables. Relationships between entities are also created using the
       imported and exported key information obtained from the database
       metadata.</para>
 
       <para>DBRE generates entity classes with names that are derived from the
       associated table name using a simple algorithm. If a table's name
-      contains an undercore, hyphen, forward or back slash character, the
-      generated class name will have a mixture of upper case and lower case
-      characters. This is also similar for column and field names. The
-      following table contains some examples.</para>
+      contains an undercore, hyphen, forward or back slash character, an upper
+      case letter is substituted for each of these characters. This is also
+      similar for column and field names. The following table contains some
+      examples.</para>
 
-    
       <informaltable>
         <tgroup cols="2">
           <thead>
@@ -90,12 +89,9 @@
 
               <entry>EamMeasurementData1h.java</entry>
             </row>
-
           </tbody>
         </tgroup>
       </informaltable>
-
-
     </section>
   </section>
 
@@ -104,17 +100,19 @@
 
     <para>DBRE supports most of the relational databases that can be
     configured for Roo-generated projects such as <link
-    xlink:href="http://www.oracle.com/index.html">Oracle</link>, <link
-    xlink:href="http://www.postgresql.org/">PostgreSQL</link>, and <link
-    xlink:href="http://www.mysql.com/">MySQL</link>. However, due to the
-    physical size of some database's JDBC driver jars, Roo does not ship these
-    drivers in its distribution zip but does provide an installation script
-    called install-jdbc-drivers.roo. To install the drivers, execute the Roo
-    command:</para>
+    xlink:href="http://www.mysql.com/">MySQL</link> and <link
+    xlink:href="http://www.postgresql.org/">PostgreSQL</link> and the
+    OSGi-enabled JDBC drivers for these databases are shipped with the Roo
+    distribution zip file. However, due to the physical size of some
+    database's JDBC driver jars, Roo does not include these jars but does
+    provide an installation script called install-jdbc-drivers.roo that can be
+    run as a post-installtion step after installing Roo. To install the
+    remaining drivers, execute the Roo command:</para>
 
     <para><programlisting>roo&gt; script --file install-jdbc-drivers.roo</programlisting></para>
 
-    <para>This command will install the JDBC drivers for Oracle, <link
+    <para>This command will install the JDBC drivers for <link
+    xlink:href="http://www.oracle.com/index.html">Oracle</link>, <link
     xlink:href="http://hsqldb.org/">HSQL</link>, <link
     xlink:href="http://www.h2database.com/html/main.html">H2</link>, <link
     xlink:href="http://jt400.sourceforge.net/">JTOpen</link> (for DB2/400),
@@ -214,32 +212,46 @@ public class Employee {
     <para>Along with the standard entity, toString, configurable ITDs, a
     DbManaged ITD is created if there are more columns in the employee table
     apart from a primary key column. For example, if the employee table has
-    employee name and employee number columns, the ITD could look like
-    this:</para>
+    mandatory employee name and employee number columns, and a nullable age
+    column the ITD could look like this:</para>
 
     <para><programlisting>privileged aspect Employee_Roo_DbManaged {
     
     @Column(name = "employee_number")
+    @NotNull
     private String Employee.employeeNumber;
     
     public String Employee.getEmployeeNumber() {
         return this.employeeNumber;
     }
     
-    public void Fork.setEmployeeNumber(String employeeNumber) {
+    public void Employee.setEmployeeNumber(String employeeNumber) {
         this.employeeNumber = employeeNumber;
     }
 
-    @Column(name = "employee_name")
+    @Column(name = "employee_name", length = "100")
+    @NotNull
     private String Employee.employeeName;
     
     public String Employee.getEmployeeName() {
         return this.employeeName;
     }
     
-    public void Fork.setEmployeeName(String employeeName) {
+    public void Employee.setEmployeeName(String employeeName) {
         this.employeeName = employeeName;
     }
+
+    @Column(name = "age")
+    private Integer Employee.age;
+    
+    public Integer Employee.getAge() {
+        return this.age;
+    }
+    
+    public void Employee.setAge(Integer age) {
+        this.age = age;
+    }
+...
 }</programlisting></para>
 
     <para>If you do not want DBRE to manage your entity any more, you can
@@ -250,12 +262,12 @@ public class Employee {
   <section>
     <title>Supported JPA 2.0 features</title>
 
-    <para>DBRE will generate and maintain JPA 2.0 primary key fields,
-    including composite keys, entity relationships such as many-valued and
-    single-valued associations, and other fields annotated with the JPA
-    @Column annotation.</para>
+    <para>DBRE will generate and maintain primary key fields, including
+    composite keys, entity relationships such as many-valued and single-valued
+    associations, and other fields annotated with the JPA @Column
+    annotation.</para>
 
-    <para>The following sections describe the JPA features currently
+    <para>The following sections describe the features currently
     supported.</para>
 
     <section>
@@ -273,9 +285,10 @@ public class Employee {
       <para>For tables with two or more primary key columns, DBRE will
       generate a primary key class annotated with @RooIdentifier(dbManaged =
       true) and add the "identifierType" attribute with the identifier class
-      name to the @RooEntity annotation. For example, a line_item table has
-      two primary keys, line_item_id and order_id. DBRE will generate the
-      LineItem entity class and LineItemPK identifier class as follows:</para>
+      name to the @RooEntity annotation in the entity class. For example, a
+      line_item table has two primary keys, line_item_id and order_id. DBRE
+      will generate the LineItem entity class and LineItemPK identifier class
+      as follows:</para>
 
       <para><programlisting>@RooJavaBean
 @RooToString
@@ -310,12 +323,11 @@ public class LineItemPK {
     public void LineItem.setId(LineItemPK id) {
         this.id = id;
     }
-
 ...
 }</programlisting></para>
 
       <para>and an identifier ITD for the LineItemPK class containing the
-      primary key fields and the type annotation for @Embedded, as
+      primary key fields and the type annotation for @Embeddable, as
       follows:</para>
 
       <para><programlisting>privileged aspect LineItemPK_Roo_Identifier {
@@ -337,7 +349,6 @@ public class LineItemPK {
     private LineItemPK.new() {
         super();
     }
-
 ...
 }</programlisting></para>
 
@@ -352,11 +363,157 @@ public class LineItemPK {
 
       <para>One of the powerful features of DBRE is its ability to create
       relationships between entities automatically based on the foreign key
-      information in the .roo-dbre XML file. <itemizedlist>
+      information in the .roo-dbre XML file. The following associations can be
+      generated:<itemizedlist>
           <listitem>
-             Many-valued associations with many-to-many multiplicity 
+            <emphasis role="bold">Many-valued associations with many-to-many
+            multiplicity</emphasis>
+
+            <para>Many-to-many associations are created if a join table is
+            detected by DBRE. To be identified as a many-to-many join table,
+            the table must have have exactly two primary keys and have exactly
+            two foreign-keys pointing to other entity tables and have no other
+            columns.</para>
+
+            <para>For example, the database contains a product table and a
+            supplier table. The database has been modelled such that a product
+            can have many suppliers and a supplier can have many products. A
+            join table called product_supplier also exists and links the two
+            tables together by having a composite primary key made up of the
+            product id and supplier id and foreign keys pointing to each of
+            the primary keys of the product and supplier tables. DBRE will
+            generate a bi-directional many-to-many association. DBRE will
+            designate which entities are the owning and inverse sides of the
+            association respectively and annotate the generated fields
+            accordingly as shown in the following code snippets:</para>
+
+            <para>
+              <programlisting>privileged aspect Product_Roo_DbManaged {
+    
+    @ManyToMany
+    @JoinTable(name = "product_supplier", joinColumns = { @JoinColumn(name = "prod_id") }, inverseJoinColumns = { @JoinColumn(name = "supp_id") })
+    private Set&lt;Supplier&gt; Product.suppliers;
+...
+}</programlisting>
+
+              <programlisting>privileged aspect Supplier_Roo_DbManaged {
+    
+    @ManyToMany(mappedBy = "suppliers")
+    private Set&lt;Product&gt; Supplier.products;
+...
+}</programlisting>
+            </para>
+
+            <para>DBRE will also create many-to-many associations where the
+            two tables each have composite primary keys. For example:</para>
+
+            <para>
+              <programlisting>privileged aspect Foo_Roo_DbManaged {
+
+    @ManyToMany
+    @JoinTable(name = "foo_bar", joinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
+    private Set&lt;Bar&gt; Foo.bars;
+...
+}
+</programlisting>
+            </para>
+          </listitem>
+
+          <listitem>
+            <emphasis role="bold">Single-valued associations to other entities
+            that have one-to-one multiplicity</emphasis>
+
+            <para>If the foreign key column represents the entire primary key
+            (or the entire index) then the relationship between the tables
+            will be one to one and a bi-directional one-to-one association is
+            created.</para>
+
+            <para>For example, the database contains a customer table and an
+            address table and a customer can only have one address. The
+            following code snippets show the one-to-one mappings:</para>
+
+            <para>
+              <programlisting>privileged aspect Address_Roo_DbManaged {
+    
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Party Address.customer;
+...
+}</programlisting>
+
+              <programlisting>privileged aspect Customer_Roo_DbManaged {
+    
+    @OneToOne(mappedBy = "customer") 
+    private Address Party.address;
+...
+}</programlisting>
+            </para>
+          </listitem>
+
+          <listitem>
+            <emphasis role="bold">Many-valued associations with one-to-many
+            multiplicity</emphasis>
+
+            <para>If the foreign key column is part of the primary key (or
+            part of an index) then the relationship between the tables will be
+            one to many. An example is shown below:</para>
+
+            <para>
+              <programlisting>privileged aspect Order_Roo_DbManaged {
+    
+    @OneToMany(mappedBy = "order")
+    private Set&lt;LineItem&gt; Order.lineItems;
+...
+}</programlisting>
+            </para>
+          </listitem>
+
+          <listitem>
+            <emphasis role="bold">Single-valued associations to other entities
+            that have many-to-one multiplicity</emphasis>
+
+            <para>When a one-to-many association is created, for example a set
+            of LineItem entities in the Order entity in the example above,
+            DBRE will also create a corresponding many-to-one association in
+            the LineItem entity, as follows:</para>
+
+            <para>
+              <programlisting>privileged aspect LineItem_Roo_DbManaged {
+    
+    @ManyToOne
+    @JoinColumn(name = "order_id", referencedColumnName = "order_id")
+    private Order LineItem.order;
+...
+}</programlisting>
+            </para>
           </listitem>
         </itemizedlist></para>
+
+      <para>DBRE wil ensure generated field names are not duplicated. For
+      example, if an entity has more than association to another entity, the
+      field names will be generated with unique names. The folllowing code
+      snippet illustrates this:</para>
+
+      <para><programlisting>privileged aspect Foo_Roo_DbManaged {
+
+    @ManyToMany
+    @JoinTable(name = "foo_bar", joinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
+    private Set&lt;Bar&gt; Foo.bars;
+
+    @ManyToMany
+    @JoinTable(name = "foo_com", joinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "bar_id2") })
+    private Set&lt;Bar&gt; Foo.bars1;
+...
+}</programlisting></para>
+    </section>
+
+    <section>
+      <title>Other fields</title>
+
+      <para>DBRE will detect column types from the database metadata and
+      generate fields and field annotations appropriately. Strings, dates,
+      booleans, numeric fields, CLOBs and BLOBs are all supported by
+      DBRE.</para>
     </section>
   </section>
 </chapter>
