@@ -247,24 +247,6 @@
         be added if new columns are added to a table, or fields will be
         removed if columns are deleted. Entities are also deleted in certain
         circumstances if their corresponding tables are dropped.</para>
-
-        <para><emphasis role="bold">Important</emphasis>: When the database
-        reverse engineer command is first run, the property determining
-        whether tables are created and dropped which is defined in the
-        persistence.xml file is modified to a value that prevents new database
-        artifacts from being created. This is done to avoid deleting the data
-        in your tables when unit tests are run or a web application is
-        started. For example, if you use Hibernate as your JPA 2.0 provider
-        the property is called 'hibernate.hbm2ddl.auto' and is initially set
-        to 'create' when the project is first created. This value allows you
-        to run unit tests and start a web application. However, the property's
-        value is changed to 'validate' when the database reverse engineer
-        command is executed. Other JPA providers such as EclipseLink and
-        OpenJPA have a similar property which are also changed when the
-        command is run. If you experience problems when running unit tests or
-        when starting your web application after reverse engineering, you may
-        need to change the property back to 'create' or 'update', for example,
-        in the case of Hibernate.</para>
       </listitem>
     </orderedlist>
   </section>
@@ -482,7 +464,11 @@ public class LineItemPK {
         <para><programlisting>privileged aspect Product_Roo_DbManaged {
     
     @ManyToMany
-    @JoinTable(name = "product_supplier", joinColumns = { @JoinColumn(name = "prod_id") }, inverseJoinColumns = { @JoinColumn(name = "supp_id") })
+    @JoinTable(name = "product_supplier", 
+        joinColumns = { 
+            @JoinColumn(name = "prod_id") }, 
+        inverseJoinColumns = { 
+            @JoinColumn(name = "supp_id") })
     private Set&lt;Supplier&gt; Product.suppliers;
 
     ...
@@ -500,7 +486,13 @@ public class LineItemPK {
         <para><programlisting>privileged aspect Foo_Roo_DbManaged {
 
     @ManyToMany
-    @JoinTable(name = "foo_bar", joinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
+    @JoinTable(name = "foo_bar", 
+        joinColumns = { 
+            @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), 
+            @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, 
+        inverseJoinColumns = { 
+            @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), 
+            @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
     private Set&lt;Bar&gt; Foo.bars;
 
     ...
@@ -581,11 +573,23 @@ public class LineItemPK {
         <para><programlisting>privileged aspect Foo_Roo_DbManaged {
 
     @ManyToMany
-    @JoinTable(name = "foo_bar", joinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
+    @JoinTable(name = "foo_bar", 
+        joinColumns = { 
+            @JoinColumn(name = "foo_bar_id1", referencedColumnName = "foo_id1"), 
+            @JoinColumn(name = "foo_bar_id2", referencedColumnName = "foo_id2") }, 
+        inverseJoinColumns = { 
+            @JoinColumn(name = "foo_bar_id1", referencedColumnName = "bar_id1"), 
+            @JoinColumn(name = "foo_bar_id2", referencedColumnName = "bar_id2") })
     private Set&lt;Bar&gt; Foo.bars;
 
     @ManyToMany
-    @JoinTable(name = "foo_com", joinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "foo_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "foo_id2") }, inverseJoinColumns = { @JoinColumn(name = "foo_com_id1", referencedColumnName = "bar_id1"), @JoinColumn(name = "foo_com_id2", referencedColumnName = "bar_id2") })
+    @JoinTable(name = "foo_com", 
+        joinColumns = { 
+            @JoinColumn(name = "foo_com_id1", referencedColumnName = "foo_id1"), 
+            @JoinColumn(name = "foo_com_id2", referencedColumnName = "foo_id2") }, 
+        inverseJoinColumns = { 
+            @JoinColumn(name = "foo_com_id1", referencedColumnName = "bar_id1"), 
+            @JoinColumn(name = "foo_com_id2", referencedColumnName = "bar_id2") })
     private Set&lt;Bar&gt; Foo.bars1;
 
     ...
@@ -628,8 +632,9 @@ public class LineItemPK {
     <itemizedlist>
       <listitem>
         <para><emphasis role="bold">Executing the database introspect or
-        database reverse engineer commands causes 'JDBC driver not available
-        for oracle.jdbc.OracleDriver'</emphasis></para>
+        database reverse engineer commands causes the message 'JDBC driver not
+        available for oracle.jdbc.OracleDriver' to be
+        displayed</emphasis></para>
 
         <para>This is due to the Oracle JDBC driver not having been installed.
         The driver must be installed if you have installed Roo for the first
@@ -640,13 +645,53 @@ public class LineItemPK {
       <listitem>
         <para><emphasis role="bold">Executing the database introspect or
         database reverse engineer commands with the Firebird database
-        configured causes 'Exception in thread "JLine Shell"
-        java.lang.NoClassDefFoundError:
-        javax/resource/ResourceException'</emphasis></para>
+        configured causes the message 'Exception in thread "JLine Shell"
+        java.lang.NoClassDefFoundError: javax/resource/ResourceException' to
+        be displayed</emphasis></para>
 
         <para>This is due to the Firebird JDBC driver not having been
         installed. The driver must be installed if you have installed Roo for
         the first time. See <xref linkend="dbre_installation" /></para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">The error message 'Caused by:
+        org.hibernate.HibernateException: Missing sequence or table:
+        hibernate_sequence' appears when starting Tomcat</emphasis></para>
+
+        <para>When the database reverse engineer command is first run, the
+        property determining whether tables are created and dropped which is
+        defined in the persistence.xml file is modified to a value that
+        prevents new database artifacts from being created. This is done to
+        avoid deleting the data in your tables when unit tests are run or a
+        web application is started. For example, if you use Hibernate as your
+        JPA 2.0 provider the property is called 'hibernate.hbm2ddl.auto' and
+        is initially set to 'create' when the project is first created. This
+        value causes Hibernate to create tables and sequences and allows you
+        to run unit tests and start a web application. However, the property's
+        value is changed to 'validate' when the database reverse engineer
+        command is executed. Other JPA providers such as EclipseLink and
+        OpenJPA have a similar property which are also changed when the
+        command is run. If you see this issue when running unit tests or when
+        starting your web application after reverse engineering, you may need
+        to change the property back to 'create' or 'update'. Check your
+        persistence.xml for the property values for other JPA
+        providers.</para>
+      </listitem>
+
+      <listitem>
+        <para><emphasis role="bold">The message 'Unable to database-managed
+        entity </emphasis><emphasis role="italic">&lt;entity
+        name&gt;</emphasis> <emphasis role="bold">because its table name was
+        not specified' appears in the Roo console during reverse
+        engineering</emphasis></para>
+
+        <para>When DBRE first creates an entity it puts in the table name in
+        the 'table' attribute of the @RooEntity annotation. This is the only
+        mechanism DBRE has for associating an entity with a table. If you
+        remove the 'table' attribute, DBRE has no way of determining what the
+        entity's corresponding table is and as a result cannot maintain the
+        entity's fields and associations.</para>
       </listitem>
     </itemizedlist>
   </section>
