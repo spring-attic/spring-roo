@@ -34,6 +34,7 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.ClassUtils;
+import org.springframework.roo.support.util.OsUtils;
 
 /**
  * Uses the feature-rich <a href="http://jline.sourceforge.net/">JLine</a> library to provide an interactive shell.
@@ -65,7 +66,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	
 	public void run() {
 		try {
-			if (JANSI_AVAILABLE && JLineLogHandler.WINDOWS_OS) {
+			if (JANSI_AVAILABLE && OsUtils.isWindows()) {
 				try {
 					reader = createAnsiWindowsReader();
 				} catch (Exception e) {

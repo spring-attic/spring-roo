@@ -2,6 +2,7 @@ package org.springframework.roo.support.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * Utilities for handling {@link File} instances.
@@ -11,6 +12,8 @@ import java.io.IOException;
  *
  */
 public abstract class FileUtils {
+	// doesn't check for backslash after the colon, since Java has no issues with paths like c:/Windows
+	private static final Pattern WINDOWS_DRIVE_PATH= Pattern.compile("^[A-Za-z]:.*");
 
 	/**
 	 * Deletes the specified {@link File}.
@@ -86,6 +89,24 @@ public abstract class FileUtils {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Checks if the provided fileName denotes an absolute path on the file system. 
+	 * On Windows, this includes both paths with and without drive letters, where the latter have to start with '\'.
+	 * No check is performed to see if the file actually exists!
+	 * 
+	 * @param fileName name of a file, which could be an absolute path
+	 * @return true if the fileName looks like an absolute path for the current OS
+	 */
+	public static boolean denotesAbsolutePath(String fileName) {
+		if (OsUtils.isWindows()) {
+			// first check for drive letter
+			if (WINDOWS_DRIVE_PATH.matcher(fileName).matches()) {
+				return true;
+			}
+		} 
+		return fileName.startsWith(File.separator);
 	}
 	
 }

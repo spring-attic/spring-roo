@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileUtils;
 
 /**
  * {@link Converter} for {@link File}.
@@ -73,7 +74,7 @@ public abstract class FileConverter implements Converter {
 	}
 	
 	private String convertCompletionBackIntoUserInputStyle(String originalUserInput, String completion) {
-		if (originalUserInput.startsWith(File.separator)) {
+		if (FileUtils.denotesAbsolutePath(originalUserInput)) {
 			// Input was originally as a fully-qualified path, so we just keep the completion in that form
 			return completion;
 		}
@@ -89,13 +90,14 @@ public abstract class FileConverter implements Converter {
 	/**
 	 * If the user input starts with a tilde character (~), replace the tilde character with the
 	 * user's home directory. If the user input does not start with a tilde, simply return the original
-	 * user input without any changes.
+	 * user input without any changes if the input specifies an absolute path, or return an absolute path 
+	 * based on the working directory if the input specifies a relative path.
 	 * 
 	 * @param userInput the user input, which may commence with a tilde (required)
 	 * @return a string that is guaranteed to no longer contain a tilde as the first character (never null)
 	 */
 	private String convertUserInputIntoAFullyQualifiedPath(String userInput) {
-		if (userInput.startsWith(File.separator)) {
+		if (FileUtils.denotesAbsolutePath(userInput)) {
 			// Input is already in a fully-qualified path form
 			return userInput;
 		}

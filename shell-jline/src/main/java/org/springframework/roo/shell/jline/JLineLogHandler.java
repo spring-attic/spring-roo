@@ -12,6 +12,7 @@ import jline.ConsoleReader;
 
 import org.springframework.roo.shell.ShellPromptAccessor;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.OsUtils;
 
 /**
  * JDK logging {@link Handler} that emits log messages to a JLine {@link ConsoleReader}.
@@ -21,7 +22,6 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JLineLogHandler extends Handler {
 
-	static final boolean WINDOWS_OS = System.getProperty("os.name").toLowerCase().contains("windows");
 	private static final boolean BRIGHT_COLORS = Boolean.getBoolean("roo.bright");
 	
 	private ConsoleReader reader;
@@ -184,7 +184,7 @@ public class JLineLogHandler extends Handler {
 		final char esc = (char) 27; 
 		return new ANSIBuffer() {
 			public ANSIBuffer reverse(String str) {
-				if (WINDOWS_OS) {
+				if (OsUtils.isWindows()) {
 					return super.reverse(str).append(ANSICodes.attrib(esc));
 				}
 				return super.reverse(str);
