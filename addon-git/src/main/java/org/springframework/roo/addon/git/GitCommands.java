@@ -62,14 +62,14 @@ public class GitCommands implements CommandMarker {
 		revisionControl.commitAllChanges(message);
 	}
 	
-	@CliCommand(value="git revert last", help="Revert commit")
+	@CliCommand(value="git revert last", help="Revert (last x) commit(s)")
 	public void revertLast(@CliOption(key={"commitCount"}, mandatory=false, help="Number of commits to revert") Integer history,
 			@CliOption(key={"message"}, mandatory=true, help="The commit message") String message) {
 		revisionControl.revertCommit(history == null ? 1 : history, message);
 	}
 	
-	@CliCommand(value="git revert commit", help="Revert commit")
-	public void revertCommit(@CliOption(key={"revString"}, mandatory=true, help="Number of commits to revert") String revstr,
+	@CliCommand(value="git revert commit", help="Roll project back to a specific commit")
+	public void revertCommit(@CliOption(key={"revString"}, mandatory=true, help="Commit id") String revstr,
 			@CliOption(key={"message"}, mandatory=true, help="The commit message") String message) {
 		revisionControl.revertCommit(revstr, message);
 	}
