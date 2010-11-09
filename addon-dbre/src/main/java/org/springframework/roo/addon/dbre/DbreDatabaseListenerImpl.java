@@ -132,7 +132,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				notifyIfRequired(metadataItem);
 			}
 		}
-	}
+	} 
 
 	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
 		JavaType javaType = dbreTypeResolutionService.suggestTypeNameForNewTable(table.getName(), javaPackage);
