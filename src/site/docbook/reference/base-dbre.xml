@@ -680,8 +680,8 @@ public class LineItemPK {
       </listitem>
 
       <listitem>
-        <para><emphasis role="bold">The message 'Unable to database-managed
-        entity </emphasis><emphasis role="italic">&lt;entity
+        <para><emphasis role="bold">The message 'Unable to maintain
+        database-managed entity </emphasis><emphasis role="italic">&lt;entity
         name&gt;</emphasis> <emphasis role="bold">because its table name was
         not specified' appears in the Roo console during reverse
         engineering</emphasis></para>

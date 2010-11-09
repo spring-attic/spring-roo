@@ -116,7 +116,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		Table table = database.findTable(getTableName());
 		if (table == null) {
-			logger.warning("Unable to database-managed entity " + javaType.getFullyQualifiedTypeName() + " because its table name was not specified");
+			logger.warning("Unable to maintain database-managed entity " + javaType.getFullyQualifiedTypeName() + " because its table name was not specified");
 			return;
 		}
 
