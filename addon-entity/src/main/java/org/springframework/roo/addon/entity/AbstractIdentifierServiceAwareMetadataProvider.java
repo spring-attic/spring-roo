@@ -44,7 +44,7 @@ public abstract class AbstractIdentifierServiceAwareMetadataProvider extends Abs
 	 * {@link IdentifierService#getIdentifiers(JavaType)}. It returns null if no provider is authoritative.
 	 * 
 	 * @param javaType the entity or PK identifier class for which column information is desired (required)
-	 * @return the applicable identifiers, or null if no registered {@link IdentifierService} was authoritiative for this type
+	 * @return the applicable identifiers, or null if no registered {@link IdentifierService} was authoritative for this type
 	 */
 	protected List<Identifier> getIdentifiersForType(JavaType javaType) {
 		List<Identifier> identifierServiceResult = null;

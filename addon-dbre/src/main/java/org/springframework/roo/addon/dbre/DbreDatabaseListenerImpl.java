@@ -18,6 +18,7 @@ import org.springframework.roo.addon.dbre.model.Column;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.Identifier;
+import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -115,9 +116,18 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		deleteManagedTypesNotInModel(tables, managedEntityTypes);
 
-		for (JavaType managedType : managedEntityTypes) {
-			String dbreMid = DbreMetadata.createIdentifier(managedType, Path.SRC_MAIN_JAVA);
+		for (JavaType managedEntityType : managedEntityTypes) {
+			String dbreMid = DbreMetadata.createIdentifier(managedEntityType, Path.SRC_MAIN_JAVA);
 			MetadataItem metadataItem = metadataService.get(dbreMid, true);
+			if (metadataItem != null) {
+				notifyIfRequired(metadataItem);
+			}
+		}
+		
+		SortedSet<JavaType> managedIdentifierTypes = dbreTypeResolutionService.getManagedIdentifierTypes();
+		for (JavaType managedIdentifierType : managedIdentifierTypes) {
+			String identifierMid = IdentifierMetadata.createIdentifier(managedIdentifierType, Path.SRC_MAIN_JAVA);
+			MetadataItem metadataItem = metadataService.get(identifierMid, true);
 			if (metadataItem != null) {
 				notifyIfRequired(metadataItem);
 			}

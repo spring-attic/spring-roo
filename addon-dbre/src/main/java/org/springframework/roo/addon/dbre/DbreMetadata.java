@@ -699,25 +699,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return uniqueField;
 	}
 
-	private boolean hasAccessor(FieldMetadata field) {
-		String requiredAccessorName = getRequiredAccessorName(field);
-
-		// Check governor for accessor method
-		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
-			return true;
-		}
-
-		// Check entity ITD for accessor method
-		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
-		for (MethodMetadata method : itdMethods) {
-			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private boolean hasField(FieldMetadata field) {
 		// Check governor for field
 		if (MemberFindingUtils.getField(governorTypeDetails, field.getFieldName()) != null) {
@@ -750,6 +731,25 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
 		for (FieldMetadata itdField : itdFields) {
 			if (itdField.getFieldName().equals(field.getFieldName())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean hasAccessor(FieldMetadata field) {
+		String requiredAccessorName = getRequiredAccessorName(field);
+
+		// Check governor for accessor method
+		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
+			return true;
+		}
+
+		// Check entity ITD for accessor method
+		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
+		for (MethodMetadata method : itdMethods) {
+			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
 				return true;
 			}
 		}

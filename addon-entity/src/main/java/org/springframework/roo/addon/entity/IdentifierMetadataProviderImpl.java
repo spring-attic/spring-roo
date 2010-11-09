@@ -42,9 +42,7 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We know governor type details are non-null and can be safely cast
 		JavaType javaType = IdentifierMetadata.getJavaType(metadataIdentificationString);
-
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
-
 		return new IdentifierMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, noArgConstructor, identifierServiceResult);
 	}
 
