@@ -11,6 +11,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -103,15 +104,17 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private FieldMetadata getSolrServerField() {
+		JavaSymbolName fieldName = new JavaSymbolName("solrServer");
 		List<AnnotationMetadataBuilder> autowired = new ArrayList<AnnotationMetadataBuilder>();
 		autowired.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, autowired, new JavaSymbolName("solrServer"), new JavaType("org.apache.solr.client.solrj.SolrServer"));
-		return fieldBuilder.build();
+		FieldMetadata fieldMd = MemberFindingUtils.getDeclaredField(governorTypeDetails, fieldName);
+		if (fieldMd != null) return fieldMd;
+		return new FieldMetadataBuilder(getId(), Modifier.TRANSIENT, autowired, fieldName, new JavaType("org.apache.solr.client.solrj.SolrServer")).build();
 	}
 
 	private MethodMetadata getPostPersistOrUpdateMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getPostPersistOrUpdateMethod());
-		MethodMetadata postPersistOrUpdate = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		MethodMetadata postPersistOrUpdate = MemberFindingUtils.getMethod(governorTypeDetails, methodName, new ArrayList<JavaType>());
 		if (postPersistOrUpdate != null) return postPersistOrUpdate;
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -127,7 +130,9 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getIndexEntityMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + beanInfoMetadata.getJavaBean().getSimpleTypeName());
-		MethodMetadata indexEntityMethod = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
+		MethodMetadata indexEntityMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (indexEntityMethod != null) return indexEntityMethod;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -137,8 +142,6 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine(beanPlural.toLowerCase() + ".add(" + javaBeanFieldName + ");");
 		bodyBuilder.appendFormalLine(annotationValues.getIndexMethod() + beanPlural + "(" + beanPlural.toLowerCase() + ");");
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(javaBeanFieldName));
 
@@ -148,7 +151,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getIndexEntitiesMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + beanPlural);
-		MethodMetadata indexEntitiesMethod = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		List<JavaType> typeParams = new ArrayList<JavaType>();
+		typeParams.add(beanInfoMetadata.getJavaBean());
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams), new ArrayList<AnnotationMetadata>()));
+		MethodMetadata indexEntitiesMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (indexEntitiesMethod != null) return indexEntitiesMethod;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -205,13 +212,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(beanInfoMetadata.getJavaBean());
-		paramTypes.add(new AnnotatedJavaType(new JavaType("java.util.Collection", 0, DataType.TYPE, null, typeParams), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(beanPlural.toLowerCase()));
-		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
 		return methodBuilder.build();
@@ -219,7 +221,9 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getDeleteIndexMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteIndexMethod());
-		MethodMetadata deleteIndex = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
+		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
+		MethodMetadata deleteIndex = MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(paramTypes));
 		if (deleteIndex != null) return deleteIndex;
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
@@ -235,8 +239,6 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(beanInfoMetadata.getJavaBean(), new ArrayList<AnnotationMetadata>()));
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName(javaBeanFieldName));
 
@@ -247,7 +249,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private MethodMetadata getPreRemoveMethod() {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getPreRemoveMethod());
-		MethodMetadata preDelete = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		MethodMetadata preDelete = MemberFindingUtils.getMethod(governorTypeDetails, methodName, new ArrayList<JavaType>());
 		if (preDelete != null) return preDelete;
 
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -262,11 +264,11 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private MethodMetadata getSimpleSearchMethod() {
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, new ArrayList<AnnotationMetadata>()));
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(JavaType.STRING_OBJECT);
 
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSimpleSearchMethod());
-		MethodMetadata searchMethod = methodExists(methodName, paramTypes);
+		MethodMetadata searchMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (searchMethod != null) return searchMethod;
 
 		JavaType queryResponse = new JavaType("org.apache.solr.client.solrj.response.QueryResponse");
@@ -277,16 +279,16 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return search(new SolrQuery(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + queryString.toLowerCase()));");
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getSearchMethod() {
 		JavaType queryResponse = new JavaType("org.apache.solr.client.solrj.response.QueryResponse");
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSearchMethod());
-		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("org.apache.solr.client.solrj.SolrQuery"), new ArrayList<AnnotationMetadata>()));
-		MethodMetadata searchMethod = methodExists(methodName, paramTypes);
+		List<JavaType> paramTypes = new ArrayList<JavaType>();
+		paramTypes.add(new JavaType("org.apache.solr.client.solrj.SolrQuery"));
+		MethodMetadata searchMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, paramTypes);
 		if (searchMethod != null) return searchMethod;
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
@@ -305,13 +307,13 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.appendFormalLine("return new " + getSimpleName(queryResponse) + "();");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, paramTypes, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
 	private MethodMetadata getSolrServerMethod() {
 		JavaSymbolName methodName = new JavaSymbolName("solrServer");
-		MethodMetadata solrServerMethod = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
+		MethodMetadata solrServerMethod = MemberFindingUtils.getMethod(governorTypeDetails, methodName, new ArrayList<JavaType>());
 		if (solrServerMethod != null) return solrServerMethod;
 
 		JavaType solrServer = new JavaType("org.apache.solr.client.solrj.SolrServer");
@@ -322,18 +324,6 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL, methodName, solrServer, bodyBuilder);
 		return methodBuilder.build();
-	}
-
-	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> paramTypes) {
-		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative
-		// We do not scan the superclass, as the caller is expected to know we'll only scan the current class
-		for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
-			if (method.getMethodName().equals(methodName) && method.getParameterTypes().equals(paramTypes)) {
-				// Found a method of the expected name; we won't check method parameters though
-				return method;
-			}
-		}
-		return null;
 	}
 
 	private String getSimpleName(JavaType type) {
