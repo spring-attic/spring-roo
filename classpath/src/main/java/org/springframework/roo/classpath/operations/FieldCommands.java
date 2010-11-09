@@ -233,8 +233,9 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords, 
-		@CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "SHORT", specifiedDefaultValue = "SHORT", help = "Indicates the style of the date format") DateTime dateFormat, 
-		@CliOption(key = "timeFormat", mandatory = false, unspecifiedDefaultValue = "NONE", specifiedDefaultValue = "NONE", help = "Indicates the style of the time format") DateTime timeFormat) {
+		@CliOption(key = "dateFormat", mandatory = false, unspecifiedDefaultValue = "SHORT", specifiedDefaultValue = "SHORT", help = "Indicates the style of the date format (ignored if dateTimeFormatPattern is specified)") DateTime dateFormat, 
+		@CliOption(key = "timeFormat", mandatory = false, unspecifiedDefaultValue = "NONE", specifiedDefaultValue = "NONE", help = "Indicates the style of the time format (ignored if dateTimeFormatPattern is specified)") DateTime timeFormat, 
+		@CliOption(key = "dateTimeFormatPattern", mandatory = false, help = "Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a") String pattern) {
 
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		DateField fieldDetails = new DateField(physicalTypeIdentifier, fieldType, fieldName);
@@ -248,6 +249,7 @@ public class FieldCommands implements CommandMarker {
 		if (comment != null) fieldDetails.setComment(comment);
 		if (dateFormat != null) fieldDetails.setDateFormat(dateFormat);
 		if (timeFormat != null) fieldDetails.setTimeFormat(timeFormat);
+		if (pattern != null) fieldDetails.setPattern(pattern);
 		if (value != null) fieldDetails.setValue(value);
 	
 		insertField(fieldDetails, permitReservedWords, transientModifier);

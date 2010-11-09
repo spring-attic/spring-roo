@@ -72,7 +72,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private SortedSet<JavaType> specialDomainTypes;
 	private String controllerPath;
 	private String entityName;
-	private Map<JavaSymbolName, String> dateTypes;
+	private Map<JavaSymbolName, DateTimeFormat> dateTypes;
 	private Map<JavaType, String> pluralCache;
 	private JsonMetadata jsonMetadata;
 	private Logger log = Logger.getLogger(getClass().getName());
@@ -966,14 +966,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		paramNames.add(new JavaSymbolName("model"));
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		Iterator<Map.Entry<JavaSymbolName, String>> it = dateTypes.entrySet().iterator();
+		Iterator<Map.Entry<JavaSymbolName, DateTimeFormat>> it = dateTypes.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry<JavaSymbolName, String> entry = it.next();
-			JavaType dateTimeFormat = new JavaType("org.joda.time.format.DateTimeFormat");
-			String dateTimeFormatSimple = dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-			JavaType localeContextHolder = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
-			String localeContextHolderSimple = localeContextHolder.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-			bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue() + "\", " + localeContextHolderSimple + ".getLocale()));");
+			Entry<JavaSymbolName, DateTimeFormat> entry = it.next();
+			String pattern;
+			if (entry.getValue().pattern != null) {
+				pattern = "\"" + entry.getValue().pattern + "\"";
+			} else {
+				JavaType dateTimeFormat = new JavaType("org.joda.time.format.DateTimeFormat");
+				String dateTimeFormatSimple = dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				JavaType localeContextHolder = new JavaType("org.springframework.context.i18n.LocaleContextHolder");
+				String localeContextHolderSimple = localeContextHolder.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+				pattern = dateTimeFormatSimple + ".patternForStyle(\"" + entry.getValue().style + "\", " + localeContextHolderSimple + ".getLocale())";
+			}
+			bodyBuilder.appendFormalLine("model.addAttribute(\"" + entityName + "_" + entry.getKey().getSymbolName().toLowerCase() + "_date_format\", " + pattern + ");");
 		}
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, addDateTimeFormatPatterns, JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
@@ -1103,8 +1109,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return specialTypes;
 	}
 
-	private Map<JavaSymbolName, String> getDatePatterns() {
-		Map<JavaSymbolName, String> dates = new HashMap<JavaSymbolName, String>();
+	private Map<JavaSymbolName, DateTimeFormat> getDatePatterns() {
+		Map<JavaSymbolName, DateTimeFormat> dates = new HashMap<JavaSymbolName, DateTimeFormat>();
 		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 			// Not interested in identifiers and version fields
 			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
@@ -1119,12 +1125,22 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 			if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(fieldMetadata.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-				if (annotation != null && annotation.getAttributeNames().contains(new JavaSymbolName("style"))) {	
-					dates.put(fieldMetadata.getFieldName(), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+				JavaSymbolName patternSymbol = new JavaSymbolName("pattern");
+				JavaSymbolName styleSymbol = new JavaSymbolName("style");
+				DateTimeFormat dateTimeFormat = null;
+				if (annotation != null) {
+					if (annotation.getAttributeNames().contains(styleSymbol)) {
+						dateTimeFormat = DateTimeFormat.withStyle(annotation.getAttribute(styleSymbol).getValue().toString());
+					} else if (annotation.getAttributeNames().contains(patternSymbol)) {
+						dateTimeFormat = DateTimeFormat.withPattern(annotation.getAttribute(patternSymbol).getValue().toString());
+					}
+				}
+				if (dateTimeFormat != null) {
+					dates.put(fieldMetadata.getFieldName(), dateTimeFormat);
 					for (String finder : entityMetadata.getDynamicFinders()) {
 						if (finder.contains(StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName()) + "Between")) {
-							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
-							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), annotation.getAttribute(new JavaSymbolName("style")).getValue().toString());
+							dates.put(new JavaSymbolName("min" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
+							dates.put(new JavaSymbolName("max" + StringUtils.capitalize(fieldMetadata.getFieldName().getSymbolName())), dateTimeFormat);
 						}
 					}
 				} else {
@@ -1227,4 +1243,23 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
+	
+	private static class DateTimeFormat {
+		public String style;
+		public String pattern;
+
+		public static DateTimeFormat withStyle(String style) {
+			DateTimeFormat d = new DateTimeFormat();
+			d.style = style;
+			return d;
+		}
+
+		public static DateTimeFormat withPattern(String pattern) {
+			DateTimeFormat d = new DateTimeFormat();
+			d.pattern = pattern;
+			return d;
+		}
+		
+	}
+	
 }

@@ -33,6 +33,9 @@ public class DateField extends FieldDetails {
 	
 	private DateTime timeFormat = null;
 
+	/** Custom date formatting through a DateTime pattern such as yyyy/mm/dd h:mm:ss a. */
+	private String pattern = null;
+
 	public DateField(String physicalTypeIdentifier, JavaType fieldType, JavaSymbolName fieldName) {
 		super(physicalTypeIdentifier, fieldType, fieldName);
 	}
@@ -61,7 +64,13 @@ public class DateField extends FieldDetails {
 		}
 		// Always add a DateTimeFormat annotation
 		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-		attributes.add(new StringAttributeValue(new JavaSymbolName("style"), (null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "S") + (null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-")));
+		if (pattern != null) {
+			attributes.add(new StringAttributeValue(new JavaSymbolName("pattern"), pattern));
+		} else {
+			String dateStyle = null != dateFormat ? String.valueOf(dateFormat.getShortKey()) : "S";
+			String timeStyle = null != timeFormat ? String.valueOf(timeFormat.getShortKey()) : "-";
+			attributes.add(new StringAttributeValue(new JavaSymbolName("style"), dateStyle + timeStyle));
+		}
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"), attributes));
 	}
 
@@ -104,4 +113,13 @@ public class DateField extends FieldDetails {
 	public void setTimeFormat(DateTime timeFormat) {
 		this.timeFormat = timeFormat;
 	}
+
+	public String getPattern() {
+		return pattern;
+	}
+
+	public void setPattern(String pattern) {
+		this.pattern = pattern;
+	}
+
 }
