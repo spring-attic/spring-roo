@@ -1,12 +1,13 @@
 package org.springframework.roo.addon.git;
 
 import java.io.File;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.eclipse.jgit.lib.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.process.manager.FileManager;
@@ -27,10 +28,7 @@ import org.springframework.roo.shell.event.ShellStatusListener;
 @Service
 public class GitShellEventListener implements ShellStatusListener, FileEventListener {
 	
-	private Logger log = Logger.getLogger(GitShellEventListener.class.getName());
-	private static String ANT_PATH_ROO_LOG = "**" + File.separator + "roo.log";
-	
-	@Reference private GitOperations revisionControl;
+	@Reference private GitOperations gitOperations;
 	
 	@Reference private Shell shell;
 	
@@ -38,23 +36,46 @@ public class GitShellEventListener implements ShellStatusListener, FileEventList
 	
 	@Reference PathResolver pathResolver;
 	
-	private boolean isDirty = false;
+	private boolean isDirty, gitEnabled = false;
+	
+	private String projectRoot = "";
 	   
 	protected void activate(ComponentContext context) {
 		shell.addShellStatusListener(this);
+		projectRoot = pathResolver.getIdentifier(Path.ROOT, ".");
+	}
+	
+	protected void deactivate(ComponentContext context) {
+		shell.removeShellStatusListener(this);
 	}
 
 	public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
-		if (isDirty && fileManager.exists(pathResolver.getIdentifier(Path.ROOT, ".git")) && newStatus.getStatus().equals(Status.EXECUTION_SUCCESS)) {
-			GitCommandResult commandResult = revisionControl.commitAllChanges(newStatus.getMessage());
-			log.info("Git commit " + commandResult.getCommitId() + " completed (" + commandResult.getResult() + ")");
+		if (isDirty && isGitEnabled() && newStatus.getStatus().equals(Status.EXECUTION_SUCCESS)) {
+			gitOperations.commitAllChanges(newStatus.getMessage());
 			isDirty = false;
 		}	
 	}
 
 	public void onFileEvent(FileEvent fileEvent) {
-		if (!fileEvent.getFileDetails().matchesAntPath(ANT_PATH_ROO_LOG)) {
+		if (!matchesIgnore(fileEvent.getFileDetails())) {
 			isDirty = true;
 		}
+	}
+	
+	private boolean matchesIgnore(FileDetails details) {
+		for (String exclusion: gitOperations.getExclusions()) {
+			if (details.matchesAntPath(projectRoot) || details.matchesAntPath(projectRoot + File.separator + exclusion)) { 
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isGitEnabled() {
+		if (gitEnabled) {
+			return true;
+		} else {
+			return gitEnabled = fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
+		}	
 	}
 }

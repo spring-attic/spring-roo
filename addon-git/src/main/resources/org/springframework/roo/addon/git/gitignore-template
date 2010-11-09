@@ -1,5 +1,6 @@
 .settings
 .classpath
 .project
+log.roo
 target
 bin

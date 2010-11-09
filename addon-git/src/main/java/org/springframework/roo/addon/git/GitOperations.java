@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.git;
 
+import java.util.Set;
+
 /**
  * Operations offered by Git addon.
  * 
@@ -15,7 +17,7 @@ public interface GitOperations {
 	 * @param message Commit message
 	 * @return Container for Git commit Id and message
 	 */
-	GitCommandResult commitAllChanges(String message);
+	void commitAllChanges(String message);
 	
 	/**
 	 * Triggers Git revert.
@@ -24,7 +26,11 @@ public interface GitOperations {
 	 * @param message Commit message
 	 * @return Container for Git commit Id and message
 	 */
-	GitCommandResult revertCommit(int noOfCommitsToRevert, String message);
+	void revertCommit(int noOfCommitsToRevert, String message);
+	
+	void log(int maxHistory);
+	
+	void revertCommit(String revstr, String message);
 	
 	/**
 	 * Convenience access to the Git config (allows setting config options)
@@ -39,6 +45,8 @@ public interface GitOperations {
 	 * Initial setup of git repository in target project.
 	 */
 	void setup();
+	
+	Set<String> getExclusions();
 	
 	/**
 	 * Check if Git commands are available in Shell. Depends on presence of 

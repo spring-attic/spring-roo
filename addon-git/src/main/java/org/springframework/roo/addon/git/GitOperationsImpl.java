@@ -1,31 +1,35 @@
 package org.springframework.roo.addon.git;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.dircache.DirCacheBuilder;
-import org.eclipse.jgit.dircache.DirCacheEntry;
-import org.eclipse.jgit.lib.Commit;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.dircache.DirCacheCheckout;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectWriter;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.RefRename;
 import org.eclipse.jgit.lib.RefUpdate;
-import org.eclipse.jgit.lib.RefUpdate.Result;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.Tree;
-import org.eclipse.jgit.lib.WorkDirCheckout;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 
@@ -42,98 +46,161 @@ public class GitOperationsImpl implements GitOperations {
 	private Repository repository;
 
 	private PersonIdent person;
-	
-	@Reference private PathResolver pathResolver;
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	
+
+	private Logger log = Logger.getLogger(getClass().getName());
+
+	private Set<String> exclusions = new HashSet<String>();
+
+	@Reference
+	private PathResolver pathResolver;
+	@Reference
+	private FileManager fileManager;
+	@Reference
+	private MetadataService metadataService;
+
+	protected void activate(ComponentContext context) {
+		if (fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT))) {
+			try {
+				repository = new FileRepositoryBuilder().readEnvironment().findGitDir().build();
+			} catch (IOException e) {
+				log.warning("Could not initialize Git support");
+			}
+		}
+	}
+
 	public boolean isGitCommandAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.ROOT, ".git"));
+		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
 	}
-	
+
 	public boolean isSetupCommandAvailable() {
-		return !fileManager.exists(pathResolver.getIdentifier(Path.ROOT, ".git"));
+		return !fileManager.exists(pathResolver.getIdentifier(Path.ROOT, Constants.DOT_GIT));
 	}
 
-	public GitCommandResult commitAllChanges(String message) {
-		try {
-			Commit commit = getCommitInstance(Constants.HEAD);
-			commit.setMessage(message);
-			commit.setTree(getDir());
-			commit.commit();
-
-			ObjectId id = commit.getCommitId();
-			RefUpdate ru = repository.updateRef(Constants.HEAD);
-			ru.setNewObjectId(id);
-			ru.setRefLogIdent(person);
-			ru.setRefLogMessage(message, true);
-			Result result = ru.update();
-
-			return new GitCommandResult(id.name(), result.toString());
-		} catch (Exception e) {
-			throw new IllegalStateException("Error committing to git repository", e);
+	public void commitAllChanges(String message) {
+		if (repository != null) {
+			try {
+				Git git = new Git(repository);
+				git.add().addFilepattern(".").call();
+				RevCommit rev = git.commit().setAll(true).setCommitter(person).setAuthor(person).setMessage(message).call();
+				log.info("Git commit " + rev.getTree().getId().name() + " [" + message + "]");
+			} catch (Exception e) {
+				throw new IllegalStateException("Could not commit changes to local Git repository", e);
+			}
+		} else {
+			throw new IllegalStateException("Git support not available");
 		}
 	}
 
 	public void push() {
-//		Transport transport = Transport.open(repository, repository.getConfig().getString("remote \"origin\"", null, "url"));
-//		final org.eclipse.jgit.transport.PushResult pr = transport.push(null, );
+		// Transport transport = Transport.open(repository,
+		// repository.getConfig().getString("remote \"origin\"", null, "url"));
+		// final org.eclipse.jgit.transport.PushResult pr = transport.push(null,
+		// );
 
 	}
 
-	public GitCommandResult revertCommit(int noOfCommitsToRevert, String message) {
-		return revertCommitByRef(Constants.HEAD + "~" + noOfCommitsToRevert, message);
-	}
-	
-	private GitCommandResult revertCommitByRef(String revstr, String message) {
-		try {
-			final ObjectId commitObjectId = repository.resolve(revstr);
-			final Commit commit = repository.mapCommit(commitObjectId);
-			final RefUpdate ru = repository.updateRef(Constants.HEAD);
-			ru.setNewObjectId(commit.getCommitId());
-			ru.setRefLogMessage(message, false);
-			
-			createBranch(repository.resolve(Constants.HEAD), "refs/heads/master_backup_" + commit.getCommitId().abbreviate(repository).name());
-			
-			WorkDirCheckout workDirCheckout = new WorkDirCheckout(repository, repository.getWorkDir(), repository.getIndex(), commit.getTree());
-			workDirCheckout.setFailOnConflict(false);
-			workDirCheckout.checkout();
-		} catch (IOException e) {
-			throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
+	public void log(int maxHistory) {
+		if (repository != null) {
+			Git git = new Git(repository);
+			try {
+				int counter = 0;
+				log.info("---------- Start Git log ----------");
+				for (RevCommit commit : git.log().call()) {
+					log.info("commit id: " + commit.getName());
+					log.info("message:   " + commit.getFullMessage());
+					log.info("");
+					if (++counter >= maxHistory)
+						break;
+				}
+				log.info("---------- End Git log ----------");
+			} catch (Exception e) {
+				throw new IllegalStateException("Could not parse git log", e);
+			}
+		} else {
+			log.warning("Git support not available");
 		}
-		return null;
+	}
+
+	public void revertCommit(int noOfCommitsToRevert, String message) {
+		revertCommit(Constants.HEAD + "~" + noOfCommitsToRevert, message);
+	}
+
+	public void revertCommit(String revstr, String message) {
+		if (repository != null) {
+			RevWalk walk = new RevWalk(repository);
+			RevCommit commit = null;
+			try {
+				commit = walk.parseCommit(repository.resolve(revstr));
+			} catch (MissingObjectException e1) {
+				log.warning("Could not find commit with id: " + revstr);
+			} catch (IncorrectObjectTypeException e1) {
+				log.warning("The provided rev does is not a commit: " + revstr);
+			} catch (Exception ignore) {
+			} finally {
+				walk.release();
+			}
+			
+			if (commit == null) {
+				return;
+			}
+			
+			try {
+				//create a tmp branch with commits up to the rev
+				createBranch(commit, "refs/heads/tmp");
+				
+				//rename master branch to backup-
+				RefRename renameMaster = repository.renameRef("refs/heads/master", "refs/heads/backup-" + commit.getId().abbreviate(5).name());
+				renameMaster.rename();
+				
+				//rename tmp branch to master
+				RefRename renameTmp = repository.renameRef("refs/heads/tmp", "refs/heads/master");
+				renameTmp.rename();
+				
+				//make sure we are on master
+				checkoutBranch("refs/heads/master");
+				System.out.println(repository.getFullBranch());
+				//commit changes
+				commitAllChanges(message);	
+			} catch (Exception e) {
+				throw new IllegalStateException("Revert of commit " + revstr + " did not succeed.", e);
+			}
+		} else {
+			throw new IllegalStateException("Git support not available");
+		}
 	}
 
 	public void setConfig(String category, String key, String value) {
-		try {
-			repository.getConfig().setString(category, null, key, value);
-			repository.getConfig().save();
-		} catch (IOException ex) {
-			throw new IllegalStateException("Could not initialize Git repository", ex);
+		if (repository != null) {
+			try {
+				repository.getConfig().setString(category, null, key, value);
+				repository.getConfig().save();
+			} catch (IOException ex) {
+				throw new IllegalStateException("Could not initialize Git repository", ex);
+			}
+		} else {
+			log.warning("Git support not available");
 		}
 	}
 
 	public void setup() {
-		final File gitDir = new File(".", Constants.DOT_GIT);
 		if (person == null) {
 			person = new PersonIdent("Roo Git Add-On", "roo@bogus.com");
 		}
 		if (repository == null) {
-
 			try {
-				repository = new Repository(gitDir);
+				repository = new FileRepositoryBuilder().readEnvironment().setGitDir(new File(".", Constants.DOT_GIT)).build();
 				repository.create();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				throw new IllegalStateException("Could not initialize Git repository", e);
 			}
 			setConfig("user", "name", person.getName());
 			setConfig("user", "email", person.getEmailAddress());
-			
+
 			setConfig("remote \"origin\"", "fetch", "+refs/heads/*:refs/remotes/origin/*");
 			setConfig("branch \"master\"", "remote", "origin");
 			setConfig("branch \"master\"", "merge", "refs/heads/master");
 		}
-		
+
 		String gitIgnore = pathResolver.getIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
 		if (!fileManager.exists(gitIgnore)) {
 			try {
@@ -142,79 +209,53 @@ public class GitOperationsImpl implements GitOperations {
 				throw new IllegalStateException("Could not install " + Constants.GITIGNORE_FILENAME + " file in project", e);
 			}
 		}
+
+		loadGitIgnore();
 	}
 
-	private Tree getDir() throws IOException {
-		DirCache cache = DirCache.lock(repository);
-		DirCacheBuilder builder = cache.builder();
-		addToCache(repository.getWorkDir(), builder);
-		builder.commit();
-		return repository.mapTree(cache.writeTree(new ObjectWriter(repository)));
+	public Set<String> getExclusions() {
+		return exclusions;
 	}
 
-	private void addToCache(File file, DirCacheBuilder builder) {
-		Assert.notNull(file, "no file defined");
-		if (file.getName().equals(Constants.DOT_GIT)) {
-			return;
-		}
-		if (file.isDirectory()) {
-			for (File _file : file.listFiles()) {
-				addToCache(_file, builder);
-			}
-		} else {
-			ObjectWriter writer = new ObjectWriter(repository);
-			DirCacheEntry entry = new DirCacheEntry(file.getPath());
-			entry.setFileMode(FileMode.REGULAR_FILE);
-			try {
-				entry.setObjectId(writer.writeBlob(file));
-			} catch (Exception e) {
-				throw new IllegalStateException("Error committing to git repository", e);
-			}
-			builder.add(entry);
-		}
-	}
-	
-	private Commit getCommitInstance(String rev) {
-		try {
-			ObjectId currentHead = repository.resolve(rev);
-
-			ObjectId[] parentIds;
-			if (currentHead != null) {
-				parentIds = new ObjectId[] { currentHead };
-			} else {
-				parentIds = new ObjectId[0];
-			}
-			Commit commit = new Commit(repository, parentIds);
-			commit.setAuthor(person);
-			commit.setCommitter(person);
-			return commit;
-		} catch (IOException e) {
-			throw new IllegalStateException("Could not resolve HEAD", e);
-		}
-	}
-	
 	private void createBranch(ObjectId objectId, String branchName) throws IOException {
 		RefUpdate updateRef = repository.updateRef(branchName);
 		updateRef.setNewObjectId(objectId);
+		updateRef.forceUpdate();
 		updateRef.update();
 	}
-	
-//	private void checkoutBranch(String branchName) throws Exception  {
-//		File workDir = repository.getWorkDir();
-//		if (workDir != null) {
-//			WorkDirCheckout workDirCheckout = new WorkDirCheckout(repository,
-//					workDir, repository.mapCommit(Constants.HEAD).getTree(),
-//					repository.getIndex(), repository.mapCommit(branchName).getTree());
-//			workDirCheckout.setFailOnConflict(false);
-//			try {
-//				workDirCheckout.checkout();
-//			} catch (CheckoutConflictException e) {
-//				throw new IllegalStateException("Could not checkout " + branchName + " branch", e);
-//			}
-//		}
-//
-//		// update the HEAD
-//		RefUpdate refUpdate = repository.updateRef(Constants.HEAD);
-//		refUpdate.link(branchName);
-//	}
+
+	private boolean checkoutBranch(String branchName) throws IllegalStateException, IOException {
+		RevWalk walk = new RevWalk(repository);
+		RevCommit head = walk.parseCommit(repository.resolve(Constants.HEAD));
+		RevCommit branch = walk.parseCommit(repository.resolve(branchName));
+		DirCacheCheckout dco = new DirCacheCheckout(repository, head.getTree().getId(), repository.lockDirCache(), branch.getTree().getId());
+		dco.setFailOnConflict(true);
+		boolean success = dco.checkout();
+		walk.release();
+		// update the HEAD
+		RefUpdate refUpdate = repository.updateRef(Constants.HEAD);
+		refUpdate.link(branchName);
+		return success;
+	}
+
+	private void loadGitIgnore() {
+		exclusions.clear();
+		String gitIgnore = pathResolver.getIdentifier(Path.ROOT, Constants.GITIGNORE_FILENAME);
+		if (fileManager.exists(gitIgnore)) {
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new FileReader(gitIgnore));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					exclusions.add(line);
+				}
+			} catch (Exception ignore) {
+			} finally {
+				try {
+					reader.close();
+				} catch (IOException ignore) {
+				}
+			}
+		}
+	}
 }

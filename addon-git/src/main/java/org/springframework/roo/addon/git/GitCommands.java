@@ -20,7 +20,7 @@ public class GitCommands implements CommandMarker {
 	
 	@Reference private GitOperations revisionControl;
 	
-	@CliAvailabilityIndicator({"git config", "git commit all", "git revert last commit", "git revert commit"})
+	@CliAvailabilityIndicator({"git config", "git commit all", "git revert last", "git revert commit", "git log"})
 	public boolean isCommandAvailable() {
 		return revisionControl.isGitCommandAvailable();
 	}
@@ -62,14 +62,20 @@ public class GitCommands implements CommandMarker {
 		revisionControl.commitAllChanges(message);
 	}
 	
-	@CliCommand(value="git revert last commit", help="Revert last commit")
-	public void revertLast(@CliOption(key={"message"}, mandatory=true, help="The commit message") String message) {
-		revisionControl.revertCommit(1, message);
+	@CliCommand(value="git revert last", help="Revert commit")
+	public void revertLast(@CliOption(key={"commitCount"}, mandatory=false, help="Number of commits to revert") Integer history,
+			@CliOption(key={"message"}, mandatory=true, help="The commit message") String message) {
+		revisionControl.revertCommit(history == null ? 1 : history, message);
 	}
 	
 	@CliCommand(value="git revert commit", help="Revert commit")
-	public void revert(@CliOption(key={"commitCount"}, mandatory=true, help="Number of commits to revert") int history,
+	public void revertCommit(@CliOption(key={"revString"}, mandatory=true, help="Number of commits to revert") String revstr,
 			@CliOption(key={"message"}, mandatory=true, help="The commit message") String message) {
-		revisionControl.revertCommit(history, message);
+		revisionControl.revertCommit(revstr, message);
+	}
+	
+	@CliCommand(value="git log", help="Commit log")
+	public void log(@CliOption(key={"maxMessages"}, mandatory=false, help="Number of commit messages to display") Integer count){
+		revisionControl.log(count == null ? Integer.MAX_VALUE : count);
 	}
 }
