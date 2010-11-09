@@ -53,7 +53,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>com.sun.*;resolution:=optional,org.apache.*;resolution:=optional,sun.io.*;resolution:=optional,*</Import-Package>
+                        <Import-Package>javax.resource.*;resolution:=optional,com.sun.*;resolution:=optional,org.apache.*;resolution:=optional,sun.io.*;resolution:=optional,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
