@@ -418,11 +418,28 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 		}
 
 		// Create the method
+		String primeStr = "prime";
+		String resultStr = "result";
+		
+		// Check field names for the same variable names used in the hashCode method
+		for (FieldMetadata field : fields) {
+			if (primeStr.equals(field.getFieldName().getSymbolName())) {
+				primeStr = "_" + primeStr;
+				break;
+			}
+		}
+		for (FieldMetadata field : fields) {
+			if (resultStr.equals(field.getFieldName().getSymbolName())) {
+				resultStr = "_" + resultStr;
+				break;
+			}
+		}
+		
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("final int prime = 31;");
-		bodyBuilder.appendFormalLine("int result = 17;");
+		bodyBuilder.appendFormalLine("final int " + primeStr + " = 31;");
+		bodyBuilder.appendFormalLine("int " + resultStr + " = 17;");
 
-		String header = "result = prime * result + ";
+		String header = resultStr + " = " + primeStr + " * " + resultStr + " + ";
 		for (FieldMetadata field : fields) {
 			String fieldName = field.getFieldName().getSymbolName();
 			JavaType fieldType = field.getFieldType();
@@ -440,7 +457,7 @@ public class IdentifierMetadata extends AbstractItdTypeDetailsProvidingMetadataI
 				bodyBuilder.appendFormalLine(header + "(" + field.getFieldName().getSymbolName() + " == null ? 0 : " + fieldName + ".hashCode());");
 			}
 		}
-		bodyBuilder.appendFormalLine("return result;");
+		bodyBuilder.appendFormalLine("return " + resultStr + ";");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName("hashCode"), JavaType.INT_PRIMITIVE, bodyBuilder);
 		return methodBuilder.build();

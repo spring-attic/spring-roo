@@ -21,6 +21,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -100,6 +101,9 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 			} else {
 				result.append(Character.toLowerCase(c));
 			}
+		}
+		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(result.toString())) {
+			result.append("1"); 
 		}
 		return result.toString();
 	}
