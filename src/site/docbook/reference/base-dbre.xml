@@ -682,8 +682,8 @@ public class LineItemPK {
       <listitem>
         <para><emphasis role="bold">The message 'Unable to maintain
         database-managed entity </emphasis><emphasis role="italic">&lt;entity
-        name&gt;</emphasis> <emphasis role="bold">because its table name was
-        not specified' appears in the Roo console during reverse
+        name&gt;</emphasis> <emphasis role="bold">because its associated table
+        name could not be found' appears in the Roo console during reverse
         engineering</emphasis></para>
 
         <para>When DBRE first creates an entity it puts in the table name in

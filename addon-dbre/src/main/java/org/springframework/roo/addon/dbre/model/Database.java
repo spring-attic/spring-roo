@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -58,11 +59,19 @@ public class Database implements Serializable {
 	}
 
 	public Set<Table> getTables() {
-		return tables;
+		return Collections.unmodifiableSet(tables);
+	}
+	
+	public Set<String> getTableNames() {
+		Set<String> tableNames = new LinkedHashSet<String>();
+		for (Table table: tables) {
+			tableNames.add(table.getName());
+		}
+		return Collections.unmodifiableSet(tableNames);
 	}
 
 	public Set<Sequence> getSequences() {
-		return sequences;
+		return Collections.unmodifiableSet(sequences);
 	}
 
 	public void setSequences(Set<Sequence> sequences) {
@@ -91,7 +100,7 @@ public class Database implements Serializable {
 	}
 
 	public Set<JoinTable> getJoinTables() {
-		return joinTables;
+		return Collections.unmodifiableSet(joinTables);
 	}
 
 	public boolean isJoinTable(Table table) {

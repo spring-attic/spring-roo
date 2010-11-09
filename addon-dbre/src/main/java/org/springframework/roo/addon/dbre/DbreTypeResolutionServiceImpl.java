@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -40,15 +41,14 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 
 	public JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage) {
 		Assert.notNull(managedEntities, "Managed entities required");
-		JavaType javaType = convertTableNameToType(tableNamePattern, javaPackage);
+		Assert.hasText(tableNamePattern, "Table name required");
+		Assert.notNull(javaPackage, "Java package required");
+		
 		for (JavaType managedEntity : managedEntities) {
-			if (managedEntity.equals(javaType)) {
+			String tableName = getTableNameFromRooEntityAnnotation(managedEntity);
+			if (tableNamePattern.equals(tableName)) {
 				return managedEntity;
 			}
-		}
-
-		if (getPhysicalTypeMetadata(javaType) != null) {
-			return javaType;
 		}
 
 		return null;
@@ -59,15 +59,7 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 	}
 
 	public JavaType suggestTypeNameForNewTable(String tableNamePattern, JavaPackage javaPackage) {
-		return convertTableNameToType(tableNamePattern, javaPackage);
-	}
-
-	public String suggestFieldName(String columnName) {
-		return getFieldName(columnName);
-	}
-
-	private JavaType convertTableNameToType(String tableNamePattern, JavaPackage javaPackage) {
-		Assert.notNull(tableNamePattern, "Table name to convert required");
+		Assert.hasText(tableNamePattern, "Table name required");
 		Assert.notNull(javaPackage, "Java package required");
 
 		StringBuilder result = new StringBuilder(javaPackage.getFullyQualifiedPackageName());
@@ -76,6 +68,10 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		}
 		result.append(getName(tableNamePattern, false));
 		return new JavaType(result.toString());
+	}
+
+	public String suggestFieldName(String columnName) {
+		return getFieldName(columnName);
 	}
 
 	private String getFieldName(String columnName) {
@@ -126,6 +122,21 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 			}
 		}
 		return Collections.unmodifiableSortedSet(managedIdentifiers);
+	}
+
+	private String getTableNameFromRooEntityAnnotation(JavaType javaType) {
+		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+		if (governorPhysicalTypeMetadata != null) {
+			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+			if (rooEntityAnnotation != null) {
+				AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
+				if (tableAttribute != null) {
+					return (String) tableAttribute.getValue();
+				}
+			}
+		}
+		return null;
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
