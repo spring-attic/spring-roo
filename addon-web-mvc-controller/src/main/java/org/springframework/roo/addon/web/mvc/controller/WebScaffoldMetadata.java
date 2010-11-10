@@ -869,10 +869,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		boolean converterPresent = false;
 
-		Set<JavaType> typesForConversion = specialDomainTypes;
+		List<JavaType> typesForConversion = new ArrayList<JavaType>(specialDomainTypes);
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
-		for (JavaType conversionType : typesForConversion) {
-			BeanInfoMetadata typeBeanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(conversionType, Path.SRC_MAIN_JAVA));
+		for (int index = 0; index < typesForConversion.size(); index++) {
+			JavaType conversionType = typesForConversion.get(index);
+			BeanInfoMetadata typeBeanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(conversionType , Path.SRC_MAIN_JAVA));
 			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(conversionType, Path.SRC_MAIN_JAVA));
 			List<MethodMetadata> elegibleMethods = new ArrayList<MethodMetadata>();
 			int fieldCounter = 3;
@@ -903,7 +904,16 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
 					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
 					if (null == methodExists(converterMethodName)) {
+						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
+							bodyBuilder.appendFormalLine("if (! conversionService.canConvert(" + conversionType.getSimpleTypeName() + ".class, String.class)) {");
+							bodyBuilder.indent();
+						}
 						bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
+						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
+							bodyBuilder.indentRemove();
+							bodyBuilder.appendFormalLine("}");
+						}
+						
 						converterPresent = true;
 						
 						// Register the converter method
