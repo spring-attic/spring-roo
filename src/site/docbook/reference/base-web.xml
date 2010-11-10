@@ -569,7 +569,8 @@ public class CarController {
             <row>
               <entry>Date / Calendar (@Future &amp; @Past are recognized)
               (Spring's @DateTimeFormat in combination with the
-              <emphasis>style</emphasis> attribute is recognized)</entry>
+              <emphasis>style</emphasis> or <emphasis>pattern</emphasis>
+              attributes is recognized)</entry>
 
               <entry>Input (with JS Date chooser)</entry>
             </row>

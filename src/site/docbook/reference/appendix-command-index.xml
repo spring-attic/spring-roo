@@ -1249,13 +1249,19 @@
                 <varlistentry>
                     <term>--dateFormat</term>
                     <listitem>
-                        <para>Indicates the style of the date format; default: 'SHORT'</para>
+                        <para>Indicates the style of the date format; default: 'SHORT' (ignored if dateTimeFormatPattern is specified)</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--timeFormat</term>
                     <listitem>
-                        <para>Indicates the style of the time format; default: 'NONE'</para>
+                        <para>Indicates the style of the time format; default: 'NONE' (ignored if dateTimeFormatPattern is specified)</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--dateTimeFormatPattern</term>
+                    <listitem>
+                        <para>Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a. U</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
