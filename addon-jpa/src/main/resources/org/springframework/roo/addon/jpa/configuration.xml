@@ -147,7 +147,7 @@
 				<dependency>
 					<groupId>com.salesforce.sdk.persistence</groupId>
 					<artifactId>datanucleus-sfdc</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
+					<version>20.0.1-SNAPSHOT</version>
 				</dependency>
 			</dependencies>
 			<filters>
@@ -383,7 +383,7 @@
 		</provider>
 		<provider id="DATANUCLEUS_2">
 			<properties>
-				<datanucleus.version>2.1.1</datanucleus.version>
+				<datanucleus.version>2.1.2</datanucleus.version>
 			</properties>
 			<repositories>
 				<repository>

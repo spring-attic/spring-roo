@@ -14,7 +14,7 @@ public enum OrmProvider {
 	OPENJPA("org.apache.openjpa.persistence.PersistenceProviderImpl"), 
 	ECLIPSELINK("org.eclipse.persistence.jpa.PersistenceProvider"),
 	DATANUCLEUS("org.datanucleus.jpa.PersistenceProviderImpl", "org.datanucleus.store.appengine.jpa.DatastorePersistenceProvider"),
-	DATANUCLEUS_2("org.datanucleus.jpa.PersistenceProviderImpl");
+	DATANUCLEUS_2("org.datanucleus.jpa.PersistenceProviderImpl", "com.salesforce.persistence.datanucleus.PersistenceProviderImpl");
 
 	private String adapter;
 	private String alternateAdapter;

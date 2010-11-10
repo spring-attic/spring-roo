@@ -303,7 +303,7 @@ public class JpaOperationsImpl implements JpaOperations {
 			case VMFORCE:
 				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
 				persistenceUnitElement.removeAttribute("transaction-type");
-				provider.setTextContent(ormProvider.getAdapter());
+				provider.setTextContent(ormProvider.getAlternateAdapter());
 				break;
 			default:
 				persistenceUnitElement.setAttribute("name", (StringUtils.hasText(persistenceUnit) ? persistenceUnit : PERSISTENCE_UNIT_NAME));
@@ -349,6 +349,7 @@ public class JpaOperationsImpl implements JpaOperations {
 					case GOOGLE_APP_ENGINE:
 						properties.appendChild(createPropertyElement("datanucleus.NontransactionalRead", "true", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.NontransactionalWrite", "true", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
 						break;
 					case VMFORCE:
 						userName = "${sfdc.userName}";
@@ -356,9 +357,11 @@ public class JpaOperationsImpl implements JpaOperations {
 						properties.appendChild(createPropertyElement("datanucleus.Optimistic", "false", persistence));
 						properties.appendChild(createPropertyElement("datanucleus.datastoreTransactionDelayOperations", "true", persistence));
 						properties.appendChild(createPropertyElement("sfdcConnectionName", "DefaultSFDCConnection", persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "true", persistence));
 						break;
 					default:
 						properties.appendChild(createPropertyElement("datanucleus.ConnectionDriverName", database.getDriverClassName(), persistence));
+						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
 						ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
 						switch (database) {
@@ -379,7 +382,6 @@ public class JpaOperationsImpl implements JpaOperations {
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionURL", connectionString, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionUserName", userName, persistence));
 				properties.appendChild(createPropertyElement("datanucleus.ConnectionPassword", password, persistence));
-				properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateTables", "true", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateColumns", "false", persistence));
 				properties.appendChild(createPropertyElement("datanucleus.autoCreateConstraints", "false", persistence));
