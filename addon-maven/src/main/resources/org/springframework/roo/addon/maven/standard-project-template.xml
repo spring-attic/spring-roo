@@ -165,6 +165,7 @@
 				<configuration>
 					<source>JAVA_VERSION</source>
 					<target>JAVA_VERSION</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
