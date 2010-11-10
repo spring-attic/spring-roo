@@ -168,7 +168,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private FieldMetadataBuilder getConversionServiceField() {
-		FieldMetadataBuilder builder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, new JavaSymbolName("conversionService"), new JavaType("org.springframework.core.convert.support.GenericConversionService"), null);
+		FieldMetadataBuilder builder = new FieldMetadataBuilder(getId(), 0, new JavaSymbolName("conversionService"), new JavaType("org.springframework.core.convert.support.GenericConversionService"), null);
 		builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
 		return builder;
 	}
@@ -1056,7 +1056,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine("catch (" + new JavaType("java.io.UnsupportedEncodingException").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " uee) {}");
 		bodyBuilder.appendFormalLine("return pathSegment;");
 		
-		return new MethodMetadataBuilder(getId(), Modifier.PRIVATE, encodeUrlPathSegment, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder).build();
+		return new MethodMetadataBuilder(getId(), 0, encodeUrlPathSegment, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder).build();
 	}
 
 	private MethodMetadata methodExists(JavaSymbolName methodName) {
