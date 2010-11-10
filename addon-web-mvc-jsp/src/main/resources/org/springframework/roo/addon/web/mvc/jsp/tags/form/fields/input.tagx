@@ -72,13 +72,13 @@
           <spring:message argumentSeparator="," arguments="${label}, " code="field_simple_validation" var="field_validation" />
         </c:otherwise>
       </c:choose>
+      <c:set var="sec_field_validation">
+        <spring:escapeBody javaScriptEscape="true">${field_validation}</spring:escapeBody>
+      </c:set>
+      <c:set var="sec_field_invalid">
+        <spring:escapeBody javaScriptEscape="true">${field_invalid}</spring:escapeBody>
+      </c:set>
       <script type="text/javascript">
-        <c:set var="sec_field_validation">
-          <spring:escapeBody javaScriptEscape="true">${field_validation}</spring:escapeBody>
-        </c:set>
-        <c:set var="sec_field_invalid">
-          <spring:escapeBody javaScriptEscape="true">${field_invalid}</spring:escapeBody>
-        </c:set>
         Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id', widgetType : 'dijit.form.ValidationTextBox', widgetAttrs : {promptMessage: '${sec_field_validation}', invalidMessage: '${sec_field_invalid}', required: ${required}}})); 
       </script>
     </div>

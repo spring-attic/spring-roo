@@ -85,6 +85,7 @@
               <c:if test="${list}">
                 <spring:url value="${path}" var="list_form_url" />
                 <spring:url value="/resources/images/list.png" var="list_image_url" />
+                <spring:message arguments="${typeName}" code="entity_list_all" var="list_label" />
                 <a href="${fn:escapeXml(list_form_url)}" alt="${fn:escapeXml(list_label)}" title="${fn:escapeXml(list_label)}">
                   <img alt="${fn:escapeXml(list_label)}" class="image" src="${fn:escapeXml(list_image_url)}" title="${fn:escapeXml(list_label)}" />
                 </a>
