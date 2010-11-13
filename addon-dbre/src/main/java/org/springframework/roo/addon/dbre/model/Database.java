@@ -92,7 +92,7 @@ public class Database implements Serializable {
 
 	public Table findTable(String name) {
 		for (Table table : tables) {
-			if (table.getName().equalsIgnoreCase(name)) {
+			if (table.getName().equals(name)) {
 				return table;
 			}
 		}

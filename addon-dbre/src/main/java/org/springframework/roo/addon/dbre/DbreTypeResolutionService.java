@@ -52,6 +52,13 @@ public interface DbreTypeResolutionService {
 	 * @return a String representing the table or column.
 	 */
 	String suggestFieldName(String name);
+	
+	/**
+	 * Returns the table name from either the @RooEntity annotation or @Table annotation
+	 * @param javaType the type to search
+	 * @return the name of the table. Can be null;
+	 */
+	String findTableName(JavaType javaType);
 
 	/**
 	 * Returns all {@link RooDbManaged} {@link RooEntity entities}.

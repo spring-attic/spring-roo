@@ -55,7 +55,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 	}
 
 	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (PhysicalTypeIdentifier.isValid(upstreamDependency)) {
+		if (upstreamDependency.startsWith("MID:org.springframework.roo.classpath.PhysicalTypeIdentifier#")) {
 			// Change to Java, so drop the cache
 			cache.clear();
 		}

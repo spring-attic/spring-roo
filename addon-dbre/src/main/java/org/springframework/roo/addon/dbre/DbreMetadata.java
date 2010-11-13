@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.logging.Logger;
 
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
@@ -21,7 +20,6 @@ import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -45,14 +43,12 @@ import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.Cardinality;
 import org.springframework.roo.classpath.operations.jsr303.SetField;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -74,7 +70,6 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	private static final Logger logger = HandlerUtils.getLogger(DbreMetadata.class);
 	private static final String PROVIDES_TYPE_STRING = DbreMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ID = new JavaType("javax.persistence.Id");
@@ -91,15 +86,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String REFERENCED_COLUMN = "referencedColumnName";
 
 	private EntityMetadata entityMetadata;
-	private MetadataService metadataService;
+	private IdentifierMetadata identifierMetadata;
 	private DbreTypeResolutionService dbreTypeResolutionService;
 	private SortedSet<JavaType> managedEntities;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, DbreTypeResolutionService dbreTypeResolutionService, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, IdentifierMetadata identifierMetadata, DbreTypeResolutionService dbreTypeResolutionService, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
+		Assert.notNull(entityMetadata, "Entity metadata required");
 
-		this.metadataService = metadataService;
+		this.entityMetadata = entityMetadata;
+		this.identifierMetadata = identifierMetadata;
 		this.dbreTypeResolutionService = dbreTypeResolutionService;
 
 		// Process values from the annotation, if present
@@ -109,14 +106,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
-		entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		if (entityMetadata == null) {
-			return;
-		}
-
-		Table table = database.findTable(getTableName());
+		Table table = database.findTable(dbreTypeResolutionService.findTableName(javaType));
 		if (table == null) {
-			logger.warning("Unable to maintain database-managed entity " + javaType.getFullyQualifiedTypeName() + " because its associated table could not be found");
 			return;
 		}
 
@@ -142,21 +133,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		itdTypeDetails = builder.build();
 	}
 
-	private String getTableName() {
-		AnnotationMetadata tableAnnotation = entityMetadata.getTableAnnotation();
-		if (tableAnnotation == null) {
-			tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
-		}
-		if (tableAnnotation != null) {
-			AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName(NAME));
-			if (nameAttribute != null) {
-				return (String) nameAttribute.getValue();
-			}
-		}
-
-		return null;
-	}
-
 	private void addManyToManyFields(Database database, Table table) {
 		Map<Table, Integer> processedTables = new LinkedHashMap<Table, Integer>();
 		for (JoinTable joinTable : database.getJoinTables()) {
@@ -169,11 +145,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			Integer tableCount = processedTables.containsKey(owningSideTable) ? processedTables.get(owningSideTable) + 1 : 0;
 			processedTables.put(owningSideTable, tableCount);
 			String fieldSuffix = processedTables.get(owningSideTable) > 0 ? String.valueOf(processedTables.get(owningSideTable)) : "";
-			
+
 			boolean sameTable = joinTable.isOwningSideSameAsInverseSide();
-			
+
 			if (owningSideTable.equals(table)) {
-				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + (sameTable ? "1" :fieldSuffix));
+				JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(inverseSideTable.getName())) + (sameTable ? "1" : fieldSuffix));
 				FieldMetadata field = getManyToManyOwningSideField(fieldName, joinTable, governorTypeDetails.getName().getPackage());
 				addToBuilder(field);
 			}
@@ -231,7 +207,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
-		
+
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
 						addToBuilder(field);
 					}
@@ -259,7 +235,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						} else {
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
 						}
-						
+
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
 						addToBuilder(field);
 					}
@@ -336,7 +312,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
 		}
 		joinTableAnnotationAttributes.add(new ArrayAttributeValue<NestedAnnotationAttributeValue>(new JavaSymbolName("inverseJoinColumns"), inverseJoinColumnArrayValues));
-		
+
 		// Add attributes to a @JoinTable annotation builder
 		joinTableBuilder.setAttributes(joinTableAnnotationAttributes);
 		annotations.add(joinTableBuilder);
@@ -559,29 +535,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private List<FieldMetadata> getIdentifierFields(JavaType javaType) {
-		List<FieldMetadata> identifierFields = new ArrayList<FieldMetadata>();
-		// Check for identifier class and exclude fields that are part of the composite primary key
-		AnnotationMetadata rooEntityAnnotation = getRooEntityAnnotation();
-		if (rooEntityAnnotation != null) {
-			AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("identifierType"));
-			if (identifierTypeAttribute != null) {
-				// Attribute identifierType exists so get the value
-				JavaType identifierType = (JavaType) identifierTypeAttribute.getValue();
-				if (identifierType != null && !identifierType.getFullyQualifiedTypeName().startsWith("java.lang")) {
-					// The identifierType is not a simple type, ie not of type 'java.lang', so find the type
-					String identifierMetadataMid = IdentifierMetadata.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
-					IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
-					if (identifierMetadata != null) {
-						identifierFields.addAll(identifierMetadata.getFields());
-					}
-				}
-			}
-		}
-		return identifierFields;
-	}
-
-	private AnnotationMetadata getRooEntityAnnotation() {
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+		return identifierMetadata != null ? identifierMetadata.getFields() : new ArrayList<FieldMetadata>();
 	}
 
 	private boolean isVersionField(String columnName) {
@@ -605,7 +559,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {
 		return isAnnotatedField(fieldName, new JavaType("javax.persistence.EmbeddedId"), "@EmbeddedId");
 	}
-	
+
 	private boolean isAnnotatedField(JavaSymbolName fieldName, JavaType annotationType, String annotationName) {
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, annotationType);
 		if (fields.size() > 0) {
@@ -704,8 +658,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (MemberFindingUtils.getField(governorTypeDetails, field.getFieldName()) != null) {
 			return true;
 		}
-		
-		// Check @Column annotation on fields in governor with same 'name' 
+
+		// Check @Column annotation on fields in governor with same 'name'
 		// attribute as the 'name' attribute in the @JoinColumn for the generated field
 		List<FieldMetadata> governorFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, COLUMN);
 		governorFields.addAll(MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JOIN_COLUMN));
@@ -726,7 +680,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				}
 			}
 		}
-		
+
 		// Check entity ITD for field
 		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
 		for (FieldMetadata itdField : itdFields) {

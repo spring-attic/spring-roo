@@ -554,7 +554,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
-		JavaSymbolName versionField = null;
+		JavaSymbolName verField = null;
 		while (true) {
 			// Compute the required field name
 			index++;
@@ -562,10 +562,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			for (int i = 0; i < index; i++) {
 				fieldName = fieldName + "_";
 			}
-			fieldName = fieldName + this.versionField;
+			fieldName = fieldName + versionField;
 			
-			versionField = new JavaSymbolName(fieldName);
-			if (MemberFindingUtils.getField(governorTypeDetails, versionField) == null) {
+			verField = new JavaSymbolName(fieldName);
+			if (MemberFindingUtils.getField(governorTypeDetails, verField) == null) {
 				// Found a usable field name
 				break;
 			}
@@ -579,7 +579,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		columnAttributes.add(new StringAttributeValue(new JavaSymbolName("name"), versionColumn));
 		annotations.add(new AnnotationMetadataBuilder(COLUMN, columnAttributes));
 		
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, versionField, versionType);
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, annotations, verField, versionType);
 		return fieldBuilder.build();
 	}
 

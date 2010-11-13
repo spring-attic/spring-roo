@@ -96,6 +96,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				destinationToUse = managedEntityTypes.first().getPackage();
 			}
 		}
+
 		// Fallback to project's top level package
 		if (destinationToUse == null) {
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
@@ -109,7 +110,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (JavaType managedEntityType : managedEntityTypes) {
 			// Remove table from set as each managed entity is processed.
 			// The tables that remain in the set will be used for creation of new entities later
-			tables.remove(updateExistingManagedEntity(managedEntityType, database));
+			Table table = updateOrDeleteManagedEntity(managedEntityType, database);
+			if (table != null) {
+				tables.remove(table);
+			}
 		}
 
 		// Create new entities from tables
@@ -119,9 +123,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				createNewManagedEntityFromTable(table, destinationToUse);
 			}
 		}
-
-		// Delete managed types, and their identifiers if applicable, if their associated tables have been dropped
-		deleteManagedTypesNotInModel(database.getTableNames(), managedEntityTypes);
 
 		// Notify
 		for (JavaType managedEntityType : managedEntityTypes) {
@@ -142,18 +143,24 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	private Table updateExistingManagedEntity(JavaType javaType, Database database) {
+	private Table updateOrDeleteManagedEntity(JavaType javaType, Database database) {
 		// Update changes to @RooEntity attributes
 		AnnotationMetadata rooEntityAnnotation = getRooEntityAnnotation(javaType);
 		Assert.notNull(rooEntityAnnotation, "@RooEntity annotation not found on " + javaType.getFullyQualifiedTypeName());
 		AnnotationMetadataBuilder rooEntityBuilder = new AnnotationMetadataBuilder(rooEntityAnnotation);
 
 		// Find table in database using 'table' attribute from @RooEntity
-		String tableName = getTableNameFromRooEntity(rooEntityAnnotation);
+		AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
 		String errMsg = "Unable to maintain database-managed entity " + javaType.getFullyQualifiedTypeName() + " because its associated table could not be found";
+		Assert.notNull(tableAttribute, errMsg);
+		String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
 		Table table = database.findTable((String) tableName);
-		Assert.notNull(table, errMsg);
+		if (table == null) {
+			// Table has been dropped so delete managed type, and its identifier if applicable
+			deleteManagedType(javaType);
+			return null;
+		}
 
 		// Get new @RooEntity attributes
 		Set<JavaSymbolName> attributesToDeleteIfPresent = new LinkedHashSet<JavaSymbolName>();
@@ -328,15 +335,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 	}
 
-	private void deleteManagedTypesNotInModel(Set<String> tableNames, SortedSet<JavaType> managedEntityTypes) {
-		for (JavaType javaType : managedEntityTypes) {
-			// Check for existence of entity from table model and delete if not in database model
-			if (!tableNames.contains(getTableNameFromRooEntity(javaType))) {
-				deleteManagedType(javaType);
-			}
-		}
-	}
-
 	private void deleteManagedType(JavaType javaType) {
 		if (isEntityDeletable(javaType)) {
 			deleteJavaType(javaType);
@@ -347,20 +345,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 				deleteJavaType(identifierType);
 			}
 		}
-	}
-
-	private String getTableNameFromRooEntity(JavaType javaType) {
-		return getTableNameFromRooEntity(getRooEntityAnnotation(javaType));
-	}
-
-	private String getTableNameFromRooEntity(AnnotationMetadata rooEntityAnnotation) {
-		if (rooEntityAnnotation != null) {
-			AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
-			if (tableAttribute != null) {
-				return (String) tableAttribute.getValue();
-			}
-		}
-		return null;
 	}
 
 	private boolean isEntityDeletable(JavaType javaType) {

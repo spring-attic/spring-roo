@@ -45,7 +45,7 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		Assert.notNull(javaPackage, "Java package required");
 		
 		for (JavaType managedEntity : managedEntities) {
-			String tableName = getTableNameFromRooEntityAnnotation(managedEntity);
+			String tableName = findTableName(managedEntity);
 			if (tableNamePattern.equals(tableName)) {
 				return managedEntity;
 			}
@@ -124,7 +124,7 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		return Collections.unmodifiableSortedSet(managedIdentifiers);
 	}
 
-	private String getTableNameFromRooEntityAnnotation(JavaType javaType) {
+	public String findTableName(JavaType javaType) {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
@@ -133,6 +133,14 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 				AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
 				if (tableAttribute != null) {
 					return (String) tableAttribute.getValue();
+				}
+			} else {
+				AnnotationMetadata tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
+				if (tableAnnotation != null) {
+					AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName("name"));
+					if (nameAttribute != null) {
+						return (String) nameAttribute.getValue();
+					}
 				}
 			}
 		}
