@@ -87,7 +87,7 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 			if (i == 0) {
 				result.append(isField ? Character.toLowerCase(c) : Character.toUpperCase(c));
 				continue;
-			} else if (i > 0 && (c == '_' || c == '-' || c == '\\' || c == '/')) {
+			} else if (i > 0 && (c == '_' || c == '-' || c == '\\' || c == '/') || c == '.') {
 				isDelimChar = true;
 				continue;
 			}
