@@ -136,11 +136,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private void addManyToManyFields(Database database, Table table) {
 		Map<Table, Integer> processedTables = new LinkedHashMap<Table, Integer>();
 		for (JoinTable joinTable : database.getJoinTables()) {
+			String errMsg = "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.";
+
 			Table owningSideTable = joinTable.getOwningSideTable();
-			Assert.notNull(owningSideTable, "Owning-side table '" + joinTable.getOwningSideTableName() + "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.");
+			Assert.notNull(owningSideTable, "Owning-side table '" + joinTable.getOwningSideTableName() + errMsg);
 
 			Table inverseSideTable = joinTable.getInverseSideTable();
-			Assert.notNull(inverseSideTable, "Inverse-side table '" + joinTable.getInverseSideTableName() + "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.");
+			Assert.notNull(inverseSideTable, "Inverse-side table '" + joinTable.getInverseSideTableName() + errMsg);
 
 			Integer tableCount = processedTables.containsKey(owningSideTable) ? processedTables.get(owningSideTable) + 1 : 0;
 			processedTables.put(owningSideTable, tableCount);
