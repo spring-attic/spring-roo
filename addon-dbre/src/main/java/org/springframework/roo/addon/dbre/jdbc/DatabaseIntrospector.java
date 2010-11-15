@@ -37,18 +37,19 @@ public class DatabaseIntrospector {
 	private static final String[] TYPES = { TableType.TABLE.name() };
 	private Connection connection;
 	private DatabaseMetaData databaseMetaData;
-	private String catalog;
+	private String catalogName;
 	private Schema schema;
 	private Set<String> excludeTables;
-	private String tableNamePattern;
-	private String columnNamePattern;
+	private String tableName;
+	private String columnName;
 	private String[] types = TYPES;
 
 	public DatabaseIntrospector(Connection connection, Schema schema, Set<String> excludeTables) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
-		catalog = this.connection.getCatalog();
+		catalogName = this.connection.getCatalog();
 		databaseMetaData = this.connection.getMetaData();
+		Assert.notNull(databaseMetaData, "Database metadata is null");
 		this.schema = schema;
 		this.excludeTables = excludeTables;
 	}
@@ -61,19 +62,19 @@ public class DatabaseIntrospector {
 		return connection;
 	}
 
-	public String getCatalog() {
-		return catalog;
+	public String getCatalogName() {
+		return catalogName;
 	}
 
-	public void setCatalog(String catalog) {
-		this.catalog = catalog;
+	public void setCatalogName(String catalogName) {
+		this.catalogName = catalogName;
 	}
 
 	public Schema getSchema() {
 		return schema;
 	}
 
-	public String getSchemaPattern() {
+	public String getSchemaName() {
 		return schema != null ? schema.getName() : null;
 	}
 
@@ -81,20 +82,20 @@ public class DatabaseIntrospector {
 		this.schema = schema;
 	}
 
-	public String getTableNamePattern() {
-		return tableNamePattern;
+	public String getTableName() {
+		return tableName;
 	}
 
-	public void setTableNamePattern(String tableNamePattern) {
-		this.tableNamePattern = tableNamePattern;
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 
-	public String getColumnNamePattern() {
-		return columnNamePattern;
+	public String getColumnName() {
+		return columnName;
 	}
 
-	public void setColumnNamePattern(String columnNamePattern) {
-		this.columnNamePattern = columnNamePattern;
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
 	}
 
 	public String[] getTypes() {
@@ -121,7 +122,7 @@ public class DatabaseIntrospector {
 	}
 
 	public Database getDatabase() throws SQLException {
-		Database database = new Database(catalog, schema, readTables());
+		Database database = new Database(getCatalog(), schema, readTables());
 		database.setSequences(readSequences());
 		database.setExcludeTables(excludeTables);
 		return database;
@@ -130,23 +131,23 @@ public class DatabaseIntrospector {
 	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
 
-		ResultSet rs = databaseMetaData.getTables(catalog, getSchemaPattern(), tableNamePattern, types);
+		ResultSet rs = databaseMetaData.getTables(getCatalog(), getSchemaPattern(), getTableNamePattern(), types);
 		try {
 			while (rs.next()) {
-				tableNamePattern = rs.getString("TABLE_NAME");
-				catalog = rs.getString("TABLE_CAT");
+				tableName = rs.getString("TABLE_NAME");
+				catalogName = rs.getString("TABLE_CAT");
 				String schemaName = rs.getString("TABLE_SCHEM");
-				schema = new Schema(!StringUtils.hasText(schemaName) && StringUtils.hasText(catalog) ? catalog : schemaName);
+				schema = new Schema(!StringUtils.hasText(schemaName) && StringUtils.hasText(catalogName) ? catalogName : schemaName);
 
 				// Check for certain tables such as Oracle recycle bin tables, and ignore
 				if (ignoreTables()) {
 					continue;
 				}
 
-				if (!hasExcludedTable(tableNamePattern)) {
+				if (!hasExcludedTable(tableName)) {
 					Table table = new Table();
-					table.setName(tableNamePattern);
-					table.setCatalog(catalog);
+					table.setName(tableName);
+					table.setCatalog(catalogName);
 					table.setSchema(schema);
 					table.setDescription(rs.getString("REMARKS"));
 
@@ -175,7 +176,7 @@ public class DatabaseIntrospector {
 	private boolean ignoreTables() {
 		boolean ignore = false;
 		try {
-			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableNamePattern.startsWith("BIN$")) {
+			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.startsWith("BIN$")) {
 				ignore = true;
 			}
 		} catch (SQLException ignored) {
@@ -186,7 +187,7 @@ public class DatabaseIntrospector {
 	private Set<Column> readColumns() throws SQLException {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
-		ResultSet rs = databaseMetaData.getColumns(catalog, getSchemaPattern(), tableNamePattern, columnNamePattern);
+		ResultSet rs = databaseMetaData.getColumns(getCatalog(), getSchemaPattern(), getTableNamePattern(), getColumnNamePattern());
 		try {
 			while (rs.next()) {
 				Column column = new Column(rs.getString("COLUMN_NAME"));
@@ -230,7 +231,7 @@ public class DatabaseIntrospector {
 	private Set<ForeignKey> readForeignKeys() throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = databaseMetaData.getImportedKeys(catalog, getSchemaPattern(), tableNamePattern);
+		ResultSet rs = databaseMetaData.getImportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
 		try {
 			while (rs.next()) {
 				String name = rs.getString("FK_NAME");
@@ -289,7 +290,7 @@ public class DatabaseIntrospector {
 	private Set<ForeignKey> readExportedKeys() throws SQLException {
 		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = databaseMetaData.getExportedKeys(catalog, getSchemaPattern(), tableNamePattern);
+		ResultSet rs = databaseMetaData.getExportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
 		try {
 			while (rs.next()) {
 				String name = rs.getString("FK_NAME");
@@ -340,7 +341,7 @@ public class DatabaseIntrospector {
 		ResultSet rs;
 		try {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
-			rs = databaseMetaData.getIndexInfo(catalog, getSchemaPattern(), tableNamePattern, false, false);
+			rs = databaseMetaData.getIndexInfo(catalogName, getSchemaPattern(), tableName, false, false);
 		} catch (SQLException e) {
 			return indices;
 		}
@@ -389,7 +390,7 @@ public class DatabaseIntrospector {
 	private Set<String> readPrimaryKeyNames() throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
-		ResultSet rs = databaseMetaData.getPrimaryKeys(catalog, getSchemaPattern(), tableNamePattern);
+		ResultSet rs = databaseMetaData.getPrimaryKeys(catalogName, getSchemaPattern(), tableName);
 		try {
 			while (rs.next()) {
 				columnNames.add(rs.getString("COLUMN_NAME"));
@@ -430,6 +431,47 @@ public class DatabaseIntrospector {
 		return sequences;
 	}
 	
+	
+	private String getCatalog() throws SQLException {
+		if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			return StringUtils.toLowerCase(catalogName);
+		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			return StringUtils.toUpperCase(catalogName);
+		} else {
+			return catalogName;
+		}
+		
+	}
+	private String getSchemaPattern() throws SQLException {
+		if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			return StringUtils.toLowerCase(getSchemaName());
+		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			return StringUtils.toUpperCase(getSchemaName());
+		} else {
+			return getSchemaName();
+		}
+	}
+
+	private String getTableNamePattern() throws SQLException {
+		if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			return StringUtils.toLowerCase(tableName);
+		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			return StringUtils.toUpperCase(tableName);
+		} else {
+			return tableName;
+		}
+	}
+	
+	private String getColumnNamePattern() throws SQLException {
+		if (databaseMetaData.storesLowerCaseIdentifiers()) {
+			return StringUtils.toLowerCase(columnName);
+		} else if (databaseMetaData.storesUpperCaseIdentifiers()) {
+			return StringUtils.toUpperCase(columnName);
+		} else {
+			return columnName;
+		}
+	}
+
 	private Dialect getDialect() {
 		try {
 			String productName = databaseMetaData.getDatabaseProductName();

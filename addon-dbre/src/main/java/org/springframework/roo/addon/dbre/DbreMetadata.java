@@ -137,10 +137,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		Map<Table, Integer> processedTables = new LinkedHashMap<Table, Integer>();
 		for (JoinTable joinTable : database.getJoinTables()) {
 			Table owningSideTable = joinTable.getOwningSideTable();
-			Assert.notNull(owningSideTable, "Owning-side table in many-to-many relationship for " + table.getName() + " could not be found");
+			Assert.notNull(owningSideTable, "Owning-side table '" + joinTable.getOwningSideTableName() + "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.");
 
 			Table inverseSideTable = joinTable.getInverseSideTable();
-			Assert.notNull(inverseSideTable, "Inverse-side table in many-to-many relationship for " + table.getName() + " could not be found");
+			Assert.notNull(inverseSideTable, "Inverse-side table '" + joinTable.getInverseSideTableName() + "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.");
 
 			Integer tableCount = processedTables.containsKey(owningSideTable) ? processedTables.get(owningSideTable) + 1 : 0;
 			processedTables.put(owningSideTable, tableCount);
@@ -174,7 +174,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 				JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(managedEntities, foreignTableName, governorTypeDetails.getName().getPackage());
-				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
+				Assert.notNull(fieldType, getErrorMsg(foreignTableName, table.getName()));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -262,7 +262,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
 				}
 				JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(managedEntities, foreignTableName, governorTypeDetails.getName().getPackage());
-				Assert.notNull(fieldType, getErrorMsg(foreignTableName));
+				Assert.notNull(fieldType, getErrorMsg(foreignTableName, table.getName()));
 
 				// Fields are stored in a field-keyed map first before adding them to the builder.
 				// This ensures the fields from foreign keys with multiple columns will only get created once.
@@ -782,6 +782,10 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 	private String getErrorMsg(String tableName) {
 		return "Type for table '" + tableName + "' could not be found";
+	}
+
+	private String getErrorMsg(String tableName, String referenceTableName) {
+		return getErrorMsg(tableName) + " but was referenced by table '" + referenceTableName + "'";
 	}
 
 	public static final String getMetadataIdentiferType() {

@@ -16,40 +16,51 @@ import org.springframework.roo.support.util.Assert;
  */
 public class JoinTable {
 	private Table table;
-	private Table owningSideTable;
-	private Table inverseSideTable;
+	private ForeignKey foreignKey1;
+	private ForeignKey foreignKey2;
 
 	JoinTable(Table table) {
-		Assert.isTrue(table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getForeignKeyCount() == 2 && table.getPrimaryKeyCount() == table.getForeignKeyCount(), "Table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns");
+		Assert.isTrue(table != null && table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getForeignKeyCount() == 2 && table.getPrimaryKeyCount() == table.getForeignKeyCount(), "Table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns");
 		this.table = table;
-
 		SortedSet<ForeignKey> foreignKeys = table.getForeignKeys();
-		this.owningSideTable = foreignKeys.first().getForeignTable(); // First table in set
-		this.inverseSideTable = foreignKeys.last().getForeignTable(); // Second and last table in set
+		this.foreignKey1 = foreignKeys.first(); // First foreign key in set
+		this.foreignKey2 = foreignKeys.last(); // Second and last foreign key in set
 	}
 
 	public Table getTable() {
 		return table;
 	}
+	
+	public String getTableName() {
+		return table.getName();
+	}
 
+	public String getOwningSideTableName() {
+		return foreignKey1.getForeignTableName();
+	}
+	
 	public Table getOwningSideTable() {
-		return owningSideTable;
+		return foreignKey1.getForeignTable();
+	}
+
+	public String getInverseSideTableName() {
+		return foreignKey2.getForeignTableName();
 	}
 
 	public Table getInverseSideTable() {
-		return inverseSideTable;
+		return foreignKey2.getForeignTable();
 	}
 
 	public String getLocalColumnReferenceOfOwningSideTable() {
-		return table.getForeignKeys().first().getReferences().first().getLocalColumnName();
+		return foreignKey1.getReferences().first().getLocalColumnName();
 	}
 
 	public String getLocalColumnReferenceOfInverseSideTable() {
-		return table.getForeignKeys().last().getReferences().first().getLocalColumnName();
+		return foreignKey2.getReferences().first().getLocalColumnName();
 	}
 
 	public boolean isOwningSideSameAsInverseSide() {
-		return owningSideTable.equals(inverseSideTable);
+		return getOwningSideTableName().equals(getInverseSideTableName());
 	}
 
 	public int hashCode() {
@@ -81,6 +92,6 @@ public class JoinTable {
 	}
 
 	public String toString() {
-		return String.format("JoinTable [table=%s, owningSideTable=%s, inverseSideTable=%s]", table.getName(), owningSideTable.getName(), inverseSideTable.getName());
+		return String.format("JoinTable [table=%s, owningSideTable=%s, inverseSideTable=%s]", table.getName(), getOwningSideTableName(), getInverseSideTableName());
 	}
 }
