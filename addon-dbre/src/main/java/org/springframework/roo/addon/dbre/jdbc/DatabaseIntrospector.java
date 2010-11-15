@@ -152,7 +152,7 @@ public class DatabaseIntrospector {
 					table.setDescription(rs.getString("REMARKS"));
 
 					table.addColumns(readColumns());
-					table.addForeignKeys(readForeignKeys());
+					table.addForeignKeys(readImportedKeys());
 					table.addExportedKeys(readExportedKeys());
 					table.addIndices(readIndices());
 
@@ -228,7 +228,7 @@ public class DatabaseIntrospector {
 		return columns;
 	}
 
-	private Set<ForeignKey> readForeignKeys() throws SQLException {
+	private Set<ForeignKey> readImportedKeys() throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs = databaseMetaData.getImportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
