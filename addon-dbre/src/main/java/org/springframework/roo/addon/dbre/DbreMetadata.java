@@ -134,7 +134,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addManyToManyFields(Database database, Table table) {
-		Map<Table, Integer> processedTables = new LinkedHashMap<Table, Integer>();
+		Map<Table, Integer> owningSideTables = new LinkedHashMap<Table, Integer>();
+
 		for (JoinTable joinTable : database.getJoinTables()) {
 			String errMsg = "' in join table '" + joinTable.getTableName() + "' for many-to-many relationship could not be found. Note table names are case sensitive in some databases such as MySQL.";
 
@@ -144,9 +145,9 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			Table inverseSideTable = joinTable.getInverseSideTable();
 			Assert.notNull(inverseSideTable, "Inverse-side table '" + joinTable.getInverseSideTableName() + errMsg);
 
-			Integer tableCount = processedTables.containsKey(owningSideTable) ? processedTables.get(owningSideTable) + 1 : 0;
-			processedTables.put(owningSideTable, tableCount);
-			String fieldSuffix = processedTables.get(owningSideTable) > 0 ? String.valueOf(processedTables.get(owningSideTable)) : "";
+			Integer tableCount = owningSideTables.containsKey(owningSideTable) ? owningSideTables.get(owningSideTable) + 1 : 0;
+			owningSideTables.put(owningSideTable, tableCount);
+			String fieldSuffix = owningSideTables.get(owningSideTable) > 0 ? String.valueOf(owningSideTables.get(owningSideTable)) : "";
 
 			boolean sameTable = joinTable.isOwningSideSameAsInverseSide();
 
@@ -236,6 +237,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getForeignColumnName()));
 						} else {
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
+						}
+
+						// Check for existence of same field - ROO-1691
+						while (true) {
+							if (!hasFieldInItd(fieldName)) {
+								break;
+							}
+							fieldName = new JavaSymbolName(fieldName.getSymbolName() + "_");
 						}
 
 						FieldMetadata field = getOneToManyMappedByField(fieldName, mappedByFieldName, foreignTableName, governorTypeDetails.getName().getPackage());
@@ -691,6 +700,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			}
 		}
 
+		return false;
+	}
+
+	private boolean hasFieldInItd(JavaSymbolName fieldName) {
+		// Check this ITD for field
+		List<FieldMetadataBuilder> declaredFields = builder.getDeclaredFields();
+		for (FieldMetadataBuilder declaredField : declaredFields) {
+			if (declaredField.getFieldName().equals(fieldName)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
