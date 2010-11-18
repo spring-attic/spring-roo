@@ -464,7 +464,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 		if (fieldType != null) {
 			boolean isCompositeKeyColumn = isCompositeKeyColumn(reference.getLocalColumn(), fieldType);
-			if (isCompositeKeyColumn || !reference.isInsertableOrUpdatable()) {
+			if (isCompositeKeyColumn || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
 				addOtherJoinColumnAttributes(joinColumnBuilder);
 			}
 		}
