@@ -136,8 +136,7 @@ public class DatabaseIntrospector {
 			while (rs.next()) {
 				tableName = rs.getString("TABLE_NAME");
 				catalogName = rs.getString("TABLE_CAT");
-				String schemaName = rs.getString("TABLE_SCHEM");
-				schema = new Schema(!StringUtils.hasText(schemaName) && StringUtils.hasText(catalogName) ? catalogName : schemaName);
+				schema = new Schema(rs.getString("TABLE_SCHEM"));
 
 				// Check for certain tables such as Oracle recycle bin tables, and ignore
 				if (ignoreTables()) {

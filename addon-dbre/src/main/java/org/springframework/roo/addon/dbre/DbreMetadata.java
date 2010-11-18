@@ -209,6 +209,14 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						JavaType fieldType = dbreTypeResolutionService.findTypeForTableName(managedEntities, foreignTableName, governorTypeDetails.getName().getPackage());
 						Assert.notNull(fieldType, getErrorMsg(foreignTableName));
 
+						// Check for existence of same field - ROO-1691
+						while (true) {
+							if (!hasFieldInItd(fieldName)) {
+								break;
+							}
+							fieldName = new JavaSymbolName(fieldName.getSymbolName() + "_");
+						}
+
 						JavaSymbolName mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
 
 						FieldMetadata field = getOneToOneMappedByField(fieldName, fieldType, mappedByFieldName);
@@ -232,7 +240,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 						String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(foreignTableName)) + fieldSuffix);
 						JavaSymbolName mappedByFieldName = null;
-						if (foreignTableName.equals(table.getName()) && exportedKey.getReferenceCount() == 1) {
+						if (exportedKey.getReferenceCount() == 1) {
 							Reference reference = exportedKey.getReferences().first();
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getForeignColumnName()));
 						} else {
@@ -264,7 +272,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				// Assume many-to-one multiplicity
 				JavaSymbolName fieldName = null;
 				String foreignTableName = foreignKey.getForeignTableName();
-				if (foreignTableName.equals(table.getName()) && foreignKey.getReferenceCount() == 1) {
+				if (foreignKey.getReferenceCount() == 1) {
 					Reference reference = foreignKey.getReferences().first();
 					fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getLocalColumnName()));
 				} else {
