@@ -245,6 +245,9 @@ public class Database implements Serializable {
 				Column column = table.findColumn(indexColumn.getName());
 				if (column != null) {
 					indexColumn.setColumn(column);
+					if (index.isUnique()) {
+						column.setUnique(true);
+					}
 				}
 			}
 		}

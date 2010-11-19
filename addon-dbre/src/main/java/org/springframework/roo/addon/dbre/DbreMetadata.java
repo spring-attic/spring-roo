@@ -609,6 +609,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			columnBuilder.addIntegerAttribute("scale", column.getScale());
 		}
 
+		// Add unique = true to @Column if applicable
+		if (column.isUnique()) {
+			columnBuilder.addBooleanAttribute("unique", true);
+		}
+		
 		annotations.add(columnBuilder);
 
 		// Add @NotNull if applicable

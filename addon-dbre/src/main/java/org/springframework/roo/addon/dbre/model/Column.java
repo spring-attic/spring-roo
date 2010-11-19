@@ -17,6 +17,7 @@ public class Column implements Serializable {
 	private Table table;
 	private boolean primaryKey;
 	private boolean required;
+	private boolean unique;
 	private boolean autoIncrement;
 	private int typeCode;
 	private ColumnType type;
@@ -74,6 +75,14 @@ public class Column implements Serializable {
 
 	public void setRequired(boolean required) {
 		this.required = required;
+	}
+
+	public boolean isUnique() {
+		return unique;
+	}
+
+	public void setUnique(boolean unique) {
+		this.unique = unique;
 	}
 
 	public boolean isAutoIncrement() {
@@ -177,6 +186,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, table=%s, primaryKey=%s, required=%s, autoIncrement=%s, typeCode=%s, type=%s, length=%s, precision=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, table, primaryKey, required, autoIncrement, typeCode, type, length, precision, scale, defaultValue, javaType, ordinalPosition);
+		return String.format("Column [name=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, typeCode=%s, type=%s, length=%s, precision=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, table, primaryKey, required, unique, autoIncrement, typeCode, type, length, precision, scale, defaultValue, javaType, ordinalPosition);
 	}
 }
