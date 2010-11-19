@@ -459,15 +459,22 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private AnnotationMetadataBuilder getJoinColumnAnnotation(Reference reference, boolean referencedColumn, JavaType fieldType) {
 		AnnotationMetadataBuilder joinColumnBuilder = new AnnotationMetadataBuilder(JOIN_COLUMN);
 		joinColumnBuilder.addStringAttribute(NAME, reference.getLocalColumn().getEscapedName());
+
 		if (referencedColumn) {
 			joinColumnBuilder.addStringAttribute(REFERENCED_COLUMN, reference.getForeignColumn().getEscapedName());
 		}
+
+		if (reference.getLocalColumn().isRequired()) {
+			joinColumnBuilder.addBooleanAttribute("nullable", false);
+		}
+
 		if (fieldType != null) {
 			boolean isCompositeKeyColumn = isCompositeKeyColumn(reference.getLocalColumn(), fieldType);
 			if (isCompositeKeyColumn || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
 				addOtherJoinColumnAttributes(joinColumnBuilder);
 			}
 		}
+		
 		return joinColumnBuilder;
 	}
 
@@ -512,7 +519,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				fieldName = getUniqueFieldName(fieldName);
 				field = getField(fieldName, column);
 				uniqueFields.put(fieldName, field);
-			} else if ((getIdField() != null && column.isPrimaryKey()) || table.findForeignKeyByLocalColumnName(columnName) != null || (table.findExportedKeyByLocalColumnName(columnName) != null && table.findUniqueReference(columnName) != null)) {
+			} else if (table.findForeignKeyByLocalColumnName(columnName) != null) {
 				field = null;
 			} else if (!isCompositeKeyField && !isVersionField(column.getName())) {
 				field = getField(fieldName, column);
@@ -560,15 +567,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private boolean isVersionField(String columnName) {
 		FieldMetadata versionField = entityMetadata.getVersionField();
 		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
-	}
-
-	private JavaSymbolName getIdField() {
-		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
-		if (idFields.size() > 0) {
-			Assert.isTrue(idFields.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return idFields.get(0).getFieldName();
-		}
-		return null;
 	}
 
 	private boolean isIdField(JavaSymbolName fieldName) {
