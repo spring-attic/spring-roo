@@ -58,17 +58,17 @@
       to extend Roo itself.</para>
     </partintro>
 
-    <xi:include href="intro.xml" />
+    <xi:include href="welcome-intro.xml" />
 
-    <xi:include href="beginning.xml" />
+    <xi:include href="welcome-beginning.xml" />
 
-    <xi:include href="architecture.xml" />
+    <xi:include href="welcome-architecture.xml" />
 
-    <xi:include href="usage.xml" />
+    <xi:include href="welcome-usage.xml" />
 
-    <xi:include href="existing.xml" />
+    <xi:include href="welcome-existing.xml" />
 
-    <xi:include href="removing.xml" />
+    <xi:include href="welcome-removing.xml" />
   </part>
 
   <part xml:id="base">
@@ -107,15 +107,11 @@
       to gain the most value from this part.</para>
     </partintro>
 
-    <xi:include href="core.xml" />
+    <xi:include href="internals-development.xml" />
 
-    <xi:include href="development.xml" />
+    <xi:include href="internals-simple-add-ons.xml" />
 
-    <xi:include href="third-party.xml" />
-
-    <xi:include href="simple-addons.xml" />
-
-    <xi:include href="advanced-addons.xml" />
+    <xi:include href="internals-advanced-add-ons.xml" />
   </part>
 
   <part xml:id="appendices">
@@ -130,10 +126,10 @@
 
     <xi:include href="appendix-command-index.xml" />
 
-    <xi:include href="upgrade.xml" />
+    <xi:include href="appendix-upgrade.xml" />
 
-    <xi:include href="background.xml" />
+    <xi:include href="appendix-background.xml" />
 
-    <xi:include href="resources.xml" />
+    <xi:include href="appendix-resources.xml" />
   </part>
 </book>

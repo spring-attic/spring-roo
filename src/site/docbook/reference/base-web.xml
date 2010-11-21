@@ -41,9 +41,9 @@
     </listitem>
 
     <listitem>
-      <para>Integration of <link xlink:href="???">Tiles</link> templating
-      framework to allow for structural customization of the Web user
-      interface</para>
+      <para>Integration of <link xlink:href="???">Apache Tiles</link>
+      templating framework to allow for structural customization of the Web
+      user interface</para>
     </listitem>
 
     <listitem>
@@ -78,7 +78,7 @@
 
   <para>The following sections will offer further details about available
   commands to generate Web MVC artifacts and also the new JSP(X)
-  round-tripping model introduced in Roo 1.1.0.</para>
+  round-tripping model introduced in Roo 1.1.</para>
 
   <section>
     <title>Controller commands</title>
@@ -432,18 +432,21 @@ public class CarController {
       </listitem>
     </itemizedlist>
 
-    <para>The hash key is calculated as outlined in the following
-    table:</para>
+    <para>The hash key attribute is important for Roo because it helps
+    determining if a user has altered a Roo managed element. This is the
+    secret to round-trip support for JSPX files, as you can edit anything at
+    any time yet Roo will be able to merge in changes to the JSPX
+    successfully. The hash key shown in the "z" attribute is calculated as
+    shown in the following table:</para>
 
     <informaltable>
       <tgroup cols="2">
         <thead>
           <row>
-            <entry align="center">Things included in hash key
-            calculation </entry>
+            <entry align="center">Included in hash key calculation </entry>
 
-            <entry align="center">Things <emphasis>not</emphasis> included in
-            hash key calculation </entry>
+            <entry align="center"><emphasis>Not</emphasis> included in hash
+            key calculation </entry>
           </row>
         </thead>
 
@@ -489,17 +492,20 @@ public class CarController {
       </tgroup>
     </informaltable>
 
-    <para>The hash key attribute is important for Roo because it helps
-    determining if a user has altered a Roo managed element. If a user changes
-    an element which was initially included by Roo the hash code will not
-    match indicating to Roo that the user has customized this specific
-    element. Once Roo has detected a hash code mismatch it will change the z
-    attribute value to 'user-managed'. If the user wishes for Roo to take
-    responsibility for the management of a 'user-managed' element again he can
-    set the value of z to '?'. Roo will replace the questionmark character
-    with a calculated hash code the once it detects this special character.
-    This mechanism allows Roo to round trip jspx files without interfering
-    with manual changes included by the user.</para>
+    <para>The hash code thus allows Roo to determine if the element is in its
+    "original" Roo form, or if the user has modified it in some way. If a user
+    changes an element, the hash code will not match and this indicates to Roo
+    that the user has customized that specific element. Once Roo has detected
+    such an event, Roo will change the "z" attribute value to "user-managed".
+    This helps clarify to the user that Roo has adopted a "hands off" approach
+    to that element and it's entirely the user's responsibility to maintain.
+    If the user wishes for Roo to take responsibility for the management of a
+    "user-managed" element once again, he or she can simply change the value
+    of "z" to "?". When Roo sees this, it will replace the questionmark
+    character with a calculated hash code. This simple mechanism allows Roo to
+    easily round trip JSPX files without interfering with manual changes
+    performed by the user. It represents a significant enhancement from Roo
+    1.0 where a file was entirely user managed or entirely Roo managed.</para>
 
     <para>Roo will order fields used in forms in the same sequence they appear
     in the domain object. The user can freely change the sequence of form
@@ -642,8 +648,7 @@ field reference --fieldName school --type com.foo.domain.School --class com.foo.
     Roo can only generate JSP views for finders which have 244 characters or
     less (including folders). If the finder name is longer than 244 characters
     Roo will silently skip the generation of jsp view artifacts for the
-    dynamic finder in question). More detail can be found in <link
-    xlink:href="https://jira.springsource.org/browse/ROO-1027">this Roo Jira
-    ticket</link>.</para>
+    dynamic finder in question). More detail can be found in ticket <link
+    xlink:href="https://jira.springsource.org/browse/ROO-1027">ROO-1027</link>.</para>
   </section>
 </chapter>

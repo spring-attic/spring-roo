@@ -133,7 +133,7 @@
         efficiency is a major objective in our <link
         linkend="background-mission">mission statement</link>). If you remove
         the <code>*_Roo_*.aj</code> files, you'll receive the code as of that
-        date and you'll miss out on further improvements we make. </para>
+        date and you'll miss out on further improvements we make.</para>
       </listitem>
 
       <listitem>
@@ -271,7 +271,7 @@
       further. If you used the command-line <code>mvn</code> command to create
       your Eclipse <code>.classpath</code> file, you'll need to execute
       <code>mvn eclipse:clean eclipse:eclipse</code> to rebuild the
-      <code>.classpath</code> file. </para>
+      <code>.classpath</code> file.</para>
 
       <para>Roo has now been entirely removed from your project and you should
       re-run your tests and user interface for verification of expected
@@ -291,7 +291,7 @@
     <code>&lt;dependency&gt;</code> element. You can obtain the correct syntax
     by simply making a new directory, changing into that directory, executing
     <code>roo script vote.roo</code>, and inspecting the resulting
-    <code>pom.xml</code>. </para>
+    <code>pom.xml</code>.</para>
 
     <para>Once you've added the dependency, you're free to load Roo from
     within your project's directory and start using the Roo commands again.
@@ -303,15 +303,23 @@
     file, Roo has no way of knowing that they originated from a push-in
     refactor as opposed to you having written them by hand. Roo therefore
     won't delete any members from your <code>.java</code> file or override
-    them in an inter-type declaration. Our advice is therefore (a) don't
-    remove Roo in the first place or (b) if you have removed Roo and go back
-    to using Roo again, delete the members from your <code>.java</code> files
-    that Roo is able to automatically manage for you. By deleting the members
-    that Roo can manage for you from the <code>.java</code> files, you'll gain
-    the maximum benefit of your decision to resume using Roo. If you're unsure
-    which members Roo can automatically manage, simply comment them out and
-    see if Roo provides them automatically for you. Naturally you'll need the
-    relevant <code>@Roo</code> annotation(s) in your <code>.java</code> files
-    before Roo will create any members automatically for you.</para>
+    them in an inter-type declaration. </para>
+
+    <para>Our advice is therefore (a) don't remove Roo in the first place or
+    (b) if you have removed Roo and go back to using Roo again, delete the
+    members from your <code>.java</code> files that Roo is able to
+    automatically manage for you. By deleting the members that Roo can manage
+    for you from the <code>.java</code> files, you'll gain the maximum benefit
+    of your decision to resume using Roo. If you're unsure which members Roo
+    can automatically manage, simply comment them out and see if Roo provides
+    them automatically for you. Naturally you'll need the relevant
+    <code>@Roo</code> annotation(s) in your <code>.java</code> files before
+    Roo will create any members automatically for you.</para>
+
+    <para>A final tip if you'd like to return to having ITDs again is that
+    AJDT 2.0 and above offers a Refactor &gt; Push Out command. This may
+    assist you in moving back to ITDs. The Edit &gt; Undo command also
+    generally works if you decide to revert immediately after a Refactor &gt;
+    Push In operation.</para>
   </section>
 </chapter>

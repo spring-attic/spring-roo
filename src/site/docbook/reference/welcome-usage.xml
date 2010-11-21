@@ -295,10 +295,9 @@ quit
     commands to compile, test and package your application ready for
     deployment. You can even use <code>mvn tomcat:run</code> to execute a
     servlet container, and Roo add-ons let you deploy straight to a cloud
-    environment like <link xlink:href="http://www.cloudfoundry.com/">Cloud
-    Foundry</link>. Again, you'll be more productive in an IDE, but it's nice
-    to know Roo doesn't force you to use an IDE unless you'd like to use
-    one.</para>
+    environment like Google App Engine. Again, you'll be more productive in an
+    IDE, but it's nice to know Roo doesn't force you to use an IDE unless
+    you'd like to use one.</para>
 
     <para>In relation to IDEs, we highly recommend that you use <link
     xlink:href="http://www.springsource.com/products/sts">SpringSource Tool
@@ -315,15 +314,16 @@ quit
     corresponding file in an Eclipse editor. There are other goodies too, like
     extra commands to deploy to SpringSource tc Server.</para>
 
-    <para>You'll need to use STS 2.3.3 and above if you'd like to use Roo
-    1.1.0.M1 or above. Because the release cycle of STS and Roo differ, when
-    you download STS you'll generally find it includes a version of Roo that
-    might not be the absolute latest. This is not a problem. All you need to
-    do is ensure you're using the latest releases STS and then within the IDE
-    select Window &gt; Preferences &gt; Spring &gt; Roo Support. Next select
-    "Add..." and find the directory which contains the latest Roo release. You
-    probably also want to tick the newly-selected Roo release, making it the
-    default for your projects when they're imported into STS.</para>
+    <para>You'll need to use STS 2.5 if you'd like to use Roo 1.1, which at
+    the time of writing represents the latest version of both tools. Because
+    the release cycle of STS and Roo differ, when you download STS you'll
+    generally find it includes a version of Roo that might not be the absolute
+    latest. This is not a problem. All you need to do is ensure you're using
+    the latest releases STS and then within the IDE select Window &gt;
+    Preferences &gt; Spring &gt; Roo Support. Next select "Add..." and find
+    the directory which contains the latest Roo release. You probably also
+    want to tick the newly-selected Roo release, making it the default for
+    your projects when they're imported into STS.</para>
 
     <para>Naturally Roo works well with standard Eclipse as well. All you need
     to do is ensure you install the latest <link
@@ -332,13 +332,18 @@ quit
     works well. We also recommend you go into Window &gt; Preferences &gt;
     General &gt; Workspace and switch on the "Refresh automatically" box. That
     way Eclipse will detect changes made to the file systme by the
-    externally-running Roo shell.</para>
+    externally-running Roo shell. It's also recommended to install the
+    m2eclipse plugin, which is automatically included if you use STS and is
+    particularly suitable for Roo-based projects.</para>
 
-    <para>When using AJDT you may be prompted whether to enable weaving of the
-    JDT. You should select to enable weaving so as to ensure the Java Editor
-    in Eclipse (or STS) gives the best AspectJ-based experience. You can also
-    verify this setting is active by loading Eclipse (or STS) and selecting
-    Window &gt; Preferences &gt; JDT Weaving.</para>
+    <para>When using AJDT you may encounter a configuration option enabling
+    you to "weave" the JDT. This is on by default in STS, so you're unlikely
+    to see the message if using STS. If you are prompted (or locate the
+    configuration settings yourself under the Window &gt; Preferences &gt; JDT
+    Weaving menu), you should enable weaving. This ensures the Java Editor in
+    Eclipse (or STS) gives the best AspectJ-based experience, such as code
+    assist etc. You can also verify this setting is active by loading Eclipse
+    (or STS) and selecting Window &gt; Preferences &gt; JDT Weaving.</para>
 
     <para>If you're using m2eclipse, you won't need to use the <link
     linkend="command-index-perform-eclipse">perform eclipse</link> command to
@@ -354,18 +359,16 @@ quit
     controller scaffold command. If you have already imported your project
     into Eclipse, simply complete the relevant controller command and then
     re-import. The project will then be a WTP and offer the ability to deploy
-    to an IDE-embedded web container.</para>
+    to an IDE-embedded web container. If you attempt to start a WTP server and
+    receive an error message, try right-clicking the project and selecting
+    Maven &gt; Update Project Configuration. This often resolves the
+    issue.</para>
 
-    <para>If you're using IntelliJ, we recommend you review IntelliJ issue
-    report <link
-    xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>
-    and consider voting on it. This issue report represents an IntelliJ
-    community request for full Aspect ITD support in IntelliJ. As shown in the
-    issue report, the AspectJ, AJDT and Roo project leads (all of whom who
-    work for the SpringSource division of VMware) have offered to assist
-    IntelliJ in securing ITD support. In the meantime you can use IntelliJ
-    with Roo applications, but IDEA-26959 will make your experience much
-    smoother.</para>
+    <para>If you're using IntelliJ, we are pleased to report that IntelliJ now
+    supports Roo. This follows the completion of ticket <link
+    xlink:href="http://youtrack.jetbrains.net/issue/IDEA-26959">IDEA-26959</link>,
+    where you can obtain more information about the AspectJ support now
+    available in IntelliJ.</para>
 
     <para>If you're using any IDE other than STS, the recommended operating
     pattern is to load the standalone Roo shell in one operating system window
@@ -384,10 +387,14 @@ quit
   <section xml:id="usage-build-system">
     <title>Build System Usage</title>
 
-    <para>For Spring Roo 1.0.0 we support the use of Apache Maven. This is a
-    common build system used in many enteprise applications. As per the <link
+    <para>Roo currently supports the use of Apache Maven. This is a common
+    build system used in many enteprise applications. We routinely poll our
+    community and look at public surveys which consistently show that nearly
+    all enterprise development projects use either Maven or Ant, so we believe
+    this is a good default for Roo projects. As per the <link
     linkend="intro-installation">installation instructions</link>, you must
-    ensure you are using Maven 2.0.9 or above.</para>
+    ensure you are using Maven 2.0.9 or above. We do recommend you use Maven
+    2.2 for best results, though.</para>
 
     <para>Roo will create a new <code>pom.xml</code> file whenever you use the
     <link linkend="command-index-project">project</link> command. The POM will
@@ -422,10 +429,9 @@ quit
     <para>Those seeking Ant/Ivy instead of Maven support are encouraged to
     vote for issue <link
     xlink:href="https://jira.springsource.org/browse/ROO-91">ROO-91</link>.
-    The internals of Roo do not rely on Maven at all, so this new feature is
-    not a significant undertaking. Nonetheless we have deferred it until we
-    see sufficient community interest to justify maintaining two build system
-    environment.</para>
+    The internals of Roo do not rely on Maven at all. Nonetheless we have
+    deferred it until we see sufficient community interest to justify
+    maintaining two build system environment.</para>
   </section>
 
   <section xml:id="usage-file-system">
@@ -450,12 +456,9 @@ quit
     <title>Add-On Installation and Removal</title>
 
     <para>Roo supports the installation and removal of third-party add-ons.
-    Roo 1.1.0.M1 significantly enhances its add-on infrastructure to build
-    upon OSGi. This replaces the earlier convention of add-ons being included
-    in the Roo shell's startup classpath. In Roo 1.1.0.M2 we will be adding
-    support for discovering and installing add-ons from remote OBR
-    repositoies. In the meantime you can use Roo's "osgi" commands to manually
-    specify bundles to install and remove from the running shell.</para>
+    Roo 1.1 added significant enhancements to its add-on model, as more
+    thoroughly discussed in <link linkend="internals">Part III</link> of this
+    manual.</para>
   </section>
 
   <section xml:id="usage-recommendations">
@@ -498,9 +501,205 @@ quit
 
       <listitem>
         <para>Refer to the <link linkend="resources">Roo Resources</link>
-        section for details of how to get assistance with Roo. We're happy to
-        hear from you.</para>
+        section for details of how to get assistance with Roo, such as the
+        forum and issue tracking database. We're happy to hear from
+        you.</para>
       </listitem>
     </itemizedlist>
+  </section>
+
+  <section xml:id="usage-add-ons">
+    <title>Managing Roo Add-Ons</title>
+
+    <para><sidebar>
+        <title>Modifying PGP Trusts For httppgp:// Scheme Operation</title>
+
+        <para>As detailed in the main text, Roo supports a special protocol
+        scheme called <code>httppgp://</code>. This performs a PGP detached
+        signature verification before proceeding to download the main
+        resource. Many Roo commands download items from the Internet, and
+        anytime a <code>httppgp://</code> scheme is encountered this
+        verification will take place.</para>
+
+        <para>One common case is if you are using the <link
+        linkend="command-index-addon-install">addon install</link> command. An
+        example of the error if the PGP detached signature is untrusted is
+        shown below:</para>
+
+        <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
+Download URL 'http://[...]equals.addon-1.2.0.jar' failed
+This resource was signed with PGP key ID '0xC3A61B10', 
+which is not currently trusted
+Use 'pgp key view' to view this key, 'pgp trust' to trust it, 
+or 'pgp automatic trust' to trust any keys</programlisting>Essentially you
+        need to decide if you trust the PGP key ID or not. There is a <link
+        linkend="command-index-pgp-key-view">pgp key view</link> command that
+        will help you learn more about a given key ID if you would like to use
+        it. You essentially have two options to cause an untrusted download to
+        be permitted:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>Use the <link linkend="command-index-pgp-trust">pgp
+            trust</link> command to trust the PGP key ID shown in the error
+            message. This will permanently trust the key ID, and it will show
+            up if you use the <link
+            linkend="command-index-pgp-list-trusted-keys">pgp list trusted
+            keys</link> command (you can of course remove it via the <link
+            linkend="command-index-pgp-untrust">pgp untrust</link> command as
+            well). An example of the command to trust a key is shown
+            below:<programlisting>roo&gt; <emphasis role="bold">pgp trust</emphasis> --keyId 0xC3A61B10</programlisting></para>
+          </listitem>
+
+          <listitem>
+            <para>Alternately, you can decide to simply switch off key
+            verification and automatically trust any keys encountered. You
+            should use caution with this command. To use it, simply type <link
+            linkend="command-index-pgp-automatic-trust">pgp automatic
+            trust</link> and press enter:<programlisting>roo&gt; <emphasis
+                  role="bold">pgp automatic trust</emphasis>
+Automatic PGP key trusting enabled (this is potentially unsafe); 
+disable by typing 'pgp automatic trust' again</programlisting></para>
+          </listitem>
+        </orderedlist>
+
+        <para>Once one of the above have been completed, you can repeat the
+        command that attempted to download a <code>httppgp://</code> resource
+        and it should succeed.</para>
+      </sidebar></para>
+
+    <para>It is easy to extend the capabilities of Spring Roo with installable
+    add-ons. This section will offer a basic overview of Roo's add-on
+    distribution model and explain how to install new add-ons. If you're
+    considering writing an add-on, please refer to the more advanced
+    information in <link linkend="internals">Part III</link> of this reference
+    guide.</para>
+
+    <para>First of all, it's important to recognize the Roo ships with a large
+    number of base add-ons. These built-in add-ons may be all you ever
+    require. Nevertheless, there is a growing community of add-ons written by
+    people outside the core Roo team. Because the core Roo team do not write
+    these add-ons, we've needed to implement an infrastructure so that
+    external people can share their add-ons and make it easy for you to
+    install them.</para>
+
+    <para>Roo's add-on distribution system encourages individual add-on
+    developers to host their add-on web site (we don't believe in a central
+    model where we require must host add-ons on our servers). The main
+    requirement an add-on developer needs to fulfill is their web site must
+    offer an OSGi Bundle Repository (OBR) index file. While Roo internally
+    uses OSGi and all modules are managed as OSGi bundles, this is transparent
+    and you do not need any familiarity with OSGi or bundles to work with the
+    Roo add-on installation system. The OBR file is usually named
+    <code>repository.xml</code> and it is available over HTTP. Within that OBR
+    file each available Roo-related add-on is listed, along with the URL where
+    it is published. The URLs look similar to normal URLs, except they will
+    usually specify a <code>httppgp://</code> protocol scheme (instead of the
+    more common <code>http://</code>).</para>
+
+    <para>The <code>httppgp://</code> protocol scheme is how we achieve a
+    level of security with add-ons. Obviously with every add-on developer able
+    to host add-ons on any web site they nominate, it would be difficult for
+    you to know whether a particular add-on can be trusted. You probably only
+    want to trust add-ons from people you already trust or have cause to
+    trust. To this end Roo offers automatic PGP-related signature capabilities
+    for any URL that uses the <code>httppgp://</code> scheme. Most Roo add-ons
+    use this scheme. The internal step-by-step process that takes place is Roo
+    essentially downloads the URL + ".asc" over HTTP. This file is a standard
+    PGP detached signature file. PGP detached signature files are increasingly
+    common, with most Maven Central artifacts now also offering a signature
+    file. If the user's Roo installation trusts the key ID that signed the PGP
+    detached signature, Roo will proceed to download the URL. If the user's
+    Roo installation does not trust the key ID, an error will be displayed and
+    the download will fail (and in turn the add-on installation process will
+    fail if the bundle was specified as a <code>httppgp://</code> URL). Please
+    see the side-bar for details on how you can trust different key IDs and
+    use the PGP-related commands in Roo.</para>
+
+    <para>Completing the picture of Roo's add-on distribution infrastructure
+    is RooBot. This is a VMware-hosted service that essentially indexes the
+    important content in all public Roo OBR files. RooBot ensures that add-ons
+    it indexes are only available over <code>httppgp://</code>, reflecting the
+    security model above. Add-on developers can be added into RooBot's index
+    in just a couple of minutes via an automated process. Every time Roo
+    loads, it automatically downloads the latest RooBot index file. This is
+    how it knows which public add-ons are available.</para>
+
+    <para>Enough with the theory, let's move on to the fun piece. In Spring
+    Roo you simply use the shell to locate new add-ons. To review the list of
+    known add-ons you can use the <link
+    linkend="command-index-addon-list">addon list</link> command. This lists
+    all add-ons that are in the RooBot-maintained index mentioned
+    above:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">addon list</emphasis></programlisting>If
+    you can't see the add-on you're looking for, you can repeat the command
+    with the optional <code>--refresh </code>option. This will refresh the
+    RooBot index.</para>
+
+    <para>To review details about a specific add-on, use the <link
+    linkend="command-index-addon-info">addon info</link> command. This command
+    (as with many others related to add-on management) requires a "bundle
+    symbolic name". This is usually the add-on's top-level package. In any
+    event, it's available via TAB completion and every add-on in the RooBot
+    index is included. To view details about an add-on:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">addon info </emphasis>--bundleSymbolicName &lt;TAB&gt;</programlisting>An
+    example of the output of <link linkend="command-index-addon-info">addon
+    info</link> is shown below:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">addon info</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
+Name: Spring Roo - Addon - equals() and hashCode()
+Ranking: 1.0
+Description: This project provides an addon for Spring Roo which aims to generate equals() and hashCode() methods.
+Version: 1.2.0
+Size: 21183
+Pgp Key '0xC3A61B10' signed by: stefan ocke (stefan.ocke@saxsys.de)
+Command name [equals]; help ['Add equals() and hashCode() methods to a class']</programlisting>Note
+    the "ranking" field. At the time of writing all add-ons have the same
+    ranking. However, we're soon adding some automatic metrics that detects
+    popular add-ons and causes them to rank more highly. This will help you
+    locate popular (and thus likely higher quality) add-ons. If you decides to
+    install a specific add-on, simply use the <link
+    linkend="command-index-addon-install">addon install</link> command:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
+Successfully installed add-on: de.saxsys.roo.equals.addon</programlisting></para>
+
+    <para>If the add-on installation is aborted with a warning that the add-on
+    author is currently not trusted, please review the sidebar about modifying
+    PGP trusts.</para>
+
+    <para>It is generally recommended to restart Roo to ensure the add-on is
+    properly initialized. This theoretically isn't necessary in most cases,
+    but it doesn't hurt.</para>
+
+    <para>Of course, you can remove add-ons as well. To uninstall any given
+    add-on, just use the <link linkend="command-index-addon-remove">addon
+    remove</link> command:<programlisting>roo&gt; <emphasis role="bold">addon remove</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
+Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
+
+    <para>Note that all of the "addon" commands only work with add-ons listed
+    in the central RooBot index file. This is fine, as most public Roo add-ons
+    are listed there. However, sometimes an add-on cannot be published into
+    the RooBot index file. The most common reason is that it's an add-on
+    internal to your organization, or perhaps it's simply not ready for public
+    consumption.</para>
+
+    <para>Even if an add-on is not listed in RooBot, you can still install it.
+    The "<link linkend="command-index-osgi-obr-url-add">osgi obr url
+    add</link>" command can be used to add the add-on's OBR URL to your Roo
+    installation. This command is typically followed by an "<link
+    linkend="command-index-osgi-obr-start">osgi obr start</link>" command to
+    download and start the add-on. Importantly, the additional security
+    verificatons performed by RooBot are skipped given RooBot is not used with
+    these commands. That means bundles you start using the "osgi obr start"
+    command may not use <code>httppgp://</code> for PGP signature
+    verification. As such you should exercise caution when using any
+    installation-related commands that do not start with "addon", as such
+    commands do not use resources subject to the RooBot security
+    verifications. Noneless there remain legitimate use cases for such
+    distribution styles, so it's good to know Roo supports them as well as the
+    more common, user-friendly and more security "addon" commands.</para>
   </section>
 </chapter>

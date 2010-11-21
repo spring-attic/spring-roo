@@ -34,16 +34,6 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>Hibernate Validator bug on Java 5 JVMs</emphasis>: If
-        you are running Java 5, please be aware of a bug in Hibernate
-        Validator that will present an exception
-        ("java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException"). This
-        is detailed in <link
-        xlink:href="https://jira.springsource.org/browse/ROO-224">ROO-224</link>
-        and does not impact Java 6 users.</para>
-      </listitem>
-
-      <listitem>
         <para><emphasis>Human language support</emphasis>: Pluralisation
         within Roo delegates to the <link
         xlink:href="https://inflector.dev.java.net/">Inflector</link> library.
@@ -58,12 +48,11 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>Shell escaping</emphasis>: In certain cases the
-        shell's TAB completion may not parse the current line correctly. This
-        happens mainly when skipping mandatory options or introducing escaped
-        sequences, both of which are uncommon when using the TAB key to build
-        the line. We're intending to revisit the shell parsing modules in due
-        course and tidy this up.</para>
+        <para><emphasis>Shell wrapping</emphasis>: In certain cases typing a
+        long command into the shell that wraps over a single line may prevent
+        you from being able to backspace to the prior line. This is caused by
+        the JLine library (not Roo). We expect to rewrite the shell at some
+        future time and will likely stop using JLine at that point.</para>
       </listitem>
 
       <listitem>
@@ -84,26 +73,16 @@
         <para><emphasis>Integration testing limitations</emphasis>: The data
         on demand mechanism (which is used for integration tests) has limited
         JSR 303 (Bean Validator) compatibility. Roo supports fields using
-        @NotNull, @Past and @Future. No other validator annotations are
-        formally supported, although many will work. To use other validator
-        annotations, you may need to edit your DataOnDemand.java file and add
-        a manual <code>getNewTransientEntity(int)</code> method. Refer to a
-        generated <code>*_Roo_DataOnDemand.aj</code> file for an example.
-        Alternately, do not use the integration test functionality in Roo
-        unless you have relatively simple validation constraints or you are
-        willing to provide this data on demand method.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis>Stack size too large verification error</emphasis>: We
-        have had an isolated report of a
-        <literal>java.lang.VerifyError</literal> with a message "Stack size
-        too large". Because Roo emits standard Java files and standard AspectJ
-        files, this is not an error within Roo. In any event, it can be
-        resolved by performing a clean build. You can do this using Project
-        &gt; Clean in Eclipse/STS, or by "<literal>mvn clean
-        compile</literal>" from the command line, or "<literal>perform
-        clean</literal>" from within Roo itself.</para>
+        @NotNull, @Past and @Future. There is experimental support for some of
+        the minimum and maximum range annotations as well. No other validator
+        annotations are formally supported, although many will work. To use
+        other validator annotations, you may need to edit your
+        DataOnDemand.java file and add a manual
+        <code>getNewTransientEntity(int)</code> method. Refer to a generated
+        <code>*_Roo_DataOnDemand.aj</code> file for an example. Alternately,
+        do not use the integration test functionality in Roo unless you have
+        relatively simple validation constraints or you are willing to provide
+        this data on demand method.</para>
       </listitem>
 
       <listitem>
@@ -140,7 +119,8 @@
 
       <listitem>
         <para>Applications with a scaffolded GWT UI require a manual
-        adjustment in src/main/webapp/WEB-INF/spring/webmvc-config.xml (this
+        adjustment in
+        <code>src/main/webapp/WEB-INF/spring/webmvc-config.xml</code> (this
         will not be required when using Spring Framework 3.0.5):</para>
 
         <programlisting>&lt;mvc:default-servlet-handler <emphasis role="bold">default-servlet-name="_ah_default"</emphasis> /&gt;</programlisting>
@@ -237,7 +217,9 @@
         simplest way to achieve this is to use <code>mvn eclipse:clean
         eclipse:eclipse</code> from the command prompt, or use the <link
         linkend="command-index-perform-eclipse">perform eclipse</link> command
-        at the <code>roo&gt;</code> shell prompt.</para>
+        at the <code>roo&gt;</code> shell prompt. You can skip this step if
+        you use m2eclipse, as would be the case for any SpringSource Tool
+        Sutie user.</para>
       </listitem>
     </itemizedlist>
 

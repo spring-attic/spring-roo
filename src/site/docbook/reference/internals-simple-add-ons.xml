@@ -18,15 +18,15 @@
       activate in the Roo Shell. Roo itself is now also <link
       xlink:href="http://en.wikipedia.org/wiki/Pretty_Good_Privacy">PGP</link>
       signed in every release. To support these capabilities a new protocol
-      handler called httppgp:// has been introduced into Roo. This tells Roo a
-      given HTTP URL also has a PGP armour detached signature available. By
-      requiring PGP signatures for all add-ons, we're able to conveniently and
-      safely host all Roo add-ons for the community. It's up to the user to
-      decide if he trusts a given PGP key, and without trusting that key, Roo
-      will refuse to even spend time downloading the httppgp:// resource.
-      Roo's approach also means you can also use standalone PGP tools like
-      GnuPG to perform signature-related operations to independently verify
-      Roo's correct operation.</para>
+      handler called <code>httppgp://</code> has been introduced into Roo.
+      This tells Roo a given HTTP URL also has a PGP armour detached signature
+      available. By requiring PGP signatures for all add-ons, we're able to
+      conveniently and safely host all Roo add-ons for the community. It's up
+      to the user to decide if he trusts a given PGP key, and without trusting
+      that key, Roo will refuse to even spend time downloading the
+      <code>httppgp://</code> resource. Roo's approach also means you can also
+      use standalone PGP tools like GnuPG to perform signature-related
+      operations to independently verify Roo's correct operation.</para>
     </sidebar>This chapter will provide an introduction to Spring Roo add-on
   development. The intention is to provide a step-by-step guide which walks
   the developer from zero code to a fully deployed and published add-on which
@@ -62,7 +62,7 @@
   to be signed with PgP keys and the addon bundle needs to be registered
   through the httppgp protocol. Add-on developers get all these features
   automatically configured if they use the new 'Add-On Creator' feature which
-  ships with Spring Roo 1.1. </para>
+  ships with Spring Roo 1.1.</para>
 
   <para>The following sections will present a complete step-by-step guide
   which demonstrates how to bootstrap a new Spring Roo add-on, publish and
@@ -97,7 +97,7 @@
 
           <listitem>
             <para>Project Description - description which could include a
-            version compatibility matrix for your add-on </para>
+            version compatibility matrix for your add-on</para>
           </listitem>
 
           <listitem>
@@ -283,7 +283,7 @@
         role="bold">src/main/java/com/foo/batch/BatchOperations.java &amp;
         BatchOperationsImpl.java</emphasis> - These artefacts are used to
         perform operations triggered by a command (more information in the
-        next sections). </para>
+        next sections).</para>
       </listitem>
 
       <listitem>
@@ -314,7 +314,7 @@
     new command in the Roo Shell; your type needs to implement the <emphasis
     role="bold">CommandMarker</emphasis> interface and you need to create a
     method which is annotated with <emphasis
-    role="bold">@CliCommand</emphasis>. Let us review some details: </para>
+    role="bold">@CliCommand</emphasis>. Let us review some details:</para>
 
     <para><programlisting>[1] <emphasis role="bold">@Component</emphasis>
 [1] <emphasis role="bold">@Service</emphasis>
@@ -355,7 +355,7 @@
       <listitem>
         <para>The command type needs to implement the the <emphasis
         role="bold">CommandMarker</emphasis> interface which Spring Roo uses
-        to scan for types which contribute commands to the Roo Shell. </para>
+        to scan for types which contribute commands to the Roo Shell.</para>
       </listitem>
 
       <listitem>
@@ -366,7 +366,7 @@
         BatchOperations and the StaticFieldConverter component offered by the
         Roo Shell OSGi bundle. For Spring users, the Felix <emphasis
         role="bold">@Reference</emphasis> is similar in its purpose to the
-        @Autowired or @Inject annotations. </para>
+        @Autowired or @Inject annotations.</para>
       </listitem>
 
       <listitem>
@@ -428,7 +428,7 @@
     more about that later). Methods offered by the operations types provided
     by the add-on are typically invoked by the accompanying commands type.
     Alternatively, operations types can also be invoked by other add-ons (this
-    is a rather unusual case). </para>
+    is a rather unusual case).</para>
 
     <para>Implementations of the operations interface need to be annotated
     with the Felix <emphasis role="bold">@Component</emphasis> and <emphasis
@@ -441,7 +441,7 @@
 
     <para>The Add-On Creator generated project includes example code which
     uses Roo's source path abstractions, file manager and various Util classes
-    which take care of project file management. </para>
+    which take care of project file management.</para>
 
     <para>Typical functionality offered by operations types include:</para>
 
@@ -534,7 +534,7 @@
         <itemizedlist>
           <listitem>
             <para>add, remove project Maven dependencies, plugins,
-            repositories, filters, properties, etc </para>
+            repositories, filters, properties, etc</para>
           </listitem>
         </itemizedlist>
       </listitem>
@@ -587,7 +587,7 @@
 
         <itemizedlist>
           <listitem>
-            <para>hides XML ugliness </para>
+            <para>hides XML ugliness</para>
 
             <itemizedlist>
               <listitem>
@@ -629,7 +629,7 @@
       <listitem>
         <para><emphasis role="bold"><link linkend="command-index-osgi-ps">osgi
         ps</link> </emphasis>- Displays OSGi bundle information &amp; status.
-        This should list your add-on as active. </para>
+        This should list your add-on as active.</para>
       </listitem>
 
       <listitem>
@@ -689,7 +689,7 @@
     and your public key is available in the relevant <emphasis>.asc</emphasis>
     files. In the repo directory you should also find the
     <emphasis>repository.xml</emphasis> file which contains all relevant
-    information for an OSGi OBR repository. </para>
+    information for an OSGi OBR repository.</para>
 
     <para><sidebar>
         <title>Raw URLs in Google Code Source Browser</title>
@@ -737,8 +737,8 @@
       </listitem>
 
       <listitem>
-        <para>the referenced bundle contains a OSGi compliant manifest.mf file
-        </para>
+        <para>the referenced bundle contains a OSGi compliant manifest.mf
+        file</para>
       </listitem>
     </itemizedlist>
 
@@ -748,100 +748,6 @@
     This registry is available to RooBot client which is integrated into the
     Spring Roo Shell. The following section provides details about add-on
     installation features integrated in the Roo Shell.</para>
-  </section>
-
-  <section xml:id="simple-addons-distribution">
-    <title>Installation</title>
-
-    <para><sidebar>
-        <title>PGP Trust for Add-On Installation</title>
-
-        <para>If the author of an add-on you wish to install is not listed in
-        your PGP trust chain, the <link
-        linkend="command-index-addon-install">addon install</link> command
-        will not execute. It's up to you to decide if you trust a given PGP
-        key, and without trusting that key, Roo will refuse to even spend time
-        downloading the httppgp:// resource:</para>
-
-        <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Download URL 'http://[...]equals.addon-1.2.0.jar' failed
-This resource was signed with PGP key ID '0xC3A61B10', 
-which is not currently trusted
-Use 'pgp key view' to view this key, 'pgp trust' to trust it, 
-or 'pgp automatic trust' to trust any keys</programlisting>You have two
-        options to trust any given add-on author:</para>
-
-        <orderedlist>
-          <listitem>
-            <para>Use the <link linkend="command-index-pgp-trust">pgp
-            trust</link> command to trust the PGP key ID for the
-            add-on:<programlisting>roo&gt; <emphasis role="bold">pgp trust</emphasis> --keyId 0xC3A61B10</programlisting></para>
-          </listitem>
-
-          <listitem>
-            <para>Use the <link
-            linkend="command-index-pgp-automatic-trust">pgp automatic
-            trust</link> command to trust all add-on authors by
-            default:<programlisting>roo&gt; <emphasis role="bold">pgp automatic trust</emphasis>
-Automatic PGP key trusting enabled (this is potentially unsafe); 
-disable by typing 'pgp automatic trust' again</programlisting></para>
-          </listitem>
-        </orderedlist>
-
-        <para>Once the trust is established for a given add-on author you can
-        repeat the <link linkend="command-index-addon-install">addon
-        install</link> command safely.</para>
-      </sidebar>With Spring Roo v1.1 the shell offers a number of new commands
-    which facilitate add-on management. To review the list of known add-ons
-    you can use the <link linkend="command-index-addon-list">addon list</link>
-    command:</para>
-
-    <para><programlisting>roo&gt; <emphasis role="bold">addon list</emphasis> --refresh</programlisting>By
-    default the Roo shell will attempt to load the latest information from the
-    roobot.xml repository. Invoking the <link
-    linkend="command-index-addon-list">addon list</link> command will present
-    this information. The optional --refresh attribute can be used to manually
-    update the current list in case no add-ons are presented or the list needs
-    to be updated. </para>
-
-    <para>To review details about a specific add-on the Roo Shell user can
-    also use the addon info command:</para>
-
-    <para><programlisting>roo&gt; <emphasis role="bold">addon info </emphasis>--bundleSymbolicName &lt;TAB&gt;</programlisting>All
-    known add-ons will be available for tab completion by bundle symbolic
-    name. If this is not the case, you need to invoke '<link
-    linkend="command-index-addon-list">addon list</link> --refresh'
-    beforehand. The following listing presents an example of the information
-    presented by the <link linkend="command-index-addon-info">addon
-    info</link> command:</para>
-
-    <para><programlisting>roo&gt; <emphasis role="bold">addon info</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Name: Spring Roo - Addon - equals() and hashCode()
-Ranking: 1.0
-Description: This project provides an addon for Spring Roo which aims to generate equals() and hashCode() methods.
-Version: 1.2.0
-Size: 21183
-Pgp Key '0xC3A61B10' signed by: stefan ocke (stefan.ocke@saxsys.de)
-Command name [equals]; help ['Add equals() and hashCode() methods to a class']</programlisting>If
-    the user decides to install a specific add-on he can use the <link
-    linkend="command-index-addon-install">addon install</link> command:</para>
-
-    <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Successfully installed add-on: de.saxsys.roo.equals.addon</programlisting></para>
-
-    <para>If the add-on installation is aborted with a warning that the add-on
-    author is currently not trusted, please review the sidebar for entitled
-    'PGP Trust for Add-On Installation' for more information.</para>
-
-    <para>To see if the add-on has been properly installed in the Roo Shell
-    OSGi container, you can use the OSGi commands listed in the previous
-    section. Alternatively, you can simply start using the new commands
-    offered by the installed add-on.</para>
-
-    <para>Finally, if you wish to uninstall or remove any given add-on you can
-    use the <link linkend="command-index-addon-remove">addon remove</link>
-    command:<programlisting>roo&gt; <emphasis role="bold">addon remove</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
   </section>
 
   <section>

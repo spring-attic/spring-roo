@@ -88,21 +88,22 @@
       </listitem>
     </itemizedlist>
 
-    <para>* The JDBC driver dependency for Oracle and DB2 are not available in
-    public Maven repositories, so Roo installs a dummy dependency in your
-    project pom.xml. You need to adjust it according to your specific version
-    of your database driver available in your private Maven repository.</para>
+    <para>* The JDBC driver dependency for these databases are not available
+    in public Maven repositories. As such, Roo configures a default dependency
+    in your project <code>pom.xml</code>. You need to adjust it according to
+    your specific version of your database driver available in your private
+    Maven repository.</para>
 
     <para>Some useful hints to get started with Orcale Express: After
-    installing Oracle Express you need to find the jdbc driber under
-    ${oracle-xe}\app\oracle\product\10.2.0\server\jdbc\lib and run the
-    command:</para>
+    installing Oracle Express you need to find the JDBC driver under
+    <code>${oracle-xe}/app/oracle/product/10.2.0/server/jdbc/lib</code> and
+    run the command:</para>
 
     <programlisting>mvn install:install-file -Dfile=ojdbc14_g.jar -DgroupId=com.oracle -DartifactId=ojdbc14 -Dversion=10.2.0.2 -Dpackaging=jar -DgeneratePom=true </programlisting>
 
     <para>Also, if you dont want Jetty (or Tomcat) to be conflicting with
-    oracle-xe web-server you should use: mvn jetty:run
-    -Djetty.port=8090.</para>
+    oracle-xe web-server, you should use the following command: <code>mvn
+    jetty:run -Djetty.port=8090</code>.</para>
 
     <para>ORM Provider Options:</para>
 
@@ -128,29 +129,37 @@
       </listitem>
     </itemizedlist>
 
+    <para>In relation to Data Nucleus, both version 1 and version 2 are
+    supported. Version 1 does not support JPA 2 and should only be used if you
+    are intending to deploy to Google App Engine. Version 2 should be used if
+    you are intending to deploy to VMforce cloud environments. In most cases
+    we recommend you use Hibernate, OpenJPA or EclipseLink.</para>
+
     <para>In addition, the <link
     linkend="command-index-persistence-setup">persistence setup</link> command
-    offers the (optional) <emphasis>databaseName</emphasis>,
+    accepts optional <emphasis>databaseName</emphasis>,
     <emphasis>userName</emphasis> and <emphasis>password</emphasis> attributes
-    for your convenience. You can also edit these details manually in the
-    database.properties file. Finally, you can also specify a pre-configured
-    JNDI datasource via the <emphasis>jndiDataSource</emphasis>
-    attribute.</para>
+    for your convenience. However, it's not necessary to use this command. You
+    can easily edit these details in the <code>database.properties</code> file
+    at any time. Finally, you can also specify a pre-configured JNDI
+    datasource via the <emphasis>jndiDataSource</emphasis> attribute.</para>
 
-    <para>The persistence setup command can be run at any time - this means
-    you can also run it to change your ORM provider or database when you plan
-    to move your application between your development setup (ie Hibernate +
-    HSQLDB) to your production setup (EclipseLink + DB2).</para>
+    <para>The persistence setup command can be re-run at any time. This means
+    you can change your ORM provider or database when you plan to move your
+    application between your development setup (eg Hibernate with HSQLDB) to
+    your production setup (eg EclipseLink with DB2). Of course this is a
+    convenience only. You'll naturally have experience fewer deployment issues
+    if you use the same platform for both development and production.</para>
 
     <para>Running the persistence setup command in the Roo shell takes care of
     configuring several aspects in your project:</para>
 
     <orderedlist>
       <listitem>
-        <para>JPA dependencies are registered in the project pom.xml Maven
-        configuration. It includes the JPA API, ORM provider (and its
-        dependencies), DB driver, Spring ORM, Spring JDBC, Commons DBCP, and
-        Commons Pool</para>
+        <para>JPA dependencies are registered in the project
+        <code>pom.xml</code> Maven configuration. It includes the JPA API, ORM
+        provider (and its dependencies), DB driver, Spring ORM, Spring JDBC,
+        Commons DBCP, and Commons Pool</para>
       </listitem>
 
       <listitem>
@@ -194,9 +203,9 @@
 
       <listitem>
         <para>A database properties file
-        (src/main/resources/META-INF/spring/database.properties) which
-        contains user name, password, JDBC driver name and connection URL
-        details:<programlisting>database.url=jdbc\:hsqldb\:mem\:foo
+        (<code>src/main/resources/META-INF/spring/database.properties</code>)
+        which contains user name, password, JDBC driver name and connection
+        URL details:<programlisting>database.url=jdbc\:hsqldb\:mem\:foo
 database.username=sa
 database.password=
 database.driverClassName=org.hsqldb.jdbcDriver
@@ -206,11 +215,12 @@ database.driverClassName=org.hsqldb.jdbcDriver
         <emphasis>userName</emphasis> and <emphasis>password</emphasis>
         attributes of the <link
         linkend="command-index-persistence-setup">persistence setup</link>
-        command.</para>
+        command. You can edit the properties file or use any of these commands
+        at any time.</para>
       </listitem>
 
       <listitem>
-        <para>A Datasource definition and a transaction manager are added to
+        <para>A DataSource definition and a transaction manager are added to
         the Spring application context:</para>
 
         <para><programlisting>[...]

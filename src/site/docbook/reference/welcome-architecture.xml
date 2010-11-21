@@ -31,10 +31,10 @@
     <para>While most people will be focusing on developing these Spring
     MVC-based web applications, it's important to recognise that Roo does not
     impose any restrictions on the sort of Java applications that can be built
-    with it. Even with Roo 1.0.0 it's easy to build any type of self-contained
-    application. Some examples of the types of requirements you can easily
-    address with the current version of Roo include (but are not limited
-    to):</para>
+    with it. Even with Roo 1.0.0 it was easy to build any type of
+    self-contained application. Some examples of the types of requirements you
+    can easily address with the current version of Roo include (but are not
+    limited to):</para>
 
     <itemizedlist>
       <listitem>
@@ -84,26 +84,6 @@
     linkend="architecture-dao">DAO layer</link> is extremely rarely added.
     We'll look at some of these layering conventions (and the rationale for
     them) as we go through the rest of this chapter.</para>
-
-    <para>In the next major release of Roo we intend to expand our <link
-    xlink:href="http://en.wikipedia.org/wiki/Cloud_computing">cloud</link>
-    support and choice of rich internet application (RIA) frameworks. While
-    today you can build a Roo based application that deploys to clouds like
-    <link xlink:href="http://cloudfoundry.com/">Cloud Foundry</link>, <link
-    xlink:href="http://aws.amazon.com/">Amazon Web Services</link> and <link
-    xlink:href="https://jira.springsource.org/browse/ROO-146">Google App
-    Engine</link>, in the future we'll have a broader number of add-ons to
-    make this easier and facilitate development with non-relational databases.
-    In terms of RIA support, we're planning to add extra services to help you
-    build <link xlink:href="http://code.google.com/webtoolkit/">Google Web
-    Toolkit</link> (GWT) frontends, in part due to the high level of synergy
-    between GWT and Roo (both heavily focusing on engineering performance and
-    a first-class Java-centric development approach). There have also been
-    requests made to support <link
-    xlink:href="http://ant.apache.org/ivy/">Apache Ivy</link> as an
-    alternative to <link xlink:href="http://maven.apache.org/">Apache
-    Maven</link>, which you can track as feature request <link
-    xlink:href="https://jira.springsource.org/browse/ROO-91">ROO-91</link>.</para>
   </section>
 
   <section xml:id="architecture-critical-technologies">
@@ -415,9 +395,9 @@ public class Choice {
     annotations, which are useful if your JPA provider supports this standard
     (as is the case if you nominate Hibernate as your JPA provider) or you are
     using a Roo-scaffolded web application front end (in which case Roo will
-    use Spring Framework 3's new JSR 303 support). Of course you do not need
-    to use the JavaBean Validation API annotations at all, but if you would
-    like to use them the relevant Roo field commands provide tab-completion
+    use Spring Framework 3's JSR 303 support). Of course you do not need to
+    use the JavaBean Validation API annotations at all, but if you would like
+    to use them the relevant Roo field commands provide tab-completion
     compatible options for each. The first time you use one of these Roo field
     commands, Roo will add required JavaBean Validation API libraries to your
     project (ie these libraries will not be in your project until you decide
@@ -473,14 +453,22 @@ public class Choice {
   <section xml:id="architecture-web">
     <title>Web Layer</title>
 
-    <para>Roo 1.0.0 can optionally provide a scaffolded Spring MVC web layer.
-    The scaffolded web layer features are explored in some depth in the <link
-    linkend="beginning">Beginning With Roo: The Tutorial</link> chapter,
+    <para>Roo 1.0 can optionally provide a scaffolded Spring MVC web layer.
+    The scaffolded MVC web layer features are explored in some depth in the
+    <link linkend="beginning">Beginning With Roo: The Tutorial</link> chapter,
     including how to customise the appearance. From an architectural
     perspective, the scaffolded layer includes a number of URL rewriting rules
     to ensure requests can be made in accordance with REST conventions. Roo's
     scaffolding model also includes Apache Tiles, Spring JavaScript, plus
     ensures easy setup of Spring Security with a single command.</para>
+
+    <para>In Spring Roo 1.1 we also added comprehensive support for Google Web
+    Toolkit (GWT). This allows you to build Generation IV web HTML5-based web
+    front-ends. These front-ends access the Spring backend using highly
+    optimized remoting protocols, and the GWT application represents the GWT
+    team's recommended best practice architecture. In fact, the GWT team at
+    Google wrote most of the Roo GWT add-on, so you can be sure it uses the
+    best GWT 2.1 features.</para>
 
     <para>Scaffolded web controllers always delegate directly to methods
     provided on an <code>@RooEntity</code> class. For maximum compatibility
@@ -620,15 +608,15 @@ public class Choice {
         <listitem>
           <para><emphasis>Non-JPA persistence</emphasis>: It is possible that
           certain entities are stored using a technology that does not have a
-          JPA provider. In this case Roo 1.0.0 does not support those entities
-          out of the box. However, if only a small number of entities are
-          effected by this consideration there is no reason one or more
-          hand-written ITDs could not be provided by the user in order to
-          maintain conceptual parity with the remainder of the Roo application
-          (which probably does have some JPA). If a large number of entities
-          are effected, the project would probably benefit from the user
-          writing a Roo add-on which will automatically manage the ITDs just
-          as Roo does for JPA.</para>
+          JPA provider. In this case Roo does not support those entities out
+          of the box. However, if only a small number of entities are effected
+          by this consideration there is no reason one or more hand-written
+          ITDs could not be provided by the user in order to maintain
+          conceptual parity with the remainder of the Roo application (which
+          probably does have some JPA). If a large number of entities are
+          effected, the project would probably benefit from the user writing a
+          Roo add-on which will automatically manage the ITDs just as Roo does
+          for JPA.</para>
         </listitem>
 
         <listitem>
@@ -698,6 +686,7 @@ public class Choice {
     xlink:href="http://jira.springframework.org/browse/ROO-301">ROO-301</link>
     represents an enhancement request for more flexibility around DAOs. You
     are invited to track this enhancement request or vote for it if you would
-    like to see this.</para>
+    like to see this. We plan on actioning this enhancement request in the
+    next version of Roo.</para>
   </section>
 </chapter>

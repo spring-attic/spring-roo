@@ -41,12 +41,12 @@
     but also provides access to all historically released versions plus SHA1
     hash codes of those files.</para>
 
-    <para>We publish all Roo modules to a Maven repository at
-    <link
+    <para>We publish all Roo modules to a Maven repository at <link
     xlink:href="http://spring-roo-repository.springsource.org/release">http://spring-roo-repository.springsource.org/release</link>.
-    This Maven repository is automatically included in user project so that the
-    annotation library can be downloaded. It is also automatically included in
-    the POM for <link linkend="third-party">third-party add-ons</link>.</para>
+    This Maven repository is automatically included in user project so that
+    the annotation library can be downloaded. It is also automatically
+    included in the POM for add-ons created via the <link
+    linkend="simple-addons-fast-creation">add-on creator</link>.</para>
   </section>
 
   <section xml:id="resources-forums">
@@ -106,22 +106,27 @@
   <section xml:id="resources-twitter">
     <title>Twitter</title>
 
-    <para>Roo Hash Code: <link
-    xlink:href="http://search.twitter.com/search?q=%23roo">#roo</link></para>
+    <para>Roo Hash Code (please include in your tweets, and also follow for
+    low-volume announcements): <link
+    xlink:href="http://search.twitter.com/search?q=@SpringRoo">@SpringRoo</link></para>
 
-    <para>Follow the core Roo development team: <link
-    xlink:href="http://twitter.com/benalexau">@benalexau</link> and <link
-    xlink:href="http://twitter.com/schmidtstefan">@schmidtstefan</link></para>
+    <para>Follow the core Roo development team for interesting Roo news and
+    progress (higher volume than just following @SpringRoo, but only a few
+    Tweets per week): <link
+    xlink:href="http://twitter.com/benalexau">@benalexau</link>, <link
+    xlink:href="http://twitter.com/schmidtstefan">@schmidtstefan</link> and
+    <link
+    xlink:href="http://twitter.com/#!/alankstewart">@alankstewart</link></para>
 
     <para>Many people who use Roo also use Twitter, including the core Roo
     development team. If you're a Twitter user, you're welcome to follow the
     Roo development team (using the Twitter IDs above) to receive
     up-to-the-minute Tweets on Roo activities, usage and events.</para>
 
-    <para>The Roo team also monitors Tweets published with the #roo hash code,
-    so if you're Tweeting about Roo, please remember to include #roo. If you
-    like Roo or have found it helpful on a project, please Tweet about it and
-    help spread the word!</para>
+    <para>The Roo team also monitors Tweets that include @SpringRoo, so if
+    you're Tweeting about Roo, please remember to include @SpringRoo somewhere
+    in the Tweet. If you like Roo or have found it helpful on a project,
+    please Tweet about it and help spread the word!</para>
 
     <para>We do request that you use the <link
     linkend="resources-forums">Community Forums</link> if you have a question
@@ -169,9 +174,8 @@
     usually helpful to provide a Roo <link linkend="usage-shell">sample
     script</link> that can be used to explain the issue. You should also
     consider whether a particular enhancement is likely to appeal to most Roo
-    users, and if not, whether perhaps writing it as a <link
-    linkend="third-party">third-party add-on</link> would be a good
-    alternative.</para>
+    users, and if not, whether perhaps writing it as an <link
+    linkend="simple-addons">add-on</link> would be a good alternative.</para>
   </section>
 
   <section xml:id="resources-source-repository">

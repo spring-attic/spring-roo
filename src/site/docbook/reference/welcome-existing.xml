@@ -70,18 +70,16 @@
     <para>Many organisations have existing databases that they'd like to use
     with Roo.</para>
 
-    <para>Enhancement request <link
-    xlink:href="https://jira.springsource.org/browse/ROO-435">ROO-435</link>
-    covers adding functionality into Roo to introspect an existing database
-    and create Java entities that represent the datbase model. Please vote for
-    this enhancement request if you'd like to see this capability added to
-    Roo.</para>
+    <para>A significant new feature added to Spring Roo 1.1 was support for
+    incremental database reverse engineering. This feature is robust and
+    comprehensive, and allows you to reverse engineer an existing database in
+    a single command. The single command doesn't even ask you any questions as
+    it operates, and it gracefully handles changes to your schema over time.
+    </para>
 
-    <para>In the meantime, we recommend you use your preferred JPA provider's
-    tool for introspecting a database and creating JPA entities that use the
-    relevant JPA annotations. Roo is immediately compatible with such
-    entities, and you need only add the @RooEntity annotation to the created
-    JPA entities. The remaining Roo features will then be compatible with the
-    introspected entities and you should have no difficulty using them.</para>
+    <para>We recommend that you consult the <link
+    linkend="base-dbre">incremental database reverse engineering
+    chapter</link> if you'd like to work with an existing relational
+    database.</para>
   </section>
 </chapter>

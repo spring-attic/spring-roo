@@ -409,8 +409,8 @@
     <para>Roo is a standard Java application that is fully self-contained
     within the Roo distribution ZIPs. You can download Roo from one of the
     <link linkend="resources-downloads">download sites</link>, or <link
-    linkend="development-building">build</link> a distribution ZIP yourself
-    from our <link linkend="resources-source-repository">source control
+    linkend="development-setup">build</link> a distribution ZIP yourself from
+    our <link linkend="resources-source-repository">source control
     repository</link>.</para>
 
     <para>If you are upgrading from an existing version of Spring Roo, you
@@ -448,6 +448,16 @@
     a number of features that make working with Roo even easier (you can of
     course use Roo with normal Eclipse or without an IDE at all if you
     prefer).</para>
+
+    <para>If you use OS X, we strongly recommend the use of the iTerm
+    application for terminal emulation. iTerm provides full ANSI support,
+    which isn't provided by the default OSX Terminal application. Some Roo
+    operations update the "flash message area", and if you have full ANSI
+    support in your terminal this will look more visually pleasing. Of course,
+    you don't need to use iTerm - Roo will just display the updates with other
+    console messages in that case. Windows and Linux users need not do
+    anything special, as those operating systems work perfectly fine
+    out-of-the-box.</para>
 
     <para>Once you have satisfied the initial requirements, you can install
     Roo by following these steps:</para>
@@ -488,8 +498,9 @@ Welcome to Spring Roo. For assistance press TAB or type "hint" then hit ENTER.
 $ <emphasis role="bold">cd ..</emphasis>
 $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
 
-    <para>If you see the logo appear, you've installed Roo
-    successfully.</para>
+    <para>If you see the logo appear, you've installed Roo successfully. For
+    those curious, the "[rev RRR]" refers to the Git commit ID used to compile
+    that particular build of Roo.</para>
   </section>
 
   <section xml:id="intro-roo-opts">
@@ -499,7 +510,7 @@ $ <emphasis role="bold">rmdir roo-test</emphasis></programlisting>
     configuration via the ROO_OPTS environment variable. An environment
     variable is used so that these configuration settings can be applied
     before the shell is instantiated and the first messages displayed. The
-    ROO_OPTS settings do not apply within SpringSource Tool Suite's embedded
+    ROO_OPTS settings does not apply within SpringSource Tool Suite's embedded
     Roo shell.</para>
 
     <para>At present the only configuration settings available is roo.bright.
@@ -604,13 +615,13 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     "mvn" instead. We just did them from within Roo to benefit from TAB
     completion. You could have also skipped the "<link
     linkend="command-index-perform-eclipse">perform eclipse</link>" command if
-    you are using the m2eclipse plugin in your STS/Eclipse installation (STS
-    automatically includes m2eclipse).</para>
-
-    <para>Please note that if you are using Java 5, you may receive an
-    exception ("java.lang.NoClassDefFoundError: javax/xml/bind/JAXBException")
-    due to a bug in Hibernate Validator. This is discussed in the <link
-    linkend="upgrade-known-issues">known issues</link> section.</para>
+    you are using the m2eclipse plugin. If you are using SpringSource Tool
+    Suite (STS), it automatically includes m2eclipse and as such you do not
+    need to use the "perform eclipse" command. Indeed if you're an STS user,
+    you could have started your Roo project right from within the IDE by
+    selecting the File &gt; New &gt; Spring Roo menu option and completing the
+    steps. In that case a Roo Shell view will open within STS and from there
+    you can enter the remaining commands.</para>
 
     <para>Now that you've loaded Tomcat, let's run the Selenium tests. You can
     do this by loading a new command window, changing into the ten-minutes
@@ -618,7 +629,7 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
     should see your FireFox web browser execute the generated Selenium tests.
     You can also visit your new web application at <link
     xlink:href="http://localhost:8080/tenminutes">http://localhost:8080/tenminutes</link>,
-    which should look like the picture below.</para>
+    which should look similar to the picture below.</para>
 
     <mediaobject>
       <imageobject>
@@ -682,6 +693,14 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
         includes Selenium tests, dynamic finders and Log4j
         configuration.</para>
       </listitem>
+
+      <listitem>
+        <para><emphasis>expenses.roo</emphasis>: The Expenses sample script
+        produces a <link
+        xlink:href="http://code.google.com/webtoolkit/">Google Web
+        Toolkit</link> (GWT) application using Spring Roo. This shows you the
+        new GWT scaffolding support we added to Roo 1.1.</para>
+      </listitem>
     </itemizedlist>
   </section>
 
@@ -714,8 +733,10 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
 
     <para>We welcome your comments and suggestions as you go about using Roo.
     One convenient way to share your experiences is to Tweet with the <link
-    xlink:href="http://search.twitter.com/search?q=%23roo">#roo</link> hash
-    code. In any event, we thank you for exploring Roo and hope that you enjoy
-    your Roo journey.</para>
+    xlink:href="http://search.twitter.com/search?q=@SpringRoo">@springroo</link>
+    hash code. You can also follow Roo's <link
+    linkend="resources-twitter">core development team</link> via Twitter for
+    the latest Roo updates. In any event, we thank you for exploring Roo and
+    hope that you enjoy your Roo journey.</para>
   </section>
 </chapter>

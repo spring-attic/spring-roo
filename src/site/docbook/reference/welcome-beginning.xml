@@ -516,20 +516,24 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
   <section xml:id="beginning-step-4">
     <title>Step 4: Using Your IDE</title>
 
-    <para>Of course Roo projects can be used in your favorite IDE. For the
-    remainder of this tutorial we'll assume you're using the <link
+    <para>Of course Roo projects can be used in your favorite IDE. We
+    recommend the use of <link
     xlink:href="http://www.springsource.com/products/sts">SpringSource Tool
-    Suite</link> (STS) which is offered free of charge. Please refer to the
-    <link linkend="usage-ide">IDE usage</link> section of this reference guide
-    for a more detailed discussion of IDE interoperability.</para>
+    Suite</link> (STS), which is available at no charge from SpringSource. If
+    you're not using SpringSource Tool Suite, please refer to the <link
+    linkend="usage-ide">IDE usage</link> section of this reference guide for a
+    more detailed discussion of IDE interoperability.</para>
 
     <para>By default Roo projects do not contain any IDE-specific workspace
-    artifacts so in order to be able to import our Pizza Shop application into
-    STS we need to create the relevant project artifacts. The Roo shell helps
-    us creating these artifacts by means of the <link
+    configuration artifacts. This means your IDE won't be able to import your
+    Pizza Shop project by default. The Roo shell can helps us creating
+    IDE-specific workspace configuration artifacts by means of the <link
     linkend="command-index-perform-eclipse"><emphasis role="bold">perform
-    eclipse</emphasis></link> command, which is appropriate if you do not have
-    the m2eclipse plugin installed:</para>
+    eclipse</emphasis></link> command. However, you should not use this
+    command if you have the m2eclipse plugin installed. If you're an STS user,
+    you have the m2eclipse plugin installed and as such you can skip the
+    "perform eclipse" command. All people not using STS or m2eclipse should
+    use the following command:</para>
 
     <para><programlisting>~.domain.PizzaOrder roo&gt; <emphasis role="bold">perform eclipse</emphasis>
 ...
@@ -559,11 +563,12 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     included JUnit tests by right clicking the pizzashop project and then
     selecting 'Run As &gt; JUnit Test'.</para>
 
-    <para>If you have m2eclipse installed, you can skip the <link
+    <para>If you're using STS or have installed m2eclipse into an
+    Eclipse-based IDE, as mentioned earlier you can skip the <link
     linkend="command-index-perform-eclipse"><emphasis role="bold">perform
-    eclipse</emphasis></link> command entirely. You simply need to select in
-    STS/Eclipse the 'File &gt; Import &gt; General &gt; Maven Projects' menu
-    option. If you're using STS you already have m2eclipse installed.</para>
+    eclipse</emphasis></link> command entirely. In this case you simply need
+    to select in STS/Eclipse the 'File &gt; Import &gt; General &gt; Maven
+    Projects' menu option.</para>
 
     <para>As detailed in the <link linkend="architecture">Application
     Architecture</link> chapter of this documentation Roo projects leverage
@@ -573,8 +578,6 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     use the <code>testMarkerMethod()</code> method to test it. For example you
     can open the <code>BaseIntegrationTest.java</code> source file and try it
     out:</para>
-
-    <para></para>
 
     <para><mediaobject>
         <imageobject>
@@ -628,8 +631,6 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     possible by leveraging new features introduced with the release of Spring
     Framework v3. The following URI - Resource mappings are applied in Roo
     generated controllers:</para>
-
-    <para></para>
 
     <para><mediaobject>
         <imageobject>
@@ -720,7 +721,9 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     added to the project. To add these dependencies to the STS workspace you
     should run the <link linkend="command-index-perform-eclipse"><emphasis
     role="bold">perform eclipse</emphasis></link> command again followed by a
-    project refresh in STS.</para>
+    project refresh (if you're using STS or m2eclipse, the "perform eclipse"
+    command should be skipped as it will automatically detect and handle the
+    addition of Spring Security to your project).</para>
 
     <para>In order to secure the views for the <code>Topping</code>,
     <code>Base</code> and <code>Pizza</code> resource in the Pizza Shop

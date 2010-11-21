@@ -144,8 +144,8 @@
     </section>
   </section>
 
-  <section>
-    <title id="dbre_installation">Installation</title>
+  <section xml:id="dbre_installation">
+    <title>Installation</title>
 
     <para>DBRE supports most of the relational databases that can be
     configured for Roo-managed projects such as <link

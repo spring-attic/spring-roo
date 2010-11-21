@@ -7,11 +7,13 @@
          xmlns:ns4="http://www.w3.org/1999/xhtml"
          xmlns:ns3="http://www.w3.org/2000/svg"
          xmlns:ns="http://docbook.org/ns/docbook">
-  <title>Solr Add-On</title>
+  <title>Apache Solr Add-On</title>
 
-  <para>The <link xlink:href="http://lucene.apache.org/solr/">Solr</link>
-  add-on provides integration between the Roo generated domain model and the
-  Solr search platform. From the Solr website:</para>
+  <para>The <link xlink:href="http://lucene.apache.org/solr/">Apache
+  Solr</link> add-on provides integration between the Roo generated domain
+  model and the Apache Solr search platform. If you haven't heard of the open
+  source Solr system, here's a quick description from the project web
+  site:</para>
 
   <para><quote>Solr is the popular, blazing fast open source enterprise search
   platform from the Apache Lucene project. Its major features include powerful
@@ -19,7 +21,7 @@
   database integration, and rich document (e.g., Word, PDF) handling. Solr is
   highly scalable, providing distributed search and index replication, and it
   powers the search and navigation features of many of the world's largest
-  internet sites. </quote></para>
+  internet sites.</quote></para>
 
   <para><quote>Solr is written in Java and runs as a standalone full-text
   search server within a servlet container such as Tomcat. Solr uses the
@@ -57,7 +59,7 @@
 
       <listitem>
         <para>Verify Solr is running correctly: <link
-        xlink:href="http://localhost:8983/solr/admin/">http://localhost:8983/solr/admin/</link>)</para>
+        xlink:href="http://localhost:8983/solr/admin/">http://localhost:8983/solr/admin/</link></para>
       </listitem>
     </orderedlist>
 
@@ -167,8 +169,8 @@
         simple searches against Solr documents for Person, and another one
         which works with a preconfigured SolrQuery object. The SolrQuery
         object allows you to leverage all functionalities of the Solr search
-        server (like faceting, sorting, term highliting, pagination, etc).
-        </para>
+        server (like faceting, sorting, term highliting, pagination,
+        etc).</para>
 
         <para>The <emphasis>indexPerson</emphasis>(..) and
         <emphasis>indexPeople</emphasis>(..) methods allow you to add new
@@ -176,7 +178,7 @@
         <emphasis>deleteIndex</emphasis>(..) method allows you to remove a
         person from the Solr index.</para>
 
-        <para> All indexing, and delete operations are executed in s separate
+        <para>All indexing, and delete operations are executed in s separate
         thread and will therefore not impact the performance of your Web
         application (this is currently achieved through the
         <emphasis>SolrSearchAsyncTaskExecutor.aj</emphasis> aspect).</para>
@@ -205,7 +207,7 @@
     <para>The @RooSolrSearchable annotation allows you to change all method
     names through their respective attributes in the annotation. Marking a
     method name with an empty String will instruct the Roo Solr add-on to not
-    generate that method (ie @RooSolrSearchable(preRemoveMethod="")). </para>
+    generate that method (ie @RooSolrSearchable(preRemoveMethod="")).</para>
 
     <para>By default all fields in a domain entity are indexed as dynamic
     fields (defined in the default schema.xml which Solr ships with). The
@@ -226,7 +228,7 @@ person.birthday_dt</programlisting></para>
 @DateTimeFormat(style = "S-")
 private Date birthDay;
 </programlisting>To index existing DB entity tables each entity exposes a
-    convenience method (example for Person entity): </para>
+    convenience method (example for Person entity):</para>
 
     <para><programlisting>Person.indexPeople(Person.findAllPeople()); </programlisting>The
     URL of the solr server location can be changed in the project
@@ -237,6 +239,6 @@ private Date birthDay;
     front-end for those who want to take this a step further: <link
     xlink:href="http://github.com/evolvingweb/ajax-solr">http://github.com/evolvingweb/ajax-solr</link>
     It is planned to provide a out of the box integration with the Ajax-Solr
-    front-end through this addon in the medium term. </para>
+    front-end through this addon in the medium term.</para>
   </section>
 </chapter>
