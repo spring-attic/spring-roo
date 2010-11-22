@@ -233,13 +233,12 @@ public class GwtMetadata extends AbstractMetadataItem {
                 JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
                 if (!fieldOrderedPropertyNames.contains(propertyName)) {
                     fieldOrderedPropertyNames.add(propertyName);
-                    FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 
-                    JavaType fieldType = field.getFieldType();
+                    JavaType returnType = accessor.getReturnType();
 
-                    PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
+                    PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 
-                    JavaType gwtSideType = getGwtSideLeafType(fieldType, ptmd);
+                    JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
 
                     // Store in the maps
                     propToGwtSideType.put(propertyName, gwtSideType);
