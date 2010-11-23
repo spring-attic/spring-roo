@@ -628,7 +628,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + fromJsonMethodName.getSymbolName() + "(json)." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
@@ -677,7 +677,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		bodyBuilder.appendFormalLine(entityName + "." + entityMetadata.getPersistMethod().getMethodName().getSymbolName() + "();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(\"" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + " created\", " + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
+		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".CREATED);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(JavaType.STRING_OBJECT);
