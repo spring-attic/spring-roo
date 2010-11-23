@@ -9,7 +9,7 @@
 	<c:if test="${empty render or render}">
 
 		<c:if test="${empty label}">
-			<spring:message code="menu_category_${fn:toLowerCase(fn:substringAfter(id,'_'))}_label" var="label"/>
+			<spring:message code="menu_category_${fn:toLowerCase(fn:substringAfter(id,'_'))}_label" var="label" htmlEscape="false"/>
 		</c:if>
 		
 		<li id="${fn:escapeXml(id)}">
