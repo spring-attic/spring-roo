@@ -3,6 +3,7 @@ package org.springframework.roo.addon.finder;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -17,6 +18,7 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -24,6 +26,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -47,6 +50,7 @@ public class FinderOperationsImpl implements FinderOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
+	@Reference private MemberDetailsScanner detailsScanner;
 	
 	public boolean isFinderCommandAvailable() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -54,6 +58,7 @@ public class FinderOperationsImpl implements FinderOperations {
 	
 	public SortedSet<String> listFindersFor(JavaType typeName, Integer depth) {
 		Assert.notNull(typeName, "Java type required");
+		Assert.notNull(detailsScanner, "Member details scanner required");
 		
 		String id = physicalTypeMetadataProvider.findIdentifier(typeName);
 		if (id == null) {
@@ -75,10 +80,24 @@ public class FinderOperationsImpl implements FinderOperations {
 		String beanInfoMid = BeanInfoMetadata.createIdentifier(javaType, path);
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMid);
 		Assert.notNull(beanInfoMetadata, "Bean info ('" + beanInfoMid +"') was unexpectedly unavailable when entity metadata was available for '" + entityMetadata + "'");
-		
+
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null) {
+			throw new IllegalStateException("Could not determine physical type metadata for type " + javaType);
+		}
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		if (cid == null) {
+			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
+		}
 		// Compute the finders
 		DynamicFinderServices finderService = new DynamicFinderServicesImpl();
-		List<JavaSymbolName> finders = finderService.getFindersFor(beanInfoMetadata, entityMetadata.getPlural(), depth);
+		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
+		exclusions.add(entityMetadata.getIdentifierField().getFieldName());
+		exclusions.add(entityMetadata.getEntityManagerField().getFieldName());
+		if (entityMetadata.getVersionField() != null) {
+			exclusions.add(entityMetadata.getVersionField().getFieldName());
+		}
+		List<JavaSymbolName> finders = finderService.getFindersFor(detailsScanner.getMemberDetails(getClass().getName(), cid), entityMetadata.getPlural(), depth, exclusions);
 
 		SortedSet<String> result = new TreeSet<String>();
 		for (JavaSymbolName finder : finders) {

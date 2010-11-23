@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.finder;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
@@ -22,12 +24,13 @@ public interface DynamicFinderServices {
 	 * This method provides a convenient generator for all possible combinations of finder
 	 * method signatures.
 	 * 
-	 * @param beanInfoMetadata the metadata for the {@link BeanInfoMetadata} for which the finder signatures combinations are generated. (required)
+	 * @param memberDetails the metadata for the {@link JavaType} for which the finder signatures combinations are generated. (required)
 	 * @param plural the pluralised form of the entity name, which is used for finder method names (required)
 	 * @param maxDepth the depth of combinations used for finder signatures combinations (a depth of 2 will combine a maximum of two attributes from the {@link BeanInfoMetadata} (required)
+	 * @param exclusions Field names which should not be contained in the suggested finders
 	 * @return all possible finder method signatures for the given depth.
 	 */
-	List<JavaSymbolName> getFindersFor(BeanInfoMetadata beanInfoMetadata, String plural, int maxDepth);
+	List<JavaSymbolName> getFindersFor(MemberDetails memberDetails, String plural, int maxDepth, Set<JavaSymbolName> exclusions);
 	
 	/**
 	 * This method generates a named JPA query String to be used in JPA entity manager queries. 

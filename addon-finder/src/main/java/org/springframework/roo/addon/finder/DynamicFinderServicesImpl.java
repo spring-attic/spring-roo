@@ -13,7 +13,9 @@ import java.util.TreeSet;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
@@ -26,8 +28,8 @@ import org.springframework.roo.support.util.Assert;
  */
 public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	
-	public List<JavaSymbolName> getFindersFor(BeanInfoMetadata beanInfoMetadata, String plural, int maxDepth) {
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
+	public List<JavaSymbolName> getFindersFor(MemberDetails memberDetails, String plural, int maxDepth, Set<JavaSymbolName> exclusions) {
+		Assert.notNull(memberDetails, "Bean info metadata required");
 		Assert.hasText(plural, "Plural required");
 		Assert.notNull(maxDepth, "maxDepth required");
 
@@ -35,23 +37,21 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		SortedSet<JavaSymbolName> tempFinders = new TreeSet<JavaSymbolName>();
 
 		for (int i = 0; i < maxDepth; i++) {
-			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
-
-				JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor);
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-				// Ignoring java.util.Map field types (see ROO-194)
-				if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
-					continue;
-				}
-				if (!PhysicalTypeIdentifier.isValid(field.getDeclaredByMetadataId())) {
-					// We are only interested in fields declared by physical types - not fields declared by ITDs
-					continue;
-				}
-				if (i == 0) {
-					tempFinders.addAll(createFinders(field, finders, "find" + plural + "By", true));
-				} else {
-					tempFinders.addAll(createFinders(field, finders, "And", false));
-					tempFinders.addAll(createFinders(field, finders, "Or", false));
+			for (MemberHoldingTypeDetails typeDetails: memberDetails.getDetails()) {
+				for (FieldMetadata field: typeDetails.getDeclaredFields()) {
+					// Ignoring java.util.Map field types (see ROO-194)
+					if (field == null || field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+						continue;
+					}
+					if (exclusions.contains(field.getFieldName())) {
+						continue;
+					}
+					if (i == 0) {
+						tempFinders.addAll(createFinders(field, finders, "find" + plural + "By", true));
+					} else {
+						tempFinders.addAll(createFinders(field, finders, "And", false));
+						tempFinders.addAll(createFinders(field, finders, "Or", false));
+					}
 				}
 			}
 			finders.addAll(tempFinders);
