@@ -11,7 +11,7 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Column implements Serializable {
-	private static final long serialVersionUID = 4749709246713636728L;
+	private static final long serialVersionUID = 3148908101422715228L;
 	private String name;
 	private String description;
 	private Table table;
@@ -26,9 +26,8 @@ public class Column implements Serializable {
 	private int scale;
 	private String defaultValue;
 	private String javaType;
-	private int ordinalPosition;
 
-	public Column(String name) {
+	Column(String name) {
 		setName(name);
 	}
 
@@ -149,14 +148,6 @@ public class Column implements Serializable {
 		this.javaType = javaType;
 	}
 
-	public int getOrdinalPosition() {
-		return ordinalPosition;
-	}
-
-	public void setOrdinalPosition(int ordinalPosition) {
-		this.ordinalPosition = ordinalPosition;
-	}
-
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -186,6 +177,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, typeCode=%s, type=%s, length=%s, precision=%s, scale=%s, defaultValue=%s, javaType=%s, ordinalPosition=%s]", name, description, table, primaryKey, required, unique, autoIncrement, typeCode, type, length, precision, scale, defaultValue, javaType, ordinalPosition);
+		return String.format("Column [name=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, typeCode=%s, type=%s, length=%s, precision=%s, scale=%s, defaultValue=%s, javaType=%s]", name, description, table.getName(), primaryKey, required, unique, autoIncrement, typeCode, type, length, precision, scale, defaultValue, javaType);
 	}
 }

@@ -9,10 +9,7 @@ import java.io.Serializable;
  * @since 1.1
  */
 public class Reference implements Serializable {
-	private static final long serialVersionUID = 6681088509378301559L;
-
-	/** The sequence value within the key. */
-	private Short sequenceNumber;
+	private static final long serialVersionUID = -9110724955358470828L;
 
 	/** The local column. */
 	private Column localColumn;
@@ -29,9 +26,11 @@ public class Reference implements Serializable {
 	private boolean insertableOrUpdatable = true;
 
 	/**
-	 * Creates a new, empty reference.
+	 * Creates a new reference between the two given columns.
 	 */
-	public Reference() {
+	Reference(String localColumnName, String foreignColumnName) {
+		this.localColumnName = localColumnName;
+		this.foreignColumnName = foreignColumnName; 
 	}
 
 	/**
@@ -40,17 +39,9 @@ public class Reference implements Serializable {
 	 * @param localColumn The local column
 	 * @param foreignColumn The remote column
 	 */
-	public Reference(Column localColumn, Column foreignColumn) {
+	Reference(Column localColumn, Column foreignColumn) {
 		setLocalColumn(localColumn);
 		setForeignColumn(foreignColumn);
-	}
-
-	public Short getSequenceNumber() {
-		return sequenceNumber;
-	}
-
-	public void setSequenceNumber(Short sequenceNumber) {
-		this.sequenceNumber = sequenceNumber;
 	}
 
 	public Column getLocalColumn() {
@@ -59,7 +50,6 @@ public class Reference implements Serializable {
 
 	public void setLocalColumn(Column localColumn) {
 		this.localColumn = localColumn;
-		this.localColumnName = localColumn == null ? null : localColumn.getName();
 	}
 
 	public Column getForeignColumn() {
@@ -68,23 +58,14 @@ public class Reference implements Serializable {
 
 	public void setForeignColumn(Column foreignColumn) {
 		this.foreignColumn = foreignColumn;
-		this.foreignColumnName = foreignColumn == null ? null : foreignColumn.getName();
 	}
 
 	public String getLocalColumnName() {
 		return localColumnName;
 	}
 
-	public void setLocalColumnName(String localColumnName) {
-		this.localColumnName = localColumnName;
-	}
-
 	public String getForeignColumnName() {
 		return foreignColumnName;
-	}
-
-	public void setForeignColumnName(String foreignColumnName) {
-		this.foreignColumnName = foreignColumnName;
 	}
 
 	public boolean isInsertableOrUpdatable() {
@@ -132,6 +113,6 @@ public class Reference implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Reference [sequenceNumber=%s, localColumnName=%s, foreignColumnName=%s]", sequenceNumber, localColumnName, foreignColumnName);
+		return String.format("Reference [localColumnName=%s, foreignColumnName=%s]", localColumnName, foreignColumnName);
 	}
 }

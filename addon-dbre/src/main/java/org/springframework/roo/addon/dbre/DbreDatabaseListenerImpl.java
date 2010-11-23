@@ -73,6 +73,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		processDatabase(newDatabase);
 	}
 
+	public void setDestinationPackage(JavaPackage destinationPackage) {
+		this.destinationPackage = destinationPackage;
+	}
+	
 	private void processDatabase(Database database) {
 		if (database == null) {
 			return;
@@ -82,25 +86,24 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			reverseEngineer(database);
 		} else {
 			identifierResults = null;
-			deleteAllManagedTypes();
 		}
 	}
 
 	private void reverseEngineer(Database database) {
 		// Lookup the relevant destination package if not explicitly given
 		SortedSet<JavaType> managedEntityTypes = dbreTypeResolutionService.getManagedEntityTypes();
-		JavaPackage destinationToUse = destinationPackage;
-		if (destinationToUse == null) {
+	
+		if (destinationPackage == null) {
 			if (!managedEntityTypes.isEmpty()) {
 				// Take the package of the first one
-				destinationToUse = managedEntityTypes.first().getPackage();
+				destinationPackage = managedEntityTypes.first().getPackage();
 			}
 		}
 
 		// Fallback to project's top level package
-		if (destinationToUse == null) {
+		if (destinationPackage == null) {
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			destinationToUse = projectMetadata.getTopLevelPackage();
+			destinationPackage = projectMetadata.getTopLevelPackage();
 		}
 
 		// Get tables from database
@@ -120,7 +123,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!database.isJoinTable(table)) {
-				createNewManagedEntityFromTable(table, destinationToUse);
+				createNewManagedEntityFromTable(table, destinationPackage);
 			}
 		}
 
@@ -155,7 +158,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		Assert.notNull(tableAttribute, errMsg);
 		String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
-		Table table = database.findTable((String) tableName);
+		Table table = database.findTable(tableName);
 		if (table == null) {
 			// Table has been dropped so delete managed type, and its identifier if applicable
 			deleteManagedType(javaType);
@@ -320,19 +323,13 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Add fields to the identifier class
 		for (Column column : columns) {
-			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
-			JavaType fieldType = column.getType().getJavaType();
 			String columnName = column.getName();
+			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(columnName));
+			JavaType fieldType = column.getType().getJavaType();
 			result.add(new Identifier(fieldName, fieldType, columnName));
 		}
 
 		return result;
-	}
-
-	private void deleteAllManagedTypes() {
-		for (JavaType javaType : dbreTypeResolutionService.getManagedEntityTypes()) {
-			deleteManagedType(javaType);
-		}
 	}
 
 	private void deleteManagedType(JavaType javaType) {
@@ -431,9 +428,5 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
-	}
-
-	public void setDestinationPackage(JavaPackage destinationPackage) {
-		this.destinationPackage = destinationPackage;
 	}
 }

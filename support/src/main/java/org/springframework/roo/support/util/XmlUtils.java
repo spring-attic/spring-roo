@@ -101,6 +101,7 @@ public final class XmlUtils {
 						}
 					}
 				}
+
 				public void write(int c) throws IOException {
 					if (c != '\r') super.write(c);
 				}
@@ -264,16 +265,16 @@ public final class XmlUtils {
 	 * @return a transformer that indents entries by 4 characters (never null)
 	 */
 	public static final Transformer createIndentingTransformer() {
-		Transformer xformer;
+		Transformer transformer;
 		try {
 			transformerFactory.setAttribute("indent-number", 4);
-			xformer = transformerFactory.newTransformer();
+			transformer = transformerFactory.newTransformer();
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-		xformer.setOutputProperty(OutputKeys.INDENT, "yes");
-		xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-		return xformer;
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+		return transformer;
 	}
 
 	/**
@@ -351,4 +352,3 @@ public final class XmlUtils {
 		return proposed.replaceAll("[:\\.-]", "_");
 	}
 }
-

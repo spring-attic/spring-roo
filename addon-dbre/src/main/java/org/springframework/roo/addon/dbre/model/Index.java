@@ -1,9 +1,9 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -14,13 +14,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Index implements Serializable {
-	private static final long serialVersionUID = 3248243308098445623L;
+	private static final long serialVersionUID = -4874675730241979824L;
 	private String name;
 	private Table table;
 	private boolean unique;
-	private SortedSet<IndexColumn> columns = new TreeSet<IndexColumn>(new IndexColumnComparator());
+	private Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
 
-	public Index(String name) {
+	Index(String name) {
 		this.name = name;
 	}
 
@@ -48,7 +48,7 @@ public class Index implements Serializable {
 		this.unique = unique;
 	}
 
-	public SortedSet<IndexColumn> getColumns() {
+	public Set<IndexColumn> getColumns() {
 		return columns;
 	}
 

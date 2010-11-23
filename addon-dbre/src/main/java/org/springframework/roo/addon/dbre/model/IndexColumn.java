@@ -11,11 +11,10 @@ import java.io.Serializable;
 public class IndexColumn implements Serializable {
 	private static final long serialVersionUID = 4206711649555220093L;
 	private String name;
-	private Short ordinalPosition;
 	private Column column;
 	private int size;
 
-	public IndexColumn(String name) {
+	IndexColumn(String name) {
 		this.name = name;
 	}
 
@@ -25,14 +24,6 @@ public class IndexColumn implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Short getOrdinalPosition() {
-		return ordinalPosition;
-	}
-
-	public void setOrdinalPosition(Short ordinalPosition) {
-		this.ordinalPosition = ordinalPosition;
 	}
 
 	public Column getColumn() {
@@ -80,6 +71,6 @@ public class IndexColumn implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("IndexColumn [name=%s, ordinalPosition=%s, column=%s, size=%s]", name, ordinalPosition, column, size);
+		return String.format("IndexColumn [name=%s, column=%s, size=%s]", name, (column != null ? column.getName() : null), size);
 	}
 }

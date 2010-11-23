@@ -11,5 +11,10 @@ import org.springframework.roo.model.JavaPackage;
  */
 public interface DbreDatabaseListener extends DatabaseListener, IdentifierService {
 	
+	/**
+	 * Specifies the {@link JavaPackage} to create entities in.
+	 * 
+	 * @param destinationPackage the JavaPackage
+	 */
 	void setDestinationPackage(JavaPackage destinationPackage);
 }

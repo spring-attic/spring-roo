@@ -9,11 +9,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import org.springframework.roo.addon.dbre.util.DatabaseXmlUtils;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents the database model, ie. the tables in the database.
@@ -22,13 +21,13 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Database implements Serializable {
-	private static final long serialVersionUID = -6066594794515924423L;
+	private static final long serialVersionUID = -5373400310368191289L;
 
-	/** The name of the database model. */
+	/** The name of the database model. Defaults to the catalog name if the schema name is not available. */
 	private String name;
 
-	/** The database {@link Schema schema}. */
-	private Schema schema;
+	/** The JavaPackage where entities are created */
+	private JavaPackage destinationPackage;
 
 	/** All tables. */
 	private Set<Table> tables = new LinkedHashSet<Table>();
@@ -36,54 +35,52 @@ public class Database implements Serializable {
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
-	/** Database sequences */
-	private Set<Sequence> sequences = new LinkedHashSet<Sequence>();
-	
 	/** Excluded tables */
 	private Set<String> excludeTables;
 
-	public Database(String name, Schema schema, Set<Table> tables) {
-		Assert.notNull(tables, "tables required");
-		this.name = name;
-		this.schema = schema;
-		this.tables = tables;
-		initialize();
+	Database() {
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public JavaPackage getDestinationPackage() {
+		return destinationPackage;
+	}
+
+	public void setDestinationPackage(JavaPackage destinationPackage) {
+		this.destinationPackage = destinationPackage;
+	}
+
 	public Schema getSchema() {
-		return schema;
+		return new Schema(name);
 	}
 
 	public Set<Table> getTables() {
 		return Collections.unmodifiableSet(tables);
 	}
-	
+
 	public Set<String> getTableNames() {
 		Set<String> tableNames = new LinkedHashSet<String>();
-		for (Table table: tables) {
+		for (Table table : tables) {
 			tableNames.add(table.getName());
 		}
 		return Collections.unmodifiableSet(tableNames);
 	}
 
-	public Set<Sequence> getSequences() {
-		return Collections.unmodifiableSet(sequences);
+	public void setTables(Set<Table> tables) {
+		Assert.notNull(tables, "tables required");
+		this.tables = tables;
 	}
 
-	public void setSequences(Set<Sequence> sequences) {
-		this.sequences = sequences;
-	}
-
-	public Set<String> getExcludeTables() {
-		return excludeTables;
-	}
-
-	public void setExcludeTables(Set<String> excludeTables) {
-		this.excludeTables = excludeTables;
+	public boolean addTable(Table table) {
+		Assert.notNull(table, "table required");
+		return tables.add(table);
 	}
 
 	public boolean hasTables() {
@@ -97,6 +94,22 @@ public class Database implements Serializable {
 			}
 		}
 		return null;
+	}
+
+	public Set<String> getExcludeTables() {
+		return excludeTables;
+	}
+
+	public String getExcludeTablesStr() {
+		return StringUtils.collectionToCommaDelimitedString(excludeTables);
+	}
+
+	void setExcludeTables(Set<String> excludeTables) {
+		this.excludeTables = excludeTables;
+	}
+
+	void setExcludeTables(String excludeTablesStr) {
+		this.excludeTables = StringUtils.commaDelimitedListToSet(excludeTablesStr);
 	}
 
 	public Set<JoinTable> getJoinTables() {
@@ -115,10 +128,10 @@ public class Database implements Serializable {
 	/**
 	 * Initialises the model by establishing the relationships between elements in this model eg. in foreign keys etc.
 	 */
-	private void initialize() {
+	void initialize() {
 		for (Table table : tables) {
 			initializeColumns(table);
-			initializeForeignKeys(table);
+			initializeImportedKeys(table);
 			initializeExportedKeys(table);
 			initializeIndices(table);
 			addJoinTables(table);
@@ -131,12 +144,12 @@ public class Database implements Serializable {
 		}
 	}
 
-	private void initializeForeignKeys(Table table) {
+	private void initializeImportedKeys(Table table) {
 		Map<String, Short> keySequenceMap = new LinkedHashMap<String, Short>();
 		Short keySequence = null;
-		Map<Column, SortedSet<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, SortedSet<ForeignKey>>();
+		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
 
-		for (ForeignKey foreignKey : table.getForeignKeys()) {
+		for (ForeignKey foreignKey : table.getImportedKeys()) {
 			foreignKey.setTable(table);
 
 			if (foreignKey.getForeignTable() == null) {
@@ -149,7 +162,7 @@ public class Database implements Serializable {
 						keySequenceMap.put(foreignTableName, keySequence);
 					}
 					foreignKey.setForeignTable(targetTable);
-					if (table.getForeignKeyCountByForeignTableName(foreignTableName) > 1) {
+					if (table.getImportedKeyCountByForeignTableName(foreignTableName) > 1) {
 						keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
 					}
 					foreignKey.setKeySequence(keySequence);
@@ -161,8 +174,8 @@ public class Database implements Serializable {
 					Column localColumn = table.findColumn(reference.getLocalColumnName());
 					if (localColumn != null) {
 						reference.setLocalColumn(localColumn);
-						
-						SortedSet<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new TreeSet<ForeignKey>(new ForeignKeyComparator());
+
+						Set<ForeignKey> fkSet = repeatedColumns.containsKey(localColumn) ? repeatedColumns.get(localColumn) : new LinkedHashSet<ForeignKey>();
 						fkSet.add(foreignKey);
 						repeatedColumns.put(localColumn, fkSet);
 					}
@@ -175,14 +188,14 @@ public class Database implements Serializable {
 				}
 			}
 		}
-		
+
 		// Mark repeated columns with insertable = false and updatable = false
-		for (Map.Entry<Column, SortedSet<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
+		for (Map.Entry<Column, Set<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
 			Set<ForeignKey> foreignKeys = entrySet.getValue();
 			if (foreignKeys.size() > 1) {
 				fk: for (ForeignKey foreignKey : foreignKeys) {
 					if (foreignKey.getReferenceCount() == 1) {
-						Reference reference = foreignKey.getReferences().first();
+						Reference reference = foreignKey.getReferences().iterator().next();
 						reference.setInsertableOrUpdatable(false);
 						break fk;
 					} else {
@@ -259,11 +272,11 @@ public class Database implements Serializable {
 	 * To be identified as a many-to-many join table, the table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns.
 	 */
 	private void addJoinTables(Table table) {
-		boolean equals = table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getForeignKeyCount() == 2 && table.getPrimaryKeyCount() == table.getForeignKeyCount();
+		boolean equals = table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getImportedKeyCount() == 2 && table.getPrimaryKeyCount() == table.getImportedKeyCount();
 		Iterator<Column> iter = table.getColumns().iterator();
 		while (equals && iter.hasNext()) {
 			Column column = iter.next();
-			equals &= table.findForeignKeyByLocalColumnName(column.getName()) != null;
+			equals &= table.findImportedKeyByLocalColumnName(column.getName()) != null;
 		}
 		if (equals) {
 			joinTables.add(new JoinTable(table));
@@ -276,7 +289,7 @@ public class Database implements Serializable {
 			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
 			return outputStream.toString();
 		} else {
-			return "Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive";
+			return "Database " + name + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive";
 		}
 	}
 }

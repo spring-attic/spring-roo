@@ -3,8 +3,6 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.springframework.roo.support.util.Assert;
 
@@ -15,17 +13,17 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Table implements Serializable {
-	private static final long serialVersionUID = 6223184549205869347L;
+	private static final long serialVersionUID = 8765395915966846012L;
 	private String catalog;
 	private Schema schema;
 	private String name;
 	private String description;
-	private SortedSet<Column> columns = new TreeSet<Column>(new ColumnComparator());
-	private SortedSet<ForeignKey> foreignKeys = new TreeSet<ForeignKey>(new ForeignKeyComparator());
+	private Set<Column> columns = new LinkedHashSet<Column>();
+	private Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<Index> indices = new LinkedHashSet<Index>();
 
-	public Table() {
+	Table() {
 	}
 
 	public String getCatalog() {
@@ -60,7 +58,7 @@ public class Table implements Serializable {
 		this.description = description;
 	}
 
-	public SortedSet<Column> getColumns() {
+	public Set<Column> getColumns() {
 		return columns;
 	}
 
@@ -101,26 +99,26 @@ public class Table implements Serializable {
 		return getPrimaryKeys().size();
 	}
 
-	public SortedSet<ForeignKey> getForeignKeys() {
-		return foreignKeys;
+	public Set<ForeignKey> getImportedKeys() {
+		return importedKeys;
 	}
 
-	public ForeignKey getForeignKey(String name) {
-		for (ForeignKey foreignKey : foreignKeys) {
+	public int getImportedKeyCount() {
+		return importedKeys.size();
+	}
+
+	public ForeignKey getImportedKey(String name) {
+		for (ForeignKey foreignKey : importedKeys) {
 			if (foreignKey.getName().equalsIgnoreCase(name)) {
 				return foreignKey;
 			}
 		}
 		return null;
-
-	}
-	public int getForeignKeyCount() {
-		return foreignKeys.size();
 	}
 
-	public int getForeignKeyCountByForeignTableName(String foreignTableName) {
+	public int getImportedKeyCountByForeignTableName(String foreignTableName) {
 		int count = 0;
-		for (ForeignKey foreignKey : foreignKeys) {
+		for (ForeignKey foreignKey : importedKeys) {
 			if (foreignKey.getForeignTableName().equalsIgnoreCase(foreignTableName)) {
 				count++;
 			}
@@ -128,18 +126,18 @@ public class Table implements Serializable {
 		return count;
 	}
 
-	public boolean addForeignKeys(Set<ForeignKey> foreignKeys) {
+	public boolean addImportedKeys(Set<ForeignKey> foreignKeys) {
 		Assert.notNull(foreignKeys, "Foreign keys required");
-		return this.foreignKeys.addAll(foreignKeys);
+		return this.importedKeys.addAll(foreignKeys);
 	}
 
-	public boolean addForeignKey(ForeignKey foreignKey) {
+	public boolean addImportedKey(ForeignKey foreignKey) {
 		Assert.notNull(foreignKey, "Foreign key required");
-		return foreignKeys.add(foreignKey);
+		return importedKeys.add(foreignKey);
 	}
 
-	public ForeignKey findForeignKeyByLocalColumnName(String localColumnName) {
-		for (ForeignKey foreignKey : foreignKeys) {
+	public ForeignKey findImportedKeyByLocalColumnName(String localColumnName) {
+		for (ForeignKey foreignKey : importedKeys) {
 			for (Reference reference : foreignKey.getReferences()) {
 				if (reference.getLocalColumnName().equalsIgnoreCase(localColumnName)) {
 					return foreignKey;
@@ -148,9 +146,13 @@ public class Table implements Serializable {
 		}
 		return null;
 	}
-	
+
 	public Set<ForeignKey> getExportedKeys() {
 		return exportedKeys;
+	}
+
+	public int getExportedKeyCount() {
+		return exportedKeys.size();
 	}
 
 	public int getExportedKeyCountByForeignTableName(String foreignTableName) {
@@ -199,7 +201,7 @@ public class Table implements Serializable {
 	}
 
 	public Index findUniqueReference(String uniqueColumnName) {
-		for (Index index : indices) {			
+		for (Index index : indices) {
 			if (index.isUnique()) {
 				for (IndexColumn column : index.getColumns()) {
 					if (column.getName().equalsIgnoreCase(uniqueColumnName)) {
@@ -248,6 +250,6 @@ public class Table implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Table [name=%s, catalog=%s, schema=%s, description=%s, columns=%s, foreignKeys=%s, exportedKeys=%s, indices=%s]", name, catalog, schema.getName(), description, columns, foreignKeys, exportedKeys, indices);
+		return String.format("Table [name=%s, catalog=%s, schema=%s, description=%s, columns=%s, importedKeys=%s, exportedKeys=%s, indices=%s]", name, catalog, (schema != null ? schema.getName() : ""), description, columns, importedKeys, exportedKeys, indices);
 	}
 }

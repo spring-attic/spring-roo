@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.jvnet.inflector.Noun;
@@ -170,7 +171,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add unique one-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
-		for (ForeignKey foreignKey : table.getForeignKeys()) {
+		for (ForeignKey foreignKey : table.getImportedKeys()) {
 			if (isOneToOne(table, foreignKey)) {
 				String foreignTableName = foreignKey.getForeignTableName();
 				Short keySequence = foreignKey.getKeySequence();
@@ -201,7 +202,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					Table foreignTable = database.findTable(foreignTableName);
 					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 
-					if (isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
+					if (isOneToOne(foreignTable, foreignTable.getImportedKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(foreignTableName) + fieldSuffix);
@@ -235,13 +236,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 					Table foreignTable = database.findTable(foreignTableName);
 					Assert.notNull(foreignTable, "Related table '" + foreignTableName + "' could not be found but was referenced by table '" + table.getName() + "'");
 
-					if (!isOneToOne(foreignTable, foreignTable.getForeignKey(exportedKey.getName()))) {
+					if (!isOneToOne(foreignTable, foreignTable.getImportedKey(exportedKey.getName()))) {
 						Short keySequence = exportedKey.getKeySequence();
 						String fieldSuffix = keySequence != null && keySequence > 0 ? String.valueOf(keySequence) : "";
 						JavaSymbolName fieldName = new JavaSymbolName(getInflectorPlural(dbreTypeResolutionService.suggestFieldName(foreignTableName)) + fieldSuffix);
 						JavaSymbolName mappedByFieldName = null;
 						if (exportedKey.getReferenceCount() == 1) {
-							Reference reference = exportedKey.getReferences().first();
+							Reference reference = exportedKey.getReferences().iterator().next();
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getForeignColumnName()));
 						} else {
 							mappedByFieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(table.getName()) + fieldSuffix);
@@ -267,13 +268,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add unique many-to-one fields
 		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
-		for (ForeignKey foreignKey : table.getForeignKeys()) {
+		for (ForeignKey foreignKey : table.getImportedKeys()) {
 			if (!isOneToOne(table, foreignKey)) {
 				// Assume many-to-one multiplicity
 				JavaSymbolName fieldName = null;
 				String foreignTableName = foreignKey.getForeignTableName();
 				if (foreignKey.getReferenceCount() == 1) {
-					Reference reference = foreignKey.getReferences().first();
+					Reference reference = foreignKey.getReferences().iterator().next();
 					fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(reference.getLocalColumnName()));
 				} else {
 					Short keySequence = foreignKey.getKeySequence();
@@ -316,7 +317,8 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add "joinColumns" attribute containing nested @JoinColumn annotations
 		List<NestedAnnotationAttributeValue> joinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		SortedSet<Reference> firstKeyReferences = joinTable.getTable().getForeignKeys().first().getReferences();
+		Iterator<ForeignKey> iter = joinTable.getTable().getImportedKeys().iterator();
+		Set<Reference> firstKeyReferences = iter.next().getReferences();
 		for (Reference reference : firstKeyReferences) {
 			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (firstKeyReferences.size() > 1));
 			joinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
@@ -325,7 +327,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		// Add "inverseJoinColumns" attribute containing nested @JoinColumn annotations
 		List<NestedAnnotationAttributeValue> inverseJoinColumnArrayValues = new ArrayList<NestedAnnotationAttributeValue>();
-		SortedSet<Reference> lastLastReferences = joinTable.getTable().getForeignKeys().last().getReferences();
+		Set<Reference> lastLastReferences = iter.next().getReferences();
 		for (Reference reference : lastLastReferences) {
 			AnnotationMetadataBuilder joinColumnBuilder = getJoinColumnAnnotation(reference, (lastLastReferences.size() > 1));
 			inverseJoinColumnArrayValues.add(new NestedAnnotationAttributeValue(new JavaSymbolName(VALUE), joinColumnBuilder.build()));
@@ -368,7 +370,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return fieldBuilder.build();
 	}
 
-	private FieldMetadata getOneToOneOrManyToOneField(JavaSymbolName fieldName, JavaType fieldType, SortedSet<Reference> references, JavaType annotationType, boolean referencedColumn) {
+	private FieldMetadata getOneToOneOrManyToOneField(JavaSymbolName fieldName, JavaType fieldType, Set<Reference> references, JavaType annotationType, boolean referencedColumn) {
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
@@ -377,7 +379,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		if (references.size() == 1) {
 			// Add @JoinColumn annotation
-			annotations.add(getJoinColumnAnnotation(references.first(), referencedColumn, fieldType));
+			annotations.add(getJoinColumnAnnotation(references.iterator().next(), referencedColumn, fieldType));
 		} else {
 			// Add @JoinColumns annotation
 			annotations.add(getJoinColumnsAnnotation(references, fieldType));
@@ -483,7 +485,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		joinColumnBuilder.addBooleanAttribute("updatable", false);
 	}
 
-	private AnnotationMetadataBuilder getJoinColumnsAnnotation(SortedSet<Reference> references, JavaType fieldType) {
+	private AnnotationMetadataBuilder getJoinColumnsAnnotation(Set<Reference> references, JavaType fieldType) {
 		List<NestedAnnotationAttributeValue> arrayValues = new ArrayList<NestedAnnotationAttributeValue>();
 
 		for (Reference reference : references) {
@@ -507,24 +509,30 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addOtherFields(JavaType javaType, Table table) {
-		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
+        Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
 		for (Column column : table.getColumns()) {
-			String columnName = column.getName();
-			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(column.getName()));
-			boolean isCompositeKeyField = isCompositeKeyField(fieldName, javaType);
 			FieldMetadata field = null;
+			String columnName = column.getName();
+			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(columnName));
 
-			if ((isEmbeddedIdField(fieldName) && !isCompositeKeyField) || (isIdField(fieldName) && !column.isPrimaryKey())) {
-				fieldName = getUniqueFieldName(fieldName);
-				field = getField(fieldName, column);
-				uniqueFields.put(fieldName, field);
-			} else if (table.findForeignKeyByLocalColumnName(columnName) != null) {
-				field = null;
-			} else if (!isCompositeKeyField && !isVersionField(column.getName())) {
-				field = getField(fieldName, column);
-				uniqueFields.put(fieldName, field);
+			boolean isCompositeKeyField = isCompositeKeyField(fieldName, javaType);
+			boolean isIdFieldDeclaredOnGovernor = isIdField(fieldName) && !column.isPrimaryKey();
+			boolean isVersionFieldDeclaredOnGovernor = isCompositeKeyField || isVersionField(column.getName());
+			boolean isForeignKey = table.findImportedKeyByLocalColumnName(columnName) != null;
+
+			if (isVersionFieldDeclaredOnGovernor && !isIdFieldDeclaredOnGovernor || isForeignKey) {
+				continue;
 			}
+
+			boolean isEmdeddedIdFieldDeclaredOnGovernor = !isCompositeKeyField && isEmbeddedIdField(fieldName);
+
+			if (isEmdeddedIdFieldDeclaredOnGovernor) {
+				fieldName = getUniqueFieldName(fieldName);
+			}
+
+			field = getField(fieldName, column);
+			uniqueFields.put(fieldName, field);
 		}
 
 		for (FieldMetadata field : uniqueFields.values()) {

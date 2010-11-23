@@ -1,8 +1,10 @@
 package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Represents a database foreign key.
@@ -13,10 +15,13 @@ import java.util.TreeSet;
  * @since 1.1
  */
 public class ForeignKey implements Serializable {
-	private static final long serialVersionUID = 8452469736391851653L;
+	private static final long serialVersionUID = -45977088025460000L;
 
 	/** The name of the foreign key, may be <code>null</code>. */
 	private String name;
+	
+	/** Whether the foreign key is an imported or exported key */
+	private boolean exported;
 
 	/** The owning table. */
 	private Table table;
@@ -37,9 +42,9 @@ public class ForeignKey implements Serializable {
 	private Short keySequence;
 
 	/** The references between local and remote columns. */
-	private SortedSet<Reference> references = new TreeSet<Reference>(new ReferenceComparator());
+	private Set<Reference> references = new LinkedHashSet<Reference>();
 
-	public ForeignKey(String name, String foreignTableName) {
+	ForeignKey(String name, String foreignTableName) {
 		this.name = name;
 		this.foreignTableName = foreignTableName;
 	}
@@ -48,8 +53,12 @@ public class ForeignKey implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public boolean isExported() {
+		return exported;
+	}
+
+	public void setExported(boolean exported) {
+		this.exported = exported;
 	}
 
 	public Table getTable() {
@@ -70,10 +79,6 @@ public class ForeignKey implements Serializable {
 
 	public String getForeignTableName() {
 		return foreignTableName;
-	}
-
-	public void setForeignTableName(String foreignTableName) {
-		this.foreignTableName = foreignTableName;
 	}
 
 	public CascadeAction getOnUpdate() {
@@ -100,7 +105,7 @@ public class ForeignKey implements Serializable {
 		this.keySequence = keySequence;
 	}
 
-	public SortedSet<Reference> getReferences() {
+	public Set<Reference> getReferences() {
 		return references;
 	}
 
@@ -109,9 +114,8 @@ public class ForeignKey implements Serializable {
 	}
 
 	public void addReference(Reference reference) {
-		if (reference != null) {
-			references.add(reference);
-		}
+		Assert.notNull(reference, "Reference required");
+		references.add(reference);
 	}
 
 	public boolean hasLocalColumn(Column column) {
@@ -123,6 +127,7 @@ public class ForeignKey implements Serializable {
 		return false;
 	}
 
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -131,35 +136,29 @@ public class ForeignKey implements Serializable {
 		return result;
 	}
 
+	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (obj == null)
 			return false;
-		}
-		if (!(obj instanceof ForeignKey)) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
 		ForeignKey other = (ForeignKey) obj;
 		if (foreignTableName == null) {
-			if (other.foreignTableName != null) {
+			if (other.foreignTableName != null)
 				return false;
-			}
-		} else if (!foreignTableName.equals(other.foreignTableName)) {
+		} else if (!foreignTableName.equals(other.foreignTableName))
 			return false;
-		}
 		if (name == null) {
-			if (other.name != null) {
+			if (other.name != null)
 				return false;
-			}
-		} else if (!name.equals(other.name)) {
+		} else if (!name.equals(other.name))
 			return false;
-		}
 		return true;
 	}
 
 	public String toString() {
-		return String.format("ForeignKey [name=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, keySequence=%s, references=%s]", name, foreignTableName, onUpdate, onDelete, keySequence, references);
+		return String.format("ForeignKey [name=%s, exported=%s, foreignTable=%s, onUpdate=%s, onDelete=%s, keySequence=%s, references=%s]", name, exported, foreignTableName, onUpdate, onDelete, keySequence, references);
 	}
 }

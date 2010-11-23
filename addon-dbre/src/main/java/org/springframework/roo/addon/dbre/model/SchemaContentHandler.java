@@ -1,6 +1,5 @@
-package org.springframework.roo.addon.dbre.util.handlers;
+package org.springframework.roo.addon.dbre.model;
 
-import org.springframework.roo.addon.dbre.model.Schema;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
@@ -27,7 +26,7 @@ public final class SchemaContentHandler extends DefaultHandler {
 	@Override 
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals("database")) {
-			schema = new Schema(attributes.getValue("schema"));
+			schema = new Schema(attributes.getValue("name"));
 		}
 	}
 }

@@ -1,8 +1,7 @@
-package org.springframework.roo.addon.dbre.jdbc;
+package org.springframework.roo.addon.dbre.model;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
@@ -11,18 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.roo.addon.dbre.model.CascadeAction;
-import org.springframework.roo.addon.dbre.model.Column;
-import org.springframework.roo.addon.dbre.model.ColumnType;
-import org.springframework.roo.addon.dbre.model.Database;
-import org.springframework.roo.addon.dbre.model.ForeignKey;
-import org.springframework.roo.addon.dbre.model.Index;
-import org.springframework.roo.addon.dbre.model.IndexColumn;
-import org.springframework.roo.addon.dbre.model.Reference;
-import org.springframework.roo.addon.dbre.model.Schema;
-import org.springframework.roo.addon.dbre.model.Sequence;
-import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.dbre.model.TableType;
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -121,10 +108,13 @@ public class DatabaseIntrospector {
 		return schemas;
 	}
 
-	public Database getDatabase() throws SQLException {
-		Database database = new Database(getCatalog(), schema, readTables());
-		database.setSequences(readSequences());
+	public Database createDatabase() throws SQLException {
+		String name = StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
+		Database database = new Database();
+		database.setName(name);
+		database.setTables(readTables());
 		database.setExcludeTables(excludeTables);
+		database.initialize();
 		return database;
 	}
 
@@ -151,8 +141,8 @@ public class DatabaseIntrospector {
 					table.setDescription(rs.getString("REMARKS"));
 
 					table.addColumns(readColumns());
-					table.addForeignKeys(readImportedKeys());
-					table.addExportedKeys(readExportedKeys());
+					table.addImportedKeys(readForeignKeys(false));
+					table.addExportedKeys(readForeignKeys(true));
 					table.addIndices(readIndices());
 
 					for (String columnName : readPrimaryKeyNames()) {
@@ -194,7 +184,7 @@ public class DatabaseIntrospector {
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
 				column.setTypeCode(rs.getInt("DATA_TYPE"));
 				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
-				
+
 				int columnSize = rs.getInt("COLUMN_SIZE");
 				switch (column.getType()) {
 					case DECIMAL:
@@ -214,9 +204,8 @@ public class DatabaseIntrospector {
 						column.setLength(columnSize);
 						break;
 				}
-				
+
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
-				column.setOrdinalPosition(rs.getInt("ORDINAL_POSITION"));
 
 				columns.add(column);
 			}
@@ -227,25 +216,31 @@ public class DatabaseIntrospector {
 		return columns;
 	}
 
-	private Set<ForeignKey> readImportedKeys() throws SQLException {
+	private Set<ForeignKey> readForeignKeys(boolean exported) throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
-		ResultSet rs = databaseMetaData.getImportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
+		ResultSet rs;
+		if (exported) {
+			rs = databaseMetaData.getExportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
+		} else {
+			rs = databaseMetaData.getImportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
+		}
+
 		try {
 			while (rs.next()) {
 				String name = rs.getString("FK_NAME");
-				String foreignTableName = rs.getString("PKTABLE_NAME");
+				String foreignTableName = rs.getString(exported ? "FKTABLE_NAME" : "PKTABLE_NAME");
 				String key = name + "_" + foreignTableName;
 
 				if (!hasExcludedTable(foreignTableName)) {
 					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
 					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
 					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
+					foreignKey.setExported(exported);
 
-					Reference reference = new Reference();
-					reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
-					reference.setLocalColumnName(rs.getString("FKCOLUMN_NAME"));
-					reference.setForeignColumnName(rs.getString("PKCOLUMN_NAME"));
+					String localColumnName = rs.getString(exported ? "PKCOLUMN_NAME" : "FKCOLUMN_NAME");
+					String foreignColumnName = rs.getString(exported ? "FKCOLUMN_NAME" : "PKCOLUMN_NAME");
+					Reference reference = new Reference(localColumnName, foreignColumnName);
 
 					if (foreignKeys.containsKey(key)) {
 						foreignKeys.get(key).addReference(reference);
@@ -284,41 +279,6 @@ public class DatabaseIntrospector {
 				cascadeAction = CascadeAction.NONE;
 		}
 		return cascadeAction;
-	}
-
-	private Set<ForeignKey> readExportedKeys() throws SQLException {
-		Map<String, ForeignKey> exportedKeys = new LinkedHashMap<String, ForeignKey>();
-
-		ResultSet rs = databaseMetaData.getExportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
-		try {
-			while (rs.next()) {
-				String name = rs.getString("FK_NAME");
-				String foreignTableName = rs.getString("FKTABLE_NAME");
-				String key = name + "_" + foreignTableName;
-
-				if (!hasExcludedTable(foreignTableName)) {
-					ForeignKey foreignKey = new ForeignKey(name, foreignTableName);
-					foreignKey.setOnUpdate(getCascadeAction(rs.getShort("UPDATE_RULE")));
-					foreignKey.setOnDelete(getCascadeAction(rs.getShort("DELETE_RULE")));
-
-					Reference reference = new Reference();
-					reference.setSequenceNumber(rs.getShort("KEY_SEQ"));
-					reference.setLocalColumnName(rs.getString("PKCOLUMN_NAME"));
-					reference.setForeignColumnName(rs.getString("FKCOLUMN_NAME"));
-
-					if (exportedKeys.containsKey(key)) {
-						exportedKeys.get(key).addReference(reference);
-					} else {
-						foreignKey.addReference(reference);
-						exportedKeys.put(key, foreignKey);
-					}
-				}
-			}
-		} finally {
-			rs.close();
-		}
-
-		return new LinkedHashSet<ForeignKey>(exportedKeys.values());
 	}
 
 	private boolean hasExcludedTable(String tableName) {
@@ -363,8 +323,6 @@ public class DatabaseIntrospector {
 					index.setUnique(!rs.getBoolean("NON_UNIQUE"));
 
 					IndexColumn indexColumn = new IndexColumn(rs.getString("COLUMN_NAME"));
-					indexColumn.setOrdinalPosition(rs.getShort("ORDINAL_POSITION"));
-
 					index.addColumn(indexColumn);
 
 					indices.add(index);
@@ -401,36 +359,6 @@ public class DatabaseIntrospector {
 		return columnNames;
 	}
 
-	private Set<Sequence> readSequences() {
-		Set<Sequence> sequences = new LinkedHashSet<Sequence>();
-		Dialect dialect = getDialect();
-		if (dialect != null && dialect.supportsSequences()) {
-			PreparedStatement pstmt = null;
-			ResultSet rs = null;
-			try {
-				pstmt = connection.prepareStatement(dialect.getQuerySequencesString(schema));
-				rs = pstmt.executeQuery();
-				while (rs.next()) {
-					sequences.add(new Sequence(rs.getString(1)));
-				}
-			} catch (SQLException ignored) {} 
-			finally {
-				if (rs != null) {
-					try {
-						rs.close();
-					} catch (SQLException ignored) {}
-				}
-				if (pstmt != null) {
-					try {
-						pstmt.close();
-					} catch (SQLException ignored) {}
-				}
-			}
-		}
-		return sequences;
-	}
-	
-	
 	private String getCatalog() throws SQLException {
 		if (databaseMetaData.storesLowerCaseIdentifiers()) {
 			return StringUtils.toLowerCase(catalogName);
@@ -439,8 +367,8 @@ public class DatabaseIntrospector {
 		} else {
 			return catalogName;
 		}
-		
 	}
+
 	private String getSchemaPattern() throws SQLException {
 		if (databaseMetaData.storesLowerCaseIdentifiers()) {
 			return StringUtils.toLowerCase(getSchemaName());
@@ -460,7 +388,7 @@ public class DatabaseIntrospector {
 			return tableName;
 		}
 	}
-	
+
 	private String getColumnNamePattern() throws SQLException {
 		if (databaseMetaData.storesLowerCaseIdentifiers()) {
 			return StringUtils.toLowerCase(columnName);
@@ -471,6 +399,7 @@ public class DatabaseIntrospector {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private Dialect getDialect() {
 		try {
 			String productName = databaseMetaData.getDatabaseProductName();

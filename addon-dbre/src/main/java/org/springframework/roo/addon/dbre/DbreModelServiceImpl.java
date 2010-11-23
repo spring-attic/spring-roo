@@ -25,10 +25,10 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.dbre.jdbc.ConnectionProvider;
-import org.springframework.roo.addon.dbre.jdbc.DatabaseIntrospector;
 import org.springframework.roo.addon.dbre.model.Database;
+import org.springframework.roo.addon.dbre.model.DatabaseIntrospector;
+import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
-import org.springframework.roo.addon.dbre.util.DatabaseXmlUtils;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.process.manager.FileManager;
@@ -195,7 +195,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 				return cachedIntrospections.get(schema);
 			}
 
-			// Read the dbre xml file, and see if it is for this schema
+			// Read the .roo-dbre xml file, and see if it is for this schema
 			Database database = deserializeDatabaseMetadataIfPossible();
 			if (database != null && database.getSchema().equals(schema)) {
 				// The deserialized from disk database is the one we want, so cache it and get out of here....
@@ -211,7 +211,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		try {
 			connection = getConnection();
 			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, excludeTables);
-			Database database = introspector.getDatabase();
+			Database database = introspector.createDatabase();
 
 			if (safeMode) {
 				// Don't change anything else or notify anyone, so leave now
@@ -278,7 +278,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
-			return DatabaseXmlUtils.readSchemaUsingSaxFromInputStream(inputStream);
+			return DatabaseXmlUtils.readSchemaFromInputStream(inputStream);
 		} catch (Exception e) {
 			return null;
 		}
@@ -301,7 +301,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
-			return DatabaseXmlUtils.readExcludeTablesUsingSaxFromInputStream(inputStream);
+			return DatabaseXmlUtils.readExcludeTablesFromInputStream(inputStream);
 		} catch (Exception e) {
 			return null;
 		}
@@ -323,7 +323,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
-			return DatabaseXmlUtils.readDatabaseStructureUsingSaxFromInputStream(inputStream);
+			return DatabaseXmlUtils.readDatabaseStructureFromInputStream(inputStream);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
