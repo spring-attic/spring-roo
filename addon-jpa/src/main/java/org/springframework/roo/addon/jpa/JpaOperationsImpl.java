@@ -325,6 +325,7 @@ public class JpaOperationsImpl implements JpaOperations {
 				}
 				properties.appendChild(createPropertyElement("hibernate.hbm2ddl.auto", hbm2dll, persistence));
 				properties.appendChild(createPropertyElement("hibernate.ejb.naming_strategy", "org.hibernate.cfg.ImprovedNamingStrategy", persistence));
+				properties.appendChild(createPropertyElement("hibernate.connection.charSet", "UTF-8", persistence));
 				properties.appendChild(persistence.createComment(" Uncomment the following two properties for JBoss only ")); 
 				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.apply_to_ddl\" value=\"false\" /")); 
 				properties.appendChild(persistence.createComment(" property name=\"hibernate.validator.autoregister_listeners\" value=\"false\" /")); 

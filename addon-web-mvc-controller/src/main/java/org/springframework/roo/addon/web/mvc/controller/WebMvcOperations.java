@@ -14,8 +14,6 @@ public interface WebMvcOperations {
 	String CHARACTER_ENCODING_FILTER_NAME =	"CharacterEncodingFilter";
 	
 	String HTTP_METHOD_FILTER_NAME = "HttpMethodFilter";
-	
-	String URL_REWRITE_FILTER_NAME = "UrlRewriteFilter";
 
 	void installMinmalWebArtefacts();
 	
