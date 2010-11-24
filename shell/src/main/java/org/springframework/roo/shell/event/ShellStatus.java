@@ -51,6 +51,7 @@ public class ShellStatus {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
 		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		return result;
 	}
@@ -64,8 +65,17 @@ public class ShellStatus {
 		if (getClass() != obj.getClass())
 			return false;
 		ShellStatus other = (ShellStatus) obj;
-		if (status != other.status)
+		if (message == null) {
+			if (other.message != null)
+				return false;
+		} else if (!message.equals(other.message))
+			return false;
+		if (status == null) {
+			if (other.status != null)
+				return false;
+		} else if (!status.equals(other.status))
 			return false;
 		return true;
 	}
+
 }
