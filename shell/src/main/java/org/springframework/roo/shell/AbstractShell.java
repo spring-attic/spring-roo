@@ -126,6 +126,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 			flash(Level.INFO, "", MY_SLOT);
     	}
 
+    	ParseResult parseResult = null;
 		try {
 			// We support simple block comments; ie a single pair per line
 			if (!inBlockComment && line.contains("/*")) {
@@ -156,7 +157,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				setShellStatus(Status.EXECUTION_SUCCESS);
 				return true;
 			}
-			ParseResult parseResult = getParser().parse(line);
+			parseResult = getParser().parse(line);
 			if (parseResult == null) {
 				return false;
 			} else {
@@ -176,10 +177,10 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				}
 			}
 			logCommandIfRequired(line, true);
-			setShellStatus(Status.EXECUTION_SUCCESS, line);
+			setShellStatus(Status.EXECUTION_SUCCESS, line, parseResult);
 			return true;
 		} catch (RuntimeException e) {
-	    	setShellStatus(Status.EXECUTION_RESULT_PROCESSING);
+	    	setShellStatus(Status.EXECUTION_FAILED, line, parseResult);
 			// We rely on execution strategy to log it
 			// Throwable root = ExceptionUtils.extractRootCause(ex);
 			// logger.log(Level.FINE, root.getMessage());
@@ -188,7 +189,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 	    	} catch (Exception ignored) {}
 			return false;
 		} finally {
-			setShellStatus(Status.EXECUTION_FAILED, line);
+			setShellStatus(Status.USER_INPUT);
 		}
 	}
 	

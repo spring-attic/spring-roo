@@ -1,5 +1,7 @@
 package org.springframework.roo.shell.event;
 
+import org.springframework.roo.shell.ParseResult;
+
 /**
  * Represents the different states that a shell can legally be in.
  * 
@@ -17,6 +19,7 @@ public class ShellStatus {
 	
 	private Status status;
 	private String message = "";
+	private ParseResult parseResult;
 	
 	public enum Status {
 		STARTING,
@@ -34,9 +37,10 @@ public class ShellStatus {
 		this.status = status;
 	}
 	
-	ShellStatus(Status status, String msg) {
+	ShellStatus(Status status, String msg, ParseResult parseResult) {
 		this.status = status;
 		this.message = msg;
+		this.parseResult = parseResult;
 	}
 
 	public String getMessage() {
@@ -46,12 +50,18 @@ public class ShellStatus {
 	public Status getStatus() {
 		return status;
 	}
+	
+	public final ParseResult getParseResult() {
+		return parseResult;
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		result = prime * result
+				+ ((parseResult == null) ? 0 : parseResult.hashCode());
 		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		return result;
 	}
@@ -69,6 +79,11 @@ public class ShellStatus {
 			if (other.message != null)
 				return false;
 		} else if (!message.equals(other.message))
+			return false;
+		if (parseResult == null) {
+			if (other.parseResult != null)
+				return false;
+		} else if (!parseResult.equals(other.parseResult))
 			return false;
 		if (status == null) {
 			if (other.status != null)

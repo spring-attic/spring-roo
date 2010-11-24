@@ -3,6 +3,7 @@ package org.springframework.roo.shell.event;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import org.springframework.roo.shell.ParseResult;
 import org.springframework.roo.shell.event.ShellStatus.Status;
 import org.springframework.roo.support.util.Assert;
 
@@ -39,10 +40,10 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 	}
 	
 	protected void setShellStatus(Status shellStatus) {
-		setShellStatus(shellStatus, null);
+		setShellStatus(shellStatus, null, null);
 	}
 	
-	protected void setShellStatus(Status shellStatus, String msg) {
+	protected void setShellStatus(Status shellStatus, String msg, ParseResult parseResult) {
 		Assert.notNull(shellStatus, "Shell status required");
 		
 		synchronized (this.shellStatus) {
@@ -50,7 +51,7 @@ public abstract class AbstractShellStatusPublisher implements ShellStatusProvide
 			if (msg == null || msg.length() == 0) {
 				st = new ShellStatus(shellStatus);
 			} else {
-				st = new ShellStatus(shellStatus, msg);
+				st = new ShellStatus(shellStatus, msg, parseResult);
 			}
 			
 			if (this.shellStatus.equals(st)) {
