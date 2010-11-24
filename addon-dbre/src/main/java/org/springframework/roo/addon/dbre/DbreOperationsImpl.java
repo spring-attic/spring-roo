@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dbre;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -46,21 +47,22 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void displayDatabaseMetadata(Schema schema, File file) {
+		Assert.notNull(schema, "Schema required");
 		Database database = dbreModelService.refreshDatabaseSafely(schema);
 		if (database == null) {
-			throw new IllegalStateException("Cannot obtain database information for schema '" + schema + "'");
+			logger.warning("Cannot obtain database information for schema '" + schema + "'");
+			return;
+		} else if (!database.hasTables()) {
+			logger.warning("Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
+			return;
 		}
 		
-		if (file != null) {
-			try {
-				OutputStream outputStream = new FileOutputStream(file);
-				DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
-				logger.info("Database metadata written to file " + file.getAbsolutePath());
-			} catch (Exception e) {
-				throw new IllegalStateException(e);
-			}
-		} else {
-			logger.info(database.toString());
+		try {
+			OutputStream outputStream = file != null ? new FileOutputStream(file) : new ByteArrayOutputStream();
+			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
+			logger.info(file != null ? ("Database metadata written to file " + file.getAbsolutePath()) : outputStream.toString());
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 

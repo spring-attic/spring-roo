@@ -1,7 +1,5 @@
 package org.springframework.roo.addon.dbre.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
@@ -280,16 +278,6 @@ public class Database implements Serializable {
 		}
 		if (equals) {
 			joinTables.add(new JoinTable(table));
-		}
-	}
-
-	public String toString() {
-		if (hasTables()) {
-			OutputStream outputStream = new ByteArrayOutputStream();
-			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(this, outputStream);
-			return outputStream.toString();
-		} else {
-			return "Database " + name + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive";
 		}
 	}
 }
