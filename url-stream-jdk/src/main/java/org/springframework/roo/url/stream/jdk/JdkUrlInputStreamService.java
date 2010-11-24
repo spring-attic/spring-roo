@@ -2,15 +2,19 @@ package org.springframework.roo.url.stream.jdk;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.logging.Level;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.shell.osgi.AbstractFlashingObject;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.url.stream.UrlInputStreamService;
+import org.springframework.roo.url.stream.UrlInputStreamUtils;
+import org.springframework.uaa.client.UaaService;
+import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
  * Simple implementation of {@link UrlInputStreamService} that uses the JDK.
@@ -23,12 +27,32 @@ import org.springframework.roo.url.stream.UrlInputStreamService;
 @Service
 public class JdkUrlInputStreamService extends AbstractFlashingObject implements UrlInputStreamService {
 
+	@Reference private UaaService uaaService;
+	
 	public InputStream openConnection(URL httpUrl) throws IOException {
-		URLConnection connection = httpUrl.openConnection();
-		connection.setRequestProperty("user-agent", "roo-jdk-url-input-stream");
+		Assert.notNull(httpUrl, "HTTP URL is required");
+		Assert.isTrue(httpUrl.getProtocol().equals("http"), "Only HTTP is supported (not " + httpUrl + ")");
+		
+		// Fail if we're banned from accessing this domain
+		Assert.isTrue(getUrlCannotBeOpenedMessage(httpUrl) == null, UrlInputStreamUtils.SETUP_UAA_REQUIRED);
+		HttpURLConnection connection = (HttpURLConnection) httpUrl.openConnection();
+		
+		// Use UAA (we know UAA Terms of Use have been accepted by this point)
+		connection.setRequestProperty("user-agent", uaaService.toHttpUserAgentHeaderValue());
+		
 		return new ProgressIndicatingInputStream(connection);
 	}
 	
+	public String getUrlCannotBeOpenedMessage(URL httpUrl) {
+		if (UrlInputStreamUtils.isVMwareDomain(httpUrl)) {
+			if (uaaService.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || uaaService.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU) {
+				return UrlInputStreamUtils.SETUP_UAA_REQUIRED;
+			}
+		}
+		// No reason it shouldn't work
+		return null;
+	}
+
 	private class ProgressIndicatingInputStream extends InputStream {
 		private InputStream delegate;
 		private float totalSize;
@@ -37,7 +61,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 		private long lastNotified;
 		private String text;
 		
-		public ProgressIndicatingInputStream(URLConnection connection) throws IOException {
+		public ProgressIndicatingInputStream(HttpURLConnection connection) throws IOException {
 			Assert.notNull(connection, "URL Connection required");
 			this.totalSize = connection.getContentLength();
 			this.delegate = connection.getInputStream();
@@ -51,6 +75,11 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 				if (lastSlash > -1) {
 					this.text = this.text.substring(lastSlash+1);
 				}
+			}
+			
+			// Handle the response code
+			if (connection.getResponseCode() == 200) {
+				uaaService.clearIfPossible();
 			}
 		}
 

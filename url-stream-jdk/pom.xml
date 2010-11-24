@@ -56,5 +56,10 @@
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>
+        <!-- Spring User Agent Analysis (UAA) -->
+        <dependency>
+            <groupId>org.springframework.uaa</groupId>
+            <artifactId>org.springframework.uaa.client</artifactId>
+        </dependency>
     </dependencies>
 </project>
