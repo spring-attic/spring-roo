@@ -36,6 +36,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
+		
 		// We know governor type details are non-null and can be safely cast
 
 		// We need to parse the annotation, which we expect to be present
@@ -72,7 +73,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, memberDetailsScanner, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
 	}
 
 	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType) {

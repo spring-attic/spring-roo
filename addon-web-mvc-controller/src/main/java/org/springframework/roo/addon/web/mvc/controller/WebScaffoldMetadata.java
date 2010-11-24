@@ -42,6 +42,7 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
@@ -75,8 +76,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private Map<JavaType, String> pluralCache;
 	private JsonMetadata jsonMetadata;
 	private Logger log = Logger.getLogger(getClass().getName());
+	private MemberDetailsScanner detailsScanner;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, MemberDetailsScanner detailsScanner, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -85,6 +87,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.notNull(controllerOperations, "Controller operations required");
+		Assert.notNull(detailsScanner, "Member details scanner required");
 		if (!isValid()) {
 			return;
 		}
@@ -92,6 +95,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.annotationValues = annotationValues;
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
+		this.detailsScanner = detailsScanner;
 		this.entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
 			this.entityName = "_" + entityName;
@@ -201,8 +205,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(entityMetadata.getIdentifierField().getFieldType(), typeAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), firstResultAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), maxResultsAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), firstResultAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultsAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
 		MethodMetadata method = methodExists(methodName, paramTypes);
@@ -256,12 +260,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		maxResultsAnnotations.add(maxResultAnnotation.build());
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), firstResultAnnotations));
-		paramTypes.add(new AnnotatedJavaType(new JavaType("Integer"), maxResultsAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), firstResultAnnotations));
+		paramTypes.add(new AnnotatedJavaType(new JavaType(Integer.class.getName()), maxResultsAnnotations));
 		paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
 		
 		MethodMetadata method = methodExists(methodName, paramTypes);
-		if (method != null) return method;
+		if (method != null) {
+			return method;
+		}
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("page"));
@@ -1142,7 +1148,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getMethod(governorTypeDetails, methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		return MemberFindingUtils.getMethod(detailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails), methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 	
 	private String getShortName(JavaType type) {
