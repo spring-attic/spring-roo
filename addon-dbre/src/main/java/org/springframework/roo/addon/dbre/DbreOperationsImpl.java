@@ -100,6 +100,7 @@ public class DbreOperationsImpl implements DbreOperations {
 		boolean changed = false;
 		if (provider.contains("hibernate")) {
 			changed = setPropertyValue(root, propertyElement, "hibernate.hbm2ddl.auto", "validate");
+			changed |= setPropertyValue(root, propertyElement, "hibernate.ejb.naming_strategy", "org.hibernate.cfg.DefaultNamingStrategy");
 		} else if (provider.contains("openjpa")) {
 			changed = setPropertyValue(root, propertyElement, "openjpa.jdbc.SynchronizeMappings", "validate");
 		} else if (provider.contains("eclipse")) {
