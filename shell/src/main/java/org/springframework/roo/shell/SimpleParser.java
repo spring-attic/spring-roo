@@ -219,11 +219,14 @@ public class SimpleParser implements Parser {
 			// Check for options specified by the user but are unavailable for the command
 			Set<String> unavailableOptions = getSpecifiedUnavailableOptions(parameterAnnotations, options);
 			if (!unavailableOptions.isEmpty()) {
+				StringBuilder message = new StringBuilder();
 				if (unavailableOptions.size() == 1) {
-					logger.warning("Option '" + unavailableOptions.iterator().next() + "' is not available for this command");
+					message.append("Option '" + unavailableOptions.iterator().next() + "' is not available for this command. ");
 				} else {
-					logger.warning("Options " + StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'") + " are not available for this command");
+					message.append("Options " + StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'") + " are not available for this command. ");
 				}
+				message.append("Use tab assist or the \"help\" command to see the legal options for this command");
+				logger.warning(message.toString());
 				return null;
 			}
 
