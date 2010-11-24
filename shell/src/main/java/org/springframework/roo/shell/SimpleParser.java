@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,6 @@ public class SimpleParser implements Parser {
 					}
 				}
 			}
-
 		}
 		return methodTarget;
 	}
@@ -114,17 +114,9 @@ public class SimpleParser implements Parser {
 				logger.warning(ExceptionUtils.extractRootCause(e).getMessage());
 				return null;
 			}
-
-			for (Annotation[] annotations : parameterAnnotations) {
-				CliOption cliOption = null;
-
-				for (Annotation a : annotations) {
-					if (a instanceof CliOption) {
-						cliOption = (CliOption) a;
-					}
-				}
-				Assert.notNull(cliOption, "CliOption not found for parameter '" + annotations + "'");
-
+			
+			Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);	
+			for (CliOption cliOption : cliOptions) {
 				Class<?> requiredType = methodTarget.method.getParameterTypes()[arguments.size()];
 
 				if (cliOption.systemProvided()) {
@@ -222,11 +214,51 @@ public class SimpleParser implements Parser {
 					CliOptionContext.resetOptionContext();
 					CliSimpleParserContext.resetSimpleParserContext();
 				}
+			}
 
+			// Check for options specified by the user but are unavailable for the command
+			Set<String> unavailableOptions = getSpecifiedUnavailableOptions(parameterAnnotations, options);
+			if (!unavailableOptions.isEmpty()) {
+				if (unavailableOptions.size() == 1) {
+					logger.warning("Option '" + unavailableOptions.iterator().next() + "' is not available for this command");
+				} else {
+					logger.warning("Options " + StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'") + " are not available for this command");
+				}
+				return null;
 			}
 
 			return new ParseResult(methodTarget.method, methodTarget.target, arguments.toArray());
 		}
+	}
+
+	private Set<String> getSpecifiedUnavailableOptions(Annotation[][] parameterAnnotations, Map<String, String> options) {
+		Set<String> cliOptionKeySet = new LinkedHashSet<String>();
+		Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);
+		for (CliOption cliOption : cliOptions) {
+			for (String key : cliOption.key()) {
+				cliOptionKeySet.add(key);
+			}			
+		}
+		Set<String> unavailableOptions = new LinkedHashSet<String>();
+		for (String suppliedOption : options.keySet()) {
+			if (!cliOptionKeySet.contains(suppliedOption)) {
+				unavailableOptions.add(suppliedOption);
+			}
+		}
+		return unavailableOptions;
+	}
+	
+	private Set<CliOption> getCliOptions(Annotation[][] parameterAnnotations) {
+		Set<CliOption> cliOptions = new LinkedHashSet<CliOption>();
+		for (Annotation[] annotations : parameterAnnotations) {
+			for (Annotation a : annotations) {
+				if (a instanceof CliOption) {
+					CliOption cliOption = (CliOption) a;
+					cliOptions.add(cliOption);
+				}
+			}
+		}
+		return cliOptions;
 	}
 
 	protected void commandNotFound(Logger logger, String buffer) {
@@ -236,6 +268,7 @@ public class SimpleParser implements Parser {
 	private Set<MethodTarget> locateTargets(String buffer, boolean strictMatching, boolean checkAvailabilityIndicators) {
 		Assert.notNull(buffer, "Buffer required");
 		Set<MethodTarget> result = new HashSet<MethodTarget>();
+
 		// The reflection could certainly be optimised, but it's good enough for now (and cached reflection
 		// is unlikely to be noticeable to a human being using the CLI)
 		for (Object o : commands) {
