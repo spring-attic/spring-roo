@@ -30,7 +30,7 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 			registerDriverIfRequired(driverClassName);
 			return (Driver) ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader()).newInstance();
 		} catch (Exception e) {
-			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
+			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'. Did you run the install-jdbc-drivers.roo script?", e);
 		}
 	}
 
