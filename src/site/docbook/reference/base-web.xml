@@ -80,7 +80,7 @@
   commands to generate Web MVC artifacts and also the new JSP(X)
   round-tripping model introduced in Roo 1.1.</para>
 
-  <section>
+  <section xml:id="controller-commands">
     <title>Controller commands</title>
 
     <para>The Web MVC addon offers three commands to generate and maintain
@@ -333,18 +333,16 @@ public class CarController {
     </orderedlist>
   </section>
 
-  <section>
+  <section xml:id="jsp-views">
     <title>JSP Views</title>
 
     <para>As mentioned in the previous section, Roo copies a number of static
     artifacts into the target project after issuing the controller command for
     the first time. These artifacts include Cascading Style Sheets, images,
     <link xlink:href="http://tiles.apache.org/">Tiles</link> layout
-    definitions, JSP files, message property files, a complete tag library, a
-    web.xml file and a <link
-    xlink:href="http://urlrewritefilter.googlecode.com/svn/trunk/src/doc/manual/3.2/index.html">urlrewrite</link>
-    file. These artifacts are arranged in different folders which is best
-    illustrated in the following picture:</para>
+    definitions, JSP files, message property files, a complete tag library and
+    a web.xml file. These artifacts are arranged in different folders which is
+    best illustrated in the following picture:</para>
 
     <mediaobject>
       <imageobject>

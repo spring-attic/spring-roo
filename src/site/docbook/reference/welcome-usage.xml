@@ -70,29 +70,23 @@
     <code>.java</code> file in your project unless you explicitly ask it to
     via a shell command. In particular, Roo will not modify a
     <code>.java</code> file just because you apply an annotation. Roo also
-    handles .xml and .properties files in the same manner. There are only two
-    file types that may be created, updated or deleted by Roo in an automatic
-    manner, those being <code>.jspx</code> files and also AspectJ files which
-    match the <code>*_Roo_*.aj</code> wildcard.</para>
+    handles .xml files in the same manner. There are only two file types that
+    may be created, updated or deleted by Roo in an automatic manner, those
+    being <code><link linkend="jsp-views">.jspx</link></code> files and also
+    AspectJ files which match the <code>*_Roo_*.aj</code> wildcard.</para>
 
-    <para>Does this mean Roo will randomly go across your project changing
-    <code>.jspx</code> and AspectJ files that match this syntax? Certainly
-    not. Roo will only ever modify a <code>.jspx</code> file if the
-    corresponding web controller contains the <code>@RooWebScaffold</code>
-    annotation and that annotation has the attribute
-    <code>automaticallyMaintainView=true</code> (which is also the default if
-    the annotation attribute is not explicitly specified). In terms of the
-    AspectJ files, Roo operates in a very specific manner. A given AspectJ
-    filename indicates the "target type" the members will be introduced into
-    and also the add-on which governs the file. Roo will only ever permit a
-    given AspectJ file to be preserved if the target type exists and the
-    corresponding add-on requests an ITD for that target type. Nearly all
-    add-ons will only create an ITD if there is a "trigger annotation" on the
-    target type, with the trigger annotation always incorporation an @Roo
-    prefix. As such, if you never put any @Roo annotation on a given .java
-    file, you can be assured Roo will never create any AspectJ ITD for that
-    target type. Refer to the <link linkend="usage-file-system">file system
-    conventions</link> section for related information.</para>
+    <para>In terms of the AspectJ files, Roo operates in a very specific
+    manner. A given AspectJ filename indicates the "target type" the members
+    will be introduced into and also the add-on which governs the file. Roo
+    will only ever permit a given AspectJ file to be preserved if the target
+    type exists and the corresponding add-on requests an ITD for that target
+    type. Nearly all add-ons will only create an ITD if there is a "trigger
+    annotation" on the target type, with the trigger annotation always
+    incorporation an @Roo prefix. As such, if you never put any @Roo
+    annotation on a given .java file, you can be assured Roo will never create
+    any AspectJ ITD for that target type. Refer to the <link
+    linkend="usage-file-system">file system conventions</link> section for
+    related information.</para>
 
     <para>You'll also notice when using Roo that is automatically responds to
     changes you make outside Roo. This is achieved by an <link
@@ -438,12 +432,13 @@ quit
     <title>File System Conventions</title>
 
     <para>We have already covered some of Roo's file system conventions in the
-    <link linkend="usage-usability">Usability Philosophy</link> section.In
+    <link linkend="usage-usability">Usability Philosophy</link> section. In
     summary Roo will automatically monitor the file system for changes and
     code generate only those files which match the <code>*_Roo_*.aj</code>
-    wildcard. It will also code generatethose JSPs associated with scaffolded
-    MVC controllers that have the annotation
-    <code>@RooWebScaffold(automaticallyMaintainView=true)</code>.</para>
+    wildcard. It will also code generate those <link
+    linkend="jsp-views">JSPs</link> associated with <link
+    linkend="controller-commands">scaffolded MVC controllers</link> that have
+    the annotation <code>@RooWebScaffold</code>.</para>
 
     <para>Roo applications follow the standard Maven-based directory layout.
     We have also placed Spring application context-related files (both

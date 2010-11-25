@@ -618,9 +618,9 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
     role="bold"><link
     linkend="command-index-controller-commands">controller</link></emphasis>
     command will also add additional dependencies such as Spring MVC, Tiles,
-    URL rewrite, etc to your project. In order to update the project classpath
-    within STS with these new dependencies you can issue 'perform eclipse'
-    again, followed by a project refresh in STS.</para>
+    etc to your project. In order to update the project classpath within STS
+    with these new dependencies you can issue 'perform eclipse' again,
+    followed by a project refresh in STS.</para>
 
     <para>All newly added Web artifacts which are needed for the view
     scaffolding can be found under the <code>src/main/webapp</code> folder.
@@ -765,7 +765,6 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     <code>PizzaOrderController.java</code> source:</para>
 
     <para><programlisting>@RooWebScaffold(path = "pizzaorder", 
-                automaticallyMaintainView = true, 
                 formBackingObject = PizzaOrder.class, 
                 <emphasis role="bold">delete=false</emphasis>, 
                 <emphasis role="bold">update=false</emphasis>)</programlisting>This
@@ -808,15 +807,28 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
         </imageobject>
       </mediaobject></para>
 
+    <para>Spring Roo also configures <link
+    xlink:href="http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/mvc.html#mvc-themeresolver">theming
+    support offered by Spring framework</link> so you can leverage this
+    feature with ease.</para>
+
     <para>To achieve a higher level of customization you can change the
-    default Tiles template and adjust the JSP pages. However, any JSP views
-    which were scaffolded for a Controller are maintained by Roo. This way Roo
-    can add and remove fields from the relevant view artifacts in case the
-    underlying domain entity changes (ie fields get added or removed). If you
-    wish to maintain these JSP artifacts yourself you need to disable the
-    handling of the artifacts by Roo by configuring
-    <code>@RooWebScaffold(automaticallyMaintainView=false)</code> in the
-    relevant controller.</para>
+    default Tiles template (WEB-INF/layouts/default.jspx) and adjust the JSP
+    pages (WEB-INF/views/*.jspx). WIth release 1.1 of Spring Roo jspx
+    artifacts can now be adjusted by the user while Roo can still make
+    adjustments as needed if domain layer changes are detected. See the <link
+    linkend="jsp-views">JSP Views</link> section for details.</para>
+
+    <para>Furthermore the Spring Roo 1.1 release introduced a set of JSP tags
+    which not only reduce the scaffolded jspx files by 90% but also offer the
+    most flexible point for view customization. Roo will install these tags
+    into the user project where they can be accessed and customized to meet
+    specific requirements of the project. For example it would be fairly easy
+    to remove the integrated Spring JS / Dojo artifacts and replace them with
+    your JS framework of choice. To make these changes available for
+    installation in other projects you can create a <link
+    linkend="simple-addons">simple add-on</link> which replaces the default
+    tags installed by Roo with your customized tags.</para>
   </section>
 
   <section xml:id="beginning-step-7">
