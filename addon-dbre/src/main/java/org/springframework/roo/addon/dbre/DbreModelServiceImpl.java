@@ -60,6 +60,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
 	private Schema lastSchema = null;
+	private Set<String> includeTables;
 	private Set<String> excludeTables;
 	private Set<DatabaseListener> listeners = new HashSet<DatabaseListener>();
 	private boolean startupCompleted = false;
@@ -157,12 +158,8 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		return getDatabase(schema, true, true);
 	}
 
-	public Set<String> getExcludeTables() {
-		if (excludeTables != null) {
-			return excludeTables;
-		}
-		
-		return deserializeExcludeTablesMetadataIfPossible();
+	public void setIncludeTables(Set<String> includeTables) {
+		this.includeTables = includeTables;
 	}
 
 	public void setExcludeTables(Set<String> excludeTables) {
@@ -210,7 +207,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection();
-			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, excludeTables);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
 
 			if (safeMode) {
@@ -223,7 +220,9 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 
 			// Also store it for next time they load Roo (in case they're on an aeroplane flying from Sydney to San Francisco and don't have the database around)
 			// todo... detect using GPS coordinates whether they're on SYD -> SFO ;-)
-			serializeDatabaseMetadataToFile(database);
+			if (database != null && database.hasTables()) {
+				serializeDatabaseMetadataToFile(database);
+			}
 
 			// Lastly, let's tell our listeners
 			publishToListeners(database);
@@ -279,29 +278,6 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		try {
 			InputStream inputStream = new FileInputStream(fileDetails.getFile());
 			return DatabaseXmlUtils.readSchemaFromInputStream(inputStream);
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	
-	/**
-	 * Reads the excluded tables information from XML if possible.
-	 * 
-	 * <p>
-	 * NOTE: the XML file can only store one database.
-	 * 
-	 * @return the excluded tables if it could be parsed, otherwise null if unavailable for any reason
-	 */
-	private Set<String> deserializeExcludeTablesMetadataIfPossible() {
-		String dbreXmlPath = getDbreXmlPath();
-		if (!fileManager.exists(dbreXmlPath)) {
-			return null;
-		}
-		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
-		try {
-			InputStream inputStream = new FileInputStream(fileDetails.getFile());
-			return DatabaseXmlUtils.readExcludeTablesFromInputStream(inputStream);
 		} catch (Exception e) {
 			return null;
 		}

@@ -109,6 +109,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		Table table = database.findTable(dbreTypeResolutionService.findTableName(javaType));
 		if (table == null) {
+			// System.out.println("Table for type " + javaType.getFullyQualifiedTypeName() + " not found");
 			return;
 		}
 

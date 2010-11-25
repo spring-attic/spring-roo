@@ -11,26 +11,26 @@ import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
 /**
- * Provides conversion between a space-separated list of table names to a Set of table names.
+ * Provides conversion between a space-separated list of table names to a set of table names.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 @Component
 @Service
-public class ExcludeTablesConverter implements Converter {
+public class IncludeExcludeTablesConverter implements Converter {
 
 	public boolean supports(Class<?> requiredType, String optionContext) {
-		return Set.class.isAssignableFrom(requiredType) && optionContext.contains("exclude-tables");
+		return Set.class.isAssignableFrom(requiredType) && (optionContext.contains("include-tables") || optionContext.contains("exclude-tables"));
 	}
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
-		Set<String> excludeTables = new LinkedHashSet<String>();
+		Set<String> tables = new LinkedHashSet<String>();
 		StringTokenizer st = new StringTokenizer(value, " ");
 		while (st.hasMoreTokens()) {
-			excludeTables.add(st.nextToken());
+			tables.add(st.nextToken());
 		}
-		return excludeTables;
+		return tables;
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {

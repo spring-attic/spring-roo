@@ -33,6 +33,9 @@ public class Database implements Serializable {
 	/** Many-to-many join tables. */
 	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
 
+	/** Included tables */
+	private Set<String> includeTables;
+
 	/** Excluded tables */
 	private Set<String> excludeTables;
 
@@ -92,6 +95,22 @@ public class Database implements Serializable {
 			}
 		}
 		return null;
+	}
+
+	public Set<String> getIncludeTables() {
+		return includeTables;
+	}
+
+	public String getIncludeTablesStr() {
+		return StringUtils.collectionToCommaDelimitedString(includeTables);
+	}
+
+	void setIncludeTables(Set<String> includeTables) {
+		this.includeTables = includeTables;
+	}
+	
+	void setIncludeTables(String includeTablesStr) {
+		this.includeTables = StringUtils.commaDelimitedListToSet(includeTablesStr);
 	}
 
 	public Set<String> getExcludeTables() {

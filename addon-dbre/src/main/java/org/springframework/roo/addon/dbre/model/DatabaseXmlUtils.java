@@ -34,6 +34,8 @@ public abstract class DatabaseXmlUtils {
 	public static final String REFERENCE = "reference";
 	public static final String ON_UPDATE = "onUpdate";
 	public static final String ON_DELETE = "onDelete";
+	public static final String EXCLUDED_TABLES = "excludedTables";
+	public static final String INCLUDED_TABLES = "includedTables";
 
 	public static enum IndexType {
 		INDEX, UNIQUE
@@ -50,9 +52,11 @@ public abstract class DatabaseXmlUtils {
 		if (database.getDestinationPackage() != null) {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
 		}
-
+		if (database.getIncludeTables() != null) {
+			databaseElement.appendChild(createOptionElement(INCLUDED_TABLES, database.getIncludeTablesStr(), document));
+		}
 		if (database.getExcludeTables() != null) {
-			databaseElement.appendChild(createOptionElement("excludeTables", database.getExcludeTablesStr(), document));
+			databaseElement.appendChild(createOptionElement(EXCLUDED_TABLES, database.getExcludeTablesStr(), document));
 		}
 
 		for (Table table : database.getTables()) {
@@ -151,24 +155,6 @@ public abstract class DatabaseXmlUtils {
 		}
 	}
 
-	public static Set<String> readExcludeTablesFromInputStreamWithDom(InputStream inputStream) {
-		Document document = getDocument(inputStream);
-		Element databaseElement = document.getDocumentElement();
-		return StringUtils.commaDelimitedListToSet(databaseElement.getAttribute("excludeTables"));
-	}
-
-	public static Set<String> readExcludeTablesFromInputStream(InputStream inputStream) {
-		try {
-			SAXParserFactory spf = SAXParserFactory.newInstance();
-			SAXParser parser = spf.newSAXParser();
-			ExcludeTablesContentHandler contentHandler = new ExcludeTablesContentHandler();
-			parser.parse(inputStream, contentHandler);
-			return contentHandler.getExcludeTables();
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
-
 	public static Database readDatabaseStructureFromInputStreamWithDom(InputStream inputStream) {
 		Document document = getDocument(inputStream);
 		Element databaseElement = document.getDocumentElement();
@@ -181,9 +167,11 @@ public abstract class DatabaseXmlUtils {
 
 		List<Element> optionElements = XmlUtils.findElements("option", databaseElement);
 		for (Element optionElement : optionElements) {
-			if (optionElement.getAttribute("key").equals("excludedTables")) {
+			if (optionElement.getAttribute("key").equals(EXCLUDED_TABLES)) {
 				database.setExcludeTables(StringUtils.commaDelimitedListToSet(optionElement.getAttribute("value")));
-				break; // Don't process any more <option> elements
+			}
+			if (optionElement.getAttribute("key").equals(INCLUDED_TABLES)) {
+				database.setIncludeTables(StringUtils.commaDelimitedListToSet(optionElement.getAttribute("value")));
 			}
 		}
 

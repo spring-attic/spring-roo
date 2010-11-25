@@ -50,34 +50,43 @@ public class DbreOperationsImpl implements DbreOperations {
 		Assert.notNull(schema, "Schema required");
 		Database database = dbreModelService.refreshDatabaseSafely(schema);
 		if (database == null) {
-			logger.warning("Cannot obtain database information for schema '" + schema + "'");
-			return;
+			logNullDatabase(schema);
 		} else if (!database.hasTables()) {
-			logger.warning("Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
-			return;
-		}
-		
-		try {
-			OutputStream outputStream = file != null ? new FileOutputStream(file) : new ByteArrayOutputStream();
-			DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
-			logger.info(file != null ? ("Database metadata written to file " + file.getAbsolutePath()) : outputStream.toString());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
+			logEmptyDatabase(schema);
+		} else {
+			try {
+				OutputStream outputStream = file != null ? new FileOutputStream(file) : new ByteArrayOutputStream();
+				DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
+				logger.info(file != null ? ("Database metadata written to file " + file.getAbsolutePath()) : outputStream.toString());
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 
-	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, Set<String> excludeTables) {
+	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, Set<String> includeTables, Set<String> excludeTables) {
 		dbreDatabaseListener.setDestinationPackage(destinationPackage);
-		
-		if (excludeTables != null) {
-			dbreModelService.setExcludeTables(excludeTables);
-		}
-		
+		dbreModelService.setIncludeTables(includeTables);
+		dbreModelService.setExcludeTables(excludeTables);
+
 		// Force it to refresh the database from the actual JDBC connection
-		dbreModelService.refreshDatabase(schema);
+		Database database = dbreModelService.refreshDatabase(schema);
+		if (database == null) {
+			logNullDatabase(schema);
+		} else if (!database.hasTables()) {
+			logEmptyDatabase(schema);
+		}
 
 		// Change the persistence.xml file to prevent tables being created and dropped.
 		updatePersistenceXml();
+	}
+	
+	private void logNullDatabase(Schema schema) {
+		logger.warning("Cannot obtain database information for schema '" + schema + "'");
+	}
+
+	private void logEmptyDatabase(Schema schema) {
+		logger.warning("Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
 	}
 
 	private void updatePersistenceXml() {

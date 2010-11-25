@@ -77,9 +77,19 @@ public interface DbreModelService {
 	Database refreshDatabaseSafely(Schema schema);
 		
 	/**
-	 * Specifies the table names to exclude.
+	 * Specifies the table names to include. 
+	 *
+	 * <p>
+	 * If includeTables is not empty, only tables in this set will be reverse engineered.
 	 *  
-	 * @param excludeTables a Set of table names
+	 * @param includeTables a set of table names
+	 */
+	void setIncludeTables(Set<String> includeTables);
+
+	/**
+	 * Specifies the table names to exclude from reverse engineering.
+	 *  
+	 * @param excludeTables a set of table names
 	 */
 	void setExcludeTables(Set<String> excludeTables);
 }

@@ -41,8 +41,9 @@ public class DbreCommands implements CommandMarker {
 	public void serializeDatabaseMetadata(
 		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
 		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage,
+		@CliOption(key = "includeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "include-tables", help = "The tables to include in reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> includeTables,
 		@CliOption(key = "excludeTables", mandatory = false, specifiedDefaultValue = "", optionContext = "exclude-tables", help = "The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes") Set<String> excludeTables) {
 		
-		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, excludeTables);
+		dbreOperations.reverseEngineerDatabase(schema, destinationPackage, includeTables, excludeTables);
 	}
 }

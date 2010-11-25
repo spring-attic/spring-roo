@@ -26,23 +26,25 @@ public class DatabaseIntrospector {
 	private DatabaseMetaData databaseMetaData;
 	private String catalogName;
 	private Schema schema;
-	private Set<String> excludeTables;
+	private Set<String> includeTables = null;
+	private Set<String> excludeTables = null;
 	private String tableName;
 	private String columnName;
 	private String[] types = TYPES;
 
-	public DatabaseIntrospector(Connection connection, Schema schema, Set<String> excludeTables) throws SQLException {
+	public DatabaseIntrospector(Connection connection, Schema schema, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
 		catalogName = this.connection.getCatalog();
 		databaseMetaData = this.connection.getMetaData();
 		Assert.notNull(databaseMetaData, "Database metadata is null");
 		this.schema = schema;
+		this.includeTables = includeTables;
 		this.excludeTables = excludeTables;
 	}
 
 	public DatabaseIntrospector(Connection connection) throws SQLException {
-		this(connection, null, null);
+		this(connection, null, null, null);
 	}
 
 	public Connection getConnection() {
@@ -113,6 +115,7 @@ public class DatabaseIntrospector {
 		Database database = new Database();
 		database.setName(name);
 		database.setTables(readTables());
+		database.setIncludeTables(includeTables);
 		database.setExcludeTables(excludeTables);
 		database.initialize();
 		return database;
@@ -133,7 +136,7 @@ public class DatabaseIntrospector {
 					continue;
 				}
 
-				if (!hasExcludedTable(tableName)) {
+				if (hasIncludedTable(tableName) && !hasExcludedTable(tableName)) {
 					Table table = new Table();
 					table.setName(tableName);
 					table.setCatalog(catalogName);
@@ -281,19 +284,31 @@ public class DatabaseIntrospector {
 		return cascadeAction;
 	}
 
+	private boolean hasIncludedTable(String tableName) {
+		if (includeTables == null || includeTables.isEmpty()) {
+			return true;
+		}
+		return hasTable(includeTables, tableName);
+	}
+	
 	private boolean hasExcludedTable(String tableName) {
-		if (excludeTables != null && StringUtils.hasText(tableName)) {
-			for (String excludedTable : excludeTables) {
-				String regex = excludedTable.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
-				Pattern pattern = Pattern.compile(regex);
-				if (pattern.matcher(tableName).matches()) {
-					return true;
-				}
+		if (excludeTables == null || excludeTables.isEmpty()) {
+			return false;
+		}
+		return hasTable(excludeTables, tableName);
+	}
+
+	private boolean hasTable(Set<String> tables, String tableName) {
+		for (String table : tables) {
+			String regex = table.replaceAll("\\*", ".*").replaceAll("\\?", ".?");
+			Pattern pattern = Pattern.compile(regex);
+			if (pattern.matcher(tableName).matches()) {
+				return true;
 			}
 		}
 		return false;
 	}
-
+	
 	private Set<Index> readIndices() throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 

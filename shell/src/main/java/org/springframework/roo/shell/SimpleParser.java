@@ -225,7 +225,7 @@ public class SimpleParser implements Parser {
 				} else {
 					message.append("Options " + StringUtils.collectionToDelimitedString(unavailableOptions, ", ", "'", "'") + " are not available for this command. ");
 				}
-				message.append("Use tab assist or the \"help\" command to see the legal options for this command");
+				message.append("Use tab assist or the \"help\" command to see the legal options");
 				logger.warning(message.toString());
 				return null;
 			}

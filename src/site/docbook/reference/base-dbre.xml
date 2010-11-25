@@ -213,7 +213,7 @@
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --excludeTables</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --includeTables --excludeTables</programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -224,19 +224,26 @@
         reverse engineer command, new entities will be created in the same
         package as they were previously created in.</para>
 
-        <para>You can use the --excludeTables option to specify tables that
-        you do not want reverse engineered. The option can take one or more
-        table names. If more than one table is required, the tables must be
-        enclosed in double quotes and each separated by a space. Wild-card
-        searching is also permitted using the asterisk (*) character to match
-        one or more characters or the '?' character to match exactly one
-        character. For example:</para>
+        <para>You can use the --includeTables and --excludeTables option to
+        specify tables that you want or do not want reverse engineered
+        respectively. The options can take one or more table names. If more
+        than one table is required, the tables must be enclosed in double
+        quotes and each separated by a space. Wild-card searching is also
+        permitted using the asterisk (*) character to match one or more
+        characters or the '?' character to match exactly one character. For
+        example:</para>
+
+        <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --includeTables "foo* bar?"</programlisting></para>
+
+        <para>This will reverse engineer all tables who table whose name
+        starts with 'foo' and any table called bar with one extra character,
+        such as 'bar1' or 'bars'.</para>
 
         <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --excludeTables "foo* bar?"</programlisting></para>
 
-        <para>This will reverse engineer all tables except any table whose
-        name starts with 'foo' and any table called bar with one extra
-        character, such as 'bar1' or 'bars'.</para>
+        <para>This will reverse engineer all tables <emphasis>except</emphasis>
+        any table whose name starts with 'foo' and any table called bar with
+        one extra character, such as 'bar1' or 'bars'.</para>
 
         <para><emphasis role="bold">Note</emphasis>: excluding tables not only
         prevent entities from being created but associations are also not

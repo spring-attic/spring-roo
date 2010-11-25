@@ -70,7 +70,11 @@ public final class DatabaseContentHandler extends DefaultHandler {
 					((ForeignKey) stack.peek()).setExported(new Boolean(option.getValue()));
 				}
 			} else if (stack.peek() instanceof Database) {
-				if (option.getKey().equals("excludedTables")) {
+				if (option.getKey().equals(DatabaseXmlUtils.INCLUDED_TABLES)) {
+					((Database) stack.peek()).setIncludeTables(option.getValue());
+				}
+			} else if (stack.peek() instanceof Database) {
+				if (option.getKey().equals(DatabaseXmlUtils.EXCLUDED_TABLES)) {
 					((Database) stack.peek()).setExcludeTables(option.getValue());
 				}
 			}

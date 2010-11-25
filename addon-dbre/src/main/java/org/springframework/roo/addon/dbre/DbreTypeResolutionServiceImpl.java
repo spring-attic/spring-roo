@@ -126,25 +126,27 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 
 	public String findTableName(JavaType javaType) {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+		String tableName = null;
 		if (governorPhysicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
 			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
 			if (rooEntityAnnotation != null) {
 				AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
 				if (tableAttribute != null) {
-					return (String) tableAttribute.getValue();
+					tableName = (String) tableAttribute.getValue();
 				}
-			} else {
+			}
+			if (!StringUtils.hasText(tableName)) {
 				AnnotationMetadata tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
 				if (tableAnnotation != null) {
 					AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName("name"));
 					if (nameAttribute != null) {
-						return (String) nameAttribute.getValue();
+						tableName = (String) nameAttribute.getValue();
 					}
 				}
 			}
 		}
-		return null;
+		return StringUtils.trimToNull(tableName);
 	}
 
 	private PhysicalTypeMetadata getPhysicalTypeMetadata(JavaType javaType) {
