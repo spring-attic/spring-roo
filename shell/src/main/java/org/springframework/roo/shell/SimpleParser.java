@@ -217,7 +217,7 @@ public class SimpleParser implements Parser {
 			}
 
 			// Check for options specified by the user but are unavailable for the command
-			Set<String> unavailableOptions = getSpecifiedUnavailableOptions(parameterAnnotations, options);
+			Set<String> unavailableOptions = getSpecifiedUnavailableOptions(cliOptions, options);
 			if (!unavailableOptions.isEmpty()) {
 				StringBuilder message = new StringBuilder();
 				if (unavailableOptions.size() == 1) {
@@ -234,9 +234,8 @@ public class SimpleParser implements Parser {
 		}
 	}
 
-	private Set<String> getSpecifiedUnavailableOptions(Annotation[][] parameterAnnotations, Map<String, String> options) {
+	private Set<String> getSpecifiedUnavailableOptions(Set<CliOption> cliOptions, Map<String, String> options) {
 		Set<String> cliOptionKeySet = new LinkedHashSet<String>();
-		Set<CliOption> cliOptions = getCliOptions(parameterAnnotations);
 		for (CliOption cliOption : cliOptions) {
 			for (String key : cliOption.key()) {
 				cliOptionKeySet.add(key);
