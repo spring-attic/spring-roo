@@ -211,7 +211,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 
 		// Add 'list all' menu item
-		menuOperations.addMenuItem(categoryName, new JavaSymbolName("list"), new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName(), "global_menu_list", "/" + controllerPath + "?page=${empty param.page ? 1 : param.page}&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
+		menuOperations.addMenuItem(categoryName, new JavaSymbolName("list"), new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName(), "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
 		Assert.notNull(pluralMetadata, "Could not determine plural for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
