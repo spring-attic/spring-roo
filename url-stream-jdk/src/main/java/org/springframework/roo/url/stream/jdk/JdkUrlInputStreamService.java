@@ -38,7 +38,10 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 		HttpURLConnection connection = (HttpURLConnection) httpUrl.openConnection();
 		
 		// Use UAA (we know UAA Terms of Use have been accepted by this point)
-		connection.setRequestProperty("user-agent", uaaService.toHttpUserAgentHeaderValue());
+		if (UrlInputStreamUtils.isVMwareDomain(httpUrl)) {
+			// Only send UAA header to VMware domains
+			connection.setRequestProperty("user-agent", uaaService.toHttpUserAgentHeaderValue());
+		}
 		
 		return new ProgressIndicatingInputStream(connection);
 	}
