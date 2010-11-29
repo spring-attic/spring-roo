@@ -19,7 +19,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
  *
  */
 public abstract class MessageDisplayUtils {
-	public static Logger logger = HandlerUtils.getLogger(MessageDisplayUtils.class);
+	private static Logger logger = HandlerUtils.getLogger(MessageDisplayUtils.class);
 
 	/**
 	 * Displays the requested file via the logger API.
