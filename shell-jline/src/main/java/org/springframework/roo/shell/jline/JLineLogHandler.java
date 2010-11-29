@@ -136,7 +136,7 @@ public class JLineLogHandler extends Handler {
 		
 	    String threadName;
 	    String eventString;
-		if (includeThreadName && !userInterfaceThreadName.equals(Thread.currentThread().getName())) {
+		if (includeThreadName && !userInterfaceThreadName.equals(Thread.currentThread().getName()) && !"".equals(Thread.currentThread().getName())) {
 	    	threadName = "[" + Thread.currentThread().getName() + "]";
 	    	
 	    	// Build an event string that will indent nicely given the left hand side now contains a thread name
