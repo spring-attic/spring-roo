@@ -6,12 +6,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,10 +25,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.felix.BundleSymbolicName;
+import org.springframework.roo.felix.pgp.PgpKeyId;
+import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -42,15 +51,18 @@ import org.w3c.dom.Element;
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	private Map<String, AddOnBundleInfo> bundleCache;
-	private @Reference
-	Shell shell;
+	@Reference private Shell shell;
+	@Reference private PgpService pgpService;
 	private Logger log = Logger.getLogger(getClass().getName());
 	private Properties props;
 	private ComponentContext context;
+	private SortedSet<AddOnBundleInfo> sortedBundleCache = new TreeSet<AddOnBundleInfo>();
+	
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
 		bundleCache = new HashMap<String, AddOnBundleInfo>();
+		
 		Thread t = new Thread(new Runnable() {
 			public void run() {
 				populateBsnMap();
@@ -122,22 +134,67 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 
-	public void listAddOns(boolean refresh) {
+	public void listAddOns(boolean refresh, int linesPerResult, int maxResults) {
 		if (refresh && populateBsnMap()) {
 			log.info("Successfully downloaded Roobot Addon Data");
 		}
 		if (bundleCache.size() != 0) {
-			log.info("List of known Spring Roo Add-ons:");
-			for (String key : bundleCache.keySet()) {
-				log.info("---------------------------------");
-				log.info(bundleCache.get(key).toString());
+			sortedBundleCache = new TreeSet<AddOnBundleInfo>(new RankingComparator());
+			sortedBundleCache.addAll(bundleCache.values());
+			log.info("Ordered by ranking; T = Trusted developer; R = Roo version XX compatible");
+			log.info("ID T R DESCRIPTION -------------------------------------------------------------");
+			int bundleId = 1;
+			StringBuilder sb = new StringBuilder(80);
+			List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
+			for (AddOnBundleInfo bundle: sortedBundleCache) {
+				sb.append(String.format("%02d ", bundleId++));
+				sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? "- " : "Y ");
+				sb.append("Y ");
+				sb.append(bundle.getVersion());
+				sb.append(" ");
+				ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
+				int lpr = linesPerResult;
+				while (split.size() > 0 && --lpr >= 0) {
+					while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
+						sb.append(split.get(0)).append(" ");
+						split.remove(0);
+					}
+					String line = sb.toString().substring(0, sb.toString().length() - 1);
+					if (lpr == 0 && split.size() > 0) {
+						line += "...";
+					}
+					log.info(line);
+					sb.setLength(0);
+					sb.append("       ");
+				}
+				if(sb.toString().trim().length() > 0) {
+					log.info(sb.toString());
+				}
+				sb.setLength(0);
+				if (--maxResults == 0) {
+					break;
+				}
 			}
-			log.info("---------------------------------");
-			log.info("[HINT] use 'addon info --bundleSymbolicName ...' to see details about a specific bundle");
+			log.info("--------------------------------------------------------------------------------");
+			log.info("[HINT] use 'addon info --bundleSymbolicName ...' to see details about a bundle");
 			log.info("[HINT] use 'addon install --bundleSymbolicName ...' to install a specific bundle");
 		} else {
 			log.info("No addons available for installation. (Are you connected to the Internet?)");
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean isTrustedKey(List<PGPPublicKeyRing> keys, String keyId) {
+		for (PGPPublicKeyRing keyRing: keys) {
+			Iterator<PGPPublicKey> it = keyRing.getPublicKeys();
+			while (it.hasNext()) {
+				PGPPublicKey pgpKey = (PGPPublicKey) it.next();
+				if (new PgpKeyId(pgpKey).equals(new PgpKeyId(keyId))) { 
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public Set<String> getAddOnBsnSet() {
@@ -163,7 +220,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			String url = props.getProperty("roobot.url", "http://spring-roo-repository.springsource.org/roobot.xml");
+			String url = props.getProperty("roobot.url", "http://spring-roo-repository.springsource.org/roobot-test.xml");
 			if (url == null) {
 				log.warning("Bundle properties could not be loaded");
 				return false;
@@ -258,15 +315,23 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				}
 			} else {
 				while (split.size() > 0) {
-					while (!(split.size() == 0) && !((split.get(0).length() + sb.length()) > 79)) {
+					while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < 79)) {
 						sb.append(split.get(0)).append(" ");
 						split.remove(0);
 					}
-					log.info(sb.toString());
+					log.info(sb.toString().substring(0, sb.toString().length() - 1));
 					sb.setLength(0);
 					sb.append("               ");
 				}
 			}
+		}
+	}
+	
+	private class RankingComparator implements Comparator<AddOnBundleInfo> {
+		public int compare(AddOnBundleInfo o1, AddOnBundleInfo o2) {
+			if (o1.getRanking() == o2.getRanking()) return 0;
+			else if (o1.getRanking() > o2.getRanking()) return 1;
+			else return -1;
 		}
 	}
 }

@@ -28,8 +28,10 @@ public interface AddOnRooBotOperations {
 	 * Information is piped to standard JDK {@link Logger.info}
 	 * 
 	 * @param refresh attempt a fresh download of roobot.xml (optional)
+	 * @param linesPerResult maximum number of lines per add-on
+	 * @param maxResults maximum number of results
 	 */
-	void listAddOns(boolean refresh);
+	void listAddOns(boolean refresh, int linesPerResult, int maxResults);
 	
 	/**
 	 * Retrieve a set of Addon bundle symbolic names.
