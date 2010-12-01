@@ -270,28 +270,21 @@ Created SRC_MAIN_JAVA/com/foo/Person_Roo_Configurable.aj
       <listitem>
         <para>Person.java:</para>
 
-        <para><programlisting>@Entity
-@RooJavaBean
+        <para><programlisting>@RooJavaBean
 @RooToString
 @RooEntity
 public class Person {
 }
-</programlisting>The first annotation added to the Person type is the JPA
-        @Entity annotation. This annotation marks the Person as persistable.
-        By default, the JPA implementation of your choice will create a table
-        definition in your database for this type. Once fields are added to
-        the Person type, they will be added as columns to the Person table.
-        The @Entity annotation has runtime retention. You will notice that by
-        default, the Person type does not contain any fields (these will be
-        added with the field commands or manually in the type) or
-        methods.</para>
+</programlisting>You will notice that by default, the Person type does not
+        contain any fields (these will be added with the field commands or
+        manually in the type) or methods.</para>
       </listitem>
 
       <listitem>
         <para>Person_Roo_JavaBean.aj (this will only be generated when fields
         are added to the Person type)</para>
 
-        <para>The second annotation added by the entity command is the
+        <para>The first annotation added by the entity command is the
         @RooJavaBean annotation. This annotation will automatically add public
         accessors and mutators for each field added to the Person type via an
         ITD. This annotation (like all Roo annotations) has source retention
@@ -301,7 +294,7 @@ public class Person {
       <listitem>
         <para>Person_Roo_ToString.aj</para>
 
-        <para>The third annotation added to the Person type is the
+        <para>The second annotation added to the Person type is the
         @RooToString annotation. This annotation will generate a toString
         method for the Person type via an ITD. The
         <emphasis>toString</emphasis>() method will contain a concatenated
@@ -318,7 +311,7 @@ public class Person {
       <listitem>
         <para>Person_Roo_Configurable.aj</para>
 
-        <para>The fourth annotation takes care of marking the Person type with
+        <para>The third annotation takes care of marking the Person type with
         Spring's @Configurable annotation. This annotation allows you to
         inject any types from the Spring bean factory into the Person type.
         The injection of the JPA entity manager (which is defined as a bean in
@@ -329,12 +322,14 @@ public class Person {
       <listitem>
         <para>Person_Roo_Entity.aj</para>
 
-        <para>The fifth annotation is the @RooEntity annotation. This
+        <para>The fourth annotation is the @RooEntity annotation. This
         annotation will introduce a number of persistence related methods into
         your Person type via an ITD:</para>
 
         <para><programlisting>privileged aspect Person_Roo_Entity {
     
+    declare @type: Person: @Entity;   
+
     @PersistenceContext
     transient EntityManager Person.entityManager;
     
@@ -404,13 +399,13 @@ public class Person {
     }
     
     public static long Person.countPeople() {
-        return ((Number) entityManager().createQuery("select count(o) from Person o")
-                                        .getSingleResult()).longValue();
+        return entityManager().createQuery("select count(o) from Person o", Long.class)
+                                        .getSingleResult();
     }
     
     @SuppressWarnings("unchecked")
     public static List&lt;Person&gt; Person.findAllPeople() {
-        return entityManager().createQuery("select o from Person o").getResultList();
+        return entityManager().createQuery("select o from Person o", Person.class).getResultList();
     }
     
     public static Person Person.findPerson(Long id) {
@@ -420,11 +415,19 @@ public class Person {
     
     @SuppressWarnings("unchecked")
     public static List&lt;Person&gt; Person.findPersonEntries(int firstResult, int maxResults) {
-        return entityManager().createQuery("select o from Person o")
+        return entityManager().createQuery("select o from Person o", Person.class)
                    .setFirstResult(firstResult).setMaxResults(maxResults).getResultList();
     }
 }
-</programlisting>As can be seen, the Person_Roo_Entity.aj ITD introduces three
+</programlisting></para>
+
+        <para>The JPA @Entity annotation is added to the Person_Roo_Entity.aj
+        ITD. This annotation marks the Person as persistable. By default, the
+        JPA implementation of your choice will create a table definition in
+        your database for this type. Once fields are added to the Person type,
+        they will be added as columns to the Person table.</para>
+
+        <para>As can be seen, the Person_Roo_Entity.aj ITD introduces three
         fields by default. A <emphasis>id</emphasis> field (which is
         autoincremented), a <emphasis>version</emphasis> field (used for
         JPA-managed optimistic locking), and a
@@ -457,7 +460,7 @@ public class Person {
         assign an empty String as the method name which will instruct Roo to
         not generate the method:</para>
 
-        <para><programlisting>@RooEntity(countMethod="")</programlisting></para>
+        <para><programlisting>@RooEntity(countMethod = "")</programlisting></para>
       </listitem>
     </orderedlist>
 
@@ -531,14 +534,14 @@ private Date birthDay;
 </programlisting>The field definition added to the Person type contains the
         appropriate JPA annotations:</para>
 
-        <para><programlisting>@ManyToOne(targetEntity = Car.class)
+        <para><programlisting>@ManyToOne
 @JoinColumn
 private Car car;
 </programlisting>The optional --cardinality command attribute allows you to
         define a one-to-one relationship (via JPAs @OneToOne annotation)
         between Person and Car if you wish:</para>
 
-        <para><programlisting>@OneToOne(targetEntity = Car.class)
+        <para><programlisting>@OneToOne
 @JoinColumn
 private Car car;</programlisting>You can add the mappedBy attribute to the
         @OneToOne annotation to define the FK name handled by the inverse side
