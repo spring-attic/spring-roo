@@ -28,30 +28,27 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-
 	private static final String PROVIDES_TYPE_STRING = BeanInfoMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	
 	private List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new ArrayList<MemberHoldingTypeDetails>();
 
 	public BeanInfoMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MemberHoldingTypeDetails> memberHoldingTypeDetails) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
-		
+
 		if (!isValid()) {
 			return;
 		}
-		
+
 		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		// TODO This eliminates the desired notification optimisations as part of ROO-1506 but is necessary in the interim until we
@@ -59,12 +56,9 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return System.identityHashCode(this);
 	}
 
-
-
 	/**
-	 * Obtains the property name for the specified JavaBean accessor or mutator method. This is determined by
-	 * discarding the first 2 or 3 letters of the method name (depending whether it is a "get", "set" or "is" method).
-	 * There is no special searching back to the actual field name.
+	 * Obtains the property name for the specified JavaBean accessor or mutator method. This is determined by discarding the first 2 or 3 letters of the method name (depending whether it is a "get",
+	 * "set" or "is" method). There is no special searching back to the actual field name.
 	 * 
 	 * @param methodMetadata to search (required, and must be a "get", "set" or "is" method)
 	 * @return the name of the property (never returned null)
@@ -80,13 +74,12 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 		throw new IllegalStateException("Method name '" + name + "' does not observe JavaBean method naming conventions");
 	}
-	
+
 	/**
 	 * Attempts to locate the field which is represented by the presented property name.
 	 * 
 	 * <p>
-	 * Not every JavaBean getter or setter actually backs to a field with an identical name. In such
-	 * cases, null will be returned.
+	 * Not every JavaBean getter or setter actually backs to a field with an identical name. In such cases, null will be returned.
 	 * 
 	 * @param propertyName the property name (required)
 	 * @return the field if found, or null if it could not be found
@@ -107,14 +100,14 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return all public accessor methods defined by the class and all superclasses, sorted alphabetically (never null, but may be empty)
 	 */
 	public List<MethodMetadata> getPublicAccessors() {
 		return getPublicAccessors(true);
 	}
-	
+
 	/**
 	 * @param sortByAccessorName indicated to sort the returned accessors by getter name
 	 * @return all public accessor methods defined by the class and all superclasses (never null, but may be empty)
@@ -124,7 +117,7 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		/** key: string based method name, value: MethodMetadata */
 		TreeMap<String, MethodMetadata> map = new TreeMap<String, MethodMetadata>();
 		List<MethodMetadata> sortedByDetectionOrder = new ArrayList<MethodMetadata>();
-		
+
 		for (MemberHoldingTypeDetails holder : memberHoldingTypeDetails) {
 			for (MethodMetadata method : holder.getDeclaredMethods()) {
 				String accessorName = method.getMethodName().getSymbolName();
@@ -143,7 +136,7 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 		return sortedByDetectionOrder;
 	}
-	
+
 	/**
 	 * @return all public mutator methods defined by the class and all superclasses, sorted alphabetically (never null, but may be empty)
 	 */
@@ -162,7 +155,7 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 		return new ArrayList<MethodMetadata>(map.values());
 	}
-	
+
 	/**
 	 * @return the Java type that this metadata represents information for (never returns null)
 	 */
@@ -184,7 +177,7 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static final String getMetadataIdentiferType() {
 		return PROVIDES_TYPE;
 	}
-	
+
 	public static final String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
@@ -200,6 +193,4 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	public static boolean isValid(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
-
-	
 }
