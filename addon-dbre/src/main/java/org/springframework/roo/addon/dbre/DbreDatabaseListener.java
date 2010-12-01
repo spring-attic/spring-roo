@@ -17,4 +17,6 @@ public interface DbreDatabaseListener extends DatabaseListener, IdentifierServic
 	 * @param destinationPackage the JavaPackage
 	 */
 	void setDestinationPackage(JavaPackage destinationPackage);
+	
+	void setTestAutomatically(boolean testAutomatically);
 }

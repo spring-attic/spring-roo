@@ -213,7 +213,7 @@
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --includeTables --excludeTables</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --includeTables --excludeTables</programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -223,6 +223,10 @@
         --package option on second and subsequent executions of the database
         reverse engineer command, new entities will be created in the same
         package as they were previously created in.</para>
+
+        <para>Use the --testAutomatically option to create integration tests
+        automatically for each new entity created by reverse
+        engineering.</para>
 
         <para>You can use the --includeTables and --excludeTables option to
         specify tables that you want or do not want reverse engineered
@@ -241,9 +245,10 @@
 
         <para><programlisting>roo&gt; database reverse engineer --schema order --package ~.domain --excludeTables "foo* bar?"</programlisting></para>
 
-        <para>This will reverse engineer all tables <emphasis>except</emphasis>
-        any table whose name starts with 'foo' and any table called bar with
-        one extra character, such as 'bar1' or 'bars'.</para>
+        <para>This will reverse engineer all tables
+        <emphasis>except</emphasis> any table whose name starts with 'foo' and
+        any table called bar with one extra character, such as 'bar1' or
+        'bars'.</para>
 
         <para><emphasis role="bold">Note</emphasis>: excluding tables not only
         prevent entities from being created but associations are also not

@@ -67,6 +67,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private Shell shell;
 	private Map<JavaType, List<Identifier>> identifierResults = null;
 	private JavaPackage destinationPackage = null;
+	private boolean testAutomatically;
 
 	// This method will be called when the database becomes available for the first time and the rest of Roo has started up OK
 	public void notifyDatabaseRefreshed(Database newDatabase) {
@@ -77,6 +78,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		this.destinationPackage = destinationPackage;
 	}
 	
+	public void setTestAutomatically(boolean testAutomatically) {
+		this.testAutomatically = testAutomatically;
+	}
+
 	private void processDatabase(Database database) {
 		if (database == null) {
 			return;
@@ -206,7 +211,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (!hasVersionField(table)) {
 			rooEntityBuilder.addStringAttribute(VERSION_FIELD, "");
 		}
-
 		if (StringUtils.hasText(table.getName())) {
 			rooEntityBuilder.addStringAttribute("table", table.getName());
 		}
@@ -227,12 +231,17 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 
 		// Create entity class
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, javaType, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setExtendsTypes(extendsTypes);
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		classpathOperations.generateClassFile(typeDetailsBuilder.build());
+		ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
+		classpathOperations.generateClassFile(entityType);
+		
+		// Create integration test class
+		if (testAutomatically) {
+			classpathOperations.newIntegrationTest(entityType.getName());
+		}
 
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

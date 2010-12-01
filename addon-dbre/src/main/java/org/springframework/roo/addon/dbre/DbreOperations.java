@@ -32,8 +32,9 @@ public interface DbreOperations {
 	 * @param schema the schema to reverse engineer (required)
 	 * @param destinationPackage the package in which all entities will be stored (if not
 	 * given, the project's top level package)
+	 * @param testAutomatically whether to create automatic integration tests for generated entities
 	 * @param includeTables the set of tables to include in reverse engineering.
 	 * @param excludeTables the set of tables to exclude from reverse engineering.
 	 */
-	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, Set<String> includeTables, Set<String> excludeTables);
+	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, Set<String> includeTables, Set<String> excludeTables);
 }
