@@ -350,7 +350,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getCreateMethod() {
-		if (entityMetadata.getPersistMethod() == null || entityMetadata.getFindAllMethod() == null) {
+		if (entityMetadata.getPersistMethod() == null) {// || entityMetadata.getFindAllMethod() == null) {
 			// Mandatory input is missing (ROO-589)
 			return null;
 		}
@@ -402,10 +402,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getCreateFormMethod() {
-		if (entityMetadata.getFindAllMethod() == null) {
-			// Mandatory input is missing (ROO-589)
-			return null;
-		}
+//		if (entityMetadata.getFindAllMethod() == null) {
+//			// Mandatory input is missing (ROO-589)
+//			return null;
+//		}
 		JavaSymbolName methodName = new JavaSymbolName("createForm");
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
@@ -463,7 +463,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getUpdateMethod() {
-		if (entityMetadata.getMergeMethod() == null || entityMetadata.getFindAllMethod() == null) {
+		if (entityMetadata.getMergeMethod() == null) {// || entityMetadata.getFindAllMethod() == null) {
 			// Mandatory input is missing (ROO-589)
 			return null;
 		}
@@ -515,7 +515,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 
 	private MethodMetadata getUpdateFormMethod() {
-		if (entityMetadata.getFindMethod() == null || entityMetadata.getFindAllMethod() == null) {
+		if (entityMetadata.getFindMethod() == null) {// || entityMetadata.getFindAllMethod() == null) {
 			// Mandatory input is missing (ROO-589)
 			return null;
 		}
