@@ -31,6 +31,7 @@ import org.springframework.roo.model.JavaType;
  */
 public class ReferenceField extends FieldDetails {
 	private String joinColumnName;
+	private String referencedColumnName;
 	private Fetch fetch = null;
 	private Cardinality cardinality = null;
 
@@ -45,6 +46,14 @@ public class ReferenceField extends FieldDetails {
 
 	public void setJoinColumnName(String joinColumnName) {
 		this.joinColumnName = joinColumnName;
+	}
+
+	public String getReferencedColumnName() {
+		return referencedColumnName;
+	}
+
+	public void setReferencedColumnName(String referencedColumnName) {
+		this.referencedColumnName = referencedColumnName;
 	}
 
 	public Fetch getFetch() {
@@ -85,6 +94,10 @@ public class ReferenceField extends FieldDetails {
 		if (joinColumnName != null) {
 			List<AnnotationAttributeValue<?>> joinColumnAttrs = new ArrayList<AnnotationAttributeValue<?>>();
 			joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("name"), joinColumnName));
+
+			if (referencedColumnName != null) {
+				joinColumnAttrs.add(new StringAttributeValue(new JavaSymbolName("referencedColumnName"), referencedColumnName));
+			}
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.JoinColumn"), joinColumnAttrs));
 		}
 	}
