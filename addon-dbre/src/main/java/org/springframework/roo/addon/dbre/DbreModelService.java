@@ -77,6 +77,13 @@ public interface DbreModelService {
 	Database refreshDatabaseSafely(Schema schema);
 		
 	/**
+	 * Sets the boolean flag to bring back database view information.
+	 * 
+	 * @param view true if database views are retrieved, otherwise false
+	 */
+	void setView(boolean view);
+	
+	/**
 	 * Specifies the table names to include. 
 	 *
 	 * <p>

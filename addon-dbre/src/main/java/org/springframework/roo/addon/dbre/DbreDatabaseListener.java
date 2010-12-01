@@ -18,5 +18,10 @@ public interface DbreDatabaseListener extends DatabaseListener, IdentifierServic
 	 */
 	void setDestinationPackage(JavaPackage destinationPackage);
 	
+	/**
+	 * Indicates whether to create integration tests for new entities.
+	 * 
+	 * @param testAutomatically true if integration tests are to be created, otherwise false
+	 */
 	void setTestAutomatically(boolean testAutomatically);
 }

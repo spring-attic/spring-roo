@@ -22,8 +22,9 @@ public interface DbreOperations {
 	 * 
 	 * @param schema the schema to introspect (required)
 	 * @param file to write to (can be null, in which case the output will appear on-screen)
+	 * @param view true if database views are displayed, otherwise false
 	 */
-	void displayDatabaseMetadata(Schema schema, File file);
+	void displayDatabaseMetadata(Schema schema, File file, boolean view);
 
 	/**
 	 * Introspects the schema and causes the related entities on disk to be created, updated
@@ -33,8 +34,9 @@ public interface DbreOperations {
 	 * @param destinationPackage the package in which all entities will be stored (if not
 	 * given, the project's top level package)
 	 * @param testAutomatically whether to create automatic integration tests for generated entities
+	 * @param view true if database views are displayed, otherwise false
 	 * @param includeTables the set of tables to include in reverse engineering.
 	 * @param excludeTables the set of tables to exclude from reverse engineering.
 	 */
-	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, Set<String> includeTables, Set<String> excludeTables);
+	void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables);
 }

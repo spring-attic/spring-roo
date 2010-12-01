@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -21,30 +22,30 @@ import org.springframework.roo.support.util.StringUtils;
  * @since 1.1
  */
 public class DatabaseIntrospector {
-	private static final String[] TYPES = { TableType.TABLE.name() };
 	private Connection connection;
 	private DatabaseMetaData databaseMetaData;
 	private String catalogName;
 	private Schema schema;
+	private boolean view;
 	private Set<String> includeTables = null;
 	private Set<String> excludeTables = null;
 	private String tableName;
 	private String columnName;
-	private String[] types = TYPES;
 
-	public DatabaseIntrospector(Connection connection, Schema schema, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
+	public DatabaseIntrospector(Connection connection, Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
 		Assert.notNull(connection, "Connection must not be null");
 		this.connection = connection;
 		catalogName = this.connection.getCatalog();
 		databaseMetaData = this.connection.getMetaData();
 		Assert.notNull(databaseMetaData, "Database metadata is null");
 		this.schema = schema;
+		this.view = view;
 		this.includeTables = includeTables;
 		this.excludeTables = excludeTables;
 	}
 
 	public DatabaseIntrospector(Connection connection) throws SQLException {
-		this(connection, null, null, null);
+		this(connection, null, false, null, null);
 	}
 
 	public Connection getConnection() {
@@ -87,14 +88,6 @@ public class DatabaseIntrospector {
 		this.columnName = columnName;
 	}
 
-	public String[] getTypes() {
-		return types;
-	}
-
-	public void setTypes(String[] types) {
-		this.types = types;
-	}
-
 	public Set<Schema> getSchemas() throws SQLException {
 		Set<Schema> schemas = new LinkedHashSet<Schema>();
 
@@ -124,6 +117,7 @@ public class DatabaseIntrospector {
 	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
 
+		String[] types = view ? new String[] { TableType.TABLE.name(), TableType.VIEW.name() } : new String[] { TableType.TABLE.name() };
 		ResultSet rs = databaseMetaData.getTables(getCatalog(), getSchemaPattern(), getTableNamePattern(), types);
 		try {
 			while (rs.next()) {
@@ -187,7 +181,7 @@ public class DatabaseIntrospector {
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
 				column.setTypeCode(rs.getInt("DATA_TYPE"));
 				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
-
+				
 				int columnSize = rs.getInt("COLUMN_SIZE");
 				switch (column.getType()) {
 					case DECIMAL:
@@ -199,6 +193,7 @@ public class DatabaseIntrospector {
 						break;
 					case CHAR:
 						if (columnSize > 1) {
+							column.setTypeCode(Types.VARCHAR);
 							column.setType(ColumnType.VARCHAR);
 							column.setLength(columnSize);
 						}

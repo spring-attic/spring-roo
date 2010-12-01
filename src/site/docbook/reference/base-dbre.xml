@@ -197,13 +197,16 @@
 
     <orderedlist>
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database introspect --schema</emphasis> --file</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database introspect --schema</emphasis> --file --enableViews</programlisting></para>
 
         <para>This command displays the database structure, or schema, in XML
         format. The --schema is mandatory and for databases which support
         schemas, you can press tab to display a list of schemas from your
         database. You can use the --file option to save the information to the
         specified file.</para>
+
+        <para>The --enableViews option when specified will also retrieve
+        database views and display them with the table information.</para>
 
         <para><emphasis role="bold">Note</emphasis>: the term "schema" is not
         used by all databases, such as MySQL and Firebird, and for these
@@ -213,7 +216,7 @@
       </listitem>
 
       <listitem>
-        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --includeTables --excludeTables</programlisting></para>
+        <para><programlisting>roo&gt; <emphasis role="bold">database reverse engineer --schema</emphasis> --package --testAutomatically --enableViews --includeTables --excludeTables</programlisting></para>
 
         <para>This command creates JPA entities in your project representing
         the tables and columns in your database. As for the database
@@ -225,8 +228,13 @@
         package as they were previously created in.</para>
 
         <para>Use the --testAutomatically option to create integration tests
-        automatically for each new entity created by reverse
-        engineering.</para>
+        automatically for each new entity created by reverse engineering.
+        </para>
+
+        <para>The --enableViews option when specified will also retrieve
+        database views and reverse engineer them into entities. Note that this
+        option should only be used in specialised use cases only, such as
+        those with database triggers.</para>
 
         <para>You can use the --includeTables and --excludeTables option to
         specify tables that you want or do not want reverse engineered

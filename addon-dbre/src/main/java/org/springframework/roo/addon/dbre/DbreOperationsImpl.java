@@ -46,8 +46,9 @@ public class DbreOperationsImpl implements DbreOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
 	}
 
-	public void displayDatabaseMetadata(Schema schema, File file) {
+	public void displayDatabaseMetadata(Schema schema, File file, boolean view) {
 		Assert.notNull(schema, "Schema required");
+		dbreModelService.setView(view);
 		Database database = dbreModelService.refreshDatabaseSafely(schema);
 		if (database == null) {
 			logNullDatabase(schema);
@@ -64,9 +65,11 @@ public class DbreOperationsImpl implements DbreOperations {
 		}
 	}
 
-	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, Set<String> includeTables, Set<String> excludeTables) {
+	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables) {
 		dbreDatabaseListener.setDestinationPackage(destinationPackage);
 		dbreDatabaseListener.setTestAutomatically(testAutomatically);
+		
+		dbreModelService.setView(view);
 		dbreModelService.setIncludeTables(includeTables);
 		dbreModelService.setExcludeTables(excludeTables);
 
