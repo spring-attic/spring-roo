@@ -101,7 +101,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
 		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
@@ -152,7 +152,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "digitsFraction", mandatory = false, help = "Maximum number of fractional digits accepted for this number") Integer digitsFraction, 
 		@CliOption(key = "min", mandatory = false, help = "The minimum value") Long min, 
 		@CliOption(key = "max", mandatory = false, help = "The maximum value") Long max, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
@@ -194,7 +194,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "sizeMin", mandatory = false, help = "The minimum string length") Integer sizeMin, 
 		@CliOption(key = "sizeMax", mandatory = false, help = "The maximum string length") Integer sizeMax, 
 		@CliOption(key = "regexp", mandatory = false, help = "The required regular expression pattern") String regexp, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
@@ -228,7 +228,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "future", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be in the future") Boolean future, 
 		@CliOption(key = "past", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be in the past") Boolean past, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "transient", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to mark the field as transient") boolean transientModifier, 
@@ -263,7 +263,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "assertFalse", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must assert false") Boolean assertFalse, 
 		@CliOption(key = "assertTrue", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must assert true") Boolean assertTrue, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "value", mandatory = false, help = "Inserts an optional Spring @Value annotation with the given content") String value,
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
 		@CliOption(key = "primitive", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates to use a primitive type") boolean primitive, 
@@ -290,7 +290,8 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
-		@CliOption(key = "joinColumnName", mandatory = false, help = "The JPA Join Column name") String joinColumnName, 
+		@CliOption(key = "joinColumnName", mandatory = false, help = "The JPA @JoinColumn name") String joinColumnName, 
+		@CliOption(key = "referencedColumnName", mandatory = false, help = "The JPA @JoinColumn referencedColumnName") String referencedColumnName, 
 		@CliOption(key = "cardinality", mandatory = false, unspecifiedDefaultValue = "MANY_TO_ONE", specifiedDefaultValue = "MANY_TO_ONE", help = "The relationship cardinarily at a JPA level") Cardinality cardinality, 
 		@CliOption(key = "fetch", mandatory = false, help = "The fetch semantics at a JPA level") Fetch fetch, 
 		@CliOption(key = "comment", mandatory = false, help = "An optional comment for JavaDocs") String comment, 
@@ -315,6 +316,10 @@ public class FieldCommands implements CommandMarker {
 		if (notNull != null) fieldDetails.setNotNull(notNull);
 		if (nullRequired != null) fieldDetails.setNullRequired(nullRequired);
 		if (joinColumnName != null) fieldDetails.setJoinColumnName(joinColumnName);
+		if (referencedColumnName != null) {
+			Assert.notNull(joinColumnName, "@JoinColumn name is required if specifying a referencedColumnName");
+			fieldDetails.setReferencedColumnName(referencedColumnName);
+		}
 		if (fetch != null) fieldDetails.setFetch(fetch);
 		if (comment != null) fieldDetails.setComment(comment);
 	
@@ -374,7 +379,7 @@ public class FieldCommands implements CommandMarker {
 		@CliOption(key = { "", "fieldName" }, mandatory = true, help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "type", mandatory = true, help = "The enum type of this field") JavaType fieldType, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName, 
-		@CliOption(key = "column", mandatory = false, help = "The JPA column name") String column, 
+		@CliOption(key = "column", mandatory = false, help = "The JPA @Column name") String column, 
 		@CliOption(key = "notNull", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value cannot be null") Boolean notNull, 
 		@CliOption(key = "nullRequired", mandatory = false, specifiedDefaultValue = "true", help = "Whether this value must be null") Boolean nullRequired, 
 		@CliOption(key = "enumType", mandatory = false, help = "The fetch semantics at a JPA level") EnumType enumType, 
