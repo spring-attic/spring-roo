@@ -9,6 +9,7 @@ import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -51,11 +52,14 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		Path path = Path.SRC_MAIN_JAVA;
 		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
+		String classOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(javaType, path);
 		
 		// We need to lookup the metadata we depend on
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
- 		
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(classOrInterfaceMetadataKey);
+		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
@@ -79,7 +83,7 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, metadataService, metadataDependencyRegistry);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, beanInfoMetadata, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, metadataService, metadataDependencyRegistry, memberDetailsScanner, entityClassOrInterfaceTypeDetails);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
