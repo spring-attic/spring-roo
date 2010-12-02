@@ -121,6 +121,10 @@ public class AddOnBundleInfo {
 			return false;
 		return true;
 	}
+	
+	public String getSummary() {
+		return bsn + "; " + name + "; " + description + "; " + signedBy + "; " + commands.toString();
+	}
 
 	public String toString() {
 		return "bsn=" + bsn + ", ranking=" + ranking + ", name="

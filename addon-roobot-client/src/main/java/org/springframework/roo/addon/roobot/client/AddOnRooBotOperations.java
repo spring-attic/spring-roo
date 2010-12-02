@@ -48,6 +48,13 @@ public interface AddOnRooBotOperations {
 	void installAddOn(AddOnBundleSymbolicName bsn);
 	
 	/**
+	 * Install addon with given Add-On ID.
+	 * 
+	 * @param bundleId the bundle id (required)
+	 */
+	void installAddOn(String bundleId);
+	
+	/**
 	 * Remove addon with given {@link BundleSymbolicName}.
 	 * 
 	 * @param bsn the bundle symbolic name (required)

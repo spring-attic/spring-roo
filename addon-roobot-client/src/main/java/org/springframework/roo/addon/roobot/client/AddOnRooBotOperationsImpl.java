@@ -11,12 +11,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,6 +32,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
+import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -51,14 +51,15 @@ import org.w3c.dom.Element;
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	private Map<String, AddOnBundleInfo> bundleCache;
+	private Map<String, AddOnBundleInfo> searchResultCache;
 	@Reference private Shell shell;
 	@Reference private PgpService pgpService;
+	@Reference private ProjectMetadata projectMetadata;
 	private Logger log = Logger.getLogger(getClass().getName());
 	private Properties props;
 	private ComponentContext context;
-	private SortedSet<AddOnBundleInfo> sortedBundleCache = new TreeSet<AddOnBundleInfo>();
+	private static String ROOBOT_XML = "http://spring-roo-repository.springsource.org/roobot.xml";
 	
-
 	protected void activate(ComponentContext context) {
 		this.context = context;
 		bundleCache = new HashMap<String, AddOnBundleInfo>();
@@ -99,26 +100,44 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 
 	public void installAddOn(AddOnBundleSymbolicName bsn) {
-		Assert.notNull(bsn, "Bundle symbolic name required");
-		boolean success = false;
-		AddOnBundleInfo bundle = bundleCache.get(bsn.getKey());
+		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
+		AddOnBundleInfo bundle = null;
+		if (bsn != null) {
+			bundle = bundleCache.get(bsn.getKey());
+		} 
 		if (bundle == null) {
-			log.warning("Could not find the '" + bsn.getKey() + "' bundle");
+			log.warning("Could not find specified bundle with symbolic name: " + bsn);
+			return;
+		} 
+		installAddon(bundle);
+	}
+	
+	public void installAddOn(String bundleKey) {
+		Assert.hasText(bundleKey, "A valid bundle ID is required");
+		AddOnBundleInfo bundle = null;
+		if (searchResultCache != null) {
+			bundle = searchResultCache.get(bundleKey);
+		}
+		if (bundle == null) {
+			log.warning("To install an addon a valid bundle ID is required");
+			return;
+		} 
+	}
+	
+	private void installAddon(AddOnBundleInfo bundle) {
+		boolean success = false;	
+		String url = bundle.getUrl();
+		if (url != null && url.length() > 0) {
+			int count = countBundles();
+			success = shell.executeCommand("osgi start --url " + url);
+			if (count == countBundles()) {
+				return; // most likely PgP verification required before the bundle can be installed, no log needed
+			}
+		}
+		if (success) {
+			log.info("Successfully installed add-on: " + bundle.getBsn());
 		} else {
-			String url = bundle.getUrl();
-			if (url != null && url.length() > 0) {
-				int count = countBundles();
-				success = shell.executeCommand("osgi start --url " + url);
-				if (count == countBundles()) {
-					return; // most likely PgP verification required before the
-							// bundle can be installed, no log needed
-				}
-			}
-			if (success) {
-				log.info("Successfully installed add-on: " + bsn.getKey());
-			} else {
-				log.warning("Unable to install add-on: " + bsn.getKey());
-			}
+			log.warning("Unable to install add-on: " + bundle.getBsn());
 		}
 	}
 
@@ -139,17 +158,20 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.info("Successfully downloaded Roobot Addon Data");
 		}
 		if (bundleCache.size() != 0) {
-			sortedBundleCache = new TreeSet<AddOnBundleInfo>(new RankingComparator());
-			sortedBundleCache.addAll(bundleCache.values());
+			searchResultCache = new HashMap<String, AddOnBundleInfo>();
+			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
+			Collections.sort(bundles, new RankingComparator());
 			log.info("Ordered by ranking; T = Trusted developer; R = Roo version XX compatible");
 			log.info("ID T R DESCRIPTION -------------------------------------------------------------");
 			int bundleId = 1;
 			StringBuilder sb = new StringBuilder(80);
 			List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
-			for (AddOnBundleInfo bundle: sortedBundleCache) {
-				sb.append(String.format("%02d ", bundleId++));
-				sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? "- " : "Y ");
-				sb.append("Y ");
+			for (AddOnBundleInfo bundle: bundles) {
+				String bundleKey = String.format("%02d ", bundleId++);
+				searchResultCache.put(bundleKey, bundle);
+				sb.append(bundleKey);
+				sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? "Y " : "- ");
+				sb.append("Y "); //TODO use projectMetadata.getProperty("roo.version"); to get the project version and read roo compatibility version from roobot.xml
 				sb.append(bundle.getVersion());
 				sb.append(" ");
 				ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
@@ -220,7 +242,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			String url = props.getProperty("roobot.url", "http://spring-roo-repository.springsource.org/roobot-test.xml");
+			String url = props.getProperty("roobot.url", ROOBOT_XML);
 			if (url == null) {
 				log.warning("Bundle properties could not be loaded");
 				return false;

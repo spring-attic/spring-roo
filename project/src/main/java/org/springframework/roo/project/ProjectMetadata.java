@@ -242,6 +242,22 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
+	 * Locates the first occurence of a property for a given name and returns it.
+	 * 
+	 * @param name the property name (required)
+	 * @return the property if found otherwise null
+	 */
+	public Property getProperty(String name) {
+		Assert.hasText(name, "Property name to locate is required");
+		for (Property p : pomProperties) {
+			if (name.equals(p.getName())) {
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * @return an unmodifiable representation of the filters (never null, but may be empty)
 	 */
 	public Set<Filter> getFilters() {
