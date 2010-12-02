@@ -24,6 +24,14 @@ public interface AddOnRooBotOperations {
 	void addOnInfo(AddOnBundleSymbolicName bsn);
 	
 	/**
+	 * Display information for a given bundle ID. 
+	 * Information is piped to standard JDK {@link Logger.info}
+	 * 
+	 * @param the bundle ID (required)
+	 */
+	void addOnInfo(String bundleId);
+	
+	/**
 	 * List all registered addons presently known to the Roo Shell.
 	 * Information is piped to standard JDK {@link Logger.info}
 	 * 
