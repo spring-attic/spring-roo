@@ -36,10 +36,27 @@ public interface AddOnRooBotOperations {
 	 * Information is piped to standard JDK {@link Logger.info}
 	 * 
 	 * @param refresh attempt a fresh download of roobot.xml (optional)
-	 * @param linesPerResult maximum number of lines per add-on
-	 * @param maxResults maximum number of results
+	 * @param linesPerResult maximum number of lines per add-on (optional)
+	 * @param maxResults maximum number of results (optional)
+	 * @param trustedOnly display only trusted add-ons in search results (optional)
+	 * @param compatibleOnly display only compatible add-ons in search results (optional)
+	 * @param requiresCommand display only add-ons which offer the specified command (optional)
 	 */
-	void listAddOns(boolean refresh, int linesPerResult, int maxResults);
+	void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand);
+	
+	/**
+	 * Search all registered addons presently known to the Roo Shell.
+	 * Information is piped to standard JDK {@link Logger.info}
+	 * 
+	 * @param searchTerms comma separated list of search terms (required)
+	 * @param refresh attempt a fresh download of roobot.xml (optional)
+	 * @param linesPerResult maximum number of lines per add-on (optional)
+	 * @param maxResults maximum number of results (optional)
+	 * @param trustedOnly display only trusted add-ons in search results (optional)
+	 * @param compatibleOnly display only compatible add-ons in search results (optional)
+	 * @param requiresCommand display only add-ons which offer the specified command (optional)
+	 */
+	void searchAddOns(String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand);
 	
 	/**
 	 * Retrieve a set of Addon bundle symbolic names.

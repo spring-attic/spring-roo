@@ -33,10 +33,24 @@ public class AddOnCommands implements CommandMarker {
 	}
 	
 	@CliCommand(value="addon list", help="List all known Spring Roo Add-ons")
-	public void refresh(@CliOption(key="refresh", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="The bundle symbolic name for the add-on of interest") boolean refresh,
+	public void list(@CliOption(key="refresh", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="The bundle symbolic name for the add-on of interest") boolean refresh,
 			@CliOption(key="linesPerResult", mandatory=false, unspecifiedDefaultValue="1", specifiedDefaultValue="1", help="The maximum number of lines displayed per add-on") int linesPerResult,
-			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="20", specifiedDefaultValue="20", help="The maximum number of add-ons to list") int maxResults) {
-		operations.listAddOns(refresh, linesPerResult, maxResults);
+			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="20", specifiedDefaultValue="20", help="The maximum number of add-ons to list") int maxResults,
+			@CliOption(key="trustedOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display trusted add-ons in search results") boolean trustedOnly,
+			@CliOption(key="compatibleOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display compatible add-ons in search results") boolean compatibleOnly,
+			@CliOption(key="requiresCommand", mandatory=false, help="Only display compatible add-ons in search results") String requiresCommand) {
+		operations.listAddOns(refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, requiresCommand);
+	}
+	
+	@CliCommand(value="addon search", help="Search all known Spring Roo Add-ons")
+	public void search(@CliOption(key="requiresDescription", mandatory=true, help="A comma separated list of search terms") String searchTerms,
+			@CliOption(key="refresh", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="The bundle symbolic name for the add-on of interest") boolean refresh,
+			@CliOption(key="linesPerResult", mandatory=false, unspecifiedDefaultValue="1", specifiedDefaultValue="1", help="The maximum number of lines displayed per add-on") int linesPerResult,
+			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="20", specifiedDefaultValue="20", help="The maximum number of add-ons to list") int maxResults,
+			@CliOption(key="trustedOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display trusted add-ons in search results") boolean trustedOnly,
+			@CliOption(key="compatibleOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display compatible add-ons in search results") boolean compatibleOnly,
+			@CliOption(key="requiresCommand", mandatory=false, help="Only display compatible add-ons in search results") String requiresCommand) {
+		operations.searchAddOns(searchTerms, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, requiresCommand);
 	}
 	
 	@CliCommand(value="addon install", help="Install Spring Roo Add-on")

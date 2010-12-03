@@ -23,6 +23,7 @@ public class AddOnBundleInfo {
 	private long size;
 	private String url;
 	private Map<String, String> commands;
+	private float searchRelevance = 0f;
 	
 	public AddOnBundleInfo(String bsn, float ranking, String name,
 			String description, Date lastUpdated, String version,
@@ -84,6 +85,14 @@ public class AddOnBundleInfo {
 
 	public Map<String, String> getCommands() {
 		return commands;
+	}
+
+	public float getSearchRelevance() {
+		return searchRelevance;
+	}
+
+	public void setSearchRelevance(float searchRelevance) {
+		this.searchRelevance = searchRelevance;
 	}
 
 	@Override

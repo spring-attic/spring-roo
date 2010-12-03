@@ -171,57 +171,114 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.info("Successfully removed add-on: " + bsn.getKey());
 		}
 	}
-
-	public void listAddOns(boolean refresh, int linesPerResult, int maxResults) {
+	
+	public void searchAddOns(String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
+		Assert.hasText(searchTerms, "Search terms for add-on required");
 		if (refresh && populateBsnMap()) {
 			log.info("Successfully downloaded Roobot Addon Data");
 		}
 		if (bundleCache.size() != 0) {
 			searchResultCache.clear();
-			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
-			Collections.sort(bundles, new RankingComparator());
-			log.info("Ordered by ranking; T = Trusted developer; R = Roo version XX compatible");
-			log.info("ID T R DESCRIPTION -------------------------------------------------------------");
-			int bundleId = 1;
-			StringBuilder sb = new StringBuilder();
-			List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
-			for (AddOnBundleInfo bundle: bundles) {
-				String bundleKey = String.format("%02d", bundleId++);
-				searchResultCache.put(bundleKey, bundle);
-				sb.append(bundleKey);
-				sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? " Y " : " - ");
-				sb.append("Y "); //TODO use projectMetadata.getProperty("roo.version"); to get the project version and read roo compatibility version from roobot.xml
-				sb.append(bundle.getVersion());
-				sb.append(" ");
-				ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
-				int lpr = linesPerResult;
-				while (split.size() > 0 && --lpr >= 0) {
-					while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
-						sb.append(split.get(0)).append(" ");
-						split.remove(0);
+			String [] terms = searchTerms.split(",");
+			for (AddOnBundleInfo bundle: bundleCache.values()) {
+				//first set relevance of all bundles to zero
+				bundle.setSearchRelevance(0f);
+				int hits = 0;
+				for (String term: terms) {
+					if (bundle.getSummary().toLowerCase().contains(term.trim().toLowerCase())) {
+						hits++;
 					}
-					String line = sb.toString().substring(0, sb.toString().length() - 1);
-					if (lpr == 0 && split.size() > 0) {
-						line += "...";
-					}
-					log.info(line);
-					sb.setLength(0);
-					sb.append("       ");
 				}
-				if(sb.toString().trim().length() > 0) {
-					log.info(sb.toString());
-				}
-				sb.setLength(0);
-				if (--maxResults == 0) {
-					break;
-				}
+				bundle.setSearchRelevance(hits / terms.length);
 			}
-			log.info("--------------------------------------------------------------------------------");
-			log.info("[HINT] use 'addon info --bundleSymbolicName ...' to see details about a bundle");
-			log.info("[HINT] use 'addon install --bundleSymbolicName ...' to install a specific bundle");
+			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
+			Collections.sort(bundles, new SearchComparator());
+			LinkedList<AddOnBundleInfo> filteredSearchResults = filterList(bundles, maxResults, trustedOnly, compatibleOnly, requiresCommand, true);
+			printResultList(filteredSearchResults, linesPerResult);
 		} else {
 			log.info("No addons available for installation. (Are you connected to the Internet?)");
 		}
+	}
+
+	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
+		if (refresh && populateBsnMap()) {
+			log.info("Successfully downloaded Roobot Addon Data");
+		}
+		if (bundleCache.size() != 0) {
+			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
+			Collections.sort(bundles, new RankingComparator());
+			LinkedList<AddOnBundleInfo> filteredList = filterList(bundles, maxResults, trustedOnly, compatibleOnly, requiresCommand, false);
+			printResultList(filteredList, linesPerResult);
+		} else {
+			log.info("No addons available for installation. (Are you connected to the Internet?)");
+		}
+	}
+	
+	private LinkedList<AddOnBundleInfo> filterList(LinkedList<AddOnBundleInfo> bundles, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
+		LinkedList<AddOnBundleInfo> filteredList = new LinkedList<AddOnBundleInfo>();
+		List<PGPPublicKeyRing> keys = null;
+		if (trustedOnly) {
+			keys = pgpService.getTrustedKeys();
+		}
+		bundle_loop: for (AddOnBundleInfo bundle: bundles) {
+			if (onlyRelevantBundles && !(bundle.getSearchRelevance() > 0)) {
+				continue bundle_loop;
+			}
+			if (trustedOnly && !isTrustedKey(keys, bundle.getPgpKey())) {
+				continue bundle_loop;
+			} 
+			if (compatibleOnly && !isCompatible(bundle.getVersion())) {
+				continue bundle_loop;
+			}
+			if (requiresCommand != null && requiresCommand.length() > 0 && !bundle.getCommands().keySet().contains(requiresCommand.trim())) {
+				continue bundle_loop;
+			}
+			if (maxResults-- == 0) {
+				break;
+			}
+			filteredList.add(bundle);
+		}
+		return filteredList;
+	}
+	
+	private void printResultList(LinkedList<AddOnBundleInfo> bundles, int linesPerResult) {
+		int bundleId = 1;
+		searchResultCache.clear();
+		StringBuilder sb = new StringBuilder();
+		List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
+		log.info("Ordered by ranking; T = Trusted developer; R = Roo version XX compatible");
+		log.warning("ID T R DESCRIPTION -------------------------------------------------------------");
+		for (AddOnBundleInfo bundle: bundles) {
+			String bundleKey = String.format("%02d", bundleId++);
+			searchResultCache.put(bundleKey, bundle);
+			sb.append(bundleKey);
+			sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? " Y " : " - ");
+			sb.append(isCompatible(bundle.getVersion()) ? "Y " : "- "); 
+			sb.append(bundle.getVersion());
+			sb.append(" ");
+			ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
+			int lpr = linesPerResult;
+			while (split.size() > 0 && --lpr >= 0) {
+				while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
+					sb.append(split.get(0)).append(" ");
+					split.remove(0);
+				}
+				String line = sb.toString().substring(0, sb.toString().length() - 1);
+				if (lpr == 0 && split.size() > 0) {
+					line += "...";
+				}
+				log.info(line);
+				sb.setLength(0);
+				sb.append("       ");
+			}
+			if(sb.toString().trim().length() > 0) {
+				log.info(sb.toString());
+			}
+			sb.setLength(0);
+		}
+		log.warning("--------------------------------------------------------------------------------");
+		log.info("[HINT] use 'addon info' to see details about a bundle");
+		log.info("[HINT] use 'addon install' to install a specific bundle");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -368,11 +425,28 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 	
+	private boolean isCompatible(String version) {
+		return true; //TODO use projectMetadata.getProperty("roo.version"); to get the project version and read roo compatibility version from roobot.xml
+	}
+	
 	private class RankingComparator implements Comparator<AddOnBundleInfo> {
 		public int compare(AddOnBundleInfo o1, AddOnBundleInfo o2) {
 			if (o1.getRanking() == o2.getRanking()) return 0;
 			else if (o1.getRanking() > o2.getRanking()) return 1;
 			else return -1;
+		}
+	}
+	
+	private class SearchComparator implements Comparator<AddOnBundleInfo> {
+		public int compare(AddOnBundleInfo o1, AddOnBundleInfo o2) {
+			if (o1.getSearchRelevance() < o2.getSearchRelevance()) return -1;
+			else if (o1.getSearchRelevance() > o2.getSearchRelevance()) return 1;
+			//order by ranking if search relevance is equal
+			else {
+				if (o1.getRanking() == o2.getRanking()) return 0;
+				else if (o1.getRanking() > o2.getRanking()) return 1;
+				else return -1;	
+			}
 		}
 	}
 }
