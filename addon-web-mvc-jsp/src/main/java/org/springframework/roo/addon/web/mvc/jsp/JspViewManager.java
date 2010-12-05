@@ -75,7 +75,7 @@ public class JspViewManager {
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 
-		entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		entityName = uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
 		Assert.notNull(webScaffoldAnnotationValues.getPath(), "Path is not specified in the @RooWebScaffold annotation for '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName() + "'");
 		
@@ -514,7 +514,7 @@ public class JspViewManager {
 				|| field.getFieldType().equals(new JavaType(Long.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(long.class.getName())
 				|| field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_integer");
-		} else if (StringUtils.uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
+		} else if (uncapitalize(field.getFieldName().getSymbolName()).contains("email")) {
 			fieldElement.setAttribute("validationMessageCode", "field_invalid_email");
 		} else if(field.getFieldType().equals(new JavaType(Double.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(double.class.getName())
 				|| field.getFieldType().equals(new JavaType(Float.class.getName())) || field.getFieldType().getFullyQualifiedTypeName().equals(float.class.getName())
@@ -617,5 +617,13 @@ public class JspViewManager {
 		}
 		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
 		return pluralMetadata.getPlural() + "Items";
+	}
+	
+	private String uncapitalize(String term) {
+		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
+		if (term != null && term.length() > 2 && Character.isUpperCase(term.charAt(0)) && Character.isUpperCase(term.charAt(1))) {
+			return term;
+		}
+		return StringUtils.uncapitalize(term);
 	}
 }

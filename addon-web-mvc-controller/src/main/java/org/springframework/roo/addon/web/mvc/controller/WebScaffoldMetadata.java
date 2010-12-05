@@ -96,7 +96,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.detailsScanner = detailsScanner;
-		this.entityName = StringUtils.uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		this.entityName = uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(this.entityName)) {
 			this.entityName = "_" + entityName;
 		}
@@ -796,7 +796,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		for (int i = 0; i < paramTypes.size(); i++) {
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), StringUtils.uncapitalize(paramNames.get(i).getSymbolName())));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(paramNames.get(i).getSymbolName())));
 			if (paramTypes.get(i).equals(JavaType.BOOLEAN_PRIMITIVE) || paramTypes.get(i).equals(JavaType.BOOLEAN_OBJECT)) {
 				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 			}
@@ -805,7 +805,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (paramTypes.get(i).equals(new JavaType(Date.class.getName())) || paramTypes.get(i).equals(new JavaType(Calendar.class.getName()))) {
 				JavaSymbolName fieldName = null;
 				if (paramNames.get(i).getSymbolName().startsWith("max") || paramNames.get(i).getSymbolName().startsWith("min")) {
-					fieldName = new JavaSymbolName(StringUtils.uncapitalize(paramNames.get(i).getSymbolName().substring(3)));
+					fieldName = new JavaSymbolName(uncapitalize(paramNames.get(i).getSymbolName().substring(3)));
 				} else {
 					fieldName = paramNames.get(i);
 				}
@@ -1262,4 +1262,11 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 	}
 	
+	private String uncapitalize(String term) {
+		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
+		if (term != null && term.length() > 2 && Character.isUpperCase(term.charAt(0)) && Character.isUpperCase(term.charAt(1))) {
+			return term;
+		}
+		return StringUtils.uncapitalize(term);
+	}
 }
