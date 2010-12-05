@@ -383,7 +383,7 @@
 		</provider>
 		<provider id="DATANUCLEUS_2">
 			<properties>
-				<datanucleus.version>2.1.2</datanucleus.version>
+				<datanucleus.version>2.1.3</datanucleus.version>
 			</properties>
 			<repositories>
 				<repository>
