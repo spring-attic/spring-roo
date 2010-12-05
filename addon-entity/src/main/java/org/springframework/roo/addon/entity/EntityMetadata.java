@@ -552,6 +552,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return null;
 		}
 		
+		if (isVMforceEnabled) {
+			versionField = "lastModifiedDate";
+			versionType = new JavaType("java.util.Calendar");
+		}
+		
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
 		JavaSymbolName verField = null;
