@@ -13,7 +13,6 @@ import java.util.SortedSet;
 
 import org.jvnet.inflector.Noun;
 import org.springframework.roo.addon.dbre.model.Column;
-import org.springframework.roo.addon.dbre.model.ColumnType;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.JoinTable;
@@ -109,7 +108,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
 		Table table = database.findTable(dbreTypeResolutionService.findTableName(javaType));
 		if (table == null) {
-			// System.out.println("Table for type " + javaType.getFullyQualifiedTypeName() + " not found");
+			// System.out.println("Table for type " + javaType.getFullyQualifiedTypeName() + " not found " + System.nanoTime());
 			return;
 		}
 
@@ -527,7 +526,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			}
 
 			boolean isEmdeddedIdFieldDeclaredOnGovernor = !isCompositeKeyField && isEmbeddedIdField(fieldName);
-
 			if (isEmdeddedIdFieldDeclaredOnGovernor) {
 				fieldName = getUniqueFieldName(fieldName);
 			}
@@ -596,7 +594,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private FieldMetadata getField(JavaSymbolName fieldName, Column column) {
-		JavaType fieldType = column.getType().getJavaType();
+		JavaType fieldType = column.getJavaType();
 
 		// Add annotations to field
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
@@ -604,6 +602,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add @Column annotation
 		AnnotationMetadataBuilder columnBuilder = new AnnotationMetadataBuilder(COLUMN);
 		columnBuilder.addStringAttribute(NAME, column.getEscapedName());
+		columnBuilder.addStringAttribute("columnDefinition", column.getTypeName());
 
 		// Add length attribute for Strings
 		if (column.getLength() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
@@ -631,7 +630,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Add JSR 220 @Temporal annotation to date fields
 		if (fieldType.equals(new JavaType("java.util.Date"))) {
 			AnnotationMetadataBuilder temporalBuilder = new AnnotationMetadataBuilder(new JavaType("javax.persistence.Temporal"));
-			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getType().name())));
+			temporalBuilder.addEnumAttribute(VALUE, new EnumDetails(new JavaType("javax.persistence.TemporalType"), new JavaSymbolName(column.getJdbcType())));
 			annotations.add(temporalBuilder);
 
 			AnnotationMetadataBuilder dateTimeFormatBuilder = new AnnotationMetadataBuilder(new JavaType("org.springframework.format.annotation.DateTimeFormat"));
@@ -640,7 +639,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Add @Lob for CLOB fields if applicable
-		if (column.getType() == ColumnType.CLOB) {
+		if (column.getJdbcType().equals("CLOB")) {
 			annotations.add(new AnnotationMetadataBuilder(new JavaType("javax.persistence.Lob")));
 		}
 

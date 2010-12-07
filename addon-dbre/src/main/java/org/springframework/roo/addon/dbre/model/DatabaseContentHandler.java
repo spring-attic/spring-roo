@@ -73,7 +73,6 @@ public final class DatabaseContentHandler extends DefaultHandler {
 				if (option.getKey().equals(DatabaseXmlUtils.INCLUDED_TABLES)) {
 					((Database) stack.peek()).setIncludeTables(option.getValue());
 				}
-			} else if (stack.peek() instanceof Database) {
 				if (option.getKey().equals(DatabaseXmlUtils.EXCLUDED_TABLES)) {
 					((Database) stack.peek()).setExcludeTables(option.getValue());
 				}
@@ -111,22 +110,27 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	}
 
 	private Column getColumn(Attributes attributes) {
-		Column column = new Column(attributes.getValue(DatabaseXmlUtils.NAME));
-		column.setDescription(attributes.getValue(DatabaseXmlUtils.DESCRIPTION));
-		column.setPrimaryKey(Boolean.parseBoolean(attributes.getValue("primaryKey")));
-		column.setJavaType(attributes.getValue("javaType"));
-		column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
-
+		String type = attributes.getValue("type");
+		String[] dataTypeAndName = StringUtils.split(type, ",");
+		int dataType = Integer.parseInt(dataTypeAndName[0]);
+		String typeName = dataTypeAndName[1];
+		
 		String size = attributes.getValue("size");
+		int columnSize;
+		int decimalDigits = 0;
 		if (size.contains(",")) {
 			String[] precisionScale = StringUtils.split(size, ",");
-			column.setPrecision(Integer.parseInt(precisionScale[0]));
-			column.setScale(Integer.parseInt(precisionScale[1]));
+			columnSize = Integer.parseInt(precisionScale[0]);
+			decimalDigits = Integer.parseInt(precisionScale[1]);
 		} else {
-			column.setLength(Integer.parseInt(size));
+			columnSize = Integer.parseInt(size);
 		}
 
-		column.setType(ColumnType.valueOf(attributes.getValue("type")));
+		Column column = new Column(attributes.getValue(DatabaseXmlUtils.NAME), dataType, typeName, columnSize, decimalDigits);
+		column.setDescription(attributes.getValue(DatabaseXmlUtils.DESCRIPTION));
+		column.setPrimaryKey(Boolean.parseBoolean(attributes.getValue("primaryKey")));
+		column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
+
 		return column;
 	}
 

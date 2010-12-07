@@ -66,6 +66,15 @@ public class Index implements Serializable {
 		Assert.notNull(indexColumn, "Column required");
 		return columns.remove(indexColumn);
 	}
+	
+	public boolean hasColumn(Column column) {
+		for (IndexColumn indexColumn : columns) {
+			if (indexColumn.getColumn().equals(column)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public int hashCode() {
 		final int prime = 31;

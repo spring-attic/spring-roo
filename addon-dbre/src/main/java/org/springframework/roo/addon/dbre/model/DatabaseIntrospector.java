@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -113,7 +112,7 @@ public class DatabaseIntrospector {
 		database.initialize();
 		return database;
 	}
-
+	
 	private Set<Table> readTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
 
@@ -176,33 +175,9 @@ public class DatabaseIntrospector {
 		ResultSet rs = databaseMetaData.getColumns(getCatalog(), getSchemaPattern(), getTableNamePattern(), getColumnNamePattern());
 		try {
 			while (rs.next()) {
-				Column column = new Column(rs.getString("COLUMN_NAME"));
+				Column column = new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"));
 				column.setDescription(rs.getString("REMARKS"));
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
-				column.setTypeCode(rs.getInt("DATA_TYPE"));
-				column.setType(ColumnType.getColumnType(column.getTypeCode())); // "TYPE_NAME"
-				
-				int columnSize = rs.getInt("COLUMN_SIZE");
-				switch (column.getType()) {
-					case DECIMAL:
-					case DOUBLE:
-					case NUMERIC:
-						column.setPrecision(columnSize);
-						column.setScale(rs.getInt("DECIMAL_DIGITS"));
-						column.setLength(0);
-						break;
-					case CHAR:
-						if (columnSize > 1) {
-							column.setTypeCode(Types.VARCHAR);
-							column.setType(ColumnType.VARCHAR);
-							column.setLength(columnSize);
-						}
-						break;
-					default:
-						column.setLength(columnSize);
-						break;
-				}
-
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 
 				columns.add(column);

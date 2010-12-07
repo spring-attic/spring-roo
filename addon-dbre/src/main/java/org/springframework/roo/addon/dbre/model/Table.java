@@ -200,17 +200,28 @@ public class Table implements Serializable {
 		return this.indices.addAll(indices);
 	}
 
-	public Index findUniqueReference(String uniqueColumnName) {
-		for (Index index : indices) {
-			if (index.isUnique()) {
-				for (IndexColumn column : index.getColumns()) {
-					if (column.getName().equalsIgnoreCase(uniqueColumnName)) {
-						return index;
-					}
-				}
+//	public Index findUniqueReference(String uniqueColumnName) {
+//		for (Index index : indices) {
+//			if (index.isUnique()) {
+//				for (IndexColumn column : index.getColumns()) {
+//					if (column.getName().equalsIgnoreCase(uniqueColumnName)) {
+//						return index;
+//					}
+//				}
+//			}
+//		}
+//		return null;
+//	}
+	
+	public boolean isPrimaryKeyIndex(Index index) {
+		Set<Column> primaryKeys = getPrimaryKeys();
+		boolean primaryKeyIndex = index.isUnique() && index.getColumns().size() == primaryKeys.size();
+		if (primaryKeyIndex) {
+			for (Column column : primaryKeys) {
+				primaryKeyIndex &= index.hasColumn(column);
 			}
 		}
-		return null;
+		return primaryKeyIndex;
 	}
 
 	public int hashCode() {

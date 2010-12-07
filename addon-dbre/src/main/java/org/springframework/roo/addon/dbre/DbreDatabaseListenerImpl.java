@@ -331,7 +331,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Column column : columns) {
 			String columnName = column.getName();
 			JavaSymbolName fieldName = new JavaSymbolName(dbreTypeResolutionService.suggestFieldName(columnName));
-			JavaType fieldType = column.getType().getJavaType();
+			JavaType fieldType = column.getJavaType();
 			result.add(new Identifier(fieldName, fieldType, columnName));
 		}
 

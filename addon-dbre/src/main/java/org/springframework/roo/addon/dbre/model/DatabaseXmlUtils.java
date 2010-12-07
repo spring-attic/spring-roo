@@ -78,10 +78,10 @@ public abstract class DatabaseXmlUtils {
 				if (column.getLength() > 0) {
 					columnElement.setAttribute("size", String.valueOf(column.getLength()));
 				} else {
-					columnElement.setAttribute("size", String.valueOf(column.getPrecision() + "," + String.valueOf(column.getScale())));
+					columnElement.setAttribute("size", column.getPrecision() + "," + column.getScale());
 				}
 
-				columnElement.setAttribute("type", column.getType().name());
+				columnElement.setAttribute("type", column.getDataType() + "," + column.getTypeName());
 				tableElement.appendChild(columnElement);
 			}
 
@@ -185,23 +185,28 @@ public abstract class DatabaseXmlUtils {
 
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
-				String name = columnElement.getAttribute(NAME);
-				Column column = new Column(name);
-				column.setDescription(columnElement.getAttribute(DESCRIPTION));
-				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
-				column.setJavaType(columnElement.getAttribute("javaType"));
-				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
+				// String name = columnElement.getAttribute(NAME);
+				String type = columnElement.getAttribute("type");
+				String[] dataTypeAndName = StringUtils.split(type, ",");
+				int dataType = Integer.parseInt(dataTypeAndName[0]);
+				String typeName = dataTypeAndName[1];
 
 				String size = columnElement.getAttribute("size");
+				int columnSize;
+				int decimalDigits = 0;
 				if (size.contains(",")) {
 					String[] precisionScale = StringUtils.split(size, ",");
-					column.setPrecision(Integer.parseInt(precisionScale[0]));
-					column.setScale(Integer.parseInt(precisionScale[1]));
+					columnSize = Integer.parseInt(precisionScale[0]);
+					decimalDigits = Integer.parseInt(precisionScale[1]);
 				} else {
-					column.setLength(Integer.parseInt(size));
+					columnSize = Integer.parseInt(size);
 				}
 
-				column.setType(ColumnType.valueOf(columnElement.getAttribute("type")));
+				Column column = new Column(columnElement.getAttribute(NAME), dataType, typeName, columnSize, decimalDigits);
+				column.setDescription(columnElement.getAttribute(DESCRIPTION));
+				column.setPrimaryKey(Boolean.parseBoolean(columnElement.getAttribute("primaryKey")));
+				column.setRequired(Boolean.parseBoolean(columnElement.getAttribute("required")));
+
 				table.addColumn(column);
 			}
 
@@ -234,6 +239,7 @@ public abstract class DatabaseXmlUtils {
 		}
 
 		database.initialize();
+		
 		return database;
 	}
 
