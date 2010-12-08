@@ -605,13 +605,13 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		columnBuilder.addStringAttribute("columnDefinition", column.getTypeName());
 
 		// Add length attribute for Strings
-		if (column.getLength() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
-			columnBuilder.addIntegerAttribute("length", column.getLength());
+		if (column.getColumnSize() < 4000 && fieldType.equals(JavaType.STRING_OBJECT)) {
+			columnBuilder.addIntegerAttribute("length", column.getColumnSize());
 		}
 
 		// Add precision and scale attributes for numeric fields
-		if (column.getPrecision() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(new JavaType("java.math.BigDecimal")))) {
-			columnBuilder.addIntegerAttribute("precision", column.getPrecision());
+		if (column.getScale() > 0 && (fieldType.equals(JavaType.DOUBLE_OBJECT) || fieldType.equals(JavaType.DOUBLE_PRIMITIVE) || fieldType.equals(new JavaType("java.math.BigDecimal")))) {
+			columnBuilder.addIntegerAttribute("precision", column.getColumnSize());
 			columnBuilder.addIntegerAttribute("scale", column.getScale());
 		}
 

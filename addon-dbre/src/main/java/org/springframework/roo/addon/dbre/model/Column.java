@@ -20,32 +20,29 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public class Column implements Serializable {
-	private static final long serialVersionUID = -7906698460288786562L;
+	private static final long serialVersionUID = 5418837699317442974L;
 	private String name;
 	private int dataType;
 	private String typeName;
 	private int columnSize;
-	private int decimalDigits;
+	private int scale = 0;
 	private String description;
 	private Table table;
 	private boolean primaryKey;
 	private boolean required;
 	private boolean unique;
 	private boolean autoIncrement;
-	private int length = 0;
-	private int precision = 0;
-	private int scale = 0;
 	private String jdbcType;
 	private JavaType javaType;
 	private String defaultValue;
 
-	Column(String name, int dataType, String typeName, int columnSize, int decimalDigits) {
+	Column(String name, int dataType, String typeName, int columnSize, int scale) {
 		Assert.hasText(name, "Column name required");
 		this.name = name;
 		this.dataType = dataType;
 		this.typeName = typeName;
-		this.columnSize = this.length = columnSize;
-		this.decimalDigits = decimalDigits;
+		this.columnSize = columnSize;
+		this.scale = scale;
 		initialize();
 	}
 
@@ -71,14 +68,10 @@ public class Column implements Serializable {
 			case Types.NUMERIC:
 				jdbcType = "NUMERIC";
 				javaType = new JavaType(BigDecimal.class.getName());
-				precision = columnSize;
-				scale = decimalDigits;
 				break;
 			case Types.DECIMAL:
 				jdbcType = "DECIMAL";
 				javaType = new JavaType(BigDecimal.class.getName());
-				precision = columnSize;
-				scale = decimalDigits;
 				break;
 			case Types.BOOLEAN:
 				jdbcType = "BOOLEAN";
@@ -115,8 +108,6 @@ public class Column implements Serializable {
 			case Types.DOUBLE:
 				jdbcType = "DOUBLE";
 				javaType = JavaType.DOUBLE_OBJECT;
-				precision = columnSize;
-				scale = decimalDigits;
 				break;
 			case Types.BINARY:
 				jdbcType = "BINARY";
@@ -200,6 +191,14 @@ public class Column implements Serializable {
 		return typeName;
 	}
 
+	public int getColumnSize() {
+		return columnSize;
+	}
+
+	public int getScale() {
+		return scale;
+	}
+
 	public String getDescription() {
 		return description;
 	}
@@ -248,18 +247,6 @@ public class Column implements Serializable {
 		this.autoIncrement = autoIncrement;
 	}
 
-	public int getLength() {
-		return length;
-	}
-
-	public int getPrecision() {
-		return precision;
-	}
-
-	public int getScale() {
-		return scale;
-	}
-
 	public String getJdbcType() {
 		return jdbcType;
 	}
@@ -300,6 +287,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, dataType=%s, typeName=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, length=%s, precision=%s, scale=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, description, table, primaryKey, required, unique, autoIncrement, length, precision, scale, jdbcType, javaType, defaultValue);
+		return String.format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, columnSize, scale, description, table, primaryKey, required, unique, autoIncrement, jdbcType, javaType, defaultValue);
 	}
 }
