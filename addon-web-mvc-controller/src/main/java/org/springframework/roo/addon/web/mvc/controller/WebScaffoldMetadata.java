@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -866,6 +868,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		boolean converterPresent = false;
 
 		List<JavaType> typesForConversion = new ArrayList<JavaType>(specialDomainTypes);
+		Set<String> converterTypeSet = new HashSet<String>();
 		typesForConversion.add(beanInfoMetadata.getJavaBean());
 		for (int index = 0; index < typesForConversion.size(); index++) {
 			JavaType conversionType = typesForConversion.get(index);
@@ -899,7 +902,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
 					String conversionTypeFieldName = uncapitalize(conversionType.getSimpleTypeName());
 					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
-					if (null == methodExists(converterMethodName, new ArrayList<AnnotatedJavaType>())) {
+					if (!converterTypeSet.contains(conversionType.getFullyQualifiedTypeName()) && null == methodExists(converterMethodName, new ArrayList<AnnotatedJavaType>())) {
+						converterTypeSet.add(conversionType.getFullyQualifiedTypeName());
 						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
 							bodyBuilder.appendFormalLine("if (! conversionService.canConvert(" + conversionType.getSimpleTypeName() + ".class, String.class)) {");
 							bodyBuilder.indent();
