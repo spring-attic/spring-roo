@@ -897,7 +897,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 				if (elegibleMethods.size() > 0) {
 					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
-					String conversionTypeFieldName = Introspector.decapitalize(StringUtils.capitalize(conversionType.getSimpleTypeName()));
+					String conversionTypeFieldName = uncapitalize(conversionType.getSimpleTypeName());
 					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
 					if (null == methodExists(converterMethodName, new ArrayList<AnnotatedJavaType>())) {
 						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
@@ -1264,9 +1264,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private String uncapitalize(String term) {
 		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
-		if (term != null && term.length() > 2 && Character.isUpperCase(term.charAt(0)) && Character.isUpperCase(term.charAt(1))) {
-			return term;
-		}
-		return StringUtils.uncapitalize(term);
+		return Introspector.decapitalize(StringUtils.capitalize(term));
 	}
 }

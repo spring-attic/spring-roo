@@ -122,7 +122,7 @@ public class JspViewManager {
 			if(++fieldCounter < 7) {
 				Element columnElement = new XmlElementBuilder("table:column", document)
 											.addAttribute("id", XmlUtils.convertId("c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
-											.addAttribute("property", Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName())))
+											.addAttribute("property", uncapitalize(field.getFieldName().getSymbolName()))
 										.build();
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
 				fieldTable.appendChild(columnElement);
@@ -178,7 +178,7 @@ public class JspViewManager {
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
-			String fieldName = Introspector.decapitalize(StringUtils.capitalize(field.getFieldName().getSymbolName()));
+			String fieldName = uncapitalize(field.getFieldName().getSymbolName());
 			Element fieldDisplay = new XmlElementBuilder("field:display", document)
 								.addAttribute("id", XmlUtils.convertId("s:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
 								.addAttribute("object", "${" + entityName.toLowerCase() + "}")
@@ -325,7 +325,7 @@ public class JspViewManager {
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(paramName);
 			if (field == null) {
 				// It may be that the field has an min or max prepended
-				field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(Introspector.decapitalize(paramName.getSymbolName().substring(3))));
+				field = beanInfoMetadata.getFieldForPropertyName(new JavaSymbolName(uncapitalize(paramName.getSymbolName().substring(3))));
 			}
 			// Ignoring java.util.Map field types (see ROO-194)
 			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
@@ -621,9 +621,6 @@ public class JspViewManager {
 	
 	private String uncapitalize(String term) {
 		// [ROO-1790] this is needed to adhere to the JavaBean naming conventions (see JavaBean spec section 8.8)
-		if (term != null && term.length() > 2 && Character.isUpperCase(term.charAt(0)) && Character.isUpperCase(term.charAt(1))) {
-			return term;
-		}
-		return StringUtils.uncapitalize(term);
+		return Introspector.decapitalize(StringUtils.capitalize(term));
 	}
 }
