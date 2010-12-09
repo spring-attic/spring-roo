@@ -23,7 +23,7 @@ public class IntegrationTestCommands implements CommandMarker {
 	@Reference private IntegrationTestOperations integrationTestOperations;
 	@Reference private ClasspathOperations classpathOperations;
 
-	@CliAvailabilityIndicator({"test mock"})
+	@CliAvailabilityIndicator({ "test mock", "test stub" })
 	public boolean isAvailable() {
 		return classpathOperations.isProjectAvailable();
 	}
@@ -38,5 +38,17 @@ public class IntegrationTestCommands implements CommandMarker {
 		}
 
 		integrationTestOperations.newMockTest(entity);
+	}
+	
+	@CliCommand(value = "test stub", help = "Creates a test stub for the specified entity")
+	public void newTestStub(
+		@CliOption(key = "entity", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the entity this mock test is targeting") JavaType entity, 
+		@CliOption(key = "permitReservedWords", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue = "true", help = "Indicates whether reserved words are ignored by Roo") boolean permitReservedWords) {
+
+		if (!permitReservedWords) {
+			ReservedWords.verifyReservedWordsNotPresent(entity);
+		}
+
+		integrationTestOperations.newTestStub(entity);
 	}
 }

@@ -15,4 +15,11 @@ public interface IntegrationTestOperations {
 	 * @param entity to produce a mock test for (required)
 	 */
 	void newMockTest(JavaType entity);
+	
+	/**
+	 * Creates a test stub for the entity. Silently returns if the test file already exists.
+	 * 
+	 * @param entity to produce a test stub for (required)
+	 */
+	void newTestStub(JavaType entity);
 }
