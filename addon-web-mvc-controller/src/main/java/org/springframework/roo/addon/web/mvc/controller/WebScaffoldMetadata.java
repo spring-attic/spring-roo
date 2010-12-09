@@ -570,7 +570,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getJsonShowMethod() {
 		JavaSymbolName toJsonMethodName = jsonMetadata.getToJsonMethodName();
-		if (toJsonMethodName == null) {
+		if (toJsonMethodName == null || entityMetadata.getFindMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("showJson");
@@ -617,7 +617,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getJsonCreateMethod() {
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
-		if (fromJsonMethodName == null) {
+		if (fromJsonMethodName == null || entityMetadata.getPersistMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("createFromJson");
@@ -657,7 +657,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getCreateFromJsonArrayMethod() {
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
-		if (fromJsonArrayMethodName == null) {
+		if (fromJsonArrayMethodName == null || entityMetadata.getPersistMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("createFromJsonArray");
@@ -706,7 +706,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getJsonListMethod() {
 		JavaSymbolName toJsonArrayMethodName = jsonMetadata.getToJsonArrayMethodName();
-		if (toJsonArrayMethodName == null) {
+		if (toJsonArrayMethodName == null || entityMetadata.getFindAllMethod() == null) {
 			return null;
 		}
 
@@ -736,7 +736,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getJsonUpdateMethod() {
 		JavaSymbolName fromJsonMethodName = jsonMetadata.getFromJsonMethodName();
-		if (fromJsonMethodName == null) {
+		if (fromJsonMethodName == null || entityMetadata.getMergeMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("updateFromJson");
@@ -782,7 +782,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private MethodMetadata getUpdateFromJsonArrayMethod() {
 		JavaSymbolName fromJsonArrayMethodName = jsonMetadata.getFromJsonArrayMethodName();
-		if (fromJsonArrayMethodName == null) {
+		if (fromJsonArrayMethodName == null || entityMetadata.getMergeMethod() == null) {
 			return null;
 		}
 		JavaSymbolName methodName = new JavaSymbolName("updateFromJsonArray");
@@ -879,6 +879,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	
 	private MethodMetadata getFinderJsonMethod(MethodMetadata methodMetadata) {
 		Assert.notNull(methodMetadata, "Method metadata required for finder");
+		if (jsonMetadata.getToJsonArrayMethodName() == null) {
+			return null;
+		}
 		JavaSymbolName finderMethodName = new JavaSymbolName("json" + StringUtils.capitalize(methodMetadata.getMethodName().getSymbolName()));
 
 		List<AnnotatedJavaType> annotatedParamTypes = new ArrayList<AnnotatedJavaType>();
