@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xml:id="base-solr"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns5="http://www.w3.org/1998/Math/MathML"
+         xmlns:ns4="http://www.w3.org/1999/xhtml"
+         xmlns:ns3="http://www.w3.org/2000/svg"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>JSON Add-On</title>
+
+  <para>The JSON add-on offers JSON support in the domain layer as well as the
+  Spring MVC scaffolding. A number of methods are provided to facilitate
+  serialization and deserialization of JSON documents into domain objects. The
+  JSON add-on makes use of the <link
+  xlink:href="http://flexjson.sourceforge.net/">Flexjson</link>
+  library.</para>
+
+  <section>
+    <title>Adding Json Functionality to Domain Types</title>
+
+    <para>The add-on offers an annotation as well as two commands which
+    support the integration of JSON support into the projects domain
+    layer:</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Annotating a target type with the default <emphasis
+        role="bold">@RooJson</emphasis> annotation will prompt Roo to create
+        an ITD with the following four methods:</para>
+
+        <para><programlisting>public String toJson() {
+   return new JSONSerializer().exclude("*.class").serialize(this);
+}
+</programlisting>This method returns a JSON representation of the current
+        object.</para>
+
+        <para><programlisting>public static Owner fromJsonToPet(String json) {
+   return new JSONDeserializer&lt;Owner&gt;().use(null, Owner.class).deserialize(json);
+}
+</programlisting>This method has a String parameter representing the JSON
+        document and returns a domain type instance if the document can be
+        serialized by the underlying deserializer.</para>
+
+        <para><programlisting>public static String toJsonArray(Collection&lt;Owner&gt; collection) {
+   return new JSONSerializer().exclude("*.class").serialize(collection);
+}
+</programlisting>This method will convert a collection of the target type,
+        provided as method parameter, into a valid JSON document containing an
+        array.</para>
+
+        <para><programlisting>public static Collection&lt;Owner&gt; fromJsonArrayToOwners(String json) {
+   return new JSONDeserializer&lt;List&lt;Owner&gt;&gt;().use(null, ArrayList.class).use("values", Owner.class).deserialize(json);
+}
+</programlisting>This method will convert a JSON array document, passed in as
+        a method parameter, into a collection of the target type.</para>
+
+        <para>The @RooJson annotation can be used to customize the names of
+        the methods being introduced to the target type. Furthermore, you can
+        disable the creation of any of the above listed methods by providing
+        an empty String argument for the unwanted method in the @RooJson
+        annotation. Example:</para>
+
+        <para><programlisting>@RooJson(toJsonMethod="", fromJsonMethod="myOwnMethodName")</programlisting></para>
+      </listitem>
+
+      <listitem>
+        <para>The json add command used from the Roo shell will introdroduce
+        the @RooJson annotation into the specified target type.</para>
+      </listitem>
+
+      <listitem>
+        <para>The json all command will detect all domain entities in the
+        project and annotate all of them with the @RooJson annotation.</para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <section>
+    <title>Json REST Interface in Spring MVC controllers</title>
+
+    <para>Once your domain types are annotated with the @RooJson annotation
+    and Spring MVC scaffolding is selected Roo will automatically create a
+    RESTful interface in the scaffolded controllers for all backing types
+    where JSON support is enabled. To disable this feature simply set the
+    exposeJson attribute in the @RooWebScaffold annotation to false:</para>
+
+    <para><programlisting>@RooWebSAcaffold(..., <emphasis role="bold">exposeJson=false</emphasis>)</programlisting>If
+    Json scaffolding is enabled Roo will provide the following methods via its
+    Spring MVC controllers:</para>
+
+    <orderedlist>
+      <listitem>
+        <para><programlisting>@RequestMapping(headers = "Accept=application/json")
+@ResponseBody
+public String <emphasis role="bold">listJson</emphasis>() {
+    return Owner.toJsonArray(Owner.findAllOwners());
+}</programlisting>As you can see this method takes advantage of Springs
+        request mappings and will respond to HTTP GET requests which contain a
+        'Accept=application/json' header. The @ResponseBody annotation is used
+        to serialize the JSON document.</para>
+
+        <para>To test the functionality with curl you can try out the Roo pet
+        clinic sample script (run roo&gt; script clinic.roo; then quit the Roo
+        shell and start Tomcat 'mvn tomcat:run'):</para>
+
+        <para><programlisting>curl -H "Accept: application/json" http://localhost:8080/petclinic/owners</programlisting></para>
+      </listitem>
+
+      <listitem>
+        <para></para>
+      </listitem>
+    </orderedlist>
+  </section>
+</chapter>
