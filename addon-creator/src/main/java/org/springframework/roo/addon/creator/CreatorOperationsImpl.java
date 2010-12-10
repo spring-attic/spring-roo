@@ -60,14 +60,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		createProject(topLevelPackage, Type.ADVANCED, description, projectName);
 		
-		installIfNeeded("Commands.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("Operations.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("OperationsImpl.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("Metadata.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("MetadataProvider.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("RooAnnotation.java", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("assembly.xml", topLevelPackage, Type.ADVANCED);
-		installIfNeeded("configuration.xml", topLevelPackage, Type.ADVANCED);
+		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("Metadata.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("MetadataProvider.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("RooAnnotation.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.ADVANCED);
+		installIfNeeded("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.ADVANCED);
 	}
 	
 	public void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName) {
@@ -75,11 +75,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		createProject(topLevelPackage, Type.SIMPLE, description, projectName);
 		
-		installIfNeeded("Commands.java", topLevelPackage, Type.SIMPLE);
-		installIfNeeded("Operations.java", topLevelPackage, Type.SIMPLE);
-		installIfNeeded("OperationsImpl.java", topLevelPackage, Type.SIMPLE);
-		installIfNeeded("PropertyName.java", topLevelPackage, Type.SIMPLE);
-		installIfNeeded("assembly.xml", topLevelPackage, Type.SIMPLE);
+		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
+		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
+		installIfNeeded("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE);
+		installIfNeeded("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE);
+		installIfNeeded("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE);
+		
 	}
 	
 	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
@@ -131,7 +134,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		createProject(topLevelPackage, Type.I18N, description, projectName);
 
-		installIfNeeded("assembly.xml", topLevelPackage, Type.I18N);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N);
 		
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + messageBundle.getName())).getOutputStream());
@@ -205,25 +208,21 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		fileManager.scan();
 	}
 	
-	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Type type) {
+	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Path path, Type type) {
 		String tlp = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = tlp.replace('.', separator);
-		String fileName = StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + targetFilename;
-		String destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + fileName);
+		String destinationFile = "";
+		if (targetFilename.endsWith(".java")) {
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separator + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + targetFilename);
+		} else {
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separator + targetFilename);
+		}
 		
 		// Different destination for assembly.xml
 		if ("assembly.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.ROOT, "src" + separator + "main" + separator + "assembly" + separator + targetFilename);
-		}
-		
-		// Different destination for configuration.xml
-		else if ("configuration.xml".equals(targetFilename)) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + targetFilename);
-		}
-		
-		// Adjust name for Roo Annotation
-		else if (targetFilename.startsWith("RooAnnotation")) {
-			destinationFile = pathResolver.getIdentifier(Path.SRC_MAIN_JAVA, packagePath + separator + "Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
+			destinationFile = pathResolver.getIdentifier(path, "src" + separator + "main" + separator + "assembly" + separator + targetFilename);
+		} else if (targetFilename.startsWith("RooAnnotation")) { // Adjust name for Roo Annotation
+			destinationFile = pathResolver.getIdentifier(path, packagePath + separator + "Roo" + StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)) + ".java");
 		}
 		
 		if (!fileManager.exists(destinationFile)) {

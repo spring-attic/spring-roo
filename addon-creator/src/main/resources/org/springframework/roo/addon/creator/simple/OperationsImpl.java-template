@@ -2,102 +2,89 @@ package __TOP_LEVEL_PACKAGE__;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.TemplateUtils;
 
 /**
- * Implementation of commands that are available via the Roo shell.
+ * Implementation of {@link __APP_NAME__Operations} interface.
  *
- * @since 1.1.0M1
+ * @since 1.1.1
  */
 @Component
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 
-	private static Logger logger = Logger.getLogger(__APP_NAME__Operations.class.getName());
+	private char separator = File.separatorChar;
 
+	/**
+	 * Get a reference to the FileManager from the underlying OSGi container. Make sure you
+	 * are referencing the Roo bundle which contains this service in your add-on pom.xml.
+	 * 
+	 * Using the Roo file manager instead if java.io.File gives you automatic rollback in case
+	 * an Exception is thrown.
+	 */
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-
-    private ComponentContext context;
-
-    protected void activate(ComponentContext context) {
-	    this.context = context;
-    }
-
-	public boolean isProjectAvailable() {
-		return getPathResolver() != null;
-	}
-
+	
 	/**
-	 * @param propertyName to obtain (required)
-	 * @return a message that will ultimately be displayed on the shell
+	 * Get a reference to the PathResolver from the underlying OSGi container. Make sure you
+	 * are referencing the Roo bundle which contains this service in your add-on pom.xml.
+	 * 
+	 * Using the PathResolver allows us reference resources in the project without a need to 
+	 * know the project layout (ie Maven project layout)
 	 */
-	public String getProperty(__APP_NAME__PropertyName propertyName) {
-		Assert.notNull(propertyName, "Property name required");
-		String internalName = "user.name";
-		if (__APP_NAME__PropertyName.HOME_DIRECTORY.equals(propertyName)) {
-			internalName = "user.home";
-		}
-		return propertyName.getPropertyName() + " : " + System.getProperty(internalName);
+	@Reference private PathResolver pathResolver;
+
+	 /** {@inheritDoc} */
+	public boolean isInstallTagsCommandAvailable() {
+		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags"));
 	}
 
+	 /** {@inheritDoc} */
+	public String getProperty(String propertyName) {
+		Assert.hasText(propertyName, "Property name required");
+		return System.getProperty(propertyName);
+	}
+
+	 /** {@inheritDoc} */
+	public void installTags() {
+		//use PathResolver to get canonical resource names for a given artifact
+		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags" + separator + "util"), "info.tagx");
+		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags" + separator + "form"), "show.tagx");
+	}
+	
 	/**
-	 * @return true if the user's project has a /[name].txt file
+	 * A private method which illustrates how to reference and manipulate resources
+	 * in the target project as well as the bundle classpath.
+	 * 
+	 * @param path
+	 * @param fileName
 	 */
-	public boolean isTextFileAvailable(String name) {
-		Assert.hasText(name, "Text file name to check for is required");
-		PathResolver pr = getPathResolver();
-		if (pr == null) {
-			return false;
-		}
-		File file = new File(pr.getIdentifier(Path.ROOT, name + ".txt"));
-		return file.exists();
-	}
-
-	public void writeTextFile(String name) {
-		Assert.hasText(name, "Text file name to write is required");
-		PathResolver pr = getPathResolver();
-		Assert.notNull(pr, "Path resolver not found");
-		String path = pr.getIdentifier(Path.ROOT, name + ".txt");
-		File file = new File(path);
+	private void createOrReplaceFile(String path, String fileName) {
+		String targetFile = path + separator + fileName;
+		
+		//use MutableFile in combination with FileManager to take advantage of Roos transactional file handling which 
+		//offers automatic rollback if an exception occurs
 		MutableFile mutableFile;
-		if (file.exists()) {
-			mutableFile = fileManager.updateFile(path);
+		if (fileManager.exists(targetFile)) {
+			mutableFile = fileManager.updateFile(targetFile);
 		} else {
-			mutableFile = fileManager.createFile(path);
+			mutableFile = fileManager.createFile(targetFile);
 		}
-		byte[] input = new String("Write text file method called at " + new Date().toString()).getBytes();
 		try {
-			FileCopyUtils.copy(input, mutableFile.getOutputStream());
+			//use FileCopyUtils for copying resources from your add-on to the target project
+			//use TemplateUtils to open an InputStream to a resource located in your bundle
+			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), fileName), mutableFile.getOutputStream());
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
-		logger.log(Level.WARNING, "Wrote: " + new String(input));
-	}
-
-	/**
-	 * @return the path resolver or null if there is no user project
-	 */
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
 	}
 }

@@ -3,22 +3,25 @@ package __TOP_LEVEL_PACKAGE__;
 /**
  * Interface of commands that are available via the Roo shell.
  *
- * @since 1.1.0-M1
+ * @since 1.1.1
  */
 public interface __APP_NAME__Operations {
 
-	boolean isProjectAvailable();
+	/**
+	 * Indicate of the install tags command should be available
+	 * 
+	 * @return true if it should be available, otherwise false
+	 */
+	boolean isInstallTagsCommandAvailable();
 
 	/**
 	 * @param propertyName to obtain (required)
 	 * @return a message that will ultimately be displayed on the shell
 	 */
-	String getProperty(__APP_NAME__PropertyName propertyName);
-
+	String getProperty(String propertyName);
+	
 	/**
-	 * @return true if the user's project has a /[name].txt file
+	 * Install tags used for MVC scaffolded apps into the target project.
 	 */
-	boolean isTextFileAvailable(String name);
-
-	void writeTextFile(String name);
+	void installTags();
 }

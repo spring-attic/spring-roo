@@ -11,61 +11,111 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.converters.StaticFieldConverter;
-import org.springframework.roo.support.util.Assert;
 
 /**
- * Sample of a command class. The command class is registered by the Roo shell following an
+ * Example of a command class. The command class is registered by the Roo shell following an
  * automatic classpath scan. You can provide simple user presentation-related logic in this
  * class. You can return any objects from each method, or use the logger directly if you'd
- * like to emit messages of different severity (and therefore different colours on 
+ * like to emit messages of different severity (and therefore different colors on 
  * non-Windows systems).
  * 
- * @since 1.1.0-M1
+ * @since 1.1.1
  */
-@Component
+@Component //use these Apache Felix annotations to register your commands class in the Roo container
 @Service
-public class __APP_NAME__Commands implements CommandMarker {
+public class __APP_NAME__Commands implements CommandMarker { //all command types must implement the CommandMarker interface
 	
-	private static Logger logger = Logger.getLogger(__APP_NAME__Commands.class.getName());
+	/**
+	 * Get hold of a JDK Logger
+	 */
+	private Logger log = Logger.getLogger(getClass().getName());
 
-	@Reference private __APP_NAME__Operations operations;
+	/**
+	 * Get a reference to the __APP_NAME__Operations from the underlying OSGi container
+	 */
+	@Reference private __APP_NAME__Operations operations; 
+	
+	/**
+	 * Get a reference to the StaticFieldConverter from the underlying OSGi container;
+	 * this is useful for 'type save' command tab completions in the Roo shell
+	 */
 	@Reference private StaticFieldConverter staticFieldConverter;
 
+	/**
+	 * The activate method for this OSGi component, this will be called by the OSGi container upon bundle activation 
+	 * (result of the 'addon install' command) 
+	 * 
+	 * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
+	 */
 	protected void activate(ComponentContext context) {
 	    staticFieldConverter.add(__APP_NAME__PropertyName.class);
     }
 
+	/**
+	 * The deactivate method for this OSGi component, this will be called by the OSGi container upon bundle deactivation 
+	 * (result of the 'addon remove' command) 
+	 * 
+	 * @param context the component context can be used to get access to the OSGi container (ie find out if certain bundles are active)
+	 */
 	protected void deactivate(ComponentContext context) {
 		staticFieldConverter.remove(__APP_NAME__PropertyName.class);
 	}
 	
-	@CliAvailabilityIndicator("welcome property")
-	public boolean isPropertyAvailable() {
-		return true;  // it's safe to always see the properties we expose
+	// *************************************************************************
+	//    Example 1 Printing colored messages to the shell
+	// *************************************************************************
+	
+	/**
+	 * This method is optional. It allows automatic command hiding in situations when the command should not be visible.
+	 * For example the 'entity' command will not be made available before the user has defined his persistence settings 
+	 * in the Roo shell or directly in the project.
+	 * 
+	 * You can define multiple methods annotated with {@link CliAvailabilityIndicator} if your commands have differing
+	 * visibility requirements.
+	 * 
+	 * @return true (default) if the command should be visible at this stage, false otherwise
+	 */
+	@CliAvailabilityIndicator("say hello")
+	public boolean isSayHelloAvailable() {
+		return true; //this command is always available!
 	}
 	
-	@CliCommand(value="welcome property", help="Obtains a pre-defined system property")
-	public String property(@CliOption(key="name", mandatory=false, specifiedDefaultValue="USERNAME", unspecifiedDefaultValue="USERNAME", help="The property name you'd like to display") __APP_NAME__PropertyName propertyName) {
-		return operations.getProperty(propertyName);
+	/**
+	 * This method registeres a command with the Roo shell. It also offers two command attributes, a mandatory one and an
+	 * optional command which has a default value.
+	 * 
+	 * @param name 
+	 * @param country
+	 */
+	@CliCommand(value="say hello", help="Prints welcome message to the Roo shell")
+	public void sayHello(@CliOption(key="name", mandatory=true, help="State your name") String name, // a mandatory command attribute
+			@CliOption(key="contryOfOrigin", mandatory=false, help="Country of orgin") __APP_NAME__PropertyName country) {
+		log.info("Welcome " + name + "!");
+		log.warning("Country of origin: " + (country == null ? __APP_NAME__PropertyName.NOT_SPECIFIED.getPropertyName() : country.getPropertyName()));
+		log.severe("It seems you are a running JDK " + operations.getProperty("java.version"));
+		log.info("You can use the default JDK logger anywhere in your add-on to send messages to the Roo shell");
 	}
 	
-	@CliAvailabilityIndicator("welcome write hello")
-	public boolean isWriteHelloAvailable() {
-		return operations.isProjectAvailable() && !operations.isTextFileAvailable("hello");
+	// *************************************************************************
+	//    Example 2 Installing and replacing tagx files in the target project
+	// *************************************************************************
+	
+	/**
+	 * Define when "web mvc install tags" command should be visible in the Roo shell. 
+	 * In this case we want to hide the command until the WEB-INF/tags folder is present.
+	 * 
+	 * @return true (default) if the command should be visible at this stage, false otherwise
+	 */
+	@CliAvailabilityIndicator("web mvc install tags") // define the exact command name
+	public boolean isInstallTagsCommandAvailable() {
+		return operations.isInstallTagsCommandAvailable();
 	}
-
-	@CliCommand(value="welcome write hello", help="Writes hello.txt in the project root directory")
-	public void writeHello() {
-		operations.writeTextFile("hello");
-	}
-
-	@CliAvailabilityIndicator("welcome write hej")
-	public boolean isWriteHejAvailable() {
-		return operations.isProjectAvailable() && !operations.isTextFileAvailable("hej");
-	}
-
-	@CliCommand(value="welcome write hej", help="Writes hej.txt in the project root directory")
-	public void writeHej() {
-		operations.writeTextFile("hej");
+	
+	/**
+	 * Replace existing MVC tagx files in the target project
+	 */
+	@CliCommand(value="web mvc install tags", help="Replace default Roo MVC tags used for scaffolding")
+	public void installTags() {
+		operations.installTags();
 	}
 }
