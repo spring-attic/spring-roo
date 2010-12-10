@@ -864,8 +864,15 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		annotations.add(requestMapping);
 
+		String beanShortName = beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine(beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ")." + entityMetadata.getRemoveMethod().getMethodName() + "();");
+		bodyBuilder.appendFormalLine(beanShortName + " " + beanShortName.toLowerCase() + " = " + beanShortName + "." + entityMetadata.getFindMethod().getMethodName() + "(" + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + ");");
+		bodyBuilder.appendFormalLine("if (" + beanShortName.toLowerCase() + " == null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("return new " + getShortName(new JavaType("org.springframework.http.ResponseEntity")) + "<String>(" + getShortName(new JavaType("org.springframework.http.HttpStatus")) + ".NOT_FOUND);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine(beanShortName.toLowerCase() + "." + entityMetadata.getRemoveMethod().getMethodName() + "();");
 		bodyBuilder.appendFormalLine("return new ResponseEntity<String>(" + new JavaType("org.springframework.http.HttpStatus").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ".OK);");
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
