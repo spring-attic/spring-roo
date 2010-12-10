@@ -83,7 +83,8 @@
         array.</para>
 
         <para><programlisting>public static Collection&lt;Owner&gt; fromJsonArrayToOwners(String json) {
-   return new JSONDeserializer&lt;List&lt;Owner&gt;&gt;().use(null, ArrayList.class).use("values", Owner.class).deserialize(json);
+   return new JSONDeserializer&lt;List&lt;Owner&gt;&gt;().use(null, 
+                     ArrayList.class).use("values", Owner.class).deserialize(json);
 }
 </programlisting>This method will convert a JSON array document, passed in as
         a method parameter, into a collection of the target type.</para>
@@ -143,7 +144,7 @@ public String <emphasis role="bold">listJson</emphasis>() {
       </listitem>
 
       <listitem>
-        <para><programlisting>@RequestMapping(value = "/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+        <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.GET, headers="Accept=application/json")
 @ResponseBody
 public Object <emphasis role="bold">showJson</emphasis>(@PathVariable("id") Long id) {
     Owner owner = Owner.findOwner(id);
@@ -172,7 +173,8 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJson</emphas
       </listitem>
 
       <listitem>
-        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.POST, headers = "Accept=application/json")
+        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.POST, 
+                headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</emphasis>(@RequestBody String json) {
     for (Owner owner: Owner.fromJsonArrayToOwners(json)) {
         owner.persist();
@@ -183,7 +185,16 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">createFromJsonArray</e
         then persisted. The method returns a HTTP 201 (CREATED) status code.
         The accompanying curl command is as follows:</para>
 
-        <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json -d '[{"address":"The Boulevard","birthDay":861372000000,"city":"Springfield","email":"homer@simpsons.com","firstName":"Homer Jay","homePage":"http://simpsons.com","lastName":"Simpson","telephone":"123456789"},{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield","email":"marge@simpsons.com","firstName":"Marge","homePage":"http://simpsons.com","lastName":"Simpson","telephone":"123456789",}]' http://localhost:8080/petclinic/owners/jsonArray
+        <programlisting>curl -i -X POST -H Accept:application/json -H Content-Type:application/json 
+     -d '[{"address":"The Boulevard","birthDay":861372000000,"city":"Springfield",
+           "email":"homer@simpsons.com","firstName":"Homer Jay",
+           "homePage":"http://simpsons.com","lastName":"Simpson",
+           "telephone":"123456789"},
+          {"address":"The Boulevard","birthDay":904140000000,
+           "city":"Springfield","email":"marge@simpsons.com",
+           "firstName":"Marge","homePage":"http://simpsons.com",
+           "lastName":"Simpson","telephone":"123456789",}]' 
+     http://localhost:8080/petclinic/owners/jsonArray
 </programlisting>
       </listitem>
 
@@ -201,12 +212,18 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJson</emphas
         status code is sent. The accompanying curl command is as
         follows:</para>
 
-        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json -d '{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield","email":"maggie@simpsons.com","firstName":"Maggie","homePage":"http://simpsons.com","id":1,"lastName":"Simpson","telephone":"123456789","version"=0}' http://localhost:8080/petclinic/owners
+        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
+     -d '{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield",
+          "email":"maggie@simpsons.com","firstName":"Maggie",
+          "homePage":"http://simpsons.com","id":1,"lastName":"Simpson",
+          "telephone":"123456789","version"=0}' 
+     http://localhost:8080/petclinic/owners
 </programlisting>
       </listitem>
 
       <listitem>
-        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.PUT, headers = "Accept=application/json")
+        <para><programlisting>@RequestMapping(value = "/jsonArray", method = RequestMethod.PUT, 
+                headers = "Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</emphasis>(@RequestBody String json) {
     for (Owner owner: Owner.fromJsonArrayToOwners(json)) {
         if (owner.merge() == null) {
@@ -219,11 +236,18 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">updateFromJsonArray</e
         then merged. The method returns a HTTP 201 (CREATED) status code. The
         accompanying curl command is as follows:</para>
 
-        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json -d '[{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield","email":"lisa@simpsons.com","firstName":"Lisa","homePage":"http://simpsons.com","id":2,"lastName":"Simpson","telephone":"123456789","version"=0},{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield","email":"abraham@simpsons.com","firstName":"Abraham","homePage":"http://simpsons.com","id":3,"lastName":"Simpson","telephone":"123456789","version"=0}]' http://localhost:8080/petclinic/owners/jsonArray</programlisting>
+        <programlisting>curl -i -X PUT -H Accept:application/json -H Content-Type:application/json 
+     -d '[{"address":"The Boulevard","birthDay":904140000000,"city":"Springfield",
+           "email":"lisa@simpsons.com","firstName":"Lisa","homePage":"http://simpsons.com",
+           "id":2,"lastName":"Simpson","telephone":"123456789","version"=0},
+          {"address":"The Boulevard","birthDay":904140000000,"city":"Springfield",
+           "email":"abraham@simpsons.com","firstName":"Abraham","homePage":"http://simpsons.com",
+           "id":3,"lastName":"Simpson","telephone":"123456789","version"=0}]' 
+     http://localhost:8080/petclinic/owners/jsonArray</programlisting>
       </listitem>
 
       <listitem>
-        <para><programlisting>@RequestMapping(value = "/{id}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+        <para><programlisting>@RequestMapping(value="/{id}", method=RequestMethod.DELETE, headers="Accept=application/json")
 public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphasis>(@PathVariable("id") Long id) {
     Owner owner = Owner.findOwner(id);
     if (owner == null) {
@@ -246,15 +270,18 @@ public ResponseEntity&lt;String&gt; <emphasis role="bold">deleteFromJson</emphas
         dynamic finders. Here is an example taken from VisitController in the
         pet clinic sample application:</para>
 
-        <para><programlisting>@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, headers = "Accept=application/json")
-public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emphasis>(@RequestParam("description") String description, @RequestParam("visitDate") @org.springframework.format.annotation.DateTimeFormat(style = "S-") Date visitDate, Model model) {
-    return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(description, visitDate).getResultList());
+        <para><programlisting>@RequestMapping(params = "find=ByDescriptionAndVisitDate", method = RequestMethod.GET, 
+                headers = "Accept=application/json")
+public String <emphasis role="bold">jsonFindVisitsByDescriptionAndVisitDate</emphasis>(@RequestParam("description") String desc, 
+        @RequestParam("visitDate") @DateTimeFormat(style = "S-") Date visitDate, Model model) {
+    return Visit.toJsonArray(Visit.findVisitsByDescriptionAndVisitDate(desc, visitDate).getResultList());
 }</programlisting>This method accepts a HTTP GET request with a number of
         request parameters which define the finder method as well as the
         finder method arguments. The accompanying curl command is as
         follows:</para>
 
-        <programlisting>curl -i -H Accept:application/json http://localhost:8080/petclinic/visits?find=ByDescriptionAndVisitDate%26description=test%26visitDate=12/1/10</programlisting>
+        <programlisting>curl -i -H Accept:application/json 
+     http://localhost:8080/petclinic/visits?find=ByDescriptionAndVisitDate%26description=test%26visitDate=12/1/10</programlisting>
       </listitem>
     </orderedlist>
 
