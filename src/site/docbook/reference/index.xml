@@ -86,11 +86,14 @@
 
     <xi:include href="base-persistence.xml" />
 
+    <xi:include href="base-dbre.xml" />
+
     <xi:include href="base-web.xml" />
+
+    <xi:include href="base-json.xml" />
 
     <xi:include href="base-solr.xml" />
 
-    <xi:include href="base-dbre.xml" />
   </part>
 
   <part xml:id="internals">
