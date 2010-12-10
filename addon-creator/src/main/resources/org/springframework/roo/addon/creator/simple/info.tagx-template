@@ -1,0 +1,8 @@
+<jsp:root xmlns:c="http://java.sun.com/jsp/jstl/core" xmlns:util="urn:jsptagdir:/WEB-INF/tags/util" xmlns:jsp="http://java.sun.com/JSP/Page" version="2.0">
+  <jsp:output omit-xml-declaration="yes" />
+
+  <util:panel id="_info_page" title="Info Page">
+  	Thanks for submitting this document!
+  </util:panel>
+
+</jsp:root>
