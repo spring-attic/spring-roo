@@ -5,13 +5,15 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.itd.ItdMetadataScanner;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
@@ -23,7 +25,7 @@ public class MetadataCommands implements CommandMarker {
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private ItdMetadataScanner itdMetadataScanner;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
 	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
@@ -95,9 +97,13 @@ public class MetadataCommands implements CommandMarker {
 		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("Java Type  : ").append(javaType.getFullyQualifiedTypeName()).append(System.getProperty("line.separator"));
-		for (MetadataItem item : itdMetadataScanner.getMetadata(id)) {
-			if (!item.getId().equals(id)) {
-				sb.append("ITD scan   : ").append(item.getId()).append(System.getProperty("line.separator"));
+		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+			sb.append("Java type details unavailable").append(System.getProperty("line.separator"));
+		} else {
+			ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
+			for (MemberHoldingTypeDetails holder : memberDetailsScanner.getMemberDetails(getClass().getName(), cid).getDetails()) {
+				sb.append("Member scan: ").append(holder.getDeclaredByMetadataId()).append(System.getProperty("line.separator"));
 			}
 		}
 		sb.append(metadataForId(id));
