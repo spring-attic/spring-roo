@@ -21,10 +21,8 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -47,36 +45,34 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private WebMvcOperations webMvcOperations;
-	@Reference private ItdMetadataScanner itdMetadataScanner;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
 
 	public void generateAll(final JavaPackage javaPackage) {
 		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
-		each_file: for (ClassOrInterfaceTypeDetails cid : cids) {
+		for (ClassOrInterfaceTypeDetails cid : cids) {
 			if (Modifier.isAbstract(cid.getModifier())) {
 				continue;
 			}
-
-			Set<MetadataItem> metadata = itdMetadataScanner.getMetadata(cid.getDeclaredByMetadataId());
-			for (MetadataItem item : metadata) {
-				if (item instanceof EntityMetadata) {
-					EntityMetadata entityMetadata = (EntityMetadata) item;
-					Set<String> downstream = dependencyRegistry.getDownstream(entityMetadata.getId());
-					// Check to see if this entity metadata has a web scaffold metadata listening to it
-					for (String ds : downstream) {
-						if (WebScaffoldMetadata.isValid(ds)) {
-							// There is already a controller for this entity
-							continue each_file;
-						}
-					}
-					// To get here, there is no listening controller, so add one
-					JavaType entity = cid.getName();
-					JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + entity.getSimpleTypeName() + "Controller");
-					createAutomaticController(controller, entity, new HashSet<String>(), entityMetadata.getPlural().toLowerCase());
-					break;
-				}
+			
+			JavaType javaType = cid.getName();
+			Path path = PhysicalTypeIdentifier.getPath(cid.getDeclaredByMetadataId());
+			EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, path));
+			
+			if (entityMetadata == null || (!entityMetadata.isValid())) {
+				continue;
 			}
+			
+			// Check to see if this entity metadata has a web scaffold metadata listening to it
+			String downstreamWebScaffoldMetadataId = WebScaffoldMetadata.createIdentifier(javaType, path);
+			if (dependencyRegistry.getDownstream(entityMetadata.getId()).contains(downstreamWebScaffoldMetadataId)) {
+				// There is already a controller for this entity
+				continue;
+			}
+			
+			// To get here, there is no listening controller, so add one
+			JavaType controller = new JavaType(javaPackage.getFullyQualifiedPackageName() + "." + javaType.getSimpleTypeName() + "Controller");
+			createAutomaticController(controller, javaType, new HashSet<String>(), entityMetadata.getPlural().toLowerCase());
 		}
 		return;
 	}

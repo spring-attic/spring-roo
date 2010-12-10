@@ -18,6 +18,7 @@ import org.springframework.roo.metadata.MetadataItem;
  * @since 1.0
  *
  */
+@Deprecated
 public interface ItdMetadataScanner {
 
 	/**

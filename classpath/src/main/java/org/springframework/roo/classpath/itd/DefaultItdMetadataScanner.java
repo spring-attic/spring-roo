@@ -22,6 +22,7 @@ import org.springframework.roo.support.util.Assert;
  */
 @Component
 @Service
+@Deprecated
 public class DefaultItdMetadataScanner implements ItdMetadataScanner {
 
 	@Reference private MetadataService metadataService;

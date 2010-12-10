@@ -68,7 +68,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private TilesOperations tilesOperations;
 	@Reference private PropFileOperations propFileOperations;
 
-	private Map<JavaType, String> pluralCache;
+	private Map<JavaType, String> pluralCache = new HashMap<JavaType, String>();
 
 	private BeanInfoMetadata beanInfoMetadata; // caution: concurrent access not supported
 
@@ -83,7 +83,6 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	public MetadataItem get(String metadataIdentificationString) {
 		// Work out the MIDs of the other metadata we depend on
 		// NB: The JavaType and Path are to the corresponding web scaffold controller class
-		pluralCache = new HashMap<JavaType, String>();
 
 		JavaType javaType = JspMetadata.getJavaType(metadataIdentificationString);
 		Path path = JspMetadata.getPath(metadataIdentificationString);
@@ -94,7 +93,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			// Can't get the corresponding scaffold, so we certainly don't need to manage any JSPs at this time
 			return null;
 		}
-
+		
 		// Shouldn't be needed, as we get notified for every change to web scaffold metadata anyway
 		// metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
 
@@ -347,10 +346,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 
-		metadataService.evict(downstreamDependency);
-		if (get(downstreamDependency) != null) {
-			metadataDependencyRegistry.notifyDownstream(downstreamDependency);
-		}
+		metadataService.get(downstreamDependency, true);
 	}
 
 	public String getProvidesType() {
