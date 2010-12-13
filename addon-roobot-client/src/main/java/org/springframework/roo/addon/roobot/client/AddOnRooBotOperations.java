@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.springframework.roo.felix.BundleSymbolicName;
+import org.springframework.roo.support.api.AddOnSearch;
 
 /**
  * Interface for operations offered by this addon.
@@ -12,8 +13,7 @@ import org.springframework.roo.felix.BundleSymbolicName;
  * @author Stefan Schmidt
  * @since 1.1
  */
-public interface AddOnRooBotOperations {
-
+public interface AddOnRooBotOperations extends AddOnSearch {
 
 	/**
 	 * Display information for a given ({@link AddOnBundleSymbolicName}. 
@@ -30,33 +30,6 @@ public interface AddOnRooBotOperations {
 	 * @param the bundle ID (required)
 	 */
 	void addOnInfo(String bundleId);
-	
-	/**
-	 * List all registered addons presently known to the Roo Shell.
-	 * Information is piped to standard JDK {@link Logger.info}
-	 * 
-	 * @param refresh attempt a fresh download of roobot.xml (optional)
-	 * @param linesPerResult maximum number of lines per add-on (optional)
-	 * @param maxResults maximum number of results (optional)
-	 * @param trustedOnly display only trusted add-ons in search results (optional)
-	 * @param compatibleOnly display only compatible add-ons in search results (optional)
-	 * @param requiresCommand display only add-ons which offer the specified command (optional)
-	 */
-	void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand);
-	
-	/**
-	 * Search all registered addons presently known to the Roo Shell.
-	 * Information is piped to standard JDK {@link Logger.info}
-	 * 
-	 * @param searchTerms comma separated list of search terms (required)
-	 * @param refresh attempt a fresh download of roobot.xml (optional)
-	 * @param linesPerResult maximum number of lines per add-on (optional)
-	 * @param maxResults maximum number of results (optional)
-	 * @param trustedOnly display only trusted add-ons in search results (optional)
-	 * @param compatibleOnly display only compatible add-ons in search results (optional)
-	 * @param requiresCommand display only add-ons which offer the specified command (optional)
-	 */
-	void searchAddOns(String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand);
 	
 	/**
 	 * Retrieve a set of Addon bundle symbolic names.

@@ -20,6 +20,7 @@ public class AddOnBundleInfo {
 	private String version;
 	private String pgpKey;
 	private String signedBy;
+	private String rooVersion = "1.1"; // temporary workaround until roobot.xml contains this info (BPA 13 Dec 2010)
 	private long size;
 	private String url;
 	private Map<String, String> commands;
@@ -49,6 +50,10 @@ public class AddOnBundleInfo {
 
 	public float getRanking() {
 		return ranking;
+	}
+
+	public final String getRooVersion() {
+		return rooVersion;
 	}
 
 	public String getName() {
@@ -138,7 +143,7 @@ public class AddOnBundleInfo {
 	public String toString() {
 		return "bsn=" + bsn + ", ranking=" + ranking + ", name="
 				+ name + ", description=" + description + ", lastUpdated="
-				+ lastUpdated + ", version=" + version + ", signedBy="
+				+ lastUpdated + ", version=" + version + ", rooVersion=" + rooVersion + ", signedBy="
 				+ signedBy + ", size=" + size + ", commands=" + commands.toString();
 	}
 }

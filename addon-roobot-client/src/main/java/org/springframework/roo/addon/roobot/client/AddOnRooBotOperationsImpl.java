@@ -36,6 +36,8 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
+import org.springframework.roo.uaa.UaaRegistrationService;
+import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,6 +45,7 @@ import org.w3c.dom.Element;
  * Implementation of commands that are available via the Roo shell.
  * 
  * @author Stefan Schmidt
+ * @author Ben Alex
  * @since 1.1
  */
 @Component
@@ -53,10 +56,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private Map<String, AddOnBundleInfo> searchResultCache;
 	@Reference private Shell shell;
 	@Reference private PgpService pgpService;
-	private Logger log = Logger.getLogger(getClass().getName());
+	@Reference private UrlInputStreamService urlInputStreamService;
+	private static final Logger log = Logger.getLogger(AddOnRooBotOperationsImpl.class.getName());
 	private Properties props;
 	private ComponentContext context;
-	private static String ROOBOT_XML = "http://spring-roo-repository.springsource.org/roobot.xml";
+	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot.xml";
 	
 	protected void activate(ComponentContext context) {
 		this.context = context;
@@ -64,9 +68,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		searchResultCache = new HashMap<String, AddOnBundleInfo>();
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				populateBsnMap();
+				populateBsnMap(true);
 			}
-		}, "Roobot XML Eager Download");
+		}, "Roo Add-on Index XML Eager Download");
 		t.start();
 		props = new Properties();
 		try {
@@ -106,10 +110,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		logInfo("Name", bundle.getName());
 		logInfo("BSN", bundle.getBsn());
 		logInfo("Version", bundle.getVersion());
-		logInfo("OBR URL", "[TODO]");
-		logInfo("JAR URL", bundle.getUrl());
+		logInfo("Roo Version", bundle.getRooVersion());
+		logInfo("Ranking", new Float(bundle.getRanking()).toString());
+		logInfo("JAR Size", bundle.getSize() + " bytes");
 		logInfo("PGP Signature", bundle.getPgpKey() + " signed by " + bundle.getSignedBy());
-		logInfo("Size", bundle.getSize() + " bytes");
+		logInfo("OBR URL", "Will be added in Roo 1.1.2"); // TODO: Add rating
+		logInfo("JAR URL", bundle.getUrl());
 		Map<String, String> commands = bundle.getCommands();
 		for (String command : commands.keySet()) {
 			logInfo("Commands", "'" + command + "' [" + commands.get(command) + "]");
@@ -146,7 +152,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private void installAddon(AddOnBundleInfo bundle) {
 		boolean success = false;	
 		String url = bundle.getUrl();
-		if (url != null && url.length() > 0) {
+		if (url != null && url.length() > 0 && bundle.getUrl().startsWith("httppgp://")) {
 			int count = countBundles();
 			success = shell.executeCommand("osgi start --url " + url);
 			if (count == countBundles()) {
@@ -172,49 +178,75 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		}
 	}
 	
-	public void searchAddOns(String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
-		Assert.hasText(searchTerms, "Search terms for add-on required");
-		if (refresh && populateBsnMap()) {
-			log.info("Successfully downloaded Roobot Addon Data");
+	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
+		if (maxResults > 99) {
+			maxResults = 99;
+		}
+		if (maxResults < 1) {
+			maxResults = 10;
+		}
+		if (bundleCache.size() == 0) {
+			// We should refresh regardless in this case
+			refresh = true;
+		}
+		if (refresh && populateBsnMap(false)) {
+			if (showFeedback) {
+				log.info("Successfully downloaded Roo add-on Data");
+			}
 		}
 		if (bundleCache.size() != 0) {
-			searchResultCache.clear();
-			String [] terms = searchTerms.split(",");
-			for (AddOnBundleInfo bundle: bundleCache.values()) {
-				//first set relevance of all bundles to zero
-				bundle.setSearchRelevance(0f);
-				int hits = 0;
-				for (String term: terms) {
-					if (bundle.getSummary().toLowerCase().contains(term.trim().toLowerCase())) {
-						hits++;
+			boolean onlyRelevantBundles = false;
+			if (searchTerms != null && !"".equals(searchTerms)) {
+				onlyRelevantBundles = true;
+				String [] terms = searchTerms.split(",");
+				for (AddOnBundleInfo bundle: bundleCache.values()) {
+					//first set relevance of all bundles to zero
+					bundle.setSearchRelevance(0f);
+					int hits = 0;
+					for (String term: terms) {
+						if (bundle.getSummary().toLowerCase().contains(term.trim().toLowerCase())) {
+							hits++;
+						}
 					}
+					bundle.setSearchRelevance(hits / terms.length);
 				}
-				bundle.setSearchRelevance(hits / terms.length);
 			}
 			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
 			Collections.sort(bundles, new SearchComparator());
-			LinkedList<AddOnBundleInfo> filteredSearchResults = filterList(bundles, maxResults, trustedOnly, compatibleOnly, requiresCommand, true);
-			printResultList(filteredSearchResults, linesPerResult);
-		} else {
-			log.info("No addons available for installation. (Are you connected to the Internet?)");
+			LinkedList<AddOnBundleInfo> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
+			if (showFeedback) {
+				printResultList(filteredSearchResults, maxResults, linesPerResult);
+			}
+			return filteredSearchResults.size();
 		}
+		
+		// There is a problem with the add-on index
+		if (showFeedback) {
+			log.info("No add-ons known. Are you online? Try the 'download status' command");
+		}
+		
+		return null;
 	}
 
 	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
-		if (refresh && populateBsnMap()) {
-			log.info("Successfully downloaded Roobot Addon Data");
+		if (bundleCache.size() == 0) {
+			// We should refresh regardless in this case
+			refresh = true;
+		}
+		if (refresh && populateBsnMap(false)) {
+			log.info("Successfully downloaded Roo add-on Data");
 		}
 		if (bundleCache.size() != 0) {
 			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
 			Collections.sort(bundles, new RankingComparator());
-			LinkedList<AddOnBundleInfo> filteredList = filterList(bundles, maxResults, trustedOnly, compatibleOnly, requiresCommand, false);
-			printResultList(filteredList, linesPerResult);
+			LinkedList<AddOnBundleInfo> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
+			printResultList(filteredList, maxResults, linesPerResult);
 		} else {
-			log.info("No addons available for installation. (Are you connected to the Internet?)");
+			log.info("No add-ons known. Are you online? Try the 'download status' command");
 		}
 	}
 	
-	private LinkedList<AddOnBundleInfo> filterList(LinkedList<AddOnBundleInfo> bundles, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
+	private LinkedList<AddOnBundleInfo> filterList(LinkedList<AddOnBundleInfo> bundles, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
 		LinkedList<AddOnBundleInfo> filteredList = new LinkedList<AddOnBundleInfo>();
 		List<PGPPublicKeyRing> keys = null;
 		if (trustedOnly) {
@@ -227,33 +259,42 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (trustedOnly && !isTrustedKey(keys, bundle.getPgpKey())) {
 				continue bundle_loop;
 			} 
-			if (compatibleOnly && !isCompatible(bundle.getVersion())) {
+			if (compatibleOnly && !isCompatible(bundle.getRooVersion())) {
 				continue bundle_loop;
 			}
-			if (requiresCommand != null && requiresCommand.length() > 0 && !bundle.getCommands().keySet().contains(requiresCommand.trim())) {
-				continue bundle_loop;
-			}
-			if (maxResults-- == 0) {
-				break;
+			if (requiresCommand != null && requiresCommand.length() > 0) {
+				boolean matchingCommand = false;
+				for (String cmd : bundle.getCommands().keySet()) {
+					if (cmd.startsWith(requiresCommand) || requiresCommand.startsWith(cmd)) {
+						matchingCommand = true;
+						break;
+					}
+				}
+				if (!matchingCommand) {
+					continue bundle_loop;
+				}
 			}
 			filteredList.add(bundle);
 		}
 		return filteredList;
 	}
 	
-	private void printResultList(LinkedList<AddOnBundleInfo> bundles, int linesPerResult) {
+	private void printResultList(LinkedList<AddOnBundleInfo> bundles, int maxResults, int linesPerResult) {
 		int bundleId = 1;
 		searchResultCache.clear();
 		StringBuilder sb = new StringBuilder();
 		List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
-		log.info("Ordered by ranking; T = Trusted developer; R = Roo version XX compatible");
+		log.info(bundles.size() + " found, sorted by rank; T = trusted developer; R = Roo " + getVersionForCompatibility() + " compatible");
 		log.warning("ID T R DESCRIPTION -------------------------------------------------------------");
 		for (AddOnBundleInfo bundle: bundles) {
+			if (maxResults-- == 0) {
+				break;
+			}
 			String bundleKey = String.format("%02d", bundleId++);
 			searchResultCache.put(bundleKey, bundle);
 			sb.append(bundleKey);
 			sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? " Y " : " - ");
-			sb.append(isCompatible(bundle.getVersion()) ? "Y " : "- "); 
+			sb.append(isCompatible(bundle.getRooVersion()) ? "Y " : "- "); 
 			sb.append(bundle.getVersion());
 			sb.append(" ");
 			ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
@@ -297,7 +338,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	public Set<String> getAddOnBsnSet() {
 		if (bundleCache == null) {
-			populateBsnMap();
+			populateBsnMap(false);
 		}
 		if (bundleCache != null && bundleCache.size() > 0) {
 			return bundleCache.keySet();
@@ -307,23 +348,40 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	public Map<String, AddOnBundleInfo> getAddOnCache(boolean refresh) {
 		if (refresh) {
-			populateBsnMap();
+			populateBsnMap(false);
 		}
 		return Collections.unmodifiableMap(bundleCache);
 	}
 
-	private boolean populateBsnMap() {
+	private boolean populateBsnMap(boolean startupTime) {
 		boolean success = false;
 		InputStream is = null;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			String url = props.getProperty("roobot.url", ROOBOT_XML);
+			String url = props.getProperty("roobot.url", ROOBOT_XML_URL);
 			if (url == null) {
 				log.warning("Bundle properties could not be loaded");
 				return false;
 			}
-			is = new URL(url).openStream();
+			if (url.startsWith("http://")) {
+				// Handle it as HTTP
+				URL httpUrl = new URL(url);
+				String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
+				if (failureMessage != null) {
+					if (!startupTime) {
+						// This wasn't just an eager startup time attempt, so let's display the error reason
+						// (for startup time, we just fail quietly)
+						log.warning(failureMessage);
+					}
+					return false;
+				}
+				// It appears we can acquire the URL, so let's do it
+				is = urlInputStreamService.openConnection(httpUrl);
+			} else {
+				// Fallback to normal protocol handler (likely in local development testing etc
+				is = new URL(url).openStream();
+			}
 			if (is == null) {
 				log.warning("Could not connect to Roo Addon bundle repository index");
 				return false;
@@ -360,6 +418,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 						AddOnBundleInfo addonBundle = new AddOnBundleInfo(bsn, new Float(bundle.getAttribute("uaa-ranking")), version.getAttribute("name"), version.getAttribute("description"), updatedDate, version.getAttribute("major") + "." + version.getAttribute("minor") + (version.getAttribute("micro").length() > 0 ? "." + version.getAttribute("micro") : "") + (version.getAttribute("qualifier").length() > 0 ? "." + version.getAttribute("qualifier") : ""), pgpKey, signedBy, new Long(version.getAttribute("size")), version.getAttribute("url"), commands);
 
+						// For security reasons we ONLY accept httppgp:// add-ons
+						if (!addonBundle.getUrl().startsWith("httppgp://")) {
+							continue;
+						}
+						
 						bundleCache.put(bsn, addonBundle);
 					}
 				}
@@ -426,7 +489,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 	
 	private boolean isCompatible(String version) {
-		return true; //TODO use projectMetadata.getProperty("roo.version"); to get the project version and read roo compatibility version from roobot.xml
+		return version.equals(getVersionForCompatibility());
+	}
+	
+	private String getVersionForCompatibility() {
+		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion();
 	}
 	
 	private class RankingComparator implements Comparator<AddOnBundleInfo> {
