@@ -11,7 +11,7 @@
     <version>${osgiVersion}</version>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Wrapping - ${pkgArtifactId}-jdbc3</name>
-    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}-jdbc3.</description>
+    <description>Postgres #jdbcdriver driverclass:org.postgresql.Driver. This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}-jdbc3.</description>
 
     <properties>
         <pkgArtifactId>postgresql</pkgArtifactId>

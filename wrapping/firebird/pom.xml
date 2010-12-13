@@ -11,7 +11,7 @@
     <version>${osgiVersion}</version>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Wrapping - ${pkgArtifactId}</name>
-    <description>This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
+    <description>#jdbcdriver driverclass:org.firebirdsql.jdbc.FBDriver. This bundle wraps the standard Maven artifact: ${pkgArtifactId}-${pkgVersion}.</description>
 
     <properties>
         <pkgArtifactId>firebird</pkgArtifactId>
@@ -19,7 +19,7 @@
         <osgiVersion>${pkgVersion}.0001</osgiVersion>
         <pkgVendor>The Firebird Project</pkgVendor>
         <pkgDocUrl>http://www.firebirdsql.org/</pkgDocUrl>
-        <pkgLicense>http://www.firebirdsql.org/index.php?op=doc&amp;id=idpl</pkgLicense> 
+        <pkgLicense><![CDATA[http://www.firebirdsql.org/index.php?op=doc&amp;id=idpl]]></pkgLicense> 
     </properties>
 
     <dependencies>
