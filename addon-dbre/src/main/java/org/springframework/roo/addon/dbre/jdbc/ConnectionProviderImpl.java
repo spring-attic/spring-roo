@@ -25,7 +25,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	private static final String PASSWORD = "password";
 	@Reference private JdbcDriverManager jdbcDriverManager;
 
-	public Connection getConnection(Properties props) throws RuntimeException {
+	public Connection getConnection(Properties props, boolean displayAddOns) throws RuntimeException {
 		Assert.isTrue(props != null && !props.isEmpty(), "Connection properties must not be null or empty");
 
 		// The properties "user" and "password" are required to make a connection
@@ -37,7 +37,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		}
 
 		String driverClassName = props.getProperty("database.driverClassName");
-		Driver driver = jdbcDriverManager.loadDriver(driverClassName);
+		Driver driver = jdbcDriverManager.loadDriver(driverClassName, displayAddOns);
 		Assert.notNull(driver, "JDBC driver not available for '" + driverClassName + "'");
 		try {
 			return driver.connect(props.getProperty("database.url"), props);
@@ -46,11 +46,11 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 		}
 	}
 
-	public Connection getConnection(Map<String, String> map) throws RuntimeException {
+	public Connection getConnection(Map<String, String> map, boolean displayAddOns) throws RuntimeException {
 		Assert.isTrue(map != null && !map.isEmpty(), "Connection properties map must not be null or empty");
 		Properties props = new Properties();
 		props.putAll(map);
-		return getConnection(props);
+		return getConnection(props, displayAddOns);
 	}
 
 	public void closeConnection(Connection connection) {

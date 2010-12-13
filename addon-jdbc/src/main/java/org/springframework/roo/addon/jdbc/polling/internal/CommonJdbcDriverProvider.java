@@ -2,11 +2,13 @@ package org.springframework.roo.addon.jdbc.polling.internal;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
+import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.util.ClassUtils;
 
 /**
@@ -15,34 +17,57 @@ import org.springframework.roo.support.util.ClassUtils;
  * as an optional import within the JDBC add-on's OSGi bundle manifest.
  *
  * @author Alan Stewart
+ * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
 public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 
+	private BundleContext bundleContext;
+	
+	protected void activate(ComponentContext context) {
+		bundleContext = context.getBundleContext();
+	}
+
+	protected void deactivate(ComponentContext context) {
+		bundleContext = null;
+	}
+	
 	public Driver loadDriver(String driverClassName) throws RuntimeException {
-		if (!ClassUtils.isPresent(driverClassName, CommonJdbcDriverProvider.class.getClassLoader())) {
-			// Not present - return null as per interface contract so another provider can be searched
+		Class<?> clazz = null;
+
+		if (ClassUtils.isPresent(driverClassName, CommonJdbcDriverProvider.class.getClassLoader())) {
+			// This is quite simple as our bundle has a direct reference
+			try {
+				clazz = ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader());
+			} catch (Exception ignoreAsSomeoneElseMightLocateIt) {}
+		}
+		
+		if (clazz == null) {
+			// Try a search
+			clazz = BundleFindingUtils.findFirstBundleWithType(bundleContext, driverClassName);
+		}
+		
+		if (clazz == null) {
+			// Let's give up given it doesn't seem to be loadable
 			return null;
 		}
+		
+		if (!Driver.class.isAssignableFrom(clazz)) {
+			// That's weird, it doesn't seem to be a driver
+			return null;
+		}
+		
+		// Time to create it and register etc
 		try {
-			registerDriverIfRequired(driverClassName);
-			return (Driver) ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader()).newInstance();
+			Driver result = (Driver) clazz.newInstance();
+			DriverManager.registerDriver(result);
+			//registerDriverIfRequired(driverClassName);
+			return result;
 		} catch (Exception e) {
-			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'. Did you run the install-jdbc-drivers.roo script?", e);
+			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
 		}
 	}
 
-	private void registerDriverIfRequired(String driverClassName) throws SQLException {
-		// DB2/400 driver must be registered with DriverManager (ROO-1479)
-		if ("com.ibm.as400.access.AS400JDBCDriver".equals(driverClassName)) {
-			DriverManager.registerDriver(new com.ibm.as400.access.AS400JDBCDriver());
-		}
-		
-		// Firebird driver must be registered with DriverManager 
-		if ("org.firebirdsql.jdbc.FBDriver".equals(driverClassName)) {
-			DriverManager.registerDriver(new org.firebirdsql.jdbc.FBDriver());
-		}
-	}
 }

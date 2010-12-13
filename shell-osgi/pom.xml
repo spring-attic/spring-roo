@@ -25,40 +25,10 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
-        <!-- Apache Felix: OSGi Bundle Repository (OBR) support -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-            <version>1.4.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.service.obr</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.shell</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.sf.kxml</groupId>
-                    <artifactId>kxml2</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
-            <type>bundle</type>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.obr</artifactId>
             <version>${roo.version}</version>
             <type>bundle</type>
         </dependency>

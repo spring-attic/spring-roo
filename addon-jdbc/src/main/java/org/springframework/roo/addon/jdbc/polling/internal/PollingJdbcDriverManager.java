@@ -2,11 +2,8 @@ package org.springframework.roo.addon.jdbc.polling.internal;
 
 import java.sql.Driver;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -14,13 +11,9 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.obr.Capability;
-import org.osgi.service.obr.Resource;
 import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
-import org.springframework.roo.obr.AddOnFinder;
-import org.springframework.roo.obr.AddOnSearchManager;
-import org.springframework.roo.obr.ObrResourceFinder;
+import org.springframework.roo.support.api.AddOnSearch;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -32,15 +25,16 @@ import org.springframework.roo.support.util.Assert;
  * may be able to provide the driver as a console message.
  *
  * @author Alan Stewart
+ * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
 @Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
-public class PollingJdbcDriverManager implements JdbcDriverManager, AddOnFinder {
+public class PollingJdbcDriverManager implements JdbcDriverManager {
 	private Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
-	@Reference private ObrResourceFinder obrResourceFinder;
-	@Reference private AddOnSearchManager addOnSearchManager;
+	private Logger logger = Logger.getLogger(PollingJdbcDriverManager.class.getName());
+	@Reference private AddOnSearch addOnSearch;
 	
 	protected void bindJdbcDriverProvider(JdbcDriverProvider listener) {
 		synchronized (providers) {
@@ -54,7 +48,7 @@ public class PollingJdbcDriverManager implements JdbcDriverManager, AddOnFinder 
 		}
 	}
 
-	public Driver loadDriver(String driverClassName) throws RuntimeException {
+	public Driver loadDriver(String driverClassName, boolean displayAddOns) throws RuntimeException {
 		Assert.hasText(driverClassName, "Driver class name required");
 		synchronized (providers) {
 			for (JdbcDriverProvider provider : providers) {
@@ -63,41 +57,32 @@ public class PollingJdbcDriverManager implements JdbcDriverManager, AddOnFinder 
 					return driver;
 				}
 			}
+			
+			if (!displayAddOns) {
+				// Caller requested add-on information not be displayed (might be in a TAB assist section etc)
+				return null;
+			}
+			
 			// No implementation could provide it
-			addOnSearchManager.completeAddOnSearch(driverClassName, this);
+			
+			// Compute a suitable search term for a JDBC driver
+			String searchTerms = "#jdbcdriver,driverclass:" + driverClassName;
+			
+			// Do a silent (console message free) lookup of matches
+			Integer matches = addOnSearch.searchAddOns(false, searchTerms, false, 1, 99, false, false, null);
+
+			// Render to screen if required
+			if (matches == null) {
+				logger.info("Spring Roo automatic add-on discovery service currently unavailable");
+			} else if (matches == 0) {
+				logger.info("addon search --requiresDescription \"" + searchTerms + "\" found no matches");
+			} else if (matches > 0) {
+				logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this JDBC driver");
+				addOnSearch.searchAddOns(true, searchTerms, false, 1, 99, false, false, null);
+			}
+
 			return null;
 		}
 	}
 
-	public SortedMap<String, String> findAddOnsOffering(String driverClassName) {
-		SortedMap<String, String> result = new TreeMap<String, String>();
-		List<Resource> resources = obrResourceFinder.getKnownResources();
-		if (resources != null) {
-			for (Resource resource : resources) {
-				outer: for (Capability capability : resource.getCapabilities()) {
-					if ("package".equals(capability.getName())) {
-						Map<?, ?> props = capability.getProperties();
-						Object v = props.get("package");
-						if (v != null) {
-							String vString = v.toString();
-							if (driverClassName.startsWith(vString)) {
-								// Found the JDBC driver
-								result.put(resource.getSymbolicName(), resource.getPresentationName());
-								break outer;
-							}
-						}
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	public String getFinderTargetSingular() {
-		return "JDBC driver";
-	}
-
-	public String getFinderTargetPlural() {
-		return "JDBC drivers";
-	}
 }

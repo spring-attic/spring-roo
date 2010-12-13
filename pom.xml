@@ -23,7 +23,6 @@
         <module>support-osgi</module>
         <module>url-stream</module>
         <module>url-stream-jdk</module>
-        <module>obr</module>
         <module>shell</module>
         <module>shell-json</module>
         <module>shell-osgi</module>

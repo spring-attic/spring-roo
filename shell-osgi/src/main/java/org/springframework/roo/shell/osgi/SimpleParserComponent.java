@@ -1,9 +1,5 @@
 package org.springframework.roo.shell.osgi;
 
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
@@ -14,19 +10,13 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.obr.Capability;
-import org.osgi.service.obr.Resource;
-import org.springframework.roo.obr.AddOnFinder;
-import org.springframework.roo.obr.AddOnSearchManager;
-import org.springframework.roo.obr.ObrResourceFinder;
 import org.springframework.roo.shell.AbstractShell;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.SimpleParser;
-import org.springframework.roo.shell.model.CommandInfo;
-import org.springframework.roo.shell.model.ModelSerializer;
+import org.springframework.roo.support.api.AddOnSearch;
 
 /**
  * OSGi component launcher for {@link SimpleParser}.
@@ -38,55 +28,52 @@ import org.springframework.roo.shell.model.ModelSerializer;
 @Service
 @References(value = {
 	@Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
-	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),
+	@Reference(name = "addOnSearch", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = AddOnSearch.class, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
 })
-public class SimpleParserComponent extends SimpleParser implements CommandMarker, AddOnFinder {
-	@Reference private ObrResourceFinder obrResourceFinder;
-	@Reference private AddOnSearchManager addOnSearchManager;
-	@Reference private ModelSerializer modelSerializer;
-	
-	public SortedMap<String, String> findAddOnsOffering(String command) {
-		SortedMap<String, String> result = new TreeMap<String, String>();
-		List<Resource> resources = obrResourceFinder.getKnownResources();
-		if (resources != null) {
-			for (Resource resource : resources) {
-				outer: for (Capability capability : resource.getCapabilities()) {
-					if ("shell-info-1".equals(capability.getName())) {
-						Map<?, ?> props = capability.getProperties();
-						Object r = props.get("shell-info-1");
-						if (r != null) {
-							String rString = r.toString();
-							List<CommandInfo> commandInfo = modelSerializer.deserializeList(rString);
-							for (CommandInfo info : commandInfo) {
-								for (String commandName : info.getCommandNames()) {
-									if (commandName.startsWith(command) || command.startsWith(commandName)) {
-										result.put(resource.getSymbolicName(), resource.getPresentationName());
-										break outer;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return result;
-	}
-
-	public String getFinderTargetSingular() {
-		return "command";
-	}
-
-	public String getFinderTargetPlural() {
-		return "commands";
-	}
+public class SimpleParserComponent extends SimpleParser implements CommandMarker {
+	private AddOnSearch addOnSearch;
 
 	@Override
 	protected void commandNotFound(Logger logger, String buffer) {
 		logger.warning("Command '" + buffer + "' not found (for assistance press " + AbstractShell.completionKeys + " or type \"hint\" then hit ENTER)");
-		addOnSearchManager.completeAddOnSearch(buffer);
+		
+		if (addOnSearch == null) {
+			return;
+		}
+		
+		// Decide which command they asked for
+		String command = buffer.trim();
+		
+		// Truncate from the first option, if any was given
+		int firstDash = buffer.indexOf("--");
+		if (firstDash > 1) {
+			command = buffer.substring(0, firstDash - 1).trim();
+		}
+		
+		// Do a silent (console message free) lookup of matches
+		Integer matches = null;
+		matches = addOnSearch.searchAddOns(false, null, false, 1, 99, false, false, command);
+		
+		// Render to screen if required
+		if (matches == null) {
+			logger.info("Spring Roo automatic add-on discovery service currently unavailable");
+		} else if (matches == 0) {
+			logger.info("addon search --requiresCommand \"" + command + "\" found no matches");
+		} else if (matches > 0) {
+			logger.info("Located add-on" + (matches == 1 ? "" : "s") + " that may offer this command");
+			addOnSearch.searchAddOns(true, null, false, 1, 99, false, false, command);
+		}
 	}
 
+	protected void bindAddOnSearch(AddOnSearch s) {
+		this.addOnSearch = s;
+	}
+	
+	protected void unbindAddOnSearch(AddOnSearch s) {
+		this.addOnSearch = null;
+	}
+	
 	protected void bindConverter(Converter c) {
 		add(c);
 	}

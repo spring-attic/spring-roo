@@ -31,8 +31,8 @@ public class SchemaConverter implements Converter {
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
-		if (dbreModelService.supportsSchema()) {
-			Set<Schema> schemas = dbreModelService.getDatabaseSchemas();
+		if (dbreModelService.supportsSchema(false)) {
+			Set<Schema> schemas = dbreModelService.getDatabaseSchemas(false);
 			for (Schema schema : schemas) {
 				completions.add(schema.getName());
 			}

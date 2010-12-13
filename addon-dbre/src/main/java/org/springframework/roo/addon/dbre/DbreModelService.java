@@ -29,16 +29,18 @@ public interface DbreModelService {
 	 * <p>
 	 * Examples of databases that do not use schemas are MySQL and Firebird.
 	 * 
+	 * @param displayAddOns display available add-ons if possible (required)
 	 * @return true if the database supports schema, otherwise false;
 	 */
-	boolean supportsSchema();
+	boolean supportsSchema(boolean displayAddOns);
 
 	/**
 	 * Returns a Set of available database {@link Schema schemas}. 
 	 * 
+	 * @param displayAddOns display available add-ons if possible (required)
 	 * @return a Set of schemas.
 	 */
-	Set<Schema> getDatabaseSchemas();
+	Set<Schema> getDatabaseSchemas(boolean displayAddOns);
 	
 	/**
 	 * Returns the last known schema.

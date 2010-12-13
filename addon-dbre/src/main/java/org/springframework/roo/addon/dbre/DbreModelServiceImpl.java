@@ -109,10 +109,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		}
 	}
 
-	public boolean supportsSchema() {
+	public boolean supportsSchema(boolean displayAddOns) {
 		Connection connection = null;
 		try {
-			connection = getConnection();
+			connection = getConnection(displayAddOns);
 			DatabaseMetaData databaseMetaData = connection.getMetaData();
 			String schemaTerm = databaseMetaData.getSchemaTerm();
 			return StringUtils.hasText(schemaTerm) && schemaTerm.equalsIgnoreCase("schema");
@@ -123,10 +123,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		}
 	}
 
-	public Set<Schema> getDatabaseSchemas() {
+	public Set<Schema> getDatabaseSchemas(boolean displayAddOns) {
 		Connection connection = null;
 		try {
-			connection = getConnection();
+			connection = getConnection(displayAddOns);
 			DatabaseIntrospector introspector = new DatabaseIntrospector(connection);
 			return introspector.getSchemas();
 		} catch (Exception e) {
@@ -211,7 +211,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 
 		Connection connection = null;
 		try {
-			connection = getConnection();
+			connection = getConnection(true);
 			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, view, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
 
@@ -311,13 +311,13 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		}
 	}
 
-	private Connection getConnection() throws SQLException {
+	private Connection getConnection(boolean displayAddOns) throws SQLException {
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
 			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
-			return connectionProvider.getConnection(connectionProperties);
+			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		} else {
 			Properties connectionProperties = getConnectionPropertiesFromDataNucleusConfiguration();
-			return connectionProvider.getConnection(connectionProperties);
+			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		}
 	}
 
