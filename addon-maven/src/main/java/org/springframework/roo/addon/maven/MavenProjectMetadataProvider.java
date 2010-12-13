@@ -38,6 +38,11 @@ import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
+import org.springframework.roo.uaa.UaaRegistrationService;
+import org.springframework.uaa.client.DetectedProducts;
+import org.springframework.uaa.client.VersionHelper;
+import org.springframework.uaa.client.DetectedProducts.ProductInfo;
+import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -62,6 +67,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 	@Reference private MetadataService metadataService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private Shell shell;
+	@Reference private UaaRegistrationService uaaRegistrationService;
 	private String pom;
 
 	protected void activate(ComponentContext context) {
@@ -150,9 +156,52 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			resources.add(new Resource(resource));
 		}
 
+		// Update window title with project name
 		shell.flash(Level.FINE, "Spring Roo: " + topLevelPackage, Shell.WINDOW_TITLE_SLOT);
 
-		return new ProjectMetadata(topLevelPackage, projectName, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources, pathResolver);
+		ProjectMetadata result = new ProjectMetadata(topLevelPackage, projectName, dependencies, buildPlugins, repositories, pluginRepositories, pomProperties, filters, resources, pathResolver);
+
+		// Update UAA with the project name
+		uaaRegistrationService.registerProject(UaaRegistrationService.SPRING_ROO, topLevelPackage.getFullyQualifiedPackageName());
+		
+		// Update UAA with the well-known Spring-related open source dependencies
+		for (ProductInfo productInfo : DetectedProducts.getProducts()) {
+			if (productInfo.getProductName().equals(DetectedProducts.SPRING_ROO.getProductName())) {
+				// No need to register with a less robust pom.xml-declared dependency metadata when we did it ourselves with a proper bundle version number lookup a moment ago...
+				continue;
+			}
+			if (productInfo.getProductName().equals(DetectedProducts.SPRING_UAA.getProductName())) {
+				// No need to register Spring UAA as this happens automatically internal to UAA
+				continue;
+			}
+			Dependency dependency = new Dependency(productInfo.getGroupId(), productInfo.getArtifactId(), "version_is_ignored_for_searching");
+			Set<Dependency> dependenciesExcludingVersion = result.getDependenciesExcludingVersion(dependency);
+			if (dependenciesExcludingVersion.size() > 0) {
+				// This dependency was detected
+				Dependency first = dependenciesExcludingVersion.iterator().next();
+				// Convert the detected dependency into a Product as best we can
+				String versionSequence = first.getVersionId();
+				// Version sequence given; see if it looks like a property
+				if (versionSequence != null && versionSequence.startsWith("${") && versionSequence.endsWith("}")) {
+					// Strip the ${ } from the version sequence
+					String propertyName = versionSequence.replace("${" , "").replace("}", "");
+					Set<Property> prop = result.getPropertiesExcludingValue(new Property(propertyName));
+					if (prop.size() > 0) {
+						// Take the first one's value and treat that as the version sequence
+						versionSequence = prop.iterator().next().getValue();
+					}
+				}
+				// Handle there being no version sequence
+				if (versionSequence == null || "".equals(versionSequence)) {
+					versionSequence = "0.0.0.UNKNOWN";
+				}
+				Product product = VersionHelper.getProduct(productInfo.getProductName(), versionSequence);
+				// Register the Spring Product with UAA
+				uaaRegistrationService.registerProject(product, topLevelPackage.getFullyQualifiedPackageName());
+			}
+		}
+		
+		return result;
 	}
 
 	public String getProvidesType() {

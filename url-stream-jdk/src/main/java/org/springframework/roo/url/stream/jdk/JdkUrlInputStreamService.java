@@ -14,6 +14,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.springframework.roo.url.stream.UrlInputStreamUtils;
 import org.springframework.uaa.client.UaaService;
+import org.springframework.uaa.client.UrlHelper;
 import org.springframework.uaa.client.protobuf.UaaClient.Privacy.PrivacyLevel;
 
 /**
@@ -34,20 +35,22 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 		Assert.isTrue(httpUrl.getProtocol().equals("http"), "Only HTTP is supported (not " + httpUrl + ")");
 		
 		// Fail if we're banned from accessing this domain
-		Assert.isTrue(getUrlCannotBeOpenedMessage(httpUrl) == null, UrlInputStreamUtils.SETUP_UAA_REQUIRED);
+		Assert.isNull(getUrlCannotBeOpenedMessage(httpUrl), UrlInputStreamUtils.SETUP_UAA_REQUIRED);
 		HttpURLConnection connection = (HttpURLConnection) httpUrl.openConnection();
 		
-		// Use UAA (we know UAA Terms of Use have been accepted by this point)
-		if (UrlInputStreamUtils.isVMwareDomain(httpUrl)) {
+		// Set UAA header if this destination host supports it (we know UAA Terms of Use have been accepted by this point)
+		boolean uaaHeaderSet = false;
+		if (UrlHelper.isUaaEnabledHost(httpUrl)) {
 			// Only send UAA header to VMware domains
 			connection.setRequestProperty("user-agent", uaaService.toHttpUserAgentHeaderValue());
+			uaaHeaderSet = true;
 		}
 		
-		return new ProgressIndicatingInputStream(connection);
+		return new ProgressIndicatingInputStream(connection, uaaHeaderSet);
 	}
 	
 	public String getUrlCannotBeOpenedMessage(URL httpUrl) {
-		if (UrlInputStreamUtils.isVMwareDomain(httpUrl)) {
+		if (UrlHelper.isVMwareDomain(httpUrl)) {
 			if (uaaService.getPrivacyLevel() == PrivacyLevel.UNDECIDED_TOU || uaaService.getPrivacyLevel() == PrivacyLevel.DECLINE_TOU) {
 				return UrlInputStreamUtils.SETUP_UAA_REQUIRED;
 			}
@@ -64,7 +67,7 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 		private long lastNotified;
 		private String text;
 		
-		public ProgressIndicatingInputStream(HttpURLConnection connection) throws IOException {
+		public ProgressIndicatingInputStream(HttpURLConnection connection, boolean uaaHeaderSet) throws IOException {
 			Assert.notNull(connection, "URL Connection required");
 			this.totalSize = connection.getContentLength();
 			this.delegate = connection.getInputStream();
@@ -80,8 +83,8 @@ public class JdkUrlInputStreamService extends AbstractFlashingObject implements 
 				}
 			}
 			
-			// Handle the response code
-			if (connection.getResponseCode() == 200) {
+			// Clear the UAA data if the request present a UAA header and the request was successful
+			if (uaaHeaderSet && connection.getResponseCode() == 200) {
 				uaaService.clearIfPossible();
 			}
 		}

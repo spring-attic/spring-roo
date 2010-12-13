@@ -45,12 +45,14 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.osgi.BundleFindingUtils;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
+import org.springframework.roo.uaa.UaaRegistrationService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -76,6 +78,7 @@ public class JspOperationsImpl implements JspOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	@Reference private I18nSupport i18nSupport;
+	@Reference private UaaRegistrationService uaaRegistrationService;
 
 	private ComponentContext context;
 
@@ -468,6 +471,12 @@ public class JspOperationsImpl implements JspOperations {
 //			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().toString()).addAttribute("label", i18n.getLanguage()).build());
 			span.appendChild(new XmlElementBuilder("util:language", footer).addAttribute("locale", i18n.getLocale().getLanguage()).addAttribute("label", i18n.getLanguage()).build());
 			XmlUtils.writeXml(footerFile.getOutputStream(), footer);
+		}
+		
+		// Record use of add-on (most languages are implemented via public add-ons)
+		String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(context.getBundleContext(), i18n.getClass().getName());
+		if (bundleSymbolicName != null) {
+			uaaRegistrationService.registerBundleSymbolicNameUse(bundleSymbolicName, null);
 		}
 	}
 

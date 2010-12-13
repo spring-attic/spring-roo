@@ -29,6 +29,7 @@
         <module>shell-osgi</module>
         <module>shell-jline</module>
         <module>shell-jline-osgi</module>
+        <module>uaa</module>
         <module>felix</module>
         <module>model</module>
         <module>metadata</module>
@@ -180,6 +181,12 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <version>1.2.0</version>
+        </dependency>
+        <!-- Spring User Agent Analysis (UAA) -->
+        <dependency>
+            <groupId>org.springframework.uaa</groupId>
+            <artifactId>org.springframework.uaa.client</artifactId>
+            <version>1.0.0.M3</version>
         </dependency>
       </dependencies>
     </dependencyManagement>
