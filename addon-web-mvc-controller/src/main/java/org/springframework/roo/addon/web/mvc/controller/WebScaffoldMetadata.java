@@ -1322,9 +1322,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (accessor.equals(em.getIdentifierAccessor()) || accessor.equals(em.getVersionAccessor())) {
 				continue;
 			}
-			// Not interested in fields that are not exposed via a mutator
+			// Not interested in fields that are not exposed via a mutator or are JPA transient fields
 			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim) || isTransientFieldType(fieldMetadata)) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();
@@ -1435,6 +1435,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private boolean isEmbeddedFieldType(FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
+	}
+	
+	private boolean isTransientFieldType(FieldMetadata field) {
+		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null;
 	}
 
 	private String getPlural(JavaType type) {
