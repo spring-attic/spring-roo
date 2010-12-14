@@ -45,6 +45,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private ClasspathOperations classpathOperations;
 	@Reference private WebMvcOperations webMvcOperations;
+	@Reference private ConversionServiceOperations conversionServiceOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
 
@@ -116,5 +117,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		classpathOperations.generateClassFile(typeDetailsBuilder.build());
 
 		webMvcOperations.installAllWebMvcArtifacts();
+		conversionServiceOperations.installConversionService(controller.getPackage());
 	}
 }
