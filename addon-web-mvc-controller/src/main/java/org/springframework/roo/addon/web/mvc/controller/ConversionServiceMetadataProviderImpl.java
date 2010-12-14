@@ -54,6 +54,7 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 		if (! registerDependencies(formBackingObjectTypes, metadataIdentificationString)) {
 			return null;
 		}
+		
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, formBackingObjectTypes);
 	}
 

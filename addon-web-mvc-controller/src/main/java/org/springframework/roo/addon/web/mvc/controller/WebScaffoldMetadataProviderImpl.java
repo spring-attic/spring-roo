@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -12,6 +13,7 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -29,6 +31,8 @@ import org.springframework.roo.project.Path;
 @Service 
 public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataProvider implements WebScaffoldMetadataProvider {
 	@Reference private ControllerOperations controllerOperations;
+	@Reference private TypeLocationService typeLocationService;
+	@Reference private ConversionServiceOperations conversionServiceOperations;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -70,6 +74,12 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		for (JavaType type : getSpecialDomainTypes(beanInfoMetadata.getJavaBean())) {
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
+		
+		Set<JavaType> types = typeLocationService.findTypesWithAnnotation(new JavaType(RooConversionService.class.getName()));
+		
+		if (types.size() == 0) {
+			conversionServiceOperations.installConversionService(governorPhysicalTypeMetadata.getItdJavaType(this).getPackage());
+		} 
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
