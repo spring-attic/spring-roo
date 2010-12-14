@@ -79,7 +79,7 @@ public class DomainJavaType {
 	 * @return the metadata identifier for the BeanInfoMetadata or null
 	 */
 	public String getBeanInfoMetadataId() {
-		return (isValidMetadata()) ? getBeanInfoMetadata().getId() : null;
+		return BeanInfoMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class DomainJavaType {
 	 * @return the metadata identifier for the EntityMetadata or null
 	 */
 	public String getEntityMetadataId() {
-		return (isValidMetadata()) ? getEntityMetadata().getId() : null;
+		return EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 	}
 
 	/**
@@ -155,13 +155,14 @@ public class DomainJavaType {
 	 *		If no methods could be selected the toString() method is added.
 	 */
 	public List<MethodMetadata> getMethodsForLabel() {
+		Assert.notNull(getBeanInfoMetadata(), "BeanInfo metadata is required.");
 		int fieldCount = 0;
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		for (MethodMetadata accessor : getBeanInfoMetadata().getPublicAccessors(false)) {
-			if (accessor.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName())) {
+			if (accessor.getMethodName().equals(getEntityMetadata().getIdentifierAccessor().getMethodName())) {
 				continue;
 			}
-			MethodMetadata versionAccessor = entityMetadata.getVersionAccessor();
+			MethodMetadata versionAccessor = getEntityMetadata().getVersionAccessor();
 			if ((versionAccessor != null) && accessor.getMethodName().equals(versionAccessor.getMethodName())) {
 				continue;
 			}
@@ -209,12 +210,12 @@ public class DomainJavaType {
 		LinkedHashSet<DomainJavaType> relatedDomainTypes = new LinkedHashSet<DomainJavaType>();
 		for (MethodMetadata accessor : getBeanInfoMetadata().getPublicAccessors(false)) {
 			// Not interested in identifiers and version fields
-			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
+			if (accessor.equals(getEntityMetadata().getIdentifierAccessor()) || accessor.equals(getEntityMetadata().getVersionAccessor())) {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator
 			FieldMetadata fieldMetadata = getBeanInfoMetadata().getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, getBeanInfoMetadata())) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();

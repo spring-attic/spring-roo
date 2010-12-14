@@ -38,7 +38,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		}
 
 		MethodMetadataBuilder installConvertersMethodBuilder = getInstallLabelConvertersMethodBuilder();
-		for (DomainJavaType domainJavaType : flattenDomainTypesList(domainJavaTypes)) {
+		for (DomainJavaType domainJavaType : getLabelConverterTypes(domainJavaTypes)) {
 			String converterMethodName = "get" + domainJavaType.getSimpleTypeName() + "Converter";
 			if (getMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
 				MethodMetadata converterMethod = getConverterMethod(domainJavaType, converterMethodName);
@@ -59,15 +59,18 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	/* Private class methods */
 	
-	LinkedHashSet<DomainJavaType> flattenDomainTypesList(LinkedHashSet<DomainJavaType> domainJavaTypes) {
-		LinkedHashSet<DomainJavaType> typesToRegister = new LinkedHashSet<DomainJavaType>();
-		for (DomainJavaType domainJavaType : domainJavaTypes) {
-			typesToRegister.add(domainJavaType);
-			for (DomainJavaType relatedType : domainJavaType.getRelatedDomainTypes()) {
-				typesToRegister.add(relatedType);
+	LinkedHashSet<DomainJavaType> getLabelConverterTypes(LinkedHashSet<DomainJavaType> domainJavaTypes) {
+		LinkedHashSet<DomainJavaType> allTypes = new LinkedHashSet<DomainJavaType>(domainJavaTypes);
+		for (DomainJavaType t : domainJavaTypes) {
+			allTypes.addAll(t.getRelatedDomainTypes());
+		}
+		LinkedHashSet<DomainJavaType> labelConverterTypes = new LinkedHashSet<DomainJavaType>(domainJavaTypes);
+		for (DomainJavaType t : allTypes) {
+			if (t.getBeanInfoMetadata() != null) {
+				labelConverterTypes.add(t);
 			}
-		}		
-		return typesToRegister;
+		}
+		return labelConverterTypes;
 	}
 	
 	MethodMetadata getConverterMethod(DomainJavaType domainType, String converterMethodName) {
