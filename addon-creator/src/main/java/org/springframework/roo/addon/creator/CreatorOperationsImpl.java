@@ -60,14 +60,14 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		createProject(topLevelPackage, Type.ADVANCED, description, projectName);
 		
-		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("Metadata.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("MetadataProvider.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("RooAnnotation.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED);
-		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.ADVANCED);
-		installIfNeeded("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.ADVANCED);
+		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("Metadata.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("MetadataProvider.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("RooAnnotation.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.ADVANCED, projectName);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.ADVANCED, projectName);
+		installIfNeeded("configuration.xml", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.ADVANCED, projectName);
 	}
 	
 	public void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName) {
@@ -75,14 +75,13 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		
 		createProject(topLevelPackage, Type.SIMPLE, description, projectName);
 		
-		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
-		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
-		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
-		installIfNeeded("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE);
-		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE);
-		installIfNeeded("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE);
-		installIfNeeded("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE);
-		
+		installIfNeeded("Commands.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
+		installIfNeeded("Operations.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
+		installIfNeeded("OperationsImpl.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
+		installIfNeeded("PropertyName.java", topLevelPackage, Path.SRC_MAIN_JAVA, Type.SIMPLE, projectName);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.SIMPLE, projectName);
+		installIfNeeded("info.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE, projectName);
+		installIfNeeded("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE, projectName);
 	}
 	
 	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
@@ -131,10 +130,12 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (description == null || description.length() == 0) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
 		}
-		
+		if (!description.contains("#mvc") || !description.contains("#localization") || !description.contains("locale:")) {
+			description = description + "; #mvc,#localization,locale:" + locale.getCountry().toLowerCase();
+		}
 		createProject(topLevelPackage, Type.I18N, description, projectName);
 
-		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N);
+		installIfNeeded("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
 		
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + separator + messageBundle.getName())).getOutputStream());
@@ -208,7 +209,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		fileManager.scan();
 	}
 	
-	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Path path, Type type) {
+	private void installIfNeeded(String targetFilename, JavaPackage topLevelPackage, Path path, Type type, String projectName) {
+		if (projectName == null || projectName.length() == 0) {
+			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
+		}
 		String tlp = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = tlp.replace('.', separator);
 		String destinationFile = "";
@@ -232,6 +236,8 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				String input = FileCopyUtils.copyToString(new InputStreamReader(templateInputStream));
 				input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage.getFullyQualifiedPackageName());
 				input = input.replace("__APP_NAME__", StringUtils.capitalize(tlp.substring(tlp.lastIndexOf(".") + 1)));
+				input = input.replace("__APP_NAME_LWR_CASE__", tlp.substring(tlp.lastIndexOf(".") + 1).toLowerCase());
+				input = input.replace("__PROJECT_NAME__", projectName.toLowerCase());
 				
 				// Output the file for the user
 				MutableFile mutableFile = fileManager.createFile(destinationFile);
