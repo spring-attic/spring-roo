@@ -57,8 +57,8 @@
         the column names in the tables. Simple and composite primary keys are
         supported (see <xref linkend="dbre_composite_keys" /> for more
         details) and relationships between entities are also created using the
-        imported and exported key information obtained from the
-        metadata.</para>
+        imported and exported key information obtained from the metadata.
+        </para>
       </section>
 
       <section>
@@ -149,33 +149,19 @@
 
     <para>DBRE supports most of the relational databases that can be
     configured for Roo-managed projects such as <link
-    xlink:href="http://www.mysql.com/">MySQL</link> and <link
-    xlink:href="http://www.postgresql.org/">PostgreSQL</link> and the
-    OSGi-enabled JDBC drivers for these databases are shipped with the Roo
-    distribution zip file. However, due to the physical size of some
-    database's JDBC driver JARs, Roo does not include these JARs but does
-    provide an installation script called install-jdbc-drivers.roo that can be
-    run as a post-installation step after installing Roo. To install the
-    remaining drivers, execute the Roo command:</para>
+    xlink:href="http://www.mysql.com/">MySQL</link>, <link
+    xlink:href="http://www.microsoft.com/sqlserver">MS SQL</link> and <link
+    xlink:href="http://www.postgresql.org/">PostgreSQL</link>. These drivers
+    are auto-detected by Roo and are downloaded for you to use in DBRE when
+    you first issue the database introspect or database reverse engineer
+    commands. Roo also provides a script called install-jdbc-drivers.roo that
+    can be run as a post-installation step after installing Roo to install the
+    <link xlink:href="http://www.oracle.com/index.html">Oracle</link> driver.
+    To install this driver, execute the Roo command:</para>
 
     <para><programlisting>roo&gt; script --file install-jdbc-drivers.roo</programlisting></para>
 
-    <para>Re-start Roo to use the drivers.</para>
-
-    <para>This command will install the JDBC drivers for <link
-    xlink:href="http://www.oracle.com/index.html">Oracle</link>, <link
-    xlink:href="http://hsqldb.org/">HSQL</link>, <link
-    xlink:href="http://www.h2database.com/html/main.html">H2</link>, <link
-    xlink:href="http://jt400.sourceforge.net/">JTOpen</link> (for DB2/400),
-    <link xlink:href="http://jtds.sourceforge.net/">jTDS</link> (for MS SQL
-    and Sybase), <link xlink:href="http://db.apache.org/derby/">Apache
-    Derby</link>, and <link
-    xlink:href="http://www.firebirdsql.org/">Firebird</link>. This
-    installation step only needs to be performed once and is not required to
-    be executed again unless you delete the Roo installation directory and
-    re-install Roo. Please note this list of databases is correct as of Roo
-    1.1 but is subject to change with newer versions of Roo and the JDBC
-    drivers.</para>
+    <para>Re-start Roo to use the driver.</para>
 
     <para><emphasis role="bold">Note</emphasis>: currently there is no
     open-source JDBC driver for DB2 and Roo does not provide an OSGi driver
@@ -228,8 +214,8 @@
         package as they were previously created in.</para>
 
         <para>Use the --testAutomatically option to create integration tests
-        automatically for each new entity created by reverse engineering.
-        </para>
+        automatically for each new entity created by reverse
+        engineering.</para>
 
         <para>The --enableViews option when specified will also retrieve
         database views and reverse engineer them into entities. Note that this
