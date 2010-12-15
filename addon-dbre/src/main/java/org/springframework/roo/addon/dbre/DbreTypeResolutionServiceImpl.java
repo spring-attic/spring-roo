@@ -18,6 +18,8 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -38,6 +40,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService {
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 
 	public JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage) {
 		Assert.notNull(managedEntities, "Managed entities required");
@@ -129,7 +132,8 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 		String tableName = null;
 		if (governorPhysicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), governorTypeDetails);
+			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType(RooEntity.class.getName()));
 			if (rooEntityAnnotation != null) {
 				AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
 				if (tableAttribute != null) {
@@ -137,7 +141,7 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 				}
 			}
 			if (!StringUtils.hasText(tableName)) {
-				AnnotationMetadata tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
+				AnnotationMetadata tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Table"));
 				if (tableAnnotation != null) {
 					AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName("name"));
 					if (nameAttribute != null) {
