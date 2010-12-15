@@ -3,7 +3,7 @@
 	<databases>
 		<database id="H2">
 			<dependencies>
-				<dependency org="com.h2database" name="h2" rev="1.2.144" />
+				<dependency org="com.h2database" name="h2" rev="1.3.148" />
 			</dependencies>
 		</database>
 		<database id="HYPERSONIC">
