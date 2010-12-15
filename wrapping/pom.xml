@@ -26,6 +26,7 @@
  		<module>hapax</module>
 		<module>mysql</module>
 		<module>firebird</module>
+		<module>h2</module>
 	<module>jsch</module>
 	<module>jgit</module>
 	</modules>
