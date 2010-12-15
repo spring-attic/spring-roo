@@ -27,8 +27,9 @@
 		<module>mysql</module>
 		<module>firebird</module>
 		<module>h2</module>
-	<module>jsch</module>
-	<module>jgit</module>
+		<module>derby</module>
+    	<module>jsch</module>
+  		<module>jgit</module>
 	</modules>
 
     <repositories>

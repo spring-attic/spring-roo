@@ -48,7 +48,7 @@
 		</database>
 		<database id="DERBY">
 			<dependencies>
-				<dependency org="org.apache.derby" name="derby" rev="10.6.1.0" />
+				<dependency org="org.apache.derby" name="derby" rev="10.7.1.1" />
 			</dependencies>
 		</database>
 		<database id="FIREBIRD">

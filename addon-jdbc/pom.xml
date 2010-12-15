@@ -51,18 +51,6 @@
 			<version>${roo.version}</version>
 			<type>bundle</type>
 		</dependency>
-		<!-- JDBC Drivers Available From Maven Central -->
-		<dependency>
-			<!-- Derby is not included in the user distribution due to an exclusion in assembly.xml -->
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derby</artifactId>
-			<version>10.6.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.2.140</version>
-		</dependency>
 		<!-- JDBC Drivers Available From Spring Roo's Wrapping Facility -->
 		<dependency>
 			<groupId>org.springframework.roo.wrapping</groupId>
@@ -98,6 +86,11 @@
 			<groupId>org.springframework.roo.wrapping</groupId>
 			<artifactId>org.springframework.roo.wrapping.h2</artifactId>
 			<version>1.3.148.0001</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.roo.wrapping</groupId>
+			<artifactId>org.springframework.roo.wrapping.derby</artifactId>
+			<version>10.7.1.1.0001</version>
 		</dependency>
 		<!-- Oracle; this comes from SpringSource EBR until we make a decision on final release packaging for it -->
 		<!-- No JARs from SpringSource EBR are included in user distribution due to an exclusion in assembly.xml -->
