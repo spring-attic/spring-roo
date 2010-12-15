@@ -3,6 +3,7 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 import com.google.gwt.activity.shared.*;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -29,6 +30,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
+
+import org.springsource.roo.extrack.client.scaffold.place.ProxyListPlace;
 
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
@@ -178,8 +181,8 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 		final Renderer<ProxyListPlace> placePickerRenderer = new ApplicationListPlaceRenderer();
 		Cell<ProxyListPlace> placePickerCell = new AbstractCell<ProxyListPlace>() {
 			@Override
-			public void render(ProxyListPlace value, Object viewData,
-					SafeHtmlBuilder sb) {
+      public void render(Context context, ProxyListPlace value,
+          SafeHtmlBuilder sb) {
 				sb.appendEscaped(placePickerRenderer.render(value));
 			}
 		};
