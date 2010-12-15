@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -17,6 +18,7 @@ import org.springframework.roo.classpath.itd.ItdSourceFileComposer;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.logging.HandlerUtils;
 
 /**
  * Represents metadata for the application-wide conversion service. Generates the following ITD methods:
@@ -31,27 +33,31 @@ import org.springframework.roo.model.JavaType;
  */
 public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
-	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, LinkedHashSet<DomainJavaType> domainJavaTypes) {
+	private static final Logger logger = HandlerUtils.getLogger(ConversionServiceMetadata.class);
+
+	ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
+		super(identifier, aspectName, governorPhysicalTypeMetadata);
+		// For testing
+	}
+
+	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, LinkedHashSet<RooJavaType> domainJavaTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		if (!isValid()) {
 			return;
 		}
 
-		MethodMetadataBuilder installConvertersMethodBuilder = getInstallLabelConvertersMethodBuilder();
-		for (DomainJavaType domainJavaType : getLabelConverterTypes(domainJavaTypes)) {
+		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
+		for (RooJavaType domainJavaType : getLabelConverterTypes(domainJavaTypes)) {
 			String converterMethodName = "get" + domainJavaType.getSimpleTypeName() + "Converter";
-			if (getMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
-				MethodMetadata converterMethod = getConverterMethod(domainJavaType, converterMethodName);
-				builder.addMethod(converterMethod);
+			if (getGovernorMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
+				builder.addMethod(getConverterMethod(domainJavaType, converterMethodName));
 			}
-			String line = "registry.addConverter(" + converterMethodName + "());";
-			installConvertersMethodBuilder.getBodyBuilder().appendFormalLine(line);
-		}		
+			installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + converterMethodName + "());");
+		}
+		MethodMetadata installMethod = installMethodBuilder.build();
+		builder.addMethod(installMethod);
+		builder.addMethod(getAfterPropertiesSetMethod(installMethod));
 		
-		MethodMetadata installConvertersMethod = installConvertersMethodBuilder.build();
-		builder.addMethod(installConvertersMethod);
-		builder.addMethod(getAfterPropertiesSetMethod(installConvertersMethod));
-
 		itdTypeDetails = builder.build();
 		
 		new ItdSourceFileComposer(itdTypeDetails);
@@ -59,40 +65,43 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	/* Private class methods */
 	
-	LinkedHashSet<DomainJavaType> getLabelConverterTypes(LinkedHashSet<DomainJavaType> domainJavaTypes) {
-		LinkedHashSet<DomainJavaType> allTypes = new LinkedHashSet<DomainJavaType>(domainJavaTypes);
-		for (DomainJavaType t : domainJavaTypes) {
-			allTypes.addAll(t.getRelatedDomainTypes());
+	LinkedHashSet<RooJavaType> getLabelConverterTypes(LinkedHashSet<RooJavaType> domainJavaTypes) {
+		LinkedHashSet<RooJavaType> allTypes = new LinkedHashSet<RooJavaType>(domainJavaTypes);
+		for (RooJavaType t : domainJavaTypes) {
+			allTypes.addAll(t.getRelatedRooTypes());
 		}
-		LinkedHashSet<DomainJavaType> labelConverterTypes = new LinkedHashSet<DomainJavaType>(domainJavaTypes);
-		for (DomainJavaType t : allTypes) {
-			if (t.getBeanInfoMetadata() != null) {
-				labelConverterTypes.add(t);
-			}
+		LinkedHashSet<RooJavaType> labelConverterTypes = new LinkedHashSet<RooJavaType>(domainJavaTypes);
+		for (RooJavaType t : allTypes) {
+			if (t.getBeanInfoMetadata() == null) {
+				logger.finer("No BeanInfoMetadata found for " + t.toString() + ". A Converter will not be created for this type.");
+				continue;
+			} 
+			labelConverterTypes.add(t);
 		}
 		return labelConverterTypes;
 	}
 	
-	MethodMetadata getConverterMethod(DomainJavaType domainType, String converterMethodName) {
+	MethodMetadata getConverterMethod(RooJavaType rooJavaType, String converterMethodName) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(domainType.getJavaType());
+		params.add(rooJavaType.getJavaType());
 		params.add(JavaType.STRING_OBJECT);
 		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "() {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("public String convert(" + domainType.getSimpleTypeName() + " " + "source" + ") {");
+		bodyBuilder.appendFormalLine("public String convert(" + rooJavaType.getSimpleTypeName() + " " + "source" + ") {");
 		bodyBuilder.indent();
 		
 		StringBuilder sb = new StringBuilder("return new StringBuilder()");
-		List<MethodMetadata> labelMethods = domainType.getMethodsForLabel();
+		List<MethodMetadata> labelMethods = rooJavaType.getMethodsForLabel();
 		for (int i=0; i < labelMethods.size(); i++) {
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
 			sb.append(".append(source." + labelMethods.get(i).getMethodName().getSymbolName() + "()");
-			if (labelMethods.get(i).getClass().isEnum()) {
+			RooJavaType returnType = new RooJavaType(labelMethods.get(i).getReturnType(), rooJavaType.getMetadataService());
+			if (returnType.isEnumType()) {
 				sb.append(".name()");
 			}
 			sb.append(")");
@@ -108,12 +117,12 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return (new MethodMetadataBuilder(getId(), 0, new JavaSymbolName(converterMethodName), converterJavaType, bodyBuilder)).build();
 	}
 	
-	MethodMetadataBuilder getInstallLabelConvertersMethodBuilder() {
+	MethodMetadataBuilder getInstallMethodBuilder() {
 		JavaSymbolName methodName = new JavaSymbolName("installLabelConverters");
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
 		parameters.add(new AnnotatedJavaType(new JavaType("org.springframework.format.FormatterRegistry"), null));
-		if (getMethod(methodName.getSymbolName(), parameters) != null) {
-			throw new IllegalStateException("Did not expect to find installLabelConverters method");
+		if (getGovernorMethod(methodName.getSymbolName(), parameters) != null) {
+			throw new IllegalStateException("Did not expect to find installLabelConverters method in " + governorTypeDetails.getName());
 		}
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		parameterNames.add(new JavaSymbolName("registry"));
@@ -126,7 +135,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		List<AnnotatedJavaType> parameters = Collections.emptyList();
 		List<JavaSymbolName> parameterNames = Collections.emptyList();
 
-		if (getMethod(methodName.getSymbolName(), parameters) != null) {
+		if (getGovernorMethod(methodName.getSymbolName(), parameters) != null) {
 			return null;
 		}
 
@@ -137,7 +146,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return (new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameters, parameterNames, bodyBuilder)).build();
 	}
 
-	MethodMetadata getMethod(String methodName, List<AnnotatedJavaType> parameters) {
+	MethodMetadata getGovernorMethod(String methodName, List<AnnotatedJavaType> parameters) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, new JavaSymbolName(methodName), AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 

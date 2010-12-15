@@ -16,8 +16,12 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -75,11 +79,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
 		
-		Set<JavaType> types = typeLocationService.findTypesWithAnnotation(new JavaType(RooConversionService.class.getName()));
-		
-		if (types.size() == 0) {
-			conversionServiceOperations.installConversionService(governorPhysicalTypeMetadata.getItdJavaType(this).getPackage());
-		} 
+		installConversionService(governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName());
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
@@ -123,6 +123,27 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			}
 		}
 		return specialTypes;
+	}
+	
+	void installConversionService(JavaType governor) {
+		JavaType rooConversionService = new JavaType(RooConversionService.class.getName());
+		if (typeLocationService.findTypesWithAnnotation(rooConversionService).size() > 0) {
+			return;
+		}
+		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
+		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(rooWebScaffold);
+		for (JavaType controller : controllers) {
+			AnnotationMetadata annotation = new RooJavaType(controller, metadataService).getTypeAnnotation(rooWebScaffold);
+			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("registerConverters"));
+			if (attr != null) {
+				if (Boolean.FALSE.equals(attr.getValue())) {
+					throw new IllegalStateException("Found registerConverters=false in scaffolded controller " + controller + ". " +
+							"Remove this property from all controllers and let Spring ROO install the new application-wide ApplicationConversionServiceFactoryBean. " +
+							"Then move your custom getXxxConverter() methods to it, delete the GenericConversionService field and the @PostContruct method.");
+				}
+			}
+		}
+		conversionServiceOperations.installConversionService(governor.getPackage());
 	}
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {

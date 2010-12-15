@@ -10,6 +10,13 @@ import java.io.OutputStream;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Provides an easy way to create a {@link MutableFile} without actually creating a file on the file system.
+ * Records all write operations in an OutputStream and makes it available via {@link #getOutputAsString()}.
+ * 
+ * @author Rossen Stoyanchev
+ * @since 1.1.1
+ */
 public class StubMutableFile implements MutableFile {
 
 	private final File file;
