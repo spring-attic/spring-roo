@@ -58,6 +58,9 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(classOrInterfaceMetadataKey);
+		if (physicalTypeMetadata == null) {
+			return null;
+		}
 		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
 		
 		// We need to abort if we couldn't find dependent metadata
