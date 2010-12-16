@@ -40,14 +40,14 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		// For testing
 	}
 
-	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, LinkedHashSet<RooJavaType> domainJavaTypes) {
+	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, LinkedHashSet<JavaTypeWrapper> domainJavaTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		if (!isValid()) {
 			return;
 		}
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
-		for (RooJavaType domainJavaType : getLabelConverterTypes(domainJavaTypes)) {
+		for (JavaTypeWrapper domainJavaType : getLabelConverterTypes(domainJavaTypes)) {
 			String converterMethodName = "get" + domainJavaType.getSimpleTypeName() + "Converter";
 			if (getGovernorMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
 				builder.addMethod(getConverterMethod(domainJavaType, converterMethodName));
@@ -65,13 +65,13 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	/* Private class methods */
 	
-	LinkedHashSet<RooJavaType> getLabelConverterTypes(LinkedHashSet<RooJavaType> domainJavaTypes) {
-		LinkedHashSet<RooJavaType> allTypes = new LinkedHashSet<RooJavaType>(domainJavaTypes);
-		for (RooJavaType t : domainJavaTypes) {
+	LinkedHashSet<JavaTypeWrapper> getLabelConverterTypes(LinkedHashSet<JavaTypeWrapper> domainJavaTypes) {
+		LinkedHashSet<JavaTypeWrapper> allTypes = new LinkedHashSet<JavaTypeWrapper>(domainJavaTypes);
+		for (JavaTypeWrapper t : domainJavaTypes) {
 			allTypes.addAll(t.getRelatedRooTypes());
 		}
-		LinkedHashSet<RooJavaType> labelConverterTypes = new LinkedHashSet<RooJavaType>(domainJavaTypes);
-		for (RooJavaType t : allTypes) {
+		LinkedHashSet<JavaTypeWrapper> labelConverterTypes = new LinkedHashSet<JavaTypeWrapper>(domainJavaTypes);
+		for (JavaTypeWrapper t : allTypes) {
 			if (t.getBeanInfoMetadata() == null) {
 				logger.finer("No BeanInfoMetadata found for " + t.toString() + ". A Converter will not be created for this type.");
 				continue;
@@ -81,7 +81,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		return labelConverterTypes;
 	}
 	
-	MethodMetadata getConverterMethod(RooJavaType rooJavaType, String converterMethodName) {
+	MethodMetadata getConverterMethod(JavaTypeWrapper rooJavaType, String converterMethodName) {
 		List<JavaType> params = new ArrayList<JavaType>();
 		params.add(rooJavaType.getJavaType());
 		params.add(JavaType.STRING_OBJECT);
@@ -100,7 +100,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 				sb.append(".append(\" \")");
 			}
 			sb.append(".append(source." + labelMethods.get(i).getMethodName().getSymbolName() + "()");
-			RooJavaType returnType = new RooJavaType(labelMethods.get(i).getReturnType(), rooJavaType.getMetadataService());
+			JavaTypeWrapper returnType = new JavaTypeWrapper(labelMethods.get(i).getReturnType(), rooJavaType.getMetadataService());
 			if (returnType.isEnumType()) {
 				sb.append(".name()");
 			}

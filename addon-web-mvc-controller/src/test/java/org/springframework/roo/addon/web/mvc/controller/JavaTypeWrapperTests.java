@@ -14,7 +14,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 
-public class RooJavaTypeTests {
+public class JavaTypeWrapperTests {
 
 	@Mock private MetadataService metadataService;
 	@Mock private BeanInfoMetadata beanInfoMetadata;
@@ -29,7 +29,7 @@ public class RooJavaTypeTests {
 		String beanInfoMid = "MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#SRC_MAIN_JAVA?somepackage.SomeClass";
 		when(metadataService.get(beanInfoMid)).thenReturn(beanInfoMetadata);
 
-		RooJavaType type = new RooJavaType(new JavaType("somepackage.SomeClass") , metadataService);
+		JavaTypeWrapper type = new JavaTypeWrapper(new JavaType("somepackage.SomeClass") , metadataService);
 		List<MethodMetadata> actual = type.getMethodsForLabel();
 		
 		assertEquals(1, actual.size());

@@ -20,7 +20,7 @@ import org.springframework.roo.model.JavaType;
 
 public class ConversionServiceMetadataTests {
 
-	private RooJavaType rooJavaType; 
+	private JavaTypeWrapper rooJavaType; 
 	private ConversionServiceMetadata metadata;
 	
 	@Mock private MetadataService metadataService;
@@ -30,7 +30,7 @@ public class ConversionServiceMetadataTests {
 	@Before
 	public void setUp() {
 		initMocks(this);
-		rooJavaType = new RooJavaType(new JavaType("somepackage.SomeClass") , metadataService);
+		rooJavaType = new JavaTypeWrapper(new JavaType("somepackage.SomeClass") , metadataService);
 		when(physicalTypeMetadata.getPhysicalTypeDetails()).thenReturn(typeDetails);
 		when(typeDetails.getName()).thenReturn(rooJavaType.getJavaType());
 		metadata = new ConversionServiceMetadata("MID:id#path", new JavaType("AspectName"), physicalTypeMetadata);
@@ -42,7 +42,7 @@ public class ConversionServiceMetadataTests {
 		methods.add(new StubMethodMetadata("getFirstName", String.class));
 		methods.add(new StubMethodMetadata("getLastName", String.class));
 		methods.add(new StubMethodMetadata("getAge", Integer.class));
-		RooJavaType theType = new RooJavaType(new JavaType("somepackage.SomeClass"), metadataService) {
+		JavaTypeWrapper theType = new JavaTypeWrapper(new JavaType("somepackage.SomeClass"), metadataService) {
 			public List<MethodMetadata> getMethodsForLabel() { return methods; }
 		};
 		
@@ -68,7 +68,7 @@ public class ConversionServiceMetadataTests {
 		final List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
 		methods.add(new StubMethodMetadata("getEnumType", String.class));
 
-		RooJavaType theType = new RooJavaType(new JavaType("somepackage.SomeClass"), metadataService) {
+		JavaTypeWrapper theType = new JavaTypeWrapper(new JavaType("somepackage.SomeClass"), metadataService) {
 			public List<MethodMetadata> getMethodsForLabel() { return methods; }
 		};
 		

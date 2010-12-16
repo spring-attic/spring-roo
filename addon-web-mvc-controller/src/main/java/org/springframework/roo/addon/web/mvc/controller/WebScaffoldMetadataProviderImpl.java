@@ -20,7 +20,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -133,7 +132,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(rooWebScaffold);
 		for (JavaType controller : controllers) {
-			AnnotationMetadata annotation = new RooJavaType(controller, metadataService).getTypeAnnotation(rooWebScaffold);
+			AnnotationMetadata annotation = new JavaTypeWrapper(controller, metadataService).getTypeAnnotation(rooWebScaffold);
 			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("registerConverters"));
 			if (attr != null) {
 				if (Boolean.FALSE.equals(attr.getValue())) {

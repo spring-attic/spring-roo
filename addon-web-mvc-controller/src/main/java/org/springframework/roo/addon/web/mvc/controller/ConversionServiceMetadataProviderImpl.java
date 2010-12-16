@@ -46,7 +46,7 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		LinkedHashSet<RooJavaType> rooJavaTypes = findFormBackingObjectTypes();
+		LinkedHashSet<JavaTypeWrapper> rooJavaTypes = findFormBackingObjectTypes();
 		if (! registerDependencies(rooJavaTypes, metadataIdentificationString)) {
 			logger.finer("Failed to register for one or form backing object type notifications. Postponing ConversionService Metadata creation!");
 			return null;
@@ -76,28 +76,28 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 
 	/* Private helper methods */
 
-	LinkedHashSet<RooJavaType> findFormBackingObjectTypes() {
+	LinkedHashSet<JavaTypeWrapper> findFormBackingObjectTypes() {
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		LinkedHashSet<RooJavaType> formBackingObjects = new LinkedHashSet<RooJavaType>();
+		LinkedHashSet<JavaTypeWrapper> formBackingObjects = new LinkedHashSet<JavaTypeWrapper>();
 		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(rooWebScaffold);
 		for (JavaType controller : controllers) {
-			AnnotationMetadata annotation = new RooJavaType(controller, metadataService).getTypeAnnotation(rooWebScaffold);
+			AnnotationMetadata annotation = new JavaTypeWrapper(controller, metadataService).getTypeAnnotation(rooWebScaffold);
 			JavaType javaType = (JavaType) annotation.getAttribute(new JavaSymbolName("formBackingObject")).getValue();
-			formBackingObjects.add(new RooJavaType(javaType , metadataService));
+			formBackingObjects.add(new JavaTypeWrapper(javaType , metadataService));
 		}
 		return formBackingObjects;
 	}
 
-	boolean registerDependencies(LinkedHashSet<RooJavaType> domainJavaTypes, String metadataId) {
+	boolean registerDependencies(LinkedHashSet<JavaTypeWrapper> domainJavaTypes, String metadataId) {
 		boolean isSuccessful = true;
-		for (RooJavaType domainJavaType : domainJavaTypes) {
+		for (JavaTypeWrapper domainJavaType : domainJavaTypes) {
 			if (! domainJavaType.isValidMetadata()) {
 				logger.finer("No BeanInfo or Entity metadata found for " + domainJavaType);
 				isSuccessful = false;
 			}
 			metadataDependencyRegistry.registerDependency(domainJavaType.getBeanInfoMetadataId(), metadataId);
 			metadataDependencyRegistry.registerDependency(domainJavaType.getEntityMetadataId(), metadataId);
-			for (RooJavaType relatedType : domainJavaType.getRelatedRooTypes()) {
+			for (JavaTypeWrapper relatedType : domainJavaType.getRelatedRooTypes()) {
 				metadataDependencyRegistry.registerDependency(relatedType.getBeanInfoMetadataId(), metadataId);
 				metadataDependencyRegistry.registerDependency(relatedType.getEntityMetadataId(), metadataId);
 			}

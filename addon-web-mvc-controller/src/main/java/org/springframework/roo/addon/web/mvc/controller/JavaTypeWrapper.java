@@ -32,7 +32,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Rossen Stoyanchev
  * @since 1.1.1
  */
-public class RooJavaType {
+public class JavaTypeWrapper {
 	
 	private final JavaType javaType;
 	private final MetadataService metadataService;
@@ -40,7 +40,7 @@ public class RooJavaType {
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
 	private PhysicalTypeMetadata physicalTypeMetadata;
-	private LinkedHashSet<RooJavaType> relatedDomainTypes;
+	private LinkedHashSet<JavaTypeWrapper> relatedDomainTypes;
 
 	/**
 	 * Default constructor.
@@ -48,7 +48,7 @@ public class RooJavaType {
 	 * @param javaType the Java type of the domain object.
 	 * @param metadataService the MetataService to use to obtain {@link BeanInfoMetadata} and {@link EntityMetadata}.
 	 */
-	public RooJavaType(JavaType javaType, MetadataService metadataService) {
+	public JavaTypeWrapper(JavaType javaType, MetadataService metadataService) {
 		Assert.notNull(javaType, "JavaType is required");
 		Assert.notNull(javaType, "MetadataService is required");
 		this.javaType = javaType;
@@ -118,11 +118,11 @@ public class RooJavaType {
 	}
 
 	/**
-	 * Provides access to all associated {@link RooJavaType} types.  
+	 * Provides access to all associated {@link JavaTypeWrapper} types.  
 	 * 
 	 * @return all associated types or an empty set.
 	 */
-	public LinkedHashSet<RooJavaType> getRelatedRooTypes() {
+	public LinkedHashSet<JavaTypeWrapper> getRelatedRooTypes() {
 		if (relatedDomainTypes == null) {
 			this.relatedDomainTypes = findRelatedDomainTypes();
 		}
@@ -156,10 +156,10 @@ public class RooJavaType {
 	}
 	
 	/**
-	 * @return true if the given Java type matches to one of the associated {@link RooJavaType} types.
+	 * @return true if the given Java type matches to one of the associated {@link JavaTypeWrapper} types.
 	 */
 	public boolean isRelatedDomainType(JavaType javaType) {
-		for (RooJavaType domainJavaType : getRelatedRooTypes()) {
+		for (JavaTypeWrapper domainJavaType : getRelatedRooTypes()) {
 			if (domainJavaType.getJavaType().equals(javaType)) {
 				return true;
 			}
@@ -232,7 +232,7 @@ public class RooJavaType {
 
 	@Override
 	public boolean equals(Object obj) {
-		return ((obj != null) && (obj instanceof RooJavaType) && this.javaType.equals(((RooJavaType) obj).javaType));
+		return ((obj != null) && (obj instanceof JavaTypeWrapper) && this.javaType.equals(((JavaTypeWrapper) obj).javaType));
 	}
 
 	@Override
@@ -242,8 +242,8 @@ public class RooJavaType {
 
 	/* Private helper methods */
 	
-	LinkedHashSet<RooJavaType> findRelatedDomainTypes() {
-		LinkedHashSet<RooJavaType> relatedDomainTypes = new LinkedHashSet<RooJavaType>();
+	LinkedHashSet<JavaTypeWrapper> findRelatedDomainTypes() {
+		LinkedHashSet<JavaTypeWrapper> relatedDomainTypes = new LinkedHashSet<JavaTypeWrapper>();
 		for (MethodMetadata accessor : getBeanInfoMetadata().getPublicAccessors(false)) {
 			// Not interested in identifiers and version fields
 			if (accessor.equals(getEntityMetadata().getIdentifierAccessor()) || accessor.equals(getEntityMetadata().getVersionAccessor())) {
@@ -258,12 +258,12 @@ public class RooJavaType {
 			if (type.isCommonCollectionType()) {
 				for (JavaType genericType : type.getParameters()) {
 					if (isApplicationType(genericType)) {
-						relatedDomainTypes.add(new RooJavaType(genericType, metadataService));
+						relatedDomainTypes.add(new JavaTypeWrapper(genericType, metadataService));
 					}
 				}
 			} else {
 				if (isApplicationType(type) && (!isEmbeddedFieldType(fieldMetadata))) {
-					relatedDomainTypes.add(new RooJavaType(type, metadataService));
+					relatedDomainTypes.add(new JavaTypeWrapper(type, metadataService));
 				}
 			}
 		}
