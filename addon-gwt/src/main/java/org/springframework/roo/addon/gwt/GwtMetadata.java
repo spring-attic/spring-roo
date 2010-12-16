@@ -865,7 +865,6 @@ public class GwtMetadata extends AbstractMetadataItem {
                     abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
 
                     InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-                    System.out.println("bodyBuilder: " + bodyBuilder.getOutput());
                     bodyBuilder.newLine().indent().append("super(");
 
                     int i = 0;
@@ -1154,7 +1153,6 @@ public class GwtMetadata extends AbstractMetadataItem {
                 transformer.transform(source, result);
 
                 String xmlString = result.getWriter().toString();
-                System.out.println(xmlString);
                 write(destFile, xmlString, fileManager);
             }
         }
