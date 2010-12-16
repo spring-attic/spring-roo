@@ -35,7 +35,6 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
@@ -72,6 +71,9 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 			// Can't acquire the plural
 			return null;
 		}
+		
+		// If the project itself changes, we want a chance to refresh this item
+		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataIdentificationString);
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type

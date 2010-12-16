@@ -737,9 +737,9 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
                                           authentication-failure-url="/login?login_error=t"/&gt;
    &lt;logout logout-url="/static/j_spring_security_logout"/&gt;
    &lt;!-- Configure these elements to secure URIs in your application --&gt;
-   &lt;intercept-url pattern="/<emphasis role="bold">pizza</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
-   &lt;intercept-url pattern="/<emphasis role="bold">topping</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
-   &lt;intercept-url pattern="/<emphasis role="bold">base</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">pizzas</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">toppings</emphasis>/**" access="hasRole('ROLE_ADMIN')"/&gt;
+   &lt;intercept-url pattern="/<emphasis role="bold">base</emphasis>s/**" access="hasRole('ROLE_ADMIN')"/&gt;
    &lt;intercept-url pattern="/resources/**" access="permitAll" /&gt;
    &lt;intercept-url pattern="/static/**" access="permitAll" /&gt;
    &lt;intercept-url pattern="/**" access="permitAll" /&gt;

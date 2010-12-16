@@ -1,7 +1,5 @@
 package __TOP_LEVEL_PACKAGE__;
 
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -20,23 +18,54 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @since 1.1
  */
-@Component
+@Component //use these Apache Felix annotations to register your commands class in the Roo container
 @Service
-public class __APP_NAME__Commands implements CommandMarker {
-	private static Logger logger = Logger.getLogger(__APP_NAME__Commands.class.getName());
+public class __APP_NAME__Commands implements CommandMarker { //all command types must implement the CommandMarker interface
+	
+	/**
+	 * Get a reference to the __APP_NAME__Operations from the underlying OSGi container
+	 */
 	@Reference private __APP_NAME__Operations operations;
 	
-	@CliAvailabilityIndicator({"__APP_NAME__ setup", "__APP_NAME__ add"})
-	public boolean isPropertyAvailable() {
-		return true;  // it's safe to always see the properties we expose
+	/**
+	 * This method is optional. It allows automatic command hiding in situations when the command should not be visible.
+	 * For example the 'entity' command will not be made available before the user has defined his persistence settings 
+	 * in the Roo shell or directly in the project.
+	 * 
+	 * You can define multiple methods annotated with {@link CliAvailabilityIndicator} if your commands have differing
+	 * visibility requirements.
+	 * 
+	 * @return true (default) if the command should be visible at this stage, false otherwise
+	 */
+	@CliAvailabilityIndicator({"__APP_NAME_LWR_CASE__ setup", "__APP_NAME_LWR_CASE__ add", "__APP_NAME_LWR_CASE__ all"})
+	public boolean isCommandAvailable() {
+		return operations.isCommandAvailable();
 	}
 	
-	@CliCommand(value="__APP_NAME__ add", help="Some helpful description")
+	/**
+	 * This method registers a command with the Roo shell. It also offers a mandatory command attribute.
+	 * 
+	 * @param type 
+	 */
+	@CliCommand(value="__APP_NAME_LWR_CASE__ add", help="Some helpful description")
 	public void add(@CliOption(key="type", mandatory=true, help="The java type to apply this annotation to") JavaType target) {
 		operations.annotateType(target);
 	}
 	
-	@CliCommand(value="__APP_NAME__ setup", help="Setup __APP_NAME__ addon")
+	/**
+	 * This method registers a command with the Roo shell. It has no command attribute.
+	 * 
+	 */
+	@CliCommand(value="__APP_NAME_LWR_CASE__ all", help="Some helpful description")
+	public void all() {
+		operations.annotateAll();
+	}
+	
+	/**
+	 * This method registers a command with the Roo shell. It has no command attribute.
+	 * 
+	 */
+	@CliCommand(value="__APP_NAME_LWR_CASE__ setup", help="Setup __APP_NAME__ addon")
 	public void setup() {
 		operations.setup();
 	}

@@ -74,11 +74,5 @@
       <version>${roo.version}</version>
       <type>bundle</type>
     </dependency>
-    <!-- External modules (if any) -->
-    <dependency>
-      <groupId>javax.annotation</groupId>
-      <artifactId>jsr250-api</artifactId>
-      <version>1.0</version>
-    </dependency>
   </dependencies>
 </project>

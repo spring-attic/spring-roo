@@ -355,7 +355,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				}
 
 				if (minAnnotationMetadata != null && maxAnnotationMetadata == null) {
-					Long minValue = (Long) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
+					Number minValue = (Number) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
 
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + ") {");
@@ -365,7 +365,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
 				} else if (minAnnotationMetadata == null && maxAnnotationMetadata != null) {
-					Long maxValue = (Long) maxAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
+					Number maxValue = (Number) maxAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
 
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " > " + maxValue + ") {");
@@ -375,9 +375,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 					bodyBuilder.appendFormalLine("}");
 					bodyBuilder.appendFormalLine("obj." + mutator.getMethodName() + "(" + field.getFieldName().getSymbolName() + ");");
 				} else if (minAnnotationMetadata != null && maxAnnotationMetadata != null) {
-					Long minValue = (Long) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
-					Long maxValue = (Long) maxAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
-					Assert.isTrue(maxValue >= minValue, "The value of @Max must be greater or equal to the value of @Min for field " + field.getFieldName().getSymbolName());
+					Number minValue = (Number) minAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
+					Number maxValue = (Number) maxAnnotationMetadata.getAttribute(new JavaSymbolName("value")).getValue();
+					Assert.isTrue(maxValue.longValue() >= minValue.longValue(), "The value of @Max must be greater or equal to the value of @Min for field " + field.getFieldName().getSymbolName());
 
 					bodyBuilder.appendFormalLine(field.getFieldType().getFullyQualifiedTypeName() + " " + field.getFieldName().getSymbolName() + " = " + initializer + ";");
 					bodyBuilder.appendFormalLine("if (" + field.getFieldName().getSymbolName() + " < " + minValue + suffix + " || " + field.getFieldName().getSymbolName() + " > " + maxValue + suffix + ") {");
@@ -578,7 +578,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.Future")) != null) {
 							initializer = "new java.util.Date(new java.util.Date().getTime() + 10000000L)";
 						} else {
-							initializer = "new java.util.Date()";
+							initializer = "new java.util.GregorianCalendar(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR), java.util.Calendar.getInstance().get(java.util.Calendar.MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.DAY_OF_MONTH), java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY), java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE), java.util.Calendar.getInstance().get(java.util.Calendar.SECOND) + new Double(Math.random() * 1000).intValue()).getTime()";
+							// initializer = "new java.util.Date()";
 						}
 					} else if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) == null) {
 						initializer = "true";
@@ -644,7 +645,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 							initializer = "new Integer(index).shortValue()";
 						} else if (field.getFieldType().equals(new JavaType("java.math.BigDecimal"))) {
-							System.out.println(field.getDeclaredByMetadataId());
 							initializer = "new java.math.BigDecimal(index)";
 						} else if (field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
 							initializer = "java.math.BigInteger.valueOf(index)";

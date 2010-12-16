@@ -2,7 +2,7 @@
 <configuration>
 	<op4j>
 		<dependencies>
-			<dependency org="org.op4j" name="op4j" rev="1.0" />
+			<dependency org="org.op4j" name="op4j" rev="1.1" />
 		</dependencies>
 	</op4j>
 </configuration>

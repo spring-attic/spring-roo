@@ -6,12 +6,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -29,7 +27,6 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
-import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -108,9 +105,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		specialDomainTypes = getSpecialDomainTypes(beanInfoMetadata.getJavaBean());
 		dateTypes = getDatePatterns();
 
-		if (annotationValues.isRegisterConverters()) {
-			builder.addField(getConversionServiceField());
-		}
 		if (annotationValues.create) {
 			builder.addMethod(getCreateMethod());
 			builder.addMethod(getCreateFormMethod());
@@ -134,9 +128,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			for (MethodMetadata method : getPopulateMethods()) {
 				builder.addMethod(method);
 			}
-		}
-		if (annotationValues.isRegisterConverters()) {
-			builder.addMethod(getRegisterConvertersMethod());
 		}
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
@@ -180,12 +171,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return annotationValues;
 	}
 	
-	private FieldMetadataBuilder getConversionServiceField() {
-		FieldMetadataBuilder builder = new FieldMetadataBuilder(getId(), 0, new JavaSymbolName("conversionService"), new JavaType("org.springframework.core.convert.support.GenericConversionService"), null);
-		builder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.beans.factory.annotation.Autowired")));
-		return builder;
-	}
-
 	private MethodMetadata getDeleteMethod() {
 		if (entityMetadata.getFindMethod() == null || entityMetadata.getRemoveMethod() == null) {
 			// Mandatory input is missing (ROO-589)
@@ -1093,111 +1078,6 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getRegisterConvertersMethod() {
-		JavaSymbolName registerConvertersMethodName = new JavaSymbolName("registerConverters");
-		MethodMetadata registerConvertersMethod = methodExists(registerConvertersMethodName, new ArrayList<AnnotatedJavaType>());
-		if (registerConvertersMethod != null) return registerConvertersMethod;
-
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		boolean converterPresent = false;
-
-		List<JavaType> typesForConversion = new ArrayList<JavaType>(specialDomainTypes);
-		Set<String> converterTypeSet = new HashSet<String>();
-		typesForConversion.add(beanInfoMetadata.getJavaBean());
-		for (int index = 0; index < typesForConversion.size(); index++) {
-			JavaType conversionType = typesForConversion.get(index);
-			BeanInfoMetadata typeBeanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(conversionType , Path.SRC_MAIN_JAVA));
-			EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(conversionType, Path.SRC_MAIN_JAVA));
-			List<MethodMetadata> elegibleMethods = new ArrayList<MethodMetadata>();
-			int fieldCounter = 3;
-			if (typeBeanInfoMetadata != null) {
-				// Determine fields to be included in converter
-				for (MethodMetadata accessor : typeBeanInfoMetadata.getPublicAccessors(false)) {
-					if (fieldCounter == 0) {
-						break;
-					}
-					if (typeEntityMetadata != null) {
-						if (accessor.getMethodName().equals(typeEntityMetadata.getIdentifierAccessor().getMethodName()) || (typeEntityMetadata.getVersionAccessor() != null && accessor.getMethodName().equals(typeEntityMetadata.getVersionAccessor().getMethodName()))) {
-							continue;
-						}
-					}
-					FieldMetadata field = typeBeanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-					if (field != null // Should not happen
-						&& !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() // Exclude collections and arrays
-						&& !getSpecialDomainTypes(conversionType).contains(field.getFieldType()) // Exclude references to other domain objects as they are too verbose
-						&& !field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) && !field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) /* Exclude boolean values as they would not be meaningful in this presentation */ ) {
-						
-						elegibleMethods.add(accessor);
-						fieldCounter--;
-					}
-				}
-
-				if (elegibleMethods.size() > 0) {
-					JavaType converter = new JavaType("org.springframework.core.convert.converter.Converter");
-					String conversionTypeFieldName = uncapitalize(conversionType.getSimpleTypeName());
-					JavaSymbolName converterMethodName = new JavaSymbolName("get" + conversionType.getSimpleTypeName() + "Converter");
-					if (!converterTypeSet.contains(conversionType.getFullyQualifiedTypeName()) && null == methodExists(converterMethodName, new ArrayList<AnnotatedJavaType>())) {
-						converterTypeSet.add(conversionType.getFullyQualifiedTypeName());
-						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
-							bodyBuilder.appendFormalLine("if (! conversionService.canConvert(" + conversionType.getSimpleTypeName() + ".class, String.class)) {");
-							bodyBuilder.indent();
-						}
-						bodyBuilder.appendFormalLine("conversionService.addConverter(" + converterMethodName.getSymbolName() + "());");
-						if (! conversionType.equals(beanInfoMetadata.getJavaBean())) {
-							bodyBuilder.indentRemove();
-							bodyBuilder.appendFormalLine("}");
-						}
-						
-						converterPresent = true;
-						
-						// Register the converter method
-						InvocableMemberBodyBuilder converterBodyBuilder = new InvocableMemberBodyBuilder();
-						converterBodyBuilder.appendFormalLine("return new " + converter.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "<" + conversionType.getSimpleTypeName() + ", String>() {");
-						converterBodyBuilder.indent();
-						converterBodyBuilder.appendFormalLine("public String convert(" + conversionType.getSimpleTypeName() + " " + conversionTypeFieldName + ") {");
-						converterBodyBuilder.indent();
-
-						StringBuilder sb = new StringBuilder();
-						sb.append("return new StringBuilder().append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(0).getMethodName().getSymbolName()).append("()");
-						if (isEnumType(elegibleMethods.get(0).getReturnType())) {
-							sb.append(".name()");
-						}
-						sb.append(")");
-						for (int i = 1; i < elegibleMethods.size(); i++) {
-							sb.append(".append(\" \").append(").append(conversionTypeFieldName).append(".").append(elegibleMethods.get(i).getMethodName().getSymbolName()).append("()");
-							if (isEnumType(elegibleMethods.get(i).getReturnType())) {
-								sb.append(".name()");
-							}
-							sb.append(")");
-						}
-						sb.append(".toString();");
-
-						converterBodyBuilder.appendFormalLine(sb.toString());
-						converterBodyBuilder.indentRemove();
-						converterBodyBuilder.appendFormalLine("}");
-						converterBodyBuilder.indentRemove();
-						converterBodyBuilder.appendFormalLine("};");
-						List<JavaType> params = new ArrayList<JavaType>();
-						params.add(conversionType);
-						params.add(JavaType.STRING_OBJECT);
-						JavaType parameterizedConverter = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
-						
-						MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, converterMethodName, parameterizedConverter, converterBodyBuilder);
-						builder.addMethod(methodBuilder.build());
-					}
-				}
-			}
-		}
-		
-		if (converterPresent) {
-			MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), 0, registerConvertersMethodName, JavaType.VOID_PRIMITIVE, bodyBuilder);
-			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("javax.annotation.PostConstruct")));
-
-			return methodBuilder.build();
-		}
-		return null; //no converter to register
-	}
-
 	private MethodMetadata getDateTimeFormatHelperMethod() {
 		JavaSymbolName addDateTimeFormatPatterns = new JavaSymbolName("addDateTimeFormatPatterns");
 
@@ -1322,9 +1202,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			if (accessor.equals(em.getIdentifierAccessor()) || accessor.equals(em.getVersionAccessor())) {
 				continue;
 			}
-			// Not interested in fields that are not exposed via a mutator
+			// Not interested in fields that are not exposed via a mutator or are JPA transient fields
 			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim) || isTransientFieldType(fieldMetadata)) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();
@@ -1435,6 +1315,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private boolean isEmbeddedFieldType(FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
+	}
+	
+	private boolean isTransientFieldType(FieldMetadata field) {
+		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Transient")) != null;
 	}
 
 	private String getPlural(JavaType type) {

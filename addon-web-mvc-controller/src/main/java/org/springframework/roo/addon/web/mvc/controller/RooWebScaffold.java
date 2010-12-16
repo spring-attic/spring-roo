@@ -91,11 +91,4 @@ public @interface RooWebScaffold {
 	 */
 	boolean exposeJson() default true;
 	
-	/**
-	 * Registers an @InitBinder method to provide converters for String presentation of objects. Useful
-	 * for adjusting the label of select boxes in the UI
-	 * 
-	 * @return indicates if the registerConverters method is provided (defaults to 'true'; optional)
-	 */
-	boolean registerConverters() default true;
 }

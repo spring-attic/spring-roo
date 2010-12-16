@@ -1,9 +1,5 @@
 package __TOP_LEVEL_PACKAGE__;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -11,39 +7,64 @@ import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.DependencyScope;
+import org.springframework.roo.project.DependencyType;
 import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
 
 /**
- * Implementation of commands that are available via the Roo shell.
+ * Implementation of operations this add-on offers
  *
  * @since 1.1
  */
-@Component
+@Component //use these Apache Felix annotations to register your commands class in the Roo container
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
-	private static Logger logger = Logger.getLogger(__APP_NAME__Operations.class.getName());
+	
+	/**
+	 * MetadataService offers access to Roo's metadata model, use it to retrieve any available metadate by its MID
+	 */
 	@Reference private MetadataService metadataService;
+	
+	/**
+	 * Use the PhysicalTypeMetadataProvider to access information about a physical type in the project
+	 */
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	
+	/**
+	 * Use ProjectOperations to install new dependencies, plugins, properties, etc into the project configuration
+	 */
 	@Reference private ProjectOperations projectOperations;
 
+	/**
+	 * Use TypeLocationService to find types which are annotated with a given annotation in the project
+	 */
+	@Reference private TypeLocationService typeLocationService;
+
+	/** {@inheritDoc} */
 	public boolean isCommandAvailable() {
-		return getPathResolver() != null;
+		// Check if a project has been created
+		return projectOperations.isDependencyModificationAllowed();
 	}
 
+	/** {@inheritDoc} */
 	public void annotateType(JavaType javaType) {
+		// Use Roo's Assert type for null checks
 		Assert.notNull(javaType, "Java type required");
 
+		//retrieve metadata for the Java source type the annotation is being added to
 		String id = physicalTypeMetadataProvider.findIdentifier(javaType);
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
@@ -52,37 +73,48 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
+		
+		// Obtain physical type details for the target type
 		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
+		
+		// Test if the type is an MutableClassOrInterfaceTypeDetails instance so the annotation can be added
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
+		// Test if the annotation already exists on the target type
 		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(Roo__APP_NAME__.class.getName()))) {
+			
+			// create JavaType instance for the add-ons trigger annotation
 			JavaType rooRoo__APP_NAME__ = new JavaType(Roo__APP_NAME__.class.getName());
-			if (!mutableTypeDetails.getAnnotations().contains(rooRoo__APP_NAME__)) {
-				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
-				mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
-			}
+
+			// create Annotation metadata
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooRoo__APP_NAME__);
+			
+			// add annotation to target type
+			mutableTypeDetails.addTypeAnnotation(annotationBuilder.build());
+		}
+	}
+
+	/** {@inheritDoc} */
+	public void annotateAll() {
+		// use the TypeLocationService to scan project for all types with a specific annotation
+		for (JavaType type: typeLocationService.findTypesWithAnnotation(new JavaType("org.springframework.roo.addon.javabean.RooJavaBean"))) {
+			annotateType(type);
 		}
 	}
 	
+	/** {@inheritDoc} */
 	public void setup() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
-		List<Element> dependencies = XmlUtils.findElements("/configuration/batch/dependencies/dependency", configuration);
-		for (Element dependency : dependencies) {
+		// install the add-on Google code repository needed to get the annotation 
+		projectOperations.addRepository(new Repository("__APP_NAME__ Roo add-on repository", "__APP_NAME__ Roo add-on repository", "https://__PROJECT_NAME__.googlecode.com/svn/repo"));
+		
+		// install the dependency on the add-on jar (
+		projectOperations.dependencyUpdate(new Dependency(new JavaPackage("__TOP_LEVEL_PACKAGE__"), new JavaSymbolName("__TOP_LEVEL_PACKAGE__"), "0.1.0.BUILD-SNAPSHOT", DependencyType.JAR, DependencyScope.PROVIDED));
+		
+		// install dependencies defined in external XML file
+		for (Element dependency : XmlUtils.findElements("/configuration/batch/dependencies/dependency", XmlUtils.getConfiguration(getClass()))) {
 			projectOperations.dependencyUpdate(new Dependency(dependency));
 		}
-	}
-	
-	/**
-	 * @return the path resolver or null if there is no user project
-	 */
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
 	}
 }
