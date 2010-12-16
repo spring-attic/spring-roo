@@ -10,11 +10,13 @@ public enum GwtPath {
 	SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD
 	MANAGED("/client/managed", "module/client/managed/" + GwtPath.templateSelector), //GWT_SCAFFOLD_GENERATED
   SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
-  SCAFFOLD_SHARED("/shared/scaffold", "module/shared/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+  SCAFFOLD_REQUEST("/client/scaffold/request", "module/client/scaffold/request/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
 	MANAGED_UI("/client/managed/ui", "module/client/managed/ui/" + GwtPath.templateSelector),
-	SERVER("/server", "module/server/" + GwtPath.templateSelector),
+  SERVER("/server", "module/server/" + GwtPath.templateSelector),
+  SERVER_SCAFFOLD("/server/scaffold", "module/server/scaffold/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
 	SHARED("/shared", "module/shared/" + GwtPath.templateSelector),
+	SHARED_SCAFFOLD("/shared/scaffold", "module/shared/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
 	SCAFFOLD_IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector), //IOC
 	SCAFFOLD_PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector), //PLACE
 	IMAGES("/client/style/images", "module/client/style/images/" + GwtPath.wildCardSelector),

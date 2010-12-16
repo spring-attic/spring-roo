@@ -3,7 +3,7 @@ package __TOP_LEVEL_PACKAGE__.shared.scaffold;
 import com.google.gwt.requestfactory.shared.ProxyFor;
 import com.google.gwt.requestfactory.shared.ValueProxy;
 
-import org.springsource.roo.extrack.server.scaffold.UserInformation;
+import __TOP_LEVEL_PACKAGE__.server.scaffold.UserInformation;
 
 /**
  * User info DTO.
