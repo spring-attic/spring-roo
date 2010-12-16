@@ -16,6 +16,7 @@ import org.springframework.roo.support.util.Assert;
 public final class AnnotatedJavaType {
 	private JavaType javaType;
 	private List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
+    private boolean isVarArgs = false;
 	
 	/**
 	 * Constructs an {@link AnnotatedJavaType}.
@@ -87,4 +88,12 @@ public final class AnnotatedJavaType {
 		}
 		return result;
 	}
+
+    public boolean isVarArgs() {
+        return isVarArgs;
+    }
+
+    public void setVarArgs(boolean varArgs) {
+        isVarArgs = varArgs;
+    }
 }

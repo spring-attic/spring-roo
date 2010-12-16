@@ -16,9 +16,12 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	private List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
 	private List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
 	private List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();
+    private List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
+    private List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-	
+
+
 	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
 	}
@@ -33,6 +36,12 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		}
 		for (MethodMetadata element : existing.getDeclaredMethods()) {
 			declaredMethods.add(new MethodMetadataBuilder(element));
+		}
+        for (ClassOrInterfaceTypeDetails element : existing.getDeclaredInnerTypes()) {
+			declaredInnerTypes.add(new ClassOrInterfaceTypeDetailsBuilder(element));
+		}
+        for (InitializerMetadata element : existing.getDeclaredInitializers()) {
+			declaredInitializers.add(new InitializerMetadataBuilder(element));
 		}
 		extendsTypes.addAll(existing.getExtendsTypes());
 		implementsTypes.addAll(existing.getImplementsTypes());
@@ -61,6 +70,22 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	public final void setDeclaredMethods(List<MethodMetadataBuilder> declaredMethods) {
 		this.declaredMethods = declaredMethods;
 	}
+
+    public List<ClassOrInterfaceTypeDetailsBuilder> getDeclaredInnerTypes() {
+        return declaredInnerTypes;
+    }
+
+    public void setDeclaredInnerTypes(List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
+        this.declaredInnerTypes = declaredInnerTypes;
+    }
+
+    public List<InitializerMetadataBuilder> getDeclaredInitializers() {
+        return declaredInitializers;
+    }
+
+    public void setDeclaredInitializers(List<InitializerMetadataBuilder> declaredInitializers) {
+        this.declaredInitializers = declaredInitializers;
+    }
 
 	public final List<JavaType> getExtendsTypes() {
 		return extendsTypes;
@@ -123,6 +148,26 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		return addMethod(new MethodMetadataBuilder(method));
 	}
 
+    public final boolean addInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {
+        if (innerType == null || !getDeclaredByMetadataId().equals(innerType.getDeclaredByMetadataId())) {
+            return false;
+        }
+        onAddInnerType(innerType);
+        return declaredInnerTypes.add(innerType);
+    }
+
+    protected void onAddInnerType(ClassOrInterfaceTypeDetailsBuilder innerType) {}
+
+    public final boolean addInitializer(InitializerMetadataBuilder initializer) {
+        if (initializer == null || !getDeclaredByMetadataId().equals(initializer.getDeclaredByMetadataId())) {
+            return false;
+        }
+        onAddInitializer(initializer);
+        return declaredInitializers.add(initializer);
+    }
+
+    protected void onAddInitializer(InitializerMetadataBuilder initializer) {}
+
 	public final boolean addImplementsType(JavaType implementsType) {
 		if (implementsType == null) return false;
 		onAddImplementType(implementsType);
@@ -158,6 +203,22 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	public final List<MethodMetadata> buildMethods() {
 		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
 		for (MethodMetadataBuilder builder : declaredMethods) {
+			result.add(builder.build());
+		}
+		return result;
+	}
+
+    public final List<ClassOrInterfaceTypeDetails> buildInnerTypes() {
+		List<ClassOrInterfaceTypeDetails> result = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (ClassOrInterfaceTypeDetailsBuilder builder : declaredInnerTypes) {
+			result.add(builder.build());
+		}
+		return result;
+	}
+
+    public final List<InitializerMetadata> buildInitializers() {
+		List<InitializerMetadata> result = new ArrayList<InitializerMetadata>();
+		for (InitializerMetadataBuilder builder : declaredInitializers) {
 			result.add(builder.build());
 		}
 		return result;
