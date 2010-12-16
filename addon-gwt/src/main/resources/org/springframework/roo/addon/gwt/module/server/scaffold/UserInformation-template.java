@@ -1,6 +1,6 @@
 package __TOP_LEVEL_PACKAGE__.server.scaffold;
 
-import org.springsource.roo.extrack.server.scaffold.UserInformation;
+import __TOP_LEVEL_PACKAGE__.server.scaffold.UserInformation;
 
 public class UserInformation {
 

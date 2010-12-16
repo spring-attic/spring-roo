@@ -4,7 +4,7 @@ import com.google.gwt.requestfactory.shared.Request;
 import com.google.gwt.requestfactory.shared.RequestContext;
 import com.google.gwt.requestfactory.shared.Service;
 
-import org.springsource.roo.extrack.server.scaffold.UserInformation;
+import __TOP_LEVEL_PACKAGE__.server.scaffold.UserInformation;
 
 
 /**
