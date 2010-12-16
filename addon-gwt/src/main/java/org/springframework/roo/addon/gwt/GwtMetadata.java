@@ -574,7 +574,6 @@ public class GwtMetadata extends AbstractMetadataItem {
         dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
         dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
         dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
-        dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SCAFFOLD_SHARED.packageName(projectMetadata));
         dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(projectMetadata));
         dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
         dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
