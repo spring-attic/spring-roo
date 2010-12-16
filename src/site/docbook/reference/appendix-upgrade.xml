@@ -232,6 +232,44 @@
     forum</link> for assistance.</para>
   </section>
 
+  <section xml:id="upgrade-1.1.1.RELEASE">
+    <title>Upgrading to 1.1.1.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.0.RELEASE to Spring Roo 1.1.1.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+
+      <listitem>
+        <para>Converters for displaying related entities on JSP pages are now
+        registered from a centralized ConversionService artifact rather than
+        from individual controllers. The change is transparent if you've never
+        set <code>@RooWebScaffold(registerConverters=false)</code> or plugged
+        in a custom ConversionService through <code>&lt;mvc:annotation-driven
+        conversion-service="myConversionService"/&gt;</code>. If you have then
+        read on.</para>
+
+        <para>Remove all "registerConverters" attributes from
+        <code>@RooWebScaffold</code> annotations and the "conversion-service"
+        attribute from <code>&lt;mvc:annotation-driven/&gt;</code> if set.
+        Then run the Spring Roo 1.1.1 shell and let it install the new
+        ConversionService. When Roo is done making changes, manually move any
+        custom <code>getXxxConverter()</code> methods to the new
+        ConversionService, delete the GenericConversionService field from all
+        controllers that have it, and delete any <code>@PostContruct</code>
+        methods used to register the converters. If you had previously
+        configured your own ConversionService, move any converters or
+        formatter registrations to the new ConversionService installed by
+        Spring Roo.</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
   <section xml:id="upgrade-1.1.0.RELEASE">
     <title>Upgrading to 1.1.0.RELEASE</title>
 
