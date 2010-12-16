@@ -36,7 +36,7 @@ class GwtProxyProperty {
           this.type = getterMethod.getReturnType();
           this.ptmd = ptmd;
     this.getter = getterMethod.getMethodName().getSymbolName();
-    
+
     String prefix = null;
     prefix = "get";
     
@@ -50,6 +50,8 @@ class GwtProxyProperty {
           this.getter = null;
           this.name = null;
   }
+
+
 
   public static boolean isAccessor(MethodMetadata method) {
     String symbolName = method.getMethodName().getSymbolName();

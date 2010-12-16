@@ -20,10 +20,10 @@
     }
   </ui:style>
  
-  <g:HTMLPanel styleName='{style.outer}'>
+  <g:HTMLPanel id="boundElementHolder" styleName='{style.outer}'>
     <div ui:field='errors' class='{style.error}'></div>
     {{#editableProperties}}
-    <div class='{style.label}'>{{=propReadable}}</div><div class='{style.value}'><{{=propBinder}} ui:field='{{=prop}}'/></div>{{/editableProperties}}
+    <div id='{{=prop}}'><div class='{style.label}'>{{=propReadable}}</div><div class='{style.value}'><{{=propBinder}} ui:field='{{=prop}}'/></div></div>{{/editableProperties}}
 
     <g:Button ui:field='save'>Save</g:Button>
   </g:HTMLPanel>
