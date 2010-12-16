@@ -1,14 +1,8 @@
 package {{=packageName}};
 
-import com.google.gwt.requestfactory.shared.LoggingRequest;
-import com.google.gwt.requestfactory.shared.RequestFactory;
-import com.google.gwt.requestfactory.shared.UserInformationRequest;
+import {{=scaffoldSharedPackage}}.ScaffoldRequestFactory;
 
-
-public interface ApplicationRequestFactory extends RequestFactory {
+public interface ApplicationRequestFactory extends ScaffoldRequestFactory {
 {{#entities}}
-{{=entity}}
-{{/entities}} 	
-  UserInformationRequest userInformationRequest();
-  LoggingRequest loggingRequest();
+{{=entity}}{{/entities}} 	
 }

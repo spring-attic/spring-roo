@@ -10,6 +10,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.*;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.EventSourceRequestTransport;
 
 public class ScaffoldModule extends AbstractGinModule {
 
@@ -22,30 +23,29 @@ public class ScaffoldModule extends AbstractGinModule {
 
     static class PlaceControllerProvider implements Provider<PlaceController> {
 
-        private final EventBus eventBus;
+        private final PlaceController placeController;
 
         @Inject
         public PlaceControllerProvider(EventBus eventBus) {
-            this.eventBus = eventBus;
+            this.placeController = new PlaceController(eventBus);
         }
 
         public PlaceController get() {
-            return new PlaceController(eventBus);
+            return placeController;
         }
     }
 
     static class RequestFactoryProvider implements Provider<ApplicationRequestFactory> {
 
-        private final EventBus eventBus;
+        private final ApplicationRequestFactory requestFactory;
 
         @Inject
         public RequestFactoryProvider(EventBus eventBus) {
-            this.eventBus = eventBus;
+            requestFactory = GWT.create(ApplicationRequestFactory.class);
+            requestFactory.initialize(eventBus, new EventSourceRequestTransport(eventBus));
         }
 
         public ApplicationRequestFactory get() {
-            ApplicationRequestFactory requestFactory = GWT.create(ApplicationRequestFactory.class);
-            requestFactory.initialize(eventBus);
             return requestFactory;
         }
     }

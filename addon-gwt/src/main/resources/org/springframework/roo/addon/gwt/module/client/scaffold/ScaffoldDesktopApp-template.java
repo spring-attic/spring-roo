@@ -10,9 +10,6 @@ import com.google.gwt.place.shared.*;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
-import com.google.gwt.requestfactory.shared.RequestEvent;
-import com.google.gwt.requestfactory.shared.UserInformationProxy;
-import com.google.gwt.requestfactory.ui.client.AuthenticationFailureHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -20,6 +17,7 @@ import com.google.inject.Inject;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
+import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -85,7 +83,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
                 shell.getLoginWidget().setUserInformation(userInformationProxy);
             }
         };
-        requestFactory.userInformationRequest().getCurrentUserInformation(Window.Location.getHref()).fire(receiver);
+        requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
 
         if (LogConfiguration.loggingIsEnabled()) {
           // Add remote logging handler

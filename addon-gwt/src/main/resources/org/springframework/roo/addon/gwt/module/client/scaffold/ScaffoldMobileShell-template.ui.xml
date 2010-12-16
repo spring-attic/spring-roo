@@ -2,7 +2,7 @@
 <ui:UiBinder
   xmlns:ui='urn:ui:com.google.gwt.uibinder'
   xmlns:g='urn:import:com.google.gwt.user.client.ui'
-  xmlns:r='urn:import:com.google.gwt.requestfactory.ui.client'>
+  xmlns:s='urn:import:org.springsource.roo.extrack.client.scaffold.ui'>
 
   <ui:image
     field='titleGradient'
@@ -118,14 +118,14 @@
       </g:HTMLPanel>
 
     <!-- Scrollable content area. -->
-    <!-- TODO(jlabanca): center widget of DockLayoutPanel. -->
-      <!-- TODO(jlabanca): Replace SimplePanel with MobileTouchPanel. -->
+    <!-- TODO: center widget of DockLayoutPanel. -->
+      <!-- TODO: Replace SimplePanel with MobileTouchPanel. -->
       <g:SimplePanel
         ui:field='body'>
       </g:SimplePanel>
 
-    <!-- TODO(jlabanca): south widget of DockLayoutPanel. -->
-      <r:LoginWidget
+    <!-- TODO: south widget of DockLayoutPanel. -->
+      <s:LoginWidget
         styleName='{style.login}'
         ui:field="loginWidget" />
 

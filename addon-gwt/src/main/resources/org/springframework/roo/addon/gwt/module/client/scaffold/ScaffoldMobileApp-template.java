@@ -161,8 +161,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
             }
         };
 
-		requestFactory.userInformationRequest().getCurrentUserInformation(
-				Window.Location.getHref()).fire(receiver);
+		requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
 
         if (LogConfiguration.loggingIsEnabled()) {
           /* Add remote logging handler */

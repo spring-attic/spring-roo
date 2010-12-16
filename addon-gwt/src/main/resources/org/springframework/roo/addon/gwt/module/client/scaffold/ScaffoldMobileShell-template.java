@@ -2,7 +2,6 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.requestfactory.ui.client.LoginWidget;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -11,6 +10,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.ProxyListPlace;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.LoginWidget;
 
 /**
  * Top level UI for the mobile version of the application.

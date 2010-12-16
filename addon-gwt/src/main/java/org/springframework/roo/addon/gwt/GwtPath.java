@@ -9,7 +9,8 @@ public enum GwtPath {
 	MANAGED_REQUEST("/client/managed/request", "module/client/request/" + GwtPath.templateSelector), //GWT_REQUEST
 	SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD
 	MANAGED("/client/managed", "module/client/managed/" + GwtPath.templateSelector), //GWT_SCAFFOLD_GENERATED
-	SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+  SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+  SCAFFOLD_SHARED("/shared/scaffold", "module/shared/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
 	MANAGED_UI("/client/managed/ui", "module/client/managed/ui/" + GwtPath.templateSelector),
 	SERVER("/server", "module/server/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
