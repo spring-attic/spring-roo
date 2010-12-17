@@ -67,6 +67,7 @@ public class {{=className}} extends Composite implements
       instance = new {{=className}}();
     }
     
+    //Jim
     return instance;
   }
   
@@ -112,6 +113,7 @@ public class {{=className}} extends Composite implements
 
 	@UiHandler("cancel")
 	void onCancel(ClickEvent event) {
+		//Jimbo
 		delegate.cancelClicked();
 	}
 

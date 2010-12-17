@@ -4,3 +4,6 @@
 target
 annotations/src/main/java/org
 */bin
+*.ipr
+*.iml
+*.iws

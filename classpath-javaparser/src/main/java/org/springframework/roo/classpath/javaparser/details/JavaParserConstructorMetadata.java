@@ -65,6 +65,10 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		this.modifier = JavaParserUtils.getJdkModifier(constructorDeclaration.getModifiers());
 		
 		this.declaredByMetadataId = declaredByMetadataId;
+
+        if (typeParameterNames == null) {
+            typeParameterNames = new HashSet<JavaSymbolName>();
+        }
 		
 		// Add method-declared type parameters (if any) to the list of type parameters
 		Set<JavaSymbolName> fullTypeParameters = new HashSet<JavaSymbolName>();
@@ -79,6 +83,9 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		
 		// Get the body
 		this.body = constructorDeclaration.getBlock().toString();
+
+        this.body = this.body.replaceFirst("\\{","");
+        this.body = this.body.substring(0, this.body.lastIndexOf("}"));
 		
 		// Lookup the parameters and their names
 		if (constructorDeclaration.getParameters() != null) {
@@ -279,5 +286,4 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 			compilationUnitServices.flush();
 		}
 	}
-
 }

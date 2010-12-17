@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -59,6 +60,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	@Reference protected MirrorTypeNamingStrategy mirrorTypeNamingStrategy;
 	@Reference protected ClasspathOperations classpathOperations;
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+    @Reference private ItdMetadataScanner itdMetadataScanner;
 
 	public MetadataItem get(String metadataIdentificationString) {
 		// Abort early if we can't continue
@@ -82,7 +84,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		// Abort if this is for a .java file under any of the GWT-related directories
 		for (GwtPath path : GwtPath.values()) {
 			if (governorTypeName.getPackage().getFullyQualifiedPackageName().equals(path.packageName(projectMetadata))) {
-				return null;
+				    return null;
 			}
 		}
 
@@ -129,7 +131,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 
 		// Our general strategy is to instantiate GwtMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager,
-                    metadataService);
+                    metadataService, physicalTypeMetadataProvider);
 
 		// Output each type that was provided in the details
 		for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
@@ -203,6 +205,6 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	}
 
 	public String getProvidesType() {
-		return GwtMetadata.getMetadataIdentiferType();
+		return GwtMetadata.getMetadataIdentifierType();
 	}
 }
