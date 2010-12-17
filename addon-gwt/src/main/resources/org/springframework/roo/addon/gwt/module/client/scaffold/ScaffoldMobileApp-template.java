@@ -30,10 +30,7 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 
-import org.springsource.roo.extrack.client.scaffold.place.ProxyListPlace;
-
 import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.AuthenticationFailureHandler;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;

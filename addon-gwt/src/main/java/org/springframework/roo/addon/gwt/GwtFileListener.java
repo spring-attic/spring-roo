@@ -417,7 +417,7 @@ public class GwtFileListener implements FileEventListener {
 		SharedType type = SharedType.APP_REQUEST_FACTORY;
         type.setOverwriteConcrete(true);
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-        dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SCAFFOLD_SHARED.packageName(projectMetadata));
+        dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 
 		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
