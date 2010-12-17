@@ -9,17 +9,34 @@ import hapax.TemplateLoader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
+import japa.parser.ParseException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
+import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.model.DataType;
+import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -27,7 +44,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Listens for the creation and deletion of files by {@link GwtMetadata}.
- * 
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
@@ -39,6 +56,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class GwtFileListener implements FileEventListener {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
+    @Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	private ProjectMetadata projectMetadata;
 	private boolean processedApplicationFiles = false;
 
@@ -68,7 +86,7 @@ public class GwtFileListener implements FileEventListener {
 				String name = fileEvent.getFileDetails().getFile().getName();
 				name = name.substring(0, name.length() - 5); // Drop .java
 				for (SharedType t : SharedType.values()) {
-					if (name.endsWith(t.getFullName())) {
+					if (name.endsWith(t.getFullName()) || name.endsWith("_Roo_Abstract")) {
 						// This is just a shared type; we don't care about changes to them
 						return;
 					}
@@ -94,15 +112,6 @@ public class GwtFileListener implements FileEventListener {
 			simpleName = simpleName.substring(0, simpleName.length() - 10); // Drop Proxy.java
 
 			Assert.hasText(simpleName, "Simple name not computed for input " + eventPath);
-
-			// Remove all the related files should the key no longer exist
-			if (!fileManager.exists(proxyFile)) {
-				for (MirrorType t : MirrorType.values()) {
-					String filename = simpleName + t.getSuffix() + ".java";
-					String canonicalPath = t.getPath().canonicalFileSystemPath(projectMetadata, filename);
-					deleteIfExists(canonicalPath);
-				}
-			}
 		}
 
 		// By this point the directory structure should correspond to files that should exist
@@ -117,7 +126,7 @@ public class GwtFileListener implements FileEventListener {
 		updateMobileActivities();
 	}
 
-	private void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
+	public void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
@@ -140,13 +149,271 @@ public class GwtFileListener implements FileEventListener {
 		}
 
 		try {
-			writeWithTemplate(type, dataDictionary);
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
-	private void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
+    private void buildView(SharedType destType, TemplateDataDictionary dataDictionary) {
+        try {
+
+            JavaType childType = getDestinationJavaType(destType);
+
+            if (dataDictionary == null) {
+                dataDictionary = buildDataDictionary(destType);
+            }
+
+            ClassOrInterfaceTypeDetails templateClass = getTemplateDetails(dataDictionary, destType.getTemplate(), childType);
+            ClassOrInterfaceTypeDetailsBuilder templateClassBuilder = new ClassOrInterfaceTypeDetailsBuilder(templateClass);
+
+            String concreteDestFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
+
+            if (destType.isCreateAbstract()) {
+                ClassOrInterfaceTypeDetailsBuilder abstractClassBuilder = createAbstractBuilder(templateClassBuilder);
+
+
+                ArrayList<FieldMetadataBuilder> fieldsToRemove = new ArrayList<FieldMetadataBuilder>();
+                for (JavaSymbolName fieldName : destType.getWatchedFieldNames()) {
+
+                    for (FieldMetadataBuilder fieldBuilder : templateClassBuilder.getDeclaredFields()) {
+                        if (fieldBuilder.getFieldName().equals(fieldName)) {
+                            abstractClassBuilder.addField(cloneFieldBuilder(new FieldMetadataBuilder(fieldBuilder.build()), abstractClassBuilder.getDeclaredByMetadataId()));
+                            fieldsToRemove.add(fieldBuilder);
+                            break;
+                        }
+                    }
+                }
+
+                templateClassBuilder.getDeclaredFields().removeAll(fieldsToRemove);
+
+                ArrayList<MethodMetadataBuilder> methodsToRemove = new ArrayList<MethodMetadataBuilder>();
+                for (JavaSymbolName methodName : destType.getWatchedMethods().keySet()) {
+
+                    for (MethodMetadataBuilder methodBuilder : templateClassBuilder.getDeclaredMethods()) {
+
+                        if (methodBuilder.getMethodName().equals(methodName)) {
+                            if (destType.getWatchedMethods().get(methodName).equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodBuilder.getParameterTypes()))) {
+                                abstractClassBuilder.addMethod(cloneMethod(methodBuilder, abstractClassBuilder.getDeclaredByMetadataId()));
+                                methodsToRemove.add(methodBuilder);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                templateClassBuilder.getDeclaredMethods().removeAll(methodsToRemove);
+
+                for (JavaType innerTypeName : destType.getWatchedInnerTypes()) {
+                    for (ClassOrInterfaceTypeDetailsBuilder innerType : templateClassBuilder.getDeclaredInnerTypes()) {
+                        if (innerType.getName().equals(innerTypeName)) {
+                            ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractClassBuilder.getDeclaredByMetadataId());
+                            builder.setAnnotations(innerType.getAnnotations());
+                            builder.setCustomData(innerType.getCustomData());
+                            builder.setDeclaredConstructors(innerType.getDeclaredConstructors());
+                            builder.setDeclaredFields(innerType.getDeclaredFields());
+                            builder.setDeclaredInnerTypes(innerType.getDeclaredInnerTypes());
+                            builder.setEnumConstants(innerType.getEnumConstants());
+                            builder.setDeclaredInitializers(innerType.getDeclaredInitializers());
+                            builder.setExtendsTypes(innerType.getExtendsTypes());
+                            builder.setImplementsTypes(innerType.getImplementsTypes());
+                            builder.setModifier(innerType.getModifier());
+                            JavaType originalType = innerType.getName();
+                            builder.setName(new JavaType(originalType.getSimpleTypeName() + "_Roo_Abstract", 0, DataType.TYPE, null, originalType.getParameters()));
+                            builder.setPhysicalTypeCategory(innerType.getPhysicalTypeCategory());
+                            builder.setRegisteredImports(innerType.getRegisteredImports());
+                            builder.setSuperclass(innerType.getSuperclass());
+                            builder.setDeclaredMethods(innerType.getDeclaredMethods());
+                            abstractClassBuilder.addInnerType(builder);
+
+                            templateClassBuilder.getDeclaredInnerTypes().remove(innerType);
+                            if (innerType.getPhysicalTypeCategory().equals(PhysicalTypeCategory.INTERFACE)) {
+                                ClassOrInterfaceTypeDetailsBuilder innerTypeBuilder = new ClassOrInterfaceTypeDetailsBuilder(innerType.build());
+
+                                innerTypeBuilder.getDeclaredMethods().clear();
+                                innerTypeBuilder.getDeclaredInnerTypes().clear();
+                                innerTypeBuilder.getExtendsTypes().clear();
+                                innerTypeBuilder.getExtendsTypes().add(new JavaType(builder.getName().getSimpleTypeName(), 0, DataType.TYPE, null, Collections.singletonList(new JavaType("V", 0, DataType.VARIABLE, null, new ArrayList<JavaType>()))));
+                                templateClassBuilder.getDeclaredInnerTypes().add(innerTypeBuilder);
+                            }
+
+                            break;
+                        }
+                    }
+                }
+
+                abstractClassBuilder.setImplementsTypes(templateClass.getImplementsTypes());
+                templateClassBuilder.getImplementsTypes().clear();
+
+                templateClassBuilder.getExtendsTypes().clear();
+                templateClassBuilder.getExtendsTypes().add(abstractClassBuilder.getName());
+
+                String output = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(abstractClassBuilder.build());
+                output = "// WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.\n\n" + output;
+
+                String abstractDestFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + abstractClassBuilder.getName().getSimpleTypeName() + ".java";
+
+                write(abstractDestFile, output, fileManager);
+            }
+
+            if (!fileManager.exists(concreteDestFile)) {
+                String output = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(templateClassBuilder.build());
+                write(concreteDestFile, output, fileManager);
+            }
+
+
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(ClassOrInterfaceTypeDetailsBuilder concreteClass) {
+
+        JavaType concreteType = concreteClass.getName();
+        String abstractName = concreteType.getSimpleTypeName() + "_Roo_Abstract";
+        abstractName = concreteType.getPackage().getFullyQualifiedPackageName() + '.' + abstractName;
+        JavaType abstractType = new JavaType(abstractName);
+        String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, Path.SRC_MAIN_JAVA);
+        ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractId);
+        builder.setPhysicalTypeCategory(PhysicalTypeCategory.CLASS);
+        builder.setName(abstractType);
+        builder.setModifier(Modifier.ABSTRACT | Modifier.PUBLIC);
+        builder.getExtendsTypes().addAll(concreteClass.getExtendsTypes());
+        builder.getRegisteredImports().addAll(concreteClass.getRegisteredImports());
+
+
+        for (JavaType extendedType : concreteClass.getExtendsTypes()) {
+            String superTypeId = PhysicalTypeIdentifier.createIdentifier(extendedType, Path.SRC_MAIN_JAVA);
+            if (getPhysicalTypeMetadata(superTypeId) == null) {
+                continue;
+            }
+            ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getPhysicalTypeDetails();
+
+                for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
+                    ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
+                    abstractConstructor.setModifier(constructorMetadata.getModifier());
+
+                    HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(superType.getName(), extendedType);
+
+                    for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
+
+                        JavaType newType = type.getJavaType();
+                        if (type.getJavaType().getParameters().size() > 0) {
+                            ArrayList<JavaType> paramTypes = new ArrayList<JavaType>();
+                            for (JavaType typeType : type.getJavaType().getParameters()) {
+                                JavaType typeParam = typeMap.get(new JavaSymbolName(typeType.toString()));
+                                if (typeParam != null) {
+                                    paramTypes.add(typeParam);
+                                }
+
+                            }
+                            newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
+                        }
+                        abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
+                    }
+                    abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
+
+                    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+                    bodyBuilder.newLine().indent().append("super(");
+
+                    int i = 0;
+                    for (JavaSymbolName paramName : abstractConstructor.getParameterNames()) {
+                        bodyBuilder.append(" ").append(paramName.getSymbolName());
+                        if (abstractConstructor.getParameterTypes().size() > i + 1) {
+                            bodyBuilder.append(", ");
+                        }
+                        i++;
+                    }
+
+                    bodyBuilder.append(");");
+
+                    bodyBuilder.newLine().indentRemove();
+                    abstractConstructor.setBodyBuilder(bodyBuilder);
+                    builder.getDeclaredConstructors().add(abstractConstructor);
+                }
+        }
+
+        return builder;
+    }
+
+    private PhysicalTypeMetadata getPhysicalTypeMetadata(String declaredByMetadataId) {
+        return (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
+    }
+
+    private HashMap<JavaSymbolName, JavaType> resolveTypes(JavaType generic, JavaType typed) {
+        HashMap<JavaSymbolName, JavaType> typeMap = new HashMap<JavaSymbolName, JavaType>();
+
+        boolean typeCountMatch = generic.getParameters().size() == typed.getParameters().size();
+        Assert.isTrue(typeCountMatch, "Type count must match.");
+
+        int i = 0;
+        for (JavaType genericParamType : generic.getParameters()) {
+            typeMap.put(genericParamType.getArgName(), typed.getParameters().get(i));
+            i++;
+        }
+
+        return typeMap;
+    }
+
+    private ClassOrInterfaceTypeDetails getTemplateDetails(TemplateDataDictionary dataDictionary, String templateFile, JavaType templateType) {
+
+        try {
+            TemplateLoader templateLoader = TemplateResourceLoader.create();
+            Template template = templateLoader.getTemplate(templateFile);
+            String templateContents = template.renderToString(dataDictionary);
+
+            String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, Path.SRC_MAIN_JAVA);
+
+            return new JavaParserMutableClassOrInterfaceTypeDetails(templateContents, templateId, templateType, metadataService, physicalTypeMetadataProvider);
+
+        } catch (TemplateException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    private MethodMetadataBuilder cloneMethod(MethodMetadataBuilder method, String metadataId) {
+        MethodMetadataBuilder methodMetadataBuilder = new MethodMetadataBuilder(metadataId);
+        methodMetadataBuilder.setMethodName(method.getMethodName());
+        methodMetadataBuilder.setReturnType(method.getReturnType());
+        methodMetadataBuilder.setBodyBuilder(method.getBodyBuilder());
+        methodMetadataBuilder.setAnnotations(method.getAnnotations());
+        methodMetadataBuilder.setModifier(method.getModifier());
+        methodMetadataBuilder.setParameterNames(method.getParameterNames());
+        methodMetadataBuilder.setParameterTypes(method.getParameterTypes());
+        methodMetadataBuilder.setThrowsTypes(method.getThrowsTypes());
+        methodMetadataBuilder.setCustomData(method.getCustomData());
+        return methodMetadataBuilder;
+    }
+
+    private FieldMetadataBuilder cloneFieldBuilder(FieldMetadataBuilder field, String metadataId) {
+
+        FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(metadataId);
+        fieldMetadataBuilder.setFieldName(field.getFieldName());
+        fieldMetadataBuilder.setFieldType(field.getFieldType());
+        if (field.getModifier() == Modifier.PRIVATE) {
+            fieldMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else if (field.getModifier() == (Modifier.PRIVATE | Modifier.FINAL)) {
+            fieldMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else {
+            fieldMetadataBuilder.setModifier(field.getModifier());
+        }
+        fieldMetadataBuilder.setAnnotations(field.getAnnotations());
+        fieldMetadataBuilder.setCustomData(field.getCustomData());
+        fieldMetadataBuilder.setFieldInitializer(field.getFieldInitializer());
+
+        return fieldMetadataBuilder;
+    }
+
+	public void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_REQUEST_FACTORY;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
@@ -160,7 +427,7 @@ public class GwtFileListener implements FileEventListener {
 		}
 
 		try {
-			writeWithTemplate(type, dataDictionary, type.getTemplate());
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -174,7 +441,7 @@ public class GwtFileListener implements FileEventListener {
 		return type.getFullyQualifiedTypeName(projectMetadata);
 	}
 
-	private void updateListPlaceRenderer(FileManager fileManager, ProjectMetadata projectMetadata) {
+	public void updateListPlaceRenderer(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.LIST_PLACE_RENDERER;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
@@ -190,8 +457,15 @@ public class GwtFileListener implements FileEventListener {
 			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
 		}
 
+
+        HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+        watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
+        type.setWatchedMethods(watchedMethods);
+
+        type.setCreateAbstract(true);
+
 		try {
-			writeWithTemplate(type, dataDictionary);
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -227,12 +501,6 @@ public class GwtFileListener implements FileEventListener {
 		}
 	}
 
-	private void deleteIfExists(String canonicalPath) {
-		if (fileManager.exists(canonicalPath)) {
-			fileManager.delete(canonicalPath);
-		}
-	}
-	
 	public void updateMasterActivities() {
 		SharedType type = SharedType.MASTER_ACTIVITIES;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
@@ -252,11 +520,22 @@ public class GwtFileListener implements FileEventListener {
       addImport(dataDictionary, simpleName, MirrorType.PROXY);
       addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
       addImport(dataDictionary, simpleName, MirrorType.MOBILE_LIST_VIEW);
-      
+
+            ArrayList<JavaSymbolName> watchFields = new ArrayList<JavaSymbolName>();
+            watchFields.add(new JavaSymbolName("requests"));
+            watchFields.add(new JavaSymbolName("placeController"));
+            type.setWatchedFieldNames(watchFields);
+
+            HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+            watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
+            type.setWatchedMethods(watchedMethods);
+
+            type.setCreateAbstract(true);
+
 		}
 
 		try {
-			writeWithTemplate(type, dataDictionary);
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -284,8 +563,19 @@ public class GwtFileListener implements FileEventListener {
 			addImport(dataDictionary, MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
 		}
 
+        ArrayList<JavaSymbolName> watchFields = new ArrayList<JavaSymbolName>();
+        watchFields.add(new JavaSymbolName("requests"));
+        watchFields.add(new JavaSymbolName("placeController"));
+        type.setWatchedFieldNames(watchFields);
+
+        HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+        watchedMethods.put(new JavaSymbolName("getActivity"), Collections.singletonList(new JavaType("com.google.gwt.place.shared.Place")));
+        type.setWatchedMethods(watchedMethods);
+
+        type.setCreateAbstract(true);
+
 		try {
-			writeWithTemplate(type, dataDictionary);
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -296,7 +586,7 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
 		try {
-			writeWithTemplate(type, dataDictionary);
+            buildView(type, dataDictionary);
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
@@ -307,8 +597,7 @@ public class GwtFileListener implements FileEventListener {
 		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-    dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
-    dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
+        dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
 		return dataDictionary;
 	}
 
@@ -316,28 +605,12 @@ public class GwtFileListener implements FileEventListener {
 		return new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
 	}
 
-	private void writeWithTemplate(SharedType destType, TemplateDataDictionary dataDictionary, String templateFile) throws TemplateException {
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
-		writeWithTemplate(destFile, dataDictionary, templateFile);
-	}
-
-	private void writeWithTemplate(SharedType destType, TemplateDataDictionary dataDictionary) throws TemplateException {
-		String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".java";
-		writeWithTemplate(destFile, dataDictionary, destType.getTemplate());
-	}
-
-	private void writeWithTemplate(String destFile, TemplateDataDictionary dataDictionary, String templateFile) throws TemplateException {
-		TemplateLoader templateLoader = TemplateResourceLoader.create();
-		Template template = templateLoader.getTemplate(templateFile);
-		write(destFile, template.renderToString(dataDictionary), fileManager);
-	}
-
 	private void addReference(TemplateDataDictionary dataDictionary, SharedType type) {
 		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
 		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
 	}
-	
+
 	private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {
-		dataDictionary.addSection("imports").setVariable("import", importDeclaration);		
+		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
 	}
 }
