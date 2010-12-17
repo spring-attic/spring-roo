@@ -4,10 +4,7 @@ import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.FieldDeclaration;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.body.VariableDeclarator;
+import japa.parser.ast.body.*;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
@@ -25,6 +22,7 @@ import java.util.Set;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
 import org.springframework.roo.model.CustomDataImpl;
@@ -110,10 +108,9 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		Assert.notNull(members, "Members required");
 		Assert.notNull(field, "Field required");
 		
-		// Import the field type into the compilation unit
-		NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
-		ClassOrInterfaceType initType = JavaParserUtils.getClassOrInterfaceType(importedType);
-		
+        JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), field.getFieldType());
+        ClassOrInterfaceType initType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), field.getFieldType(), compilationUnitServices);
+
 		FieldDeclaration newField = ASTHelper.createFieldDeclaration(JavaParserUtils.getJavaParserModifier(field.getModifier()), initType, field.getFieldName().getSymbolName());
 		
 		// Add parameterized types for the field type (not initializer)
@@ -123,7 +120,6 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 			for (JavaType parameter : field.getFieldType().getParameters()) {
 				NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
 				fieldTypeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
-//				fieldTypeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 			}
 		}
 		
@@ -264,5 +260,4 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
-
 }

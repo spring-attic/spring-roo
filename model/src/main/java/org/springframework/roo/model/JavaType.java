@@ -201,7 +201,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		} else if (argName != null && !staticForm) {
 			sb.append(argName);
 			if (dataType == DataType.TYPE) {
-				sb.append(" extends ");
+                if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
+				    sb.append(" extends ");
+                }
 			}
 		}
 
@@ -216,7 +218,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 					} else {
 						sb.append(getSimpleTypeName());
 					}
-				} else {
+				} else if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
 					sb.append(fullyQualifiedTypeName);
 				}
 			}

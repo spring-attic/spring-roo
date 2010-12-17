@@ -47,7 +47,11 @@ public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
 	public {{=className}}() {
 		init(BINDER.createAndBindUi(this), table, newButton);
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-    {{#properties}}
+    	init();
+ 	}
+
+	public void init() {
+		{{#properties}}
     paths.add("{{=prop}}");
     table.addColumn(new TextColumn<{{=proxy}}>() {
       Renderer<{{=propType}}> renderer = {{=propRenderer}};
@@ -57,8 +61,7 @@ public class {{=className}} extends AbstractProxyListView<{{=proxy}}> {
         return renderer.render(object.{{=propGetter}}());
       }
     }, "{{=propReadable}}");{{/properties}}
- 	}
-
+	}
   public String[] getPaths() {
     return paths.toArray(new String[paths.size()]);
   }

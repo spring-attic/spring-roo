@@ -44,8 +44,8 @@
     </div>
     <div ui:field='errors' class='{style.errors}'></div>
 
-    <table class="{style.fields}">{{#editableProperties}}
-      <tr><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><{{=propBinder}} ui:field='{{=prop}}'/></td></tr>{{/editableProperties}}
+    <table id='boundElementHolder' class="{style.fields}">{{#editableProperties}}
+      <tr id='{{=prop}}'><td><div class='{style.label}'>{{=propReadable}}:</div></td><td><{{=propBinder}} ui:field='{{=prop}}'/></td></tr>{{/editableProperties}}
     </table>
 
     <div class='{style.bar}'>

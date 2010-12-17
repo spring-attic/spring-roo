@@ -14,12 +14,11 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
-
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.AuthenticationFailureHandler;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.request.*;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.*;
 import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
 __GAE_IMPORT__
 import java.util.ArrayList;

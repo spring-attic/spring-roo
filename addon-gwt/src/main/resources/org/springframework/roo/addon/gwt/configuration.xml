@@ -19,12 +19,12 @@
 			<dependency>
 				<groupId>com.google.gwt</groupId>
 				<artifactId>gwt-servlet</artifactId>
-				<version>2.1.1</version>
+				<version>2.1.1-rc1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.gwt</groupId>
 				<artifactId>gwt-user</artifactId>
-        <version>2.1.1</version>
+        <version>2.1.1-rc1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -76,7 +76,7 @@
 			</plugin>
 		</plugins>
 		<gae-dependencies>
-		
+
 		</gae-dependencies>
 		<gae-plugins>
 			<plugin>

@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -78,6 +79,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 				@SuppressWarnings({ "unchecked", "rawtypes" })
 				public synchronized Enumeration keys() {
 					final Object[] keys = keySet().toArray();
+					Arrays.sort(keys);
 					return new Enumeration() {
 						int i = 0;
 
