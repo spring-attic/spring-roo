@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
 	<gwt>
-		<gwt.version>2.1.1</gwt.version>
-		<repositories>
-			<repository>
-				<id>gwt-repo</id>
-				<name>Google Web Toolkit Repository</name>
-                <url>http://google-web-toolkit.googlecode.com/svn/2.1.0/gwt/maven/</url>
-			</repository>
-		</repositories>
+		<properties>
+			<gwt.version>2.1.1</gwt.version>
+		</properties>
 		<dependencies>
 			<dependency>
 				<groupId>com.google.gwt</groupId>
