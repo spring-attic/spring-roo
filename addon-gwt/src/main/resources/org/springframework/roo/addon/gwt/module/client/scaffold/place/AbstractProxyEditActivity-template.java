@@ -69,8 +69,13 @@ public abstract class AbstractProxyEditActivity<P extends EntityProxy> implement
       return;
     }
     
+    RequestContext request = editorDriver.flush();
+    if (editorDriver.hasErrors()) {
+      return;
+    }
+
     setWaiting(true);
-    editorDriver.flush().fire(new Receiver<Void>() {
+    request.fire(new Receiver<Void>() {
       /*
        * Callbacks do nothing if editorDriver is null, we were stopped in
        * midflight
@@ -112,6 +117,7 @@ public abstract class AbstractProxyEditActivity<P extends EntityProxy> implement
     editorDriver = view.createEditorDriver();
     view.setDelegate(this);
     editorDriver.edit(getProxy(), createSaveRequest(getProxy()));
+    editorDriver.flush();
     display.setWidget(view);
   }
 
