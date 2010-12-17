@@ -38,7 +38,7 @@ import __TOP_LEVEL_PACKAGE__.client.scaffold.request.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.*;
 import __TOP_LEVEL_PACKAGE__.client.style.MobileListResources;
 import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
-
+__GAE_IMPORT__
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -147,20 +147,19 @@ public class ScaffoldMobileApp extends ScaffoldApp {
     private void init() {
 
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-	    public void onUncaughtException(Throwable e) {
-	        Window.alert("Error: " + e.getMessage());
-	        log.log(Level.SEVERE, e.getMessage(), e);
-	    }
+            public void onUncaughtException(Throwable e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+          }
         });
 
         Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-			@Override
-            public void onSuccess(UserInformationProxy userInformationProxy) {
-                shell.getLoginWidget().setUserInformation(userInformationProxy);
-            }
+			    @Override
+          public void onSuccess(UserInformationProxy userInformationProxy) {
+            shell.getLoginWidget().setUserInformation(userInformationProxy);
+          }
         };
 
-		requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
+        requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
 
         if (LogConfiguration.loggingIsEnabled()) {
           /* Add remote logging handler */
@@ -174,6 +173,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
                                            new ArrayList<String>()));
         }
 
+__GAE_HOOKUP__
         /* Left side lets us pick from all the types of entities */
 
 		final Renderer<ProxyListPlace> placePickerRenderer = new ApplicationListPlaceRenderer();

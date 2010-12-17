@@ -10,15 +10,17 @@ public enum GwtPath {
 	SCAFFOLD("/client/scaffold", "module/client/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD
 	MANAGED("/client/managed", "module/client/managed/" + GwtPath.templateSelector), //GWT_SCAFFOLD_GENERATED
   SCAFFOLD_UI("/client/scaffold/ui", "module/client/scaffold/ui/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
-  SCAFFOLD_REQUEST("/client/scaffold/request", "module/client/scaffold/request/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+  SCAFFOLD_REQUEST("/client/scaffold/request", "module/client/scaffold/request/" + GwtPath.templateSelector),
 	MANAGED_UI("/client/managed/ui", "module/client/managed/ui/" + GwtPath.templateSelector),
   SERVER("/server", "module/server/" + GwtPath.templateSelector),
-  SERVER_SCAFFOLD("/server/scaffold", "module/server/scaffold/" + GwtPath.templateSelector),
+  SERVER_GAE("/server/gae", "module/server/gae/" + GwtPath.templateSelector),
 	STYLE("/client/style", "module/client/style/" + GwtPath.templateSelector),
 	SHARED("/shared", "module/shared/" + GwtPath.templateSelector),
-	SHARED_SCAFFOLD("/shared/scaffold", "module/shared/scaffold/" + GwtPath.templateSelector), //GWT_SCAFFOLD_UI
+  SHARED_SCAFFOLD("/shared/scaffold", "module/shared/scaffold/" + GwtPath.templateSelector),
+  SHARED_GAE("/shared/gae", "module/shared/gae/" + GwtPath.templateSelector),
 	SCAFFOLD_IOC("/client/scaffold/ioc", "module/client/scaffold/ioc/" + GwtPath.templateSelector), //IOC
-	SCAFFOLD_PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector), //PLACE
+  SCAFFOLD_PLACE("/client/scaffold/place", "module/client/scaffold/place/" + GwtPath.templateSelector), //PLACE
+  SCAFFOLD_GAE("/client/scaffold/gae", "module/client/scaffold/gae/" + GwtPath.templateSelector),
 	IMAGES("/client/style/images", "module/client/style/images/" + GwtPath.wildCardSelector),
 	WEB("", "webapp/" + GwtPath.wildCardSelector),
 	//MOBILE("/client/managed/mobile", "module/client/mobile/" + GwtPath.templateSelector),//MOBILE

@@ -10,11 +10,6 @@ import com.google.gwt.requestfactory.shared.RequestFactory;
  */
 public interface ScaffoldRequestFactory extends RequestFactory {
   /**
-   * Return a request for basic user information.
-   */
-  UserInformationRequest userInformationRequest();
-  
-  /**
    * Return a GWT logging request.
    */
   LoggingRequest loggingRequest();

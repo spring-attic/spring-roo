@@ -15,13 +15,16 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 
+import org.springsource.roo.extrackgae.client.scaffold.gae.GaeLoginWidgetDriver;
+import org.springsource.roo.extrackgae.client.scaffold.gae.ReloadOnAuthenticationFailure;
+
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.request.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.*;
 import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
-
+__GAE_IMPORT__
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,18 +78,11 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
     private void init() {
 
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-	    public void onUncaughtException(Throwable e) {
-	        Window.alert("Error: " + e.getMessage());
-	        log.log(Level.SEVERE, e.getMessage(), e);
-	    }
+          public void onUncaughtException(Throwable e) {
+            Window.alert("Error: " + e.getMessage());
+            log.log(Level.SEVERE, e.getMessage(), e);
+          }
         });
-
-        Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-            public void onSuccess(UserInformationProxy userInformationProxy) {
-                shell.getLoginWidget().setUserInformation(userInformationProxy);
-            }
-        };
-        requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
 
         if (LogConfiguration.loggingIsEnabled()) {
           // Add remote logging handler
@@ -113,10 +109,7 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
             }
         });
 
-        /* Check for Authentication failures or mismatches */
-
-        RequestEvent.register(eventBus, new AuthenticationFailureHandler());
-
+__GAE_HOOKUP__
         CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
         ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
         ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);

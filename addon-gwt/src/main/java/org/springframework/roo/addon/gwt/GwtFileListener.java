@@ -120,7 +120,7 @@ public class GwtFileListener implements FileEventListener {
 	private void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-
+		
 		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
@@ -158,6 +158,10 @@ public class GwtFileListener implements FileEventListener {
 			String entity = new StringBuilder("\t").append(simpleName).append("Request ").append(StringUtils.uncapitalize(simpleName)).append("Request();").toString();
 			dataDictionary.addSection("entities").setVariable("entity", entity);
 		}
+
+    if (projectMetadata.isGaeEnabled()) {
+      dataDictionary.showSection("gae");
+    }
 
 		try {
 			writeWithTemplate(type, dataDictionary, type.getTemplate());
@@ -308,7 +312,8 @@ public class GwtFileListener implements FileEventListener {
 		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
     dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
-    dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
+    dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
+    dataDictionary.setVariable("sharedGaePackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 		return dataDictionary;
 	}
 

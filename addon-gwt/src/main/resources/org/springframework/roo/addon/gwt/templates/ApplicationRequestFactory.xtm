@@ -1,8 +1,9 @@
 package {{=packageName}};
 
-import {{=scaffoldSharedPackage}}.ScaffoldRequestFactory;
-
-public interface ApplicationRequestFactory extends ScaffoldRequestFactory {
+import {{=sharedScaffoldPackage}}.ScaffoldRequestFactory;
+{{#gae}}import {{=sharedGaePackage}}.MakesGaeRequests;
+{{/gae}}
+public interface ApplicationRequestFactory extends ScaffoldRequestFactory{{#gae}}, MakesGaeRequests{{/gae}} {
 {{#entities}}
 {{=entity}}{{/entities}} 	
 }
