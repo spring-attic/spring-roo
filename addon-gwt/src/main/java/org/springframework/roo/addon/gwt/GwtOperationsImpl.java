@@ -178,7 +178,7 @@ public class GwtOperationsImpl implements GwtOperations {
 						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
 						
 						if (isGaeEnabled) {
-              input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + "client.scaffold.gae.*;\n");
+              input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
               input = input.replace("__GAE_HOOKUP__", getGaeHookup());
 						} else {
               input = input.replace("__GAE_IMPORT__", "");

@@ -313,7 +313,7 @@ public class GwtFileListener implements FileEventListener {
 		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
     dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
     dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
-    dataDictionary.setVariable("sharedGaePackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
+    dataDictionary.setVariable("sharedGaePackage", GwtPath.SHARED_GAE.packageName(projectMetadata));
 		return dataDictionary;
 	}
 

@@ -152,15 +152,6 @@ public class ScaffoldMobileApp extends ScaffoldApp {
           }
         });
 
-        Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-			    @Override
-          public void onSuccess(UserInformationProxy userInformationProxy) {
-            shell.getLoginWidget().setUserInformation(userInformationProxy);
-          }
-        };
-
-        requestFactory.userInformationRequest().getCurrentUserInformation().fire(receiver);
-
         if (LogConfiguration.loggingIsEnabled()) {
           /* Add remote logging handler */
           RequestFactoryLogHandler.LoggingRequestProvider provider = new RequestFactoryLogHandler.LoggingRequestProvider() {
