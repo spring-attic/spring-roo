@@ -68,8 +68,8 @@
 		</database>
 		<database id="GAE">
 			<properties>
-				<gae.version>1.3.7</gae.version>
-				<gae-test.version>1.3.7</gae-test.version>
+				<gae.version>1.4.0</gae.version>
+				<gae-test.version>1.4.0</gae-test.version>
 				<gae.home>${user.home}/.m2/repository/com/google/appengine/appengine-java-sdk/${gae.version}/appengine-java-sdk-${gae.version}</gae.home>
 			</properties>
 			<repositories>
