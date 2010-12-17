@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.place.shared.*;
+import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
@@ -29,15 +30,17 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 
+import org.springsource.roo.extrack.client.scaffold.place.ProxyListPlace;
+
+import __TOP_LEVEL_PACKAGE__.shared.scaffold.UserInformationProxy;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.AuthenticationFailureHandler;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.activity.IsScaffoldMobileActivity;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.request.*;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.ui.*;
 import __TOP_LEVEL_PACKAGE__.client.style.MobileListResources;
-import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -251,7 +254,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 				activityMapper, eventBus);
 
         activityManager.setDisplay(shell.getBody());
-        
+
         /* Browser history integration */
         ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
         mapper.setFactory(placeHistoryFactory);

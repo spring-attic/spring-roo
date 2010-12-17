@@ -86,7 +86,7 @@ public class GwtFileListener implements FileEventListener {
 				String name = fileEvent.getFileDetails().getFile().getName();
 				name = name.substring(0, name.length() - 5); // Drop .java
 				for (SharedType t : SharedType.values()) {
-					if (name.endsWith(t.getFullName()) || name.endsWith("_Roo_Abstract")) {
+					if (name.endsWith(t.getFullName()) || name.endsWith("_Roo_Gwt")) {
 						// This is just a shared type; we don't care about changes to them
 						return;
 					}
@@ -219,7 +219,7 @@ public class GwtFileListener implements FileEventListener {
                             builder.setImplementsTypes(innerType.getImplementsTypes());
                             builder.setModifier(innerType.getModifier());
                             JavaType originalType = innerType.getName();
-                            builder.setName(new JavaType(originalType.getSimpleTypeName() + "_Roo_Abstract", 0, DataType.TYPE, null, originalType.getParameters()));
+                            builder.setName(new JavaType(originalType.getSimpleTypeName() + "_Roo_Gwt", 0, DataType.TYPE, null, originalType.getParameters()));
                             builder.setPhysicalTypeCategory(innerType.getPhysicalTypeCategory());
                             builder.setRegisteredImports(innerType.getRegisteredImports());
                             builder.setSuperclass(innerType.getSuperclass());
@@ -270,7 +270,7 @@ public class GwtFileListener implements FileEventListener {
     private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(ClassOrInterfaceTypeDetailsBuilder concreteClass) {
 
         JavaType concreteType = concreteClass.getName();
-        String abstractName = concreteType.getSimpleTypeName() + "_Roo_Abstract";
+        String abstractName = concreteType.getSimpleTypeName() + "_Roo_Gwt";
         abstractName = concreteType.getPackage().getFullyQualifiedPackageName() + '.' + abstractName;
         JavaType abstractType = new JavaType(abstractName);
         String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, Path.SRC_MAIN_JAVA);
@@ -416,6 +416,7 @@ public class GwtFileListener implements FileEventListener {
 	public void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_REQUEST_FACTORY;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SCAFFOLD_SHARED.packageName(projectMetadata));
 
 		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";

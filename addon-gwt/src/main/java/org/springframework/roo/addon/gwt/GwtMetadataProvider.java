@@ -16,7 +16,6 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
-import org.springframework.roo.classpath.itd.ItdMetadataScanner;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -33,18 +32,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
- * You can find a list of mirror-compatible objects in {@link MirrorType}. 
- * 
+ * You can find a list of mirror-compatible objects in {@link MirrorType}.
+ *
  * <p>
  * For now only @RooEntity instances will be mirror-compatible.
- * 
+ *
  * <p>
  * Like all Roo add-ons, this provider aims to expose potentially-useful contents of the above files via {@link GwtMetadata}.
  * It also attempts to avoiding writing to disk unless actually necessary.
- * 
+ *
  * <p>
- * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes". 
- * 
+ * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes".
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
@@ -60,7 +59,6 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	@Reference protected MirrorTypeNamingStrategy mirrorTypeNamingStrategy;
 	@Reference protected ClasspathOperations classpathOperations;
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-    @Reference private ItdMetadataScanner itdMetadataScanner;
 
 	public MetadataItem get(String metadataIdentificationString) {
 		// Abort early if we can't continue

@@ -570,6 +570,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
         dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
         dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
+        dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SCAFFOLD_SHARED.packageName(projectMetadata));
         dataDictionary.setVariable("uiPackage", GwtPath.MANAGED_UI.packageName(projectMetadata));
         dataDictionary.setVariable("name", governorTypeDetails.getName().getSimpleTypeName());
         dataDictionary.setVariable("pluralName", entityMetadata.getPlural());
@@ -821,7 +822,7 @@ public class GwtMetadata extends AbstractMetadataItem {
     private ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(ClassOrInterfaceTypeDetailsBuilder concreteClass) {
 
         JavaType concreteType = concreteClass.getName();
-        String abstractName = concreteType.getSimpleTypeName() + "_Roo_Abstract";
+        String abstractName = concreteType.getSimpleTypeName() + "_Roo_Gwt";
         abstractName = concreteType.getPackage().getFullyQualifiedPackageName() + '.' + abstractName;
         JavaType abstractType = new JavaType(abstractName);
         String abstractId = PhysicalTypeIdentifier.createIdentifier(abstractType, Path.SRC_MAIN_JAVA);
@@ -954,7 +955,7 @@ public class GwtMetadata extends AbstractMetadataItem {
                             builder.setImplementsTypes(innerType.getImplementsTypes());
                             builder.setModifier(innerType.getModifier());
                             JavaType originalType = innerType.getName();
-                            builder.setName(new JavaType(originalType.getSimpleTypeName() + "_Roo_Abstract", 0, DataType.TYPE, null, originalType.getParameters()));
+                            builder.setName(new JavaType(originalType.getSimpleTypeName() + "_Roo_Gwt", 0, DataType.TYPE, null, originalType.getParameters()));
                             builder.setPhysicalTypeCategory(innerType.getPhysicalTypeCategory());
                             builder.setRegisteredImports(innerType.getRegisteredImports());
                             builder.setSuperclass(innerType.getSuperclass());

@@ -16,14 +16,14 @@ public interface UserInformationProxy extends ValueProxy  {
    * @return the user's email address as a String
    */
   String getEmail();
-  
+
   /**
    * Returns the user's logout url.
    *
    * @return the user's logout url as a String
    */
   String getLogoutUrl();
-  
+
   /**
    * Returns the user's name.
    *
