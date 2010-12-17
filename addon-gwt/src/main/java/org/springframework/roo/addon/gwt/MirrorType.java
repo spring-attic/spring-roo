@@ -51,6 +51,7 @@ public enum MirrorType {
     private HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
     private List<JavaType> watchedInnerTypes = new ArrayList<JavaType>();
     private boolean createAbstract = false;
+    private boolean overwriteConcrete = false;
 
 
 	private MirrorType(GwtPath path, String suffix, String name, String template) {
@@ -116,5 +117,13 @@ public enum MirrorType {
 
     public void setCreateAbstract(boolean createAbstract) {
         this.createAbstract = createAbstract;
+    }
+
+    public boolean isOverwriteConcrete() {
+        return overwriteConcrete;
+    }
+
+    public void setOverwriteConcrete(boolean overwriteConcrete) {
+        this.overwriteConcrete = overwriteConcrete;
     }
 }

@@ -35,6 +35,7 @@ public enum SharedType {
     private HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
     private List<JavaType> watchedInnerTypes = new ArrayList<JavaType>();
     private boolean createAbstract = false;
+    private boolean overwriteConcrete = false;
 
     private SharedType(GwtPath path, String fullName, String name, String template) {
         this.path = path;
@@ -93,5 +94,13 @@ public enum SharedType {
 
     public void setCreateAbstract(boolean createAbstract) {
         this.createAbstract = createAbstract;
+    }
+
+    public boolean isOverwriteConcrete() {
+        return overwriteConcrete;
+    }
+
+    public void setOverwriteConcrete(boolean overwriteConcrete) {
+        this.overwriteConcrete = overwriteConcrete;
     }
 }

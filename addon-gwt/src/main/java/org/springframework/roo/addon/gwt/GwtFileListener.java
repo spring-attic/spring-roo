@@ -129,7 +129,7 @@ public class GwtFileListener implements FileEventListener {
 	public void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-
+        type.setOverwriteConcrete(true);
 		MirrorType locate = MirrorType.PROXY;
 		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
@@ -256,7 +256,7 @@ public class GwtFileListener implements FileEventListener {
                 write(abstractDestFile, output, fileManager);
             }
 
-            if (!fileManager.exists(concreteDestFile)) {
+            if (!fileManager.exists(concreteDestFile) || destType.isOverwriteConcrete()) {
                 String output = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(templateClassBuilder.build());
                 write(concreteDestFile, output, fileManager);
             }
@@ -415,6 +415,7 @@ public class GwtFileListener implements FileEventListener {
 
 	public void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
 		SharedType type = SharedType.APP_REQUEST_FACTORY;
+        type.setOverwriteConcrete(true);
 		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
         dataDictionary.setVariable("scaffoldSharedPackage", GwtPath.SCAFFOLD_SHARED.packageName(projectMetadata));
 
