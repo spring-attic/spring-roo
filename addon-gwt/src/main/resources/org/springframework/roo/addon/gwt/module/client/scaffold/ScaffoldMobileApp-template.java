@@ -3,6 +3,7 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 import com.google.gwt.activity.shared.*;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -15,7 +16,6 @@ import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
 import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
-import com.google.gwt.requestfactory.shared.UserInformationProxy;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.cellview.client.CellList;
@@ -30,13 +30,15 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.ui.ApplicationListPlaceRenderer;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.activity.IsScaffoldMobileActivity;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
 import __TOP_LEVEL_PACKAGE__.client.style.MobileListResources;
-
+import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
+__GAE_IMPORT__
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -145,21 +147,10 @@ public class ScaffoldMobileApp extends ScaffoldApp {
     private void init() {
 
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-	    public void onUncaughtException(Throwable e) {
-	        Window.alert("Error: " + e.getMessage());
-	        log.log(Level.SEVERE, e.getMessage(), e);
-	    }
+            public void onUncaughtException(Throwable e) {
+            log.log(Level.SEVERE, e.getMessage(), e);
+          }
         });
-
-        Receiver<UserInformationProxy> receiver = new Receiver<UserInformationProxy>() {
-			@Override
-            public void onSuccess(UserInformationProxy userInformationProxy) {
-                shell.getLoginWidget().setUserInformation(userInformationProxy);
-            }
-        };
-
-		requestFactory.userInformationRequest().getCurrentUserInformation(
-				Window.Location.getHref()).fire(receiver);
 
         if (LogConfiguration.loggingIsEnabled()) {
           /* Add remote logging handler */
@@ -173,13 +164,14 @@ public class ScaffoldMobileApp extends ScaffoldApp {
                                            new ArrayList<String>()));
         }
 
+__GAE_HOOKUP__
         /* Left side lets us pick from all the types of entities */
 
 		final Renderer<ProxyListPlace> placePickerRenderer = new ApplicationListPlaceRenderer();
 		Cell<ProxyListPlace> placePickerCell = new AbstractCell<ProxyListPlace>() {
 			@Override
-			public void render(ProxyListPlace value, Object viewData,
-					SafeHtmlBuilder sb) {
+      public void render(Context context, ProxyListPlace value,
+          SafeHtmlBuilder sb) {
 				sb.appendEscaped(placePickerRenderer.render(value));
 			}
 		};
@@ -250,7 +242,7 @@ public class ScaffoldMobileApp extends ScaffoldApp {
 				activityMapper, eventBus);
 
         activityManager.setDisplay(shell.getBody());
-        
+
         /* Browser history integration */
         ScaffoldPlaceHistoryMapper mapper = GWT.create(ScaffoldPlaceHistoryMapper.class);
         mapper.setFactory(placeHistoryFactory);

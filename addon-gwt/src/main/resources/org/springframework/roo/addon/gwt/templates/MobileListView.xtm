@@ -69,9 +69,13 @@ public class {{=className}} extends MobileProxyListView<{{=proxy}}> {
 
 	public {{=className}}() {
 		super("New {{=name}}", new CellRenderer());
-		{{#mobileProperties}}
-		paths.add("{{=prop}}");{{/mobileProperties}}
+		init();
 	}
+
+	public void init() {
+	    {{#mobileProperties}}
+		paths.add("{{=prop}}");{{/mobileProperties}}
+    }
 
 	public String[] getPaths() {
 		return paths.toArray(new String[paths.size()]);

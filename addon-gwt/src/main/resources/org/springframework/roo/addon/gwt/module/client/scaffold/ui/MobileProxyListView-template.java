@@ -1,6 +1,7 @@
 package __TOP_LEVEL_PACKAGE__.client.scaffold.ui;
 
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.requestfactory.shared.EntityProxy;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -44,7 +45,7 @@ public abstract class MobileProxyListView<P extends EntityProxy> extends
 		// Create the CellList to display the proxies.
 		AbstractCell<P> cell = new AbstractCell<P>() {
 	   	@Override
-			public void render(P value, Object key, SafeHtmlBuilder sb) {
+      public void render(Context context, P value, SafeHtmlBuilder sb) {
 				renderer.render(value, sb);
 			}
 		};

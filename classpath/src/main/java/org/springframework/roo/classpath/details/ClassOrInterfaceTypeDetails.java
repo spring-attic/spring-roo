@@ -1,6 +1,7 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.model.JavaSymbolName;
 
@@ -31,4 +32,10 @@ public interface ClassOrInterfaceTypeDetails extends MemberHoldingTypeDetails {
 	 * @return the constants (may be empty, but never null)
 	 */
 	List<JavaSymbolName> getEnumConstants();
+
+
+    /**
+	 * @return the explicitly-registered imports this user wishes to have defined in the type (cannot be null, but may be empty)
+	 */
+    Set<ImportMetadata> getRegisteredImports();
 }

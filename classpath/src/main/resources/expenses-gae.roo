@@ -1,4 +1,4 @@
-project --topLevelPackage org.springsource.roo.extrack
+project --topLevelPackage org.springsource.roo.extrackgae
 
 persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 

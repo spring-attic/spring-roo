@@ -145,6 +145,10 @@ public class GwtOperationsImpl implements GwtOperations {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
 
+		if (!isGaeEnabled() && targetDirectory.contains("/gae")) {
+		  return;
+		}
+		
 		if (!targetDirectory.endsWith("/")) {
 			targetDirectory += "/";
 		}
@@ -159,9 +163,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		for (URL url : urls) {
 			String fileName = url.getPath().substring(url.getPath().lastIndexOf("/") + 1);
 			fileName = fileName.replace("-template", "");
-			if (fileName.contains("GaeUserInformation") && !isGaeEnabled()) {
-				continue;
-			}
 
 			String targetFilename = targetDirectory + fileName;
 			if (!fileManager.exists(targetFilename)) {
@@ -171,9 +172,20 @@ public class GwtOperationsImpl implements GwtOperations {
 					} else {
 						// Read template and insert the user's package
 						String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
-						input = input.replace("__TOP_LEVEL_PACKAGE__", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+						String topLevelPackage = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+            input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
 						input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());
 						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
+						
+						if (isGaeEnabled) {
+              input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
+              input = input.replace("__GAE_HOOKUP__", getGaeHookup());
+              input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");
+						} else {
+              input = input.replace("__GAE_IMPORT__", "");
+              input = input.replace("__GAE_HOOKUP__", "");
+              input = input.replace("__GAE_REQUEST_TRANSPORT__", "");
+						}
 						
 						// Output the file for the user
 						MutableFile mutableFile = fileManager.createFile(targetFilename);
@@ -186,7 +198,13 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
-	private void updateMavenEclipsePlugin() {
+  private CharSequence getGaeHookup() {
+    return "    // AppEngine user authentication\n\n"
+        + "    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.loginWidget);\n"
+        + "    new ReloadOnAuthenticationFailure().register(eventBus);\n\n";
+  }
+
+  private void updateMavenEclipsePlugin() {
 		String pom = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
 
@@ -285,13 +303,10 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
-		WebXmlUtils.WebXmlParam initParams = null;
+		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		if (isGaeEnabled()) {
-			String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".server.GaeUserInformation";
-			initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
-			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
-		} else {
-			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
+			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectMetadata) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, 
+			    "This filter makes GAE authentication services visible to a RequestFactory client.");
 		}
 		
 		removeIfFound("/web-app/error-page", webXmlRoot);

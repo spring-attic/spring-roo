@@ -1,7 +1,9 @@
 package org.springframework.roo.classpath.details;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.model.JavaSymbolName;
@@ -18,6 +20,7 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 	private PhysicalTypeCategory physicalTypeCategory;
 	private ClassOrInterfaceTypeDetailsBuilder superclass;
 	private List<JavaSymbolName> enumConstants = new ArrayList<JavaSymbolName>();
+    private Set<ImportMetadata> registeredImports = new HashSet<ImportMetadata>();
 
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
@@ -31,6 +34,8 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 			superclass = new ClassOrInterfaceTypeDetailsBuilder(existing.getSuperclass());
 		}
 		enumConstants.addAll(existing.getEnumConstants());
+        registeredImports = existing.getRegisteredImports();
+
 	}
 
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, int modifier, JavaType name, PhysicalTypeCategory physicalTypeCategory) {
@@ -81,6 +86,14 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		if (this.superclass != null) {
 			superclass = this.superclass.build();
 		}
-		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants());
+		return new DefaultClassOrInterfaceTypeDetails(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getName(), getPhysicalTypeCategory(), buildConstructors(), buildFields(), buildMethods(), buildInnerTypes(), buildInitializers(), superclass, getExtendsTypes(), getImplementsTypes(), getEnumConstants(), getRegisteredImports());
 	}
+
+    public Set<ImportMetadata> getRegisteredImports() {
+        return registeredImports;
+    }
+
+    public void setRegisteredImports(Set<ImportMetadata> registeredImports) {
+        this.registeredImports = registeredImports;
+    }
 }

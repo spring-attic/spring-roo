@@ -32,18 +32,18 @@ import org.springframework.roo.support.util.Assert;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
- * You can find a list of mirror-compatible objects in {@link MirrorType}. 
- * 
+ * You can find a list of mirror-compatible objects in {@link MirrorType}.
+ *
  * <p>
  * For now only @RooEntity instances will be mirror-compatible.
- * 
+ *
  * <p>
  * Like all Roo add-ons, this provider aims to expose potentially-useful contents of the above files via {@link GwtMetadata}.
  * It also attempts to avoiding writing to disk unless actually necessary.
- * 
+ *
  * <p>
- * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes". 
- * 
+ * A separate type monitors the creation/deletion of the aforementioned files to maintain "global indexes".
+ *
  * @author Ben Alex
  * @author Alan Stewart
  * @author Ray Cromwell
@@ -82,7 +82,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		// Abort if this is for a .java file under any of the GWT-related directories
 		for (GwtPath path : GwtPath.values()) {
 			if (governorTypeName.getPackage().getFullyQualifiedPackageName().equals(path.packageName(projectMetadata))) {
-				return null;
+				    return null;
 			}
 		}
 
@@ -129,7 +129,7 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 
 		// Our general strategy is to instantiate GwtMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager,
-                    metadataService);
+                    metadataService, physicalTypeMetadataProvider);
 
 		// Output each type that was provided in the details
 		for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
@@ -203,6 +203,6 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	}
 
 	public String getProvidesType() {
-		return GwtMetadata.getMetadataIdentiferType();
+		return GwtMetadata.getMetadataIdentifierType();
 	}
 }

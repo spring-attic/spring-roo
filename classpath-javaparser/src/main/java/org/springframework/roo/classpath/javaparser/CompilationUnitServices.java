@@ -6,6 +6,7 @@ import japa.parser.ast.expr.Expression;
 
 import java.util.List;
 
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 
@@ -41,4 +42,6 @@ public interface CompilationUnitServices {
 	 * Forces the implementation to flush any changes.
 	 */
 	void flush();
+
+    PhysicalTypeCategory getPhysicalTypeCategory();
 }
