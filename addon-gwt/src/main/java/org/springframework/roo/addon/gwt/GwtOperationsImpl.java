@@ -180,9 +180,11 @@ public class GwtOperationsImpl implements GwtOperations {
 						if (isGaeEnabled) {
               input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
               input = input.replace("__GAE_HOOKUP__", getGaeHookup());
+              input = input.replace("__GAE_REQUEST_TRANSPORT__", ", new GaeAuthRequestTransport(eventBus)");
 						} else {
               input = input.replace("__GAE_IMPORT__", "");
               input = input.replace("__GAE_HOOKUP__", "");
+              input = input.replace("__GAE_REQUEST_TRANSPORT__", "");
 						}
 						
 						// Output the file for the user

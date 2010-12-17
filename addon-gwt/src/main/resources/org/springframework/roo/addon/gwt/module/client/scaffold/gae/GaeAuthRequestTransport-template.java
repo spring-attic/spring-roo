@@ -2,10 +2,12 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.requestfactory.client.DefaultRequestTransport;
 import com.google.gwt.requestfactory.shared.ServerFailure;
+import com.google.gwt.user.client.Window;
 
 /**
  * Extends DefaultRequestTransport to handle the authentication failures
@@ -53,5 +55,13 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
         superCallback.onError(request, exception);
       }
     };
+  }
+
+  @Override
+  protected RequestBuilder createRequestBuilder() {
+    RequestBuilder builder = super.createRequestBuilder();
+    // GaeAuthFilter uses this to construct login url
+    builder.setHeader("requestUrl", Window.Location.getHref());
+    return builder;
   }
 }

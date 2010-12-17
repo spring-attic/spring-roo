@@ -29,7 +29,11 @@ public class GaeAuthFilter implements Filter {
     HttpServletResponse response = (HttpServletResponse) servletResponse;
     
     if (!userService.isUserLoggedIn()) {
-      response.setHeader("login", userService.createLoginURL(request.getRequestURI()));
+      String requestUrl = request.getHeader("requestUrl");
+      if (requestUrl == null) {
+        requestUrl = request.getRequestURI();
+      }
+      response.setHeader("login", userService.createLoginURL(requestUrl));
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
       return; 
     } 
