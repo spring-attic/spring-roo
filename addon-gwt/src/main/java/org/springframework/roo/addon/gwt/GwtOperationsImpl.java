@@ -301,13 +301,10 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
-		WebXmlUtils.WebXmlParam initParams = null;
+		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		if (isGaeEnabled()) {
-			String userClass = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".server.GaeUserInformation";
-			initParams = new WebXmlUtils.WebXmlParam("userInfoClass", userClass);
-			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null, initParams);
-		} else {
-			WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
+			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectMetadata) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, 
+			    "This filter makes GAE authentication services visible to a RequestFactory client.");
 		}
 		
 		removeIfFound("/web-app/error-page", webXmlRoot);
