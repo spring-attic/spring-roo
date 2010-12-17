@@ -18,8 +18,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
-import org.springframework.roo.classpath.scanner.MemberDetails;
-import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
@@ -40,7 +38,6 @@ import org.springframework.roo.support.util.StringUtils;
 public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService {
 	@Reference private MetadataService metadataService;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
 
 	public JavaType findTypeForTableName(SortedSet<JavaType> managedEntities, String tableNamePattern, JavaPackage javaPackage) {
 		Assert.notNull(managedEntities, "Managed entities required");
@@ -129,27 +126,34 @@ public class DbreTypeResolutionServiceImpl implements DbreTypeResolutionService 
 
 	public String findTableName(JavaType javaType) {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
+		if (governorPhysicalTypeMetadata == null) {
+			// Give up early
+			return null;
+		}
+		
+		// Try to locate a table name, which can be specified either via @Table or via @RooEntity(table = "foo")
 		String tableName = null;
-		if (governorPhysicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
-			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), governorTypeDetails);
-			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType(RooEntity.class.getName()));
-			if (rooEntityAnnotation != null) {
-				AnnotationAttributeValue<?> tableAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName("table"));
+		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		
+		AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Table"));
+		if (annotation != null) {
+			AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName("name"));
+			if (nameAttribute != null) {
+				tableName = (String) nameAttribute.getValue();
+			}
+		}
+		
+		if (!StringUtils.hasText(tableName)) {
+			// The search continues...
+			annotation = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, new JavaType(RooEntity.class.getName()));
+			if (annotation != null) {
+				AnnotationAttributeValue<?> tableAttribute = annotation.getAttribute(new JavaSymbolName("table"));
 				if (tableAttribute != null) {
 					tableName = (String) tableAttribute.getValue();
 				}
 			}
-			if (!StringUtils.hasText(tableName)) {
-				AnnotationMetadata tableAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Table"));
-				if (tableAnnotation != null) {
-					AnnotationAttributeValue<?> nameAttribute = tableAnnotation.getAttribute(new JavaSymbolName("name"));
-					if (nameAttribute != null) {
-						tableName = (String) nameAttribute.getValue();
-					}
-				}
-			}
 		}
+		
 		return StringUtils.trimToNull(tableName);
 	}
 
