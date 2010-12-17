@@ -93,6 +93,11 @@ public class {{=className}} extends AbstractActivity
    	this.display = displayIn;
    	Receiver<EntityProxy> callback = new Receiver<EntityProxy>() {
       public void onSuccess(EntityProxy proxy) {
+        if (proxy == null) {
+            // Deleted entity, bad bookmark, that kind of thing
+            placeController.goTo(getBackButtonPlace());
+            return;
+        }
         if (display == null) {
    	  		return;
    			}
