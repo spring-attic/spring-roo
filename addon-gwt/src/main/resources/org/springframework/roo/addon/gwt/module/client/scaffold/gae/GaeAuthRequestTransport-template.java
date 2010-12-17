@@ -9,6 +9,8 @@ import com.google.gwt.requestfactory.client.DefaultRequestTransport;
 import com.google.gwt.requestfactory.shared.ServerFailure;
 import com.google.gwt.user.client.Window;
 
+import org.springsource.roo.extrackgae.client.scaffold.gae.GaeAuthenticationFailureEvent;
+
 /**
  * Extends DefaultRequestTransport to handle the authentication failures
  * reported by {@link com.google.gwt.sample.gaerequest.server.GaeAuthFilter}
@@ -34,7 +36,8 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
          * as it sees fit.
          */
 
-        if (Response.SC_UNAUTHORIZED == response.getStatusCode()) {
+        int statusCode = response.getStatusCode();
+        if (Response.SC_UNAUTHORIZED == statusCode) {
           String loginUrl = response.getHeader("login");
           if (loginUrl != null) {
             /*
@@ -47,6 +50,17 @@ public class GaeAuthRequestTransport extends DefaultRequestTransport {
             eventBus.fireEvent(new GaeAuthenticationFailureEvent(loginUrl));
             return;
           }
+        }
+        if (statusCode == 0) {
+          /*
+           * A response with no status follows the SC_UNAUTHORIZED.
+           * Report it as non-fatal, so that
+           * com.google.gwt.requestfactory.shared.Receiver will not post a
+           * runtime exception
+           */
+          receiver.onTransportFailure(new ServerFailure(
+              "Status zero response, probably after auth failure", null, null, false /* not fatal */));
+          return;
         }
         superCallback.onResponseReceived(request, response);
       }
