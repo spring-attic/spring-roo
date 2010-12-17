@@ -145,7 +145,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
 
-		if (!isGaeEnabled() && targetDirectory.contains(".gae.")) {
+		if (!isGaeEnabled() && targetDirectory.contains(".gae")) {
 		  return;
 		}
 		

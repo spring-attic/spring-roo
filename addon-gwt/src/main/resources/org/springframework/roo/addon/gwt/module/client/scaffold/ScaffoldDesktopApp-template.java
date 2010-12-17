@@ -15,9 +15,6 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
 
-import org.springsource.roo.extrackgae.client.scaffold.gae.GaeLoginWidgetDriver;
-import org.springsource.roo.extrackgae.client.scaffold.gae.ReloadOnAuthenticationFailure;
-
 import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
 import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
