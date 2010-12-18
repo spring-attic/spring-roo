@@ -60,6 +60,7 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
   private HandlerRegistration rangeChangeHandler;
   private ProxyListView<P> view;
   private AcceptsOneWidget display;
+  private EntityProxyId<P> pendingSelection;
 
   public AbstractProxyListActivity(PlaceController placeController,
       ProxyListView<P> view, Class<P> proxyType) {
@@ -130,6 +131,7 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
           idToProxy.put(proxyId, proxy);
         }
         getView().asHasData().setRowData(range.getStart(), values);
+        finishPendingSelection();
         if (display != null) {
           display.setWidget(getView());
         }
@@ -165,7 +167,18 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
     // Select the new proxy, if it's relevant
     if (proxyId != null) {
       P selectMe = idToProxy.get(proxyId);
-      selectionModel.setSelected(selectMe, true);
+      
+      if (selectMe != null) {
+        pendingSelection = null;
+        selectionModel.setSelected(selectMe, true);
+      } else {
+        /* 
+         * It may be that an async request is about to fetch it.
+         * Make note to select it when it arrives (see 
+         * finishPendingSelection()).
+         */
+        pendingSelection = proxyId;
+      }
     }
   }
 
@@ -224,6 +237,20 @@ public abstract class AbstractProxyListActivity<P extends EntityProxy>
   @SuppressWarnings("unchecked")
   private EntityProxyId<P> cast(ProxyPlace proxyPlace) {
     return (EntityProxyId<P>) proxyPlace.getProxyId();
+  }
+
+  /**
+   * Finish selecting a proxy that hadn't yet arrived when
+   * {@link #select(EntityProxyId)} was called.
+   */
+  private void finishPendingSelection() {
+    if (pendingSelection != null) {
+      P selectMe = idToProxy.get(pendingSelection);
+      pendingSelection = null;
+      if (selectMe != null) {
+        selectionModel.setSelected(selectMe, true);
+      }
+    }
   }
 
   private void fireRangeRequest(final Range range,
