@@ -9,22 +9,22 @@ import org.springframework.roo.shell.CommandMarker;
 
 /**
  * Commands for the GWT add-on to be used by the Roo shell.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
 @Component
 @Service
 public class GwtCommands implements CommandMarker {
-	@Reference private GwtOperations gwtOperations;
-	
-	@CliAvailabilityIndicator("gwt setup")
-	public boolean isInstallSecurityAvailable() {
-		return gwtOperations.isSetupGwtAvailable();
-	}
-	
-	@CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
-	public void installSecurity() {
-		gwtOperations.setupGwt();
-	}
+    @Reference private GwtOperations gwtOperations;
+
+    @CliAvailabilityIndicator("gwt setup")
+    public boolean isInstallSecurityAvailable() {
+        return gwtOperations.isSetupGwtAvailable();
+    }
+
+    @CliCommand(value = "gwt setup", help = "Install Google Web Toolkit (GWT) into your project")
+    public void installSecurity() {
+        gwtOperations.setupGwt();
+    }
 }

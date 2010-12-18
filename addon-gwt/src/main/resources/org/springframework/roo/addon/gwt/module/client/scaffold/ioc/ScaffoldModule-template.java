@@ -1,5 +1,8 @@
 package __TOP_LEVEL_PACKAGE__.client.scaffold.ioc;
 
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.*;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.EventSourceRequestTransport;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
@@ -8,13 +11,12 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.*;
-import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.request.EventSourceRequestTransport;
+
 __GAE_IMPORT__
+
 public class ScaffoldModule extends AbstractGinModule {
 
-	@Override
+    @Override
     protected void configure() {
         bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
         bind(ApplicationRequestFactory.class).toProvider(RequestFactoryProvider.class).in(Singleton.class);
@@ -43,7 +45,7 @@ public class ScaffoldModule extends AbstractGinModule {
         public RequestFactoryProvider(EventBus eventBus) {
             requestFactory = GWT.create(ApplicationRequestFactory.class);
             requestFactory.initialize(eventBus, new EventSourceRequestTransport(
-                eventBus__GAE_REQUEST_TRANSPORT__));
+                    eventBus__GAE_REQUEST_TRANSPORT__));
         }
 
         public ApplicationRequestFactory get() {

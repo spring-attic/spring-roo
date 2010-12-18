@@ -198,7 +198,6 @@ public class GwtMetadata extends AbstractMetadataItem {
         String destinationMetadataId = getDestinationMetadataId(MirrorType.PROXY);
 
         //Get the Proxy's PhysicalTypeMetaData representation of the on disk Proxy
-        PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(destinationMetadataId);
         JavaType name = PhysicalTypeIdentifier.getJavaType(destinationMetadataId);
 
         //Create a new ClassOrInterfaceTypeDetailsBuilder for the Proxy, will be overridden if the Proxy has already been created
@@ -254,7 +253,6 @@ public class GwtMetadata extends AbstractMetadataItem {
                     match = true;
                     break;
                 }
-
             }
 
             if (!match) {
@@ -287,7 +285,6 @@ public class GwtMetadata extends AbstractMetadataItem {
                 }
 
             }
-
 
             if (!match) {
                 typeDetailsBuilder.addMethod(methodBuilder);
@@ -545,16 +542,6 @@ public class GwtMetadata extends AbstractMetadataItem {
         }
     }
 
-    private void writeWithTemplate(String destFile, MirrorType destType, String templateFile) throws TemplateException {
-        writeWithTemplate(destFile, buildDataDictionary(destType), templateFile);
-    }
-
-    private void writeWithTemplate(String destFile, TemplateDataDictionary dataDictionary, String templateFile) throws TemplateException {
-        TemplateLoader templateLoader = TemplateResourceLoader.create();
-        Template template = templateLoader.getTemplate(templateFile);
-        write(destFile, template.renderToString(dataDictionary), fileManager);
-    }
-
     private boolean isShared(JavaType type) {
         PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
         return ptmd != null && ptmd.getPhysicalLocationCanonicalPath().startsWith(GwtPath.SHARED.canonicalFileSystemPath(projectMetadata));
@@ -731,7 +718,8 @@ public class GwtMetadata extends AbstractMetadataItem {
         try {
             MirrorType destType = MirrorType.LIST_VIEW;
             String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
-            writeWithTemplate(destFile, destType, "ListViewUiXml");
+            buildUiXml(getTemplateContents("ListViewUiXml", destType, null), destFile);
+            //writeWithTemplate(destFile, destType, "ListViewUiXml");
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -841,48 +829,48 @@ public class GwtMetadata extends AbstractMetadataItem {
             }
             ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getPhysicalTypeDetails();
 
-                for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
-                    ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
-                    abstractConstructor.setModifier(constructorMetadata.getModifier());
+            for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
+                ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
+                abstractConstructor.setModifier(constructorMetadata.getModifier());
 
-                    HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(superType.getName(), extendedType);
+                HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(superType.getName(), extendedType);
 
-                    for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
+                for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
 
-                        JavaType newType = type.getJavaType();
-                        if (type.getJavaType().getParameters().size() > 0) {
-                            ArrayList<JavaType> paramTypes = new ArrayList<JavaType>();
-                            for (JavaType typeType : type.getJavaType().getParameters()) {
-                                JavaType typeParam = typeMap.get(new JavaSymbolName(typeType.toString()));
-                                if (typeParam != null) {
-                                    paramTypes.add(typeParam);
-                                }
-
+                    JavaType newType = type.getJavaType();
+                    if (type.getJavaType().getParameters().size() > 0) {
+                        ArrayList<JavaType> paramTypes = new ArrayList<JavaType>();
+                        for (JavaType typeType : type.getJavaType().getParameters()) {
+                            JavaType typeParam = typeMap.get(new JavaSymbolName(typeType.toString()));
+                            if (typeParam != null) {
+                                paramTypes.add(typeParam);
                             }
-                            newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
+
                         }
-                        abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
+                        newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
                     }
-                    abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
-
-                    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-                    bodyBuilder.newLine().indent().append("super(");
-
-                    int i = 0;
-                    for (JavaSymbolName paramName : abstractConstructor.getParameterNames()) {
-                        bodyBuilder.append(" ").append(paramName.getSymbolName());
-                        if (abstractConstructor.getParameterTypes().size() > i + 1) {
-                            bodyBuilder.append(", ");
-                        }
-                        i++;
-                    }
-
-                    bodyBuilder.append(");");
-
-                    bodyBuilder.newLine().indentRemove();
-                    abstractConstructor.setBodyBuilder(bodyBuilder);
-                    builder.getDeclaredConstructors().add(abstractConstructor);
+                    abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
                 }
+                abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
+
+                InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+                bodyBuilder.newLine().indent().append("super(");
+
+                int i = 0;
+                for (JavaSymbolName paramName : abstractConstructor.getParameterNames()) {
+                    bodyBuilder.append(" ").append(paramName.getSymbolName());
+                    if (abstractConstructor.getParameterTypes().size() > i + 1) {
+                        bodyBuilder.append(", ");
+                    }
+                    i++;
+                }
+
+                bodyBuilder.append(");");
+
+                bodyBuilder.newLine().indentRemove();
+                abstractConstructor.setBodyBuilder(bodyBuilder);
+                builder.getDeclaredConstructors().add(abstractConstructor);
+            }
 
         }
 
@@ -1175,7 +1163,7 @@ public class GwtMetadata extends AbstractMetadataItem {
                     watchedMethods.put(new JavaSymbolName(property.getSetValuePickerMethodName()), params);
                 }
             }
-            watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName()  + ".client.scaffold.place.ProxyListPlace")));
+            watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
             destType.setWatchedMethods(watchedMethods);
             buildView(destType);
         } catch (Exception e) {
@@ -1206,7 +1194,6 @@ public class GwtMetadata extends AbstractMetadataItem {
             type.setWatchedMethods(watchedMethods);
 
             buildView(type, dataDictionary);
-            // writeWithTemplate(type, dataDictionary, type.getTemplate());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1272,6 +1259,15 @@ public class GwtMetadata extends AbstractMetadataItem {
         }
     }
 
+    private String getTemplateContents(String templateName, MirrorType destType, TemplateDataDictionary dataDictionary) throws TemplateException {
+        if (dataDictionary == null) {
+            dataDictionary = buildDataDictionary(destType);
+        }
+        TemplateLoader templateLoader = TemplateResourceLoader.create();
+        Template template = templateLoader.getTemplate(templateName);
+        return template.renderToString(dataDictionary);
+    }
+
     private void buildSetEditor() {
         try {
             MirrorType type = MirrorType.SET_EDITOR;
@@ -1286,7 +1282,8 @@ public class GwtMetadata extends AbstractMetadataItem {
         try {
             MirrorType destType = MirrorType.SET_EDITOR;
             String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
-            writeWithTemplate(destFile, destType, "SetEditorUiXml");
+            buildUiXml(getTemplateContents("SetEditorUiXml", destType, null), destFile);
+            //writeWithTemplate(destFile, destType, "SetEditorUiXml");
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1306,7 +1303,8 @@ public class GwtMetadata extends AbstractMetadataItem {
         try {
             MirrorType destType = MirrorType.LIST_EDITOR;
             String destFile = destType.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + getDestinationJavaType(destType).getSimpleTypeName() + ".ui.xml";
-            writeWithTemplate(destFile, destType, "ListEditorUiXml");
+            buildUiXml(getTemplateContents("ListEditorUiXml", destType, null), destFile);
+           // writeWithTemplate(destFile, destType, "ListEditorUiXml");
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1418,6 +1416,7 @@ public class GwtMetadata extends AbstractMetadataItem {
      * Return the type arg for the client side method, given the domain method return type.
      * if domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
      * if domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
+     *
      * @param domainMethodReturnType
      */
     private JavaType getGwtSideMethodType(JavaType domainMethodReturnType) {

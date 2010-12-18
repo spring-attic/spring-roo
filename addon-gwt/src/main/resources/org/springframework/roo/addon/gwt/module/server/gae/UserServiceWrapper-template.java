@@ -9,9 +9,9 @@ import com.google.appengine.api.users.User;
  * methods.
  */
 public interface UserServiceWrapper {
-  public String createLoginURL(String destinationURL);
+    public String createLoginURL(String destinationURL);
 
-  public String createLogoutURL(String destinationURL);
+    public String createLogoutURL(String destinationURL);
 
-  public User getCurrentUser();
+    public User getCurrentUser();
 }

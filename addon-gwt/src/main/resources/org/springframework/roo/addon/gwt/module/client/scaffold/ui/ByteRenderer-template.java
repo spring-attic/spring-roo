@@ -7,26 +7,26 @@ import com.google.gwt.text.shared.Renderer;
  * A simple renderer of Byte values.
  */
 public class ByteRenderer extends AbstractRenderer<Byte> {
-  private static ByteRenderer INSTANCE;
+    private static ByteRenderer INSTANCE;
 
-  /**
-   * @return the instance
-   */
-  public static Renderer<Byte> instance() {
-    if (INSTANCE == null) {
-      INSTANCE = new ByteRenderer();
-    }
-    return INSTANCE;
-  }
-
-  protected ByteRenderer() {
-  }
-
-  public String render(Byte object) {
-    if (object == null) {
-      return "";
+    /**
+     * @return the instance
+     */
+    public static Renderer<Byte> instance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ByteRenderer();
+        }
+        return INSTANCE;
     }
 
-    return object.toString();
-  }
+    protected ByteRenderer() {
+    }
+
+    public String render(Byte object) {
+        if (object == null) {
+            return "";
+        }
+
+        return object.toString();
+    }
 }

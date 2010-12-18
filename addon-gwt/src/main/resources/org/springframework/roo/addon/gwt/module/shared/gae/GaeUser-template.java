@@ -8,6 +8,7 @@ import com.google.gwt.requestfactory.shared.ValueProxy;
  */
 @ProxyForName("com.google.appengine.api.users.User")
 public interface GaeUser extends ValueProxy {
-  String getNickname();
-  String getEmail();
+    String getNickname();
+
+    String getEmail();
 }

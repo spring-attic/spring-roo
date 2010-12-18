@@ -8,8 +8,8 @@ import com.google.gwt.user.client.ui.ValueBox;
  */
 public class ByteBox extends ValueBox<Byte> {
 
-  public ByteBox() {
-    super(Document.get().createTextInputElement(), ByteRenderer.instance(),
-        ByteParser.instance());
-  }
+    public ByteBox() {
+        super(Document.get().createTextInputElement(), ByteRenderer.instance(),
+                ByteParser.instance());
+    }
 }

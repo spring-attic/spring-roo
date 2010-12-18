@@ -1,13 +1,12 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
 import com.google.gwt.place.shared.PlaceTokenizer;
 import com.google.inject.Inject;
 
-import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
-
 public class PlaceHistoryFactory {
-	
-	private final ProxyListPlace.Tokenizer proxyListPlaceTokenizer;
+
+    private final ProxyListPlace.Tokenizer proxyListPlaceTokenizer;
     private final ProxyPlace.Tokenizer proxyPlaceTokenizer;
 
     @Inject

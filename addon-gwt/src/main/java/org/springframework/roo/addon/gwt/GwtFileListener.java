@@ -1,20 +1,6 @@
 package org.springframework.roo.addon.gwt;
 
-import hapax.Template;
-import hapax.TemplateDataDictionary;
-import hapax.TemplateDictionary;
-import hapax.TemplateException;
-import hapax.TemplateLoader;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
+import hapax.*;
 import japa.parser.ParseException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -42,6 +28,15 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Listens for the creation and deletion of files by {@link GwtMetadata}.
  *
@@ -54,106 +49,106 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class GwtFileListener implements FileEventListener {
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
+    @Reference private FileManager fileManager;
+    @Reference private MetadataService metadataService;
     @Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	private ProjectMetadata projectMetadata;
-	private boolean processedApplicationFiles = false;
+    private ProjectMetadata projectMetadata;
+    private boolean processedApplicationFiles = false;
 
-	public void onFileEvent(FileEvent fileEvent) {
-		projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return;
-		}
+    public void onFileEvent(FileEvent fileEvent) {
+        projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+        if (projectMetadata == null) {
+            return;
+        }
 
-		String eventPath = fileEvent.getFileDetails().getCanonicalPath();
+        String eventPath = fileEvent.getFileDetails().getCanonicalPath();
 
-		if (!eventPath.endsWith(".java")) {
-			return;
-		}
-		boolean isMaintainedByRoo = eventPath.startsWith(GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata)) || eventPath.startsWith(GwtPath.MANAGED.canonicalFileSystemPath(projectMetadata));
-		if (!isMaintainedByRoo && (processedApplicationFiles || !eventPath.startsWith(GwtPath.SCAFFOLD.canonicalFileSystemPath(projectMetadata)))) {
-			return;
-		}
+        if (!eventPath.endsWith(".java")) {
+            return;
+        }
+        boolean isMaintainedByRoo = eventPath.startsWith(GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata)) || eventPath.startsWith(GwtPath.MANAGED.canonicalFileSystemPath(projectMetadata));
+        if (!isMaintainedByRoo && (processedApplicationFiles || !eventPath.startsWith(GwtPath.SCAFFOLD.canonicalFileSystemPath(projectMetadata)))) {
+            return;
+        }
 
-		// Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
-		if (isMaintainedByRoo) {
-			// First thing is for us to figure out the proxy file (or what it used to be called, if it has gone away)
-			String proxyFile = null;
-			if (eventPath.endsWith("Proxy.java")) {
-				proxyFile = eventPath;
-			} else {
-				String name = fileEvent.getFileDetails().getFile().getName();
-				name = name.substring(0, name.length() - 5); // Drop .java
-				for (SharedType t : SharedType.values()) {
-					if (name.endsWith(t.getFullName()) || name.endsWith("_Roo_Gwt")) {
-						// This is just a shared type; we don't care about changes to them
-						return;
-					}
-				}
+        // Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
+        if (isMaintainedByRoo) {
+            // First thing is for us to figure out the proxy file (or what it used to be called, if it has gone away)
+            String proxyFile = null;
+            if (eventPath.endsWith("Proxy.java")) {
+                proxyFile = eventPath;
+            } else {
+                String name = fileEvent.getFileDetails().getFile().getName();
+                name = name.substring(0, name.length() - 5); // Drop .java
+                for (SharedType t : SharedType.values()) {
+                    if (name.endsWith(t.getFullName()) || name.endsWith("_Roo_Gwt")) {
+                        // This is just a shared type; we don't care about changes to them
+                        return;
+                    }
+                }
 
-				// A suffix could be inclusive of another suffix, so we need to find the best (longest) match,
-				// not necessarily the first match.
-				String bestMatch = "";
-				for (MirrorType t : MirrorType.values()) {
-					String suffix = t.getSuffix();
-					if (name.endsWith(suffix) && suffix.length() > bestMatch.length()) {
-						// Drop the part of the filename with the suffix, as well as the extension
-						bestMatch = suffix;
-						String entityName = name.substring(0, name.lastIndexOf(suffix));
-						proxyFile = GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
-					}
-				}
-			}
-			Assert.hasText(proxyFile, "Proxy file not computed for input " + eventPath);
+                // A suffix could be inclusive of another suffix, so we need to find the best (longest) match,
+                // not necessarily the first match.
+                String bestMatch = "";
+                for (MirrorType t : MirrorType.values()) {
+                    String suffix = t.getSuffix();
+                    if (name.endsWith(suffix) && suffix.length() > bestMatch.length()) {
+                        // Drop the part of the filename with the suffix, as well as the extension
+                        bestMatch = suffix;
+                        String entityName = name.substring(0, name.lastIndexOf(suffix));
+                        proxyFile = GwtPath.MANAGED_REQUEST.canonicalFileSystemPath(projectMetadata, entityName + "Proxy.java");
+                    }
+                }
+            }
+            Assert.hasText(proxyFile, "Proxy file not computed for input " + eventPath);
 
-			// Calculate the name without the "Proxy.java" portion (simplifies working with it later)
-			String simpleName = new File(proxyFile).getName();
-			simpleName = simpleName.substring(0, simpleName.length() - 10); // Drop Proxy.java
+            // Calculate the name without the "Proxy.java" portion (simplifies working with it later)
+            String simpleName = new File(proxyFile).getName();
+            simpleName = simpleName.substring(0, simpleName.length() - 10); // Drop Proxy.java
 
-			Assert.hasText(simpleName, "Simple name not computed for input " + eventPath);
-		}
+            Assert.hasText(simpleName, "Simple name not computed for input " + eventPath);
+        }
 
-		// By this point the directory structure should correspond to files that should exist
+        // By this point the directory structure should correspond to files that should exist
 
-		// Now we need to refresh all the application-wide files
-		processedApplicationFiles = true;
-		updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
-		updateApplicationRequestFactory(fileManager, projectMetadata);
-		updateListPlaceRenderer(fileManager, projectMetadata);
-		updateMasterActivities();
-		updateDetailsActivities();
-		updateMobileActivities();
-	}
+        // Now we need to refresh all the application-wide files
+        processedApplicationFiles = true;
+        updateApplicationEntityTypesProcessor(fileManager, projectMetadata);
+        updateApplicationRequestFactory(fileManager, projectMetadata);
+        updateListPlaceRenderer(fileManager, projectMetadata);
+        updateMasterActivities();
+        updateDetailsActivities();
+        updateMobileActivities();
+    }
 
-	public void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-		type.setOverwriteConcrete(true);
-		MirrorType locate = MirrorType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+    public void updateApplicationEntityTypesProcessor(FileManager fileManager, ProjectMetadata projectMetadata) {
+        SharedType type = SharedType.APP_ENTITY_TYPES_PROCESSOR;
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        type.setOverwriteConcrete(true);
+        MirrorType locate = MirrorType.PROXY;
+        String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+        for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+            String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+            String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
 
-			dataDictionary.addSection("proxys").setVariable("proxy", fullPath);
+            dataDictionary.addSection("proxys").setVariable("proxy", fullPath);
 
-			String entity1 = new StringBuilder("\t\tif (").append(fullPath).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") null);\n\t\t\treturn;\n\t\t}").toString();
-			dataDictionary.addSection("entities1").setVariable("entity", entity1);
+            String entity1 = new StringBuilder("\t\tif (").append(fullPath).append(".class.equals(clazz)) {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") null);\n\t\t\treturn;\n\t\t}").toString();
+            dataDictionary.addSection("entities1").setVariable("entity", entity1);
 
-			String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(fullPath).append(") {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
-			dataDictionary.addSection("entities2").setVariable("entity", entity2);
+            String entity2 = new StringBuilder("\t\tif (proxy instanceof ").append(fullPath).append(") {\n\t\t\tprocessor.handle").append(simpleName).append("((").append(fullPath).append(") proxy);\n\t\t\treturn;\n\t\t}").toString();
+            dataDictionary.addSection("entities2").setVariable("entity", entity2);
 
-			String entity3 = new StringBuilder("\tpublic abstract void handle").append(simpleName).append("(").append(fullPath).append(" proxy);").toString();
-			dataDictionary.addSection("entities3").setVariable("entity", entity3);
-		}
+            String entity3 = new StringBuilder("\tpublic abstract void handle").append(simpleName).append("(").append(fullPath).append(" proxy);").toString();
+            dataDictionary.addSection("entities3").setVariable("entity", entity3);
+        }
 
-		try {
+        try {
             buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     private void buildView(SharedType destType, TemplateDataDictionary dataDictionary) {
         try {
@@ -289,48 +284,48 @@ public class GwtFileListener implements FileEventListener {
             }
             ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getPhysicalTypeDetails();
 
-                for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
-                    ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
-                    abstractConstructor.setModifier(constructorMetadata.getModifier());
+            for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
+                ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
+                abstractConstructor.setModifier(constructorMetadata.getModifier());
 
-                    HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(superType.getName(), extendedType);
+                HashMap<JavaSymbolName, JavaType> typeMap = resolveTypes(superType.getName(), extendedType);
 
-                    for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
+                for (AnnotatedJavaType type : constructorMetadata.getParameterTypes()) {
 
-                        JavaType newType = type.getJavaType();
-                        if (type.getJavaType().getParameters().size() > 0) {
-                            ArrayList<JavaType> paramTypes = new ArrayList<JavaType>();
-                            for (JavaType typeType : type.getJavaType().getParameters()) {
-                                JavaType typeParam = typeMap.get(new JavaSymbolName(typeType.toString()));
-                                if (typeParam != null) {
-                                    paramTypes.add(typeParam);
-                                }
-
+                    JavaType newType = type.getJavaType();
+                    if (type.getJavaType().getParameters().size() > 0) {
+                        ArrayList<JavaType> paramTypes = new ArrayList<JavaType>();
+                        for (JavaType typeType : type.getJavaType().getParameters()) {
+                            JavaType typeParam = typeMap.get(new JavaSymbolName(typeType.toString()));
+                            if (typeParam != null) {
+                                paramTypes.add(typeParam);
                             }
-                            newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
+
                         }
-                        abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
+                        newType = new JavaType(type.getJavaType().getFullyQualifiedTypeName(), type.getJavaType().getArray(), type.getJavaType().getDataType(), type.getJavaType().getArgName(), paramTypes);
                     }
-                    abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
-
-                    InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-                    bodyBuilder.newLine().indent().append("super(");
-
-                    int i = 0;
-                    for (JavaSymbolName paramName : abstractConstructor.getParameterNames()) {
-                        bodyBuilder.append(" ").append(paramName.getSymbolName());
-                        if (abstractConstructor.getParameterTypes().size() > i + 1) {
-                            bodyBuilder.append(", ");
-                        }
-                        i++;
-                    }
-
-                    bodyBuilder.append(");");
-
-                    bodyBuilder.newLine().indentRemove();
-                    abstractConstructor.setBodyBuilder(bodyBuilder);
-                    builder.getDeclaredConstructors().add(abstractConstructor);
+                    abstractConstructor.getParameterTypes().add(new AnnotatedJavaType(newType, null));
                 }
+                abstractConstructor.setParameterNames(constructorMetadata.getParameterNames());
+
+                InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+                bodyBuilder.newLine().indent().append("super(");
+
+                int i = 0;
+                for (JavaSymbolName paramName : abstractConstructor.getParameterNames()) {
+                    bodyBuilder.append(" ").append(paramName.getSymbolName());
+                    if (abstractConstructor.getParameterTypes().size() > i + 1) {
+                        bodyBuilder.append(", ");
+                    }
+                    i++;
+                }
+
+                bodyBuilder.append(");");
+
+                bodyBuilder.newLine().indentRemove();
+                abstractConstructor.setBodyBuilder(bodyBuilder);
+                builder.getDeclaredConstructors().add(abstractConstructor);
+            }
         }
 
         return builder;
@@ -413,55 +408,55 @@ public class GwtFileListener implements FileEventListener {
         return fieldMetadataBuilder;
     }
 
-	public void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType type = SharedType.APP_REQUEST_FACTORY;
+    public void updateApplicationRequestFactory(FileManager fileManager, ProjectMetadata projectMetadata) {
+        SharedType type = SharedType.APP_REQUEST_FACTORY;
         type.setOverwriteConcrete(true);
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
         dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
 
-		MirrorType locate = MirrorType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-			String entity = new StringBuilder("\t").append(simpleName).append("Request ").append(StringUtils.uncapitalize(simpleName)).append("Request();").toString();
-			dataDictionary.addSection("entities").setVariable("entity", entity);
-		}
+        MirrorType locate = MirrorType.PROXY;
+        String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+        for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+            String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+            String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+            String entity = new StringBuilder("\t").append(simpleName).append("Request ").append(StringUtils.uncapitalize(simpleName)).append("Request();").toString();
+            dataDictionary.addSection("entities").setVariable("entity", entity);
+        }
 
-    if (projectMetadata.isGaeEnabled()) {
-      dataDictionary.showSection("gae");
+        if (projectMetadata.isGaeEnabled()) {
+            dataDictionary.showSection("gae");
+        }
+
+        try {
+            buildView(type, dataDictionary);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-		try {
-            buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+    public static String getQualifiedType(MirrorType type, ProjectMetadata projectMetadata, String clazz) {
+        return type.getPath().packageName(projectMetadata) + "." + clazz + type.getSuffix();
+    }
 
-	public static String getQualifiedType(MirrorType type, ProjectMetadata projectMetadata, String clazz) {
-		return type.getPath().packageName(projectMetadata) + "." + clazz + type.getSuffix();
-	}
+    public static String getQualifiedType(SharedType type, ProjectMetadata projectMetadata) {
+        return type.getFullyQualifiedTypeName(projectMetadata);
+    }
 
-	public static String getQualifiedType(SharedType type, ProjectMetadata projectMetadata) {
-		return type.getFullyQualifiedTypeName(projectMetadata);
-	}
+    public void updateListPlaceRenderer(FileManager fileManager, ProjectMetadata projectMetadata) {
+        SharedType type = SharedType.LIST_PLACE_RENDERER;
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
 
-	public void updateListPlaceRenderer(FileManager fileManager, ProjectMetadata projectMetadata) {
-		SharedType type = SharedType.LIST_PLACE_RENDERER;
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
-
-		MirrorType locate = MirrorType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-      TemplateDataDictionary section = dataDictionary.addSection("entities");
-      section.setVariable("entitySimpleName", simpleName);
-      section.setVariable("entityFullPath", fullPath);
-			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
-		}
+        MirrorType locate = MirrorType.PROXY;
+        String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+        for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+            String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+            String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+            TemplateDataDictionary section = dataDictionary.addSection("entities");
+            section.setVariable("entitySimpleName", simpleName);
+            section.setVariable("entityFullPath", fullPath);
+            addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
+        }
 
 
         HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
@@ -470,62 +465,62 @@ public class GwtFileListener implements FileEventListener {
 
         type.setCreateAbstract(true);
 
-		try {
+        try {
             buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	private void write(String destFile, String newContents, FileManager fileManager) {
-		// Write to disk, or update a file if it is already present
-		MutableFile mutableFile = null;
-		if (fileManager.exists(destFile)) {
-			// First verify if the file has even changed
-			File f = new File(destFile);
-			String existing = null;
-			try {
-				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {
-			}
+    private void write(String destFile, String newContents, FileManager fileManager) {
+        // Write to disk, or update a file if it is already present
+        MutableFile mutableFile = null;
+        if (fileManager.exists(destFile)) {
+            // First verify if the file has even changed
+            File f = new File(destFile);
+            String existing = null;
+            try {
+                existing = FileCopyUtils.copyToString(new FileReader(f));
+            } catch (IOException ignoreAndJustOverwriteIt) {
+            }
 
-			if (!newContents.equals(existing)) {
-				mutableFile = fileManager.updateFile(destFile);
-			}
-		} else {
-			mutableFile = fileManager.createFile(destFile);
-			Assert.notNull(mutableFile, "Could not create output file '" + destFile + "'");
-		}
+            if (!newContents.equals(existing)) {
+                mutableFile = fileManager.updateFile(destFile);
+            }
+        } else {
+            mutableFile = fileManager.createFile(destFile);
+            Assert.notNull(mutableFile, "Could not create output file '" + destFile + "'");
+        }
 
-		try {
-			if (mutableFile != null) {
-				// If mutableFile was null, that means the source == destination content
-				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
-		}
-	}
+        try {
+            if (mutableFile != null) {
+                // If mutableFile was null, that means the source == destination content
+                FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
+            }
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
+        }
+    }
 
-	public void updateMasterActivities() {
-		SharedType type = SharedType.MASTER_ACTIVITIES;
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
-		addReference(dataDictionary, SharedType.SCAFFOLD_APP);
+    public void updateMasterActivities() {
+        SharedType type = SharedType.MASTER_ACTIVITIES;
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+        addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+        addReference(dataDictionary, SharedType.SCAFFOLD_APP);
 
-		MirrorType locate = MirrorType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-      TemplateDataDictionary section = dataDictionary.addSection("entities");
-      section.setVariable("entitySimpleName", simpleName);
-      section.setVariable("entityFullPath", fullPath);
-      addImport(dataDictionary, simpleName, MirrorType.LIST_ACTIVITY);
-      addImport(dataDictionary, simpleName, MirrorType.PROXY);
-      addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
-      addImport(dataDictionary, simpleName, MirrorType.MOBILE_LIST_VIEW);
+        MirrorType locate = MirrorType.PROXY;
+        String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+        for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+            String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+            String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+            TemplateDataDictionary section = dataDictionary.addSection("entities");
+            section.setVariable("entitySimpleName", simpleName);
+            section.setVariable("entityFullPath", fullPath);
+            addImport(dataDictionary, simpleName, MirrorType.LIST_ACTIVITY);
+            addImport(dataDictionary, simpleName, MirrorType.PROXY);
+            addImport(dataDictionary, simpleName, MirrorType.LIST_VIEW);
+            addImport(dataDictionary, simpleName, MirrorType.MOBILE_LIST_VIEW);
 
             ArrayList<JavaSymbolName> watchFields = new ArrayList<JavaSymbolName>();
             watchFields.add(new JavaSymbolName("requests"));
@@ -538,36 +533,36 @@ public class GwtFileListener implements FileEventListener {
 
             type.setCreateAbstract(true);
 
-		}
+        }
 
-		try {
+        try {
             buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-  private void addImport(TemplateDataDictionary dataDictionary,
-      String simpleName, MirrorType mirrorType) {
-    addImport(dataDictionary, mirrorType.getPath().packageName(projectMetadata) + "." + simpleName + mirrorType.getSuffix());
-  }
+    private void addImport(TemplateDataDictionary dataDictionary,
+                           String simpleName, MirrorType mirrorType) {
+        addImport(dataDictionary, mirrorType.getPath().packageName(projectMetadata) + "." + simpleName + mirrorType.getSuffix());
+    }
 
-	public void updateDetailsActivities() {
-		SharedType type = SharedType.DETAILS_ACTIVITIES;
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
-		addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-		addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
+    public void updateDetailsActivities() {
+        SharedType type = SharedType.DETAILS_ACTIVITIES;
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+        addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
+        addReference(dataDictionary, SharedType.APP_ENTITY_TYPES_PROCESSOR);
 
-		MirrorType locate = MirrorType.PROXY;
-		String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
-		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
-			String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
-			String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
-			String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
-			dataDictionary.addSection("entities").setVariable("entity", entity);
-			addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
-			addImport(dataDictionary, MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
-		}
+        MirrorType locate = MirrorType.PROXY;
+        String antPath = locate.getPath().canonicalFileSystemPath(projectMetadata) + File.separatorChar + "**" + locate.getSuffix() + ".java";
+        for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
+            String fullPath = fd.getFile().getName().substring(0, fd.getFile().getName().length() - 5); // Drop .java from filename
+            String simpleName = fullPath.substring(0, fullPath.length() - locate.getSuffix().length()); // Drop "Proxy" suffix from filename
+            String entity = new StringBuilder("\t\t\tpublic void handle").append(simpleName).append("(").append(fullPath).append(" proxy) {\n").append("\t\t\t\tsetResult(new ").append(simpleName).append("ActivitiesMapper(requests, placeController).getActivity(proxyPlace));\n\t\t\t}").toString();
+            dataDictionary.addSection("entities").setVariable("entity", entity);
+            addImport(dataDictionary, MirrorType.PROXY.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.PROXY.getSuffix());
+            addImport(dataDictionary, MirrorType.ACTIVITIES_MAPPER.getPath().packageName(projectMetadata) + "." + simpleName + MirrorType.ACTIVITIES_MAPPER.getSuffix());
+        }
 
         ArrayList<JavaSymbolName> watchFields = new ArrayList<JavaSymbolName>();
         watchFields.add(new JavaSymbolName("requests"));
@@ -580,45 +575,45 @@ public class GwtFileListener implements FileEventListener {
 
         type.setCreateAbstract(true);
 
-		try {
+        try {
             buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	public void updateMobileActivities() {
-		SharedType type = SharedType.MOBILE_ACTIVITIES;
-		TemplateDataDictionary dataDictionary = buildDataDictionary(type);
+    public void updateMobileActivities() {
+        SharedType type = SharedType.MOBILE_ACTIVITIES;
+        TemplateDataDictionary dataDictionary = buildDataDictionary(type);
 
-		try {
+        try {
             buildView(type, dataDictionary);
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
-	}
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
-	private TemplateDataDictionary buildDataDictionary(SharedType destType) {
-		JavaType javaType = getDestinationJavaType(destType);
-		TemplateDataDictionary dataDictionary = TemplateDictionary.create();
-		dataDictionary.setVariable("className", javaType.getSimpleTypeName());
-		dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
-		dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
-		dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
-		dataDictionary.setVariable("sharedGaePackage", GwtPath.SHARED_GAE.packageName(projectMetadata));
-		return dataDictionary;
-	}
+    private TemplateDataDictionary buildDataDictionary(SharedType destType) {
+        JavaType javaType = getDestinationJavaType(destType);
+        TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+        dataDictionary.setVariable("className", javaType.getSimpleTypeName());
+        dataDictionary.setVariable("packageName", javaType.getPackage().getFullyQualifiedPackageName());
+        dataDictionary.setVariable("placePackage", GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata));
+        dataDictionary.setVariable("sharedScaffoldPackage", GwtPath.SHARED_SCAFFOLD.packageName(projectMetadata));
+        dataDictionary.setVariable("sharedGaePackage", GwtPath.SHARED_GAE.packageName(projectMetadata));
+        return dataDictionary;
+    }
 
-	private JavaType getDestinationJavaType(SharedType destType) {
-		return new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
-	}
+    private JavaType getDestinationJavaType(SharedType destType) {
+        return new JavaType(destType.getFullyQualifiedTypeName(projectMetadata));
+    }
 
-	private void addReference(TemplateDataDictionary dataDictionary, SharedType type) {
-		addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
-		dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
-	}
+    private void addReference(TemplateDataDictionary dataDictionary, SharedType type) {
+        addImport(dataDictionary, getDestinationJavaType(type).getFullyQualifiedTypeName());
+        dataDictionary.setVariable(type.getName(), getDestinationJavaType(type).getSimpleTypeName());
+    }
 
-	private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {
-		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
-	}
+    private void addImport(TemplateDataDictionary dataDictionary, String importDeclaration) {
+        dataDictionary.addSection("imports").setVariable("import", importDeclaration);
+    }
 }

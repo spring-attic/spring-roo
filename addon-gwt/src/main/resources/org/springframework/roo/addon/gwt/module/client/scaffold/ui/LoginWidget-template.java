@@ -14,35 +14,35 @@ import com.google.gwt.user.client.ui.Widget;
  * A simple widget which displays info about the user and a logout link.
  */
 public class LoginWidget extends Composite {
-  interface Binder extends UiBinder<Widget, LoginWidget> {
-  }
-
-  private static final Binder BINDER = GWT.create(Binder.class);
-
-  @UiField
-  SpanElement name;
-  @UiField
-  Anchor logoutLink;
-
-  public LoginWidget() {
-    initWidget(BINDER.createAndBindUi(this));
-  }
-
-  public void setUserName(String userName) {
-    name.setInnerText(userName);
-  }
-
-  public void setLogoutUrl(String url) {
-    logoutLink.setHref(url);
-  }
-
-  /**
-   * Squelch clicks of the logout link if no href has been set.
-   */
-  @UiHandler("logoutLink")
-  void handleClick(ClickEvent e) {
-    if ("".equals(logoutLink.getHref())) {
-      e.stopPropagation();
+    interface Binder extends UiBinder<Widget, LoginWidget> {
     }
-  }
+
+    private static final Binder BINDER = GWT.create(Binder.class);
+
+    @UiField
+    SpanElement name;
+    @UiField
+    Anchor logoutLink;
+
+    public LoginWidget() {
+        initWidget(BINDER.createAndBindUi(this));
+    }
+
+    public void setUserName(String userName) {
+        name.setInnerText(userName);
+    }
+
+    public void setLogoutUrl(String url) {
+        logoutLink.setHref(url);
+    }
+
+    /**
+     * Squelch clicks of the logout link if no href has been set.
+     */
+    @UiHandler("logoutLink")
+    void handleClick(ClickEvent e) {
+        if ("".equals(logoutLink.getHref())) {
+            e.stopPropagation();
+        }
+    }
 }

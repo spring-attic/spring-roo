@@ -1,5 +1,10 @@
 package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
 
+import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
+import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
+import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
 import com.google.gwt.activity.shared.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
@@ -9,20 +14,16 @@ import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.place.shared.*;
 import com.google.gwt.requestfactory.client.RequestFactoryLogHandler;
 import com.google.gwt.requestfactory.shared.LoggingRequest;
-import com.google.gwt.requestfactory.shared.Receiver;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HasConstrainedValue;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.inject.Inject;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.request.RequestEvent;
-import __TOP_LEVEL_PACKAGE__.client.managed.request.ApplicationRequestFactory;
-import __TOP_LEVEL_PACKAGE__.client.managed.activity.*;
-import __TOP_LEVEL_PACKAGE__.client.scaffold.place.*;
-import __TOP_LEVEL_PACKAGE__.shared.scaffold.*;
-__GAE_IMPORT__
+
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+__GAE_IMPORT__
 
 /**
  * Application for browsing entities.
@@ -73,22 +74,22 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
     private void init() {
 
         GWT.setUncaughtExceptionHandler(new GWT.UncaughtExceptionHandler() {
-          public void onUncaughtException(Throwable e) {
-            Window.alert("Error: " + e.getMessage());
-            log.log(Level.SEVERE, e.getMessage(), e);
-          }
+            public void onUncaughtException(Throwable e) {
+                Window.alert("Error: " + e.getMessage());
+                log.log(Level.SEVERE, e.getMessage(), e);
+            }
         });
 
         if (LogConfiguration.loggingIsEnabled()) {
-          // Add remote logging handler
-          RequestFactoryLogHandler.LoggingRequestProvider provider = new RequestFactoryLogHandler.LoggingRequestProvider() {
-              public LoggingRequest getLoggingRequest() {
-                return requestFactory.loggingRequest();
-              }
+            // Add remote logging handler
+            RequestFactoryLogHandler.LoggingRequestProvider provider = new RequestFactoryLogHandler.LoggingRequestProvider() {
+                public LoggingRequest getLoggingRequest() {
+                    return requestFactory.loggingRequest();
+                }
             };
-          Logger.getLogger("").addHandler(
-              new RequestFactoryLogHandler(provider, Level.WARNING,
-                                           new ArrayList<String>()));
+            Logger.getLogger("").addHandler(
+                    new RequestFactoryLogHandler(provider, Level.WARNING,
+                            new ArrayList<String>()));
         }
 
         RequestEvent.register(eventBus, new RequestEvent.Handler() {
@@ -96,15 +97,15 @@ public class ScaffoldDesktopApp extends ScaffoldApp {
             private static final int LOADING_TIMEOUT = 250;
 
             public void onRequestEvent(RequestEvent requestEvent) {
-              if (requestEvent.getState() == RequestEvent.State.SENT) {
-                shell.getMole().showDelayed(LOADING_TIMEOUT);
-              } else {
-                shell.getMole().hide();
-              }
+                if (requestEvent.getState() == RequestEvent.State.SENT) {
+                    shell.getMole().showDelayed(LOADING_TIMEOUT);
+                } else {
+                    shell.getMole().hide();
+                }
             }
         });
 
-__GAE_HOOKUP__
+        __GAE_HOOKUP__
         CachingActivityMapper cached = new CachingActivityMapper(applicationMasterActivities);
         ProxyPlaceToListPlace proxyPlaceToListPlace = new ProxyPlaceToListPlace();
         ActivityMapper masterActivityMap = new FilteredActivityMapper(proxyPlaceToListPlace, cached);

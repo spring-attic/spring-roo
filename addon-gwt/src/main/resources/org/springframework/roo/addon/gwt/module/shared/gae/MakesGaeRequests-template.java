@@ -6,8 +6,8 @@ package __TOP_LEVEL_PACKAGE__.__SEGMENT_PACKAGE__;
  */
 public interface MakesGaeRequests {
 
-  /**
-   * Return a request selector.
-   */
-  GaeUserServiceRequest userServiceRequest();
+    /**
+     * Return a request selector.
+     */
+    GaeUserServiceRequest userServiceRequest();
 }
