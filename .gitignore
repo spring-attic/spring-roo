@@ -7,3 +7,4 @@ annotations/src/main/java/org
 *.ipr
 *.iml
 *.iws
+.idea
