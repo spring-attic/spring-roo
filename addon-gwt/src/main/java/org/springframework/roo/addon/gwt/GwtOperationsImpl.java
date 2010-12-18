@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provides GWT installation services.
@@ -296,7 +295,16 @@ public class GwtOperationsImpl implements GwtOperations {
         if (isGaeEnabled()) {
             WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectMetadata) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc,
                     "This filter makes GAE authentication services visible to a RequestFactory client.");
+
+            String displayName = "Redirect to the login page if needed before showing any html pages";
+            WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
+            ArrayList<String> roleNames = new ArrayList<String>();
+            roleNames.add("*");
+            String userDataConstraint = null;
+            WebXmlUtils.addSecurityConstraint(displayName, Collections.singletonList(webResourceCollection), roleNames, userDataConstraint, webXmlDoc, null);
         }
+
+
 
         removeIfFound("/web-app/error-page", webXmlRoot);
         XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);

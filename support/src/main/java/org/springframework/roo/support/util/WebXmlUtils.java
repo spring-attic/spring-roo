@@ -5,6 +5,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.List;
+
 /**
  * Helper util class to allow more convenient handling of web.xml file in Web projects.
  * 
@@ -339,6 +341,71 @@ public abstract class WebXmlUtils {
 		}
 		appendChildIfNotPresent(errorPage, new XmlElementBuilder("location", webXml).setText(location).build(), webXml);
 	}
+
+        /**
+     * Add a security constraint to a web.xml document
+     *
+     * @param displayName (optional)
+     * @param webResourceCollections (required)
+     * @param roleNames (optional)
+     * @param transportGuarantee (optional)
+     * @param webXml (required)
+     * @param comment (optional)
+     * */
+    public static void addSecurityConstraint(String displayName, List<WebResourceCollection> webResourceCollections, List<String> roleNames, String transportGuarantee, Document webXml, String comment) {
+        Assert.notNull(webXml, "Web XML document required");
+        Assert.notNull(webResourceCollections, "A security-constraint element must contain at least one web-resource-collection");
+        Assert.isTrue(webResourceCollections.size() > 0, "A security-constraint element must contain at least one web-resource-collection");
+
+        Element securityConstraint = XmlUtils.findFirstElement("security-constraint", webXml.getDocumentElement());
+        if (securityConstraint == null) {
+            securityConstraint = webXml.createElement("security-constraint");
+            insertAfter(securityConstraint, "session-config[last()]", webXml);
+            if (StringUtils.hasText(comment)) {
+				addCommentBefore(securityConstraint, comment, webXml);
+			}
+        }
+
+        if (StringUtils.hasText(displayName)) {
+            appendChildIfNotPresent(securityConstraint, new XmlElementBuilder("display-name", webXml).setText(displayName).build(), webXml);
+        }
+
+        for (WebResourceCollection webResourceCollection :  webResourceCollections) {
+            XmlElementBuilder webResourceCollectionBuilder = new XmlElementBuilder("web-resource-collection", webXml);
+            Assert.hasText(webResourceCollection.getWebResourceName(), "web-resource-name is required");
+            webResourceCollectionBuilder.addChild(new XmlElementBuilder("web-resource-name", webXml).setText(webResourceCollection.getWebResourceName()).build());
+            if (StringUtils.hasText(webResourceCollection.getDescription())) {
+                webResourceCollectionBuilder.addChild(new XmlElementBuilder("description", webXml).setText(webResourceCollection.getWebResourceName()).build());
+            }
+            for (String urlPattern : webResourceCollection.getUrlPatterns()) {
+                if (StringUtils.hasText(urlPattern)) {
+                    webResourceCollectionBuilder.addChild(new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build());
+                }
+            }
+            for (String httpMethod : webResourceCollection.getHttpMethods()) {
+                if (StringUtils.hasText(httpMethod)) {
+                    webResourceCollectionBuilder.addChild(new XmlElementBuilder("http-method", webXml).setText(httpMethod).build());
+                }
+            }
+            appendChildIfNotPresent(securityConstraint, webResourceCollectionBuilder.build(), webXml);
+        }
+
+        if (roleNames != null && roleNames.size() > 0) {
+            XmlElementBuilder authConstraintBuilder = new XmlElementBuilder("auth-constraint", webXml);
+            for (String roleName : roleNames) {
+                if (StringUtils.hasText(roleName)) {
+                    authConstraintBuilder.addChild(new XmlElementBuilder("role-name", webXml).setText(roleName).build());
+                }
+            }
+            appendChildIfNotPresent(securityConstraint, authConstraintBuilder.build(), webXml);
+        }
+
+        if (StringUtils.hasText(transportGuarantee)) {
+            XmlElementBuilder userDataConstraintBuilder = new XmlElementBuilder("user-data-constraint", webXml);
+            userDataConstraintBuilder.addChild(new XmlElementBuilder("transport-guarantee", webXml).setText(transportGuarantee).build());
+            appendChildIfNotPresent(securityConstraint, userDataConstraintBuilder.build(), webXml);
+        }
+    }
 	
 	private static void insertBetween(Element element, String afterElementName, String beforeElementName, Document doc) {
 		Element beforeElement = XmlUtils.findFirstElement("/web-app/" + beforeElementName, doc.getDocumentElement());
@@ -453,4 +520,39 @@ public abstract class WebXmlUtils {
 	public static enum FilterPosition {
 		FIRST, LAST, BEFORE, AFTER, BETWEEN;
 	}
+
+    /**
+     * Convenience class for passing a web-resource-collection element's details
+     * @since 1.1.1
+     */
+    public static class WebResourceCollection {
+
+        private String webResourceName;
+        private String description;
+        private List<String> urlPatterns;
+        private List<String> httpMethods;
+
+        public WebResourceCollection(String webResourceName, String description, List<String> urlPatterns, List<String> httpMethods) {
+            this.webResourceName = webResourceName;
+            this.description = description;
+            this.urlPatterns = urlPatterns;
+            this.httpMethods = httpMethods;
+        }
+
+        public String getWebResourceName() {
+            return webResourceName;
+        }
+
+        public List<String> getUrlPatterns() {
+            return urlPatterns;
+        }
+
+        public List<String> getHttpMethods() {
+            return httpMethods;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
 }
