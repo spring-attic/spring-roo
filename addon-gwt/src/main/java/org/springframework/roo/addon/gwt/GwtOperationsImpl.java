@@ -15,11 +15,13 @@ import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -96,6 +98,8 @@ public class GwtOperationsImpl implements GwtOperations {
             for (Element dependency : XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration)) {
                 projectOperations.dependencyUpdate(new Dependency(dependency));
             }
+
+            updateDataNulcueusPlugin();
         }
 
         // Add POM plugin
@@ -127,6 +131,43 @@ public class GwtOperationsImpl implements GwtOperations {
             String id = GwtMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
             metadataService.get(id);
         }
+    }
+
+    private void  updateDataNulcueusPlugin() {
+        String pomXml = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+        Assert.isTrue(fileManager.exists(pomXml), "pom.xml not found; cannot continue");
+
+        MutableFile mutablePomXml = null;
+        InputStream is = null;
+        Document pomXmlDoc;
+        try {
+            mutablePomXml = fileManager.updateFile(pomXml);
+            is = mutablePomXml.getInputStream();
+            pomXmlDoc = XmlUtils.getDocumentBuilder().parse(mutablePomXml.getInputStream());
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+
+        Element pomRoot = (Element) pomXmlDoc.getFirstChild();
+        List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
+        for (Element pluginElement : pluginElements) {
+            Plugin plugin = new Plugin(pluginElement);
+            if ("maven-datanucleus-plugin".equals(plugin.getArtifactId().getSymbolName()) && "org.datanucleus".equals(plugin.getGroupId().getFullyQualifiedPackageName())) {
+                Element configElement = plugin.getConfiguration().getConfiguration();
+                configElement.appendChild(new XmlElementBuilder("mappingExcludes", pomXmlDoc).setText("**/GaeAuthFilter.class").build());
+            }
+
+        }
+
+        XmlUtils.writeXml(mutablePomXml.getOutputStream(), pomXmlDoc);
     }
 
     private void copyDirectoryContents(GwtPath gwtPath, ProjectMetadata projectMetadata) {

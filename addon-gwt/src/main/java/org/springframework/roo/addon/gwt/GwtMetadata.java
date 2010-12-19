@@ -1045,7 +1045,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
     private void buildUiXml(String templateContents, String destFile) throws TransformerException, IOException, SAXException {
 
-        Transformer transformer = XmlUtils.createIndentingTransformer();// TransformerFactory.newInstance().newTransformer();
+        Transformer transformer = XmlUtils.createIndentingTransformer();
         DocumentBuilder builder = XmlUtils.getDocumentBuilder();
         builder.setEntityResolver(new EntityResolver() {
             public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
