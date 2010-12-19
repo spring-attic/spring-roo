@@ -96,7 +96,14 @@ public class GwtMetadata extends AbstractMetadataItem {
             for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
                 JavaType returnType = accessor.getReturnType();
                 checkPrimitive(returnType);
+
+                PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
+                if (isEmbeddable(ptmd)) {
+                    throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + returnType.getSimpleTypeName() + "' in '" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + "'.");
+                }
             }
+
+
         }
 
         // We know GwtMetadataProvider already took care of all the necessary checks. So we can just re-create fresh representations of the types we're responsible for
