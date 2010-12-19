@@ -9,7 +9,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
-import org.springframework.roo.support.util.ClassUtils;
 
 /**
  * Basic implementation of {@link JdbcDriverProvider} that provides common JDBC drivers.
@@ -35,19 +34,8 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 	}
 	
 	public Driver loadDriver(String driverClassName) throws RuntimeException {
-		Class<?> clazz = null;
-
-		if (ClassUtils.isPresent(driverClassName, CommonJdbcDriverProvider.class.getClassLoader())) {
-			// This is quite simple as our bundle has a direct reference
-			try {
-				clazz = ClassUtils.forName(driverClassName, CommonJdbcDriverProvider.class.getClassLoader());
-			} catch (Exception ignoreAsSomeoneElseMightLocateIt) {}
-		}
-		
-		if (clazz == null) {
-			// Try a search
-			clazz = BundleFindingUtils.findFirstBundleWithType(bundleContext, driverClassName);
-		}
+		// Try a search
+		Class<?> clazz = BundleFindingUtils.findFirstBundleWithType(bundleContext, driverClassName);
 		
 		if (clazz == null) {
 			// Let's give up given it doesn't seem to be loadable
@@ -63,11 +51,9 @@ public class CommonJdbcDriverProvider implements JdbcDriverProvider {
 		try {
 			Driver result = (Driver) clazz.newInstance();
 			DriverManager.registerDriver(result);
-			//registerDriverIfRequired(driverClassName);
 			return result;
 		} catch (Exception e) {
 			throw new IllegalStateException("Unable to load JDBC driver '" + driverClassName + "'", e);
 		}
 	}
-
 }

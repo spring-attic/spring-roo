@@ -10,19 +10,6 @@
 	<artifactId>org.springframework.roo.addon.jdbc</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - JDBC Driver Acquisition</name>
-	<!-- TEMPORARY EBR USAGE RETAINED ONLY FOR ORACLE JDBC DRIVER BELOW (BPA 27/Jul/10) -->
-	<repositories>
-		<repository>
-			<id>com.springsource.repository.bundles.release</id>
-			<name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/release</url>
-		</repository>
-		<repository>
-			<id>com.springsource.repository.bundles.external</id>
-			<name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/external</url>
-		</repository>
-	</repositories>
 	<dependencies>
 		<!-- OSGi -->
 		<dependency>
