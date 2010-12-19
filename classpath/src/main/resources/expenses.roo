@@ -2,7 +2,7 @@ project --topLevelPackage org.springsource.roo.extrack
 
 persistence setup --provider HIBERNATE --database HYPERSONIC_IN_MEMORY
 
-enum type --class ~.client.shared.Gender
+enum type --class ~.shared.domain.Gender
 enum constant --name MALE
 enum constant --name FEMALE
 
@@ -11,7 +11,7 @@ field string --fieldName displayName --notNull
 field string --fieldName userName --sizeMin 3 --sizeMax 30 --notNull
 field string --fieldName department
 field reference --type Employee supervisor
-field enum --fieldName gender --type ~.client.shared.Gender
+field enum --fieldName gender --type ~.shared.domain.Gender
 field boolean --fieldName admin --notNull
 
 entity --class ~.server.domain.Report --testAutomatically

@@ -15,12 +15,7 @@ import org.springframework.roo.support.osgi.UrlFindingUtils;
 import org.springframework.roo.support.util.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
 import java.io.*;
 import java.net.URL;
 import java.util.*;

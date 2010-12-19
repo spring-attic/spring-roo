@@ -124,17 +124,17 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 
         // Our general strategy is to instantiate GwtMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
         GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager,
-                metadataService, physicalTypeMetadataProvider);
+                metadataService, physicalTypeMetadataProvider, classpathOperations);
 
         // Output each type that was provided in the details
-        for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
+        /*for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
             // Determine the canonical filename
             String physicalLocationCanonicalPath = classpathOperations.getPhysicalLocationCanonicalPath(details.getDeclaredByMetadataId());
 
             // Create (or modify the .java file)
             PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(details.getDeclaredByMetadataId(), physicalLocationCanonicalPath, details);
             physicalTypeMetadataProvider.createPhysicalType(toCreate);
-        }
+        }*/
 
         return gwtMetadata;
     }

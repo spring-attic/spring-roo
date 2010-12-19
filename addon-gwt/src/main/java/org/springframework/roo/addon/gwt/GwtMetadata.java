@@ -8,6 +8,7 @@ import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.*;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
@@ -68,10 +69,11 @@ public class GwtMetadata extends AbstractMetadataItem {
     private JavaSymbolName versionPropertyName;
 
     private LinkedHashMap<JavaSymbolName, JavaType> orderedProxyFields;
-    private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+    private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+    private ClasspathOperations classpathOperations;
 
 
-    public GwtMetadata(String identifier, MirrorTypeNamingStrategy mirrorTypeNamingStrategy, ProjectMetadata projectMetadata, ClassOrInterfaceTypeDetails governorTypeDetails, Path mirrorTypePath, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FileManager fileManager, MetadataService metadataService, PhysicalTypeMetadataProvider physicalTypeMetadataProvider) {
+    public GwtMetadata(String identifier, MirrorTypeNamingStrategy mirrorTypeNamingStrategy, ProjectMetadata projectMetadata, ClassOrInterfaceTypeDetails governorTypeDetails, Path mirrorTypePath, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FileManager fileManager, MetadataService metadataService, MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider, ClasspathOperations classpathOperations) {
         super(identifier);
         this.mirrorTypeNamingStrategy = mirrorTypeNamingStrategy;
         this.projectMetadata = projectMetadata;
@@ -82,6 +84,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         this.fileManager = fileManager;
         this.metadataService = metadataService;
         this.physicalTypeMetadataProvider = physicalTypeMetadataProvider;
+        this.classpathOperations = classpathOperations;
 
         if (beanInfoMetadata != null) {
             for (AnnotationMetadata annotation : entityMetadata.getItdTypeDetails().getAnnotations()) {
@@ -98,7 +101,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
         // We know GwtMetadataProvider already took care of all the necessary checks. So we can just re-create fresh representations of the types we're responsible for
         resolveEntityInformation();
-        resolveProxyFields();
+
 
         buildProxy();
         buildActivitiesMapper();
@@ -168,7 +171,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             addReference(dataDictionary, MirrorType.EDIT_VIEW);
             addReference(dataDictionary, MirrorType.MOBILE_EDIT_VIEW);
             addReference(dataDictionary, MirrorType.REQUEST);
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -195,6 +198,9 @@ public class GwtMetadata extends AbstractMetadataItem {
     }
 
     private void buildProxy() {
+
+        resolveProxyFields();
+
         String destinationMetadataId = getDestinationMetadataId(MirrorType.PROXY);
 
         //Get the Proxy's PhysicalTypeMetaData representation of the on disk Proxy
@@ -237,13 +243,11 @@ public class GwtMetadata extends AbstractMetadataItem {
 
 
         // Getter methods for EmployeeProxy
-        Map<JavaSymbolName, JavaSymbolName> propertyToMethod = new HashMap<JavaSymbolName, JavaSymbolName>();
         for (JavaSymbolName propertyName : orderedProxyFields.keySet()) {
             JavaType methodReturnType = orderedProxyFields.get(propertyName);
             JavaSymbolName methodName = new JavaSymbolName("get" + new JavaSymbolName(propertyName.getSymbolNameCapitalisedFirstLetter()));
             List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
             List<JavaSymbolName> methodParameterNames = new ArrayList<JavaSymbolName>();
-            propertyToMethod.put(propertyName, methodName);
             MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(destinationMetadataId, Modifier.ABSTRACT, methodName, methodReturnType, AnnotatedJavaType.convertFromJavaTypes(methodParameterTypes), methodParameterNames, new InvocableMemberBodyBuilder());
 
             //Only add a method if it isn't already present, this leaves the user defined methods in play
@@ -292,6 +296,19 @@ public class GwtMetadata extends AbstractMetadataItem {
         }
 
         this.proxy = typeDetailsBuilder.build();
+
+        // Determine the canonical filename
+        String physicalLocationCanonicalPath = classpathOperations.getPhysicalLocationCanonicalPath(typeDetailsBuilder.getDeclaredByMetadataId());
+        String contents = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(typeDetailsBuilder.build());
+        contents = "// WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.\n\n" + contents;
+
+        write(physicalLocationCanonicalPath, contents, fileManager);
+
+        // Create (or modify the .java file)
+        //PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(typeDetailsBuilder.getDeclaredByMetadataId(), physicalLocationCanonicalPath, typeDetailsBuilder.build());
+        //physicalTypeMetadataProvider.createPhysicalType(toCreate);
+
+
     }
 
 
@@ -404,9 +421,25 @@ public class GwtMetadata extends AbstractMetadataItem {
         boolean isDomainObject = !isEnum
                 && !isShared(returnType)
                 && !(isRequestFactoryPrimitive(returnType))
-                && !(isCollectionType(returnType));
+                && !(isCollectionType(returnType))
+                && !isEmbeddable(ptmd);
 
         return isDomainObject;
+    }
+
+    private boolean isEmbeddable(PhysicalTypeMetadata ptmd) {
+        if (ptmd != null && ptmd.getPhysicalTypeDetails() != null) {
+            if (ptmd.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getPhysicalTypeDetails()).getAnnotations();
+                for (AnnotationMetadata annotation : annotations) {
+                    if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean isCollectionType(JavaType returnType) {
@@ -468,7 +501,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             innerTypesToWatch.add(new JavaType("View"));
             type.setWatchedInnerTypes(innerTypesToWatch);
 
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -481,7 +514,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             TemplateDataDictionary dataDictionary = buildDataDictionary(type);
             addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
             addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -495,7 +528,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             addReference(dataDictionary, SharedType.SCAFFOLD_MOBILE_APP);
             addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
             addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -517,7 +550,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             methodsToWatch.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
             type.setWatchedMethods(methodsToWatch);
 
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -536,7 +569,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             methodsToWatch.put(new JavaSymbolName("init"), new ArrayList<JavaType>());
             destType.setWatchedMethods(methodsToWatch);
 
-            buildView(destType, null);
+            buildType(destType);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -737,7 +770,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             watchedMethods.put(new JavaSymbolName("setValue"), Collections.singletonList(proxy.getName()));
             destType.setWatchedMethods(watchedMethods);
 
-            buildView(destType, null);
+            buildType(destType);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -877,18 +910,16 @@ public class GwtMetadata extends AbstractMetadataItem {
         return builder;
     }
 
-    private void buildView(MirrorType destType) {
-        buildView(destType, null);
+    private void buildType(MirrorType destType) {
+        buildType(destType, buildDataDictionary(destType));
     }
 
-    private void buildView(MirrorType destType, TemplateDataDictionary dataDictionary) {
+    private void buildType(MirrorType destType, TemplateDataDictionary dataDictionary) {
         try {
 
-            JavaType childType = getDestinationJavaType(destType);
+            Assert.notNull(dataDictionary, "TemplateDataDictionary instance is required");
 
-            if (dataDictionary == null) {
-                dataDictionary = buildDataDictionary(destType);
-            }
+            JavaType childType = getDestinationJavaType(destType);
 
             ClassOrInterfaceTypeDetails templateClass = getTemplateDetails(dataDictionary, destType.getTemplate(), childType);
             ClassOrInterfaceTypeDetailsBuilder templateClassBuilder = new ClassOrInterfaceTypeDetailsBuilder(templateClass);
@@ -980,8 +1011,9 @@ public class GwtMetadata extends AbstractMetadataItem {
                 write(abstractDestFile, output, fileManager);
             }
 
-            if (!fileManager.exists(concreteDestFile)) {
+            if (!fileManager.exists(concreteDestFile) || destType.isOverwriteConcrete()) {
                 String output = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(templateClassBuilder.build());
+                output = "// WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.\n\n" + output;
                 write(concreteDestFile, output, fileManager);
             }
 
@@ -1003,7 +1035,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             watchedMethods.put(new JavaSymbolName("setValue"), Collections.singletonList(proxy.getName()));
             destType.setWatchedMethods(watchedMethods);
 
-            buildView(destType, null);
+            buildType(destType);
 
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -1156,7 +1188,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             for (MethodMetadata method : proxy.getDeclaredMethods()) {
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
                 GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
-                if (property.isEnum() || property.isProxy()) {
+                if (property.isEnum() || property.isProxy() || property.isEmbeddable()) {
                     List<JavaType> params = new ArrayList<JavaType>();
                     JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
                     params.add(param);
@@ -1165,7 +1197,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             }
             watchedMethods.put(new JavaSymbolName("render"), Collections.singletonList(new JavaType(projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName() + ".client.scaffold.place.ProxyListPlace")));
             destType.setWatchedMethods(watchedMethods);
-            buildView(destType);
+            buildType(destType);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1193,7 +1225,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             }
             type.setWatchedMethods(watchedMethods);
 
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1221,7 +1253,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             }
             type.setWatchedMethods(watchedMethods);
 
-            buildView(type, dataDictionary);
+            buildType(type, dataDictionary);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1272,7 +1304,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         try {
             MirrorType type = MirrorType.SET_EDITOR;
             type.setCreateAbstract(true);
-            buildView(type);
+            buildType(type);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1293,7 +1325,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         try {
             MirrorType type = MirrorType.LIST_EDITOR;
             type.setCreateAbstract(true);
-            buildView(type);
+            buildType(type);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -1371,7 +1403,14 @@ public class GwtMetadata extends AbstractMetadataItem {
         typeDetailsBuilder.setDeclaredMethods(methods);
         typeDetailsBuilder.setExtendsTypes(extendsTypes);
         typeDetailsBuilder.setImplementsTypes(implementsTypes);
-        this.request = typeDetailsBuilder.build();
+
+        String physicalLocationCanonicalPath = classpathOperations.getPhysicalLocationCanonicalPath(typeDetailsBuilder.getDeclaredByMetadataId());
+        String contents = JavaParserMutableClassOrInterfaceTypeDetails.getOutput(typeDetailsBuilder.build());
+        contents = "// WARNING: DO NOT EDIT THIS FILE. THIS FILE IS MANAGED BY SPRING ROO.\n\n" + contents;
+
+        write(physicalLocationCanonicalPath, contents, fileManager);
+
+        //this.request = typeDetailsBuilder.build();
     }
 
     private void buildInstanceRequestMethod(String destinationMetadataId,

@@ -17,11 +17,15 @@ package org.springframework.roo.addon.gwt;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.util.List;
 
 class GwtProxyProperty {
     private final ProjectMetadata projectMetadata;
@@ -180,7 +184,7 @@ class GwtProxyProperty {
     }
 
     public String getRenderer() {
-        return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+        return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() || isEmbeddable() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
     }
 
     String getProxyRendererType() {
@@ -223,7 +227,7 @@ class GwtProxyProperty {
     }
 
     public boolean isProxy() {
-        return !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection();
+        return !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection() && !isEmbeddable();
     }
 
     private boolean isCollection() {
@@ -232,6 +236,22 @@ class GwtProxyProperty {
 
     boolean isEnum() {
         return ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+    }
+
+
+    public boolean isEmbeddable() {
+        if (ptmd != null && ptmd.getPhysicalTypeDetails() != null) {
+            if (ptmd.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getPhysicalTypeDetails()).getAnnotations();
+                for (AnnotationMetadata annotation : annotations) {
+                    if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public String getSetValuePickerMethod() {

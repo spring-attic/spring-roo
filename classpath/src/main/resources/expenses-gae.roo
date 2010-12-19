@@ -2,7 +2,7 @@ project --topLevelPackage org.springsource.roo.extrackgae
 
 persistence setup --provider DATANUCLEUS --database GOOGLE_APP_ENGINE --applicationId roo-extract
 
-enum type --class ~.client.shared.Gender
+enum type --class ~.shared.Gender
 enum constant --name MALE
 enum constant --name FEMALE
 
