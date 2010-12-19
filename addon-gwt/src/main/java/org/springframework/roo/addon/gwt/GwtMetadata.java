@@ -219,7 +219,7 @@ public class GwtMetadata extends AbstractMetadataItem {
         List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
 
         // @ProxyFor(Employee.class)
-        typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ProxyFor")));
+        typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ProxyForName")));
 
         //Only add annotations that don't already exist on the target
         for (AnnotationMetadataBuilder annotationBuilder : typeAnnotations) {
@@ -1387,7 +1387,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
         List<AnnotationMetadataBuilder> typeAnnotations = createAnnotations();
         // @Service(Employee.class)
-        typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.Service")));
+        typeAnnotations.add(createAdditionalAnnotation(new JavaType("com.google.gwt.requestfactory.shared.ServiceName")));
 
         List<ConstructorMetadataBuilder> constructors = new ArrayList<ConstructorMetadataBuilder>();
         List<FieldMetadataBuilder> fields = new ArrayList<FieldMetadataBuilder>();
@@ -1518,7 +1518,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
     private AnnotationMetadataBuilder createAdditionalAnnotation(JavaType serverType) {
         List<AnnotationAttributeValue<?>> serverTypeAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-        serverTypeAttributes.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
+        serverTypeAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName().getFullyQualifiedTypeName()));
         return new AnnotationMetadataBuilder(serverType, serverTypeAttributes);
     }
 
@@ -1528,7 +1528,7 @@ public class GwtMetadata extends AbstractMetadataItem {
     private List<AnnotationMetadataBuilder> createAnnotations() {
         List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
         List<AnnotationAttributeValue<?>> rooGwtMirroredFromConfig = new ArrayList<AnnotationAttributeValue<?>>();
-        rooGwtMirroredFromConfig.add(new ClassAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName()));
+        rooGwtMirroredFromConfig.add(new StringAttributeValue(new JavaSymbolName("value"), governorTypeDetails.getName().getFullyQualifiedTypeName()));
         annotations.add(new AnnotationMetadataBuilder(new JavaType(RooGwtMirroredFrom.class.getName()), rooGwtMirroredFromConfig));
         return annotations;
     }

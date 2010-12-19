@@ -12,5 +12,5 @@ public @interface RooGwtMirroredFrom {
     /**
      * @return the fully-qualified type name this key instance was mirrored from
      */
-    Class<?> value();
+    String value();
 }

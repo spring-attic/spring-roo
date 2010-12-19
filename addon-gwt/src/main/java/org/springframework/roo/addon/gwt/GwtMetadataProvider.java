@@ -16,6 +16,7 @@ import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.*;
 import org.springframework.roo.model.JavaSymbolName;
@@ -101,8 +102,8 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
             AnnotationMetadata rooGwtAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooGwtMirroredFrom.class.getName()));
             Assert.notNull(rooGwtAnnotation, "@" + RooGwtMirroredFrom.class.getSimpleName() + " removed from " + keyTypeName.getFullyQualifiedTypeName() + " unexpectedly");
             AnnotationAttributeValue<?> value = rooGwtAnnotation.getAttribute(new JavaSymbolName("value"));
-            Assert.isInstanceOf(ClassAttributeValue.class, value, "Expected class-based content in @" + RooGwtMirroredFrom.class.getSimpleName() + " on " + keyTypeName.getFullyQualifiedTypeName());
-            JavaType actualValue = ((ClassAttributeValue) value).getValue();
+            Assert.isInstanceOf(StringAttributeValue.class, value, "Expected string-based content in @" + RooGwtMirroredFrom.class.getSimpleName() + " on " + keyTypeName.getFullyQualifiedTypeName());
+            JavaType actualValue = new JavaType(value.getValue().toString());
 
             // Now we've read the original type, let's verify it's the same as what we're expecting
             Assert.isTrue(actualValue.equals(governorTypeName), "Every mappable type in the project must have a unique simple type name (" + governorTypeName + " and " + actualValue + " both cannot map to single key " + keyTypeName + ")");
@@ -123,20 +124,8 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
         }
 
         // Our general strategy is to instantiate GwtMetadata, which offers a conceptual representation of what should go into the 4 key-specific types; after that we do comparisons and write to disk if needed
-        GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager,
+        return new GwtMetadata(metadataIdentificationString, mirrorTypeNamingStrategy, projectMetadata, governorTypeDetails, keyTypePath, beanInfoMetadata, entityMetadata, fileManager,
                 metadataService, physicalTypeMetadataProvider, classpathOperations);
-
-        // Output each type that was provided in the details
-        /*for (ClassOrInterfaceTypeDetails details : gwtMetadata.getAllTypes()) {
-            // Determine the canonical filename
-            String physicalLocationCanonicalPath = classpathOperations.getPhysicalLocationCanonicalPath(details.getDeclaredByMetadataId());
-
-            // Create (or modify the .java file)
-            PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(details.getDeclaredByMetadataId(), physicalLocationCanonicalPath, details);
-            physicalTypeMetadataProvider.createPhysicalType(toCreate);
-        }*/
-
-        return gwtMetadata;
     }
 
     private boolean isMappable(ClassOrInterfaceTypeDetails governorTypeDetails, EntityMetadata entityMetadata) {
