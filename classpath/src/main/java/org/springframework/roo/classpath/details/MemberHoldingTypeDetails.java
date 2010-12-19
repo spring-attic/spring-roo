@@ -19,6 +19,10 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	List<? extends ConstructorMetadata> getDeclaredConstructors();
 	
 	List<? extends FieldMetadata> getDeclaredFields();
+
+    List<? extends InitializerMetadata> getDeclaredInitializers();
+
+    List<? extends ClassOrInterfaceTypeDetails> getDeclaredInnerTypes();
 	
 	/**
 	 * Lists the classes this type extends. This may be empty. Always empty in the case of an enum.
@@ -44,6 +48,5 @@ public interface MemberHoldingTypeDetails extends PhysicalTypeDetails, Identifia
 	 * @return an unmodifiable representation of classes this type implements (may be empty, but never null)
 	 */
 	List<JavaType> getImplementsTypes();
-	
 
 }

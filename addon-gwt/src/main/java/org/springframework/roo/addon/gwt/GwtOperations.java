@@ -2,12 +2,12 @@ package org.springframework.roo.addon.gwt;
 
 /**
  * Interface for {@link GwtOperationsImpl}.
- * 
+ *
  * @author Ben Alex
  */
 public interface GwtOperations {
 
-	boolean isSetupGwtAvailable();
+    boolean isSetupGwtAvailable();
 
-	void setupGwt();
+    void setupGwt();
 }

@@ -7,7 +7,7 @@ import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Provides a basic implementation of {@link MirrorTypeNamingStrategy}.
- * 
+ *
  * @author Ben Alex
  * @since 1.1
  */
@@ -15,9 +15,9 @@ import org.springframework.roo.project.ProjectMetadata;
 @Service
 public class DefaultMirrorTypeNamingStrategy implements MirrorTypeNamingStrategy {
 
-	public JavaType convertGovernorTypeNameIntoKeyTypeName(MirrorType type, ProjectMetadata projectMetadata, JavaType governorTypeName) {
-		String simple = governorTypeName.getSimpleTypeName();
-		String destinationPackage = type.getPath().packageName(projectMetadata);
-		return new JavaType(destinationPackage + "." + simple + type.getSuffix());
-	}
+    public JavaType convertGovernorTypeNameIntoKeyTypeName(MirrorType type, ProjectMetadata projectMetadata, JavaType governorTypeName) {
+        String simple = governorTypeName.getSimpleTypeName();
+        String destinationPackage = type.getPath().packageName(projectMetadata);
+        return new JavaType(destinationPackage + "." + simple + type.getSuffix());
+    }
 }

@@ -9,26 +9,26 @@ import java.math.BigDecimal;
  * A simple renderer of Float values.
  */
 public class BigDecimalRenderer extends AbstractRenderer<BigDecimal> {
-  private static BigDecimalRenderer INSTANCE;
+    private static BigDecimalRenderer INSTANCE;
 
-  /**
-   * @return the instance
-   */
-  public static Renderer<BigDecimal> instance() {
-    if (INSTANCE == null) {
-      INSTANCE = new BigDecimalRenderer();
-    }
-    return INSTANCE;
-  }
-
-  protected BigDecimalRenderer() {
-  }
-
-  public String render(BigDecimal object) {
-    if (object == null) {
-      return "";
+    /**
+     * @return the instance
+     */
+    public static Renderer<BigDecimal> instance() {
+        if (INSTANCE == null) {
+            INSTANCE = new BigDecimalRenderer();
+        }
+        return INSTANCE;
     }
 
-    return object.toString();
-  }
+    protected BigDecimalRenderer() {
+    }
+
+    public String render(BigDecimal object) {
+        if (object == null) {
+            return "";
+        }
+
+        return object.toString();
+    }
 }

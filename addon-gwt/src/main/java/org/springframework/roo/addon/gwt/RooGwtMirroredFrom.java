@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface RooGwtMirroredFrom {
-	
-	/**
-	 * @return the fully-qualified type name this key instance was mirrored from
-	 */
-	Class<?> value();
+
+    /**
+     * @return the fully-qualified type name this key instance was mirrored from
+     */
+    Class<?> value();
 }

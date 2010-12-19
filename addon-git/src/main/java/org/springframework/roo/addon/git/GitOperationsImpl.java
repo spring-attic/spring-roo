@@ -184,7 +184,7 @@ public class GitOperationsImpl implements GitOperations {
 
 	public void setup() {
 		if (person == null) {
-			person = new PersonIdent("Roo Git Add-On", "roo@bogus.com");
+			person = new PersonIdent("Roo Git Add-On", "s2-roo@vmware.com");
 		}
 		if (repository == null) {
 			try {

@@ -1,43 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.1//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.1/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.1//EN"
+        "http://google-web-toolkit.googlecode.com/svn/tags/2.0.1/distro-source/core/src/gwt-module.dtd">
 <module rename-to="applicationScaffold">
-  <inherits name='com.google.gwt.activity.Activity' />
-  <inherits name='com.google.gwt.place.Place' />
-  <inherits name="com.google.gwt.user.User" />
-  <inherits name="com.google.gwt.user.theme.standard.Standard" />
-  <inherits name='com.google.gwt.requestfactory.RequestFactory'/>
-  <inherits name="com.google.gwt.user.cellview.CellView" />
-  <inherits name='com.google.gwt.logging.Logging'/>
-  <inherits name="com.google.gwt.inject.Inject"/>
-  <inherits name="com.google.gwt.text.Text"/>
+    <inherits name='com.google.gwt.activity.Activity'/>
+    <inherits name='com.google.gwt.place.Place'/>
+    <inherits name="com.google.gwt.user.User"/>
+    <inherits name="com.google.gwt.user.theme.standard.Standard"/>
+    <inherits name='com.google.gwt.requestfactory.RequestFactory'/>
+    <inherits name="com.google.gwt.user.cellview.CellView"/>
+    <inherits name='com.google.gwt.logging.Logging'/>
+    <inherits name="com.google.gwt.inject.Inject"/>
+    <inherits name="com.google.gwt.text.Text"/>
 
-  <source path='client'/>
-  <source path='shared'/>
-   
-  <public path="public"/>
+    <source path='client'/>
+    <source path='shared'/>
 
-  <!-- Logging Configuration -->
-  <set-property name="gwt.logging.enabled" value="TRUE"/> 
-  <set-property name="gwt.logging.logLevel" value="INFO"/>
-  <set-property name="gwt.logging.consoleHandler" value="ENABLED" /> 
-  <set-property name="gwt.logging.developmentModeHandler" value="ENABLED" />
-  <set-property name="gwt.logging.firebugHandler" value="ENABLED" />
-  <set-property name="gwt.logging.hasWidgetsHandler" value="DISABLED" />
-  <set-property name="gwt.logging.popupHandler" value="DISABLED" />
-  <set-property name="gwt.logging.systemHandler" value="ENABLED" />
-  <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED" />
+    <public path="public"/>
 
-  <!-- Uncomment if you are enabling server side deobfuscation of StackTraces
-  <set-property name="compiler.emulatedStack" value="true" />
-  <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
-  <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
-  -->
-  
-  <define-property name="mobile.user.agent" values="mobilesafari, none"/>
-  
-  <property-provider name="mobile.user.agent">
-  
-  <![CDATA[
+    <!-- Logging Configuration -->
+    <set-property name="gwt.logging.enabled" value="TRUE"/>
+    <set-property name="gwt.logging.logLevel" value="INFO"/>
+    <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.developmentModeHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.firebugHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.hasWidgetsHandler" value="DISABLED"/>
+    <set-property name="gwt.logging.popupHandler" value="DISABLED"/>
+    <set-property name="gwt.logging.systemHandler" value="ENABLED"/>
+    <set-property name="gwt.logging.simpleRemoteHandler" value="DISABLED"/>
+
+    <!-- Uncomment if you are enabling server side deobfuscation of StackTraces
+    <set-property name="compiler.emulatedStack" value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
+    -->
+
+    <define-property name="mobile.user.agent" values="mobilesafari, none"/>
+
+    <property-provider name="mobile.user.agent">
+
+        <![CDATA[
   		var ua = navigator.userAgent.toLowerCase();
 
         if (ua.indexOf("webkit") != -1 && ua.indexOf("mobile") != -1) {
@@ -67,16 +68,16 @@
 
         return "none";
   ]]>
-  
-  </property-provider>
-  
-  <replace-with class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.MobileInjectorWrapper">
-  		<when-type-is class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.DesktopInjectorWrapper"/>
-  		<all>
-  			<when-property-is name="mobile.user.agent" value="mobilesafari"/>
+
+    </property-provider>
+
+    <replace-with class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.MobileInjectorWrapper">
+        <when-type-is class="__TOP_LEVEL_PACKAGE__.client.scaffold.ioc.DesktopInjectorWrapper"/>
+        <all>
+            <when-property-is name="mobile.user.agent" value="mobilesafari"/>
         </all>
-  </replace-with>
-  
-  <entry-point class="__TOP_LEVEL_PACKAGE__.client.scaffold.Scaffold" />
-  	
+    </replace-with>
+
+    <entry-point class="__TOP_LEVEL_PACKAGE__.client.scaffold.Scaffold"/>
+
 </module>

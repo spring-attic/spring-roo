@@ -4,11 +4,7 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.BodyDeclaration;
-import japa.parser.ast.body.MethodDeclaration;
-import japa.parser.ast.body.Parameter;
-import japa.parser.ast.body.TypeDeclaration;
-import japa.parser.ast.body.VariableDeclaratorId;
+import japa.parser.ast.body.*;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
@@ -24,10 +20,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.javaparser.CompilationUnitServices;
+import org.springframework.roo.classpath.javaparser.JavaParserMutableClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.javaparser.JavaParserUtils;
 import org.springframework.roo.model.AbstractCustomDataAccessorProvider;
 import org.springframework.roo.model.CustomDataImpl;
@@ -85,7 +83,12 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		
 		// Get the body
 		this.body = methodDeclaration.getBody() == null ? null : methodDeclaration.getBody().toString();
-		
+
+        if (this.body != null) {
+            this.body = this.body.replaceFirst("\\{", "");
+            this.body = this.body.substring(0, this.body.lastIndexOf("}"));
+        }
+
 		// Lookup the parameters and their names
 		if (methodDeclaration.getParameters() != null) {
 			for (Parameter p : methodDeclaration.getParameters()) {
@@ -100,8 +103,9 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 						annotations.add(md);
 					}
 				}
-				
-				parameterTypes.add(new AnnotatedJavaType(parameterType, annotations));
+				AnnotatedJavaType param = new AnnotatedJavaType(parameterType, annotations);
+                param.setVarArgs(p.isVarArgs());
+				parameterTypes.add(param);
 				parameterNames.add(new JavaSymbolName(p.getId().getName()));
 			}
 		}
@@ -193,8 +197,6 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				List<Type> typeArgs = new ArrayList<Type>();
 				cit.setTypeArgs(typeArgs);
 				for (JavaType parameter : method.getReturnType().getParameters()) {
-					// NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-					// typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
 					typeArgs.add(JavaParserUtils.importParametersForType(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter));
 				}
 			}
@@ -226,6 +228,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		// Add any method parameters, including their individual annotations and type parameters
 		List<Parameter> parameters = new ArrayList<Parameter>();
 		d.setParameters(parameters);
+
 		int index = -1;
 		for (AnnotatedJavaType methodParameter : method.getParameterTypes()) {
 			index++;
@@ -245,24 +248,12 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			if (methodParameter.getJavaType().isPrimitive()) {
 				parameterType = JavaParserUtils.getType(methodParameter.getJavaType());
 			} else {
-				NameExpr importedType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), methodParameter.getJavaType());
-				ClassOrInterfaceType cit = JavaParserUtils.getClassOrInterfaceType(importedType);
-				
-				// Add any type arguments presented for the return type
-				if (methodParameter.getJavaType().getParameters().size() > 0) {
-					List<Type> typeArgs = new ArrayList<Type>();
-					cit.setTypeArgs(typeArgs);
-					for (JavaType parameter : methodParameter.getJavaType().getParameters()) {
-						NameExpr importedParameterType = JavaParserUtils.importTypeIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), parameter);
-						typeArgs.add(JavaParserUtils.getReferenceType(importedParameterType));
-					}
-					
-				}
-				parameterType = cit;
+				parameterType = JavaParserMutableClassOrInterfaceTypeDetails.getResolvedName(compilationUnitServices.getEnclosingTypeName(), AnnotatedJavaType.convertFromAnnotatedJavaTypes(Collections.singletonList(methodParameter)).get(0), compilationUnitServices);
 			}
 
 			// Create a Java Parser method parameter and add it to the list of parameters
 			Parameter p = new Parameter(parameterType, new VariableDeclaratorId(parameterName));
+            p.setVarArgs(methodParameter.isVarArgs());
 			p.setAnnotations(parameterAnnotations);
 			parameters.add(p);
 		}
@@ -280,7 +271,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		// Set the body
 		if (!StringUtils.hasText(method.getBody())) {
 			// Never set the body if an abstract method
-			if (!Modifier.isAbstract(method.getModifier())) {
+			if (!Modifier.isAbstract(method.getModifier()) && !PhysicalTypeCategory.INTERFACE.equals(compilationUnitServices.getPhysicalTypeCategory())) {
 				d.setBody(new BlockStmt());
 			}
 		} else {
@@ -346,7 +337,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 				}
 			}
 		}
-	
+
 		// Add the method to the end of the compilation unit
 		members.add(d);
 		

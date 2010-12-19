@@ -39,6 +39,8 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 	private List<ConstructorMetadata> declaredConstructors = new ArrayList<ConstructorMetadata>();
 	private List<FieldMetadata> declaredFields = new ArrayList<FieldMetadata>();
 	private List<MethodMetadata> declaredMethods = new ArrayList<MethodMetadata>();
+    private List<ClassOrInterfaceTypeDetails> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetails>();
+    private List<InitializerMetadata> declaredInitializers = new ArrayList<InitializerMetadata>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
 	private Set<JavaType> registeredImports = new HashSet<JavaType>();
@@ -142,6 +144,14 @@ public class DefaultItdTypeDetails extends AbstractIdentifiableAnnotatedJavaStru
 	public List<? extends MethodMetadata> getDeclaredMethods() {
 		return Collections.unmodifiableList(declaredMethods);
 	}
+
+    public List<ClassOrInterfaceTypeDetails> getDeclaredInnerTypes() {
+        return Collections.unmodifiableList(declaredInnerTypes);
+    }
+
+    public List<InitializerMetadata> getDeclaredInitializers() {
+        return Collections.unmodifiableList(declaredInitializers);
+    }
 	
 	public List<JavaType> getExtendsTypes() {
 		return Collections.unmodifiableList(extendsTypes);
