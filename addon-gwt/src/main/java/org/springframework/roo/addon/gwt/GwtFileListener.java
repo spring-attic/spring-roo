@@ -71,6 +71,7 @@ public class GwtFileListener implements FileEventListener {
             return;
         }
 
+        //TODO: What does this even do? Is it still needed? - JT
         // Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
        /* if (isMaintainedByRoo) {
             // First thing is for us to figure out the proxy file (or what it used to be called, if it has gone away)
