@@ -172,7 +172,7 @@ public class DatabaseIntrospector {
 	private Set<Column> readColumns() throws SQLException {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
-		ResultSet rs = databaseMetaData.getColumns(catalogName, getSchemaPattern(), tableName, getColumnNamePattern());
+		ResultSet rs = databaseMetaData.getColumns(catalogName, getSchemaName(), tableName, getColumnNamePattern());
 		try {
 			while (rs.next()) {
 				Column column = new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"));
@@ -194,9 +194,9 @@ public class DatabaseIntrospector {
 
 		ResultSet rs;
 		if (exported) {
-			rs = databaseMetaData.getExportedKeys(catalogName, getSchemaPattern(), tableName);
+			rs = databaseMetaData.getExportedKeys(catalogName, getSchemaName(), tableName);
 		} else {
-			rs = databaseMetaData.getImportedKeys(catalogName, getSchemaPattern(), tableName);
+			rs = databaseMetaData.getImportedKeys(catalogName, getSchemaName(), tableName);
 		}
 
 		try {
@@ -285,7 +285,7 @@ public class DatabaseIntrospector {
 		ResultSet rs;
 		try {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
-			rs = databaseMetaData.getIndexInfo(catalogName, getSchemaPattern(), tableName, false, false);
+			rs = databaseMetaData.getIndexInfo(catalogName, getSchemaName(), tableName, false, false);
 		} catch (SQLException e) {
 			return indices;
 		}
@@ -332,7 +332,7 @@ public class DatabaseIntrospector {
 	private Set<String> readPrimaryKeyNames() throws SQLException {
 		Set<String> columnNames = new LinkedHashSet<String>();
 
-		ResultSet rs = databaseMetaData.getPrimaryKeys(catalogName, getSchemaPattern(), tableName);
+		ResultSet rs = databaseMetaData.getPrimaryKeys(catalogName, getSchemaName(), tableName);
 		try {
 			while (rs.next()) {
 				columnNames.add(rs.getString("COLUMN_NAME"));
