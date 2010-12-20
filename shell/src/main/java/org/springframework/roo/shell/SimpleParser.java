@@ -146,7 +146,7 @@ public class SimpleParser implements Parser {
 				}
 
 				// Ensure the user specified a value if the value is mandatory
-				if ((value == null || "".equals(value.trim())) && cliOption.mandatory()) {
+				if (!StringUtils.hasText(value) && cliOption.mandatory()) {
 					if ("".equals(cliOption.key()[0])) {
 						StringBuilder message = new StringBuilder("You must specify a default option ");
 						if (cliOption.key().length > 1) {
@@ -195,7 +195,7 @@ public class SimpleParser implements Parser {
 						}
 					}
 					if (c == null) {
-						// Fallback to a normal SimpleTypeConverter and attempt conversion
+						// Fall back to a normal SimpleTypeConverter and attempt conversion
 						throw new IllegalStateException("TODO: Add basic type conversion");
 						// SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 						// result = simpleTypeConverter.convertIfNecessary(value, requiredType, mp);
@@ -238,12 +238,12 @@ public class SimpleParser implements Parser {
 		Set<String> cliOptionKeySet = new LinkedHashSet<String>();
 		for (CliOption cliOption : cliOptions) {
 			for (String key : cliOption.key()) {
-				cliOptionKeySet.add(key);
+				cliOptionKeySet.add(key.toLowerCase());
 			}			
 		}
 		Set<String> unavailableOptions = new LinkedHashSet<String>();
 		for (String suppliedOption : options.keySet()) {
-			if (!cliOptionKeySet.contains(suppliedOption)) {
+			if (!cliOptionKeySet.contains(suppliedOption.toLowerCase())) {
 				unavailableOptions.add(suppliedOption);
 			}
 		}
@@ -628,13 +628,12 @@ public class SimpleParser implements Parser {
 			if ((lastOptionValue == null || "".equals(lastOptionValue)) && !translated.endsWith(" ")) {
 				// Given we haven't got an option value of any form, and there's no space at the buffer end, we must still be typing an option key
 
-				// TODO: only include the option key itself
+				// TODO: Only include the option key itself
 
 				for (CliOption option : cliOptions) {
 					for (String value : option.key()) {
-						if (value != null && lastOptionKey != null && value.startsWith(lastOptionKey)) {
-							String remainder = value.substring(lastOptionKey.length());
-							results.add(translated + remainder + " ");
+						if (value != null && lastOptionKey != null && value.regionMatches(true, 0, lastOptionKey, 0, lastOptionKey.length())) {
+							results.add(translated.substring(0, (translated.length() - lastOptionKey.length())) + value + " ");
 						}
 					}
 				}
@@ -994,7 +993,6 @@ public class SimpleParser implements Parser {
 
 					logger.info(sb.toString());
 				}
-
 				// Only a single argument, so default to the normal help operation
 			}
 
