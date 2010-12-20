@@ -384,7 +384,13 @@ public class GwtFileListener implements FileEventListener {
         methodMetadataBuilder.setReturnType(method.getReturnType());
         methodMetadataBuilder.setBodyBuilder(method.getBodyBuilder());
         methodMetadataBuilder.setAnnotations(method.getAnnotations());
-        methodMetadataBuilder.setModifier(method.getModifier());
+        if (method.getModifier() == Modifier.PRIVATE) {
+            methodMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else if (method.getModifier() == (Modifier.PRIVATE | Modifier.FINAL)) {
+            methodMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else {
+            methodMetadataBuilder.setModifier(method.getModifier());
+        }
         methodMetadataBuilder.setParameterNames(method.getParameterNames());
         methodMetadataBuilder.setParameterTypes(method.getParameterTypes());
         methodMetadataBuilder.setThrowsTypes(method.getThrowsTypes());
