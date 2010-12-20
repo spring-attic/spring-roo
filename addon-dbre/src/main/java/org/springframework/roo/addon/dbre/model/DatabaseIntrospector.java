@@ -172,7 +172,7 @@ public class DatabaseIntrospector {
 	private Set<Column> readColumns() throws SQLException {
 		Set<Column> columns = new LinkedHashSet<Column>();
 
-		ResultSet rs = databaseMetaData.getColumns(getCatalog(), getSchemaPattern(), getTableNamePattern(), getColumnNamePattern());
+		ResultSet rs = databaseMetaData.getColumns(catalogName, getSchemaPattern(), tableName, getColumnNamePattern());
 		try {
 			while (rs.next()) {
 				Column column = new Column(rs.getString("COLUMN_NAME"), rs.getInt("DATA_TYPE"), rs.getString("TYPE_NAME"), rs.getInt("COLUMN_SIZE"), rs.getInt("DECIMAL_DIGITS"));
@@ -194,9 +194,9 @@ public class DatabaseIntrospector {
 
 		ResultSet rs;
 		if (exported) {
-			rs = databaseMetaData.getExportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
+			rs = databaseMetaData.getExportedKeys(catalogName, getSchemaPattern(), tableName);
 		} else {
-			rs = databaseMetaData.getImportedKeys(getCatalog(), getSchemaPattern(), getTableNamePattern());
+			rs = databaseMetaData.getImportedKeys(catalogName, getSchemaPattern(), tableName);
 		}
 
 		try {
