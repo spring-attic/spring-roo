@@ -517,7 +517,19 @@ public class GwtMetadata extends AbstractMetadataItem {
     private void buildDetailsActivity() {
         try {
             MirrorType type = MirrorType.DETAIL_ACTIVITY;
-            type.setCreateAbstract(false);
+            type.setCreateAbstract(true);
+
+            ArrayList<JavaSymbolName> fieldsToWatch = new ArrayList<JavaSymbolName>();
+            fieldsToWatch.add(new JavaSymbolName("requests"));
+            fieldsToWatch.add(new JavaSymbolName("proxyId"));
+            type.setWatchedFieldNames(fieldsToWatch);
+
+            HashMap<JavaSymbolName, List<JavaType>> methodsToWatch = new HashMap<JavaSymbolName, List<JavaType>>();
+            List<JavaType> params = new ArrayList<JavaType>();
+            params.add(new JavaType("com.google.gwt.requestfactory.shared.Receiver", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.gwt.requestfactory.shared.EntityProxy"))));
+            methodsToWatch.put(new JavaSymbolName("find"), params);
+            type.setWatchedMethods(methodsToWatch);
+
             TemplateDataDictionary dataDictionary = buildDataDictionary(type);
             addReference(dataDictionary, SharedType.APP_REQUEST_FACTORY);
             addReference(dataDictionary, SharedType.IS_SCAFFOLD_MOBILE_ACTIVITY);
@@ -805,7 +817,13 @@ public class GwtMetadata extends AbstractMetadataItem {
         methodMetadataBuilder.setReturnType(method.getReturnType());
         methodMetadataBuilder.setBodyBuilder(method.getBodyBuilder());
         methodMetadataBuilder.setAnnotations(method.getAnnotations());
-        methodMetadataBuilder.setModifier(method.getModifier());
+        if (method.getModifier() == Modifier.PRIVATE) {
+            methodMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else if (method.getModifier() == (Modifier.PRIVATE | Modifier.FINAL)) {
+            methodMetadataBuilder.setModifier(Modifier.PROTECTED);
+        } else {
+            methodMetadataBuilder.setModifier(method.getModifier());
+        }
         methodMetadataBuilder.setParameterNames(method.getParameterNames());
         methodMetadataBuilder.setParameterTypes(method.getParameterTypes());
         methodMetadataBuilder.setThrowsTypes(method.getThrowsTypes());
@@ -1056,6 +1074,8 @@ public class GwtMetadata extends AbstractMetadataItem {
             Template template = templateLoader.getTemplate(templateFile);
             String templateContents = template.renderToString(dataDictionary);
 
+           // System.out.println("\n templateContents: " + templateContents + "\n");
+
             String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, Path.SRC_MAIN_JAVA);
 
             return new JavaParserMutableClassOrInterfaceTypeDetails(templateContents, templateId, templateType, metadataService, physicalTypeMetadataProvider);
@@ -1195,7 +1215,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             for (MethodMetadata method : proxy.getDeclaredMethods()) {
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
                 GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
-                if (property.isEnum() || property.isProxy() || property.isEmbeddable()) {
+                if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
                     List<JavaType> params = new ArrayList<JavaType>();
                     JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
                     params.add(param);
@@ -1223,7 +1243,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             for (MethodMetadata method : proxy.getDeclaredMethods()) {
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
                 GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
-                if (property.isEnum() || property.isProxy()) {
+                if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
                     List<JavaType> params = new ArrayList<JavaType>();
                     JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
                     params.add(param);
@@ -1251,7 +1271,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             for (MethodMetadata method : proxy.getDeclaredMethods()) {
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(method.getReturnType(), Path.SRC_MAIN_JAVA));
                 GwtProxyProperty property = new GwtProxyProperty(projectMetadata, method, ptmd);
-                if (property.isEnum() || property.isProxy()) {
+                if (property.isEnum() || property.isProxy() || property.isEmbeddable() || property.isCollectionOfProxy()) {
                     List<JavaType> params = new ArrayList<JavaType>();
                     JavaType param = new JavaType("java.util.Collection", 0, DataType.TYPE, null, Collections.singletonList(property.getPropertyType()));
                     params.add(param);

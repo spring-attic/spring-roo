@@ -8,7 +8,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.requestfactory.client.DefaultRequestTransport;
 import com.google.gwt.requestfactory.shared.ServerFailure;
 import com.google.gwt.user.client.Window;
-import org.springsource.roo.extrackgae.client.scaffold.gae.GaeAuthenticationFailureEvent;
+import __TOP_LEVEL_PACKAGE__.client.scaffold.gae.GaeAuthenticationFailureEvent;
 
 /**
  * Extends DefaultRequestTransport to handle the authentication failures

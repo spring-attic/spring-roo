@@ -9,6 +9,7 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -24,6 +25,7 @@ import org.springframework.roo.project.Path;
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
+    @Reference private ClasspathOperations classpathOperations;
 	
 	protected void activate(ComponentContext context) {
 		// Ensure we're notified of all metadata related to physical Java types, in particular their initial creation
@@ -38,7 +40,7 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
+		return new JavaBeanMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, classpathOperations);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
