@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -9,6 +11,8 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
@@ -23,8 +27,8 @@ import org.springframework.roo.project.Path;
 @Component(immediate = true)
 @Service
 public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implements DbreMetadataProvider {
-	@Reference private DbreTypeResolutionService dbreTypeResolutionService;
 	@Reference private DbreModelService dbreModelService;
+	@Reference private TypeLocationService typeLocationService;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -59,7 +63,9 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, identifierMetadata, dbreTypeResolutionService, database);
+		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
+
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, identifierMetadata, managedEntities, database);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
