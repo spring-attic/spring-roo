@@ -306,7 +306,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isVMforceEnabled() {
 		for (Dependency dependency : dependencies) {
-			if ("com.salesforce.sdk.persistence".equals(dependency.getGroupId().getFullyQualifiedPackageName())) {
+			if ("com.force.sdk".equals(dependency.getGroupId().getFullyQualifiedPackageName())) {
 				return true;
 			}
 		}
