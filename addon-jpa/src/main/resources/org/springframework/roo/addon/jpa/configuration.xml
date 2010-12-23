@@ -138,16 +138,19 @@
 		<database id="VMFORCE">
 			<repositories>
 				<repository>
-					<id>vmforce-snapshots</id>
-					<url>http://maven.springsource.com/snapshot</url>
-					<name>VMForce Repo</name>
+					<id>com.force.maven.release</id>
+					<name>Force.com Maven Repo</name>
+					<url>http://repo.t.salesforce.com/archiva/repository/releases</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
 				</repository>
 			</repositories>
 			<dependencies>
 				<dependency>
-					<groupId>com.salesforce.sdk.persistence</groupId>
-					<artifactId>datanucleus-sfdc</artifactId>
-					<version>20.0.1-SNAPSHOT</version>
+					<groupId>com.force.sdk</groupId>
+					<artifactId>force-jpa</artifactId>
+					<version>20.0.0</version>
 				</dependency>
 			</dependencies>
 			<filters>
