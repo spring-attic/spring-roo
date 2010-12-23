@@ -36,9 +36,8 @@ public class AddOnBundleSymbolicNameConverter implements Converter {
 				for (BundleVersion bundleVersion : bundle.getVersions()) {
 					completions.add(bsn + ";" + bundleVersion.getVersion());
 				}
-			} else {
-				completions.add(bsn);
-			}
+			} 
+			completions.add(bsn);
 		}
 		return false;
 	}

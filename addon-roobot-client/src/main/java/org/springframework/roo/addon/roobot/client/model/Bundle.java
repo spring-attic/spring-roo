@@ -27,33 +27,6 @@ public class Bundle {
 		this.comments = inComments;
 		versions = new ArrayList<BundleVersion>();
 	}
-	
-	public BundleVersion getBundleVersion(String bundleKey) {
-		Assert.hasText(bundleKey, "Bundle key required");
-		if (bundleKey.contains(";")) {
-			String[] split = bundleKey.split(";");
-			Assert.isTrue(split.length == 2, "Incorrect bundle identifier presented");
-			String remains = split[1];
-			if (remains.contains("@")) {
-				String[] split2 = remains.split("@");
-				for (BundleVersion version: versions) {
-					if (version.getVersion().equalsIgnoreCase(split2[0]) && version.getObrUrl().equalsIgnoreCase(split2[1])) {
-						return version;
-					}
-				}
-			} else {
-				for (BundleVersion version: versions) {
-					if (version.getVersion().equalsIgnoreCase(remains)) {
-						return version;
-					}
-				}
-			}
-			throw new IllegalStateException("Unable to find bundle with key " + bundleKey);
-		} else {
-			Assert.isTrue(versions.size() == 1, "Bundle identifier is nondeterministic. Higher precision required.");
-			return versions.iterator().next();
-		}
-	}
 
 	public float getSearchRelevance() {
 		return searchRelevance;
@@ -94,6 +67,23 @@ public class Bundle {
     	}
     	return null;
     }
+    
+	public BundleVersion getBundleVersion(String bundleKey) {
+		Assert.hasText(bundleKey, "Bundle key required");
+		if (bundleKey.contains(";")) {
+			String[] split = bundleKey.split(";");
+			Assert.isTrue(split.length == 2, "Incorrect bundle identifier presented");
+			String remains = split[1];
+			for (BundleVersion version: versions) {
+				if (version.getVersion().equalsIgnoreCase(remains)) {
+					return version;
+				}
+			}
+			throw new IllegalStateException("Unable to find bundle with key " + bundleKey);
+		} else {
+			return getLatestVersion();
+		}
+	}
 
 	public int hashCode() {
 		final int prime = 31;

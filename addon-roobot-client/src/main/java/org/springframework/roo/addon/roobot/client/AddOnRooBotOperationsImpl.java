@@ -87,15 +87,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	public void addOnInfo(AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		Bundle bundle = null;
-		if (bsn != null) {
-			bundle = bundleCache.get(bsn.getKey());
-		} 
+		String bsnString = bsn.getKey();
+		if (bsnString.contains(";")) {
+			bsnString = bsnString.split(";")[0];
+		}
+		Bundle bundle = bundleCache.get(bsnString);
 		if (bundle == null) {
 			log.warning("Unable to find specified bundle with symbolic name: " + bsn.getKey());
 			return;
 		} 
-		addOnInfo(bundle);
+		addOnInfo(bundle, bundle.getBundleVersion(bsn.getKey()));
 	}
 	
 	public void addOnInfo(String bundleKey) {
@@ -108,34 +109,32 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.warning("A valid bundle ID is required");
 			return;
 		} 
-		addOnInfo(bundle);
+		addOnInfo(bundle, bundle.getBundleVersion(bundleKey));
 	}
 	
-	private void addOnInfo(Bundle bundle) {
-		List<BundleVersion> versionOrderedBundles = BundleVersion.orderByVersion(new ArrayList<BundleVersion>(bundle.getVersions()));
-		BundleVersion latestVersion = versionOrderedBundles.get(versionOrderedBundles.size() - 1);
-		StringBuilder sb = new StringBuilder(latestVersion.getVersion());
-		if (versionOrderedBundles.size() > 1) {
+	private void addOnInfo(Bundle bundle, BundleVersion bundleVersion) {
+		StringBuilder sb = new StringBuilder(bundleVersion.getVersion());
+		if (bundle.getVersions().size() > 1) {
 			sb.append(" [available versions: ");
-			for (BundleVersion version: versionOrderedBundles) {
-				sb.append(version.getVersion()).append(",");
+			for (BundleVersion version: BundleVersion.orderByVersion(new ArrayList<BundleVersion>(bundle.getVersions()))) {
+				sb.append(version.getVersion()).append(", ");
 			};
-			sb.deleteCharAt(sb.length() - 1).append("]");
+			sb.delete(sb.length() - 2, sb.length()).append("]");
 		}
-		logInfo("Name", latestVersion.getPresentationName());
+		logInfo("Name", bundleVersion.getPresentationName());
 		logInfo("BSN", bundle.getSymbolicName());
 		logInfo("Version", sb.toString());
-		logInfo("Roo Version", latestVersion.getRooVersion());
+		logInfo("Roo Version", bundleVersion.getRooVersion());
 		logInfo("Ranking", new Float(bundle.getRanking()).toString());
-		logInfo("JAR Size", latestVersion.getSize() + " bytes");
-		logInfo("PGP Signature", latestVersion.getPgpKey() + " signed by " + latestVersion.getPgpDescriptions());
-		logInfo("OBR URL", latestVersion.getObrUrl());
-		logInfo("JAR URL", latestVersion.getUri());
-		Map<String, String> commands = latestVersion.getCommands();
+		logInfo("JAR Size", bundleVersion.getSize() + " bytes");
+		logInfo("PGP Signature", bundleVersion.getPgpKey() + " signed by " + bundleVersion.getPgpDescriptions());
+		logInfo("OBR URL", bundleVersion.getObrUrl());
+		logInfo("JAR URL", bundleVersion.getUri());
+		Map<String, String> commands = bundleVersion.getCommands();
 		for (String command : commands.keySet()) {
 			logInfo("Commands", "'" + command + "' [" + commands.get(command) + "]");
 		}
-		logInfo("Description", latestVersion.getDescription());
+		logInfo("Description", bundleVersion.getDescription());
 		int cc = 0;
 		for (Comment comment: bundle.getComments()) {
 			logInfo("Comment " + (++cc), "Rating [" + comment.getRating().name() + "], Date [" + SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(comment.getDate()) + "], Comment [" + comment.getComment() + "]");
@@ -144,12 +143,13 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 	public void installAddOn(AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		Bundle bundle = null;
-		if (bsn != null) {
-			bundle = bundleCache.get(bsn.getKey());
-		} 
+		String bsnString = bsn.getKey();
+		if (bsnString.contains(";")) {
+			bsnString = bsnString.split(";")[0];
+		}
+		Bundle bundle = bundleCache.get(bsnString);
 		if (bundle == null) {
-			log.warning("Could not find specified bundle with symbolic name: " + bsn);
+			log.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
 			return;
 		} 
 		installAddon(bundle.getBundleVersion(bsn.getKey()));
