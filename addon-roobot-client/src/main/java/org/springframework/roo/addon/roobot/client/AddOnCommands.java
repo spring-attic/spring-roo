@@ -4,6 +4,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.roobot.client.model.Rating;
 import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;

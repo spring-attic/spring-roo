@@ -26,7 +26,7 @@ public class AddOnIndexPublicFeatureResolver implements PublicFeatureResolver {
 		if (bundleSymbolicNameOrTypeName.startsWith("org.springframework.roo")) {
 			return true;
 		}
-		for (String bsn : rooBotOperations.getAddOnBsnSet()) {
+		for (String bsn : rooBotOperations.getAddOnCache(false).keySet()) {
 			if (bundleSymbolicNameOrTypeName.startsWith(bsn)) {
 				return true;
 			}

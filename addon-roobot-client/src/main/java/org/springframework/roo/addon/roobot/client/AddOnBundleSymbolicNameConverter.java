@@ -1,11 +1,13 @@
 package org.springframework.roo.addon.roobot.client;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.roobot.client.model.Bundle;
+import org.springframework.roo.addon.roobot.client.model.BundleVersion;
 import org.springframework.roo.shell.Converter;
 import org.springframework.roo.shell.MethodTarget;
 
@@ -27,9 +29,16 @@ public class AddOnBundleSymbolicNameConverter implements Converter {
 	}
 	
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String originalUserInput, String optionContext, MethodTarget target) {
-		Set<String> bsn = addonManagerOperations.getAddOnBsnSet();
-		if (bsn != null) {
-			completions.addAll(bsn);
+		Map<String, Bundle> bundles = addonManagerOperations.getAddOnCache(false);
+		for (String bsn : bundles.keySet()) {
+			Bundle bundle = bundles.get(bsn);
+			if (bundle.getVersions().size() > 1) {
+				for (BundleVersion bundleVersion : bundle.getVersions()) {
+					completions.add(bsn + ";" + bundleVersion.getVersion());
+				}
+			} else {
+				completions.add(bsn);
+			}
 		}
 		return false;
 	}

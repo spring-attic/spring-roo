@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.roobot.client;
 
+import org.springframework.roo.addon.roobot.client.model.Rating;
 import org.springframework.roo.felix.BundleSymbolicName;
 
 /**

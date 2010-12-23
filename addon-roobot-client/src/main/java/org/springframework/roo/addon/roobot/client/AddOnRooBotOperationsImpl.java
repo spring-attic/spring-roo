@@ -1,22 +1,23 @@
 package org.springframework.roo.addon.roobot.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Logger;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,9 +27,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPPublicKeyRing;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.roobot.client.model.Bundle;
+import org.springframework.roo.addon.roobot.client.model.BundleVersion;
+import org.springframework.roo.addon.roobot.client.model.Comment;
+import org.springframework.roo.addon.roobot.client.model.Rating;
 import org.springframework.roo.felix.BundleSymbolicName;
 import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
@@ -52,23 +56,24 @@ import org.w3c.dom.Element;
 @Service
 public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
-	private Map<String, AddOnBundleInfo> bundleCache;
-	private Map<String, AddOnBundleInfo> searchResultCache;
+	private Map<String, Bundle> bundleCache;
+	private Map<String, Bundle> searchResultCache;
 	@Reference private Shell shell;
 	@Reference private PgpService pgpService;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private static final Logger log = Logger.getLogger(AddOnRooBotOperationsImpl.class.getName());
 	private Properties props;
 	private ComponentContext context;
-	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot.xml";
+	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
+	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	
 	protected void activate(ComponentContext context) {
 		this.context = context;
-		bundleCache = new HashMap<String, AddOnBundleInfo>();
-		searchResultCache = new HashMap<String, AddOnBundleInfo>();
+		bundleCache = new HashMap<String, Bundle>();
+		searchResultCache = new HashMap<String, Bundle>();
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				populateBsnMap(true);
+				populateBundleCache(true);
 			}
 		}, "Roo Add-on Index XML Eager Download");
 		t.start();
@@ -82,12 +87,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	public void addOnInfo(AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		AddOnBundleInfo bundle = null;
+		Bundle bundle = null;
 		if (bsn != null) {
 			bundle = bundleCache.get(bsn.getKey());
 		} 
 		if (bundle == null) {
-			log.warning("Could not find specified bundle with symbolic name: " + bsn);
+			log.warning("Unable to find specified bundle with symbolic name: " + bsn.getKey());
 			return;
 		} 
 		addOnInfo(bundle);
@@ -95,7 +100,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	public void addOnInfo(String bundleKey) {
 		Assert.hasText(bundleKey, "A valid bundle ID is required");
-		AddOnBundleInfo bundle = null;
+		Bundle bundle = null;
 		if (searchResultCache != null) {
 			bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
 		}
@@ -106,26 +111,40 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		addOnInfo(bundle);
 	}
 	
-	private void addOnInfo(AddOnBundleInfo bundle) {
-		logInfo("Name", bundle.getName());
-		logInfo("BSN", bundle.getBsn());
-		logInfo("Version", bundle.getVersion());
-		logInfo("Roo Version", bundle.getRooVersion());
+	private void addOnInfo(Bundle bundle) {
+		List<BundleVersion> versionOrderedBundles = BundleVersion.orderByVersion(new ArrayList<BundleVersion>(bundle.getVersions()));
+		BundleVersion latestVersion = versionOrderedBundles.get(versionOrderedBundles.size() - 1);
+		StringBuilder sb = new StringBuilder(latestVersion.getVersion());
+		if (versionOrderedBundles.size() > 1) {
+			sb.append(" [available versions: ");
+			for (BundleVersion version: versionOrderedBundles) {
+				sb.append(version.getVersion()).append(",");
+			};
+			sb.deleteCharAt(sb.length() - 1).append("]");
+		}
+		logInfo("Name", latestVersion.getPresentationName());
+		logInfo("BSN", bundle.getSymbolicName());
+		logInfo("Version", sb.toString());
+		logInfo("Roo Version", latestVersion.getRooVersion());
 		logInfo("Ranking", new Float(bundle.getRanking()).toString());
-		logInfo("JAR Size", bundle.getSize() + " bytes");
-		logInfo("PGP Signature", bundle.getPgpKey() + " signed by " + bundle.getSignedBy());
-		logInfo("OBR URL", "Will be added in Roo 1.1.2"); // TODO: Add rating
-		logInfo("JAR URL", bundle.getUrl());
-		Map<String, String> commands = bundle.getCommands();
+		logInfo("JAR Size", latestVersion.getSize() + " bytes");
+		logInfo("PGP Signature", latestVersion.getPgpKey() + " signed by " + latestVersion.getPgpDescriptions());
+		logInfo("OBR URL", latestVersion.getObrUrl());
+		logInfo("JAR URL", latestVersion.getUri());
+		Map<String, String> commands = latestVersion.getCommands();
 		for (String command : commands.keySet()) {
 			logInfo("Commands", "'" + command + "' [" + commands.get(command) + "]");
 		}
-		logInfo("Description", bundle.getDescription());
+		logInfo("Description", latestVersion.getDescription());
+		int cc = 0;
+		for (Comment comment: bundle.getComments()) {
+			logInfo("Comment " + (++cc), "Rating [" + comment.getRating().name() + "], Date [" + SimpleDateFormat.getDateInstance(SimpleDateFormat.SHORT).format(comment.getDate()) + "], Comment [" + comment.getComment() + "]");
+		}
 	}
 
 	public void installAddOn(AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		AddOnBundleInfo bundle = null;
+		Bundle bundle = null;
 		if (bsn != null) {
 			bundle = bundleCache.get(bsn.getKey());
 		} 
@@ -133,12 +152,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.warning("Could not find specified bundle with symbolic name: " + bsn);
 			return;
 		} 
-		installAddon(bundle);
+		installAddon(bundle.getBundleVersion(bsn.getKey()));
 	}
 	
 	public void installAddOn(String bundleKey) {
 		Assert.hasText(bundleKey, "A valid bundle ID is required");
-		AddOnBundleInfo bundle = null;
+		Bundle bundle = null;
 		if (searchResultCache != null) {
 			bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
 		}
@@ -146,13 +165,13 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.warning("To install an addon a valid bundle ID is required");
 			return;
 		} 
-		installAddon(bundle);
+		installAddon(bundle.getBundleVersion(bundleKey));
 	}
 	
-	private void installAddon(AddOnBundleInfo bundle) {
+	private void installAddon(BundleVersion bundleVersion) {
 		boolean success = false;	
-		String url = bundle.getUrl();
-		if (url != null && url.length() > 0 && bundle.getUrl().startsWith("httppgp://")) {
+		String url = bundleVersion.getUri();
+		if (url != null && url.length() > 0 && url.startsWith("httppgp://")) {
 			int count = countBundles();
 			success = shell.executeCommand("osgi start --url " + url);
 			if (count == countBundles()) {
@@ -160,9 +179,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 		}
 		if (success) {
-			log.info("Successfully installed add-on: " + bundle.getBsn());
+			log.info("Successfully installed add-on: " + bundleVersion.getPresentationName());
 		} else {
-			log.warning("Unable to install add-on: " + bundle.getBsn());
+			log.warning("Unable to install add-on: " + bundleVersion.getPresentationName());
 		}
 	}
 
@@ -189,7 +208,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			// We should refresh regardless in this case
 			refresh = true;
 		}
-		if (refresh && populateBsnMap(false)) {
+		if (refresh && populateBundleCache(false)) {
 			if (showFeedback) {
 				log.info("Successfully downloaded Roo add-on Data");
 			}
@@ -199,21 +218,21 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			if (searchTerms != null && !"".equals(searchTerms)) {
 				onlyRelevantBundles = true;
 				String [] terms = searchTerms.split(",");
-				for (AddOnBundleInfo bundle: bundleCache.values()) {
+				for (Bundle bundle: bundleCache.values()) {
 					//first set relevance of all bundles to zero
 					bundle.setSearchRelevance(0f);
 					int hits = 0;
+					BundleVersion latest = bundle.getLatestVersion();
 					for (String term: terms) {
-						if (bundle.getSummary().toLowerCase().contains(term.trim().toLowerCase())) {
+						if ((bundle.getSymbolicName() + ";" + latest.getSummary()).toLowerCase().contains(term.trim().toLowerCase())) {
 							hits++;
 						}
 					}
 					bundle.setSearchRelevance(hits / terms.length);
 				}
 			}
-			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
-			Collections.sort(bundles, new SearchComparator());
-			LinkedList<AddOnBundleInfo> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
+			List<Bundle> bundles = Bundle.orderBySearchRelevance(new ArrayList<Bundle>(bundleCache.values()));
+			LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
 			if (showFeedback) {
 				printResultList(filteredSearchResults, maxResults, linesPerResult);
 			}
@@ -233,38 +252,38 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			// We should refresh regardless in this case
 			refresh = true;
 		}
-		if (refresh && populateBsnMap(false)) {
+		if (refresh && populateBundleCache(false)) {
 			log.info("Successfully downloaded Roo add-on Data");
 		}
 		if (bundleCache.size() != 0) {
-			LinkedList<AddOnBundleInfo> bundles = new LinkedList<AddOnBundleInfo>(bundleCache.values());
-			Collections.sort(bundles, new RankingComparator());
-			LinkedList<AddOnBundleInfo> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
+			List<Bundle> bundles = Bundle.orderByRanking(new ArrayList<Bundle>(bundleCache.values()));
+			LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
 			printResultList(filteredList, maxResults, linesPerResult);
 		} else {
 			log.info("No add-ons known. Are you online? Try the 'download status' command");
 		}
 	}
 	
-	private LinkedList<AddOnBundleInfo> filterList(LinkedList<AddOnBundleInfo> bundles, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
-		LinkedList<AddOnBundleInfo> filteredList = new LinkedList<AddOnBundleInfo>();
+	private LinkedList<Bundle> filterList(List<Bundle> bundles, boolean trustedOnly, boolean compatibleOnly, String requiresCommand, boolean onlyRelevantBundles) {
+		LinkedList<Bundle> filteredList = new LinkedList<Bundle>();
 		List<PGPPublicKeyRing> keys = null;
 		if (trustedOnly) {
 			keys = pgpService.getTrustedKeys();
 		}
-		bundle_loop: for (AddOnBundleInfo bundle: bundles) {
+		bundle_loop: for (Bundle bundle: bundles) {
+			BundleVersion latest = bundle.getLatestVersion();
 			if (onlyRelevantBundles && !(bundle.getSearchRelevance() > 0)) {
 				continue bundle_loop;
 			}
-			if (trustedOnly && !isTrustedKey(keys, bundle.getPgpKey())) {
+			if (trustedOnly && !isTrustedKey(keys, latest.getPgpKey())) {
 				continue bundle_loop;
 			} 
-			if (compatibleOnly && !isCompatible(bundle.getRooVersion())) {
+			if (compatibleOnly && !isCompatible(latest.getRooVersion())) {
 				continue bundle_loop;
 			}
 			if (requiresCommand != null && requiresCommand.length() > 0) {
 				boolean matchingCommand = false;
-				for (String cmd : bundle.getCommands().keySet()) {
+				for (String cmd : latest.getCommands().keySet()) {
 					if (cmd.startsWith(requiresCommand) || requiresCommand.startsWith(cmd)) {
 						matchingCommand = true;
 						break;
@@ -279,25 +298,26 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return filteredList;
 	}
 	
-	private void printResultList(LinkedList<AddOnBundleInfo> bundles, int maxResults, int linesPerResult) {
+	private void printResultList(LinkedList<Bundle> bundles, int maxResults, int linesPerResult) {
 		int bundleId = 1;
 		searchResultCache.clear();
 		StringBuilder sb = new StringBuilder();
 		List<PGPPublicKeyRing> keys = pgpService.getTrustedKeys();
 		log.info(bundles.size() + " found, sorted by rank; T = trusted developer; R = Roo " + getVersionForCompatibility() + " compatible");
 		log.warning("ID T R DESCRIPTION -------------------------------------------------------------");
-		for (AddOnBundleInfo bundle: bundles) {
+		for (Bundle bundle: bundles) {
 			if (maxResults-- == 0) {
 				break;
 			}
+			BundleVersion latest = bundle.getLatestVersion();
 			String bundleKey = String.format("%02d", bundleId++);
 			searchResultCache.put(bundleKey, bundle);
 			sb.append(bundleKey);
-			sb.append(isTrustedKey(keys, bundle.getPgpKey()) ? " Y " : " - ");
-			sb.append(isCompatible(bundle.getRooVersion()) ? "Y " : "- "); 
-			sb.append(bundle.getVersion());
+			sb.append(isTrustedKey(keys, latest.getPgpKey()) ? " Y " : " - ");
+			sb.append(isCompatible(latest.getRooVersion()) ? "Y " : "- "); 
+			sb.append(latest.getVersion());
 			sb.append(" ");
-			ArrayList<String> split = new ArrayList<String>(Arrays.asList(bundle.getDescription().split("\\s")));
+			ArrayList<String> split = new ArrayList<String>(Arrays.asList(latest.getDescription().split("\\s")));
 			int lpr = linesPerResult;
 			while (split.size() > 0 && --lpr >= 0) {
 				while (!(split.size() == 0) && ((split.get(0).length() + sb.length()) < (lpr == 0 ? 77 : 80))) {
@@ -336,24 +356,14 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		return false;
 	}
 
-	public Set<String> getAddOnBsnSet() {
-		if (bundleCache == null) {
-			populateBsnMap(false);
-		}
-		if (bundleCache != null && bundleCache.size() > 0) {
-			return bundleCache.keySet();
-		}
-		return new HashSet<String>();
-	}
-
-	public Map<String, AddOnBundleInfo> getAddOnCache(boolean refresh) {
+	public Map<String, Bundle> getAddOnCache(boolean refresh) {
 		if (refresh) {
-			populateBsnMap(false);
+			populateBundleCache(false);
 		}
 		return Collections.unmodifiableMap(bundleCache);
 	}
 
-	private boolean populateBsnMap(boolean startupTime) {
+	private boolean populateBundleCache(boolean startupTime) {
 		boolean success = false;
 		InputStream is = null;
 		try {
@@ -386,48 +396,87 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				log.warning("Could not connect to Roo Addon bundle repository index");
 				return false;
 			}
-			Document roobotXml = db.parse(is);
+			
+			ZipInputStream zip = new ZipInputStream(is);
+			zip.getNextEntry();
+			
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			byte[] buffer = new byte[8192];
+			int length = -1;
+			    while (zip.available() > 0) {
+			    length = zip.read(buffer, 0, 8192);
+			         if (length > 0) {
+			         baos.write(buffer, 0, length);
+			    }
+			}
+
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+			Document roobotXml = db.parse(bais);
 
 			if (roobotXml != null) {
 				bundleCache.clear();
-				for (Element bundle : XmlUtils.findElements("/roobot/bundles/bundle", roobotXml.getDocumentElement())) {
+				for (Element bundleElement : XmlUtils.findElements("/roobot/bundles/bundle", roobotXml.getDocumentElement())) {
+					String bsn = bundleElement.getAttribute("bsn");
+					
+					List<Comment> comments = new LinkedList<Comment>();
+					for (Element commentElement: XmlUtils.findElements("comments/comment", bundleElement)) {
+						comments.add(new Comment(Rating.fromInt(new Integer(commentElement.getAttribute("rating"))), commentElement.getAttribute("comment"), dateFormat.parse(commentElement.getAttribute("date"))));
+					}
+					Bundle bundle = new Bundle(bundleElement.getAttribute("bsn"), new Float(bundleElement.getAttribute("uaa-ranking")).floatValue(), comments);
 
-					String bsn = bundle.getAttribute("bsn");
-					Element version = XmlUtils.findFirstElement("version", bundle);
-					if (bsn != null && bsn.length() > 0 && version != null) {
-						String signedBy = "";
-						String pgpKey = version.getAttribute("pgp-key-id");
-						if (pgpKey != null && pgpKey.length() > 0) {
-							Element pgpSigned = XmlUtils.findFirstElement("/roobot/pgp-keys/pgp-key[@id='" + pgpKey + "']/pgp-key-description", roobotXml.getDocumentElement());
-							if (pgpSigned != null) {
-								signedBy = pgpSigned.getAttribute("text");
+					for (Element versionElement: XmlUtils.findElements("versions/version", bundleElement)) {
+						if (bsn != null && bsn.length() > 0 && versionElement != null) {
+							String signedBy = "";
+							String pgpKey = versionElement.getAttribute("pgp-key-id");
+							if (pgpKey != null && pgpKey.length() > 0) {
+								Element pgpSigned = XmlUtils.findFirstElement("/roobot/pgp-keys/pgp-key[@id='" + pgpKey + "']/pgp-key-description", roobotXml.getDocumentElement());
+								if (pgpSigned != null) {
+									signedBy = pgpSigned.getAttribute("text");
+								}
 							}
+	
+							Map<String, String> commands = new HashMap<String, String>();
+							for (Element shell : XmlUtils.findElements("shell-commands/shell-command", versionElement)) {
+								commands.put(shell.getAttribute("command"), shell.getAttribute("help"));
+							}
+							
+					    	StringBuilder versionBuilder = new StringBuilder();
+					    	versionBuilder.append(versionElement.getAttribute("major")).append(".").append(versionElement.getAttribute("minor"));
+					    	String versionMicro = versionElement.getAttribute("micro");
+					    	if (versionMicro != null && versionMicro.length() > 0) {
+					    		versionBuilder.append(".").append(versionMicro);
+					    	}
+					    	String versionQualifier = versionElement.getAttribute("qualifier");
+					    	if (versionQualifier != null && versionQualifier.length() > 0) {
+					    		versionBuilder.append(".").append(versionQualifier);
+					    	}   
+					    	
+					    	String rooVersion = versionElement.getAttribute("roo-version");
+					    	if (rooVersion.equals("*") || rooVersion.length() == 0) {
+					    		rooVersion = getVersionForCompatibility();
+					    	} else {
+					    		String[] split = rooVersion.split(".");
+					    		if (split.length > 2) {
+					    			//only interested in major.minor
+					    			rooVersion = split[0] + "." + split[1];
+					    		}
+					    	}
+							
+					    	BundleVersion version = new BundleVersion(versionElement.getAttribute("url"), versionElement.getAttribute("obr-url"), versionBuilder.toString(), versionElement.getAttribute("name"), new Long(versionElement.getAttribute("size")).longValue(), versionElement.getAttribute("description"), pgpKey, signedBy, rooVersion, commands);
+					    	// For security reasons we ONLY accept httppgp:// add-on versions
+					    	if (!version.getUri().startsWith("httppgp://")) {
+								continue;
+							}
+							bundle.addVersion(version);
 						}
-
-						Date updatedDate = null;
-						String[] updatedArray = version.getAttribute("last-updated").split(".");
-						if (updatedArray.length > 0) {
-							String updated = updatedArray[0];
-							updatedDate = new Date(new Long(updated));
-						}
-
-						Map<String, String> commands = new HashMap<String, String>();
-						for (Element shell : XmlUtils.findElements("shell", version)) {
-							commands.put(shell.getAttribute("command"), shell.getAttribute("help"));
-						}
-
-						AddOnBundleInfo addonBundle = new AddOnBundleInfo(bsn, new Float(bundle.getAttribute("uaa-ranking")), version.getAttribute("name"), version.getAttribute("description"), updatedDate, version.getAttribute("major") + "." + version.getAttribute("minor") + (version.getAttribute("micro").length() > 0 ? "." + version.getAttribute("micro") : "") + (version.getAttribute("qualifier").length() > 0 ? "." + version.getAttribute("qualifier") : ""), pgpKey, signedBy, new Long(version.getAttribute("size")), version.getAttribute("url"), commands);
-
-						// For security reasons we ONLY accept httppgp:// add-ons
-						if (!addonBundle.getUrl().startsWith("httppgp://")) {
-							continue;
-						}
-						
-						bundleCache.put(bsn, addonBundle);
+						bundleCache.put(bsn, bundle);
 					}
 				}
 				success = true;
 			}
+			zip.close();
+			baos.close();
+			bais.close();
 		} catch (Throwable ignore) {
 		} finally {
 			try {
@@ -443,7 +492,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private int countBundles() {
 		BundleContext bc = context.getBundleContext();
 		if (bc != null) {
-			Bundle[] bundles = bc.getBundles();
+			org.osgi.framework.Bundle[] bundles = bc.getBundles();
 			if (bundles != null) {
 				return bundles.length;
 			}
@@ -493,27 +542,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 	
 	private String getVersionForCompatibility() {
-		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMajorVersion();
-	}
-	
-	private class RankingComparator implements Comparator<AddOnBundleInfo> {
-		public int compare(AddOnBundleInfo o1, AddOnBundleInfo o2) {
-			if (o1.getRanking() == o2.getRanking()) return 0;
-			else if (o1.getRanking() > o2.getRanking()) return 1;
-			else return -1;
-		}
-	}
-	
-	private class SearchComparator implements Comparator<AddOnBundleInfo> {
-		public int compare(AddOnBundleInfo o1, AddOnBundleInfo o2) {
-			if (o1.getSearchRelevance() < o2.getSearchRelevance()) return -1;
-			else if (o1.getSearchRelevance() > o2.getSearchRelevance()) return 1;
-			//order by ranking if search relevance is equal
-			else {
-				if (o1.getRanking() == o2.getRanking()) return 0;
-				else if (o1.getRanking() > o2.getRanking()) return 1;
-				else return -1;	
-			}
-		}
+		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMinorVersion();
 	}
 }

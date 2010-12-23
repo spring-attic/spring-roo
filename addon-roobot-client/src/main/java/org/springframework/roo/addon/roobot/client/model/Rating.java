@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.roobot.client;
+package org.springframework.roo.addon.roobot.client.model;
 
 import org.springframework.roo.support.style.ToStringCreator;
 
@@ -6,6 +6,7 @@ import org.springframework.roo.support.style.ToStringCreator;
  * Star ratings for the "addon feedback bundle" command.
  * 
  * @author Ben Alex
+ * @author Stefan Schmidt
  * @since 1.1.1
  */
 public enum Rating {
@@ -19,6 +20,17 @@ public enum Rating {
 
 	private Rating(Integer key) {
 		this.key = key;
+	}
+	
+	public static Rating fromInt(Integer rating) {
+		switch (rating) {
+		case 1: return VERY_BAD;
+		case 2: return BAD;
+		case 3: return NEUTRAL;
+		case 4: return GOOD;
+		case 5: return VERY_GOOD;
+		default: return NEUTRAL;
+		}
 	}
 
 	public Integer getKey() {
