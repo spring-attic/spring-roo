@@ -302,7 +302,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Determines whether the VMforce maven dependency exists in the pom.
 	 * 
-	 * @return true if the com.salesforce.sdk.persistence is present in the pom.xml, otherwise false
+	 * @return true if the com.force.sdk is present in the pom.xml, otherwise false
 	 */
 	public boolean isVMforceEnabled() {
 		for (Dependency dependency : dependencies) {
