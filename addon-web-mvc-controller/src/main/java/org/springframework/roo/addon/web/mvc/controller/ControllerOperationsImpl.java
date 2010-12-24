@@ -27,6 +27,7 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -47,6 +48,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private FileManager fileManager;
 
 	public void generateAll(final JavaPackage javaPackage) {
 		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
@@ -89,6 +91,10 @@ public class ControllerOperationsImpl implements ControllerOperations {
 
 		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 
+		if (fileManager.exists(resourceIdentifier)) {
+			return; //type exists already - nothing to do
+		}
+			
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		// Create annotation @RooWebScaffold(path = "/test", formBackingObject = MyObject.class)
