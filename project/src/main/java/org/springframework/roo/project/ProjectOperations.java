@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import java.util.List;
+
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaSymbolName;
 
@@ -89,6 +91,17 @@ public interface ProjectOperations {
 	 * @param projectType the ProjectType to update.
 	 */
 	void updateProjectType(ProjectType projectType);
+	
+	/**
+	 * Allows addition of JAR dependencies to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param dependencies to add (required)
+	 */
+	void addDependencies(List<Dependency> dependencies);
 
 	/**
 	 * Allows addition of a JAR dependency to the POM. 

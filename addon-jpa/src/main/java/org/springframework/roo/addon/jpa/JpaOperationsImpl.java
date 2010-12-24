@@ -3,6 +3,7 @@ package org.springframework.roo.addon.jpa;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -97,6 +98,7 @@ public class JpaOperationsImpl implements JpaOperations {
 		updatePersistenceXml(ormProvider, database, hostName, databaseName, userName, password, persistenceUnit);
 		updateGaeXml(ormProvider, database, applicationId);
 		updateVMforceConfigProperties(ormProvider, database, userName, password);
+		
 		if (!StringUtils.hasText(jndi)) {
 			updateDatabaseProperties(ormProvider, database, hostName, databaseName, userName, password);
 		}
@@ -592,26 +594,31 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateDependencies(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		
 		List<Element> databaseDependencies = XmlUtils.findElements(getDbXPath(database) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : databaseDependencies) {
-			projectOperations.addDependency(new Dependency(dependencyElement));
+			dependencies.add(new Dependency(dependencyElement));
 		}
 
 		List<Element> ormDependencies = XmlUtils.findElements(getProviderXPath(ormProvider) + "/dependencies/dependency", configuration);
 		for (Element dependencyElement : ormDependencies) {
-			projectOperations.addDependency(new Dependency(dependencyElement));
+			dependencies.add(new Dependency(dependencyElement));
 		}
 
 		// Hard coded to JPA & Hibernate Validator for now
 		List<Element> jpaDependencies = XmlUtils.findElements("/configuration/persistence/provider[@id = 'JPA']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jpaDependencies) {
-			projectOperations.addDependency(new Dependency(dependencyElement));
+			dependencies.add(new Dependency(dependencyElement));
 		}
 
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/spring/dependencies/dependency", configuration);
 		for (Element dependencyElement : springDependencies) {
-			projectOperations.addDependency(new Dependency(dependencyElement));
+			dependencies.add(new Dependency(dependencyElement));
 		}
+		
+		// Add all new dependencies to pom.xml
+		projectOperations.addDependencies(dependencies);
 
 		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
 			logger.warning("The " + database.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
@@ -623,69 +630,99 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateRepositories(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Repository> repositories = new ArrayList<Repository>();
+
 		List<Element> databaseRepositories = XmlUtils.findElements(getDbXPath(database) + "/repositories/repository", configuration);
 		for (Element repositoryElement : databaseRepositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
+			repositories.add(new Repository(repositoryElement));
 		}
 	
 		List<Element> ormRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/repositories/repository", configuration);
 		for (Element repositoryElement : ormRepositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
+			repositories.add(new Repository(repositoryElement));
 		}
 	
 		List<Element> jpaRepositories = XmlUtils.findElements("/configuration/persistence/provider[@id='JPA']/repositories/repository", configuration);
 		for (Element repositoryElement : jpaRepositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
+			repositories.add(new Repository(repositoryElement));
+		}
+		
+		for (Repository repository : repositories) {
+			projectOperations.addRepository(repository);
 		}
 	}
 
 	private void updatePluginRepositories(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Repository> pluginRepositories = new ArrayList<Repository>();
+
 		List<Element> databasePluginRepositories = XmlUtils.findElements(getDbXPath(database) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : databasePluginRepositories) {
-			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
+			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
 		
 		List<Element> ormPluginRepositories = XmlUtils.findElements(getProviderXPath(ormProvider) + "/pluginRepositories/pluginRepository", configuration);
 		for (Element pluginRepositoryElement : ormPluginRepositories) {
-			projectOperations.addPluginRepository(new Repository(pluginRepositoryElement));
+			pluginRepositories.add(new Repository(pluginRepositoryElement));
+		}
+		
+		for (Repository pluginRepository : pluginRepositories) {
+			projectOperations.addPluginRepository(pluginRepository);
 		}
 	}
 
 	private void updateFilters(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Filter> filters = new ArrayList<Filter>();
+
 		List<Element> databaseFilters = XmlUtils.findElements(getDbXPath(database) + "/filters/filter", configuration);
 		for (Element filterElement : databaseFilters) {
-			projectOperations.addFilter(new Filter(filterElement));
+			filters.add(new Filter(filterElement));
 		}
 	
 		List<Element> ormFilters = XmlUtils.findElements(getProviderXPath(ormProvider) + "/filters/filter", configuration);
 		for (Element filterElement : ormFilters) {
-			projectOperations.addFilter(new Filter(filterElement));
+			filters.add(new Filter(filterElement));
+		}
+		
+		for (Filter filter : filters) {
+			projectOperations.addFilter(filter);
 		}
 	}
 
 	private void updateResources(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Resource> resources = new ArrayList<Resource>();
+
 		List<Element> databaseResources = XmlUtils.findElements(getDbXPath(database) + "/resources/resource", configuration);
 		for (Element resourceElement : databaseResources) {
-			projectOperations.addResource(new Resource(resourceElement));
+			resources.add(new Resource(resourceElement));
 		}
 	
 		List<Element> ormResources = XmlUtils.findElements(getProviderXPath(ormProvider) + "/resources/resource", configuration);
 		for (Element resourceElement : ormResources) {
-			projectOperations.addResource(new Resource(resourceElement));
+			resources.add(new Resource(resourceElement));
+		}
+		
+		for (Resource resource : resources) {
+			projectOperations.addResource(resource);
 		}
 	}
 
 	private void updateBuildPlugins(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		List<Plugin> buildPlugins = new ArrayList<Plugin>();
+
 		List<Element> databasePlugins = XmlUtils.findElements(getDbXPath(database) + "/plugins/plugin", configuration);
 		for (Element pluginElement : databasePlugins) {
-			projectOperations.addBuildPlugin(new Plugin(pluginElement));
+			buildPlugins.add(new Plugin(pluginElement));
 		}
 	
 		List<Element> ormPlugins = XmlUtils.findElements(getProviderXPath(ormProvider) + "/plugins/plugin", configuration);
 		for (Element pluginElement : ormPlugins) {
-			projectOperations.addBuildPlugin(new Plugin(pluginElement));
+			buildPlugins.add(new Plugin(pluginElement));
 		}
 		
+		for (Plugin buildPlugin : buildPlugins) {
+			projectOperations.addBuildPlugin(buildPlugin);
+		}
+
 		if (database == JdbcDatabase.GOOGLE_APP_ENGINE) {
 			updateEclipsePlugin(true);
 		}
@@ -693,21 +730,26 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateEclipsePlugin(boolean addBuildCommand) {
 		String pomPath = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
-		MutableFile pomMutableFile = null;
+		MutableFile mutableFile = null;
 
 		Document pom;
 		try {
 			if (fileManager.exists(pomPath)) {
-				pomMutableFile = fileManager.updateFile(pomPath);
-				pom = XmlUtils.getDocumentBuilder().parse(pomMutableFile.getInputStream());
+				mutableFile = fileManager.updateFile(pomPath);
+				pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
 			} else {
 				throw new IllegalStateException("Could not acquire pom.xml in " + pomPath);
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-
+		
+		updateEclipsePlugin(addBuildCommand, pom, mutableFile);
+	}
+	
+	private void updateEclipsePlugin(boolean addBuildCommand, Document pom, MutableFile mutableFile) {
 		Element root = pom.getDocumentElement();
+		
 		String gaeBuildCommandName = "com.google.appengine.eclipse.core.enhancerbuilder";
 		Element additionalBuildcommandsElement = XmlUtils.findFirstElement("/project/build/plugins/plugin[artifactId = 'maven-eclipse-plugin']/configuration/additionalBuildcommands", root);
 		Assert.notNull(additionalBuildcommandsElement, "additionalBuildcommands element of the maven-eclipse-plugin reqired");
@@ -719,68 +761,129 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildCommandElement = pom.createElement("buildCommand");
 			buildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(buildCommandElement);
-			XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		} 
 		
 		if (!addBuildCommand && buildCommandElement != null) {
 			additionalBuildcommandsElement.removeChild(buildCommandElement);
-			XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase database) {
+		String pomPath = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
+		MutableFile mutableFile = fileManager.updateFile(pomPath);
+
+		Document pom;
+		try {
+			pom = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+		} catch (Exception ex) {
+			throw new IllegalStateException("Could not open POM '" + pomPath + "'", ex);
+		}
+
+		Element root = (Element) pom.getFirstChild();
+		
+		List<JdbcDatabase> databases = new ArrayList<JdbcDatabase>();
 		for (JdbcDatabase jdbcDatabase : JdbcDatabase.values()) {
 			if (!jdbcDatabase.getKey().equals(database.getKey()) && !jdbcDatabase.getDriverClassName().equals(database.getDriverClassName())) {
-				List<Element> dependencies = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/dependencies/dependency", configuration);
-				for (Element dependencyElement : dependencies) {
-					projectOperations.removeDependency(new Dependency(dependencyElement));
-				}
-				
-				List<Element> filters = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/filters/filter", configuration);
-				for (Element filterElement : filters) {
-					projectOperations.removeFilter(new Filter(filterElement));
-				}
-				
-				List<Element> plugins = XmlUtils.findElements(getDbXPath(jdbcDatabase) + "/plugins/plugin", configuration);
-				for (Element pluginElement : plugins) {
-					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
-				}
+				databases.add(jdbcDatabase);
 			}
 		}
+		removeArtifacts(getDbXPath(databases), root, configuration);
+
+		List<OrmProvider> ormProviders = new ArrayList<OrmProvider>();
 		for (OrmProvider provider : OrmProvider.values()) {
 			if (provider != ormProvider) {
-				// List<Element> pomProperties = XmlUtils.findElements(getProviderXPath(provider) + "/properties/*", configuration);
-				// for (Element propertyElement : pomProperties) {
-				// projectOperations.removeProperty(new Property(propertyElement));
-				// }
-				List<Element> dependencies = XmlUtils.findElements(getProviderXPath(provider) + "/dependencies/dependency", configuration);
-				for (Element dependencyElement : dependencies) {
-					projectOperations.removeDependency(new Dependency(dependencyElement));
-				}
-				
-				List<Element> filters = XmlUtils.findElements(getProviderXPath(provider) + "/filters/filter", configuration);
-				for (Element filterElement : filters) {
-					projectOperations.removeFilter(new Filter(filterElement));
-				}
-				
-				List<Element> plugins = XmlUtils.findElements(getProviderXPath(provider) + "/plugins/plugin", configuration);
-				for (Element pluginElement : plugins) {
-					projectOperations.removeBuildPlugin(new Plugin(pluginElement));
+				ormProviders.add(provider);
+			}
+		}
+		removeArtifacts(getProviderXPath(ormProviders), root, configuration);
+		
+		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
+
+		if (database != JdbcDatabase.GOOGLE_APP_ENGINE) {
+			updateEclipsePlugin(false, pom, mutableFile);
+		}
+	}
+		
+	private void removeArtifacts(String xPathExpression, Element root, Element configuration) {
+		// Remove unwanted dependencies
+		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
+		for (Element candidate : XmlUtils.findElements("/project/dependencies/dependency", root)) {
+			unwanted: for (Element dependencyElement : XmlUtils.findElements(xPathExpression + "/dependencies/dependency", configuration)) {
+				if (new Dependency(dependencyElement).equals(new Dependency(candidate))) {
+					// Found it
+					dependenciesElement.removeChild(candidate);
+					break unwanted;
 				}
 			}
 		}
-		
-		if (database != JdbcDatabase.GOOGLE_APP_ENGINE) {
-			updateEclipsePlugin(false);
+		XmlUtils.removeTextNodes(dependenciesElement);
+
+		// Remove unwanted filters
+		Element filtersElement = XmlUtils.findFirstElement("/project/build/filters", root);
+		for (Element candidate : XmlUtils.findElements("/project/build/filters/filter", root)) {
+			unwanted: for (Element filterElement : XmlUtils.findElements(xPathExpression + "/filters/filter", configuration)) {
+				if (new Filter(filterElement).equals(new Filter(candidate))) {
+					// Found it
+					filtersElement.removeChild(candidate);
+					break unwanted;
+				}
+			}
 		}
+		XmlUtils.removeTextNodes(filtersElement);
+		if (filtersElement != null && !filtersElement.hasChildNodes()) {
+			filtersElement.getParentNode().removeChild(filtersElement);
+		}
+
+		// Remove unwanted plugins
+		Element pluginsElement = XmlUtils.findFirstElement("/project/build/plugins", root);
+		for (Element candidate : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
+			unwanted: for (Element pluginElement : XmlUtils.findElements(xPathExpression + "/plugins/plugin", configuration)) {
+				if (new Plugin(pluginElement).equals(new Plugin(candidate))) {
+					// Found it
+					pluginsElement.removeChild(candidate);
+					break unwanted;
+				}
+			}
+		}
+		XmlUtils.removeTextNodes(pluginsElement);
 	}
 
 	private String getDbXPath(JdbcDatabase database) {
 		return "/configuration/databases/database[@id = '" + database.getKey() + "']";
 	}
 
+	private String getDbXPath(List<JdbcDatabase> databases) {
+		StringBuilder builder = new StringBuilder("/configuration/databases/database[");
+		for (int i = 0, n = databases.size(); i < n; i++) {
+			builder.append("@id = '");
+			builder.append(databases.get(i).getKey());
+			builder.append("'");
+			if (i < n - 1) {
+				builder.append(" or ");
+			}
+		}
+		builder.append("]");
+		return builder.toString();
+	}
+	
 	private String getProviderXPath(OrmProvider provider) {
 		return "/configuration/ormProviders/provider[@id = '" + provider.name() + "']";
+	}
+	
+	private String getProviderXPath(List<OrmProvider> ormProviders) {
+		StringBuilder builder = new StringBuilder("/configuration/ormProviders/provider[");
+		for (int i = 0, n = ormProviders.size(); i < n; i++) {
+			builder.append("@id = '");
+			builder.append(ormProviders.get(i).name());
+			builder.append("'");
+			if (i < n - 1) {
+				builder.append(" or ");
+			}
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 	private Element createPropertyElement(String name, String value, Document doc) {

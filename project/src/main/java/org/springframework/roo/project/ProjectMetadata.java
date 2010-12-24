@@ -2,10 +2,11 @@ package org.springframework.roo.project;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
@@ -74,6 +75,17 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return PROJECT_IDENTIFIER;
 	}
 	
+	/**
+	 * Convenience method for determining whether all presented dependencies are registered. 
+	 *
+	 * @param dependencies to check (required)
+	 * @return whether all the dependencies are currently registered or not
+	 */
+	public boolean isAllDependenciesRegistered(List<Dependency> dependencies) {
+		Assert.notNull(dependencies, "Dependencies to check is required");
+		return this.dependencies.containsAll(dependencies);
+	}
+
 	/**
 	 * Convenience method for determining whether a particular dependency is registered. 
 	 *

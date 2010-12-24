@@ -1,5 +1,7 @@
 package org.springframework.roo.project;
 
+import java.util.List;
+
 import org.springframework.roo.metadata.MetadataProvider;
 
 /**
@@ -11,6 +13,19 @@ import org.springframework.roo.metadata.MetadataProvider;
  * @since 1.0
  */
 public interface ProjectMetadataProvider extends MetadataProvider {
+	
+	/**
+	 * Attempts to add the specified dependencies. If all the dependencies already exist according
+	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * Otherwise each new dependency is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param dependency to add (required)
+	 */
+	void addDependencies(List<Dependency> dependencies);
 	
 	/**
 	 * Attempts to add the specified dependency. If the dependency already exists according

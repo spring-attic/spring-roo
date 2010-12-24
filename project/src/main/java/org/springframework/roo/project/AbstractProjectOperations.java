@@ -1,6 +1,7 @@
 package org.springframework.roo.project;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -185,6 +186,15 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		projectMetadataProvider.updateProjectType(projectType);
 	}
 	
+	public final void addDependencies(List<Dependency> dependencies) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
+		Assert.notNull(dependencies, "Dependencies required");
+		projectMetadataProvider.addDependencies(dependencies);
+		for (Dependency dependency : dependencies) {
+			sendDependencyAdditionNotifications(dependency);
+		}
+	}
+
 	public final void addDependency(Dependency dependency) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(dependency, "Dependency required");

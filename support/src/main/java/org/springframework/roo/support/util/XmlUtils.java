@@ -226,7 +226,11 @@ public final class XmlUtils {
 		NodeList nodes = null;
 
 		try {
-			XPathExpression expr = xpath.compile(xPathExpression);
+			XPathExpression expr = compiledExpressionCache.get(xPathExpression);
+			if (expr == null) {
+				expr = xpath.compile(xPathExpression);
+				compiledExpressionCache.put(xPathExpression, expr);
+			}
 			nodes = (NodeList) expr.evaluate(root, XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException("Unable evaluate xpath expression", e);
@@ -295,6 +299,10 @@ public final class XmlUtils {
 	 * @param element the element where empty text nodes will be removed
 	 */
 	public static void removeTextNodes(Element element) {
+		if (element == null) {
+			return;
+		}
+		
 		NodeList children = element.getChildNodes();
 		for (int i = children.getLength() - 1; i >= 0; i--) {
 			Node child = children.item(i);

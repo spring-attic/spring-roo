@@ -92,20 +92,20 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
+		Element root = (Element) document.getFirstChild();
 
 		// Obtain project name
-		Element artifactIdElement = XmlUtils.findFirstElement("/project/artifactId", rootElement);
+		Element artifactIdElement = XmlUtils.findFirstElement("/project/artifactId", root);
 		String artifactId = artifactIdElement.getTextContent();
 		Assert.hasText(artifactId, "Project name could not be determined from POM '" + pom + "'");
 		String projectName = artifactId;
 
 		// Obtain top level package
-		Element groupIdElement = XmlUtils.findFirstElement("/project/groupId", rootElement);
+		Element groupIdElement = XmlUtils.findFirstElement("/project/groupId", root);
 		
 		if (groupIdElement == null) {
-			// Fallback to a group ID assumed to be the same as any possible <parent> (ROO-1193)
-			groupIdElement = XmlUtils.findFirstElement("/project/parent/groupId", rootElement);
+			// Fall back to a group ID assumed to be the same as any possible <parent> (ROO-1193)
+			groupIdElement = XmlUtils.findFirstElement("/project/parent/groupId", root);
 		}
 		
 		Assert.notNull(groupIdElement, "Maven pom.xml must provide a <groupId> for the <project>");
@@ -116,43 +116,43 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		// Build dependencies list
 		Set<Dependency> dependencies = new HashSet<Dependency>();
-		for (Element dependency : XmlUtils.findElements("/project/dependencies/dependency", rootElement)) {
+		for (Element dependency : XmlUtils.findElements("/project/dependencies/dependency", root)) {
 			dependencies.add(new Dependency(dependency));
 		}
 
 		// Build plugins list
 		Set<Plugin> buildPlugins = new HashSet<Plugin>();
-		for (Element plugin : XmlUtils.findElements("/project/build/plugins/plugin", rootElement)) {
+		for (Element plugin : XmlUtils.findElements("/project/build/plugins/plugin", root)) {
 			buildPlugins.add(new Plugin(plugin));
 		}
 
 		// Build repositories list
 		Set<Repository> repositories = new HashSet<Repository>();
-		for (Element repository : XmlUtils.findElements("/project/repositories/repository", rootElement)) {
+		for (Element repository : XmlUtils.findElements("/project/repositories/repository", root)) {
 			repositories.add(new Repository(repository));
 		}
 		
 		// Build plugin repositories list
 		Set<Repository> pluginRepositories = new HashSet<Repository>();
-		for (Element pluginRepository : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", rootElement)) {
+		for (Element pluginRepository : XmlUtils.findElements("/project/pluginRepositories/pluginRepository", root)) {
 			pluginRepositories.add(new Repository(pluginRepository));
 		}
 
 		// Build properties list
 		Set<Property> pomProperties = new HashSet<Property>();
-		for (Element prop : XmlUtils.findElements("/project/properties/*", rootElement)) {
+		for (Element prop : XmlUtils.findElements("/project/properties/*", root)) {
 			pomProperties.add(new Property(prop));
 		}
 
 		// Filters list
 		Set<Filter> filters = new HashSet<Filter>();
-		for (Element filter : XmlUtils.findElements("/project/build/filters/filter/*", rootElement)) {
+		for (Element filter : XmlUtils.findElements("/project/build/filters/filter/*", root)) {
 			filters.add(new Filter(filter));
 		}
 		
 		// Resources list
 		Set<Resource> resources = new HashSet<Resource>();
-		for (Element resource : XmlUtils.findElements("/project/build/resources/resource/*", rootElement)) {
+		for (Element resource : XmlUtils.findElements("/project/build/resources/resource/*", root)) {
 			resources.add(new Resource(resource));
 		}
 
@@ -208,6 +208,44 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		return PROVIDES_TYPE;
 	}
 
+	public void addDependencies(List<Dependency> dependencies) {
+		Assert.notNull(dependencies, "Dependencies to add required");
+		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(md, "Project metadata is not yet available, so dependency addition is unavailable");
+		if (md.isAllDependenciesRegistered(dependencies)) {
+			return;
+		}
+		
+		MutableFile mutableFile = fileManager.updateFile(pom);
+
+		Document document;
+		try {
+			document = XmlUtils.getDocumentBuilder().parse(mutableFile.getInputStream());
+		} catch (Exception ex) {
+			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
+		}
+
+		Element root = (Element) document.getFirstChild();
+		Element dependenciesElement = XmlUtils.findFirstElement("/project/dependencies", root);
+		Assert.notNull(dependenciesElement, "Dependencies unable to be found");
+
+		StringBuilder builder = new StringBuilder();
+		for (Dependency dependency : dependencies) {
+			if (md.isDependencyRegistered(dependency)) {
+				continue;
+			}
+			dependenciesElement.appendChild(createDependencyElement(dependency, document));
+			builder.append(dependency.getSimpleDescription());
+			builder.append(", ");
+		}
+		builder.delete(builder.lastIndexOf(","), builder.length());
+		builder.insert(0, builder.indexOf(",") == -1 ? "Added dependency " : "Added dependencies ");
+
+		mutableFile.setDescriptionOfChange(builder.toString());
+		
+		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
+	}
+
 	public void addDependency(Dependency dependency) {
 		Assert.notNull(dependency, "Dependency to add required");
 		ProjectMetadata md = (ProjectMetadata) get(ProjectMetadata.getProjectIdentifier());
@@ -225,8 +263,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
-		Element dependencies = XmlUtils.findFirstElement("/project/dependencies", rootElement);
+		Element root = (Element) document.getFirstChild();
+		Element dependencies = XmlUtils.findFirstElement("/project/dependencies", root);
 		Assert.notNull(dependencies, "Dependencies unable to be found");
 
 		dependencies.appendChild(createDependencyElement(dependency, document));
@@ -316,8 +354,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
-		Element plugins = XmlUtils.findFirstElement("/project/build/plugins", rootElement);
+		Element root = (Element) document.getFirstChild();
+		Element plugins = XmlUtils.findFirstElement("/project/build/plugins", root);
 		Assert.notNull(plugins, "Plugins unable to be found");
 
 		Element pluginElement = document.createElement("plugin");
@@ -559,8 +597,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
-		Element properties = XmlUtils.findFirstElement("/project/properties", rootElement);
+		Element root = (Element) document.getFirstChild();
+		Element properties = XmlUtils.findFirstElement("/project/properties", root);
 
 		for (Element candidate : XmlUtils.findElements("/project/properties/*", document.getDocumentElement())) {
 			if (property.equals(new Property(candidate))) {
@@ -759,10 +797,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
-		Element dependencies = XmlUtils.findFirstElement(containingPath, rootElement);
+		Element root = (Element) document.getFirstChild();
+		Element dependencies = XmlUtils.findFirstElement(containingPath, root);
 
-		for (Element candidate : XmlUtils.findElements(path, rootElement)) {
+		for (Element candidate : XmlUtils.findElements(path, root)) {
 			if (dependency.equals(new Dependency(candidate))) {
 				// Found it
 				dependencies.removeChild(candidate);
@@ -792,10 +830,10 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			throw new IllegalStateException("Could not open POM '" + pom + "'", ex);
 		}
 
-		Element rootElement = (Element) document.getFirstChild();
-		Element plugins = XmlUtils.findFirstElement(containingPath, rootElement);
+		Element root = (Element) document.getFirstChild();
+		Element plugins = XmlUtils.findFirstElement(containingPath, root);
 
-		for (Element candidate : XmlUtils.findElements(path, rootElement)) {
+		for (Element candidate : XmlUtils.findElements(path, root)) {
 			if (plugin.equals(new Plugin(candidate))) {
 				// Found it
 				plugins.removeChild(candidate);
