@@ -1,7 +1,9 @@
 package org.springframework.roo.metadata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,7 +46,9 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	// Mutex
 	private Boolean lock = new Boolean(true);
 
-	private Set<String> activeRequests = new HashSet<String>();
+	// Request control
+	private List<String> activeRequests = new ArrayList<String>(); // list to assist output "stacks" which show the order of requests
+	private List<String> keysToRetry = new ArrayList<String>();  // list to help us verify correct operation through logs (predictable ordering)
 	
 	protected void bindMetadataProvider(MetadataProvider mp) {
 		synchronized (lock) {
@@ -72,60 +76,96 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
-	
+
 	public MetadataItem get(String metadataIdentificationString, boolean evictCache) {
+		return getInternal(metadataIdentificationString, evictCache, true);
+	}
+	
+	public MetadataItem getInternal(String metadataIdentificationString, boolean evictCache, boolean cacheRetrievalAllowed) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a metadata instance");
 		
 		synchronized (lock) {
-			if (activeRequests.contains(metadataIdentificationString)) {
-				recursiveGets++;
-				return null;
-			}
-			
 			validGets++;
-			
-			if (!evictCache) {
-				// Try the cache first
-				MetadataItem result = getFromCache(metadataIdentificationString);
+
+			try {
+				// Do some cache eviction if the caller requested it
+				if (evictCache) {
+					evict(metadataIdentificationString);
+					cacheEvictions++;
+				}
+				
+				// We can use the cache even for a recursive get (unless of course the caller has prevented it)
+				if (cacheRetrievalAllowed) {
+					// Try the cache first
+					MetadataItem result = getFromCache(metadataIdentificationString);
+					if (result != null) {
+						cacheHits++;
+						return result;
+					}
+				}
+				
+				cacheMisses++;
+
+				// Determine if this MID was already requested earlier. We need to stop these infinite requests from occurring.
+				if (activeRequests.contains(metadataIdentificationString)) {
+					recursiveGets++;
+					if (!keysToRetry.contains(metadataIdentificationString)) {
+						keysToRetry.add(metadataIdentificationString);
+					}
+					/*
+					System.out.println("Blocked recursive request for " + metadataIdentificationString + "");
+					List<String> reversed = new ArrayList<String>();
+					reversed.addAll(activeRequests);
+					Collections.reverse(reversed);
+					for (String midStackMember : reversed) {
+						System.out.println("  " + midStackMember);
+					}
+					*/
+					return null;
+				}
+				
+				// Infinite loop management
+				activeRequests.add(metadataIdentificationString);
+
+				// Get the destination
+				String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
+				MetadataProvider p = providerMap.get(mdClassId);
+				Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
+				
+				// Obtain the item
+				MetadataItem result = p.get(metadataIdentificationString);
+				
+				// If the item isn't available, evict it from the cache (unless we did so at the start of the method already)
+				if (result == null && !evictCache) {
+					evict(metadataIdentificationString);
+					cacheEvictions++;
+				}
+				
+				// Put into the cache, provided it isn't null
 				if (result != null) {
-					cacheHits++;
-					return result;
+					super.put(result);
+					cachePuts++;
+				}
+				
+				activeRequests.remove(metadataIdentificationString);
+
+				return result;
+
+			} finally {
+				// Have we processed all requests? If so, handle any retries we recorded
+				if (activeRequests.size() == 0) {
+					List<String> thisRetry = new ArrayList<String>();
+					thisRetry.addAll(keysToRetry);
+					keysToRetry.clear();
+					for (String retryMid : thisRetry) {
+						// Important: we should not evict any prior version from the cache (an interim version is acceptable).
+						// We discard the result of the get; this is purely to facilitate updating metadata stored in memory and on-disk
+//						System.out.println("**** Retrying " + retryMid);
+						getInternal(retryMid, false, false);
+					}
+//					System.out.println("Done " + metadataIdentificationString);
 				}
 			}
-			
-			cacheMisses++;
-
-			// Infinite loop management
-			activeRequests.add(metadataIdentificationString);
-
-			// Get the destination
-			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
-			MetadataProvider p = providerMap.get(mdClassId);
-			Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
-			
-			// Appears to be a valid key with a valid provider, so let's do some eviction if requested
-			if (evictCache) {
-				evict(metadataIdentificationString);
-				cacheEvictions++;
-			}
-			
-			// Obtain the item
-			MetadataItem result = p.get(metadataIdentificationString);
-			
-			// If the item isn't available, evict it from the cache unless we did so already
-			if (result == null && !evictCache) {
-				evict(metadataIdentificationString);
-				cacheEvictions++;
-			}
-			
-			// Put into the cache, provided it isn't null
-			if (result != null) {
-				super.put(result);
-				cachePuts++;
-			}
-			
-			activeRequests.remove(metadataIdentificationString);
-			return result;
 		}
 	}
 
