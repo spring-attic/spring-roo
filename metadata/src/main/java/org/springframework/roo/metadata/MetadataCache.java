@@ -46,4 +46,14 @@ public interface MetadataCache {
 	 * @param maxCapacity the new maximum capacity
 	 */
 	void setMaxCapacity(int maxCapacity);
+	
+	/**
+	* Eagerly inserts an item into the cache. ONLY SPRING ROO INFRASTRUCTURE SHOULD INVOKE THIS METHOD.
+	* Do not invoke this method from add-ons, as the caching semantics are likely to be modified in
+	* the future and you should not rely on this method remaining.
+	* 
+	* @param metadataItem an instance-identifying metadata item to insert (required)
+	*/
+	void put(MetadataItem metadataItem);
+
 }

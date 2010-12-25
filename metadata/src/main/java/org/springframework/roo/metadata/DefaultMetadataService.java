@@ -146,7 +146,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			
 			// Put into the cache, provided it isn't null
 			if (result != null) {
-				super.putInCache(metadataIdentificationString, result);
+				super.put(result);
 				cachePuts++;
 			}
 			

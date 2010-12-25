@@ -41,12 +41,11 @@ public abstract class AbstractMetadataCache implements MetadataCache {
 		return maxCapacity;
 	}
 
-	protected void putInCache(String metadataIdentificationString, MetadataItem metadataItem) {
-		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Only metadata instances can be cached (not '" + metadataIdentificationString + "')");
+	public void put(MetadataItem metadataItem) {
 		Assert.notNull(metadataItem, "A metadata item is required");
-		this.map.put(metadataIdentificationString, metadataItem);
+		this.map.put(metadataItem.getId(), metadataItem);
 	}
-	
+
 	protected MetadataItem getFromCache(String metadataIdentificationString) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Only metadata instances can be cached (not '" + metadataIdentificationString + "')");
 		return this.map.get(metadataIdentificationString);
