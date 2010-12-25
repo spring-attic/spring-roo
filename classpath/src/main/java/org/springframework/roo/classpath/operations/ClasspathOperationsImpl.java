@@ -102,7 +102,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		String superclassMetadataId = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
 		Assert.notNull(superclassMetadataId, "Unable to locate requested type'" + requiredClassOrInterface.getFullyQualifiedTypeName() + "'");
 		PhysicalTypeMetadata superclassMetadata = (PhysicalTypeMetadata) metadataService.get(superclassMetadataId);
-		PhysicalTypeDetails superclassPhysicalDetails = superclassMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails superclassPhysicalDetails = superclassMetadata.getMemberHoldingTypeDetails();
 		Assert.notNull(superclassPhysicalDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' exists on disk but cannot be parsed");
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, superclassPhysicalDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' is not an interface or class");
 		return (ClassOrInterfaceTypeDetails) superclassPhysicalDetails;
@@ -131,7 +131,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
@@ -149,7 +149,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(fieldMetadata.getDeclaredByMetadataId());
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(fieldMetadata.getDeclaredByMetadataId()));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
@@ -246,7 +246,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(physicalTypeIdentifier));
 		return (ClassOrInterfaceTypeDetails) ptd;

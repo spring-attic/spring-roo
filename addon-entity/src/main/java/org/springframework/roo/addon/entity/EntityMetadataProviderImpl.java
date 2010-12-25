@@ -52,7 +52,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		
 		// Now we walk the inheritance hierarchy until we find some existing EntityMetadata
 		EntityMetadata parent = null;
-		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getSuperclass();
+		ClassOrInterfaceTypeDetails superCid = ((ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()).getSuperclass();
 		while (superCid != null && parent == null) {
 			String superCidPhysicalTypeIdentifier = superCid.getDeclaredByMetadataId();
 			Path path = PhysicalTypeIdentifier.getPath(superCidPhysicalTypeIdentifier);

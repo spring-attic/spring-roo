@@ -124,7 +124,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(declaredByMetadataId);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(declaredByMetadataId));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;

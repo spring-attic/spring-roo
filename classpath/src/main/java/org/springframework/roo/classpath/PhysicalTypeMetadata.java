@@ -1,8 +1,10 @@
 package org.springframework.roo.classpath;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
-import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.classpath.itd.MemberHoldingTypeDetailsMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.model.JavaType;
 
 /**
@@ -25,14 +27,10 @@ import org.springframework.roo.model.JavaType;
  * @author Ben Alex
  * @since 1.0
  * @see ItdMetadataProvider
+ * @see MemberDetailsScanner
  */
-public interface PhysicalTypeMetadata extends MetadataItem {
+public interface PhysicalTypeMetadata extends MemberHoldingTypeDetailsMetadataItem<MemberHoldingTypeDetails> {
 
-	/**
-	 * @return the actual details of this physical type, if it could be parsed (may be null if unable to parse)
-	 */
-	PhysicalTypeDetails getPhysicalTypeDetails();
-	
 	/**
 	 * @return the location of the disk file containing this resource, in canonical name format (never null) 
 	 */

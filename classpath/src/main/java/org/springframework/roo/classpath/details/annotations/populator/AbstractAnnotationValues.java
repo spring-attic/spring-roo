@@ -44,7 +44,7 @@ public abstract class AbstractAnnotationValues {
 		Assert.notNull(governorPhysicalTypeMetadata, "Governor physical type metadata required");
 		Assert.notNull(annotationType, "Annotation to locate is required");
 
-		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 		if (physicalTypeDetails != null && physicalTypeDetails instanceof ClassOrInterfaceTypeDetails) {
 			classParsed = true;

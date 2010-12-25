@@ -47,7 +47,7 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {		
 		// We know governor type details are non-null and can be safely cast
-		JavaType javaType = governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName();
+		JavaType javaType = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName();
 
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		if (entityMetadata == null) {

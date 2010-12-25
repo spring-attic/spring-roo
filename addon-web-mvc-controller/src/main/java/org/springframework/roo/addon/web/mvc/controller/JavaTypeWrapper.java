@@ -143,7 +143,7 @@ public class JavaTypeWrapper {
 	 */
 	public AnnotationMetadata getTypeAnnotation(JavaType annotation) {
 		Assert.notNull(getPhysicalTypeMetadata(), "Java source code unavailable for type " + javaType);
-		ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata().getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata().getMemberHoldingTypeDetails();
 		Assert.notNull(details, "Java source code details unavailable for type " + javaType);
 		return MemberFindingUtils.getTypeAnnotation(details, annotation);
 	}
@@ -173,7 +173,7 @@ public class JavaTypeWrapper {
 	public boolean isEnumType() {
 		PhysicalTypeMetadata ptm = getPhysicalTypeMetadata();
 		if (ptm != null) {
-			PhysicalTypeDetails ptmDetails = ptm.getPhysicalTypeDetails();
+			PhysicalTypeDetails ptmDetails = ptm.getMemberHoldingTypeDetails();
 			if (ptmDetails != null) {
 				if (PhysicalTypeCategory.ENUMERATION.equals(ptmDetails.getPhysicalTypeCategory())) {
 					return true;

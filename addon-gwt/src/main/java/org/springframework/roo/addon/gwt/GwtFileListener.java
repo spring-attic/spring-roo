@@ -286,7 +286,7 @@ public class GwtFileListener implements FileEventListener {
             if (getPhysicalTypeMetadata(superTypeId) == null) {
                 continue;
             }
-            ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getPhysicalTypeDetails();
+            ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getMemberHoldingTypeDetails();
 
             for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
                 ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);

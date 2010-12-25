@@ -53,7 +53,7 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		this.aspectName = aspectName;
 		this.governorPhysicalTypeMetadata = governorPhysicalTypeMetadata;
 
-		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails physicalTypeDetails = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) {
 			// There is a problem
@@ -69,7 +69,7 @@ public class AbstractItdTypeDetailsProvidingMetadataItem extends AbstractMetadat
 		this.builder = new ItdTypeDetailsBuilder(getId(), governorTypeDetails, aspectName, true);
 	}
 	
-	public final ItdTypeDetails getItdTypeDetails() {
+	public final ItdTypeDetails getMemberHoldingTypeDetails() {
 		return itdTypeDetails;
 	}
 

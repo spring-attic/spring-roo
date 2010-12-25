@@ -85,7 +85,7 @@ public class FinderOperationsImpl implements FinderOperations {
 		if (physicalTypeMetadata == null) {
 			throw new IllegalStateException("Could not determine physical type metadata for type " + javaType);
 		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (cid == null) {
 			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
 		}
@@ -157,7 +157,7 @@ public class FinderOperationsImpl implements FinderOperations {
 			logger.warning("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is unavailable");
 			return;
 		}
-		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
 		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
 

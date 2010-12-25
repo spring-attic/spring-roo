@@ -91,7 +91,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 
 	public void createPhysicalType(PhysicalTypeMetadata toCreate) {
 		Assert.notNull(toCreate, "Metadata to create is required");
-		PhysicalTypeDetails physicalTypeDetails = toCreate.getPhysicalTypeDetails();
+		PhysicalTypeDetails physicalTypeDetails = toCreate.getMemberHoldingTypeDetails();
 		Assert.notNull(physicalTypeDetails, "Unable to parse '" + toCreate + "'");
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
 		ClassOrInterfaceTypeDetails cit = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
@@ -158,8 +158,8 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 			return null;
 		}
 		JavaParserClassMetadata result = new JavaParserClassMetadata(fileManager, fileIdentifier, metadataIdentificationString, metadataService, this);
-		if (result.getPhysicalTypeDetails() != null && result.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) result.getPhysicalTypeDetails();
+		if (result.getMemberHoldingTypeDetails() != null && result.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) result.getMemberHoldingTypeDetails();
 			if (details.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS && details.getExtendsTypes().size() == 1) {
 				// This is a class, and it extends another class
 				if (details.getSuperclass() != null) {

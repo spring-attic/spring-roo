@@ -159,8 +159,8 @@ public class JavaParserInnerTypeMetadata extends AbstractCustomDataAccessorProvi
 				if (superclassId != null) {
 					superPtm = (PhysicalTypeMetadata) metadataService.get(superclassId);
 				}
-				if (superPtm != null && superPtm.getPhysicalTypeDetails() != null && superPtm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-					this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getPhysicalTypeDetails();
+				if (superPtm != null && superPtm.getMemberHoldingTypeDetails() != null && superPtm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+					this.superclass = (ClassOrInterfaceTypeDetails) superPtm.getMemberHoldingTypeDetails();
 				}
 			}
 		}

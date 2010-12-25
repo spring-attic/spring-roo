@@ -212,8 +212,8 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 
 		// Determine if we should generate the metadata on the basis of it containing a trigger annotation
 		ClassOrInterfaceTypeDetails cid = null;
-		if (governorPhysicalTypeMetadata.getPhysicalTypeDetails() != null && governorPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() != null && governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+			cid = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 			// Only create metadata if the type is annotated with one of the metadata triggers
 			for (JavaType trigger : metadataTriggers) {
@@ -261,9 +261,9 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			}
 			
 			// Handle the management of the ITD file
-			if (metadata.getItdTypeDetails() != null) {
+			if (metadata.getMemberHoldingTypeDetails() != null) {
 				// Construct the source file composer
-				ItdSourceFileComposer itdSourceFileComposer = new ItdSourceFileComposer(metadata.getItdTypeDetails());
+				ItdSourceFileComposer itdSourceFileComposer = new ItdSourceFileComposer(metadata.getMemberHoldingTypeDetails());
 
 				// Output the ITD if there is actual content involved
 				// (if there is no content, we continue on to the deletion phase at the bottom of this conditional block)

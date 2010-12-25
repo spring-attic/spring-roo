@@ -289,7 +289,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Table has either no primary keys or more than one primary key so create a composite key
 
 			// Check if identifier class already exists and if not, create it
-			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+			if (identifierPhysicalTypeMetadata == null || !identifierPhysicalTypeMetadata.isValid() || !(identifierPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 				createIdentifierClass(identifierType);
 			}
 
@@ -395,7 +395,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Check for added constructors, fields and methods
-		ClassOrInterfaceTypeDetails managedIdentifier = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails managedIdentifier = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		return managedIdentifier.getDeclaredConstructors().isEmpty() && managedIdentifier.getDeclaredFields().isEmpty() && managedIdentifier.getDeclaredMethods().isEmpty();
 	}
 
@@ -415,7 +415,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private JavaType getIdentifierType(JavaType javaType) {
 		PhysicalTypeMetadata governorPhysicalTypeMetadata = getPhysicalTypeMetadata(javaType);
 		if (governorPhysicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 			AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, ROO_ENTITY);
 			if (rooEntityAnnotation != null) {
 				AnnotationAttributeValue<?> identifierTypeAttribute = rooEntityAnnotation.getAttribute(new JavaSymbolName(IDENTIFIER_TYPE));

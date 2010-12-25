@@ -135,8 +135,8 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 
 	private ClassOrInterfaceTypeDetails getClassOrInterfaceTypeDetails(String physicalTypeMid) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeMid);
-		if (physicalTypeMetadata != null && physicalTypeMetadata.getPhysicalTypeDetails() != null && physicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		if (physicalTypeMetadata != null && physicalTypeMetadata.getMemberHoldingTypeDetails() != null && physicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+			return (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		}
 		return null;
 	}

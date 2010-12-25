@@ -98,10 +98,10 @@ public class MetadataCommands implements CommandMarker {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Java Type  : ").append(javaType.getFullyQualifiedTypeName()).append(System.getProperty("line.separator"));
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
-		if (ptm == null || ptm.getPhysicalTypeDetails() == null || !(ptm.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+		if (ptm == null || ptm.getMemberHoldingTypeDetails() == null || !(ptm.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
 			sb.append("Java type details unavailable").append(System.getProperty("line.separator"));
 		} else {
-			ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getPhysicalTypeDetails();
+			ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) ptm.getMemberHoldingTypeDetails();
 			for (MemberHoldingTypeDetails holder : memberDetailsScanner.getMemberDetails(getClass().getName(), cid).getDetails()) {
 				sb.append("Member scan: ").append(holder.getDeclaredByMetadataId()).append(System.getProperty("line.separator"));
 			}

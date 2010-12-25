@@ -121,7 +121,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		String pid = PhysicalTypeIdentifier.createIdentifier(entity, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(pid);
 		if (physicalTypeMetadata != null) {
-			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+			ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 			MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), governorTypeDetails);
 			for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
 				if (!(typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.entity.EntityMetadata") || typeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.tostring.ToStringMetadata"))) {

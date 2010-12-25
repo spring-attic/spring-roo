@@ -7,10 +7,10 @@ import japa.parser.ast.body.TypeDeclaration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataService;
@@ -31,7 +31,7 @@ import org.springframework.roo.support.util.Assert;
 public class JavaParserClassMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 	private static final Logger logger = HandlerUtils.getLogger(JavaParserClassMetadata.class);
 	private String fileIdentifier;
-	private PhysicalTypeDetails physicalTypeDetails;
+	private MemberHoldingTypeDetails memberHoldingTypeDetails;
 
 	/**
 	 * Creates a new {@link JavaParserClassMetadata} that parses the specified file.
@@ -66,11 +66,11 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 				// This implementation only supports the main type declared within a compilation unit
 				if (PhysicalTypeIdentifier.getJavaType(metadataIdentificationString).getSimpleTypeName().equals(candidate.getName())) {
 					// We have the required type declaration
-					physicalTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, candidate, fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
+					memberHoldingTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, candidate, fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
 					break;
 				}
 			}
-			Assert.notNull(physicalTypeDetails, "Parsing empty, enum or annotation types is unsupported");
+			Assert.notNull(memberHoldingTypeDetails, "Parsing empty, enum or annotation types is unsupported");
 
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.finest("Parsed '" + metadataIdentificationString + "'");
@@ -95,8 +95,8 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 		}
 	}
 
-	public PhysicalTypeDetails getPhysicalTypeDetails() {
-		return physicalTypeDetails;
+	public MemberHoldingTypeDetails getMemberHoldingTypeDetails() {
+		return memberHoldingTypeDetails;
 	}
 
 	public String getPhysicalLocationCanonicalPath() {
@@ -123,7 +123,7 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 		tsc.append("identifier", getId());
 		tsc.append("valid", valid);
 		tsc.append("fileIdentifier", fileIdentifier);
-		tsc.append("physicalTypeDetails", physicalTypeDetails);
+		tsc.append("memberHoldingTypeDetails", memberHoldingTypeDetails);
 		return tsc.toString();
 	}
 }

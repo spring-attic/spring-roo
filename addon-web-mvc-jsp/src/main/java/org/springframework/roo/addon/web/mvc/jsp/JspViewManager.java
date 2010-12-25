@@ -576,7 +576,7 @@ public class JspViewManager {
 		if (physicalTypeMetadata == null) {
 			return false;
 		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (cid == null) {
 			return false;
 		}
@@ -586,7 +586,7 @@ public class JspViewManager {
 	private boolean isEnumType(JavaType type) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata != null) {
-			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
+			PhysicalTypeDetails details = physicalTypeMetadata.getMemberHoldingTypeDetails();
 			if (details != null) {
 				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
 					return true;

@@ -78,7 +78,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
 		
-		installConversionService(governorPhysicalTypeMetadata.getPhysicalTypeDetails().getName());
+		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type

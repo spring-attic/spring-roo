@@ -300,7 +300,7 @@ public class FieldCommands implements CommandMarker {
 
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
-		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 		
@@ -344,7 +344,7 @@ public class FieldCommands implements CommandMarker {
 		
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
-		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) ptd;
 	
@@ -408,7 +408,7 @@ public class FieldCommands implements CommandMarker {
 		// Check if the field type is a JPA @Embeddable class
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(fieldType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(physicalTypeMetadata, "The specified target '--type' does not exist or can not be found. Please create this type first.");
-		PhysicalTypeDetails ptd = physicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = physicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, ptd);
 		Assert.notNull(MemberFindingUtils.getDeclaredTypeAnnotation((MemberHoldingTypeDetails) ptd, new JavaType("javax.persistence.Embeddable")), "The field embedded command is only applicable to JPA @Embeddable field types.");
 		
@@ -416,7 +416,7 @@ public class FieldCommands implements CommandMarker {
 		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(typeName, Path.SRC_MAIN_JAVA);
 		PhysicalTypeMetadata targetTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
 		Assert.notNull(targetTypeMetadata, "The specified target '--class' does not exist or can not be found. Please create this type first.");
-		PhysicalTypeDetails targetPtd = targetTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails targetPtd = targetTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MemberHoldingTypeDetails.class, targetPtd);
 		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) targetPtd;
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);

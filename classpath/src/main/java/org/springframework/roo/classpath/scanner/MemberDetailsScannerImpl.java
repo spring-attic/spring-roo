@@ -101,12 +101,12 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 					}
 					Assert.isInstanceOf(ItdTypeDetailsProvidingMetadataItem.class, metadataItem, "ITD metadata provider '" + mp + "' failed to return the correct metadata type");
 					ItdTypeDetailsProvidingMetadataItem itdTypeDetailsMd = (ItdTypeDetailsProvidingMetadataItem) metadataItem;
-					if (itdTypeDetailsMd.getItdTypeDetails() == null) {
+					if (itdTypeDetailsMd.getMemberHoldingTypeDetails() == null) {
 						continue;
 					}
 		
 					// Capture the member details
-					memberHoldingTypeDetails.add(itdTypeDetailsMd.getItdTypeDetails());
+					memberHoldingTypeDetails.add(itdTypeDetailsMd.getMemberHoldingTypeDetails());
 				}
 			}
 

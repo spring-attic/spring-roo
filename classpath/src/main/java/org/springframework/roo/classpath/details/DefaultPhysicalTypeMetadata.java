@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath.details;
 
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.ItdMetadataProvider;
@@ -10,20 +9,20 @@ import org.springframework.roo.support.util.Assert;
 
 public class DefaultPhysicalTypeMetadata extends AbstractMetadataItem implements PhysicalTypeMetadata {
 
-	private PhysicalTypeDetails physicalTypeDetails;
+	private MemberHoldingTypeDetails memberHoldingTypeDetails;
 	private String physicalLocationCanonicalPath;
 	
-	public DefaultPhysicalTypeMetadata(String metadataIdentificationString, String physicalLocationCanonicalPath, PhysicalTypeDetails physicalTypeDetails) {
+	public DefaultPhysicalTypeMetadata(String metadataIdentificationString, String physicalLocationCanonicalPath, MemberHoldingTypeDetails memberHoldingTypeDetails) {
 		super(metadataIdentificationString);
 		Assert.isTrue(PhysicalTypeIdentifier.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not appear to be a valid physical type identifier");
 		Assert.hasText(physicalLocationCanonicalPath, "Physical location canonical path required");
-		Assert.notNull(physicalTypeDetails, "Physical type details required");
-		this.physicalTypeDetails = physicalTypeDetails;
+		Assert.notNull(memberHoldingTypeDetails, "Member holding type details required");
+		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
 		this.physicalLocationCanonicalPath = physicalLocationCanonicalPath;
 	}
 
-	public PhysicalTypeDetails getPhysicalTypeDetails() {
-		return physicalTypeDetails;
+	public MemberHoldingTypeDetails getMemberHoldingTypeDetails() {
+		return memberHoldingTypeDetails;
 	}
 
 	public String getPhysicalLocationCanonicalPath() {

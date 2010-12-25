@@ -1276,7 +1276,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private boolean isEnumType(JavaType type) {
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), type, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata != null) {
-			PhysicalTypeDetails details = physicalTypeMetadata.getPhysicalTypeDetails();
+			PhysicalTypeDetails details = physicalTypeMetadata.getMemberHoldingTypeDetails();
 			if (details != null) {
 				if (details.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION)) {
 					return true;
@@ -1291,7 +1291,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (physicalTypeMetadata == null) {
 			return false;
 		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (cid == null) {
 			return false;
 		}

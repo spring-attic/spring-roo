@@ -386,7 +386,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void excludeFieldsInToStringAnnotation(String fieldName) {
-		PhysicalTypeDetails ptd = governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
 		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
 
@@ -708,7 +708,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check entity ITD for field
-		List<? extends FieldMetadata> itdFields = entityMetadata.getItdTypeDetails().getDeclaredFields();
+		List<? extends FieldMetadata> itdFields = entityMetadata.getMemberHoldingTypeDetails().getDeclaredFields();
 		for (FieldMetadata itdField : itdFields) {
 			if (itdField.getFieldName().equals(field.getFieldName())) {
 				return true;
@@ -738,7 +738,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check entity ITD for accessor method
-		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
+		List<? extends MethodMetadata> itdMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
 		for (MethodMetadata method : itdMethods) {
 			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
 				return true;
@@ -779,7 +779,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check entity ITD for mutator method
-		List<? extends MethodMetadata> itdMethods = entityMetadata.getItdTypeDetails().getDeclaredMethods();
+		List<? extends MethodMetadata> itdMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
 		for (MethodMetadata method : itdMethods) {
 			if (method.getMethodName().equals(new JavaSymbolName(requiredMutatorName))) {
 				return true;

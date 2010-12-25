@@ -416,8 +416,8 @@ public class GwtMetadata extends AbstractMetadataItem {
 
     private boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
         boolean isEnum = ptmd != null
-                && ptmd.getPhysicalTypeDetails() != null
-                && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+                && ptmd.getMemberHoldingTypeDetails() != null
+                && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 
         boolean isDomainObject = !isEnum
                 && !isShared(returnType)
@@ -429,9 +429,9 @@ public class GwtMetadata extends AbstractMetadataItem {
     }
 
     private boolean isEmbeddable(PhysicalTypeMetadata ptmd) {
-        if (ptmd != null && ptmd.getPhysicalTypeDetails() != null) {
-            if (ptmd.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getPhysicalTypeDetails()).getAnnotations();
+        if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
+            if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getMemberHoldingTypeDetails()).getAnnotations();
                 for (AnnotationMetadata annotation : annotations) {
                     if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
                         return true;
@@ -878,7 +878,7 @@ public class GwtMetadata extends AbstractMetadataItem {
             if (getPhysicalTypeMetadata(superTypeId) == null) {
                 continue;
             }
-            ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getPhysicalTypeDetails();
+            ClassOrInterfaceTypeDetails superType = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata(superTypeId).getMemberHoldingTypeDetails();
 
             for (ConstructorMetadata constructorMetadata : superType.getDeclaredConstructors()) {
                 ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);

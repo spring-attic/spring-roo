@@ -235,14 +235,14 @@ class GwtProxyProperty {
     }
 
     boolean isEnum() {
-        return ptmd != null && ptmd.getPhysicalTypeDetails() != null && ptmd.getPhysicalTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
+        return ptmd != null && ptmd.getMemberHoldingTypeDetails() != null && ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
     }
 
 
     public boolean isEmbeddable() {
-        if (ptmd != null && ptmd.getPhysicalTypeDetails() != null) {
-            if (ptmd.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getPhysicalTypeDetails()).getAnnotations();
+        if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
+            if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+                List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getMemberHoldingTypeDetails()).getAnnotations();
                 for (AnnotationMetadata annotation : annotations) {
                     if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
                         return true;

@@ -84,10 +84,10 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 
         // Obtain the governor's information
         PhysicalTypeMetadata governorPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(governorTypeName, governorTypePath));
-        if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
+        if (governorPhysicalTypeMetadata == null || !governorPhysicalTypeMetadata.isValid() || !(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails)) {
             return null;
         }
-        ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getPhysicalTypeDetails();
+        ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 
         // Next let's obtain a handle to the "proxy" we'd want to produce/modify/delete as applicable for this governor
         JavaType keyTypeName = mirrorTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(MirrorType.PROXY, projectMetadata, governorTypeName);
@@ -96,9 +96,9 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
         // Lookup any existing proxy type and verify it is mapped to this governor MID (ie detect name collisions and abort if necessary)
         // We do this before deleting, to verify we don't get into a delete-create-delete type case if there are name collisions
         PhysicalTypeMetadata keyPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
-        if (keyPhysicalTypeMetadata != null && keyPhysicalTypeMetadata.isValid() && keyPhysicalTypeMetadata.getPhysicalTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
+        if (keyPhysicalTypeMetadata != null && keyPhysicalTypeMetadata.isValid() && keyPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
             // The key presently exists, so do a sanity check
-            ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) keyPhysicalTypeMetadata.getPhysicalTypeDetails();
+            ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) keyPhysicalTypeMetadata.getMemberHoldingTypeDetails();
             AnnotationMetadata rooGwtAnnotation = MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooGwtMirroredFrom.class.getName()));
             Assert.notNull(rooGwtAnnotation, "@" + RooGwtMirroredFrom.class.getSimpleName() + " removed from " + keyTypeName.getFullyQualifiedTypeName() + " unexpectedly");
             AnnotationAttributeValue<?> value = rooGwtAnnotation.getAttribute(new JavaSymbolName("value"));

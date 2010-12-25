@@ -50,7 +50,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
 		Assert.notNull(ptm, "Java source code unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
-		PhysicalTypeDetails ptd = ptm.getPhysicalTypeDetails();
+		PhysicalTypeDetails ptd = ptm.getMemberHoldingTypeDetails();
 		Assert.notNull(ptd, "Java source code details unavailable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;

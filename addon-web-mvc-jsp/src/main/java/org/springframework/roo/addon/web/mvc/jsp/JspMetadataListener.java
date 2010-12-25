@@ -320,7 +320,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		if (physicalTypeMetadata == null) {
 			return false;
 		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		if (cid == null) {
 			return false;
 		}

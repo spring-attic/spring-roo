@@ -61,7 +61,7 @@ public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvi
 		if (physicalTypeMetadata == null) {
 			return null;
 		}
-		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getPhysicalTypeDetails();
+		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {

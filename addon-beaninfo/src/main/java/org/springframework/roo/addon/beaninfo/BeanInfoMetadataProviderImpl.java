@@ -31,7 +31,7 @@ public final class BeanInfoMetadataProviderImpl extends AbstractItdMetadataProvi
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(BeanInfoMetadataProviderImpl.class.getName(), (ClassOrInterfaceTypeDetails)governorPhysicalTypeMetadata.getPhysicalTypeDetails()).getDetails();
+		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(BeanInfoMetadataProviderImpl.class.getName(), (ClassOrInterfaceTypeDetails)governorPhysicalTypeMetadata.getMemberHoldingTypeDetails()).getDetails();
 		for (MemberHoldingTypeDetails memberHolder : memberHoldingTypeDetails) {
 			metadataDependencyRegistry.registerDependency(memberHolder.getDeclaredByMetadataId(), metadataIdentificationString);
 		}
