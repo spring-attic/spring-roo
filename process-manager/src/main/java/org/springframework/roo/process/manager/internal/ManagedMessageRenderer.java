@@ -31,7 +31,7 @@ public class ManagedMessageRenderer {
 		if (createOperation) {
 			message.append("Created ");
 		} else {
-			message.append("Managed ");
+			message.append("Updated ");
 		}
 		message.append(filenameResolver.getMeaningfulName(file));
 		if (descriptionOfChange != null && descriptionOfChange.length() > 0) {
