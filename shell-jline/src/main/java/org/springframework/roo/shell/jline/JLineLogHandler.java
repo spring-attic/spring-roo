@@ -30,7 +30,8 @@ public class JLineLogHandler extends Handler {
 	private static String lastMessage;
 	private static boolean includeThreadName = true;
 	private boolean ansiSupported;
-    private String userInterfaceThreadName;
+	private String userInterfaceThreadName;
+	private static boolean suppressDuplicateMessages = true;
 
 	public JLineLogHandler(ConsoleReader reader, ShellPromptAccessor shellPromptAccessor) {
 		Assert.notNull(reader, "Console reader required");
@@ -86,13 +87,21 @@ public class JLineLogHandler extends Handler {
 	public static void resetMessageTracking() {
 		lastMessage = null; // see ROO-251
 	}
-		
+	
+	public static boolean isSuppressDuplicateMessages() {
+		return suppressDuplicateMessages;
+	}
+
+	public static void setSuppressDuplicateMessages(boolean suppressDuplicateMessages) {
+		JLineLogHandler.suppressDuplicateMessages = suppressDuplicateMessages;
+	}
+
 	@Override
 	public void publish(LogRecord record) {
 		try {
-			// Avoid repeating the same message that displayed immediately before the current message (ROO-30)
+			// Avoid repeating the same message that displayed immediately before the current message (ROO-30, ROO-1873)
 			String toDisplay = toDisplay(record);
-			if (toDisplay.equals(lastMessage)) {
+			if (toDisplay.equals(lastMessage) && suppressDuplicateMessages) {
 				return;
 			}
 			lastMessage = toDisplay;

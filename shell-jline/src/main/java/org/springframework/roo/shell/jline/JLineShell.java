@@ -366,6 +366,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
     
 	public void setDevelopmentMode(boolean developmentMode) {
 		JLineLogHandler.setIncludeThreadName(developmentMode);
+		JLineLogHandler.setSuppressDuplicateMessages(!developmentMode); // we want to see duplicate messages during development time (ROO-1873)
 		this.developmentMode = developmentMode;
 	}
 
