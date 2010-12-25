@@ -1,13 +1,9 @@
 package org.springframework.roo.metadata;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -76,29 +72,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
 	}
-
-	public SortedSet<MetadataProvider> getRegisteredProviders() {
-		SortedSet<MetadataProvider> sortedProviders = new TreeSet<MetadataProvider>(new Comparator<MetadataProvider>() {
-			public int compare(MetadataProvider o1, MetadataProvider o2) {
-				return o1.getClass().getName().compareTo(o2.getClass().getName());
-			}
-		});
-
-		synchronized (lock) {
-			sortedProviders.addAll(providers);
-			return Collections.unmodifiableSortedSet(sortedProviders);
-		}
-	}
 	
-	public MetadataProvider getRegisteredProvider(String metadataIdentificationString) {
-		Assert.isTrue(MetadataIdentificationUtils.isValid(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' is not valid");
-		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingClass(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a class");
-
-		synchronized (lock) {
-			return providerMap.get(metadataIdentificationString);
-		}
-	}
-
 	public MetadataItem get(String metadataIdentificationString, boolean evictCache) {
 		Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(metadataIdentificationString), "Metadata identification string '" + metadataIdentificationString + "' does not identify a metadata instance");
 		
@@ -126,7 +100,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 
 			// Get the destination
 			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(metadataIdentificationString));
-			MetadataProvider p = getRegisteredProvider(mdClassId);
+			MetadataProvider p = providerMap.get(mdClassId);
 			Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
 			
 			// Appears to be a valid key with a valid provider, so let's do some eviction if requested
@@ -166,7 +140,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 		synchronized (lock) {
 			// Get the destination
 			String mdClassId = MetadataIdentificationUtils.create(MetadataIdentificationUtils.getMetadataClass(downstreamDependency));
-			MetadataProvider p = getRegisteredProvider(mdClassId);
+			MetadataProvider p = providerMap.get(mdClassId);
 			
 			if (p == null) {
 				// No known provider that can consume this notification, so just return as per the interface contract
@@ -210,7 +184,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			super.evictAll();
 			
 			// Clear the caches of any metadata providers which support the interface
-			for (MetadataProvider p : getRegisteredProviders()) {
+			for (MetadataProvider p : providers) {
 				if (p instanceof MetadataCache) {
 					((MetadataCache)p).evictAll();
 				}
@@ -220,7 +194,7 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("providers", getRegisteredProviders());
+		tsc.append("providers", providers);
 		tsc.append("validGets", validGets);
 		tsc.append("recursiveGets", recursiveGets);
 		tsc.append("cachePuts", cachePuts);
