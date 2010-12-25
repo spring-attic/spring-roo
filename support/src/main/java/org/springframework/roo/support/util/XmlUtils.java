@@ -77,6 +77,10 @@ public final class XmlUtils {
 			if (os != null) {
 				os.close();
 			}
+			Writer writer = streamResult.getWriter();
+			if (writer != null) {
+				writer.close();
+			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}

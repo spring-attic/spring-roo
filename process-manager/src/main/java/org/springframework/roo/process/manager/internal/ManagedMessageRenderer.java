@@ -13,11 +13,25 @@ public class ManagedMessageRenderer {
 	private File file;
 	private String descriptionOfChange = null;
 	private boolean createOperation;
+	private String hashCode = null;
+	private boolean includeHashCode = false;
 	
 	public void setDescriptionOfChange(String message) {
 		this.descriptionOfChange = message;
 	}
 	
+	void setHashCode(String hashCode) {
+		this.hashCode = hashCode;
+	}
+	
+	boolean isIncludeHashCode() {
+		return includeHashCode;
+	}
+
+	void setIncludeHashCode(boolean includeHashCode) {
+		this.includeHashCode = includeHashCode;
+	}
+
 	public ManagedMessageRenderer(FilenameResolver filenameResolver, File file, boolean createOperation) {
 		Assert.notNull(filenameResolver, "Filename resolver required");
 		Assert.notNull(file, "File to manage required");
@@ -28,6 +42,10 @@ public class ManagedMessageRenderer {
 	
 	void logManagedMessage() {
 		StringBuilder message = new StringBuilder();
+		if (hashCode != null && includeHashCode && hashCode.length() >= 7) {
+			// display only the first 6 characters, being consistent with Git hash code display conventions
+			message.append(hashCode.subSequence(0, 7)).append(" ");
+		}
 		if (createOperation) {
 			message.append("Created ");
 		} else {

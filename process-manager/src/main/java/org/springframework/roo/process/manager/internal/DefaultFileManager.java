@@ -36,6 +36,7 @@ import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
+import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
@@ -55,6 +56,8 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 	@Reference private UndoManager undoManager;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private ProcessManager processManager;
+	
 	private boolean pathsRegistered = false;
 	private FilenameResolver filenameResolver = new DefaultFilenameResolver();
 	/** key: file identifier, value: new textual content */
@@ -120,6 +123,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		}
 		new CreateFile(undoManager, filenameResolver, actual);
 		ManagedMessageRenderer renderer = new ManagedMessageRenderer(filenameResolver, actual, true);
+		renderer.setIncludeHashCode(processManager.isDevelopmentMode());
 		return new DefaultMutableFile(actual, null, renderer);
 	}
 
@@ -143,6 +147,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		Assert.isTrue(actual.exists(), "File '" + fileIdentifier + "' does not exist");
 		new UpdateFile(undoManager, filenameResolver, actual);
 		ManagedMessageRenderer renderer = new ManagedMessageRenderer(filenameResolver, actual, false);
+		renderer.setIncludeHashCode(processManager.isDevelopmentMode());
 		return new DefaultMutableFile(actual, fileMonitorService, renderer);
 	}
 

@@ -1,12 +1,16 @@
 package org.springframework.roo.process.manager.internal;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.HexUtils;
 
 /**
  * Ensures the {@link NotifiableFileMonitorService#notifyChanged(String)} method is invoked when 
@@ -21,12 +25,17 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  *
  */
-public class MonitoredOutputStream extends FileOutputStream {
-
-	private String fileCanonicalPath;
+public class MonitoredOutputStream extends ByteArrayOutputStream {
+	private File file;
 	private NotifiableFileMonitorService fileMonitorService;
 	private ManagedMessageRenderer managedMessageRenderer;
-	private boolean logged = false;
+	private static MessageDigest sha = null;
+	
+	static {
+		try {
+			sha = MessageDigest.getInstance("SHA1");
+		} catch (NoSuchAlgorithmException ignored) {}
+	}
 	
 	/**
 	 * Constructs a {@link MonitoredOutputStream}.
@@ -37,44 +46,37 @@ public class MonitoredOutputStream extends FileOutputStream {
 	 * @throws FileNotFoundException if the file cannot be found
 	 */
 	public MonitoredOutputStream(File file, ManagedMessageRenderer managedMessageRenderer, NotifiableFileMonitorService fileMonitorService) throws FileNotFoundException {
-		super(file);
 		Assert.notNull(file, "File required");
 		Assert.notNull(managedMessageRenderer, "Message renderer required");
-		try {
-			this.fileCanonicalPath = file.getCanonicalPath();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
+		this.file = file;
 		this.fileMonitorService = fileMonitorService;
 		this.managedMessageRenderer = managedMessageRenderer;
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		if (!logged) logNow();
-		super.write(b, off, len);
-	}
-
-	@Override
-	public void write(byte[] b) throws IOException {
-		if (!logged) logNow();
-		super.write(b);
-	}
-
-	@Override
-	public void write(int b) throws IOException {
-		if (!logged) logNow();
-		super.write(b);
-	}
-	
-	private void logNow() {
-		logged = true;
-		this.managedMessageRenderer.logManagedMessage();
-	}
-
-	@Override
 	public void close() throws IOException {
-		super.close();
+		// Obtain the bytes the user is writing out
+		byte[] bytes = toByteArray();
+		
+		// Try to calculate the SHA hash code
+		if (sha != null) {
+			byte[] digest = sha.digest(bytes);
+			this.managedMessageRenderer.setHashCode(HexUtils.toHex(digest));
+		}
+		
+		// Log that we're writing the file
+		this.managedMessageRenderer.logManagedMessage();
+		
+		// Write the actual file out to disk
+		FileCopyUtils.copy(bytes, file);
+		
+		// Tell the FileMonitorService what happened
+		String fileCanonicalPath;
+		try {
+			fileCanonicalPath = file.getCanonicalPath();
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		}
 		if (fileMonitorService != null) {
 			fileMonitorService.notifyChanged(fileCanonicalPath);
 		}

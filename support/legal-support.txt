@@ -41,4 +41,22 @@ org.springframework.roo.support.util.StringUtils
 
 -----------------------------------------------------------------------
 
+Licensed Software: Spring Security
+Software Web Site: http://www.springframework.org/security
+Effective License: Apache License, Version 2.0
+License Info Page: http://www.apache.org/licenses/LICENSE-2.0.html
+
+Statement as required by the license:
+
+  "This product includes software developed by the Spring Security
+   Project (http://www.springframework.org/security)"
+
+Spring Security is not a dependency of this module. It is noted in the
+legal section because the following files were originally derived from
+Spring Security:
+
+org.springframework.roo.support.util.HexUtils
+
+-----------------------------------------------------------------------
+
 [end]
