@@ -937,7 +937,7 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends AbstractCustom
 
 		final String newContents = getOutput(cit);
 
-		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+		fileManager.createOrUpdateTextFileIfRequired(fileIdentifier, newContents, true);
 	}
 
 	public String toString() {

@@ -270,7 +270,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 				if (itdSourceFileComposer.isContent()) {
 					String itd = itdSourceFileComposer.getOutput();
 					
-					fileManager.createOrUpdateTextFileIfRequired(itdFilename, itd);
+					fileManager.createOrUpdateTextFileIfRequired(itdFilename, itd, false);
 					// Important to exit here, so we don't proceed onto the delete operation below
 					// (as we have a valid ITD that has been written out by now)
 					return metadata;

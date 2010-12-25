@@ -19,6 +19,9 @@ import org.springframework.roo.project.ProjectMetadata;
  * <p>
  * A {@link FileManager} must also listen for any new {@link ProjectMetadata}. When detected, it will verify the required directories exist and start monitoring them.
  * 
+ * <p>
+ * An implementation may elect to defer writes to disk or discard them until {@link #commit()} or {@link #clear()} respectively is invoked.
+ * 
  * @author Ben Alex
  * @since 1.0
  * 
@@ -113,11 +116,25 @@ public interface FileManager {
 	 * <p>
 	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
 	 * 
+	 * <p>
+	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
+	 * 
 	 * @param fileIdentifier to create or update as appropriate (required)
 	 * @param newContents the replacement contents (required)
+	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
-	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents);
+	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately);
 
+	/**
+	 * Commits actual changes to the disk that an implementation may have elected to defer.
+	 */
+	void commit();
+	
+	/**
+	 * Discards proposed changes to the disk that an implementation may have elected to defer.
+	 */
+	void clear();
+	
 	/**
 	 * Obtains an already-existing file for reading. The path should be in canonical file name format.
 	 * 

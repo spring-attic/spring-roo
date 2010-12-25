@@ -46,4 +46,14 @@ public interface UndoManager {
 	 * Executing this command guarantees the {@link Stack} will be empty upon return, with every element reset.
 	 */
 	void reset();
+	
+	/**
+	 * @param undoListener registers a new undo listener (required)
+	 */
+	void addUndoListener(UndoListener undoListener);
+	
+	/**
+	 * @param undoListener removes a previously-registered undo listener (required)
+	 */
+	void removeUndoListener(UndoListener undoListener);
 }

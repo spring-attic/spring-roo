@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -24,6 +26,8 @@ import org.springframework.roo.file.undo.DefaultFilenameResolver;
 import org.springframework.roo.file.undo.DeleteDirectory;
 import org.springframework.roo.file.undo.DeleteFile;
 import org.springframework.roo.file.undo.FilenameResolver;
+import org.springframework.roo.file.undo.UndoEvent;
+import org.springframework.roo.file.undo.UndoListener;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.file.undo.UpdateFile;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -46,20 +50,24 @@ import org.springframework.roo.support.util.FileCopyUtils;
  */
 @Component
 @Service
-public class DefaultFileManager implements FileManager, MetadataNotificationListener {
+public class DefaultFileManager implements FileManager, MetadataNotificationListener, UndoListener {
 	@Reference private MetadataService metadataService;
 	@Reference private UndoManager undoManager;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	private boolean pathsRegistered = false;
 	private FilenameResolver filenameResolver = new DefaultFilenameResolver();
+	/** key: file identifier, value: new textual content */
+	private Map<String, String> deferredFileWrites = new HashMap<String, String>();
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
+		undoManager.addUndoListener(this);
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
+		undoManager.removeUndoListener(this);
 	}
 
 	public boolean exists(String fileIdentifier) {
@@ -179,11 +187,11 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 				}
 			}
 
-			// Explicitly perform a scan now that we've added all the directories we wish to monitor
-			fileMonitorService.scanAll();
-
 			// Avoid doing this operation again unless the validity changes
 			pathsRegistered = md.isValid();
+		
+			// Explicitly perform a scan now that we've added all the directories we wish to monitor
+			fileMonitorService.scanAll();
 		}
 	}
 
@@ -195,7 +203,26 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		return ((NotifiableFileMonitorService) fileMonitorService).scanNotified();
 	}
 
-	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
+	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
+		if (writeImmediately) {
+			createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+		} else {
+			deferredFileWrites.put(fileIdentifier, newContents);
+		}
+	}
+	
+	public void commit() {
+		try {
+			for (String fileIdentifier : deferredFileWrites.keySet()) {
+				String newContents = deferredFileWrites.get(fileIdentifier);
+				createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+			}
+		} finally {
+			deferredFileWrites.clear();
+		}
+	}
+	
+	private void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents) {
 		MutableFile mutableFile = null;
 		if (exists(fileIdentifier)) {
 			// First verify if the file has even changed
@@ -221,4 +248,17 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 	}
+
+	public void clear() {
+		deferredFileWrites.clear();
+	}
+
+	public void onUndoEvent(UndoEvent event) {
+		if (event.isUndoing()) {
+			clear();
+		} else {
+			commit();
+		}
+	}
+
 }

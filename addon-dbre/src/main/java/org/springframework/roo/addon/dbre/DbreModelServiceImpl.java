@@ -263,7 +263,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		String path = getDbreXmlPath();
 		OutputStream outputStream = new ByteArrayOutputStream();
 		DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
-		fileManager.createOrUpdateTextFileIfRequired(path, outputStream.toString());
+		fileManager.createOrUpdateTextFileIfRequired(path, outputStream.toString(), false);
 	}
 
 	/**
