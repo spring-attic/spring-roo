@@ -774,7 +774,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			}
 
 			// Otherwise let everyone know something has happened of interest, plus evict any cached entries from the MetadataService
-			metadataService.evict(ProjectMetadata.getProjectIdentifier());
+			metadataService.get(ProjectMetadata.getProjectIdentifier(), true);
 			metadataDependencyRegistry.notifyDownstream(ProjectMetadata.getProjectIdentifier());
 		}
 	}

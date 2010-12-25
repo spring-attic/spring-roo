@@ -18,7 +18,6 @@ import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataProvider;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
@@ -52,7 +51,6 @@ import org.springframework.roo.support.util.Assert;
 @Component(componentAbstract = true)
 public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
 	@Reference protected FileManager fileManager;
-	@Reference protected MetadataService metadataService;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
 	private boolean dependsOnGovernorBeingAClass = true;

@@ -24,6 +24,7 @@ import org.apache.felix.scr.annotations.Reference;
 public abstract class AbstractHashCodeTrackingMetadataNotifier {
 
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference protected MetadataService metadataService;
 	private Map<String,Integer> hashes = new HashMap<String, Integer>();
 
 	/**
@@ -44,6 +45,10 @@ public abstract class AbstractHashCodeTrackingMetadataNotifier {
 		// To get this far, we need to notify and replace/add the metadata item's hash for future reference
 		//System.out.println(getClass().getSimpleName() + " notifying " + metadataItem.getId() + " (hash " + newHash + ")");
 		hashes.put(instanceId, newHash);
+		
+		// Eagerly insert into the cache to so any recursive gets for this metadata item will be returned successfully
+		metadataService.put(metadataItem);
+		
 		metadataDependencyRegistry.notifyDownstream(metadataItem.getId());
 	}
 

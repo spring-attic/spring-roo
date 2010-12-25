@@ -168,6 +168,12 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			}
 		}
 	}
+	
+	@Override
+	public void put(MetadataItem metadataItem) {
+		super.put(metadataItem);
+		cachePuts++;
+	}
 
 	public MetadataItem get(String metadataIdentificationString) {
 		return get(metadataIdentificationString, false);
