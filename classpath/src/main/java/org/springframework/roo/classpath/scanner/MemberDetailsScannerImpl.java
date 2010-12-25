@@ -11,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
+import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -30,40 +31,76 @@ import org.springframework.roo.support.util.Assert;
  * Automatically detects all {@link MemberDetailsDecorator} instances in the OSGi container and will delegate to them
  * during execution of the {@link #getMemberDetails(MetadataProvider, ClassOrInterfaceTypeDetails)} method.
  * 
+ * <p>
+ * While internally this implementation will visit {@link MetadataProvider}s and {@link MemberDetailsDecorator}s in the order
+ * of their type name, it is essential an add-on developer does not rely on this behaviour. Correct use of the metadata
+ * infrastructure does not require special type naming approaches to be employed. The ordering behaviour exists solely
+ * to simplify debugging for add-on developers and log comparison between invocations.
+ * 
  * @author Ben Alex
  * @since 1.1
  *
  */
 @Component
 @Service
-@Reference(name="memberHoldingDecorator", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=MemberDetailsDecorator.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE)
+@References(
+	value={
+		@Reference(name = "memberHoldingDecorator", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=MemberDetailsDecorator.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE),
+		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	}
+)
 public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
+	@Reference protected MetadataService metadataService;
+
+	// Mutex
+	private Boolean lock = new Boolean(true);
+
+	private SortedSet<MetadataProvider> providers = new TreeSet<MetadataProvider>(new Comparator<MetadataProvider>() {
+		public int compare(MetadataProvider o1, MetadataProvider o2) {
+			return o1.getClass().getName().compareTo(o2.getClass().getName());
+		}
+	});
 	
 	private SortedSet<MemberDetailsDecorator> decorators = new TreeSet<MemberDetailsDecorator>(new Comparator<MemberDetailsDecorator>() {
 		public int compare(MemberDetailsDecorator o1, MemberDetailsDecorator o2) {
 			return o1.getClass().getName().compareTo(o2.getClass().getName());
 		}
 	});
-	@Reference protected MetadataService metadataService;
 	
 	protected void bindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
-		synchronized (decorators) {
+		synchronized (lock) {
 			decorators.add(decorator);
 		}
 	}
 
 	protected void unbindMemberHoldingDecorator(MemberDetailsDecorator decorator) {
-		synchronized (decorators) {
+		synchronized (lock) {
 			decorators.remove(decorator);
 		}
 	}
+
+	protected void bindMetadataProvider(MetadataProvider mp) {
+		synchronized (lock) {
+			Assert.notNull(mp, "Metadata provider required");
+			String mid = mp.getProvidesType();
+			Assert.isTrue(MetadataIdentificationUtils.isIdentifyingClass(mid), "Metadata provider '" + mp + "' violated interface contract by returning '" + mid + "'");
+			providers.add(mp);
+		}
+	}
 	
+	protected void unbindMetadataProvider(MetadataProvider mp) {
+		synchronized (lock) {
+			Assert.notNull(mp, "Metadata provider required");
+			providers.remove(mp);
+		}
+	}
+
 	protected void deactivate(ComponentContext componentContext) {
-		synchronized (metadataService) {}
+		synchronized (lock) {}
 	}
 
 	public final MemberDetails getMemberDetails(String requestingClass, ClassOrInterfaceTypeDetails cid) {
-		synchronized (metadataService) {
+		synchronized (lock) {
 			// Create a list of discovered members
 			List<MemberHoldingTypeDetails> memberHoldingTypeDetails = new ArrayList<MemberHoldingTypeDetails>();
 			
@@ -79,14 +116,14 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 				memberHoldingTypeDetails.add(currentClass);
 				
 				// Locate all MetadataProvider instances that provide ITDs and thus MemberHoldingTypeDetails information
-				for (MetadataProvider mp : metadataService.getRegisteredProviders()) {
+				for (MetadataProvider mp : providers) {
 					// Skip non-ITD providers
 					if (!(mp instanceof ItdMetadataProvider)) {
 						continue;
 					}
 					
 					// Skip myself
-					if (mp.getClass().equals(requestingClass.getClass())) {
+					if (mp.getClass().getName().equals(requestingClass)) {
 						continue;
 					}
 					
@@ -113,19 +150,17 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 			// Turn out list of discovered members into a result
 			MemberDetails result = new MemberDetailsImpl(memberHoldingTypeDetails);
 			
-			synchronized (decorators) {
-				// Loop until such time as we complete a full loop where no changes are made to the result
-				boolean additionalLoopRequired = true;
-				while (additionalLoopRequired) {
-					additionalLoopRequired = false;
-					for (MemberDetailsDecorator decorator : decorators) {
-						MemberDetails newResult = decorator.decorate(requestingClass, result);
-						Assert.isTrue(newResult != null, "Decorator '" + decorator.getClass().getName() + "' returned an illegal result");
-						if (!newResult.equals(result)) {
-							additionalLoopRequired = true;
-						}
-						result = newResult;
+			// Loop until such time as we complete a full loop where no changes are made to the result
+			boolean additionalLoopRequired = true;
+			while (additionalLoopRequired) {
+				additionalLoopRequired = false;
+				for (MemberDetailsDecorator decorator : decorators) {
+					MemberDetails newResult = decorator.decorate(requestingClass, result);
+					Assert.isTrue(newResult != null, "Decorator '" + decorator.getClass().getName() + "' returned an illegal result");
+					if (!newResult.equals(result)) {
+						additionalLoopRequired = true;
 					}
+					result = newResult;
 				}
 			}
 			
