@@ -68,7 +68,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 	LinkedHashSet<JavaTypeWrapper> getLabelConverterTypes(LinkedHashSet<JavaTypeWrapper> domainJavaTypes) {
 		LinkedHashSet<JavaTypeWrapper> allTypes = new LinkedHashSet<JavaTypeWrapper>(domainJavaTypes);
 		for (JavaTypeWrapper t : domainJavaTypes) {
-			allTypes.addAll(t.getRelatedRooTypes());
+			allTypes.addAll(t.getRelatedDomainTypes());
 		}
 		LinkedHashSet<JavaTypeWrapper> labelConverterTypes = new LinkedHashSet<JavaTypeWrapper>(domainJavaTypes);
 		for (JavaTypeWrapper t : allTypes) {

@@ -2,10 +2,14 @@ package org.springframework.roo.addon.web.mvc.controller;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -39,8 +43,10 @@ public class JavaTypeWrapper {
 
 	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
-	private PhysicalTypeMetadata physicalTypeMetadata;
-	private LinkedHashSet<JavaTypeWrapper> relatedDomainTypes;
+	private Set<JavaTypeWrapper> relatedDomainTypes;
+	private PhysicalTypeMetadata physicalTypeMetadata = null;
+	private ClassOrInterfaceTypeDetails details = null;
+	private static ThreadLocal<Set<JavaType>> alreadyProcessed = new ThreadLocal<Set<JavaType>>();
 
 	/**
 	 * Default constructor.
@@ -53,6 +59,23 @@ public class JavaTypeWrapper {
 		Assert.notNull(javaType, "MetadataService is required");
 		this.javaType = javaType;
 		this.metadataService = metadataService;
+		this.beanInfoMetadata = (BeanInfoMetadata) metadataService.get(getBeanInfoMetadataId());
+		this.entityMetadata = (EntityMetadata) metadataService.get(getEntityMetadataId());
+		this.physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(getPhysicalTypeMetadataId());
+		
+		try {
+			if (alreadyProcessed.get() == null) {
+				alreadyProcessed.set(new HashSet<JavaType>());
+			}
+			alreadyProcessed.get().add(javaType);
+			this.relatedDomainTypes = findRelatedDomainTypes();
+		} finally {
+			alreadyProcessed.get().remove(javaType);
+		}
+		
+		if (this.physicalTypeMetadata != null) {
+			this.details = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
+		}
 	}
 
 	/**
@@ -77,30 +100,10 @@ public class JavaTypeWrapper {
 	}
 
 	/**
-	 * @return the BeanInfoMetadata for the domain object type
-	 */
-	public BeanInfoMetadata getBeanInfoMetadata() {
-		if (beanInfoMetadata == null) {
-			beanInfoMetadata = (BeanInfoMetadata) metadataService.get(getBeanInfoMetadataId());
-		}
-		return beanInfoMetadata;
-	}
-
-	/**
 	 * @return the metadata identifier for the EntityMetadata or null
 	 */
 	public String getEntityMetadataId() {
 		return EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-	}
-
-	/**
-	 * @return the EntityMetadata for the domain object type
-	 */
-	public EntityMetadata getEntityMetadata() {
-		if (entityMetadata == null) {
-			entityMetadata = (EntityMetadata) metadataService.get(getEntityMetadataId());
-		}
-		return entityMetadata;
 	}
 
 	public String getPhysicalTypeMetadataId() {
@@ -108,32 +111,21 @@ public class JavaTypeWrapper {
 	}
 	
 	/**
-	 * @return the PhysicalTypeMetadata for the domain object type
-	 */
-	public PhysicalTypeMetadata getPhysicalTypeMetadata() {
-		if (physicalTypeMetadata == null) {
-			physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(getPhysicalTypeMetadataId());
-		}
-		return physicalTypeMetadata;
-	}
-
-	/**
-	 * Provides access to all associated {@link JavaTypeWrapper} types.  
-	 * 
-	 * @return all associated types or an empty set.
-	 */
-	public LinkedHashSet<JavaTypeWrapper> getRelatedRooTypes() {
-		if (relatedDomainTypes == null) {
-			this.relatedDomainTypes = findRelatedDomainTypes();
-		}
-		return relatedDomainTypes;
-	}
-
-	/**
 	 * @return the MetadataService instance provided to the constructor
 	 */
-	public MetadataService getMetadataService() {
+	MetadataService getMetadataService() {
 		return metadataService;
+	}
+	
+	public Set<JavaTypeWrapper> getRelatedDomainTypes() {
+		if (relatedDomainTypes == null) {
+			return null;
+		}
+		return Collections.unmodifiableSet(relatedDomainTypes);
+	}
+	
+	public BeanInfoMetadata getBeanInfoMetadata() {
+		return beanInfoMetadata;
 	}
 
 	/**
@@ -142,8 +134,7 @@ public class JavaTypeWrapper {
 	 * @return the annotation or null if not found
 	 */
 	public AnnotationMetadata getTypeAnnotation(JavaType annotation) {
-		Assert.notNull(getPhysicalTypeMetadata(), "Java source code unavailable for type " + javaType);
-		ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) getPhysicalTypeMetadata().getMemberHoldingTypeDetails();
+		Assert.notNull(physicalTypeMetadata, "Java source code unavailable for type " + javaType);
 		Assert.notNull(details, "Java source code details unavailable for type " + javaType);
 		return MemberFindingUtils.getTypeAnnotation(details, annotation);
 	}
@@ -152,14 +143,14 @@ public class JavaTypeWrapper {
 	 * @return true if the bean info and entity metadata obtained from the metadata service are both valid
 	 */
 	public boolean isValidMetadata() {
-		return ((getBeanInfoMetadata() != null) && getBeanInfoMetadata().isValid() && (getEntityMetadata() != null) && getEntityMetadata().isValid());
+		return ((beanInfoMetadata != null) && beanInfoMetadata.isValid() && entityMetadata != null && entityMetadata.isValid());
 	}
 	
 	/**
 	 * @return true if the given Java type matches to one of the associated {@link JavaTypeWrapper} types.
 	 */
 	public boolean isRelatedDomainType(JavaType javaType) {
-		for (JavaTypeWrapper domainJavaType : getRelatedRooTypes()) {
+		for (JavaTypeWrapper domainJavaType : relatedDomainTypes) {
 			if (domainJavaType.getJavaType().equals(javaType)) {
 				return true;
 			}
@@ -171,7 +162,7 @@ public class JavaTypeWrapper {
 	 * @return true if the given type is an enumeration.
 	 */
 	public boolean isEnumType() {
-		PhysicalTypeMetadata ptm = getPhysicalTypeMetadata();
+		PhysicalTypeMetadata ptm = physicalTypeMetadata;
 		if (ptm != null) {
 			PhysicalTypeDetails ptmDetails = ptm.getMemberHoldingTypeDetails();
 			if (ptmDetails != null) {
@@ -193,18 +184,18 @@ public class JavaTypeWrapper {
 	 *		If no methods could be selected the toString() method is added.
 	 */
 	public List<MethodMetadata> getMethodsForLabel() {
-		Assert.notNull(getBeanInfoMetadata(), "BeanInfo metadata is required.");
+		Assert.notNull(beanInfoMetadata, "BeanInfo metadata is required.");
 		int fieldCount = 0;
 		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		for (MethodMetadata accessor : getBeanInfoMetadata().getPublicAccessors(false)) {
-			if (accessor.getMethodName().equals(getEntityMetadata().getIdentifierAccessor().getMethodName())) {
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+			if (accessor.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName())) {
 				continue;
 			}
-			MethodMetadata versionAccessor = getEntityMetadata().getVersionAccessor();
+			MethodMetadata versionAccessor = entityMetadata.getVersionAccessor();
 			if ((versionAccessor != null) && accessor.getMethodName().equals(versionAccessor.getMethodName())) {
 				continue;
 			}
-			FieldMetadata field = getBeanInfoMetadata().getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
 			if (field != null // Should not happen
 					&& !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() // Exclude collections and arrays
 					&& !isRelatedDomainType(field.getFieldType()) // Exclude references to other domain objects as they are too verbose
@@ -222,7 +213,7 @@ public class JavaTypeWrapper {
 			methods.add(new MethodMetadataBuilder(getBeanInfoMetadataId(), Modifier.PUBLIC, new JavaSymbolName("toString"), 
 					new JavaType("java.lang.String"), null, null, new InvocableMemberBodyBuilder()).build());
 		}
-		return methods;
+		return Collections.unmodifiableList(methods);
 	}
 	
 	@Override
@@ -240,29 +231,37 @@ public class JavaTypeWrapper {
 		return "DomainJavaType [javaType=" + javaType + "]";
 	}
 
-	/* Private helper methods */
-	
-	LinkedHashSet<JavaTypeWrapper> findRelatedDomainTypes() {
+	private Set<JavaTypeWrapper> findRelatedDomainTypes() {
 		LinkedHashSet<JavaTypeWrapper> relatedDomainTypes = new LinkedHashSet<JavaTypeWrapper>();
-		for (MethodMetadata accessor : getBeanInfoMetadata().getPublicAccessors(false)) {
+		if (beanInfoMetadata == null) {
+			return null;
+		}
+		outer:
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 			// Not interested in identifiers and version fields
-			if (accessor.equals(getEntityMetadata().getIdentifierAccessor()) || accessor.equals(getEntityMetadata().getVersionAccessor())) {
+			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = getBeanInfoMetadata().getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
-			if (fieldMetadata == null || !hasMutator(fieldMetadata, getBeanInfoMetadata())) {
+			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
 				continue;
 			}
 			JavaType type = accessor.getReturnType();
 			if (type.isCommonCollectionType()) {
 				for (JavaType genericType : type.getParameters()) {
 					if (isApplicationType(genericType)) {
+						if (alreadyProcessed.get().contains(genericType)) {
+							continue outer;
+						}
 						relatedDomainTypes.add(new JavaTypeWrapper(genericType, metadataService));
 					}
 				}
 			} else {
 				if (isApplicationType(type) && (!isEmbeddedFieldType(fieldMetadata))) {
+					if (alreadyProcessed.get().contains(type)) {
+						continue outer;
+					}
 					relatedDomainTypes.add(new JavaTypeWrapper(type, metadataService));
 				}
 			}
@@ -270,17 +269,17 @@ public class JavaTypeWrapper {
 		return relatedDomainTypes;
 	}
 
-	boolean isApplicationType(JavaType javaType) {
+	private boolean isApplicationType(JavaType javaType) {
 		return (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null);
 	}
 	
-	boolean isEmbeddedFieldType(FieldMetadata field) {
+	private boolean isEmbeddedFieldType(FieldMetadata field) {
 		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
 	}
 
-	boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
+	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
 		for (MethodMetadata mutator : bim.getPublicMutators()) {
-			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) {
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) {
 				return true;
 			}
 		}

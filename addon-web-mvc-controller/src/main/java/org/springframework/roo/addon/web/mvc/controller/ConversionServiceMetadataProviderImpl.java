@@ -40,8 +40,12 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooConversionService.class.getName()));
+	}
+
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		removeMetadataTrigger(new JavaType(RooConversionService.class.getName()));
 	}
 
 	@Override
@@ -97,7 +101,11 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 			}
 			metadataDependencyRegistry.registerDependency(domainJavaType.getBeanInfoMetadataId(), metadataId);
 			metadataDependencyRegistry.registerDependency(domainJavaType.getEntityMetadataId(), metadataId);
-			for (JavaTypeWrapper relatedType : domainJavaType.getRelatedRooTypes()) {
+			Set<JavaTypeWrapper> relatedDomainTypes = domainJavaType.getRelatedDomainTypes();
+			if (relatedDomainTypes == null) {
+				continue;
+			}
+			for (JavaTypeWrapper relatedType : relatedDomainTypes) {
 				metadataDependencyRegistry.registerDependency(relatedType.getBeanInfoMetadataId(), metadataId);
 				metadataDependencyRegistry.registerDependency(relatedType.getEntityMetadataId(), metadataId);
 			}
