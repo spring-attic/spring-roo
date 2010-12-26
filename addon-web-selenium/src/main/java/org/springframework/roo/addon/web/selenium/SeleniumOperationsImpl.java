@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -254,7 +255,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	private List<FieldMetadata> getEligableFields() {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			
 			if(field != null && hasMutator(field)) {
@@ -275,7 +276,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	
 	private boolean hasMutator(FieldMetadata fieldMetadata) {
 		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}

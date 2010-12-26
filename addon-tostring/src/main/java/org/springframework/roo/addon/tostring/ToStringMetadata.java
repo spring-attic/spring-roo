@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -130,7 +130,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 			for (MethodMetadata accessor : getPublicAccessors(false)) {
 				String accessorName = accessor.getMethodName().getSymbolName();
-				String fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
+				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
 					String accessorText = accessorName + "()";
 					if (accessor.getReturnType().isCommonCollectionType()) {

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -306,7 +307,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String initializer = mutatorArguments.get(mutator);
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutator);
 
-			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator);
+			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 			if (field.getFieldType().equals(JavaType.STRING_OBJECT) && (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), NOT_NULL) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), SIZE) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MIN) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), MAX) != null)) {
 				// Check for @Size or @Column with length attribute
@@ -537,7 +538,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				String mutatorName = mutatorMethod.getMethodName().getSymbolName();
 				// Check if mutator method
 				if (Modifier.isPublic(mutatorMethod.getModifier()) && mutatorMethod.getParameterTypes().size() == 1 && mutatorName.startsWith("set")) {
-					JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutatorMethod);
+					JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutatorMethod);
 					FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 					if (field == null) {
 						// There is no field for this mutator, so chances are it's not mandatory

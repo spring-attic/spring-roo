@@ -2,6 +2,7 @@ package org.springframework.roo.addon.gwt;
 
 import hapax.*;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.*;
 import org.springframework.roo.classpath.details.*;
@@ -195,7 +196,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 
         if (beanInfoMetadata != null) {
             for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
-                JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+                JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
                 JavaType returnType = accessor.getReturnType();
                 PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
                 JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);

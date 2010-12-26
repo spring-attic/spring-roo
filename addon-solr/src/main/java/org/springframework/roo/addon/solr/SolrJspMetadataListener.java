@@ -11,6 +11,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
@@ -146,7 +147,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 						accessor.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())) {
 					continue;
 				}
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
 				Assert.notNull(field, "Could not determine field for accessor: " + accessor);
 				
 				facetFields.append(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");

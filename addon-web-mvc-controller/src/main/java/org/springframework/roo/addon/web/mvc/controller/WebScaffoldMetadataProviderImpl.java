@@ -9,6 +9,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
@@ -103,7 +104,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim)) {
 				continue;
 			}
@@ -147,7 +148,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
 		for (MethodMetadata mutator : bim.getPublicMutators()) {
-			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}

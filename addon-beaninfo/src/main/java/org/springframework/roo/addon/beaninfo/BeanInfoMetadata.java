@@ -57,25 +57,6 @@ public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	/**
-	 * Obtains the property name for the specified JavaBean accessor or mutator method. This is determined by discarding the first 2 or 3 letters of the method name (depending whether it is a "get",
-	 * "set" or "is" method). There is no special searching back to the actual field name.
-	 * 
-	 * @param methodMetadata to search (required, and must be a "get", "set" or "is" method)
-	 * @return the name of the property (never returned null)
-	 */
-	public static JavaSymbolName getPropertyNameForJavaBeanMethod(MethodMetadata methodMetadata) {
-		Assert.notNull(methodMetadata, "Method metadata is required");
-		String name = methodMetadata.getMethodName().getSymbolName();
-		if (name.startsWith("set") || name.startsWith("get")) {
-			return new JavaSymbolName(name.substring(3));
-		}
-		if (name.startsWith("is")) {
-			return new JavaSymbolName(name.substring(2));
-		}
-		throw new IllegalStateException("Method name '" + name + "' does not observe JavaBean method naming conventions");
-	}
-
-	/**
 	 * Attempts to locate the field which is represented by the presented property name.
 	 * 
 	 * <p>

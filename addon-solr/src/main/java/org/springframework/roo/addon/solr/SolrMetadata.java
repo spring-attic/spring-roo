@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -171,7 +172,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors()) {
-			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method));
+			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
 			Assert.notNull(field, "Could not determine field '" + method.getMethodName().getSymbolName().substring(3) + "' for method " + method.getMethodName().getSymbolName());
 			FieldMetadata version = entityMetadata.getVersionField();
 			if (version != null && field.getFieldName().equals(version.getFieldName())) {

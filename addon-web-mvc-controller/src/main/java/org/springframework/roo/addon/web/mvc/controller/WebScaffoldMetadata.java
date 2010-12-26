@@ -9,12 +9,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
@@ -427,7 +428,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		boolean listAdded = false;
 		for (MethodMetadata accessorMethod : beanInfoMetadata.getPublicAccessors()) {
 			if (specialDomainTypes.contains(accessorMethod.getReturnType())) {
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessorMethod));
+				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessorMethod));
 				if (null != field && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.validation.constraints.NotNull"))) {
 					EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(accessorMethod.getReturnType(), Path.SRC_MAIN_JAVA));
 					if (entityMetadata != null) {
@@ -1203,7 +1204,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator or are JPA transient fields
-			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata fieldMetadata = bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata, bim) || isTransientFieldType(fieldMetadata)) {
 				continue;
 			}
@@ -1231,7 +1232,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator
-			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(accessor));
+			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
 			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
 				continue;
 			}
@@ -1300,7 +1301,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
 		for (MethodMetadata mutator : bim.getPublicMutators()) {
-			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}

@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooIdentifier;
@@ -192,7 +193,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName(), true);
 
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName fieldName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (field != null && isRooIdentifier(field.getFieldType())) {
@@ -289,7 +290,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	private List<FieldMetadata> getElegibleFields() {
 		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
 		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = BeanInfoMetadata.getPropertyNameForJavaBeanMethod(method);
+			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
 
 			if (field != null && hasMutator(field)) {
@@ -310,7 +311,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 	private boolean hasMutator(FieldMetadata fieldMetadata) {
 		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoMetadata.getPropertyNameForJavaBeanMethod(mutator)))) return true;
+			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
 		}
 		return false;
 	}
