@@ -1,6 +1,5 @@
 package org.springframework.roo.classpath.itd;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +11,8 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.metadata.MetadataNotificationListener;
@@ -21,8 +20,6 @@ import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -52,66 +49,56 @@ import org.springframework.roo.support.util.Assert;
 public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTrackingMetadataNotifier implements ItdMetadataProvider, MetadataNotificationListener {
 	@Reference protected FileManager fileManager;
 	@Reference protected MemberDetailsScanner memberDetailsScanner;
+	
+	/** Cancel production if the governor type details are required, but aren't available */
 	private boolean dependsOnGovernorTypeDetailAvailability = true;
+	
+	/** Requires the governor to be a {@link PhysicalTypeCategory#CLASS} (as opposed to an interface etc) */
 	private boolean dependsOnGovernorBeingAClass = true;
-
+	
 	/** The annotations which, if present on a class or interface, will cause metadata to be created */
 	private List<JavaType> metadataTriggers = new ArrayList<JavaType>();
 	
 	/** We don't care about trigger annotations; we always produce metadata */
 	private boolean ignoreTriggerAnnotations = false;
-
+	
 	private boolean isNotificationForJavaType(String mid) {
 		return MetadataIdentificationUtils.getMetadataClass(mid).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType()));
 	}
 	
-	public final void notify(String upstreamDependency, String downstreamDependency) {
-		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency) && !isNotificationForJavaType(upstreamDependency)) {
-			// This notification is NOT for a JavaType, and did NOT identify a specific downstream instance, so we must compute
-			// all possible downstream dependencies by a disk scan.
-			
-			// Scan for every .java file in the project and create a MID specific to this subclass for each
-			List<String> allMids = new ArrayList<String>();
-			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-			Assert.notNull(projectMetadata, "ProjectMetadata required");
-			PathResolver pathResolver = projectMetadata.getPathResolver();
-			for (Path path : pathResolver.getSourcePaths()) {
-				FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(path)), null);
-				String antPath = pathResolver.getRoot(path) + File.separatorChar + "**" + File.separatorChar + "*.java";
-				for (FileDetails fileDetails : fileManager.findMatchingAntPath(antPath)) {
-					String fullPath = srcRoot.getRelativeSegment(fileDetails.getCanonicalPath());
-					fullPath = fullPath.substring(1, fullPath.lastIndexOf(".java")).replace(File.separatorChar, '.'); // ditch the first / and .java
-					JavaType javaType;
-					try {
-						javaType = new JavaType(fullPath);
-					} catch (RuntimeException loopToNextFile) { // ROO-1022
-						continue;
-					}
-					String mid = createLocalIdentifier(javaType, path);
-					allMids.add(mid);
-				}
-			}
-			
-			for (String mid : allMids) {
-				MetadataItem metadataItem = metadataService.get(mid, true);
-				if (metadataItem != null) {
-					notifyIfRequired(metadataItem);
-				}
-			}
+	/**
+	 * Designed to handle events originating from a {@link MetadataDependencyRegistry#addNotificationListener(MetadataNotificationListener)}
+	 * registration. Such events are always presented with a non-null upstream dependency indicator and a null downstream dependency
+	 * indicator. These events differ from events related to {@link PhysicalTypeIdentifier} registrations, as in those cases the downstream
+	 * dependency indicator will be the class-level {@link #getProvidesType()}.
+	 * 
+	 * <p>
+	 * This method allows subclasses to specially handle generic {@link MetadataDependencyRegistry} events.
+	 * 
+	 * @param upstreamDependency the upstream which was modified (guaranteed to be non-null, but could be class-level or instance-level)
+	 */
+	protected void notifyForGenericListener(String upstreamDependency) {}
 	
+	public final void notify(String upstreamDependency, String downstreamDependency) {
+		if (downstreamDependency == null) {
+			notifyForGenericListener(upstreamDependency);
 			return;
 		}
 		
+		// Handle if the downstream dependency is "class level",  meaning we need to figure out the specific downstream MID this metadata provider wants to update/refresh.
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
-			Assert.isTrue(isNotificationForJavaType(upstreamDependency), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "')");
+			// We have not identified an instance-specific downstream MID, so we'll need to calculate an instance-specific downstream MID to retrieve.
+			// We only support analysis of a PhysicalTypeIdentifier upstream MID to convert this to a downstream MID.
+			// In any other case the downstream metadata should have registered an instance-specific downstream dependency on a given upstream.
+			Assert.isTrue(isNotificationForJavaType(upstreamDependency), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "') for metadata provider " + getClass().getName());
 			
 			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
 			JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
 			Path path = PhysicalTypeIdentifier.getPath(upstreamDependency);
 			downstreamDependency = createLocalIdentifier(javaType, path);
 			
-			// We only need to proceed if the downstream dependency relationship is not already registered
-			// (if it's already registered, the event will be delivered directly later on)
+			// We only need to proceed if the downstream dependency relationship is not already registered.
+			// It is unusual to register a direct downstream relationship given it costs dependency registration memory and class-level physical Java type notifications will always occur anyway.
 			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
 				return;
 			}
@@ -120,10 +107,9 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		// We should now have an instance-specific "downstream dependency" that can be processed by this class
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(downstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(getProvidesType())), "Unexpected downstream notification for '" + downstreamDependency + "' to this provider (which uses '" + getProvidesType() + "'");
 		
-		MetadataItem metadataItem = metadataService.get(downstreamDependency, true);
-		if (metadataItem != null) {
-			notifyIfRequired(metadataItem);
-		}
+		// We no longer notify downstreams here, as the "get" operation with eviction will ensure the main get(String) method below will be fired and it
+		// directly notified downstreams as part of that method (BPA 10 Dec 2010)
+		metadataService.get(downstreamDependency, true);
 	}
 	
 	/**
@@ -200,14 +186,14 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			// We can't get even basic information about the physical type, so abort (the ITD will be deleted by ItdFileDeletionService)
 			return null;
 		}
-
+		
 		// Determine ITD details
 		String itdFilename = governorPhysicalTypeMetadata.getItdCanoncialPath(this);
 		JavaType aspectName = governorPhysicalTypeMetadata.getItdJavaType(this);
-
+		
 		// Flag to indicate whether we'll even try to create this metadata
 		boolean produceMetadata = false;
-
+		
 		// Determine if we should generate the metadata on the basis of it containing a trigger annotation
 		ClassOrInterfaceTypeDetails cid = null;
 		if (governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() != null && governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
@@ -221,7 +207,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 				}
 			}
 		}
-	
+		
 		// Fallback to ignoring trigger annotations
 		if (ignoreTriggerAnnotations) {
 			produceMetadata = true;
@@ -240,60 +226,73 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		if (fileManager.exists(itdFilename) && !produceMetadata) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
+			// TODO: Overload fileManager.delete(..) so we can give a message so the console output is more meaningful
 			fileManager.delete(itdFilename);
 		}
 		
 		if (produceMetadata) {
 			// This type contains an annotation we were configured to detect, or there is an ITD (which may need deletion), so we need to produce the metadata
-			ItdTypeDetailsProvidingMetadataItem metadata;
-			metadata = getMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, itdFilename);
+			ItdTypeDetailsProvidingMetadataItem metadata = getMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, itdFilename);
 			
-			// Register a direct connection between the physical type and this metadata
-			// (this is needed so changes to the inheritance hierarchies are eventually notified to us)
-			// TODO: DETERMINE IF THIS IS REALLY NECESSARY, AS IT SHOULD FILTER DOWN VIA PTM (BPA 6 Sep 10)
-			metadataDependencyRegistry.registerDependency(governorPhysicalTypeMetadata.getId(), metadataIdentificationString);
+			// There is no requirement to register a direct connection with the physical type and this metadata because changes will
+			// trickle down via the class-level notification registered by convention by AbstractItdMetadataProvider subclasses (BPA 10 Dec 2010)
 			
-			// Quit if the subclass returned null; it might have experienced issues parsing etc
-			if (metadata == null) {
+			// Quit if the subclass returned null or a metadata item they're not happy with; it might have experienced issues parsing etc
+			if (metadata == null || !metadata.isValid()) {
 				return null;
 			}
 			
-			// Handle the management of the ITD file
-			if (metadata.getMemberHoldingTypeDetails() != null) {
-				// Construct the source file composer
-				ItdSourceFileComposer itdSourceFileComposer = new ItdSourceFileComposer(metadata.getMemberHoldingTypeDetails());
+			// By this point we have a valid MetadataItem, but it might not contain any members for the resulting ITD etc
 
-				// Output the ITD if there is actual content involved
-				// (if there is no content, we continue on to the deletion phase at the bottom of this conditional block)
+			// Handle the management of the ITD file
+			boolean deleteItdFile = false;
+			
+			if (metadata.getMemberHoldingTypeDetails() == null) {
+				// We have no members in this ITD, so its on-disk existence falls into question... :-)
+				// Exterminate it.
+				deleteItdFile = true;
+			}
+			
+			if (!deleteItdFile) {
+				// We have some members in the ITD, so decide if we're to write something to disk
+				ItdSourceFileComposer itdSourceFileComposer = new ItdSourceFileComposer(metadata.getMemberHoldingTypeDetails());
+				
+				// Decide whether the get an ITD on-disk based on whether there is physical content to write
 				if (itdSourceFileComposer.isContent()) {
+					// We have content to write
 					String itd = itdSourceFileComposer.getOutput();
 					
 					fileManager.createOrUpdateTextFileIfRequired(itdFilename, itd, false);
-					// Important to exit here, so we don't proceed onto the delete operation below
-					// (as we have a valid ITD that has been written out by now)
-					return metadata;
-				} 
-
+				} else {
+					// We don't have content to write
+					deleteItdFile = true;
+				}
 			}
-
-			// Delete the ITD if we determine deletion is appropriate
-			if (metadata.isValid() && fileManager.exists(itdFilename)) {
-				fileManager.delete(itdFilename);
+			
+			if (deleteItdFile) {
+				if (fileManager.exists(itdFilename)) {
+					// TODO: Overload fileManager.delete(..) to accept a message and inform the user what's happening
+					fileManager.delete(itdFilename);
+				}
 			}
+			
+			// Eagerly notify that the metadata has been updated; this also registers the metadata hash code in the superclass' cache to avoid
+			// unnecessary subsequent notifications if it hasn't changed
+			notifyIfRequired(metadata);
 			
 			return metadata;
 		}
 		
 		return null;
 	}
-
+	
 	public final String getIdForPhysicalJavaType(String physicalJavaTypeIdentifier) {
 		Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(physicalJavaTypeIdentifier).equals(MetadataIdentificationUtils.getMetadataClass(PhysicalTypeIdentifier.getMetadataIdentiferType())), "Expected a valid physical Java type instance identifier (not '" + physicalJavaTypeIdentifier + "')");
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalJavaTypeIdentifier);
 		Path path = PhysicalTypeIdentifier.getPath(physicalJavaTypeIdentifier);
 		return createLocalIdentifier(javaType, path);
 	}
-
+	
 	/**
 	 * If set to true (default is true), ensures subclass not called unless the governor type details are available.
 	 * 
@@ -302,7 +301,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	public void setDependsOnGovernorTypeDetailAvailability(boolean dependsOnGovernorTypeDetailAvailability) {
 		this.dependsOnGovernorTypeDetailAvailability = dependsOnGovernorTypeDetailAvailability;
 	}
-
+	
 	/**
 	 * If set to true (default is true), ensures the governor type details represent a class. Note that 
 	 * {@link #setDependsOnGovernorTypeDetailAvailability(boolean)} must also be true to ensure this can be relied upon. 
