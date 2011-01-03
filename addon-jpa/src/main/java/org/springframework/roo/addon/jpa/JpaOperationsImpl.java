@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -31,7 +30,6 @@ import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.project.Repository;
 import org.springframework.roo.project.Resource;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -50,7 +48,6 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class JpaOperationsImpl implements JpaOperations {
-	private static final Logger logger = HandlerUtils.getLogger(JpaOperationsImpl.class);
 	private static final String PERSISTENCE_UNIT = "persistence-unit";
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
@@ -367,17 +364,8 @@ public class JpaOperationsImpl implements JpaOperations {
 						properties.appendChild(createPropertyElement("datanucleus.autoCreateSchema", "false", persistence));
 						ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 						connectionString = connectionString.replace("TO_BE_CHANGED_BY_ADDON", projectMetadata.getProjectName());
-						switch (database) {
-							case HYPERSONIC_IN_MEMORY:
-							case HYPERSONIC_PERSISTENT:
-							case H2_IN_MEMORY:
-								userName = StringUtils.hasText(userName) ? userName : "sa";
-								break;
-							case DERBY:
-								break;
-							default:
-								logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
-								break;
+						if (database.getKey().equals("HYPERSONIC") || database == JdbcDatabase.H2_IN_MEMORY || database == JdbcDatabase.SYBASE) {
+							userName = StringUtils.hasText(userName) ? userName : "sa";
 						}
 						properties.appendChild(createPropertyElement("datanucleus.storeManagerType", "rdbms", persistence));
 				}
@@ -494,24 +482,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		String connectionString = getConnectionString(database, hostName, databaseName);
 		props.put("database.url", connectionString);
 
-		String dbPropsMsg = "Please enter your database details in src/main/resources/META-INF/spring/database.properties.";
-		switch (database) {
-		case HYPERSONIC_IN_MEMORY:
-		case HYPERSONIC_PERSISTENT:
-		case H2_IN_MEMORY:
+		if (database.getKey().equals("HYPERSONIC") || database == JdbcDatabase.H2_IN_MEMORY || database == JdbcDatabase.SYBASE) {
 			userName = StringUtils.hasText(userName) ? userName : "sa";
-			break;
-		case DERBY:
-			break;
-		case SYBASE:
-			userName = StringUtils.hasText(userName) ? userName : "sa";
-			logger.warning(dbPropsMsg);
-			break;
-		default:
-			logger.warning(dbPropsMsg);
-			break;
 		}
-
 		props.put("database.username", StringUtils.trimToEmpty(userName));
 		props.put("database.password", StringUtils.trimToEmpty(password));
 
@@ -619,10 +592,6 @@ public class JpaOperationsImpl implements JpaOperations {
 		
 		// Add all new dependencies to pom.xml
 		projectOperations.addDependencies(dependencies);
-
-		if (database == JdbcDatabase.ORACLE || database == JdbcDatabase.DB2) {
-			logger.warning("The " + database.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
-		}
 	}
 
 	private String getProjectName() {

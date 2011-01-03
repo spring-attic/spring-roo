@@ -75,6 +75,22 @@ public class JpaCommands implements CommandMarker {
 		}
 
 		jpaOperations.configureJpa(ormProvider, jdbcDatabase, jndi, applicationId, hostName, databaseName, userName, password, persistenceUnit);
+		
+		if (jdbcDatabase == JdbcDatabase.ORACLE || jdbcDatabase == JdbcDatabase.DB2) {
+			logger.warning("The " + jdbcDatabase.name() + " JDBC driver is not available in public maven repositories. Please adjust the pom.xml dependency to suit your needs");
+		}
+		
+		if (!(jdbcDatabase == JdbcDatabase.HYPERSONIC_IN_MEMORY || jdbcDatabase == JdbcDatabase.HYPERSONIC_PERSISTENT || jdbcDatabase == JdbcDatabase.H2_IN_MEMORY)) {
+			if (ormProvider == OrmProvider.DATANUCLEUS || ormProvider == OrmProvider.DATANUCLEUS_2) {
+				if (jdbcDatabase == JdbcDatabase.VMFORCE) {
+					logger.warning("Please enter your database details in src/main/resources/config.properties.");					
+				} else {
+					logger.warning("Please enter your database details in src/main/resources/META-INF/persistence.xml.");
+				}
+			} else {
+				logger.warning("Please enter your database details in src/main/resources/META-INF/spring/database.properties.");
+			}
+		}
 	}
 
 	@CliCommand(value = "database properties list", help = "Shows database configuration details")
