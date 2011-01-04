@@ -827,7 +827,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			if (resource.equals(new Resource(candidate))) {
 				// Found it
 				candidate.getParentNode().removeChild(candidate);
-				mutableFile.setDescriptionOfChange("Removed resourse");
+				mutableFile.setDescriptionOfChange("Removed resource");
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}
