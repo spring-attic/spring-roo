@@ -110,12 +110,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			int offset = fullyQualifiedTypeName.lastIndexOf(".");
 			simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
 		}
-		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
-			// Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
-			if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
-				throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
-			}
-		}
+		// Disabled as per ROO-1734
+//		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
+//			// Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
+//			if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
+//				throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
+//			}
+//		}
 
 		this.array = array;
 		this.dataType = primitive;
