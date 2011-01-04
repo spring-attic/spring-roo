@@ -165,17 +165,22 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 
         for (ImportDeclaration importDeclaration : imports) {
             if (importDeclaration.getName() instanceof QualifiedNameExpr) {
-                if (importDeclaration.isAsterisk()) {
-                    JavaPackage typePackage = new JavaPackage(((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString() + "." + importDeclaration.getName().getName());
-                    ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, null, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-                    registeredImports.add(newImport.build());
-                } else {
-                    JavaType type = new JavaType(((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString() + "." + importDeclaration.getName().getName());
-                    JavaPackage typePackage = type.getPackage();
-
-                    ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
-                    registeredImports.add(newImport.build());
-                }
+				String qualifier = ((QualifiedNameExpr) importDeclaration.getName()).getQualifier().toString();
+				String simpleName = importDeclaration.getName().getName();
+				String fullName = qualifier + "." + simpleName;
+				// We want to calculate these...
+				JavaPackage typePackage = null; // always
+				JavaType type = null; // maybe
+				if (fullName.toLowerCase().equals(fullName)) {
+					// Everything is already lowercase, so assume it's just a straight package name and no static type imports are happening
+					typePackage = new JavaPackage(fullName);
+				} else {
+					// There is an uppercase in there, so let's make a JavaType as it can compute the enclosing type properly
+					type = new JavaType(fullName);
+					typePackage = type.getPackage();
+				}
+                ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
+                registeredImports.add(newImport.build());
             }
         }
 
@@ -673,6 +678,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		tsc.append("extendsTypes", extendsTypes);
 		tsc.append("implementsTypes", implementsTypes);
 		tsc.append("typeAnnotations", annotations);
+		tsc.append("declaredInnerTypes", declaredInnerTypes);
 		tsc.append("customData", getCustomData());
 		return tsc.toString();
 	}
