@@ -3,6 +3,7 @@ package org.springframework.roo.addon.jpa;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -489,7 +490,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put("database.password", StringUtils.trimToEmpty(password));
 
 		try {
-			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream os = databaseMutableFile.getOutputStream();
+			props.store(os, "Updated at " + new Date());
+			os.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
@@ -527,7 +530,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put("sfdc.password", StringUtils.trimToEmpty(password));
 
 		try {
-			props.store(configMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream os = configMutableFile.getOutputStream();
+			props.store(os, "Updated at " + new Date());
+			os.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
