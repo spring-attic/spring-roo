@@ -26,7 +26,7 @@ public class EnumConverter implements Converter {
 		for (Enum enumValue : enumClass.getEnumConstants()) {
 			String candidate = enumValue.name();
 			if ("".equals(existingData) || candidate.startsWith(existingData) || existingData.startsWith(candidate) || candidate.toUpperCase().startsWith(existingData.toUpperCase()) || existingData.toUpperCase().startsWith(candidate.toUpperCase())) {
-				completions.add(enumValue.name());
+				completions.add(candidate);
 			}
 		}
 		return true;
