@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.email;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
@@ -177,7 +178,9 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		try {
-			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream outputStream = databaseMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
@@ -256,7 +259,9 @@ public class MailOperationsImpl implements MailOperations {
 		}
 
 		try {
-			props.store(databaseMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream outputStream = databaseMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
