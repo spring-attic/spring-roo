@@ -96,6 +96,7 @@ public class JspViewManager {
 								.addAttribute("xmlns:table", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build())
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build();
 		document.appendChild(div);
@@ -153,6 +154,7 @@ public class JspViewManager {
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build())
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 		
@@ -212,6 +214,7 @@ public class JspViewManager {
 								.addAttribute("xmlns:c", "http://java.sun.com/jsp/jstl/core")
 								.addAttribute("xmlns:spring", "http://www.springframework.org/tags")
 								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build())
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 
@@ -264,6 +267,7 @@ public class JspViewManager {
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build())
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 
@@ -302,6 +306,7 @@ public class JspViewManager {
 								.addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields")
 								.addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page")
 								.addAttribute("version", "2.0")
+								.addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build())
 								.addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build())
 							.build());
 		
