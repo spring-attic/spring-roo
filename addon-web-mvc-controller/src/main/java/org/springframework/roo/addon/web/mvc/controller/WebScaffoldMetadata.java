@@ -1267,7 +1267,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	}
 	
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> parameters) {
-		return MemberFindingUtils.getMethod(detailsScanner.getMemberDetails(getClass().getName(), governorTypeDetails), methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
+		return MemberFindingUtils.getMethod(detailsScanner.getMemberDetails(WebScaffoldMetadataProviderImpl.class.getName(), governorTypeDetails), methodName, AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
 	}
 	
 	private String getShortName(JavaType type) {
