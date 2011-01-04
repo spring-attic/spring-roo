@@ -621,9 +621,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			repositories.add(new Repository(repositoryElement));
 		}
 		
-		for (Repository repository : repositories) {
-			projectOperations.addRepository(repository);
-		}
+		// Add all new repositories to pom.xml
+		projectOperations.addRepositories(repositories);
 	}
 
 	private void updatePluginRepositories(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
@@ -735,11 +734,13 @@ public class JpaOperationsImpl implements JpaOperations {
 			buildCommandElement = pom.createElement("buildCommand");
 			buildCommandElement.appendChild(nameElement);
 			additionalBuildcommandsElement.appendChild(buildCommandElement);
+			mutableFile.setDescriptionOfChange("Updated maven-eclipse-plugin");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		} 
 		
 		if (!addBuildCommand && buildCommandElement != null) {
 			additionalBuildcommandsElement.removeChild(buildCommandElement);
+			mutableFile.setDescriptionOfChange("Updated maven-eclipse-plugin");
 			XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 		}
 	}
@@ -772,6 +773,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			}
 		}
 		removeArtifacts(getProviderXPath(ormProviders), root, configuration);
+		
+		mutableFile.setDescriptionOfChange("Removed redundant artifacts");
 		
 		XmlUtils.writeXml(mutableFile.getOutputStream(), pom);
 

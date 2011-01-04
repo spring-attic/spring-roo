@@ -130,7 +130,7 @@ public class Repository implements Comparable<Repository> {
 		}
 		return result;
 	}
-
+	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
 		tsc.append("id", id);
