@@ -546,13 +546,15 @@ public class JpaOperationsImpl implements JpaOperations {
 				Properties props = new Properties();
 				props.load(log4jMutableFile.getInputStream());
 				final String dnKey = "log4j.category.DataNucleus";
+				OutputStream outputStream = log4jMutableFile.getOutputStream();
 				if (ormProvider == OrmProvider.DATANUCLEUS && !props.containsKey(dnKey)) {
 					props.put(dnKey, "WARN");
-					props.store(log4jMutableFile.getOutputStream(), "Updated at " + new Date());
+					props.store(outputStream, "Updated at " + new Date());
 				} else if (ormProvider != OrmProvider.DATANUCLEUS && props.containsKey(dnKey)) {
 					props.remove(dnKey);
-					props.store(log4jMutableFile.getOutputStream(), "Updated at " + new Date());
+					props.store(outputStream, "Updated at " + new Date());
 				}
+				outputStream.close();
 			}
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);

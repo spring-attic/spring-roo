@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.Properties;
@@ -117,7 +118,9 @@ public class SolrOperationsImpl implements SolrOperations {
 		props.put("executor.poolSize", "10");
 
 		try {
-			props.store(solrMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream outputStream = solrMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}

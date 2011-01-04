@@ -2,6 +2,7 @@ package org.springframework.roo.addon.logging;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.Properties;
 
@@ -79,7 +80,9 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		}
 		
 		try {
-			props.store(log4jMutableFile.getOutputStream(), "Updated at " + new Date());
+			OutputStream outputStream = log4jMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
