@@ -57,8 +57,8 @@
         the column names in the tables. Simple and composite primary keys are
         supported (see <xref linkend="dbre_composite_keys" /> for more
         details) and relationships between entities are also created using the
-        imported and exported key information obtained from the metadata.
-        </para>
+        imported and exported key information obtained from the
+        metadata.</para>
       </section>
 
       <section>
@@ -150,18 +150,43 @@
     <para>DBRE supports most of the relational databases that can be
     configured for Roo-managed projects such as <link
     xlink:href="http://www.mysql.com/">MySQL</link>, <link
-    xlink:href="http://www.microsoft.com/sqlserver">MS SQL</link> and <link
+    xlink:href="http://www.microsoft.com/sqlserver">MS SQL</link>, and <link
     xlink:href="http://www.postgresql.org/">PostgreSQL</link>. These drivers
-    are auto-detected by Roo and are downloaded for you to use in DBRE when
-    you first issue the database introspect or database reverse engineer
-    commands. Roo also provides a script called install-jdbc-drivers.roo that
-    can be run as a post-installation step after installing Roo to install the
+    are auto-detected by Roo and you will be prompted by the Roo shell to
+    download your configured database's JDBC driver when you first issue the
+    database introspect or database reverse engineer commands (see <xref
+    linkend="dbre_commands" /> below). For example, if you have configured
+    your Roo project to use a MySQL database, when the database introspect
+    command is first issued, you will see the following console output:</para>
+
+    <para><programlisting>roo&gt; database introspect --schema no-schema-required 
+Located add-on that may offer this JDBC driver
+1 found, sorted by rank; T = trusted developer; R = Roo 1.1 compatible
+ID T R DESCRIPTION -------------------------------------------------------------
+01 Y Y 5.1.13.0001 #jdbcdriver driverclass:com.mysql.jdbc.Driver. This...
+--------------------------------------------------------------------------------
+[HINT] use 'addon info' to see details about a bundle
+[HINT] use 'addon install' to install a specific bundle
+JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
+
+    <para>You can then install the MySQL JDBC driver by entering the following
+    Roo command:</para>
+
+    <para><programlisting>roo&gt; addon install --bundleId 01</programlisting></para>
+
+    <para>The JDBC driver for MySQL is immediately available for you to use.
+    You can now enter the database introspect and database reverse engineer
+    commands (see <xref linkend="dbre_commands" /> below).</para>
+
+    <para>Roo also provides a script called install-jdbc-drivers.roo that can
+    be run as a post-installation step after installing Roo to install the
     <link xlink:href="http://www.oracle.com/index.html">Oracle</link> driver.
     To install this driver, execute the Roo command:</para>
 
     <para><programlisting>roo&gt; script --file install-jdbc-drivers.roo</programlisting></para>
 
-    <para>Re-start Roo to use the driver.</para>
+    <para>The JDBC driver for Oracle is also immediately available for
+    use.</para>
 
     <para><emphasis role="bold">Note</emphasis>: currently there is no
     open-source JDBC driver for DB2 and Roo does not provide an OSGi driver
@@ -175,11 +200,11 @@
   <section>
     <title xml:id="dbre_commands">DBRE Add-On commands</title>
 
-    <para>After you have installed all the JDBC drivers and configured your
-    persistence layer with the <link
-    linkend="command-index-persistence-setup">persistence setup</link>
-    command, you can introspect and reverse engineer the database configured
-    for your project. DBRE contains two commands:</para>
+    <para>After you have configured your persistence layer with the <link
+    linkend="command-index-persistence-setup">persistence setup</link> command
+    and installed all the JDBC drivers and you can introspect and reverse
+    engineer the database configured for your project. DBRE contains two
+    commands:</para>
 
     <orderedlist>
       <listitem>
