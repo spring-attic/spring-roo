@@ -249,6 +249,8 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	public void setDevelopmentMode(boolean developmentMode) {
 		this.developmentMode = developmentMode;
+		// To assist with debugging, development mode does not undertake undo operations
+		this.undoManager.setUndoEnabled(!developmentMode);
 	}
 
 	/**

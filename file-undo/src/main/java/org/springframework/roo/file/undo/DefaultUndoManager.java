@@ -22,6 +22,7 @@ public class DefaultUndoManager implements UndoManager {
 
 	private Stack<UndoableOperation> stack = new Stack<UndoableOperation>();
 	private Set<UndoListener> listeners = new HashSet<UndoListener>();
+	private boolean undoEnabled = true;
 	
 	protected void activate(ComponentContext context) {
 	}
@@ -45,6 +46,10 @@ public class DefaultUndoManager implements UndoManager {
 
 	public boolean undo() {
 		boolean undoMode = true;
+		if (!undoEnabled) {
+			// Force the undo stack to simply reset (but not perform any undos)
+			undoMode = false;
+		}
 		while (!this.stack.empty()) {
 			UndoableOperation op = this.stack.pop();
 			try {
@@ -65,6 +70,10 @@ public class DefaultUndoManager implements UndoManager {
 		return undoMode;
 	}
 	
+	public void setUndoEnabled(boolean undoEnabled) {
+		this.undoEnabled = undoEnabled;
+	}
+
 	private void notifyListeners(boolean undoing) {
 		for (UndoListener listener : listeners) {
 			listener.onUndoEvent(new UndoEvent(undoing));

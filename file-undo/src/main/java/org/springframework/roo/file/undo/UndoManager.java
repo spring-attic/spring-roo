@@ -56,4 +56,9 @@ public interface UndoManager {
 	 * @param undoListener removes a previously-registered undo listener (required)
 	 */
 	void removeUndoListener(UndoListener undoListener);
+	
+	/**
+	 * @param undoEnabled enables or disables the undo feature, which is useful for debugging (defaults to true)
+	 */
+	void setUndoEnabled(boolean undoEnabled);
 }
