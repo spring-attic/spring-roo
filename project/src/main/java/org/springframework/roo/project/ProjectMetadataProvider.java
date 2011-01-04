@@ -23,7 +23,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param dependency to add (required)
+	 * @param dependency the dependency to add (required)
 	 */
 	void addDependencies(List<Dependency> dependencies);
 	
@@ -36,7 +36,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param dependency to add (required)
+	 * @param dependency the dependency to add (required)
 	 */
 	void addDependency(Dependency dependency);
 	
@@ -49,7 +49,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param dependency to remove (required)
+	 * @param dependency the dependency to remove (required)
 	 */
 	void removeDependency(Dependency dependency);
 	
@@ -62,7 +62,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param plugin to add (required)
+	 * @param plugin the plugin to add (required)
 	 */
 	void addBuildPlugin(Plugin plugin);
 	
@@ -75,9 +75,22 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param plugin to remove (required)
+	 * @param plugin the plugin to remove (required)
 	 */
 	void removeBuildPlugin(Plugin plugin);
+	
+	/**
+	 * Attempts to add the specified repositories. If all the repositories already exists according
+	 * to {@link ProjectMetadata#isRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise each new repository is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param repositories a list of repositories to add (required)
+	 */
+	void addRepositories(List<Repository> repositories);
 	
 	/**
 	 * Attempts to add the specified repository. If the repository already exists according
@@ -88,7 +101,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param repository to add (required)
+	 * @param repository the repository to add (required)
 	 */
 	void addRepository(Repository repository);
 	
@@ -101,7 +114,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param repository to remove (required)
+	 * @param repository the repository to remove (required)
 	 */
 	void removeRepository(Repository repository);
 	
@@ -114,7 +127,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param repository repository to add (required)
+	 * @param repository the plugin repository to add (required)
 	 */
 	void addPluginRepository(Repository repository);
 	
@@ -127,7 +140,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param repository repository to remove (required)
+	 * @param repository the plugin repository to remove (required)
 	 */
 	void removePluginRepository(Repository repository);
 
@@ -140,7 +153,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param property to add (required)
+	 * @param property the property to add (required)
 	 */
 	void addProperty(Property property);
 	
@@ -153,7 +166,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param property to remove (required)
+	 * @param property the property to remove (required)
 	 */
 	void removeProperty(Property property);
 
@@ -166,7 +179,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param filter to add (required)
+	 * @param filter the filter to add (required)
 	 */
 	void addFilter(Filter filter);
 	
@@ -179,7 +192,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param filter to remove (required)
+	 * @param filter the filter to remove (required)
 	 */
 	void removeFilter(Filter filter);
 
@@ -192,7 +205,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param resource to add (required)
+	 * @param resource the resource to add (required)
 	 */
 	void addResource(Resource resource);
 	
@@ -205,7 +218,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param resource to remove (required)
+	 * @param resource the resource to remove (required)
 	 */
 	void removeResource(Resource resource);
 
@@ -217,7 +230,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
 	 * available, or if the on-disk representation cannot be modified for any reason.
 	 * 
-	 * @param projectType to update (required)
+	 * @param projectType the project type to update (required)
 	 */
 	void updateProjectType(ProjectType projectType);
 }

@@ -78,7 +78,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether all presented dependencies are registered. 
 	 *
-	 * @param dependencies to check (required)
+	 * @param dependencies the dependencies to check (required)
 	 * @return whether all the dependencies are currently registered or not
 	 */
 	public boolean isAllDependenciesRegistered(List<Dependency> dependencies) {
@@ -89,7 +89,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	/**
 	 * Convenience method for determining whether a particular dependency is registered. 
 	 *
-	 * @param dependency to check (required)
+	 * @param dependency the dependency to check (required)
 	 * @return whether the dependency is currently registered or not
 	 */
 	public boolean isDependencyRegistered(Dependency dependency) {
@@ -97,6 +97,17 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		return dependencies.contains(dependency);
 	}
 	
+	/**
+	 * Convenience method for determining whether all presented dependencies are registered. 
+	 *
+	 * @param repositories the repositories to check (required)
+	 * @return whether all the repositories are currently registered or not
+	 */
+	public boolean isAllRepositoriesRegistered(List<Repository> repositories) {
+		Assert.notNull(repositories, "Repositories to check is required");
+		return this.repositories.containsAll(repositories);
+	}
+
 	/**
 	 * Convenience method for determining whether a particular repository
 	 * is registered.

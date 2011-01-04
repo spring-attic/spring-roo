@@ -251,6 +251,15 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyAdditionNotifications(dependency);
 	}
 
+	public final void addRepositories(List<Repository> repositories) {
+		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
+		Assert.notNull(repositories, "Repositories required");
+		projectMetadataProvider.addRepositories(repositories);
+		for (Repository repository : repositories) {
+			sendRepositoryAdditionNotifications(repository);
+		}
+	}
+
 	public final void addRepository(Repository repository) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Repository modification prohibited at this time");
 		Assert.notNull(repository, "Repository required");

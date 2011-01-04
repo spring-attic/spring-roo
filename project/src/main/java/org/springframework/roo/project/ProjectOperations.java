@@ -99,7 +99,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param dependencies to add (required)
+	 * @param dependencies a list of dependencies to add (required)
 	 */
 	void addDependencies(List<Dependency> dependencies);
 
@@ -110,7 +110,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param dependency to add (required)
+	 * @param dependency the dependency to add (required)
 	 */
 	void addDependency(Dependency dependency);
 
@@ -134,7 +134,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * dependency from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param dependency to remove (required)
+	 * @param dependency the dependency to remove (required)
 	 */
 	void removeDependency(Dependency dependency);
 
@@ -156,9 +156,20 @@ public interface ProjectOperations {
 	 * present, removes any dependency which matches {@link ProjectMetadata#getDependenciesExcludingVersion(Dependency)}.
 	 * Always adds the presented dependency.
 	 * 
-	 * @param dependency dependency to add (required)
+	 * @param dependency the dependency to add (required)
 	 */
 	void dependencyUpdate(Dependency dependency);
+
+	/**
+	 * Allows addition of repositories to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param repositories a list of repositories to add (required)
+	 */
+	void addRepositories(List<Repository> repositories);
 
 	/**
 	 * Allows addition of a repository to the POM. 
@@ -167,7 +178,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository repository to add (required)
+	 * @param repository the repository to add (required)
 	 */
 	void addRepository(Repository repository);
 
@@ -178,7 +189,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository repository to remove (required)
+	 * @param repository the repository to remove (required)
 	 */
 	void removeRepository(Repository repository);
 
@@ -189,7 +200,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository plugin repository to add (required)
+	 * @param repository the plugin repository to add (required)
 	 */
 	void addPluginRepository(Repository repository);
 	
@@ -200,7 +211,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * plugin repository from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param repository plugin repository to remove (required)
+	 * @param repository the plugin repository to remove (required)
 	 */
 	void removePluginRepository(Repository repository);
 
@@ -211,7 +222,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add 
 	 * a new build capability to their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param plugin build plugin to add (required)
+	 * @param plugin the build plugin to add (required)
 	 */
 	void addBuildPlugin(Plugin plugin);
 
@@ -222,7 +233,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * build plugin from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param plugin build plugin to remove (required)
+	 * @param plugin the build plugin to remove (required)
 	 */
 	void removeBuildPlugin(Plugin plugin);
 
@@ -231,7 +242,7 @@ public interface ProjectOperations {
 	 * present, removes any build plugin which matches {@link ProjectMetadata#getBuildPluginsExcludingVersion(Plugin)}.
 	 * Always adds the presented plugin.
 	 * 
-	 * @param plugin build plugin to update (required)
+	 * @param plugin the build plugin to update (required)
 	 */
 	void buildPluginUpdate(Plugin plugin);
 	
@@ -242,7 +253,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param property POM property to add (required)
+	 * @param property the POM property to add (required)
 	 */
 	void addProperty(Property property);
 
@@ -253,7 +264,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * property from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param property POM property to remove (required)
+	 * @param property the POM property to remove (required)
 	 */
 	void removeProperty(Property property);
 	
@@ -264,7 +275,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param filter filter to add (required)
+	 * @param filter the filter to add (required)
 	 */
 	void addFilter(Filter filter);
 	
@@ -275,7 +286,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * filter from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param filter filter to remove (required)
+	 * @param filter the filter to remove (required)
 	 */
 	void removeFilter(Filter filter);
 
@@ -286,7 +297,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
 	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param resource resource to add (required)
+	 * @param resource the resource to add (required)
 	 */
 	void addResource(Resource resource);
 	
@@ -297,7 +308,7 @@ public interface ProjectOperations {
 	 * Provides a convenient way for third parties to instruct end users how to use the CLI to remove an unwanted
 	 * resource from their projects without requiring the user to manually edit a pom.xml or write an add-on.
 	 * 
-	 * @param resource resource to remove (required)
+	 * @param resource the resource to remove (required)
 	 */
 	void removeResource(Resource resource);
 }
