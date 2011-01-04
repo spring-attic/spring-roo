@@ -705,7 +705,7 @@ public class SimpleParser implements Parser {
 								} else {
 									// Only add the result **if** what they've typed is compatible *AND* they haven't already typed it in full
 									if (lastOptionValue.toLowerCase().startsWith(currentValue.toLowerCase()) || currentValue.toLowerCase().startsWith(lastOptionValue.toLowerCase())) {
-										if (!lastOptionValue.equals(currentValue)) {
+										if (!lastOptionValue.equalsIgnoreCase(currentValue)) {
 											results.add(prefix + currentValue + suffix);
 										}
 									}
