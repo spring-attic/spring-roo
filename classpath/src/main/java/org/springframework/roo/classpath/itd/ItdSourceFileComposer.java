@@ -99,6 +99,10 @@ public class ItdSourceFileComposer {
 		types.addAll(resolver.getRegisteredImports());
 		if (types.size() > 0) {
 			for (JavaType importType : types) {
+				if (introductionTo.equals(importType.getEnclosingType())) {
+					// We don't "import" types defined within governor, as they already have scope and this causes AJDT warnings (see ROO-1686)
+					continue;
+				}
 				topOfFile.append("import " + importType.getFullyQualifiedTypeName() + ";").append(getNewLine());
 			}
 			
