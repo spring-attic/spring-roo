@@ -642,7 +642,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 			Element propertyElement = new XmlElementBuilder(property.getName(), document).setText(property.getValue()).build();
 			properties.appendChild(propertyElement);
-			mutableFile.setDescriptionOfChange("Adding property '" + property.getName() + "' to '" + property.getValue() + "'");
+			mutableFile.setDescriptionOfChange("Added property '" + property.getName() + "' with value '" + property.getValue() + "'");
 		}
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
