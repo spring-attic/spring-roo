@@ -198,6 +198,16 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			return new EnumAttributeValue(annotationName, enumDetails);
 		}
 
+		if (expression instanceof NameExpr) {
+			NameExpr field = (NameExpr) expression;
+			String name = field.getName();
+
+			JavaType fieldType = new JavaType("unknown.Object"); // as we have no way of finding out the real type
+
+			EnumDetails enumDetails = new EnumDetails(fieldType, new JavaSymbolName(name));
+			return new EnumAttributeValue(annotationName, enumDetails);
+		}
+
 		if (expression instanceof ClassExpr) {
 			ClassExpr clazz = (ClassExpr) expression;
 			Type nameToFind = clazz.getType();
