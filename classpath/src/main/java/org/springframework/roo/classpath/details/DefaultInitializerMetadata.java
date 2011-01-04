@@ -1,19 +1,14 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
-import java.util.List;
 
-import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.CustomData;
-import org.springframework.roo.model.JavaSymbolName;
-import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.style.ToStringCreator;
 
 /**
  * Default implementation of {@link InitializerMetadata}.
  * 
- * @author Ben Alex
+ * @author James Tyrrell
  * @since 1.1.1
  */
 public class DefaultInitializerMetadata extends AbstractIdentifiableJavaStructureProvider implements InitializerMetadata {

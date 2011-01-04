@@ -62,15 +62,12 @@ public class JavaParserClassMetadata extends AbstractMetadataItem implements Phy
 			Assert.isTrue(fileManager.exists(fileIdentifier), "Path '" + fileIdentifier + "' must exist");
 			CompilationUnit compilationUnit = JavaParser.parse(fileManager.getInputStream(fileIdentifier));
 
-			for (TypeDeclaration candidate : compilationUnit.getTypes()) {
-				// This implementation only supports the main type declared within a compilation unit
-				if (PhysicalTypeIdentifier.getJavaType(metadataIdentificationString).getSimpleTypeName().equals(candidate.getName())) {
-					// We have the required type declaration
-					memberHoldingTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, candidate, fileManager, metadataIdentificationString, fileIdentifier, PhysicalTypeIdentifier.getJavaType(metadataIdentificationString), metadataService, physicalTypeMetadataProvider);
-					break;
-				}
-			}
-			Assert.notNull(memberHoldingTypeDetails, "Parsing empty, enum or annotation types is unsupported");
+			JavaType javaType = PhysicalTypeIdentifier.getJavaType(metadataIdentificationString);
+			TypeDeclaration typeDeclaration = JavaParserUtils.locateTypeDeclaration(compilationUnit, javaType);
+			Assert.notNull(typeDeclaration, "Could not locate '" + javaType.getSimpleTypeName() + "' in compilation unit");
+			// Many callers rely on the metadata containing methods that provide mutation of the on-disk compilation unit
+			memberHoldingTypeDetails = new JavaParserMutableClassOrInterfaceTypeDetails(compilationUnit, typeDeclaration, metadataIdentificationString, javaType, metadataService, physicalTypeMetadataProvider, fileManager, fileIdentifier);
+			Assert.notNull(memberHoldingTypeDetails, "Unable to parse '" + javaType + "'");
 
 			if (logger.isLoggable(Level.FINEST)) {
 				logger.finest("Parsed '" + metadataIdentificationString + "'");

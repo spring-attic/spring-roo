@@ -4,7 +4,11 @@ import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.TypeParameter;
-import japa.parser.ast.body.*;
+import japa.parser.ast.body.BodyDeclaration;
+import japa.parser.ast.body.MethodDeclaration;
+import japa.parser.ast.body.Parameter;
+import japa.parser.ast.body.TypeDeclaration;
+import japa.parser.ast.body.VariableDeclaratorId;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.BlockStmt;
@@ -175,8 +179,8 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		return tsc.toString();
 	}
 
-	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, boolean permitFlush, Set<JavaSymbolName> typeParameters) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+	public static void addMethod(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, MethodMetadata method, Set<JavaSymbolName> typeParameters) {
+		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(method, "Method required");
 		
@@ -222,7 +226,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : method.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation, false);
+			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 	
 		// Add any method parameters, including their individual annotations and type parameters
@@ -237,7 +241,7 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
 	
 			for (AnnotationMetadata parameterAnnotation : methodParameter.getAnnotations()) {
-				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation, false);
+				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
 			
 			// Compute the parameter name
@@ -340,9 +344,5 @@ public class JavaParserMethodMetadata extends AbstractCustomDataAccessorProvider
 
 		// Add the method to the end of the compilation unit
 		members.add(d);
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
 	}
 }

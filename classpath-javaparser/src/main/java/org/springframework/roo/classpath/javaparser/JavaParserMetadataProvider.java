@@ -1,6 +1,9 @@
 package org.springframework.roo.classpath.javaparser;
 
+import japa.parser.ParseException;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,7 +99,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "This implementation can only create class or interface types");
 		ClassOrInterfaceTypeDetails cit = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 		String fileIdentifier = toCreate.getPhysicalLocationCanonicalPath();
-		JavaParserMutableClassOrInterfaceTypeDetails.createType(fileManager, cit, fileIdentifier);
+		JavaParserMutableClassOrInterfaceTypeDetails.createOrUpdateTypeOnDisk(fileManager, cit, fileIdentifier);
 	}
 
 	public void onFileEvent(FileEvent fileEvent) {
@@ -182,4 +185,23 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 		return result;
 	}
 
+	public String getCompilationUnitContents(ClassOrInterfaceTypeDetails cit) {
+		Assert.notNull(cit, "Class or interface type details are required");
+		return JavaParserMutableClassOrInterfaceTypeDetails.getCompilationUnitContents(cit);
+	}
+
+	public ClassOrInterfaceTypeDetails parse(String compilationUnit, String declaredByMetadataId, JavaType javaType) {
+		Assert.hasText(compilationUnit, "Compilation unit required");
+		Assert.hasText(declaredByMetadataId, "Declaring metadata ID required");
+		Assert.notNull(javaType, "Java type to locate required");
+		try {
+			return new JavaParserClassOrInterfaceTypeDetails(compilationUnit, declaredByMetadataId, javaType, metadataService, this);
+		} catch (IOException ioe) {
+			throw new IllegalStateException(ioe);
+		} catch (CloneNotSupportedException cne) {
+			throw new IllegalStateException(cne);
+		} catch (ParseException pe) {
+			throw new IllegalStateException(pe);
+		}
+	}
 }

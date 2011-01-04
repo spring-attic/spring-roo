@@ -155,7 +155,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		return tsc.toString();
 	}
 	
-	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, boolean permitFlush, Set<JavaSymbolName> typeParameters) {
+	public static void addConstructor(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, ConstructorMetadata constructor, Set<JavaSymbolName> typeParameters) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(constructor, "Method required");
@@ -169,7 +169,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		d.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : constructor.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation, false);
+			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 	
 		// Add any constructor parameters, including their individual annotations and type parameters
@@ -183,7 +183,7 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 			List<AnnotationExpr> parameterAnnotations = new ArrayList<AnnotationExpr>();
 	
 			for (AnnotationMetadata parameterAnnotation : constructorParameter.getAnnotations()) {
-				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation, false);
+				JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, parameterAnnotations, parameterAnnotation);
 			}
 			
 			// Compute the parameter name
@@ -281,9 +281,5 @@ public class JavaParserConstructorMetadata extends AbstractCustomDataAccessorPro
 	
 		// Add the constructor to the end of the compilation unit
 		members.add(d);
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
 	}
 }

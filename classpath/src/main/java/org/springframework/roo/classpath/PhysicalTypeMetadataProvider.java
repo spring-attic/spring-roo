@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath;
 
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.metadata.MetadataProvider;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.ClasspathProvidingProjectMetadata;
@@ -46,4 +47,33 @@ public interface PhysicalTypeMetadataProvider extends MetadataProvider {
 	 * @return the string (in {@link PhysicalTypeIdentifier} format) if found, or null if not found
 	 */
 	String findIdentifier(JavaType javaType);
+
+	
+	/**
+	 * Returns the compilation unit contents that represents the passed class or interface details.
+	 * This is useful if an add-on requires a compilation unit representation but doesn't wish to cause that
+	 * representation to be emitted to disk via {@link MutablePhysicalTypeMetadataProvider}. One concrete
+	 * time this is useful is when an add-on wishes to emulate an ITD-like model for an external system that
+	 * cannot support ITDs and may wish to insert a custom header etc before writing it to disk.
+	 * 
+	 * @param cit a parsed representation of a class or interface (required)
+	 * @return a valid Java compilation unit for the passed object (never null or empty)
+	 */
+	String getCompilationUnitContents(ClassOrInterfaceTypeDetails cit);
+	
+	/**
+	 * Builds a {@link ClassOrInterfaceTypeDetails} object that represents the requested {@link JavaType}
+	 * from the passed compilation unit text. This is useful if an add-on wishes to parse some arbitrary
+	 * compilation unit contents it acquired from outside the user project, such as a template that ships
+	 * with the add-on. The add-on can subsequently modify the returned object (via the builder) and
+	 * eventually write the final version to the user's project. This therefore allows more elegant add-on
+	 * usage patterns, as they need not write "stub" compilation units into a user project simply to parse
+	 * them for subsequent re-writing.
+	 * 
+	 * @param compilationUnit the text of a legal Java compilation unit (required)
+	 * @param declaredByMetadataId the metadata ID that should be used in the returned object (required)
+	 * @param javaType the Java type to locate in the compilation unit and parse (required)
+	 * @return a parsed representation of the requested type from the passed compilation unit (never null)
+	 */
+	ClassOrInterfaceTypeDetails parse(String compilationUnit, String declaredByMetadataId, JavaType javaType);
 }

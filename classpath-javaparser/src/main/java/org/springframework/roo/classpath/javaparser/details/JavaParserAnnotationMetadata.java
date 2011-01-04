@@ -237,11 +237,11 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 	/**
 	 * Facilitates the addition of the annotation to the presented type.
 	 * 
-	 * @param compilationUnitServices to use for flushing (required)
+	 * @param compilationUnitServices to use (required)
 	 * @param annotations to add to the end of (required)
 	 * @param annotation to add (required)
 	 */
-	public static void addAnnotationToList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, AnnotationMetadata annotation, boolean permitFlush) {
+	public static void addAnnotationToList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, AnnotationMetadata annotation) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(annotations, "Annotations required");
 		Assert.notNull(annotation, "Annotation metadata required");
@@ -323,9 +323,6 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 					// they specified only a single member-value pair, and it is the default anyway, so we need not do anything except update the value
 					Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 					smae.setMemberValue(toUse);
-					if (permitFlush) {
-						compilationUnitServices.flush();
-					}
 					return;
 				} else {
 					// There is >1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
@@ -344,20 +341,16 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 				annotationPairs.add(pair);
 			}
 		}
-
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
 	}
 
 	/**
 	 * Facilitates the removal of the annotation type indicated.
 	 * 
-	 * @param compilationUnitServices to use for flushing (required)
+	 * @param compilationUnitServices to use (required)
 	 * @param annotations to remove the annotation from (required)
 	 * @param annotation to remove (required)
 	 */
-	public static void removeAnnotationFromList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, JavaType annotation, boolean permitFlush) {
+	public static void removeAnnotationFromList(CompilationUnitServices compilationUnitServices, List<AnnotationExpr> annotations, JavaType annotation) {
 		Assert.notNull(compilationUnitServices, "Compilation unit services required");
 		Assert.notNull(annotations, "Annotations required");
 		Assert.notNull(annotation, "Annotation metadata required");
@@ -383,10 +376,6 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 		Assert.notNull(toRemove, "Could not find annotation for type '" + annotation.getFullyQualifiedTypeName() + "' to remove");
 
 		annotations.remove(toRemove);
-
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
 	}
 
 	@SuppressWarnings("unchecked")

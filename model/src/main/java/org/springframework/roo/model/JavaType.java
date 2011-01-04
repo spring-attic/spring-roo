@@ -200,25 +200,24 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			sb.append("?");
 		} else if (argName != null && !staticForm) {
 			sb.append(argName);
-			if (dataType == DataType.TYPE) {
-                if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
-				    sb.append(" extends ");
-                }
+			if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
+				if (dataType == DataType.TYPE) {
+					sb.append(" extends ");
+				}
 			}
 		}
 
 		if (!WILDCARD_NEITHER.equals(argName)) {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
 
-			if (dataType == DataType.TYPE || !staticForm) {
-				// TODO: Use the import registration resolver
+			if (!fullyQualifiedTypeName.equals("java.lang.Object") && (dataType == DataType.TYPE || !staticForm)) {
 				if (resolver != null) {
 					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
 						sb.append(fullyQualifiedTypeName);
 					} else {
 						sb.append(getSimpleTypeName());
 					}
-				} else if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
+				} else {
 					sb.append(fullyQualifiedTypeName);
 				}
 			}

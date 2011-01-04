@@ -8,7 +8,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 /**
  * Default implementation of {@link ImportMetadata}.
  * 
- * @author Ben Alex
+ * @author James Tyrrell
  * @since 1.1.1
  */
 public class DefaultImportMetadata extends AbstractIdentifiableJavaStructureProvider implements ImportMetadata {

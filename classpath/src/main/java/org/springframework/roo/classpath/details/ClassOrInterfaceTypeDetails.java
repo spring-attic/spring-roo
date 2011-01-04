@@ -9,9 +9,8 @@ import org.springframework.roo.model.JavaSymbolName;
  * Provides information about the different components of a class, interface or enum.
  * 
  * <p>
- * For simplicity of implementation this is not a complete representation of all members and other
- * information available via Java bytecode. For example, static initialisers and inner classes
- * are unsupported.
+ * As per this interface's extension of {@link MemberHoldingTypeDetails}, instances of
+ * implementing classes must be immutable.
  * 
  * @author Ben Alex
  * @since 1.0

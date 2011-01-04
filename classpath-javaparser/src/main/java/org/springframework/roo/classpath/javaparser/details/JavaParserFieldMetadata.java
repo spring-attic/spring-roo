@@ -4,7 +4,10 @@ import japa.parser.ASTHelper;
 import japa.parser.JavaParser;
 import japa.parser.ParseException;
 import japa.parser.ast.CompilationUnit;
-import japa.parser.ast.body.*;
+import japa.parser.ast.body.BodyDeclaration;
+import japa.parser.ast.body.FieldDeclaration;
+import japa.parser.ast.body.TypeDeclaration;
+import japa.parser.ast.body.VariableDeclarator;
 import japa.parser.ast.expr.AnnotationExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
@@ -103,8 +106,8 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		return fieldType;
 	}
 	
-	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field, boolean permitFlush) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+	public static void addField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, FieldMetadata field) {
+		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(field, "Field required");
 		
@@ -189,7 +192,7 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		List<AnnotationExpr> annotations = new ArrayList<AnnotationExpr>();
 		newField.setAnnotations(annotations);
 		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation, false);
+			JavaParserAnnotationMetadata.addAnnotationToList(compilationUnitServices, annotations, annotation);
 		}
 		
 
@@ -210,14 +213,10 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 
 		// Add the field to the compilation unit
 		members.add(nextFieldIndex, newField);
-		
-		if (permitFlush) {
-			compilationUnitServices.flush();
-		}
 	}
 	
 	public static void removeField(CompilationUnitServices compilationUnitServices, List<BodyDeclaration> members, JavaSymbolName fieldName) {
-		Assert.notNull(compilationUnitServices, "Compilation unit services required");
+		Assert.notNull(compilationUnitServices, "Flushable compilation unit services required");
 		Assert.notNull(members, "Members required");
 		Assert.notNull(fieldName, "Field name to remove is required");
 		
@@ -241,8 +240,6 @@ public class JavaParserFieldMetadata extends AbstractCustomDataAccessorProvider 
 		
 		// Do removal outside iteration of body declaration members, to avoid concurrent modification exceptions
 		members.remove(toDelete);
-
-		compilationUnitServices.flush();
 	}
 
 	public String getFieldInitializer() {

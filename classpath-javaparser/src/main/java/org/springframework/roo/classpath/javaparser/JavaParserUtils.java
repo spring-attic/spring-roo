@@ -1,5 +1,6 @@
 package org.springframework.roo.classpath.javaparser;
 
+import japa.parser.ast.CompilationUnit;
 import japa.parser.ast.ImportDeclaration;
 import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.ClassOrInterfaceDeclaration;
@@ -369,7 +370,7 @@ public class JavaParserUtils  {
         String symbolName = nameToFind.getName();
         if (symbolName.equals("?")) {
             symbolName = JavaType.WILDCARD_NEITHER.getSymbolName();
-            return new JavaType(symbolName, 0, DataType.VARIABLE, null, null);
+			return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
         }
 
 		// Unqualified name detected, so check if it's in the type parameter list
@@ -635,7 +636,7 @@ public class JavaParserUtils  {
 			return new NameExpr(typeToImport.getSimpleTypeName());
 		}
 
-        if (!StringUtils.hasText(typeToImport.getPackage().getFullyQualifiedPackageName())) {
+        if (typeToImport.isDefaultPackage()) {
 			return new NameExpr(typeToImport.getSimpleTypeName());
 		}
 
@@ -754,5 +755,27 @@ public class JavaParserUtils  {
 
 		// Make no changes
 		return value;
+	}
+
+	/**
+	 * Searches a compilation unit and locates the declaration with the given type name.
+	 * 
+	 * @param compilationUnit to scan (required)
+	 * @param javaType the target to locate (required)
+	 * @return the located type declaration or null if it could not be found
+	 */
+	public static final TypeDeclaration locateTypeDeclaration(CompilationUnit compilationUnit, JavaType javaType) {
+		Assert.notNull(compilationUnit, "Compilation unit required");
+		Assert.notNull(javaType, "Java type to search for required");
+		if (compilationUnit.getTypes() == null) {
+			return null;
+		}
+		for (TypeDeclaration candidate : compilationUnit.getTypes()) {
+			if (javaType.getSimpleTypeName().equals(candidate.getName())) {
+				// We have the required type declaration
+				return candidate;
+			}
+		}
+		return null;
 	}
 }

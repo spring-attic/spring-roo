@@ -6,7 +6,10 @@ import org.springframework.roo.model.JavaType;
 /**
  * Metadata concerning a particular import.
  * 
- * @author Ben Alex
+ * <p>
+ * As always with metadata types, instances of this class are immutable once constructed.
+ * 
+ * @author James Tyrrell
  * @since 1.1.1
  */
 public interface ImportMetadata extends IdentifiableJavaStructure {
@@ -21,8 +24,14 @@ public interface ImportMetadata extends IdentifiableJavaStructure {
 	 */
     JavaType getImportType();
 
+    /**
+     * @return true if the import used the "static" keyword
+     */
     boolean isStatic();
 
+    /**
+     * @return true if the import was a wildcard (eg "import com.foo.*;")
+     */
 	boolean isAsterisk();
 	
 }
