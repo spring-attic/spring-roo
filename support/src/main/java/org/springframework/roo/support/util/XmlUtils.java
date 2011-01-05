@@ -50,39 +50,37 @@ public final class XmlUtils {
 	/**
 	 * Write an XML document to the OutputStream provided. This will use the pre-configured Roo provided Transformer.
 	 * 
-	 * @param outputEntry The output stream to write to.
-	 * @param document The document to write
+	 * @param outputStream the output stream to write to. The stream is closed upon completion.
+	 * @param document the document to write.
 	 */
-	public static final void writeXml(OutputStream outputEntry, Document document) {
-		writeXml(createIndentingTransformer(), outputEntry, document);
+	public static final void writeXml(OutputStream outputStream, Document document) {
+		writeXml(createIndentingTransformer(), outputStream, document);
 	}
 
 	/**
-	 * Write an XML document to the outputstream provided. This will use the provided Transformer.
+	 * Write an XML document to the OutputStream provided. This will use the provided Transformer.
 	 * 
-	 * @param transformer The transformer (can be obtained from XmlUtils.createIndentingTransformer())
-	 * @param outputEntry The output stream to write to.
-	 * @param document The document to write
+	 * @param transformer the transformer (can be obtained from XmlUtils.createIndentingTransformer())
+	 * @param outputStream the output stream to write to. The stream is closed upon completion.
+	 * @param document the document to write.
 	 */
-	public static final void writeXml(Transformer transformer, OutputStream outputEntry, Document document) {
+	public static final void writeXml(Transformer transformer, OutputStream outputStream, Document document) {
 		Assert.notNull(transformer, "Transformer required");
-		Assert.notNull(outputEntry, "Output entry required");
+		Assert.notNull(outputStream, "OutputStream required");
 		Assert.notNull(document, "Document required");
 		
 		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
 		try {
-			StreamResult streamResult = createUnixStreamResultForEntry(outputEntry);
+			StreamResult streamResult = createUnixStreamResultForEntry(outputStream);
 			transformer.transform(new DOMSource(document), streamResult);
-			OutputStream os = streamResult.getOutputStream();
-			if (os != null) {
-				os.close();
-			}
-			Writer writer = streamResult.getWriter();
-			if (writer != null) {
-				writer.close();
-			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
+		} finally {
+			try {
+				outputStream.close();
+			} catch (IOException ignored) {
+				// Do nothing
+			}
 		}
 	}
 	
@@ -90,14 +88,14 @@ public final class XmlUtils {
 	 * Creates a {@link StreamResult} by wrapping the given outputEntry in an
 	 * {@link OutputStreamWriter} that transforms Windows line endings (\r\n) 
 	 * into Unix line endings (\n) on Windows for consistency with Roo's templates.  
-	 * @param outputEntry
+	 * @param outputStream
 	 * @return StreamResult 
 	 * @throws UnsupportedEncodingException 
 	 */
-	private static StreamResult createUnixStreamResultForEntry(OutputStream outputEntry) throws UnsupportedEncodingException {
+	private static StreamResult createUnixStreamResultForEntry(OutputStream outputStream) throws UnsupportedEncodingException {
 		final Writer writer;
 		if (System.getProperty("line.separator").equals("\r\n")) {
-			writer = new OutputStreamWriter(outputEntry, "ISO-8859-1") {
+			writer = new OutputStreamWriter(outputStream, "ISO-8859-1") {
 				public void write(char[] cbuf, int off, int len) throws IOException {
 					for (int i = off; i < off + len; i++) {
 						if (cbuf[i] != '\r' || (i < cbuf.length - 1 && cbuf[i + 1] != '\n')) {
@@ -121,7 +119,7 @@ public final class XmlUtils {
 				}
 			};
 		} else {
-			writer = new OutputStreamWriter(outputEntry, "ISO-8859-1");
+			writer = new OutputStreamWriter(outputStream, "ISO-8859-1");
 		}
 		return new StreamResult(writer);
 	}
