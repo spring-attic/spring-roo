@@ -79,6 +79,37 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 */
 	protected void notifyForGenericListener(String upstreamDependency) {}
 	
+	/**
+	 * Invoked whenever a "class-level" downstream dependency identifier is presented in a metadata notification. An "instance-specific"
+	 * downstream dependency identifier is required so that a metadata request can ultimately be made. This method is responsible for
+	 * evaluating the upstream dependency identifier and converting it into a valid downstream dependency identifier. The downstream
+	 * dependency identifier must be of the same type as this metadata provider's {@link #getProvidesType()}. The downstream dependency
+	 * identifier must also be instance-specific. 
+	 * 
+	 * <p>
+	 * The basic implementation offered in this class will only convert a {@link PhysicalTypeIdentifier}. If a subclass registers
+	 * a dependency on an upstream (other than {@link PhysicalTypeIdentifier#getMetadataIdentiferType()}) and presents their
+	 * {@link #getProvidesType()} as the downstream (thus meaning only class-level downstream dependency identifiers will be presented),
+	 * they must override this method and appropriately handle instance-specific downstream dependency identifier resolution.
+	 * 
+	 * <p>
+	 * This method may also return null if it wishes to abort processing of the notification. This may be appropriate if a determination
+	 * cannot be made at this time for whatever reason (eg too early in a lifecycle etc).
+	 * 
+	 * @param upstreamDependency the upstream (never null)
+	 * @return an instance-specific MID of type {@link #getProvidesType()} (or null if the metadata notification should be aborted)
+	 */
+	protected String resolveDownstreamDependencyIdentifier(String upstreamDependency) {
+		// We only support analysis of a PhysicalTypeIdentifier upstream MID to convert this to a downstream MID.
+		// In any other case the downstream metadata should have registered an instance-specific downstream dependency on a given upstream.
+		Assert.isTrue(isNotificationForJavaType(upstreamDependency), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "') for metadata provider " + getClass().getName());
+		
+		// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
+		JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
+		Path path = PhysicalTypeIdentifier.getPath(upstreamDependency);
+		return createLocalIdentifier(javaType, path);
+	}
+
 	public final void notify(String upstreamDependency, String downstreamDependency) {
 		if (downstreamDependency == null) {
 			notifyForGenericListener(upstreamDependency);
@@ -88,17 +119,17 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		// Handle if the downstream dependency is "class level",  meaning we need to figure out the specific downstream MID this metadata provider wants to update/refresh.
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			// We have not identified an instance-specific downstream MID, so we'll need to calculate an instance-specific downstream MID to retrieve.
-			// We only support analysis of a PhysicalTypeIdentifier upstream MID to convert this to a downstream MID.
-			// In any other case the downstream metadata should have registered an instance-specific downstream dependency on a given upstream.
-			Assert.isTrue(isNotificationForJavaType(upstreamDependency), "Expected class-level notifications only for physical Java types (not '" + upstreamDependency + "') for metadata provider " + getClass().getName());
+			downstreamDependency = resolveDownstreamDependencyIdentifier(upstreamDependency);
 			
-			// A physical Java type has changed, and determine what the corresponding local metadata identification string would have been
-			JavaType javaType = PhysicalTypeIdentifier.getJavaType(upstreamDependency);
-			Path path = PhysicalTypeIdentifier.getPath(upstreamDependency);
-			downstreamDependency = createLocalIdentifier(javaType, path);
+			// We skip if the resolution method returns null, as it doesn't want to continue for some reason
+			if (downstreamDependency == null) {
+				return;
+			}
+			
+			Assert.isTrue(MetadataIdentificationUtils.isIdentifyingInstance(downstreamDependency), "An instance-specific downstream MID was required by '" + getClass().getName() + "' (not '" + downstreamDependency + "')");
 			
 			// We only need to proceed if the downstream dependency relationship is not already registered.
-			// It is unusual to register a direct downstream relationship given it costs dependency registration memory and class-level physical Java type notifications will always occur anyway.
+			// It is unusual to register a direct downstream relationship given it costs dependency registration memory and class-level notifications will always occur anyway.
 			if (metadataDependencyRegistry.getDownstream(upstreamDependency).contains(downstreamDependency)) {
 				return;
 			}
@@ -111,7 +142,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 		// directly notified downstreams as part of that method (BPA 10 Dec 2010)
 		metadataService.get(downstreamDependency, true);
 	}
-	
+
 	/**
 	 * Called whenever there is a requirement to produce a local identifier (ie an instance identifier consistent with
 	 * {@link #getProvidesType()}) for the indicated {@link JavaType} and {@link Path}.
