@@ -640,9 +640,8 @@ public class JpaOperationsImpl implements JpaOperations {
 			pluginRepositories.add(new Repository(pluginRepositoryElement));
 		}
 		
-		for (Repository pluginRepository : pluginRepositories) {
-			projectOperations.addPluginRepository(pluginRepository);
-		}
+		// Add all new plugin repositories to pom.xml
+		projectOperations.addPluginRepositories(pluginRepositories);
 	}
 
 	private void updateFilters(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {

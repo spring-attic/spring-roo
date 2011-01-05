@@ -64,10 +64,10 @@ public class ProjectMetadata extends AbstractMetadataItem {
 		this.dependencies = dependencies;
 		this.buildPlugins = buildPlugins;
 		this.repositories = repositories;
+		this.pluginRepositories = pluginRepositories;
 		this.pomProperties = pomProperties;
 		this.filters = filters;
 		this.resources = resources;
-		this.pluginRepositories = pluginRepositories;
 		this.pathResolver = pathResolver;
 	}
 
@@ -98,7 +98,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	}
 	
 	/**
-	 * Convenience method for determining whether all presented dependencies are registered. 
+	 * Convenience method for determining whether all presented repositories are registered. 
 	 *
 	 * @param repositories the repositories to check (required)
 	 * @return whether all the repositories are currently registered or not
@@ -118,6 +118,17 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	public boolean isRepositoryRegistered(Repository repository) {
 		Assert.notNull(repository, "Repository to check is required");
 		return repositories.contains(repository);
+	}
+
+	/**
+	 * Convenience method for determining whether all presented plugin repositories are registered. 
+	 *
+	 * @param repositories the plugin repositories to check (required)
+	 * @return whether all the plugin repositories are currently registered or not
+	 */
+	public boolean isAllPluginRepositoriesRegistered(List<Repository> repositories) {
+		Assert.notNull(repositories, "Plugin repositories to check is required");
+		return pluginRepositories.containsAll(repositories);
 	}
 
 	/**

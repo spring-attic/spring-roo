@@ -194,6 +194,17 @@ public interface ProjectOperations {
 	void removeRepository(Repository repository);
 
 	/**
+	 * Allows addition of plugin repositories to the POM. 
+	 * 
+	 * <p>
+	 * Provides a convenient way for third parties to instruct end users how to use the CLI to add support
+	 * for their projects without requiring the user to manually edit a pom.xml or write an add-on.
+	 * 
+	 * @param repositories a list of plugin repositories to add (required)
+	 */
+	void addPluginRepositories(List<Repository> repositories);
+
+	/**
 	 * Allows addition of a plugin repository to the POM. 
 	 * 
 	 * <p>

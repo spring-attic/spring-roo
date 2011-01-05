@@ -119,6 +119,19 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	void removeRepository(Repository repository);
 	
 	/**
+	 * Attempts to add the specified plugin repositories. If all the repositories already exists according
+	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)}, the method silently returns.
+	 * Otherwise each new repository is added.
+	 * 
+	 * <p>
+	 * An exception is thrown if this method is called before there is {@link ProjectMetadata}
+	 * available, or if the on-disk representation cannot be modified for any reason.
+	 * 
+	 * @param repositories a list of plugin repositories to add (required)
+	 */
+	void addPluginRepositories(List<Repository> repositories);
+
+	/**
 	 * Attempts to add the specified plugin repository. If the plugin repository already exists according
 	 * to {@link ProjectMetadata#isPluginRepositoryRegistered(Repository)}, the method silently returns.
 	 * Otherwise the repository is added.
