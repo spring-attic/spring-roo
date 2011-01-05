@@ -458,10 +458,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * Locates the identifier accessor method.
 	 * 
 	 * <p>
-	 * If {@link #getIdentifierField()} returns a field created by this ITD, a public accessor will automatically be produced
-	 * in the declaring class. If the field is declared within the entity itself, it is expected a public accessor
-	 * is provided in the same class as declared the field. Failure to provide such an accessor will 
-	 * result in an exception.
+	 * If {@link #getIdentifierField()} returns a field created by this ITD or if the field is declared within the entity itself, 
+	 * a public accessor will automatically be produced in the declaring class.
 	 * 
 	 * @return the accessor (never returns null)
 	 */
@@ -497,6 +495,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 	
+	/**
+	 * Locates the identifier mutator method.
+	 * 
+	 * <p>
+	 * If {@link #getIdentifierField()} returns a field created by this ITD or if the field is declared within the entity itself, 
+	 * a public mutator will automatically be produced in the declaring class.
+	 * 
+	 * @return the mutator (never returns null)
+	 */
 	public MethodMetadata getIdentifierMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parent != null) {
@@ -512,7 +519,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("id"));
 		
-		// See if the user provided the field, and thus the accessor method
+		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
 			// Locate an existing mutator
 			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
@@ -610,12 +617,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * Locates the version accessor method.
 	 * 
 	 * <p>
-	 * If {@link #getVersionField()} returns a field created by this ITD, a public accessor will automatically be produced
-	 * in the declaring class. If the field is declared within the entity itself, it is expected a public accessor
-	 * is provided in the same class as declared the field. Failure to provide such an accessor will 
-	 * result in an exception.
+	 * If {@link #getVersionField()} returns a field created by this ITD or if the version field is declared within the entity itself, 
+	 * a public accessor will automatically be produced in the declaring class.
 	 * 
-	 * @return the version identifier (may return null if there is no version field declared in this class)
+	 * @return the version accessor (may return null if there is no version field declared in this class)
 	 */
 	public MethodMetadata getVersionAccessor() {
 		FieldMetadata version = getVersionField();
@@ -635,13 +640,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		// Compute the name of the accessor that will be produced
 		String requiredAccessorName = "get" + StringUtils.capitalize(version.getFieldName().getSymbolName());
 		
-		// See if the user provided the field, and thus the accessor method
+		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
-			// User is required to provide one
-			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
-			Assert.notNull(method, "User provided @Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @Version field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return method;
+			// Locate an existing accessor
+			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				} else {
+					// Method is not public so make the required accessor name unique 
+					requiredAccessorName += "_";
+				}
+			}
 		}
 		
 		// We declared the field in this ITD, so produce a public accessor for it
@@ -652,6 +663,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return methodBuilder.build();
 	}
 	
+	/**
+	 * Locates the version mutator method.
+	 * 
+	 * <p>
+	 * If {@link #getVersionField()} returns a field created by this ITD or if the version field is declared within the entity itself, 
+	 * a public mutator will automatically be produced in the declaring class.
+	 * 
+	 * @return the mutator (may return null if there is no version field declared in this class)
+	 */
 	public MethodMetadata getVersionMutator() {
 		// TODO: This is a temporary workaround to support web data binding approaches; to be reviewed more thoroughly in future
 		if (parent != null) {
@@ -671,13 +691,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("version"));
 		
-		// See if the user provided the field, and thus the accessor method
+		// See if the user provided the field
 		if (!getId().equals(version.getDeclaredByMetadataId())) {
-			// User is required to provide one
-			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
-			Assert.notNull(method, "User provided @javax.persistence.Version field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			Assert.isTrue(Modifier.isPublic(method.getModifier()), "User provided @Version field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return method;
+			// Locate an existing mutator
+			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				} else {
+					// Method is not public so make the required mutator name unique 
+					requiredMutatorName += "_";
+				}
+			}
 		}
 		
 		// We declared the field in this ITD, so produce a public mutator for it
