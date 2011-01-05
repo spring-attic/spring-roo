@@ -508,7 +508,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			if (md.isRepositoryRegistered(repository)) {
 				continue;
 			}
-			repositoriesElement.appendChild(createRepositoryElement(document, repository));
+			repositoriesElement.appendChild(createRepositoryElement(document, repository, false));
 			builder.append(repository.getUrl());
 			builder.append(", ");
 		}
@@ -520,8 +520,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
 
-	private Element createRepositoryElement(Document document, Repository repository) {
-		Element repositoryElement = new XmlElementBuilder("repository", document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
+	private Element createRepositoryElement(Document document, Repository repository, boolean isPluginRepository) {
+		String repoType = isPluginRepository ? "pluginRepository" : "repository";
+		Element repositoryElement = new XmlElementBuilder(repoType, document).addChild(new XmlElementBuilder("id", document).setText(repository.getId()).build()).addChild(new XmlElementBuilder("url", document).setText(repository.getUrl()).build()).build();
 		if (repository.getName() != null) {
 			repositoryElement.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
 		}
@@ -571,7 +572,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (repositoriesElement == null) {
 			repositoriesElement = document.createElement(containingPath);
 		}
-		repositoriesElement.appendChild(createRepositoryElement(document, repository));
+		repositoriesElement.appendChild(createRepositoryElement(document, repository, path.equals("pluginRepository")));
 		
 		mutableFile.setDescriptionOfChange("Added " + (path.equals("pluginRepository") ? "plugin " : "") + "repository " + repository.getId());
 		 
