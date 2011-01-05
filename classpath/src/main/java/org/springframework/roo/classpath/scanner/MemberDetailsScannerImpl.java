@@ -44,9 +44,9 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 @References(
-	value={
-		@Reference(name = "memberHoldingDecorator", strategy=ReferenceStrategy.EVENT, policy=ReferencePolicy.DYNAMIC, referenceInterface=MemberDetailsDecorator.class, cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE),
-		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
+	value = { 
+		@Reference(name = "memberHoldingDecorator", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MemberDetailsDecorator.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
+		@Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE) 
 	}
 )
 public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
@@ -107,7 +107,7 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 			// Build a List representing the class hierarchy, where the first element is the absolute superclass
 			List<ClassOrInterfaceTypeDetails> cidHierarchy = new ArrayList<ClassOrInterfaceTypeDetails>();
 			while (cid != null) {
-				cidHierarchy.add(0, cid);  // note to the top of the list
+				cidHierarchy.add(0, cid);  // Note to the top of the list
 				cid = cid.getSuperclass();
 			}
 			
@@ -167,5 +167,4 @@ public final class MemberDetailsScannerImpl implements MemberDetailsScanner {
 			return result;
 		}
 	}
-	
 }
