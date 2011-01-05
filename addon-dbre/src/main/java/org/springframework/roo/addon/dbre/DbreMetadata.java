@@ -573,17 +573,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isIdField(JavaSymbolName fieldName) {
-		return isAnnotatedField(fieldName, ID, "@Id");
+		return isAnnotatedField(fieldName, ID);
 	}
 
 	private boolean isEmbeddedIdField(JavaSymbolName fieldName) {
-		return isAnnotatedField(fieldName, new JavaType("javax.persistence.EmbeddedId"), "@EmbeddedId");
+		return isAnnotatedField(fieldName, new JavaType("javax.persistence.EmbeddedId"));
 	}
 
-	private boolean isAnnotatedField(JavaSymbolName fieldName, JavaType annotationType, String annotationName) {
+	private boolean isAnnotatedField(JavaSymbolName fieldName, JavaType annotationType) {
 		List<FieldMetadata> fields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, annotationType);
 		if (fields.size() > 0) {
-			Assert.isTrue(fields.size() == 1, "More than one field was annotated with " + annotationName + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+			Assert.isTrue(fields.size() == 1, "More than one field was annotated with @" + annotationType.getSimpleTypeName() + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
 			return fields.get(0).getFieldName().equals(fieldName);
 		}
 		return false;

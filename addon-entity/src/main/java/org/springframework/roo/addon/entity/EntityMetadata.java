@@ -365,19 +365,15 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		// Try to locate an existing field with @javax.persistence.Id
-		List<FieldMetadata> foundId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
-		if (foundId.size() > 0) {
-			Assert.isTrue(foundId.size() == 1, "More than one field was annotated with @Id in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			FieldMetadata field = foundId.get(0);
-			return field;
+		List<FieldMetadata> idFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, ID);
+		if (idFields.size() > 0) {
+			return getIdentifierField(idFields, ID);
 		}
 		
 		// Try to locate an existing field with @javax.persistence.EmbeddedId
-		List<FieldMetadata> foundEmbeddedId = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
-		if (foundEmbeddedId.size() > 0) {
-			Assert.isTrue(foundEmbeddedId.size() == 1, "More than one field was annotated with @EmbeddedId in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			FieldMetadata field = foundEmbeddedId.get(0);
-			return field;
+		List<FieldMetadata> embeddedIdFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, EMBEDDED_ID);
+		if (embeddedIdFields.size() > 0) {
+			return getIdentifierField(embeddedIdFields, EMBEDDED_ID);
 		}
 
 		if ("".equals(identifierField)) {
@@ -454,6 +450,11 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return fieldBuilder.build();
 	}
 	
+	private FieldMetadata getIdentifierField(List<FieldMetadata> identifierFields, JavaType identifierType) {
+		Assert.isTrue(identifierFields.size() == 1, "More than one field was annotated with @" + identifierType.getSimpleTypeName() + " in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
+		return identifierFields.get(0);
+	}
+
 	/**
 	 * Locates the identifier accessor method.
 	 * 
