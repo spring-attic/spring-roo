@@ -474,8 +474,8 @@ public class JpaOperationsImpl implements JpaOperations {
 				Assert.notNull(templateInputStream, "Could not acquire database properties template");
 				props.load(templateInputStream);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
 
 		props.put("database.driverClassName", jdbcDatabase.getDriverClassName());
@@ -490,9 +490,9 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put("database.password", StringUtils.trimToEmpty(password));
 
 		try {
-			OutputStream os = databaseMutableFile.getOutputStream();
-			props.store(os, "Updated at " + new Date());
-			os.close();
+			OutputStream outputStream = databaseMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
 		} catch (IOException ioe) {
 			throw new IllegalStateException(ioe);
 		}
@@ -530,11 +530,11 @@ public class JpaOperationsImpl implements JpaOperations {
 		props.put("sfdc.password", StringUtils.trimToEmpty(password));
 
 		try {
-			OutputStream os = configMutableFile.getOutputStream();
-			props.store(os, "Updated at " + new Date());
-			os.close();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+			OutputStream outputStream = configMutableFile.getOutputStream();
+			props.store(outputStream, "Updated at " + new Date());
+			outputStream.close();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 
