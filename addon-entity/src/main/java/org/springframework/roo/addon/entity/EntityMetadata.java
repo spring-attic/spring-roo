@@ -25,6 +25,7 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.InheritanceType;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.EnumDetails;
@@ -58,6 +59,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
 
 	private EntityMetadata parent;
+	private MemberDetails memberDetails;
 	private boolean noArgConstructor;
 	private String plural;
 	private boolean isGaeEnabled;
@@ -87,7 +89,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String catalog = "";
 	@AutoPopulate private String inheritanceType = "";
 		
-	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, List<Identifier> identifierServiceResult) {
+	public EntityMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata parent, boolean noArgConstructor, String plural, ProjectMetadata projectMetadata, MemberDetails memberDetails, List<Identifier> identifierServiceResult) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.hasText(plural, "Plural required for '" + identifier + "'");
@@ -97,6 +99,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 		
 		this.parent = parent;
+		this.memberDetails = memberDetails;
 		this.noArgConstructor = noArgConstructor;
 		this.plural = StringUtils.capitalize(plural);
 		isGaeEnabled = projectMetadata.isGaeEnabled();
@@ -464,25 +467,33 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public MethodMetadata getIdentifierAccessor() {
 		if (parent != null) {
+			System.out.println("parent not null");
 			return parent.getIdentifierAccessor();
 		}
-		
+
 		// Locate the identifier field, and compute the name of the accessor that will be produced
 		FieldMetadata id = getIdentifierField();
 		String requiredAccessorName = "get" + StringUtils.capitalize(id.getFieldName().getSymbolName());
-		
-		// See if the user provided the field, and thus the accessor method
+
+		// See if the user provided the field
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
-			// User is required to provide one
-			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
-			Assert.isTrue(method != null && Modifier.isPublic(method.getModifier()), "User provided @Id or @EmbeddedId field but failed to provide a public '" + requiredAccessorName + "()' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return method;
+			// Located an existing accessor
+			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>());
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				} else {
+					// Method is not public so make the required accessor name unique 
+					requiredAccessorName += "_";
+				}
+			}
 		}
-		
+
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return this." + id.getFieldName().getSymbolName() + ";");
-		
+
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), id.getFieldType(), bodyBuilder);
 		return methodBuilder.build();
 	}
@@ -504,10 +515,17 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// See if the user provided the field, and thus the accessor method
 		if (!getId().equals(id.getDeclaredByMetadataId())) {
-			// User is required to provide one
-			MethodMetadata method = MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
-			Assert.isTrue(method != null && Modifier.isPublic(method.getModifier()), "User provided @Id or @EmbeddedId field but failed to provide a public '" + requiredMutatorName + "(id)' method in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");
-			return method;
+			// Locate an existing mutator
+			MethodMetadata method = MemberFindingUtils.getMethod(memberDetails, new JavaSymbolName(requiredMutatorName), paramTypes);
+			if (method != null) {
+				if (Modifier.isPublic(method.getModifier())) {
+					// Method exists and is public so return it
+					return method;
+				} else {
+					// Method is not public so make the required mutator name unique 
+					requiredMutatorName += "_";
+				}
+			}
 		}
 		
 		// We declared the field in this ITD, so produce a public mutator for it
