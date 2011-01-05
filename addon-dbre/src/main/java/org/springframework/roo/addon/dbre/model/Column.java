@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Array;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Ref;
 import java.sql.Struct;
 import java.sql.Types;
@@ -79,11 +80,11 @@ public class Column implements Serializable {
 				break;
 			case Types.BIT:
 				jdbcType = "BIT";
-				javaType = JavaType.BOOLEAN_PRIMITIVE;
+				javaType = JavaType.BOOLEAN_OBJECT;
 				break;
 			case Types.TINYINT:
 				jdbcType = "TINYINT";
-				javaType = JavaType.SHORT_OBJECT;
+				javaType = columnSize > 1 ? JavaType.SHORT_OBJECT : JavaType.BOOLEAN_OBJECT; // ROO-1860
 				break;
 			case Types.SMALLINT:
 				jdbcType = "SMALLINT";
@@ -135,8 +136,7 @@ public class Column implements Serializable {
 				break;
 			case Types.CLOB:
 				jdbcType = "CLOB";
-				javaType = JavaType.STRING_OBJECT;
-				// javaType = new JavaType(Clob.class.getName());
+				javaType = new JavaType(Clob.class.getName());
 				break;
 			case Types.BLOB:
 				jdbcType = "BLOB";
