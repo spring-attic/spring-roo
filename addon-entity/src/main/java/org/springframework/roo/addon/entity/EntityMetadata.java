@@ -467,7 +467,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 */
 	public MethodMetadata getIdentifierAccessor() {
 		if (parent != null) {
-			System.out.println("parent not null");
 			return parent.getIdentifierAccessor();
 		}
 
