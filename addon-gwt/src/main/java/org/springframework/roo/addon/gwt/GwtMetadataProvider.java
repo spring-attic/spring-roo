@@ -24,6 +24,8 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 
+import java.lang.reflect.Modifier;
+
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
  * You can find a list of mirror-compatible objects in {@link MirrorType}.
@@ -114,10 +116,11 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
 		if (!isMappable(governorTypeDetails, entityMetadata)) {
 			// Delete the key; this will trigger the listener to delete the rest
-			String keyPath = classpathOperations.getPhysicalLocationCanonicalPath(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
+			//TODO: What is going on here?? - JT
+			/*String keyPath = classpathOperations.getPhysicalLocationCanonicalPath(PhysicalTypeIdentifier.createIdentifier(keyTypeName, keyTypePath));
 			if (fileManager.exists(keyPath)) {
 				fileManager.delete(keyPath);
-			}
+			}*/
 			return null;
 		}
 
@@ -127,6 +130,9 @@ public final class GwtMetadataProvider implements MetadataNotificationListener, 
 	}
 
 	private boolean isMappable(ClassOrInterfaceTypeDetails governorTypeDetails, EntityMetadata entityMetadata) {
+		if (governorTypeDetails.getModifier() == (Modifier.ABSTRACT ^ Modifier.PUBLIC) || governorTypeDetails.getModifier() == Modifier.ABSTRACT) {
+			return false;
+		}
 		if (governorTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
 			return entityMetadata != null && entityMetadata.isValid() && entityMetadata.getFindAllMethod() != null;
 		}
