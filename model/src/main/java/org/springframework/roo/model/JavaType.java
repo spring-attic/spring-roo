@@ -201,8 +201,8 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			sb.append("?");
 		} else if (argName != null && !staticForm) {
 			sb.append(argName);
-			if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
-				if (dataType == DataType.TYPE) {
+			if (dataType == DataType.TYPE) {
+				if (!fullyQualifiedTypeName.equals("java.lang.Object")) {
 					sb.append(" extends ");
 				}
 			}
@@ -211,7 +211,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		if (!WILDCARD_NEITHER.equals(argName)) {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
 
-			if (!fullyQualifiedTypeName.equals("java.lang.Object") && (dataType == DataType.TYPE || !staticForm)) {
+			if (dataType == DataType.TYPE || !staticForm) {
 				if (resolver != null) {
 					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
 						sb.append(fullyQualifiedTypeName);
@@ -219,7 +219,15 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 						sb.append(getSimpleTypeName());
 					}
 				} else {
-					sb.append(fullyQualifiedTypeName);
+					if (fullyQualifiedTypeName.equals("java.lang.Object")) {
+						// It's Object, so we need to only append if this isn't a type arg
+						if (argName == null) {
+							sb.append(fullyQualifiedTypeName);
+						}
+					} else {
+						// It's ok to just append it as it's not Object
+						sb.append(fullyQualifiedTypeName);
+					}
 				}
 			}
 
