@@ -17,12 +17,15 @@ import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooIdentifier;
 import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
+import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -31,6 +34,7 @@ import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -59,14 +63,16 @@ public class JspViewManager {
 	private final String entityName;
 	private final String controllerPath;
 	private Map<JavaType, String> pluralCache;
+	private TypeLocationService typeLocationService;
 	
-	public JspViewManager(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+	public JspViewManager(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues, TypeLocationService typeLocationService) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
 		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
+		Assert.notNull(typeLocationService, "Type location service required");
 		this.fields = Collections.unmodifiableList(fields);
 		
 		this.pluralCache = new HashMap<JavaType, String>();
@@ -75,6 +81,7 @@ public class JspViewManager {
 		this.metadataService = metadataService;
 		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
+		this.typeLocationService = typeLocationService;
 
 		entityName = uncapitalize(beanInfoMetadata.getJavaBean().getSimpleTypeName());
 		
@@ -343,11 +350,10 @@ public class JspViewManager {
 			if (type.isCommonCollectionType() && isSpecialType(type.getParameters().get(0))) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type.getParameters().get(0), Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
-					String plural = getPlural(type.getParameters().get(0)).toLowerCase();
 					fieldElement = new XmlElementBuilder("field:select", document)
-										.addAttribute("items", "${" + plural + "}")
+										.addAttribute("items", "${" + getPlural(type.getParameters().get(0)).toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-										.addAttribute("path", "/" + plural)
+										.addAttribute("path", "/" + getPathForType(type))
 									.build();
 					
 					FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(paramName);
@@ -356,10 +362,9 @@ public class JspViewManager {
 					}
 				}
 			} else if (isEnumType(type) && null != MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) && isEnumType(field.getFieldType())) {
-				String plural = getPlural(type).toLowerCase();
 				fieldElement = new XmlElementBuilder("field:select", document)
-									.addAttribute("items", "${" + plural + "}")
-									.addAttribute("path", "/" + plural)
+									.addAttribute("items", "${" + getPlural(type).toLowerCase() + "}")
+									.addAttribute("path", "/" + getPathForType(type))
 								.build();
 				
 			} else if (type.getFullyQualifiedTypeName().equals(Boolean.class.getName()) || type.getFullyQualifiedTypeName().equals(boolean.class.getName())) {	
@@ -367,11 +372,10 @@ public class JspViewManager {
 			} else if (isSpecialType(type)) {
 				EntityMetadata typeEntityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
 				if (typeEntityMetadata != null) {
-					String plural = getPlural(type).toLowerCase();
 					fieldElement = new XmlElementBuilder("field:select", document)
-										.addAttribute("items", "${" + plural + "}")
+										.addAttribute("items", "${" + getPlural(type).toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-										.addAttribute("path", "/" + plural)
+										.addAttribute("path", "/" + getPathForType(type))
 									.build();
 				}
 			} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Date.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
@@ -421,8 +425,7 @@ public class JspViewManager {
 				 fieldElement = document.createElement("field:checkbox");
 			// Handle enum fields	 
 			} else if (null != MemberFindingUtils.getAnnotationOfType(annotations, new JavaType("javax.persistence.Enumerated")) && isEnumType(fieldType)) {
-				String plural = getPlural(fieldType).toLowerCase();
-				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + plural + "}").addAttribute("path", plural).build();
+				fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + getPlural(fieldType).toLowerCase() + "}").addAttribute("path", getPathForType(fieldType)).build();
 			} else {
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.OneToMany")) {
@@ -443,7 +446,7 @@ public class JspViewManager {
 							fieldElement = new XmlElementBuilder("field:select", document)
 													.addAttribute("items", "${" + getPlural(referenceType).toLowerCase() + "}")
 													.addAttribute("itemValue", getEntityMetadataForField(field).getIdentifierField().getFieldName().getSymbolName())
-													.addAttribute("path", "/" + getPlural(referenceType).toLowerCase())
+													.addAttribute("path", "/" + getPathForType(getJavaTypeForField(field)))
 												.build();
 											
 							if (annotation.getAnnotationType().getFullyQualifiedTypeName().equals("javax.persistence.ManyToMany")) {
@@ -515,6 +518,29 @@ public class JspViewManager {
 
 	private EntityMetadata getEntityMetadataForField(FieldMetadata field) {
 		return (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(getJavaTypeForField(field), Path.SRC_MAIN_JAVA));
+	}
+	
+	private String getPathForType(JavaType type) {
+		WebScaffoldMetadata webScaffoldMetadata = null;
+		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
+		for (ClassOrInterfaceTypeDetails coitd: typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(rooWebScaffold)) {
+			for (AnnotationMetadata annotation: coitd.getAnnotations()) {
+				if (annotation.getAnnotationType().equals(rooWebScaffold)) {
+					AnnotationAttributeValue<?> formBackingObject = annotation.getAttribute(new JavaSymbolName("formBackingObject"));
+					if (formBackingObject instanceof ClassAttributeValue) {
+						ClassAttributeValue formBackingObjectValue = (ClassAttributeValue) formBackingObject;
+						if (formBackingObjectValue.getValue().equals(type)) {
+							webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(coitd.getName(), Path.SRC_MAIN_JAVA));
+						}
+					}
+				}
+			}
+		}
+		if (webScaffoldMetadata != null) {
+			return webScaffoldMetadata.getAnnotationValues().getPath();
+		} else {
+			return getPlural(type).toLowerCase();
+		}
 	}
 
 	private void addCommonAttributes(FieldMetadata field, Element fieldElement) {

@@ -26,6 +26,7 @@ import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -68,6 +69,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private PathResolver pathResolver;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private TypeLocationService typeLocationService;
 
 	private Map<JavaType, String> pluralCache = new HashMap<JavaType, String>();
 
@@ -140,7 +142,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 
-		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues());
+		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues(), typeLocationService);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 
