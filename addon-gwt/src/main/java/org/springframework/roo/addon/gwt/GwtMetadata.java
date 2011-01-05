@@ -694,7 +694,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 				section.setVariable("rendererType", property.getProxyRendererType());
 				if (property.isProxy() || property.isCollectionOfProxy()) {
 					String propTypeName = StringUtils.uncapitalize(property.isCollectionOfProxy() ? method.getReturnType().getParameters().get(0).getSimpleTypeName() : method.getReturnType().getSimpleTypeName());
-					System.out.println("Name: " + method);
 					propTypeName = propTypeName.substring(0, propTypeName.indexOf("Proxy"));
 					section.setVariable("requestInterface", propTypeName + "Request");
 					section.setVariable("findMethod", "find" + StringUtils.capitalize(propTypeName) + "Entries(0, 50)");
