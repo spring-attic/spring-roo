@@ -196,6 +196,13 @@ public class GwtMetadata extends AbstractMetadataItem {
 		if (beanInfoMetadata != null) {
 			for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 				JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName()));
+				// Check to make user that a reserved word isn't being used a field name.
+				// The user is notified about what needs to be changed but a rollback shouldn't be triggered.
+				// TODO: Notification needs to be more noticeable.
+				if (propertyName.getSymbolName().equals("owner")) {
+					System.out.println("'owner' is not allowed to be used as field name as it is currently reserved by GWT. Please rename the field 'owner' in type " + governorTypeDetails.getName().getSimpleTypeName() + ".");
+					continue;
+				}
 				JavaType returnType = accessor.getReturnType();
 				PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(returnType, Path.SRC_MAIN_JAVA));
 				JavaType gwtSideType = getGwtSideLeafType(returnType, ptmd);
