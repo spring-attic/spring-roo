@@ -10,17 +10,14 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
-import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link EntityMetadata}.
