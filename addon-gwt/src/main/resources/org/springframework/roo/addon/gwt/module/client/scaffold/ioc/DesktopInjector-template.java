@@ -6,5 +6,5 @@ import com.google.gwt.inject.client.GinModules;
 @GinModules(value = {ScaffoldModule.class})
 public interface DesktopInjector extends ScaffoldInjector {
 
-    ScaffoldDesktopApp getScaffoldApp();
+	ScaffoldDesktopApp getScaffoldApp();
 }

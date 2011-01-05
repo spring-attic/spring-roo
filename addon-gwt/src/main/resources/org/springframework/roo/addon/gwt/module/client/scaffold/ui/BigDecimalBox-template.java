@@ -10,8 +10,8 @@ import java.math.BigDecimal;
  */
 public class BigDecimalBox extends ValueBox<BigDecimal> {
 
-    public BigDecimalBox() {
-        super(Document.get().createTextInputElement(), BigDecimalRenderer.instance(),
-                BigDecimalParser.instance());
-    }
+	public BigDecimalBox() {
+		super(Document.get().createTextInputElement(), BigDecimalRenderer.instance(),
+				BigDecimalParser.instance());
+	}
 }

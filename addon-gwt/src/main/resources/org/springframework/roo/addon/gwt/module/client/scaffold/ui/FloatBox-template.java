@@ -8,8 +8,8 @@ import com.google.gwt.user.client.ui.ValueBox;
  */
 public class FloatBox extends ValueBox<Float> {
 
-    public FloatBox() {
-        super(Document.get().createTextInputElement(), FloatRenderer.instance(),
-                FloatParser.instance());
-    }
+	public FloatBox() {
+		super(Document.get().createTextInputElement(), FloatRenderer.instance(),
+				FloatParser.instance());
+	}
 }

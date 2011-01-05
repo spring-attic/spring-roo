@@ -13,67 +13,67 @@ import com.google.gwt.user.client.ui.*;
  * The outermost UI of the application.
  */
 public class ScaffoldDesktopShell extends Composite {
-    interface Binder extends UiBinder<Widget, ScaffoldDesktopShell> {
-    }
+	interface Binder extends UiBinder<Widget, ScaffoldDesktopShell> {
+	}
 
-    private static final Binder BINDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-    @UiField
-    SimplePanel details;
-    @UiField
-    DivElement error;
-    @UiField
-    LoginWidget loginWidget;
-    @UiField
-    SimplePanel master;
-    @UiField
-    NotificationMole mole;
-    @UiField(provided = true)
-    ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(new ApplicationListPlaceRenderer());
+	@UiField
+	SimplePanel details;
+	@UiField
+	DivElement error;
+	@UiField
+	LoginWidget loginWidget;
+	@UiField
+	SimplePanel master;
+	@UiField
+	NotificationMole mole;
+	@UiField(provided = true)
+	ValuePicker<ProxyListPlace> placesBox = new ValuePicker<ProxyListPlace>(new ApplicationListPlaceRenderer());
 
-    public ScaffoldDesktopShell() {
-        initWidget(BINDER.createAndBindUi(this));
-    }
+	public ScaffoldDesktopShell() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-    /**
-     * @return the panel to hold the details
-     */
-    public SimplePanel getDetailsPanel() {
-        return details;
-    }
+	/**
+	 * @return the panel to hold the details
+	 */
+	public SimplePanel getDetailsPanel() {
+		return details;
+	}
 
-    /**
-     * @return the login widget
-     */
-    public LoginWidget getLoginWidget() {
-        return loginWidget;
-    }
+	/**
+	 * @return the login widget
+	 */
+	public LoginWidget getLoginWidget() {
+		return loginWidget;
+	}
 
-    /**
-     * @return the panel to hold the master list
-     */
-    public SimplePanel getMasterPanel() {
-        return master;
-    }
+	/**
+	 * @return the panel to hold the master list
+	 */
+	public SimplePanel getMasterPanel() {
+		return master;
+	}
 
-    /**
-     * @return the notification mole for loading feedback
-     */
-    public NotificationMole getMole() {
-        return mole;
-    }
+	/**
+	 * @return the notification mole for loading feedback
+	 */
+	public NotificationMole getMole() {
+		return mole;
+	}
 
-    /**
-     * @return the navigator
-     */
-    public HasConstrainedValue<ProxyListPlace> getPlacesBox() {
-        return placesBox;
-    }
+	/**
+	 * @return the navigator
+	 */
+	public HasConstrainedValue<ProxyListPlace> getPlacesBox() {
+		return placesBox;
+	}
 
-    /**
-     * @param string
-     */
-    public void setError(String string) {
-        error.setInnerText(string);
-    }
+	/**
+	 * @param string
+	 */
+	public void setError(String string) {
+		error.setInnerText(string);
+	}
 }

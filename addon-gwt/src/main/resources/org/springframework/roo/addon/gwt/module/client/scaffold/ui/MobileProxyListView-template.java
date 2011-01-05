@@ -22,37 +22,37 @@ import com.google.gwt.user.client.ui.Widget;
  * @param <P> the type of the proxy
  */
 public abstract class MobileProxyListView<P extends EntityProxy> extends
-        AbstractProxyListView<P> {
+		AbstractProxyListView<P> {
 
-    interface Binder extends UiBinder<Widget, MobileProxyListView> {
-    }
+	interface Binder extends UiBinder<Widget, MobileProxyListView> {
+	}
 
-    private static final Binder BINDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-    @UiField(provided = true)
-    CellList<P> list;
-    @UiField
-    Button newButton;
+	@UiField(provided = true)
+	CellList<P> list;
+	@UiField
+	Button newButton;
 
-    /**
-     * Constructor.
-     *
-     * @param buttonText the text to display on the create button
-     * @param renderer   the {@link SafeHtmlRenderer} used to render the proxy
-     */
-    public MobileProxyListView(String buttonText, final SafeHtmlRenderer<P> renderer) {
-        // Create the CellList to display the proxies.
-        AbstractCell<P> cell = new AbstractCell<P>() {
-            @Override
-            public void render(Context context, P value, SafeHtmlBuilder sb) {
-                renderer.render(value, sb);
-            }
-        };
-        this.list = new CellList<P>(cell,
-                ScaffoldMobileApp.getMobileListResources());
-        init(BINDER.createAndBindUi(this), list, newButton);
+	/**
+	 * Constructor.
+	 *
+	 * @param buttonText the text to display on the create button
+	 * @param renderer   the {@link SafeHtmlRenderer} used to render the proxy
+	 */
+	public MobileProxyListView(String buttonText, final SafeHtmlRenderer<P> renderer) {
+		// Create the CellList to display the proxies.
+		AbstractCell<P> cell = new AbstractCell<P>() {
+			@Override
+			public void render(Context context, P value, SafeHtmlBuilder sb) {
+				renderer.render(value, sb);
+			}
+		};
+		this.list = new CellList<P>(cell,
+				ScaffoldMobileApp.getMobileListResources());
+		init(BINDER.createAndBindUi(this), list, newButton);
 
-        // Initialize the widget.
-        this.newButton.setText(buttonText);
-    }
+		// Initialize the widget.
+		this.newButton.setText(buttonText);
+	}
 }

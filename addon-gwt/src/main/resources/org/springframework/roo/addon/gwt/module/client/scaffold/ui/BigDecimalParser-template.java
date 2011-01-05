@@ -10,30 +10,30 @@ import java.text.ParseException;
  */
 public class BigDecimalParser implements Parser<BigDecimal> {
 
-    private static BigDecimalParser INSTANCE;
+	private static BigDecimalParser INSTANCE;
 
-    /**
-     * @return the instance of the no-op renderer
-     */
-    public static Parser<BigDecimal> instance() {
-        if (INSTANCE == null) {
-            INSTANCE = new BigDecimalParser();
-        }
-        return INSTANCE;
-    }
+	/**
+	 * @return the instance of the no-op renderer
+	 */
+	public static Parser<BigDecimal> instance() {
+		if (INSTANCE == null) {
+			INSTANCE = new BigDecimalParser();
+		}
+		return INSTANCE;
+	}
 
-    protected BigDecimalParser() {
-    }
+	protected BigDecimalParser() {
+	}
 
-    public BigDecimal parse(CharSequence object) throws ParseException {
-        if (object == null || "".equals(object.toString())) {
-            return null;
-        }
+	public BigDecimal parse(CharSequence object) throws ParseException {
+		if (object == null || "".equals(object.toString())) {
+			return null;
+		}
 
-        try {
-            return new BigDecimal(object.toString());
-        } catch (NumberFormatException e) {
-            throw new ParseException(e.getMessage(), 0);
-        }
-    }
+		try {
+			return new BigDecimal(object.toString());
+		} catch (NumberFormatException e) {
+			throw new ParseException(e.getMessage(), 0);
+		}
+	}
 }

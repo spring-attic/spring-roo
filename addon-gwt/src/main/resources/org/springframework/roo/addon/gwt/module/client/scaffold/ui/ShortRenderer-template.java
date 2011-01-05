@@ -7,26 +7,26 @@ import com.google.gwt.text.shared.Renderer;
  * A simple renderer of Short values.
  */
 public class ShortRenderer extends AbstractRenderer<Short> {
-    private static ShortRenderer INSTANCE;
+	private static ShortRenderer INSTANCE;
 
-    /**
-     * @return the instance
-     */
-    public static Renderer<Short> instance() {
-        if (INSTANCE == null) {
-            INSTANCE = new ShortRenderer();
-        }
-        return INSTANCE;
-    }
+	/**
+	 * @return the instance
+	 */
+	public static Renderer<Short> instance() {
+		if (INSTANCE == null) {
+			INSTANCE = new ShortRenderer();
+		}
+		return INSTANCE;
+	}
 
-    protected ShortRenderer() {
-    }
+	protected ShortRenderer() {
+	}
 
-    public String render(Short object) {
-        if (object == null) {
-            return "";
-        }
+	public String render(Short object) {
+		if (object == null) {
+			return "";
+		}
 
-        return object.toString();
-    }
+		return object.toString();
+	}
 }

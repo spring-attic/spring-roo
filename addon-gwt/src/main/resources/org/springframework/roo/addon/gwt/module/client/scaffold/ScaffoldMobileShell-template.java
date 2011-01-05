@@ -15,80 +15,80 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ScaffoldMobileShell extends Composite {
 
-    interface Binder extends UiBinder<Widget, ScaffoldMobileShell> {
-    }
+	interface Binder extends UiBinder<Widget, ScaffoldMobileShell> {
+	}
 
-    private static final Binder BINDER = GWT.create(Binder.class);
+	private static final Binder BINDER = GWT.create(Binder.class);
 
-    @UiField
-    Button backButton;
-    @UiField
-    Element backButtonWrapper;
-    @UiField
-    SimplePanel body;
-    @UiField
-    Button editButton;
-    @UiField
-    LoginWidget loginWidget;
-    @UiField
-    Element title;
+	@UiField
+	Button backButton;
+	@UiField
+	Element backButtonWrapper;
+	@UiField
+	SimplePanel body;
+	@UiField
+	Button editButton;
+	@UiField
+	LoginWidget loginWidget;
+	@UiField
+	Element title;
 
-    public ScaffoldMobileShell() {
-        initWidget(BINDER.createAndBindUi(this));
-    }
+	public ScaffoldMobileShell() {
+		initWidget(BINDER.createAndBindUi(this));
+	}
 
-    /**
-     * @return the back button
-     */
-    public Button getBackButton() {
-        return backButton;
-    }
+	/**
+	 * @return the back button
+	 */
+	public Button getBackButton() {
+		return backButton;
+	}
 
-    /**
-     * @return the body
-     */
-    public SimplePanel getBody() {
-        return body;
-    }
+	/**
+	 * @return the body
+	 */
+	public SimplePanel getBody() {
+		return body;
+	}
 
-    /**
-     * @return the edit button
-     */
-    public Button getEditButton() {
-        return editButton;
-    }
+	/**
+	 * @return the edit button
+	 */
+	public Button getEditButton() {
+		return editButton;
+	}
 
-    /**
-     * @return the login widget
-     */
-    public LoginWidget getLoginWidget() {
-        return loginWidget;
-    }
+	/**
+	 * @return the login widget
+	 */
+	public LoginWidget getLoginWidget() {
+		return loginWidget;
+	}
 
-    /**
-     * Show or hide the back button.
-     *
-     * @param visible true to show the button, false to hide
-     */
-    public void setBackButtonVisible(boolean visible) {
-        setVisible(backButtonWrapper, visible);
-    }
+	/**
+	 * Show or hide the back button.
+	 *
+	 * @param visible true to show the button, false to hide
+	 */
+	public void setBackButtonVisible(boolean visible) {
+		setVisible(backButtonWrapper, visible);
+	}
 
-    /**
-     * Show or hide the edit button.
-     *
-     * @param visible true to show the button, false to hide
-     */
-    public void setEditButtonVisible(boolean visible) {
-        editButton.setVisible(visible);
-    }
+	/**
+	 * Show or hide the edit button.
+	 *
+	 * @param visible true to show the button, false to hide
+	 */
+	public void setEditButtonVisible(boolean visible) {
+		editButton.setVisible(visible);
+	}
 
-    /**
-     * Set the title of the app.
-     *
-     * @param text the title to display at the top of the app
-     */
-    public void setTitleText(String text) {
-        title.setInnerText(text);
-    }
+	/**
+	 * Set the title of the app.
+	 *
+	 * @param text the title to display at the top of the app
+	 */
+	public void setTitleText(String text) {
+		title.setInnerText(text);
+	}
 }

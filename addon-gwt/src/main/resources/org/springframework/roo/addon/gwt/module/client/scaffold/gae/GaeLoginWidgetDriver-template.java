@@ -11,29 +11,29 @@ import com.google.gwt.user.client.Window.Location;
  * Makes GAE requests to drive a LoginWidget.
  */
 public class GaeLoginWidgetDriver {
-    private final MakesGaeRequests requests;
+	private final MakesGaeRequests requests;
 
-    public GaeLoginWidgetDriver(MakesGaeRequests requests) {
-        this.requests = requests;
-    }
+	public GaeLoginWidgetDriver(MakesGaeRequests requests) {
+		this.requests = requests;
+	}
 
-    public void setWidget(final LoginWidget widget) {
+	public void setWidget(final LoginWidget widget) {
 
-        GaeUserServiceRequest request = requests.userServiceRequest();
+		GaeUserServiceRequest request = requests.userServiceRequest();
 
-        request.createLogoutURL(Location.getHref()).to(new Receiver<String>() {
-            public void onSuccess(String response) {
-                widget.setLogoutUrl(response);
-            }
-        });
+		request.createLogoutURL(Location.getHref()).to(new Receiver<String>() {
+			public void onSuccess(String response) {
+				widget.setLogoutUrl(response);
+			}
+		});
 
-        request.getCurrentUser().to(new Receiver<GaeUser>() {
-            @Override
-            public void onSuccess(GaeUser response) {
-                widget.setUserName(response.getNickname());
-            }
-        });
+		request.getCurrentUser().to(new Receiver<GaeUser>() {
+			@Override
+			public void onSuccess(GaeUser response) {
+				widget.setUserName(response.getNickname());
+			}
+		});
 
-        request.fire();
-    }
+		request.fire();
+	}
 }

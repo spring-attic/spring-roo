@@ -11,9 +11,9 @@ import com.google.gwt.requestfactory.shared.Service;
  */
 @Service(value = UserServiceWrapper.class, locator = UserServiceLocator.class)
 public interface GaeUserServiceRequest extends RequestContext {
-    public Request<String> createLoginURL(String destinationURL);
+	public Request<String> createLoginURL(String destinationURL);
 
-    public Request<String> createLogoutURL(String destinationURL);
+	public Request<String> createLogoutURL(String destinationURL);
 
-    public Request<GaeUser> getCurrentUser();
+	public Request<GaeUser> getCurrentUser();
 }

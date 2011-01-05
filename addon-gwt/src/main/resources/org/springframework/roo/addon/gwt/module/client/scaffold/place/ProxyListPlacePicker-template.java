@@ -14,44 +14,44 @@ import com.google.gwt.user.client.ui.HasConstrainedValue;
  * the current place, and firing place change events as selections are made.
  */
 public class ProxyListPlacePicker implements ValueChangeHandler<ProxyListPlace>,
-        PlaceChangeEvent.Handler {
+		PlaceChangeEvent.Handler {
 
-    private HasConstrainedValue<ProxyListPlace> view;
+	private HasConstrainedValue<ProxyListPlace> view;
 
-    private final PlaceController placeController;
-    private final ProxyPlaceToListPlace proxyPlaceToListPlace;
+	private final PlaceController placeController;
+	private final ProxyPlaceToListPlace proxyPlaceToListPlace;
 
-    public ProxyListPlacePicker(PlaceController placeController,
-                                ProxyPlaceToListPlace proxyPlaceToListPlace) {
-        this.placeController = placeController;
-        this.proxyPlaceToListPlace = proxyPlaceToListPlace;
-    }
+	public ProxyListPlacePicker(PlaceController placeController,
+	                            ProxyPlaceToListPlace proxyPlaceToListPlace) {
+		this.placeController = placeController;
+		this.proxyPlaceToListPlace = proxyPlaceToListPlace;
+	}
 
-    public void onPlaceChange(PlaceChangeEvent event) {
-        view.setValue(proxyPlaceToListPlace.proxyListPlaceFor(event.getNewPlace()),
-                false);
-    }
+	public void onPlaceChange(PlaceChangeEvent event) {
+		view.setValue(proxyPlaceToListPlace.proxyListPlaceFor(event.getNewPlace()),
+				false);
+	}
 
-    public void onValueChange(ValueChangeEvent<ProxyListPlace> event) {
-        placeController.goTo(event.getValue());
-    }
+	public void onValueChange(ValueChangeEvent<ProxyListPlace> event) {
+		placeController.goTo(event.getValue());
+	}
 
-    public HandlerRegistration register(EventBus eventBus,
-                                        HasConstrainedValue<ProxyListPlace> view) {
+	public HandlerRegistration register(EventBus eventBus,
+	                                    HasConstrainedValue<ProxyListPlace> view) {
 
-        this.view = view;
+		this.view = view;
 
-        final HandlerRegistration placeRegistration = eventBus.addHandler(
-                PlaceChangeEvent.TYPE, this);
+		final HandlerRegistration placeRegistration = eventBus.addHandler(
+				PlaceChangeEvent.TYPE, this);
 
-        final HandlerRegistration viewRegistration = view.addValueChangeHandler(this);
+		final HandlerRegistration viewRegistration = view.addValueChangeHandler(this);
 
-        return new HandlerRegistration() {
-            public void removeHandler() {
-                placeRegistration.removeHandler();
-                viewRegistration.removeHandler();
-                ProxyListPlacePicker.this.view = null;
-            }
-        };
-    }
+		return new HandlerRegistration() {
+			public void removeHandler() {
+				placeRegistration.removeHandler();
+				viewRegistration.removeHandler();
+				ProxyListPlacePicker.this.view = null;
+			}
+		};
+	}
 }

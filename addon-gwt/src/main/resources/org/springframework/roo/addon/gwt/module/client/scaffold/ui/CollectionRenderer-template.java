@@ -9,34 +9,34 @@ import java.util.Collection;
  * A renderer for Collections that is parameterized by another renderer.
  */
 public class CollectionRenderer<E, R extends Renderer<E>, T extends Collection<E>>
-        extends AbstractRenderer<T> implements Renderer<T> {
+		extends AbstractRenderer<T> implements Renderer<T> {
 
-    public static <E, R extends Renderer<E>,
-            T extends Collection<E>> CollectionRenderer<E, R, T> of(
-            R r) {
-        return new CollectionRenderer<E, R, T>(r);
-    }
+	public static <E, R extends Renderer<E>,
+			T extends Collection<E>> CollectionRenderer<E, R, T> of(
+			R r) {
+		return new CollectionRenderer<E, R, T>(r);
+	}
 
-    private R elementRenderer;
+	private R elementRenderer;
 
-    public CollectionRenderer(R elementRenderer) {
-        this.elementRenderer = elementRenderer;
-    }
+	public CollectionRenderer(R elementRenderer) {
+		this.elementRenderer = elementRenderer;
+	}
 
-    @Override
-    public String render(T t) {
-        StringBuffer toReturn = new StringBuffer();
-        boolean first = true;
-        if (t != null) {
-            for (E e : t) {
-                if (!first) {
-                    toReturn.append(',');
-                } else {
-                    first = false;
-                }
-                toReturn.append(elementRenderer.render(e));
-            }
-        }
-        return toReturn.toString();
-    }
+	@Override
+	public String render(T t) {
+		StringBuffer toReturn = new StringBuffer();
+		boolean first = true;
+		if (t != null) {
+			for (E e : t) {
+				if (!first) {
+					toReturn.append(',');
+				} else {
+					first = false;
+				}
+				toReturn.append(elementRenderer.render(e));
+			}
+		}
+		return toReturn.toString();
+	}
 }

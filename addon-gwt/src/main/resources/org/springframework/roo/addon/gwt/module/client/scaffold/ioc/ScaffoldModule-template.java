@@ -16,40 +16,40 @@ __GAE_IMPORT__
 
 public class ScaffoldModule extends AbstractGinModule {
 
-    @Override
-    protected void configure() {
-        bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
-        bind(ApplicationRequestFactory.class).toProvider(RequestFactoryProvider.class).in(Singleton.class);
-        bind(PlaceController.class).toProvider(PlaceControllerProvider.class).in(Singleton.class);
-    }
+	@Override
+	protected void configure() {
+		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
+		bind(ApplicationRequestFactory.class).toProvider(RequestFactoryProvider.class).in(Singleton.class);
+		bind(PlaceController.class).toProvider(PlaceControllerProvider.class).in(Singleton.class);
+	}
 
-    static class PlaceControllerProvider implements Provider<PlaceController> {
+	static class PlaceControllerProvider implements Provider<PlaceController> {
 
-        private final PlaceController placeController;
+		private final PlaceController placeController;
 
-        @Inject
-        public PlaceControllerProvider(EventBus eventBus) {
-            this.placeController = new PlaceController(eventBus);
-        }
+		@Inject
+		public PlaceControllerProvider(EventBus eventBus) {
+			this.placeController = new PlaceController(eventBus);
+		}
 
-        public PlaceController get() {
-            return placeController;
-        }
-    }
+		public PlaceController get() {
+			return placeController;
+		}
+	}
 
-    static class RequestFactoryProvider implements Provider<ApplicationRequestFactory> {
+	static class RequestFactoryProvider implements Provider<ApplicationRequestFactory> {
 
-        private final ApplicationRequestFactory requestFactory;
+		private final ApplicationRequestFactory requestFactory;
 
-        @Inject
-        public RequestFactoryProvider(EventBus eventBus) {
-            requestFactory = GWT.create(ApplicationRequestFactory.class);
-            requestFactory.initialize(eventBus, new EventSourceRequestTransport(
-                    eventBus__GAE_REQUEST_TRANSPORT__));
-        }
+		@Inject
+		public RequestFactoryProvider(EventBus eventBus) {
+			requestFactory = GWT.create(ApplicationRequestFactory.class);
+			requestFactory.initialize(eventBus, new EventSourceRequestTransport(
+					eventBus__GAE_REQUEST_TRANSPORT__));
+		}
 
-        public ApplicationRequestFactory get() {
-            return requestFactory;
-        }
-    }
+		public ApplicationRequestFactory get() {
+			return requestFactory;
+		}
+	}
 }

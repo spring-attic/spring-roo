@@ -14,38 +14,38 @@ import com.google.gwt.view.client.HasData;
  * @param <P> the type of the proxy
  */
 public abstract class AbstractProxyListView<P extends EntityProxy> extends
-        Composite implements ProxyListView<P> {
+		Composite implements ProxyListView<P> {
 
-    private HasData<P> display;
-    private ProxyListView.Delegate<P> delegate;
+	private HasData<P> display;
+	private ProxyListView.Delegate<P> delegate;
 
-    public HasData<P> asHasData() {
-        return display;
-    }
+	public HasData<P> asHasData() {
+		return display;
+	}
 
-    @Override
-    public AbstractProxyListView<P> asWidget() {
-        return this;
-    }
+	@Override
+	public AbstractProxyListView<P> asWidget() {
+		return this;
+	}
 
-    public void setDelegate(final Delegate<P> delegate) {
-        this.delegate = delegate;
-    }
+	public void setDelegate(final Delegate<P> delegate) {
+		this.delegate = delegate;
+	}
 
-    protected void init(Widget root, HasData<P> display, Button newButton) {
-        super.initWidget(root);
-        this.display = display;
+	protected void init(Widget root, HasData<P> display, Button newButton) {
+		super.initWidget(root);
+		this.display = display;
 
-        newButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                delegate.createClicked();
-            }
-        });
-    }
+		newButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				delegate.createClicked();
+			}
+		});
+	}
 
-    protected void initWidget(Widget widget) {
-        throw new UnsupportedOperationException(
-                "AbstractRecordListView must be initialized via "
-                        + "init(Widget, HasData<P>, Button) ");
-    }
+	protected void initWidget(Widget widget) {
+		throw new UnsupportedOperationException(
+				"AbstractRecordListView must be initialized via "
+						+ "init(Widget, HasData<P>, Button) ");
+	}
 }

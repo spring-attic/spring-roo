@@ -24,105 +24,105 @@ import java.util.List;
  * @since 1.1
  */
 public enum MirrorType {
-    PROXY(GwtPath.MANAGED_REQUEST, "Proxy", "proxy", null),
-    REQUEST(GwtPath.MANAGED_REQUEST, "Request", "request", null),
-    ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"),
-    DETAIL_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "DetailsActivity", "detailsActivity", "DetailsActivity"),
-    EDIT_ACTIVITY_WRAPPER(GwtPath.MANAGED_ACTIVITY, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper"),
-    LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "ListActivity", "listActivity", "ListActivity"),
-    LIST_VIEW(GwtPath.MANAGED_UI, "ListView", "listView", "ListView"),
-    LIST_VIEW_BINDER(GwtPath.MANAGED_UI, "ListViewBinder", "listViewBinder", null),
-    MOBILE_LIST_VIEW(GwtPath.MANAGED_UI, "MobileListView", "mobileListView", "MobileListView"),
-    DETAILS_VIEW_BINDER(GwtPath.MANAGED_UI, "DetailsViewBinder", "detailsViewBinder", null),
-    DETAILS_VIEW(GwtPath.MANAGED_UI, "DetailsView", "detailsView", "DetailsView"),
-    MOBILE_DETAILS_VIEW(GwtPath.MANAGED_UI, "MobileDetailsView", "mobileDetailsView", "MobileDetailsView"),
-    EDIT_VIEW_BINDER(GwtPath.MANAGED_UI, "EditViewBinder", "editViewBinder", null),
-    EDIT_VIEW(GwtPath.MANAGED_UI, "EditView", "editView", "EditView"),
-    MOBILE_EDIT_VIEW(GwtPath.MANAGED_UI, "MobileEditView", "mobileEditView", "MobileEditView"),
-    EDIT_RENDERER(GwtPath.MANAGED_UI, "ProxyRenderer", "renderer", "EditRenderer"),
-    SET_EDITOR(GwtPath.MANAGED_UI, "SetEditor", "setEditor", "SetEditor"),
-    LIST_EDITOR(GwtPath.MANAGED_UI, "ListEditor", "listEditor", "ListEditor");
+	PROXY(GwtPath.MANAGED_REQUEST, "Proxy", "proxy", null),
+	REQUEST(GwtPath.MANAGED_REQUEST, "Request", "request", null),
+	ACTIVITIES_MAPPER(GwtPath.MANAGED_ACTIVITY, "ActivitiesMapper", "activitiesMapper", "ActivitiesMapper"),
+	DETAIL_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "DetailsActivity", "detailsActivity", "DetailsActivity"),
+	EDIT_ACTIVITY_WRAPPER(GwtPath.MANAGED_ACTIVITY, "EditActivityWrapper", "editActivityWrapper", "EditActivityWrapper"),
+	LIST_ACTIVITY(GwtPath.MANAGED_ACTIVITY, "ListActivity", "listActivity", "ListActivity"),
+	LIST_VIEW(GwtPath.MANAGED_UI, "ListView", "listView", "ListView"),
+	LIST_VIEW_BINDER(GwtPath.MANAGED_UI, "ListViewBinder", "listViewBinder", null),
+	MOBILE_LIST_VIEW(GwtPath.MANAGED_UI, "MobileListView", "mobileListView", "MobileListView"),
+	DETAILS_VIEW_BINDER(GwtPath.MANAGED_UI, "DetailsViewBinder", "detailsViewBinder", null),
+	DETAILS_VIEW(GwtPath.MANAGED_UI, "DetailsView", "detailsView", "DetailsView"),
+	MOBILE_DETAILS_VIEW(GwtPath.MANAGED_UI, "MobileDetailsView", "mobileDetailsView", "MobileDetailsView"),
+	EDIT_VIEW_BINDER(GwtPath.MANAGED_UI, "EditViewBinder", "editViewBinder", null),
+	EDIT_VIEW(GwtPath.MANAGED_UI, "EditView", "editView", "EditView"),
+	MOBILE_EDIT_VIEW(GwtPath.MANAGED_UI, "MobileEditView", "mobileEditView", "MobileEditView"),
+	EDIT_RENDERER(GwtPath.MANAGED_UI, "ProxyRenderer", "renderer", "EditRenderer"),
+	SET_EDITOR(GwtPath.MANAGED_UI, "SetEditor", "setEditor", "SetEditor"),
+	LIST_EDITOR(GwtPath.MANAGED_UI, "ListEditor", "listEditor", "ListEditor");
 
-    private GwtPath path;
-    private String suffix;
-    private String name;
-    private String template;
-    private ArrayList<JavaSymbolName> watchedFieldNames = new ArrayList<JavaSymbolName>();
-    private HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
-    private List<JavaType> watchedInnerTypes = new ArrayList<JavaType>();
-    private boolean createAbstract = false;
-    private boolean overwriteConcrete = false;
-
-
-    private MirrorType(GwtPath path, String suffix, String name, String template) {
-        this.path = path;
-        this.suffix = suffix;
-        this.name = name;
-        this.template = template;
-    }
-
-    public GwtPath getPath() {
-        return path;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getTemplate() {
-        return template;
-    }
-
-    public boolean isList() {
-        return this == LIST_ACTIVITY || this == LIST_VIEW || this == LIST_VIEW_BINDER;
-    }
-
-    public boolean isUI() {
-        return getPath() != GwtPath.MANAGED_REQUEST;
-    }
+	private GwtPath path;
+	private String suffix;
+	private String name;
+	private String template;
+	private ArrayList<JavaSymbolName> watchedFieldNames = new ArrayList<JavaSymbolName>();
+	private HashMap<JavaSymbolName, List<JavaType>> watchedMethods = new HashMap<JavaSymbolName, List<JavaType>>();
+	private List<JavaType> watchedInnerTypes = new ArrayList<JavaType>();
+	private boolean createAbstract = false;
+	private boolean overwriteConcrete = false;
 
 
-    public ArrayList<JavaSymbolName> getWatchedFieldNames() {
-        return watchedFieldNames;
-    }
+	private MirrorType(GwtPath path, String suffix, String name, String template) {
+		this.path = path;
+		this.suffix = suffix;
+		this.name = name;
+		this.template = template;
+	}
 
-    public void setWatchedFieldNames(ArrayList<JavaSymbolName> watchedFieldNames) {
-        this.watchedFieldNames = watchedFieldNames;
-    }
+	public GwtPath getPath() {
+		return path;
+	}
 
-    public HashMap<JavaSymbolName, List<JavaType>> getWatchedMethods() {
-        return watchedMethods;
-    }
+	public String getSuffix() {
+		return suffix;
+	}
 
-    public void setWatchedMethods(HashMap<JavaSymbolName, List<JavaType>> watchedMethods) {
-        this.watchedMethods = watchedMethods;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public List<JavaType> getWatchedInnerTypes() {
-        return watchedInnerTypes;
-    }
+	public String getTemplate() {
+		return template;
+	}
 
-    public void setWatchedInnerTypes(List<JavaType> watchedInnerTypes) {
-        this.watchedInnerTypes = watchedInnerTypes;
-    }
+	public boolean isList() {
+		return this == LIST_ACTIVITY || this == LIST_VIEW || this == LIST_VIEW_BINDER;
+	}
 
-    public boolean isCreateAbstract() {
-        return createAbstract;
-    }
+	public boolean isUI() {
+		return getPath() != GwtPath.MANAGED_REQUEST;
+	}
 
-    public void setCreateAbstract(boolean createAbstract) {
-        this.createAbstract = createAbstract;
-    }
 
-    public boolean isOverwriteConcrete() {
-        return overwriteConcrete;
-    }
+	public ArrayList<JavaSymbolName> getWatchedFieldNames() {
+		return watchedFieldNames;
+	}
 
-    public void setOverwriteConcrete(boolean overwriteConcrete) {
-        this.overwriteConcrete = overwriteConcrete;
-    }
+	public void setWatchedFieldNames(ArrayList<JavaSymbolName> watchedFieldNames) {
+		this.watchedFieldNames = watchedFieldNames;
+	}
+
+	public HashMap<JavaSymbolName, List<JavaType>> getWatchedMethods() {
+		return watchedMethods;
+	}
+
+	public void setWatchedMethods(HashMap<JavaSymbolName, List<JavaType>> watchedMethods) {
+		this.watchedMethods = watchedMethods;
+	}
+
+	public List<JavaType> getWatchedInnerTypes() {
+		return watchedInnerTypes;
+	}
+
+	public void setWatchedInnerTypes(List<JavaType> watchedInnerTypes) {
+		this.watchedInnerTypes = watchedInnerTypes;
+	}
+
+	public boolean isCreateAbstract() {
+		return createAbstract;
+	}
+
+	public void setCreateAbstract(boolean createAbstract) {
+		this.createAbstract = createAbstract;
+	}
+
+	public boolean isOverwriteConcrete() {
+		return overwriteConcrete;
+	}
+
+	public void setOverwriteConcrete(boolean overwriteConcrete) {
+		this.overwriteConcrete = overwriteConcrete;
+	}
 }

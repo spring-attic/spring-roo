@@ -13,28 +13,28 @@ import java.io.IOException;
  */
 public class GaeAuthFilter implements Filter {
 
-    public void destroy() {
-    }
+	public void destroy() {
+	}
 
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-                         FilterChain filterChain) throws IOException, ServletException {
-        UserService userService = UserServiceFactory.getUserService();
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+	                     FilterChain filterChain) throws IOException, ServletException {
+		UserService userService = UserServiceFactory.getUserService();
+		HttpServletRequest request = (HttpServletRequest) servletRequest;
+		HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        if (!userService.isUserLoggedIn()) {
-            String requestUrl = request.getHeader("requestUrl");
-            if (requestUrl == null) {
-                requestUrl = request.getRequestURI();
-            }
-            response.setHeader("login", userService.createLoginURL(requestUrl));
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
+		if (!userService.isUserLoggedIn()) {
+			String requestUrl = request.getHeader("requestUrl");
+			if (requestUrl == null) {
+				requestUrl = request.getRequestURI();
+			}
+			response.setHeader("login", userService.createLoginURL(requestUrl));
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			return;
+		}
 
-        filterChain.doFilter(request, response);
-    }
+		filterChain.doFilter(request, response);
+	}
 
-    public void init(FilterConfig config) {
-    }
+	public void init(FilterConfig config) {
+	}
 }

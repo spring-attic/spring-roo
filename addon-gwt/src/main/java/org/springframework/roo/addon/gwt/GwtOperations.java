@@ -7,7 +7,7 @@ package org.springframework.roo.addon.gwt;
  */
 public interface GwtOperations {
 
-    boolean isSetupGwtAvailable();
+	boolean isSetupGwtAvailable();
 
-    void setupGwt();
+	void setupGwt();
 }
