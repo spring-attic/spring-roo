@@ -94,6 +94,7 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 
 	boolean registerDependencies(LinkedHashSet<JavaTypeWrapper> domainJavaTypes, String metadataId) {
 		boolean isSuccessful = true;
+		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), metadataId);
 		for (JavaTypeWrapper domainJavaType : domainJavaTypes) {
 			if (! domainJavaType.isValidMetadata()) {
 				logger.finer("No BeanInfo or Entity metadata found for " + domainJavaType);
