@@ -57,6 +57,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
 	private static final JavaType PERSISTENCE_CONTEXT = new JavaType("javax.persistence.PersistenceContext");
 	private static final JavaType COLUMN = new JavaType("javax.persistence.Column");
+	private static final JavaType QUERY = new JavaType("javax.persistence.Query");
 
 	private EntityMetadata parent;
 	private MemberDetails memberDetails;
@@ -819,7 +820,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("} else {");
 			bodyBuilder.indent();
-			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = this." + getEntityManagerField().getFieldName().getSymbolName() + ".find(this.getClass(), this." + getIdentifierField().getFieldName().getSymbolName() + ");");
+			bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " attached = " + governorTypeDetails.getName().getSimpleTypeName() + "." + getFindMethod().getMethodName().getSymbolName() + "(this." + identifierField + ");");
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".remove(attached);");
 			bodyBuilder.indentRemove();
 			bodyBuilder.appendFormalLine("}");
@@ -1017,18 +1018,43 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			addTransactionalAnnotation(annotations);
 		}
 
+		InvocableMemberBodyBuilder bodyBuilder;
+		if (isGaeEnabled) {
+			bodyBuilder = getGaeFindMethodBody();
+		} else {
+			bodyBuilder = new InvocableMemberBodyBuilder();
+			if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
+				bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
+			} else if (!getIdentifierField().getFieldType().isPrimitive()) {
+				bodyBuilder.appendFormalLine("if (id == null) return null;");
+			}
+			bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
+		}
+		int modifier = Modifier.PUBLIC | Modifier.STATIC;
+		
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		methodBuilder.setAnnotations(annotations);
+		return methodBuilder.build();
+	}
+
+	private InvocableMemberBodyBuilder getGaeFindMethodBody() {
+		builder.getImportRegistrationResolver().addImport(QUERY);
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		if (JavaType.STRING_OBJECT.equals(getIdentifierField().getFieldType())) {
 			bodyBuilder.appendFormalLine("if (id == null || 0 == id.length()) return null;");
 		} else if (!getIdentifierField().getFieldType().isPrimitive()) {
 			bodyBuilder.appendFormalLine("if (id == null) return null;");
 		}
-		bodyBuilder.appendFormalLine("return " + ENTITY_MANAGER_METHOD_NAME + "().find(" + governorTypeDetails.getName().getSimpleTypeName() + ".class, id);");
-		int modifier = Modifier.PUBLIC | Modifier.STATIC;
-		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), modifier, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
-		methodBuilder.setAnnotations(annotations);
-		return methodBuilder.build();
+		bodyBuilder.appendFormalLine("Query query = " + ENTITY_MANAGER_METHOD_NAME + "().createQuery(\"select o from " + governorTypeDetails.getName().getSimpleTypeName() + " o where o." + identifierField + " = :id\").setParameter(\"id\"," + identifierField + ");");
+		bodyBuilder.appendFormalLine(governorTypeDetails.getName().getSimpleTypeName() + " result = null;");
+		bodyBuilder.appendFormalLine("List results = query.getResultList();");
+		bodyBuilder.appendFormalLine("if (results.size() > 0) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("result = (" + governorTypeDetails.getName().getSimpleTypeName() + ") results.get(0);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("return result;");
+		return bodyBuilder;
 	}
 	
 	/**
