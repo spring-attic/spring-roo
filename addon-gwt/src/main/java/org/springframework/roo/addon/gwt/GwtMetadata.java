@@ -244,9 +244,9 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 
 		/*
-				   * Decide which fields we'll be mapping. Remember the natural ordering for
-				   * processing, but order proxy getters alphabetically by name.
-				   */
+		 * Decide which fields we'll be mapping. Remember the natural ordering for
+		 * processing, but order proxy getters alphabetically by name.
+		 */
 
 
 		// Getter methods for EmployeeProxy
@@ -419,23 +419,32 @@ public class GwtMetadata extends AbstractMetadataItem {
 				&& ptmd.getMemberHoldingTypeDetails() != null
 				&& ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
 
-		boolean isDomainObject = !isEnum
-				&& !isShared(returnType)
+		return !isEnum
+				&& isEntity(ptmd)
 				&& !(isRequestFactoryPrimitive(returnType))
 				&& !(isCollectionType(returnType))
 				&& !isEmbeddable(ptmd);
+	}
 
-		return isDomainObject;
+	private boolean isEntity(PhysicalTypeMetadata ptmd) {
+		if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
+			List<AnnotationMetadata> annotations = ptmd.getMemberHoldingTypeDetails().getAnnotations();
+			for (AnnotationMetadata annotation : annotations) {
+				if (annotation.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.entity.RooEntity"))) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private boolean isEmbeddable(PhysicalTypeMetadata ptmd) {
 		if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
-			if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-				List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getMemberHoldingTypeDetails()).getAnnotations();
-				for (AnnotationMetadata annotation : annotations) {
-					if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
-						return true;
-					}
+			List<AnnotationMetadata> annotations = ptmd.getMemberHoldingTypeDetails().getAnnotations();
+			for (AnnotationMetadata annotation : annotations) {
+				if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
+					return true;
 				}
 			}
 		}
@@ -588,11 +597,6 @@ public class GwtMetadata extends AbstractMetadataItem {
 		}
 	}
 
-	private boolean isShared(JavaType type) {
-		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		return ptmd != null && ptmd.getPhysicalLocationCanonicalPath().startsWith(GwtPath.SHARED.canonicalFileSystemPath(projectMetadata));
-	}
-
 	private TemplateDataDictionary buildDataDictionary(MirrorType destType) {
 		JavaType javaType = getDestinationJavaType(destType);
 		JavaType proxyType = getDestinationJavaType(MirrorType.PROXY);
@@ -690,6 +694,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 				section.setVariable("rendererType", property.getProxyRendererType());
 				if (property.isProxy() || property.isCollectionOfProxy()) {
 					String propTypeName = StringUtils.uncapitalize(property.isCollectionOfProxy() ? method.getReturnType().getParameters().get(0).getSimpleTypeName() : method.getReturnType().getSimpleTypeName());
+					System.out.println("Name: " + method);
 					propTypeName = propTypeName.substring(0, propTypeName.indexOf("Proxy"));
 					section.setVariable("requestInterface", propTypeName + "Request");
 					section.setVariable("findMethod", "find" + StringUtils.capitalize(propTypeName) + "Entries(0, 50)");
