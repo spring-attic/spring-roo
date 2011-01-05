@@ -228,7 +228,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		artifactId.setTextContent("selenium-maven-plugin");
 		plugin.appendChild(artifactId);
 		Element version = pom.createElement("version");
-		version.setTextContent("1.0.1");
+		version.setTextContent("1.1");
 		plugin.appendChild(version);
 		Element configuration = pom.createElement("configuration");
 		Element suite = pom.createElement("suite");
