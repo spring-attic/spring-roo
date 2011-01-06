@@ -83,7 +83,7 @@ public class WebXmlUtilsTests {
 
 	@Test
 	public void testAddFilterAtPositionWithDispatcher() {
-		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BEFORE, null, "filter1", "filter2", Object.class.getName(), "/test", webXml, null, null, Arrays.asList(WebXmlUtils.Dispatcher.ERROR, WebXmlUtils.Dispatcher.FORWARD, WebXmlUtils.Dispatcher.REQUEST));
+		WebXmlUtils.addFilterAtPosition(WebXmlUtils.FilterPosition.BEFORE, null, "filter1", "filter2", Object.class.getName(), "/test", webXml, null, null, Arrays.asList(WebXmlUtils.Dispatcher.ERROR, WebXmlUtils.Dispatcher.INCLUDE, WebXmlUtils.Dispatcher.FORWARD, WebXmlUtils.Dispatcher.REQUEST));
 		
 		Element filter = XmlUtils.findFirstElement("filter", webXml.getDocumentElement());
 		assertNotNull(filter);
@@ -94,10 +94,11 @@ public class WebXmlUtilsTests {
 		assertEquals("filter2", XmlUtils.findFirstElement("filter-name", filterMapping).getTextContent());
 		assertEquals("/test", XmlUtils.findFirstElement("url-pattern", filterMapping).getTextContent());
 		List<Element> dispatchers = XmlUtils.findElements("dispatcher", filterMapping);
-		assertEquals(3, dispatchers.size());
+		assertEquals(4, dispatchers.size());
 		assertEquals(WebXmlUtils.Dispatcher.ERROR.name(), dispatchers.get(0).getTextContent());
-		assertEquals(WebXmlUtils.Dispatcher.FORWARD.name(), dispatchers.get(1).getTextContent());
-		assertEquals(WebXmlUtils.Dispatcher.REQUEST.name(), dispatchers.get(2).getTextContent());
+		assertEquals(WebXmlUtils.Dispatcher.INCLUDE.name(), dispatchers.get(1).getTextContent());
+		assertEquals(WebXmlUtils.Dispatcher.FORWARD.name(), dispatchers.get(2).getTextContent());
+		assertEquals(WebXmlUtils.Dispatcher.REQUEST.name(), dispatchers.get(3).getTextContent());
 	}
 
 	@Test

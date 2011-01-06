@@ -555,7 +555,7 @@ public abstract class WebXmlUtils {
 	 *
 	 */
 	public static enum Dispatcher {
-		FORWARD, REQUEST, ERROR;
+		FORWARD, REQUEST, INCLUDE, ERROR;
 	}
 
     /**
