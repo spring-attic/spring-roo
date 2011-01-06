@@ -21,6 +21,7 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -44,6 +45,7 @@ import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * Implementation of commands that are available via the Roo shell.
@@ -152,7 +154,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
 			return;
 		} 
-		installAddon(bundle.getBundleVersion(bsn.getKey()));
+		installAddon(bundle.getBundleVersion(bsn.getKey()), bsn.getKey());
 	}
 	
 	public void installAddOn(String bundleKey) {
@@ -165,23 +167,39 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.warning("To install an addon a valid bundle ID is required");
 			return;
 		} 
-		installAddon(bundle.getBundleVersion(bundleKey));
+		installAddon(bundle.getBundleVersion(bundleKey), bundle.getSymbolicName());
 	}
 	
-	private void installAddon(BundleVersion bundleVersion) {
-		boolean success = false;	
-		String url = bundleVersion.getUri();
-		if (url != null && url.length() > 0 && url.startsWith("httppgp://")) {
-			int count = countBundles();
-			success = shell.executeCommand("osgi start --url " + url);
-			if (count == countBundles()) {
-				return; // most likely PgP verification required before the bundle can be installed, no log needed
-			}
+	private void installAddon(BundleVersion bundleVersion, String bsn) {
+		if (!verifyRepository(bundleVersion.getObrUrl())) {
+			return;
 		}
+		boolean success = true;	
+		int count = countBundles();
+		boolean requiresWrappedCoreDep = bundleVersion.getDescription().contains("#wrappedCoreDependency");
+		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url add --url http://spring-roo-repository.springsource.org/repository.xml")) {
+			success = false;
+		}
+		if (!shell.executeCommand("osgi obr url add --url " + bundleVersion.getObrUrl())) {
+			success = false;
+		}
+		if (!shell.executeCommand("osgi obr start --bundleSymbolicName " + bsn)) {
+			success = false;
+		}
+		if (!shell.executeCommand("osgi obr url remove --url " + bundleVersion.getObrUrl())) {
+			success = false;
+		}
+		if (requiresWrappedCoreDep && !shell.executeCommand("osgi obr url remove --url http://spring-roo-repository.springsource.org/repository.xml")) {
+			success = false;
+		}
+		if (count == countBundles()) {
+			return; // most likely PgP verification required before the bundle can be installed, no log needed
+		}
+
 		if (success) {
-			log.info("Successfully installed add-on: " + bundleVersion.getPresentationName());
+			log.info("Successfully installed add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 		} else {
-			log.warning("Unable to install add-on: " + bundleVersion.getPresentationName());
+			log.warning("Unable to install add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 		}
 	}
 
@@ -543,5 +561,29 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private String getVersionForCompatibility() {
 		return UaaRegistrationService.SPRING_ROO.getMajorVersion() + "." + UaaRegistrationService.SPRING_ROO.getMinorVersion();
+	}
+	
+	private boolean verifyRepository(String repoUrl) {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		Document doc = null;
+		try {
+			URL obrUrl = null;
+			obrUrl = new URL(repoUrl);
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.parse(obrUrl.openStream());
+			Assert.notNull(doc, "RooBot was unable to parse the repository document of this add-on");
+			for (Element resource: XmlUtils.findElements("resource", doc.getDocumentElement())) {
+				if (resource.hasAttribute("uri")) {
+					if (!resource.getAttribute("uri").startsWith("httppgp")) {
+						log.warning("Sorry, the resource " + resource.getAttribute("uri") + " does not follow HTTPGP conventions mandated by Spring Roo so the OBR file at " + repoUrl + " is unacceptable at this time");
+						return false;
+					}
+				}
+			}
+			doc = null;
+		} catch (Exception e) {
+			throw new IllegalStateException("RooBot was unable to parse the repository document of this add-on", e);
+		}
+		return true;
 	}
 }
