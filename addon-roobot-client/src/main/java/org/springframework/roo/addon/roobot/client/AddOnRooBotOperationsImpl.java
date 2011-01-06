@@ -198,6 +198,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 
 		if (success) {
 			log.info("Successfully installed add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
+			log.warning("[Hint] Please consider rating this add-on with the following command:");
+			log.warning("[Hint] addon feedback bundle --bundleSymbolicName " + bsn.substring(0, bsn.indexOf(";") != -1 ? bsn.indexOf(";") : bsn.length()) + " --rating ... --comment \"...\"");
 		} else {
 			log.warning("Unable to install add-on: " + bundleVersion.getPresentationName() + " [version: " + bundleVersion.getVersion() + "]");
 		}
