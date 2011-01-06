@@ -90,7 +90,7 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	private void logEmptyDatabase(Schema schema) {
-		logger.warning("Schema " + schema.getName() + " does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
+		logger.warning("Schema '" + schema.getName() + "' does not exist or does not have any tables. Note that the schema names of some databases are case-sensitive");
 	}
 
 	private void updatePersistenceXml() {

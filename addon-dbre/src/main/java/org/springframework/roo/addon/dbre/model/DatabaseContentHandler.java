@@ -4,6 +4,7 @@ import java.util.Stack;
 
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -112,6 +113,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	private Column getColumn(Attributes attributes) {
 		String type = attributes.getValue("type");
 		String[] dataTypeAndName = StringUtils.split(type, ",");
+		Assert.notNull(dataTypeAndName, getColumnErrorMessage("type", "12,varchar"));
 		int dataType = Integer.parseInt(dataTypeAndName[0]);
 		String typeName = dataTypeAndName[1];
 		
@@ -120,6 +122,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		int decimalDigits = 0;
 		if (size.contains(",")) {
 			String[] precisionScale = StringUtils.split(size, ",");
+			Assert.notNull(precisionScale, getColumnErrorMessage("size", "17,2"));
 			columnSize = Integer.parseInt(precisionScale[0]);
 			decimalDigits = Integer.parseInt(precisionScale[1]);
 		} else {
@@ -132,6 +135,10 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		column.setRequired(Boolean.parseBoolean(attributes.getValue("required")));
 
 		return column;
+	}
+
+	private String getColumnErrorMessage(String attributeName, String example) {
+		return "The '" + attributeName + "' attribute of the column element must contain a comma separated value pair, eg, " + attributeName + "=\"" + example + "\". Your .roo-dbre file may be not be in the current format. Delete the file and execute the database reverse engineer command again.";
 	}
 
 	private ForeignKey getForeignKey(Attributes attributes) {
