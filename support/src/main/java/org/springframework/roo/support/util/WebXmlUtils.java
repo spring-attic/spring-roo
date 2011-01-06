@@ -5,6 +5,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -97,7 +99,7 @@ public abstract class WebXmlUtils {
 	public static void addFilter(String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
 		addFilterAtPosition(FilterPosition.LAST, null, null, filterName, filterClass, urlPattern, webXml, comment, initParams);
 	}
-
+	
 	/**
 	 * Add a new filter definition to web.xml document. The filter will be added at the FilterPosition specified.
 	 * 
@@ -111,10 +113,31 @@ public abstract class WebXmlUtils {
 	 * @param initParams (optional)
 	 */
 	public static void addFilterAtPosition(FilterPosition filterPosition, String afterFilterName, String beforeFilterName, String filterName, String filterClass, String urlPattern, Document webXml, String comment, WebXmlParam... initParams) {
+		addFilterAtPosition(filterPosition, afterFilterName, beforeFilterName, filterName, filterClass, urlPattern, webXml, comment, initParams == null ? new ArrayList<WebXmlParam>() : Arrays.asList(initParams), new ArrayList<Dispatcher>());
+	}
+
+	/**
+	 * Add a new filter definition to web.xml document. The filter will be added at the FilterPosition specified.
+	 * 
+	 * @param filterPosition Filter position (required)
+	 * @param beforeFilterName (optional for filter position FIRST and LAST, required for BEFORE and AFTER)
+	 * @param filterName (required)
+	 * @param filterClass the fully qualified name of the filter type (required)
+	 * @param urlPattern (required)
+	 * @param webXml the web.xml document (required)
+	 * @param comment (optional)
+	 * @param initParams (optional)
+	 * @param dispatchers (optional)
+	 */
+	public static void addFilterAtPosition(FilterPosition filterPosition, String afterFilterName, String beforeFilterName, String filterName, String filterClass, String urlPattern, Document webXml, String comment, List<WebXmlParam> initParams, List<Dispatcher> dispatchers) {
 		Assert.notNull(webXml, "Web XML document required");
 		Assert.hasText(filterName, "Filter name required");
 		Assert.hasText(filterClass, "Filter class required");
 		Assert.notNull(urlPattern, "Filter URL mapping pattern required");
+		
+		if (initParams == null) {
+			initParams = new ArrayList<WebXmlUtils.WebXmlParam>();
+		}
 		
 		//creating filter
 		Element filter = XmlUtils.findFirstElement("/web-app/filter[filter-name = '" + filterName + "']", webXml.getDocumentElement());
@@ -168,6 +191,9 @@ public abstract class WebXmlUtils {
 			}
 		}
 		appendChildIfNotPresent(filterMappingE, new XmlElementBuilder("url-pattern", webXml).setText(urlPattern).build(), webXml);
+		for (Dispatcher dispatcher: dispatchers) {
+			appendChildIfNotPresent(filterMappingE, new XmlElementBuilder("dispatcher", webXml).setText(dispatcher.name()).build(), webXml);
+		}
 	}
 	
 	/**
@@ -342,7 +368,7 @@ public abstract class WebXmlUtils {
 		appendChildIfNotPresent(errorPage, new XmlElementBuilder("location", webXml).setText(location).build(), webXml);
 	}
 
-        /**
+     /**
      * Add a security constraint to a web.xml document
      *
      * @param displayName (optional)
@@ -519,6 +545,17 @@ public abstract class WebXmlUtils {
 	 */
 	public static enum FilterPosition {
 		FIRST, LAST, BEFORE, AFTER, BETWEEN;
+	}
+	
+	/**
+	 * Enum to define dispatcher
+	 * 
+	 * @author Stefan Schmidt
+	 * @since 1.1.1
+	 *
+	 */
+	public static enum Dispatcher {
+		FORWARD, REQUEST, ERROR;
 	}
 
     /**
