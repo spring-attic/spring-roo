@@ -34,6 +34,8 @@ package org.springframework.roo.metadata;
  *
  */
 public abstract class MetadataIdentificationUtils {
+	private static final char[] MID_COLON = {'M', 'I', 'D', ':'};
+
 	/**
 	 * Indicates whether the argument appears to be a valid metadata identification string.
 	 * 
@@ -41,7 +43,19 @@ public abstract class MetadataIdentificationUtils {
 	 * @return true if the string appears to be a valid metadata identification string
 	 */
 	public static final boolean isValid(String metadataIdentificationString) {
-		return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
+		// previously: return metadataIdentificationString != null && metadataIdentificationString.startsWith("MID:");
+		if (metadataIdentificationString == null) {
+			return false;
+		}
+		if (metadataIdentificationString.length() < 4) {
+			return false;
+		}
+		for (int i = 0; i < 4; i++) {
+			if (metadataIdentificationString.charAt(i) != MID_COLON[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	/**

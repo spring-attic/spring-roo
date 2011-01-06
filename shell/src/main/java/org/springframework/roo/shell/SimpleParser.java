@@ -46,27 +46,10 @@ public class SimpleParser implements Parser {
 	private Object mutex = this;
 	private Set<Converter> converters = new HashSet<Converter>();
 	private Set<CommandMarker> commands = new HashSet<CommandMarker>();
+	private Map<String, MethodTarget> availabilityIndicators = new HashMap<String, MethodTarget>();
 	
 	private MethodTarget getAvailabilityIndicator(String command) {
-		MethodTarget methodTarget = null;
-		for (Object target : commands) {
-			for (Method m : target.getClass().getMethods()) {
-				CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
-				if (availability != null) {
-					Assert.isTrue(m.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + m.toGenericString() + ")");
-					Assert.isTrue(m.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + m.toGenericString() + ")");
-					for (String cmd : availability.value()) {
-						if (cmd.equals(command)) {
-							Assert.isTrue(methodTarget == null, "Cannot specify an availability indicator for '" + cmd + "' more than once");
-							methodTarget = new MethodTarget();
-							methodTarget.method = m;
-							methodTarget.target = target;
-						}
-					}
-				}
-			}
-		}
-		return methodTarget;
+		return availabilityIndicators.get(command);
 	}
 
 	public ParseResult parse(String buffer) {
@@ -1036,12 +1019,34 @@ public class SimpleParser implements Parser {
 	public final void add(CommandMarker command) {
 		synchronized (mutex) {
 			commands.add(command);
+			for (Method m : command.getClass().getMethods()) {
+				CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
+				if (availability != null) {
+					Assert.isTrue(m.getParameterTypes().length == 0, "CliAvailabilityIndicator is only legal for 0 parameter methods (" + m.toGenericString() + ")");
+					Assert.isTrue(m.getReturnType().equals(Boolean.TYPE), "CliAvailabilityIndicator is only legal for primitive boolean return types (" + m.toGenericString() + ")");
+					for (String cmd : availability.value()) {
+						Assert.isTrue(!availabilityIndicators.containsKey(cmd), "Cannot specify an availability indicator for '" + cmd + "' more than once");
+						MethodTarget methodTarget = new MethodTarget();
+						methodTarget.method = m;
+						methodTarget.target = command;
+						availabilityIndicators.put(cmd, methodTarget);
+					}
+				}
+			}
 		}
 	}
 
 	public final void remove(CommandMarker command) {
 		synchronized (mutex) {
 			commands.remove(command);
+			for (Method m : command.getClass().getMethods()) {
+				CliAvailabilityIndicator availability = m.getAnnotation(CliAvailabilityIndicator.class);
+				if (availability != null) {
+					for (String cmd : availability.value()) {
+						availabilityIndicators.remove(cmd);
+					}
+				}
+			}
 		}
 	}
 

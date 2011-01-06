@@ -1,6 +1,8 @@
 package org.springframework.roo.uaa;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -28,6 +30,8 @@ public class MetadataPollingUaaRegistrationFacility {
 	private BundleContext bundleContext;
 	private Timer timer = new Timer();
 	private Set<String> previouslyNotifiedBsns = new HashSet<String>();
+	private Map<String, String> typeToBsnMap = new HashMap<String, String>();
+	private static final String NOT_FOUND = "___NOT_FOUND___";
 	
 	protected void activate(ComponentContext context) {
 		this.bundleContext = context.getBundleContext();
@@ -46,8 +50,18 @@ public class MetadataPollingUaaRegistrationFacility {
 				// Deal with modules being used via the add-on infrastructure
 				for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
 					String typeName = stat.getName();
-					String bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(bundleContext, typeName);
+					String bundleSymbolicName = typeToBsnMap.get(typeName);
 					if (bundleSymbolicName == null) {
+						// Try to look it up and cache the outcome
+						bundleSymbolicName = BundleFindingUtils.findFirstBundleForTypeName(bundleContext, typeName);
+						if (bundleSymbolicName == null) {
+							bundleSymbolicName = NOT_FOUND;
+						}
+						// Cache to avoid the lookup cost in the future
+						typeToBsnMap.put(typeName, bundleSymbolicName);
+					}
+					
+					if (bundleSymbolicName == null || NOT_FOUND.equals(bundleSymbolicName)) {
 						continue;
 					}
 					

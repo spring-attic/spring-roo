@@ -134,6 +134,12 @@ public class Activator implements BundleActivator {
 
 	private void potentiallyChangeStartLevel() {
 		if (requiredImplementations.keySet().equals(runningImplementations)) {
+			if (System.getProperty("roo.pause") != null) {
+				System.out.println("roo.pause detected; press any key to proceed");
+				try {
+					System.in.read();
+				} catch (IOException ignored) {}
+			}
 			startLevel.setStartLevel(99);
 		}
 	}
