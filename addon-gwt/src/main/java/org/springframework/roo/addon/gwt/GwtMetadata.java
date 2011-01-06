@@ -1,12 +1,54 @@
 package org.springframework.roo.addon.gwt;
 
-import hapax.*;
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateException;
+import hapax.TemplateLoader;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.classpath.*;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.details.annotations.*;
+import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
+import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
+import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.AbstractMetadataItem;
@@ -19,22 +61,18 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.*;
+import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.StringUtils;
+import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.lang.reflect.Modifier;
-import java.util.*;
 
 /**
  * Metadata for GWT.
@@ -48,6 +86,7 @@ import java.util.*;
 public class GwtMetadata extends AbstractMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = GwtMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static Logger logger = HandlerUtils.getLogger(GwtMetadata.class);
 
 	private FileManager fileManager;
 	private MetadataService metadataService;
@@ -200,7 +239,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 				// The user is notified about what needs to be changed but a rollback shouldn't be triggered.
 				// TODO: Notification needs to be more noticeable.
 				if (propertyName.getSymbolName().equals("owner")) {
-					System.out.println("'owner' is not allowed to be used as field name as it is currently reserved by GWT. Please rename the field 'owner' in type " + governorTypeDetails.getName().getSimpleTypeName() + ".");
+					logger.severe("'owner' is not allowed to be used as field name as it is currently reserved by GWT. Please rename the field 'owner' in type " + governorTypeDetails.getName().getSimpleTypeName() + ".");
 					continue;
 				}
 				JavaType returnType = accessor.getReturnType();
