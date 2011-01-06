@@ -165,14 +165,22 @@ Located add-on that may offer this JDBC driver
 ID T R DESCRIPTION -------------------------------------------------------------
 01 Y Y 5.1.13.0001 #jdbcdriver driverclass:com.mysql.jdbc.Driver. This...
 --------------------------------------------------------------------------------
-[HINT] use 'addon info' to see details about a bundle
-[HINT] use 'addon install' to install a specific bundle
+[HINT] use 'addon info TAB' to see details about a bundle
+[HINT] use 'addon install TAB' to install a specific bundle
 JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
-    <para>You can then install the MySQL JDBC driver by entering the following
-    Roo command:</para>
+    <para>You can get further information about the search result by with the
+    following command:<programlisting>roo&gt; addon info id --searchResultId 01</programlisting></para>
 
-    <para><programlisting>roo&gt; addon install --bundleId 01</programlisting></para>
+    <para>This may list several versions of a driver if available.</para>
+
+    <para>You can then install the latest MySQL JDBC driver by entering the
+    following Roo command:</para>
+
+    <para><programlisting>roo&gt; addon install id --searchResultId 01</programlisting></para>
+
+    <para>Alternatively, to install a different version (if available) of the
+    driver you can use the following command:<programlisting>roo&gt; addon install bundle --bundleSymbolicName org.springframework.roo.wrapping.mysql-connector-java;&lt;version&gt;</programlisting></para>
 
     <para>The JDBC driver for MySQL is immediately available for you to use.
     You can now enter the database introspect and database reverse engineer
