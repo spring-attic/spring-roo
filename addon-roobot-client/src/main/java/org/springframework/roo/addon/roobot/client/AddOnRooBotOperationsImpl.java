@@ -575,7 +575,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			for (Element resource: XmlUtils.findElements("resource", doc.getDocumentElement())) {
 				if (resource.hasAttribute("uri")) {
 					if (!resource.getAttribute("uri").startsWith("httppgp")) {
-						log.warning("Sorry, the resource " + resource.getAttribute("uri") + " does not follow HTTPGP conventions mandated by Spring Roo so the OBR file at " + repoUrl + " is unacceptable at this time");
+						log.warning("Sorry, the resource " + resource.getAttribute("uri") + " does not follow HTTPPGP conventions mandated by Spring Roo so the OBR file at " + repoUrl + " is unacceptable at this time");
 						return false;
 					}
 				}
