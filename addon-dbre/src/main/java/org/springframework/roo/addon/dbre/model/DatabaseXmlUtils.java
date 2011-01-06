@@ -185,7 +185,6 @@ public abstract class DatabaseXmlUtils {
 
 			List<Element> columnElements = XmlUtils.findElements("column", tableElement);
 			for (Element columnElement : columnElements) {
-				// String name = columnElement.getAttribute(NAME);
 				String type = columnElement.getAttribute("type");
 				String[] dataTypeAndName = StringUtils.split(type, ",");
 				int dataType = Integer.parseInt(dataTypeAndName[0]);
