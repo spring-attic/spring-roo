@@ -628,8 +628,6 @@ public class SimpleParser implements Parser {
 			if ((lastOptionValue == null || "".equals(lastOptionValue)) && !translated.endsWith(" ")) {
 				// Given we haven't got an option value of any form, and there's no space at the buffer end, we must still be typing an option key
 
-				// TODO: Only include the option key itself
-
 				for (CliOption option : cliOptions) {
 					for (String value : option.key()) {
 						if (value != null && lastOptionKey != null && value.regionMatches(true, 0, lastOptionKey, 0, lastOptionKey.length())) {
@@ -699,15 +697,13 @@ public class SimpleParser implements Parser {
 							// Only include in the candidates those results which are compatible with the present buffer
 							for (String currentValue : allValues) {
 								// We only provide a suggestion if the lastOptionValue == ""
-								if (lastOptionValue == null || "".equals(lastOptionValue)) {
+								if (!StringUtils.hasText(lastOptionValue)) {
 									// We should add the result, as they haven't typed anything yet
 									results.add(prefix + currentValue + suffix);
 								} else {
 									// Only add the result **if** what they've typed is compatible *AND* they haven't already typed it in full
-									if (lastOptionValue.toLowerCase().startsWith(currentValue.toLowerCase()) || currentValue.toLowerCase().startsWith(lastOptionValue.toLowerCase())) {
-										if (!lastOptionValue.equalsIgnoreCase(currentValue)) {
-											results.add(prefix + currentValue + suffix);
-										}
+									if (currentValue.toLowerCase().startsWith(lastOptionValue.toLowerCase()) && !lastOptionValue.equalsIgnoreCase(currentValue) && lastOptionValue.length() < currentValue.length()) {
+										results.add(prefix + currentValue + suffix);
 									}
 								}
 							}
