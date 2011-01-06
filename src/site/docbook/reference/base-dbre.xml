@@ -186,23 +186,13 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     You can now enter the database introspect and database reverse engineer
     commands (see <xref linkend="dbre_commands" /> below).</para>
 
-    <para>Roo also provides a script called install-jdbc-drivers.roo that can
-    be run as a post-installation step after installing Roo to install the
-    <link xlink:href="http://www.oracle.com/index.html">Oracle</link> driver.
-    To install this driver, execute the Roo command:</para>
-
-    <para><programlisting>roo&gt; script --file install-jdbc-drivers.roo</programlisting></para>
-
-    <para>The JDBC driver for Oracle is also immediately available for
-    use.</para>
-
-    <para><emphasis role="bold">Note</emphasis>: currently there is no
-    open-source JDBC driver for DB2 and Roo does not provide an OSGi driver
-    for this database. If you are a DB2 user, you will need to obtain an
-    OSGi-enabled driver from IBM or wrap your own DB2 driver jars using Roo's
-    wrapping facility. To see how to wrap a JAR, check Roo out of our source
-    code repository and take a look in the /wrapping directory for an
-    example.</para>
+    <para><emphasis role="bold">Note</emphasis>: currently there are no
+    open-source JDBC drivers for Oracle or DB2 and Roo does not provide OSGis
+    driver for these databases. If you are an Oracle or DB2 user, you will
+    need to obtain an OSGi-enabled driver from Oracle or IBM respectively or
+    wrap your own Oracle or DB2 driver jars using Roo's wrapping facility. To
+    see how to wrap a JAR, check Roo out of our source code repository and
+    take a look in the /wrapping directory for an example.</para>
   </section>
 
   <section>
