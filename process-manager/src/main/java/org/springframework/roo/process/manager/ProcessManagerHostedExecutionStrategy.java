@@ -61,5 +61,12 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
 		return false;
 	}
 
-	
+	public void terminate() {
+		synchronized (mutex) {
+			if (processManager != null) {
+				processManager.terminate();
+			}
+		}
+	}
+
 }

@@ -167,6 +167,8 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				if (result != null) {
 					if (result instanceof ExitShellRequest) {
 						exitShellRequest = (ExitShellRequest) result;
+						// Give ProcessManager a chance to close down its threads before the overall OSGi framework is terminated (ROO-1938)
+						executionStrategy.terminate();
 					} else if (result instanceof Iterable<?>) {
 						for (Object o : (Iterable<?>) result) {
 							logger.info(o.toString());

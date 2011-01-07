@@ -99,6 +99,13 @@ public interface ProcessManager extends ProcessManagerStatusProvider {
 	 * diagnostics are requested from add-ons (defaults to false)
 	 */
 	boolean isDevelopmentMode();
+	
+	/**
+	 * Allows the process manager to terminate gracefully. In particular this means any background
+	 * threads it has started are terminated. It is safe to call this method more than once, but no
+	 * other method in the process manager need operate correctly after termination.
+	 */
+	void terminate();
 
 	void timerBasedPoll();
 	

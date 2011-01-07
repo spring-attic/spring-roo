@@ -49,11 +49,9 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	private String workingDir = null; // the working directory of the current roo project
 	
 	protected void activate(ComponentContext context) {
-		
 		// obtain the working directory from the framework properties
 		// TODO CD move constant to proper location
 		workingDir = context.getBundleContext().getProperty("roo.working.directory");
-		
 		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
 				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
@@ -80,13 +78,16 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	protected void deactivate(ComponentContext context) {
 		// We have lost a required component (eg UndoManager; ROO-1037)
+		terminate(); // safe to call even if we'd terminated earlier
+	}
+	
+	public void terminate() {
 		synchronized (processManagerStatus) {
-			// Do the check again, now this thread has a lock on processManagerStatus
-			if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
-				// We have the lock on processManagerStatus, yet it's not available; this would be odd
-				logger.warning("Unexpected status " + getProcessManagerStatus() + " without lock");
+			// To get this far this thread has a lock on process manager status, so we control process manager and can terminate it
+			if (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
+				t.cancel();
+				setProcessManagerStatus(ProcessManagerStatus.TERMINATED);
 			}
-			t.cancel();
 		}
 	}
 

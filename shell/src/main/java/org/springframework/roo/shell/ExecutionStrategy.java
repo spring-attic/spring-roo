@@ -30,4 +30,10 @@ public interface ExecutionStrategy {
 	 * @return whether commands can be presented for processing at this time
 	 */
 	boolean isReadyForCommands();
+	
+	/**
+	 * Indicates the execution runtime should be terminated. This allows it to cleanup before returning
+	 * control flow to the caller. Necessary for clean shutdowns.
+	 */
+	void terminate();
 }
