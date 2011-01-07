@@ -18,7 +18,7 @@ import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -33,7 +33,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate = true)
 @Service
-public final class DataOnDemandMetadataProvider extends AbstractItdMetadataProvider {
+public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	private Map<JavaType, String> entityToDodMidMap = new HashMap<JavaType, String>();
 	private Map<String, JavaType> dodMidToEntityMap = new HashMap<String, JavaType>();
