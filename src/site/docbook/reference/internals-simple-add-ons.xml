@@ -145,7 +145,7 @@
     <title>Fast Creation</title>
 
     <para><sidebar>
-        <title>Roo's Three Add-On Creator Commands</title>
+        <title>Roo's Four Add-On Creator Commands</title>
 
         <para>With release 1.1 Spring Roo offers three commands to help
         developers quickly create new add-ons:</para>
@@ -197,10 +197,26 @@
               </listitem>
 
               <listitem>
-                <para>When: A new translation is added to the Spring MVC admin
-                UI scaffolding</para>
+                <para><emphasis>When</emphasis>: A new translation is added to
+                the Spring MVC admin UI scaffolding</para>
               </listitem>
             </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para><emphasis role="bold">addon create
+            wrapper</emphasis><itemizedlist>
+                <listitem>
+                  <para><emphasis>What</emphasis>: Wrapping of a maven
+                  artifact with an OSGi compliant manifest</para>
+                </listitem>
+
+                <listitem>
+                  <para><emphasis>When</emphasis>: A dependency is needed to
+                  complete other functionality offered by a Roo add-on (for
+                  example a JDBC driver for the DBRE add-on)</para>
+                </listitem>
+              </itemizedlist></para>
           </listitem>
         </itemizedlist>
       </sidebar>Once you have installed Java, Maven, PGP, SVN tools and have
@@ -674,11 +690,28 @@
 
 &lt;project-name&gt;$ <emphasis role="bold">svn commit</emphasis> -m "initial commit"
 
-&lt;project-name&gt;$ <emphasis role="bold">mvn release:prepare release:perform</emphasis></programlisting>The
+&lt;project-name&gt;$ <emphasis role="bold">mvn release:prepare release:perform </emphasis></programlisting>The
     Maven release plugin will ask for tag and release artefact names. Typical
     conventions Roo follows (in compliance with OSGi practices) is to use
     major, minor and micro version numbering as well as textual identifier. Eg
     0.1.1.RELEASE, 0.1.2.BUILD-SNAPSHOT.</para>
+
+    <para>Deployment for bundles created with Roo's wrapping command can be
+    deployed rather than released. For example, to create a wrapped bundle of
+    the postgres JDBC driver you can use this command:<programlisting>roo&gt; <emphasis
+          role="bold">addon create wrapper</emphasis> --topLevelPackage com.foo.wrapper --projectName spring-roo-postgres-wrapper --artifactId postgresql \
+--groupId postgresql --version 9.0-801.jdbc3 --description "Postgres #jdbcdriver driverclass:org.postgresql.Driver." \
+--licenseUrl http://jdbc.postgresql.org/license.html --docUrl http://jdbc.postgresql.org/ --vendorName "The PostgreSQL Global Development Group"</programlisting></para>
+
+    <para>This can then be deployed to a Google code project (setup in the
+    same way described above) with a simple deploy command:</para>
+
+    <para><programlisting>&lt;project-name&gt;$ <emphasis role="bold">mvn deploy</emphasis></programlisting></para>
+
+    <para></para>
+
+    <para><emphasis role="bold">Publishing your repository to
+    RooBot</emphasis></para>
 
     <para>Once the release is complete you can check your Google Code project
     to see that your add-on pom.xml has been updated to the new version (eg
@@ -700,7 +733,12 @@
         of a document (eg repo/repository.xml) you need to click the 'View raw
         file' link found in the 'File info' section in the right-hand menu.
         Example of a raw URL:
-        http://&lt;project-name&gt;.googlecode.com/svn/repo/repository.xml</para>
+        http://&lt;project-name&gt;.googlecode.com/svn/repo/repository.xml.
+        Make sure the version appendix is <emphasis
+        role="bold">removed</emphasis> from the URL before clinicking the
+        'View raw file' link (ie
+        http://&lt;project-name&gt;.googlecode.com/svn/repo/repository.xml<emphasis
+        role="bold">?r=25)</emphasis></para>
       </sidebar>The URL to the raw (see sidebar) repository.xml artefact can
     then be registered with <link
     xlink:href="mailto:s2-roobot@vmware.com">RooBot</link>:</para>

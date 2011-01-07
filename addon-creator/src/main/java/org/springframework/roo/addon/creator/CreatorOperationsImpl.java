@@ -27,6 +27,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
@@ -53,7 +54,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
 	}
 	
-	private enum Type {SIMPLE, ADVANCED, I18N};
+	private enum Type {SIMPLE, ADVANCED, I18N, WRAPPER};
 	
 	public void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
@@ -84,6 +85,44 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		installIfNeeded("show.tagx", topLevelPackage, Path.SRC_MAIN_RESOURCES, Type.SIMPLE, projectName);
 	}
 	
+	public void createWrapperAddon(JavaPackage topLevelPackage, String groupId, String artifactId, String version, String vendorName, String lincenseUrl, String docUrl, String osgiImports, String description, String projectName) {
+		Assert.notNull(topLevelPackage, "Top Level Package required");
+		if (projectName == null || projectName.length() == 0) {
+			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
+		}
+		Document pom;
+		try {
+			pom = XmlUtils.getDocumentBuilder().parse(TemplateUtils.getTemplate(getClass(), "wrapper/roo-addon-wrapper-template.xml"));
+		} catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+		Element rootElement = pom.getDocumentElement();
+		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/groupId", rootElement).setTextContent(groupId);
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/artifactId", rootElement).setTextContent(artifactId);
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/version", rootElement).setTextContent(version);
+		XmlUtils.findRequiredElement("/project/properties/pkgArtifactId", rootElement).setTextContent(artifactId);
+		XmlUtils.findRequiredElement("/project/properties/pkgVersion", rootElement).setTextContent(version);
+		XmlUtils.findRequiredElement("/project/properties/pkgVendor", rootElement).setTextContent(vendorName);
+		XmlUtils.findRequiredElement("/project/properties/pkgLicense", rootElement).setTextContent(lincenseUrl);
+		XmlUtils.findRequiredElement("/project/properties/repo.folder", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
+		if (docUrl != null && docUrl.length() > 0) {
+			XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", rootElement).setTextContent(docUrl);
+		}
+		if (osgiImports != null && osgiImports.length() > 0) {
+			Element config = XmlUtils.findRequiredElement("/project/build/plugins/plugin[artifactId = 'maven-bundle-plugin']/configuration/instructions", rootElement);
+			config.appendChild(new XmlElementBuilder("Import-Package", pom).setText(osgiImports).build());
+		}
+		if (description != null && description.length() > 0) {
+			Element descriptionE = XmlUtils.findRequiredElement("/project/description", rootElement);
+			descriptionE.setTextContent(description + " " + descriptionE.getTextContent());
+		}
+		
+		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
+		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
+	}
+
 	public void createI18nAddon(JavaPackage topLevelPackage, String language, Locale locale, File messageBundle, File flagGraphic, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
 		Assert.notNull(locale, "Locale required");
@@ -175,7 +214,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			}
 		}		
 	}
-	
+			
 	private void createProject(JavaPackage topLevelPackage, Type type, String description, String projectName) {
 		if (projectName == null || projectName.length() == 0) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");

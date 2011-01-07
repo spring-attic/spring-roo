@@ -53,12 +53,28 @@ public class CreatorCommands implements CommandMarker {
 		generatorOperations.createSimpleAddon(tlp, description, projectName);
 	}
 	
-	@CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies")
+	@CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)")
 	public void advanced(
 		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new addon") JavaPackage tlp, 
 		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
 		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
 		generatorOperations.createAdvancedAddon(tlp, description, projectName);
+	}
+	
+	@CliCommand(value = "addon create wrapper", help = "Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle")
+	public void wrapper(
+		@CliOption(key = "topLevelPackage", mandatory = true, optionContext = "update", help = "The top level package of the new wrapper bundle") JavaPackage tlp, 
+		@CliOption(key = "groupId", mandatory = true, help = "Dependency group id") String groupId,
+		@CliOption(key = "artifactId", mandatory = true, help = "Dependency artifact id)") String artifactId,
+		@CliOption(key = "version", mandatory = true, help = "Dependency version") String version,
+		@CliOption(key = "vendorName", mandatory = true, help = "Dependency vendor name)") String vendorName,
+		@CliOption(key = "licenseUrl", mandatory = true, help = "Dependency license URL") String lincenseUrl,
+		@CliOption(key = "docUrl", mandatory = false, help = "Dependency documentation URL") String docUrl,
+		@CliOption(key = "description", mandatory = false, help = "Description of the bundle (use keywords with #-tags for better search integration)") String description,
+		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName,
+		@CliOption(key = "osgiImports", mandatory = false, help = "Contents of Import-Package in OSGi manifest") String osgiImports) {
+		
+		generatorOperations.createWrapperAddon(tlp, groupId, artifactId, version, vendorName, lincenseUrl, docUrl, osgiImports, description, projectName);
 	}
 }

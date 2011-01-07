@@ -19,4 +19,6 @@ public interface CreatorOperations {
 	void createSimpleAddon(JavaPackage topLevelPackage, String description, String projectName);
 	
 	void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName);
+	
+	void createWrapperAddon(JavaPackage topLevelPackage, String groupId, String artifactId, String version, String vendorName, String lincenseUrl, String docUrl, String osgiImports, String description, String projectName);
 }
