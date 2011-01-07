@@ -156,8 +156,13 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			String result = "";
 			BinaryExpr current = (BinaryExpr) expression;
 			while (current instanceof BinaryExpr) {
-				Assert.isInstanceOf(StringLiteralExpr.class, current.getRight());
-				String right = ((StringLiteralExpr) current.getRight()).getValue();
+				String right = "";
+				if (current.getRight() instanceof StringLiteralExpr) {
+					right = ((StringLiteralExpr) current.getRight()).getValue();
+				} else if (current.getRight() instanceof NameExpr) {
+					right = ((NameExpr) current.getRight()).getName();
+				}
+				
 				result = right + result;
 				if (current.getLeft() instanceof StringLiteralExpr) {
 					String left = ((StringLiteralExpr) current.getLeft()).getValue();
