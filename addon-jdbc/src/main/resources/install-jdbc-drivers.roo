@@ -1,6 +1,0 @@
-// JDBC drivers for databases such as MySQL, PostgreSQL, H2 etc are auto-detected, downloaded, and installed
-// Installing OSGi JDBC Oracle driver ...
-osgi start --url http://repository.springsource.com/maven/bundles/external/javax/transaction/com.springsource.javax.transaction/1.1.0/com.springsource.javax.transaction-1.1.0.jar
-osgi start --url http://repository.springsource.com/maven/bundles/external/javax/resource/com.springsource.javax.resource/1.5.0/com.springsource.javax.resource-1.5.0.jar
-osgi start --url http://repository.springsource.com/maven/bundles/external/com/oracle/jdbc/com.springsource.oracle.jdbc/10.2.0.2/com.springsource.oracle.jdbc-10.2.0.2.jar
-
