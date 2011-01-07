@@ -29,7 +29,8 @@
     </authorgroup>
 
     <legalnotice>
-      <para>Copyright 2009, 2010 VMware, Inc. All Rights Reserved.</para>
+      <para>Copyright 2009, 2010, 2011 VMware, Inc. All Rights
+      Reserved.</para>
 
       <para>Copies of this document may be made for your own use and for
       distribution to others, provided that you do not charge any fee for such
@@ -93,7 +94,6 @@
     <xi:include href="base-json.xml" />
 
     <xi:include href="base-solr.xml" />
-
   </part>
 
   <part xml:id="internals">

@@ -1,46 +1,121 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.0.RELEASE [rev f40381e].</para>
+    <para>This appendix was automatically built from Roo 1.1.1.RELEASE [rev 1222d72].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
         <para>Add On Commands are contained in org.springframework.roo.addon.roobot.client.AddOnCommands.</para>
-        <section xml:id="command-index-addon-info">
-            <title>addon info</title>
-            <para>Provide information about a specific Spring Roo Add-on</para>
-            <programlisting><![CDATA[addon info --bundleSymbolicName]]></programlisting>
+        <section xml:id="command-index-addon-feedback-bundle">
+            <title>addon feedback bundle</title>
+            <para>Provide anonymous ratings and comments on a Spring Roo Add-on (your feedback will be published publicly)</para>
+            <programlisting><![CDATA[addon feedback bundle --bundleSymbolicName --rating]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--rating</term>
+                    <listitem>
+                        <para>How much did you like this add-on?; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--comment</term>
+                    <listitem>
+                        <para>Your comments on this add-on eg "this is my comment!"; limit of 140 characters; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
-        <section xml:id="command-index-addon-install">
-            <title>addon install</title>
-            <para>Install Spring Roo Add-on</para>
-            <programlisting><![CDATA[addon install --bundleSymbolicName]]></programlisting>
+        <section xml:id="command-index-addon-info-bundle">
+            <title>addon info bundle</title>
+            <para>Provide information about a specific Spring Roo Add-on</para>
+            <programlisting><![CDATA[addon info bundle --bundleSymbolicName]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-info-id">
+            <title>addon info id</title>
+            <para>Provide information about a specific Spring Roo Add-on</para>
+            <programlisting><![CDATA[addon info id --searchResultId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--searchResultId</term>
+                    <listitem>
+                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-install-bundle">
+            <title>addon install bundle</title>
+            <para>Install Spring Roo Add-on</para>
+            <programlisting><![CDATA[addon install bundle --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-install-id">
+            <title>addon install id</title>
+            <para>Install Spring Roo Add-on</para>
+            <programlisting><![CDATA[addon install id --searchResultId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--searchResultId</term>
+                    <listitem>
+                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-addon-list">
             <title>addon list</title>
-            <para>List all known Spring Roo Add-ons</para>
+            <para>List all known Spring Roo Add-ons (up to the maximum number displayed on a single page)</para>
             <programlisting><![CDATA[addon list]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--refresh</term>
                     <listitem>
-                        <para>The bundle symbolic name for the addon of interest; default if option present: 'true'; default if option not present: 'false'</para>
+                        <para>Refresh the add-on index from the Internet; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--linesPerResult</term>
+                    <listitem>
+                        <para>The maximum number of lines displayed per add-on; default: '2'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--maxResults</term>
+                    <listitem>
+                        <para>The maximum number of add-ons to list; default: '99'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--trustedOnly</term>
+                    <listitem>
+                        <para>Only display trusted add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--compatibleOnly</term>
+                    <listitem>
+                        <para>Only display compatible add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -53,7 +128,56 @@
                 <varlistentry>
                     <term>--bundleSymbolicName</term>
                     <listitem>
-                        <para>The bundle symbolic name for the addon of interest; no default value (mandatory) </para>
+                        <para>The bundle symbolic name for the add-on of interest; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-search">
+            <title>addon search</title>
+            <para>Search all known Spring Roo Add-ons</para>
+            <programlisting><![CDATA[addon search]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--requiresDescription</term>
+                    <listitem>
+                        <para>A comma separated list of search terms; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--refresh</term>
+                    <listitem>
+                        <para>Refresh the add-on index from the Internet; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--linesPerResult</term>
+                    <listitem>
+                        <para>The maximum number of lines displayed per add-on; default: '2'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--maxResults</term>
+                    <listitem>
+                        <para>The maximum number of add-ons to list; default: '20'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--trustedOnly</term>
+                    <listitem>
+                        <para>Only display trusted add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--compatibleOnly</term>
+                    <listitem>
+                        <para>Only display compatible add-ons in search results; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--requiresCommand</term>
+                    <listitem>
+                        <para>Only display add-ons in search results that offer this command; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -228,6 +352,18 @@
                     <term>--identifierType</term>
                     <listitem>
                         <para>The data type that will be used for the JPA identifier field (defaults to java.lang.Long); default: 'java.lang.Long'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionField</term>
+                    <listitem>
+                        <para>The JPA version field name to use for this entity; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--versionColumn</term>
+                    <listitem>
+                        <para>The JPA version field column to use for this entity; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -423,7 +559,7 @@
         <para>Creator Commands are contained in org.springframework.roo.addon.creator.CreatorCommands.</para>
         <section xml:id="command-index-addon-create-advanced">
             <title>addon create advanced</title>
-            <para>Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies</para>
+            <para>Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)</para>
             <programlisting><![CDATA[addon create advanced --topLevelPackage]]></programlisting>
             <variablelist>
                 <varlistentry>
@@ -520,6 +656,73 @@
                 </varlistentry>
             </variablelist>
         </section>
+        <section xml:id="command-index-addon-create-wrapper">
+            <title>addon create wrapper</title>
+            <para>Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle</para>
+            <programlisting><![CDATA[addon create wrapper --topLevelPackage --groupId --artifactId --version --vendorName --licenseUrl]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--topLevelPackage</term>
+                    <listitem>
+                        <para>The top level package of the new wrapper bundle; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--groupId</term>
+                    <listitem>
+                        <para>Dependency group id; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--artifactId</term>
+                    <listitem>
+                        <para>Dependency artifact id); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--version</term>
+                    <listitem>
+                        <para>Dependency version; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--vendorName</term>
+                    <listitem>
+                        <para>Dependency vendor name); no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--licenseUrl</term>
+                    <listitem>
+                        <para>Dependency license URL; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--docUrl</term>
+                    <listitem>
+                        <para>Dependency documentation URL; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--description</term>
+                    <listitem>
+                        <para>Description of the bundle (use keywords with #-tags for better search integration); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--projectName</term>
+                    <listitem>
+                        <para>Provide a custom project name (if not provided the top level package name will be used instead); no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--osgiImports</term>
+                    <listitem>
+                        <para>Contents of Import-Package in OSGi manifest; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
     </section>
     <section xml:id="command-index-dbre-commands">
         <title>Dbre Commands</title>
@@ -541,23 +744,53 @@
                         <para>The file to save the metadata to; no default value</para>
                     </listitem>
                 </varlistentry>
+                <varlistentry>
+                    <term>--enableViews</term>
+                    <listitem>
+                        <para>Display database views; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
             </variablelist>
         </section>
         <section xml:id="command-index-database-reverse-engineer">
             <title>database reverse engineer</title>
-            <para>Create and updates entities based on the database metadata</para>
-            <programlisting><![CDATA[database reverse engineer]]></programlisting>
+            <para>Create and updates entities based on te database metadata</para>
+            <programlisting><![CDATA[database reverse engineer --schema]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--schema</term>
                     <listitem>
-                        <para>The database schema name; no default value</para>
+                        <para>The database schema name; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--package</term>
                     <listitem>
                         <para>The package in which new entities will be placed; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--testAutomatically</term>
+                    <listitem>
+                        <para>Create automatic integration tests for entities; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--enableViews</term>
+                    <listitem>
+                        <para>Reverse engineer database views; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--includeTables</term>
+                    <listitem>
+                        <para>The tables to include in reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--excludeTables</term>
+                    <listitem>
+                        <para>The tables to exclude from reverse engineering. Must be separated by spaces and enclosed by pairs of double quotes</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1128,7 +1361,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name; no default value</para>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1219,7 +1452,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name; no default value</para>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1249,19 +1482,19 @@
                 <varlistentry>
                     <term>--dateFormat</term>
                     <listitem>
-                        <para>Indicates the style of the date format; default: 'SHORT' (ignored if dateTimeFormatPattern is specified)</para>
+                        <para>Indicates the style of the date format (ignored if dateTimeFormatPattern is specified); default: 'SHORT'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--timeFormat</term>
                     <listitem>
-                        <para>Indicates the style of the time format; default: 'NONE' (ignored if dateTimeFormatPattern is specified)</para>
+                        <para>Indicates the style of the time format (ignored if dateTimeFormatPattern is specified); default: 'NONE'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
                     <term>--dateTimeFormatPattern</term>
                     <listitem>
-                        <para>Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a. U</para>
+                        <para>Indicates a DateTime format pattern such as yyyy-MM-dd hh:mm:ss a; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -1318,6 +1551,12 @@
                     <term>--class</term>
                     <listitem>
                         <para>The name of the class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--column</term>
+                    <listitem>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1432,7 +1671,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name; no default value</para>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1517,7 +1756,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name; no default value</para>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1578,7 +1817,13 @@
                 <varlistentry>
                     <term>--joinColumnName</term>
                     <listitem>
-                        <para>The JPA Join Column name; no default value</para>
+                        <para>The JPA @JoinColumn name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--referencedColumnName</term>
+                    <listitem>
+                        <para>The JPA @JoinColumn referencedColumnName; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1760,7 +2005,7 @@
                 <varlistentry>
                     <term>--column</term>
                     <listitem>
-                        <para>The JPA column name; no default value</para>
+                        <para>The JPA @Column name; no default value</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -1844,6 +2089,111 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-git-commands">
+        <title>Git Commands</title>
+        <para>Git Commands are contained in org.springframework.roo.addon.git.GitCommands.</para>
+        <section xml:id="command-index-git-commit-all">
+            <title>git commit all</title>
+            <para>Trigger a commit manually for the project</para>
+            <programlisting><![CDATA[git commit all --message]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--message</term>
+                    <listitem>
+                        <para>The commit message; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-git-config">
+            <title>git config</title>
+            <para>Git revision control configuration (.git/config)</para>
+            <programlisting><![CDATA[git config]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--userName</term>
+                    <listitem>
+                        <para>The user name; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--email</term>
+                    <listitem>
+                        <para>The user email; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--repoUrl</term>
+                    <listitem>
+                        <para>The URL of the remote repository; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--colorCoding</term>
+                    <listitem>
+                        <para>Enable color coding of commands in OS shell; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-git-log">
+            <title>git log</title>
+            <para>Commit log</para>
+            <programlisting><![CDATA[git log]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--maxMessages</term>
+                    <listitem>
+                        <para>Number of commit messages to display; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-git-revert-commit">
+            <title>git revert commit</title>
+            <para>Roll project back to a specific commit</para>
+            <programlisting><![CDATA[git revert commit --revString --message]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--revString</term>
+                    <listitem>
+                        <para>Commit id; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--message</term>
+                    <listitem>
+                        <para>The commit message; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-git-revert-last">
+            <title>git revert last</title>
+            <para>Revert (last x) commit(s)</para>
+            <programlisting><![CDATA[git revert last --message]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--commitCount</term>
+                    <listitem>
+                        <para>Number of commits to revert; no default value</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--message</term>
+                    <listitem>
+                        <para>The commit message; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-git-setup">
+            <title>git setup</title>
+            <para>Setup Git revision control</para>
+            <programlisting><![CDATA[git setup]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
     <section xml:id="command-index-gwt-commands">
         <title>Gwt Commands</title>
         <para>Gwt Commands are contained in org.springframework.roo.addon.gwt.GwtCommands.</para>
@@ -1852,6 +2202,35 @@
             <para>Install Google Web Toolkit (GWT) into your project</para>
             <programlisting><![CDATA[gwt setup]]></programlisting>
             <para>This command does not accept any options.</para>
+        </section>
+    </section>
+    <section xml:id="command-index-hades-commands">
+        <title>Hades Commands</title>
+        <para>Hades Commands are contained in org.synyx.hades.roo.addon.HadesCommands.</para>
+        <section xml:id="command-index-hades-install">
+            <title>hades install</title>
+            <para>Installs Hades for the project</para>
+            <programlisting><![CDATA[hades install]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-hades-repository">
+            <title>hades repository</title>
+            <para>Creates a Hades repository interface</para>
+            <programlisting><![CDATA[hades repository --entity]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The entity you want to create the repository for; default if option present: '*' (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--package</term>
+                    <listitem>
+                        <para>No help available; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
         </section>
     </section>
     <section xml:id="command-index-hint-commands">
@@ -1878,6 +2257,25 @@
             <title>test mock</title>
             <para>Creates a mock test for the specified entity</para>
             <programlisting><![CDATA[test mock]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--entity</term>
+                    <listitem>
+                        <para>The name of the entity this mock test is targeting; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--permitReservedWords</term>
+                    <listitem>
+                        <para>Indicates whether reserved words are ignored by Roo; default if option present: 'true'; default if option not present: 'false'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-test-stub">
+            <title>test stub</title>
+            <para>Creates a test stub for the specified entity</para>
+            <programlisting><![CDATA[test stub]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--entity</term>
@@ -2189,13 +2587,13 @@
         </section>
         <section xml:id="command-index-web-mvc-install-language">
             <title>web mvc install language</title>
-            <para>Create a new manual Controller (ie where you write the methods)</para>
+            <para>Install new internationalization bundle for MVC scaffolded UI.</para>
             <programlisting><![CDATA[web mvc install language --code]]></programlisting>
             <variablelist>
                 <varlistentry>
                     <term>--code</term>
                     <listitem>
-                        <para>The path and name of the controller object to be created; no default value (mandatory) </para>
+                        <para>The language code for the desired bundle; no default value (mandatory) </para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2518,6 +2916,29 @@
             </variablelist>
         </section>
     </section>
+    <section xml:id="command-index-op4j-commands">
+        <title>Op4j Commands</title>
+        <para>Op4j Commands are contained in org.springframework.roo.addon.op4j.Op4jCommands.</para>
+        <section xml:id="command-index-op4j-add">
+            <title>op4j add</title>
+            <para>Some helpful description</para>
+            <programlisting><![CDATA[op4j add]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--class</term>
+                    <listitem>
+                        <para>The java type to apply the RooOp4j annotation to; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-op4j-setup">
+            <title>op4j setup</title>
+            <para>Setup Op4j addon</para>
+            <programlisting><![CDATA[op4j setup]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+    </section>
     <section xml:id="command-index-pgp-commands">
         <title>Pgp Commands</title>
         <para>Pgp Commands are contained in org.springframework.roo.felix.pgp.PgpCommands.</para>
@@ -2826,6 +3247,54 @@
                     <term>--searchServerUrl</term>
                     <listitem>
                         <para>The Url of the Solr search server; default: 'http://localhost:8983/solr'</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+    </section>
+    <section xml:id="command-index-uaa-commands">
+        <title>Uaa Commands</title>
+        <para>Uaa Commands are contained in org.springframework.roo.uaa.UaaCommands.</para>
+        <section xml:id="command-index-download-accept-terms-of-use">
+            <title>download accept terms of use</title>
+            <para>Accepts the Spring User Agent Analysis (UAA) Terms of Use</para>
+            <programlisting><![CDATA[download accept terms of use]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-download-privacy-level">
+            <title>download privacy level</title>
+            <para>Changes the Spring User Agent Analysis (UAA) privacy level</para>
+            <programlisting><![CDATA[download privacy level --privacyLevel]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--privacyLevel</term>
+                    <listitem>
+                        <para>The new UAA privacy level to use; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-download-reject-terms-of-use">
+            <title>download reject terms of use</title>
+            <para>Rejects the Spring User Agent Analysis (UAA) Terms of Use</para>
+            <programlisting><![CDATA[download reject terms of use]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-download-status">
+            <title>download status</title>
+            <para>Provides a summary of the Spring User Agent Analysis (UAA) status and commands</para>
+            <programlisting><![CDATA[download status]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-download-view">
+            <title>download view</title>
+            <para>Displays the Spring User Agent Analysis (UAA) header content in plain text</para>
+            <programlisting><![CDATA[download view]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--file</term>
+                    <listitem>
+                        <para>The file to save the UAA JSON content to; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>

@@ -165,8 +165,9 @@ Located add-on that may offer this JDBC driver
 ID T R DESCRIPTION -------------------------------------------------------------
 01 Y Y 5.1.13.0001 #jdbcdriver driverclass:com.mysql.jdbc.Driver. This...
 --------------------------------------------------------------------------------
-[HINT] use 'addon info TAB' to see details about a bundle
-[HINT] use 'addon install TAB' to install a specific bundle
+[HINT] use 'addon info id --searchResultId ..' to see details about a search result
+[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or
+[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version
 JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
     <para>You can get further information about the search result by with the
@@ -187,12 +188,13 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
     commands (see <xref linkend="dbre_commands" /> below).</para>
 
     <para><emphasis role="bold">Note</emphasis>: currently there are no
-    open-source JDBC drivers for Oracle or DB2 and Roo does not provide OSGis
-    driver for these databases. If you are an Oracle or DB2 user, you will
+    open-source JDBC drivers for Oracle or DB2 and Roo does not provide OSGi
+    drivers for these databases. If you are an Oracle or DB2 user, you will
     need to obtain an OSGi-enabled driver from Oracle or IBM respectively or
-    wrap your own Oracle or DB2 driver jars using Roo's wrapping facility. To
-    see how to wrap a JAR, check Roo out of our source code repository and
-    take a look in the /wrapping directory for an example.</para>
+    wrap your own Oracle or DB2 driver jars using Roo's wrapping facility. Use
+    the <link linkend="command-index-addon-create-wrapper">addon create
+    wrapper</link> to turn an existing DB2 or Oracle JDBC driver into an OSGi
+    bundle you can install into Roo.</para>
   </section>
 
   <section>

@@ -510,15 +510,16 @@ quit
         <title>Modifying PGP Trusts For httppgp:// Scheme Operation</title>
 
         <para>As detailed in the main text, Roo supports a special protocol
-        scheme called <code>httppgp://</code>. This performs a PGP detached
-        signature verification before proceeding to download the main
-        resource. Many Roo commands download items from the Internet, and
-        anytime a <code>httppgp://</code> scheme is encountered this
-        verification will take place.</para>
+        scheme called <code>httppgp://</code>. This performs a Pretty Good
+        Privacy (PGP) detached signature verification before proceeding to
+        download the main resource. We use this as a key foundation of our
+        add-on security model. Many Roo commands download items from the
+        Internet, and anytime a <code>httppgp://</code> scheme is encountered
+        a PGP verification will take place.</para>
 
         <para>One common case is if you are using the <link
-        linkend="command-index-addon-install">addon install</link> command. An
-        example of the error if the PGP detached signature is untrusted is
+        linkend="command-index-addon-install-id">addon install</link> command.
+        An example of the error if the PGP detached signature is untrusted is
         shown below:</para>
 
         <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
@@ -530,8 +531,10 @@ or 'pgp automatic trust' to trust any keys</programlisting>Essentially you
         need to decide if you trust the PGP key ID or not. There is a <link
         linkend="command-index-pgp-key-view">pgp key view</link> command that
         will help you learn more about a given key ID if you would like to use
-        it. You essentially have two options to cause an untrusted download to
-        be permitted:</para>
+        it. You can also view keys at public PGP key servers such as <link
+        xlink:href="http://pgp.mit.edu/">http://pgp.mit.edu/</link>. You
+        essentially have two options to cause an untrusted httppgp download to
+        be performed by Roo:</para>
 
         <orderedlist>
           <listitem>
@@ -542,14 +545,21 @@ or 'pgp automatic trust' to trust any keys</programlisting>Essentially you
             linkend="command-index-pgp-list-trusted-keys">pgp list trusted
             keys</link> command (you can of course remove it via the <link
             linkend="command-index-pgp-untrust">pgp untrust</link> command as
-            well). An example of the command to trust a key is shown
+            well). All of the keys you trust are stored in
+            <code>~/.spring_roo_pgp.bpg</code>, which is a binary encoded PGP
+            key store which you can also view and manage using normal PGP
+            tools. An example of the command to trust a key is shown
             below:<programlisting>roo&gt; <emphasis role="bold">pgp trust</emphasis> --keyId 0xC3A61B10</programlisting></para>
           </listitem>
 
           <listitem>
             <para>Alternately, you can decide to simply switch off key
-            verification and automatically trust any keys encountered. You
-            should use caution with this command. To use it, simply type <link
+            verification and automatically trust any keys encountered. Such
+            keys are stored in your <code>~/.spring_roo_pgp.bpg</code> file.
+            You should use caution with this command, although it can be
+            convenient if you'd simply like to install some new add-ons and
+            their dependencies without considering every key used to sign
+            them. To use automatic trust, simply type <link
             linkend="command-index-pgp-automatic-trust">pgp automatic
             trust</link> and press enter:<programlisting>roo&gt; <emphasis
                   role="bold">pgp automatic trust</emphasis>
@@ -581,16 +591,19 @@ disable by typing 'pgp automatic trust' again</programlisting></para>
     <para>Roo's add-on distribution system encourages individual add-on
     developers to host their add-on web site (we don't believe in a central
     model where we require must host add-ons on our servers). The main
-    requirement an add-on developer needs to fulfill is their web site must
-    offer an OSGi Bundle Repository (OBR) index file. While Roo internally
-    uses OSGi and all modules are managed as OSGi bundles, this is transparent
-    and you do not need any familiarity with OSGi or bundles to work with the
-    Roo add-on installation system. The OBR file is usually named
-    <code>repository.xml</code> and it is available over HTTP. Within that OBR
-    file each available Roo-related add-on is listed, along with the URL where
-    it is published. The URLs look similar to normal URLs, except they will
-    usually specify a <code>httppgp://</code> protocol scheme (instead of the
-    more common <code>http://</code>).</para>
+    requirement an add-on developer needs to fulfill is their add-ons must be
+    in OSGi format and their web site must include an OSGi Bundle Repository
+    (OBR) index file. While Roo internally uses OSGi and all modules are
+    managed as OSGi bundles, this is transparent and you do not need any
+    familiarity with OSGi or bundles to work with the Roo add-on installation
+    system. An OBR file is usually named <code>repository.xml</code> and it is
+    available over HTTP. If you're curious what these OBR files look like, you
+    can view the Spring Roo OBR repository at <link
+    xlink:href="http://spring-roo-repository.springsource.org/repository.xml">http://spring-roo-repository.springsource.org/repository.xml</link>.
+    Within an OBR file each available Roo-related add-on is listed, along with
+    the URL where it is published. The URLs look similar to normal URLs,
+    except they will usually specify a <code>httppgp://</code> protocol scheme
+    (instead of the more common <code>http://</code>).</para>
 
     <para>The <code>httppgp://</code> protocol scheme is how we achieve a
     level of security with add-ons. Obviously with every add-on developer able
@@ -623,47 +636,107 @@ disable by typing 'pgp automatic trust' again</programlisting></para>
     <para>Enough with the theory, let's move on to the fun piece. In Spring
     Roo you simply use the shell to locate new add-ons. To review the list of
     known add-ons you can use the <link
-    linkend="command-index-addon-list">addon list</link> command. This lists
-    all add-ons that are in the RooBot-maintained index mentioned
+    linkend="command-index-addon-list">addon list</link> or <link
+    linkend="command-index-addon-search">addon search</link> command. This
+    lists all add-ons that are in the RooBot-maintained index mentioned
     above:</para>
 
-    <para><programlisting>roo&gt; <emphasis role="bold">addon list</emphasis></programlisting>If
-    you can't see the add-on you're looking for, you can repeat the command
-    with the optional <code>--refresh </code>option. This will refresh the
-    RooBot index.</para>
+    <para><programlisting>roo&gt; <emphasis role="bold">addon search</emphasis>
+1234 found, sorted by rank; T = trusted developer; R = Roo 1.1 compatible
+ID T R DESCRIPTION -------------------------------------------------------------
+01 Y Y 2.3.0.0001 This bundle wraps the standard Maven artifact:
+       protobuf-java-2.3.0-lite.
+02 Y - 0.3.0.RELEASE Addon for Spring Roo to provide generic DAO and query
+       methods based on Hades.
+03 Y Y 0.9.94.0001 This bundle wraps the standard Maven artifact:
+       jline-0.9.94.S2-A (S2-A is a private patched version; see ROO-350 for...
+04 - - 1.1.6 Addons that adds Content Negotiating View Resolver configuration
+       to your application context: MVC multiple representations By default...
+...(output truncated for reference guide inclusion)...
+[HINT] use 'addon info id --searchResultId ..' to see details about a search result
+[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or
+[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version</programlisting>There
+    are various options you can pass to the search command to see more lines
+    per result, perform filtering and so on. Just use --TAB as usual to see
+    these options.</para>
+
+    <para>If you can't see the add-on you're looking for, you can repeat the
+    command with the optional <code>--refresh </code>option. This will refresh
+    your local RooBot index from our server.</para>
 
     <para>To review details about a specific add-on, use the <link
-    linkend="command-index-addon-info">addon info</link> command. This command
-    (as with many others related to add-on management) requires a "bundle
-    symbolic name". This is usually the add-on's top-level package. In any
-    event, it's available via TAB completion and every add-on in the RooBot
-    index is included. To view details about an add-on:</para>
+    linkend="command-index-addon-info-id">addon info id</link> command as
+    mentioned in the hint at the bottom of the search results. There is also a
+    related command called <link
+    linkend="command-index-addon-info-bundle">addon info bundle</link> which
+    requires a "bundle symbolic name", which is usually the add-on's top-level
+    package. However, it's often more convenient to use the search result "ID"
+    number (to the left hand side of each row) rather than typing out a bundle
+    symbolic name. Let's try this. To view details about the second add-on
+    listed, enter this command:</para>
 
-    <para><programlisting>roo&gt; <emphasis role="bold">addon info </emphasis>--bundleSymbolicName &lt;TAB&gt;</programlisting>An
-    example of the output of <link linkend="command-index-addon-info">addon
-    info</link> is shown below:</para>
+    <para><programlisting>roo&gt; <emphasis role="bold">addon info id </emphasis>--searchResultId 02</programlisting>An
+    example of the output of <link linkend="command-index-addon-info-id">addon
+    info id</link> is shown below:</para>
 
-    <para><programlisting>roo&gt; <emphasis role="bold">addon info</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Name: Spring Roo - Addon - equals() and hashCode()
-Ranking: 1.0
-Description: This project provides an addon for Spring Roo which aims to generate equals() and hashCode() methods.
-Version: 1.2.0
-Size: 21183
-Pgp Key '0xC3A61B10' signed by: stefan ocke (stefan.ocke@saxsys.de)
-Command name [equals]; help ['Add equals() and hashCode() methods to a class']</programlisting>Note
-    the "ranking" field. At the time of writing all add-ons have the same
-    ranking. However, we're soon adding some automatic metrics that detects
-    popular add-ons and causes them to rank more highly. This will help you
-    locate popular (and thus likely higher quality) add-ons. If you decides to
-    install a specific add-on, simply use the <link
-    linkend="command-index-addon-install">addon install</link> command:</para>
+    <para><programlisting>roo&gt; <emphasis role="bold">addon info id</emphasis> --searchResultId 02
+Name.........: Hades - Roo addon
+BSN..........: org.synyx.hades.roo.addon
+Version......: 0.3.0.RELEASE
+Roo Version..: 1.1.0
+Ranking......: 1.0
+JAR Size.....: 20458 bytes
+PGP Signature: 0xF2C57936 signed by Oliver Gierke (info@olivergierke.de)
+OBR URL......: http://hades.synyx.org/static/roo/repo/repository.xml
+JAR URL......: httppgp://hades.synyx.org/static/roo/repo/org/synyx/hades/org.syn
+               yx.hades.roo.addon/0.3.0.RELEASE/org.synyx.hades.roo.addon-0.3.0.
+               RELEASE.jar
+Commands.....: 'hades install' [Installs Hades for the project]
+Commands.....: 'hades repository' [Creates a Hades repository interface]
+Description..: Addon for Spring Roo to provide generic DAO and query methods
+               based on Hades.
+Comment 1....: Rating [GOOD], Date [17/12/10], Comment [Nice add-on for those
+               who want to use a separate repository layer, can be improved in
+               functionality]
+</programlisting>In the above output "BSN" means bundle symbolic name, which
+    is the alternate way of referring to a given add-on. The output also shows
+    you the Roo shell commands that are available via the add-on. These
+    commands are automatically seen by the Roo shell, so if you typed in this
+    case "hades install" without first having installed the add-on, Roo would
+    have performed a search and shown you this add-on offered the command.
+    This is a great feature and means you can often just type commands you
+    think you might need and find out which add-ons offer them without
+    performing an explicit search. A similar feature exists for JDBC
+    resolution if you try to reverse engineer a database for which there is no
+    installed JDBC driver (Roo will automatically suggest the add-on your need
+    and instruct you which command to use to install it).</para>
 
-    <para><programlisting>roo&gt; <emphasis role="bold">addon install</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
-Successfully installed add-on: de.saxsys.roo.equals.addon</programlisting></para>
+    <para>If you decide to install a specific add-on, simply use the <link
+    linkend="command-index-addon-install-id">addon install id</link>
+    command:</para>
+
+    <para><programlisting>roo&gt; <emphasis role="bold">addon install id</emphasis> --searchResultId 02
+Successfully installed add-on: org.synyx.hades.roo.addon
+[Hint] Please consider rating this add-on with the following command:
+[Hint] addon feedback bundle --bundleSymbolicName org.synyx.hades.roo.addon --rating ... --comment "..."</programlisting></para>
 
     <para>If the add-on installation is aborted with a warning that the add-on
     author is currently not trusted, please review the sidebar about modifying
-    PGP trusts.</para>
+    PGP trusts. To simplify identifying add-ons from developers you already
+    trust, the <link linkend="command-index-addon-search">addon search</link>
+    results include a "T" column which means "trusted developer". If you see a
+    "Y" in that column, you've already trusted that developer's PGP key and
+    thus installation will work without needing to add their key. If you see a
+    "-" in that column, you'll need to first tell Roo you trust their key (as
+    explained in the PGP sidebar).</para>
+
+    <para>As per the [HINT] messages that appear immediately after installing
+    an add-on, we appreciate your feedback about the add-ons you use. You can
+    use the <link linkend="command-index-addon-feedback-bundle">addon feedback
+    bundle</link> command for this purpose, as shown in the console text
+    above. If you provide a rating or comment, it will show up for other
+    people to see when they use the <link
+    linkend="command-index-addon-info-id">addon info</link> command.</para>
 
     <para>It is generally recommended to restart Roo to ensure the add-on is
     properly initialized. This theoretically isn't necessary in most cases,
@@ -671,7 +744,9 @@ Successfully installed add-on: de.saxsys.roo.equals.addon</programlisting></para
 
     <para>Of course, you can remove add-ons as well. To uninstall any given
     add-on, just use the <link linkend="command-index-addon-remove">addon
-    remove</link> command:<programlisting>roo&gt; <emphasis role="bold">addon remove</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
+    remove</link> command. On this occasion we'll use the bundle symbolic name
+    (which is available via TAB completion as is usual with
+    Roo):<programlisting>roo&gt; <emphasis role="bold">addon remove</emphasis> --bundleSymbolicName de.saxsys.roo.equals.addon
 Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
 
     <para>Note that all of the "addon" commands only work with add-ons listed
@@ -688,13 +763,15 @@ Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
     linkend="command-index-osgi-obr-start">osgi obr start</link>" command to
     download and start the add-on. Importantly, the additional security
     verificatons performed by RooBot are skipped given RooBot is not used with
-    these commands. That means bundles you start using the "osgi obr start"
-    command may not use <code>httppgp://</code> for PGP signature
-    verification. As such you should exercise caution when using any
-    installation-related commands that do not start with "addon", as such
-    commands do not use resources subject to the RooBot security
-    verifications. Noneless there remain legitimate use cases for such
-    distribution styles, so it's good to know Roo supports them as well as the
-    more common, user-friendly and more security "addon" commands.</para>
+    these commands (or other related commands such as <link
+    linkend="command-index-osgi-start">osgi start</link>). That means bundles
+    you start using the "osgi obr start" command may not use
+    <code>httppgp://</code> for PGP signature verification. As such you should
+    exercise caution when using any installation-related commands that do not
+    start with "addon", as such commands do not use resources subject to the
+    RooBot security verifications. Noneless there remain legitimate use cases
+    for such distribution styles, so it's good to know Roo supports them as
+    well as the more common, user-friendly and more security "addon"
+    commands.</para>
   </section>
 </chapter>
