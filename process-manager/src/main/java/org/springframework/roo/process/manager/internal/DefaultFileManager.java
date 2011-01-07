@@ -268,6 +268,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		if (event.isUndoing()) {
 			clear();
 		} else {
+			// it's a flush or a reset event
 			commit();
 		}
 	}

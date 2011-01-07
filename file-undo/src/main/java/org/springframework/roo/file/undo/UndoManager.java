@@ -48,6 +48,12 @@ public interface UndoManager {
 	void reset();
 	
 	/**
+	 * Indicates a caller wishes the {@link UndoManager} or "flush" its contents. The exact meaning of a flush is
+	 * implementation dependent. It is guaranteed to not change the undo stack, but simply notify {@link UndoListener}s.
+	 */
+	void flush();
+	
+	/**
 	 * @param undoListener registers a new undo listener (required)
 	 */
 	void addUndoListener(UndoListener undoListener);

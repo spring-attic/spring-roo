@@ -178,6 +178,9 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				result = callback.callback();
 			}
 			
+			// flush the undo manager so that any changes it has been holding are written to disk and the file monitor service
+			undoManager.flush();
+			
 			// guarantee scans repeat until there are no more changes detected
 			while (fileMonitorService.isDirty()) {
 				if (fileMonitorService instanceof NotifiableFileMonitorService) {
@@ -185,6 +188,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				} else {
 					fileMonitorService.scanAll();
 				}
+				undoManager.flush(); // in case something else happened as a result of event notifications above
 			}
 			
 			// it all seems to have worked, so clear the undo history

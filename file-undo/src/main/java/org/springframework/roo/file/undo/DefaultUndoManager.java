@@ -7,6 +7,7 @@ import java.util.Stack;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.file.undo.UndoEvent.UndoOperation;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -32,6 +33,10 @@ public class DefaultUndoManager implements UndoManager {
 		this.stack.push(undoableOperation);
 	}
 
+	public void flush() {
+		notifyListeners(UndoOperation.FLUSH);
+	}
+	
 	public void reset() {
 		while (!this.stack.empty()) {
 			UndoableOperation op = this.stack.pop();
@@ -41,7 +46,7 @@ public class DefaultUndoManager implements UndoManager {
 				throw new IllegalStateException("UndoableOperation '" + op + "' threw an exception, in violation of the interface contract");
 			}
 		}
-		notifyListeners(false);
+		notifyListeners(UndoOperation.RESET);
 	}
 
 	public boolean undo() {
@@ -66,7 +71,7 @@ public class DefaultUndoManager implements UndoManager {
 				throw new IllegalStateException("UndoableOperation '" + op + "' threw an exception, in violation of the interface contract");
 			}
 		}
-		notifyListeners(true);
+		notifyListeners(UndoOperation.UNDO);
 		return undoMode;
 	}
 	
@@ -74,9 +79,9 @@ public class DefaultUndoManager implements UndoManager {
 		this.undoEnabled = undoEnabled;
 	}
 
-	private void notifyListeners(boolean undoing) {
+	private void notifyListeners(UndoOperation operation) {
 		for (UndoListener listener : listeners) {
-			listener.onUndoEvent(new UndoEvent(undoing));
+			listener.onUndoEvent(new UndoEvent(operation));
 		}
 	}
 
