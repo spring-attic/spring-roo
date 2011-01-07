@@ -254,7 +254,7 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			produceMetadata = false;
 		}
 		
-		if (fileManager.exists(itdFilename) && !produceMetadata) {
+		if (!produceMetadata && fileManager.exists(itdFilename)) {
 			// We don't seem to want metadata anymore, yet the ITD physically exists, so get rid of it
 			// This might be because the trigger annotation has been removed, the governor is missing a class declaration etc
 			// TODO: Overload fileManager.delete(..) so we can give a message so the console output is more meaningful
@@ -301,10 +301,11 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 			}
 			
 			if (deleteItdFile) {
-				if (fileManager.exists(itdFilename)) {
-					// TODO: Overload fileManager.delete(..) to accept a message and inform the user what's happening
-					fileManager.delete(itdFilename);
-				}
+				// Notice we use the createOrUpdateTextFileIfRequired method, as a zero byte payload will delete the file.
+				// This is better than calling fileManager.delete(..) in this case, as we can ensure if a subsequent update happens
+				// in the same process manager operation it will not physically delete the file or display console messages to that effect.
+				// We also need not perform an FileManager.exists(..) call, which is more efficient as it might update several times.
+				fileManager.createOrUpdateTextFileIfRequired(itdFilename, "", false);
 			}
 			
 			// Eagerly notify that the metadata has been updated; this also registers the metadata hash code in the superclass' cache to avoid

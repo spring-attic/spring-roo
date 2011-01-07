@@ -220,7 +220,13 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		try {
 			for (String fileIdentifier : deferredFileWrites.keySet()) {
 				String newContents = deferredFileWrites.get(fileIdentifier);
-				createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+				if (newContents.length() == 0) {
+					if (exists(fileIdentifier)) {
+						delete(fileIdentifier);
+					}
+				} else {
+					createOrUpdateTextFileIfRequired(fileIdentifier, newContents);
+				}
 			}
 		} finally {
 			deferredFileWrites.clear();

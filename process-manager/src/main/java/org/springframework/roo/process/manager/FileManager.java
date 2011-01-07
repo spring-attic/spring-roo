@@ -111,7 +111,13 @@ public interface FileManager {
 	MutableFile updateFile(String fileIdentifier);
 
 	/**
-	 * Provides a simple way to create or update a file, skipping any modification if the file's contents match the proposed contents. This should only be called for text files.
+	 * Provides a simple way to create or update a file, skipping any modification if the file's contents match the proposed contents. This should only
+	 * be called for text files.
+	 * 
+	 * <p>
+	 * This mechanism also automatically deletes an unwanted file if the new contents are zero bytes. If deleting, the existence of
+	 * the file need not be considered in advance (it will only delete if the file is present, but it will not fail if the file does not
+	 * exist or has been separately deleted).
 	 * 
 	 * <p>
 	 * Implementations guarantee to {@link #createDirectory(String)} as required to create any required parent directories.
@@ -120,7 +126,7 @@ public interface FileManager {
 	 * Implementations are required to observe the {@link #commit()} and {@link #clear()} semantics defined in the type-level JavaDocs.
 	 * 
 	 * @param fileIdentifier to create or update as appropriate (required)
-	 * @param newContents the replacement contents (required)
+	 * @param newContents the replacement contents (required, but can be zero bytes if the file should be deleted)
 	 * @param writeImmediately forces immediate write of the file to disk (false means it can be deferred, as recommended)
 	 */
 	void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately);
