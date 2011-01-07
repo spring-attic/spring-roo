@@ -358,8 +358,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			sb.setLength(0);
 		}
 		log.warning("--------------------------------------------------------------------------------");
-		log.info("[HINT] use 'addon info TAB' to see details about a bundle");
-		log.info("[HINT] use 'addon install TAB' to install a specific bundle");
+		log.info("[HINT] use 'addon info id --searchResultId ..' to see details about a search result");
+		log.info("[HINT] use 'addon install id --searchResultId ..' to install a specific search result, or");
+		log.info("[HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version");
 	}
 	
 	@SuppressWarnings("unchecked")
