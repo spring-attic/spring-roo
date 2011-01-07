@@ -109,7 +109,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		}
 	}
 
-	public boolean supportsSchema(boolean displayAddOns) {
+	public boolean supportsSchema(boolean displayAddOns) throws RuntimeException {
 		Connection connection = null;
 		try {
 			connection = getConnection(displayAddOns);
@@ -117,7 +117,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 			String schemaTerm = databaseMetaData.getSchemaTerm();
 			return StringUtils.hasText(schemaTerm) && schemaTerm.equalsIgnoreCase("schema");
 		} catch (Exception e) {
-			return false;
+			throw new IllegalStateException(e);
 		} finally {
 			connectionProvider.closeConnection(connection);
 		}

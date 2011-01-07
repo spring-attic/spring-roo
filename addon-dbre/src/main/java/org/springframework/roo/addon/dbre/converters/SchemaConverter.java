@@ -31,13 +31,17 @@ public class SchemaConverter implements Converter {
 	}
 
 	public boolean getAllPossibleValues(List<String> completions, Class<?> requiredType, String existingData, String optionContext, MethodTarget target) {
-		if (dbreModelService.supportsSchema(false)) {
-			Set<Schema> schemas = dbreModelService.getDatabaseSchemas(false);
-			for (Schema schema : schemas) {
-				completions.add(schema.getName());
+		try {
+			if (dbreModelService.supportsSchema(false)) {
+				Set<Schema> schemas = dbreModelService.getDatabaseSchemas(false);
+				for (Schema schema : schemas) {
+					completions.add(schema.getName());
+				}
+			} else {
+				completions.add("no-schema-required");
 			}
-		} else {
-			completions.add("no-schema-required");
+		} catch (Exception e) {
+			completions.add("unable-to-obtain-connection");
 		}
 
 		return true;

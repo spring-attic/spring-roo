@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.jdbc.JdbcDriverManager;
 import org.springframework.roo.addon.jdbc.polling.JdbcDriverProvider;
 import org.springframework.roo.support.api.AddOnSearch;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -32,8 +33,8 @@ import org.springframework.roo.support.util.Assert;
 @Service
 @Reference(name = "jdbcDriverProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = JdbcDriverProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class PollingJdbcDriverManager implements JdbcDriverManager {
+	private static final Logger logger = HandlerUtils.getLogger(PollingJdbcDriverManager.class);
 	private Set<JdbcDriverProvider> providers = new HashSet<JdbcDriverProvider>();
-	private Logger logger = Logger.getLogger(PollingJdbcDriverManager.class.getName());
 	@Reference private AddOnSearch addOnSearch;
 	
 	protected void bindJdbcDriverProvider(JdbcDriverProvider listener) {
@@ -84,5 +85,4 @@ public class PollingJdbcDriverManager implements JdbcDriverManager {
 			return null;
 		}
 	}
-
 }

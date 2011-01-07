@@ -31,8 +31,9 @@ public interface DbreModelService {
 	 * 
 	 * @param displayAddOns display available add-ons if possible (required)
 	 * @return true if the database supports schema, otherwise false;
+	 * @throws RuntimeException if there is a problem acquiring a connection
 	 */
-	boolean supportsSchema(boolean displayAddOns);
+	boolean supportsSchema(boolean displayAddOns) throws RuntimeException;
 
 	/**
 	 * Returns a Set of available database {@link Schema schemas}. 
