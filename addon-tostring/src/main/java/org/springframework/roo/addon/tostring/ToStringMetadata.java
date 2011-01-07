@@ -9,13 +9,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -40,18 +38,18 @@ import org.springframework.roo.support.util.StringUtils;
 public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = ToStringMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private List<MemberHoldingTypeDetails> memberHoldingTypeDetails;
+	private List<MethodMetadata> publicAccessors;
 
 	// From annotation
 	@AutoPopulate private String toStringMethod = "toString";
 	@AutoPopulate private String[] excludeFields;
 
-	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MemberHoldingTypeDetails> memberHoldingTypeDetails) {
+	public ToStringMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<MethodMetadata> publicAccessors) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(memberHoldingTypeDetails, "Bean info metadata required");
+		Assert.notNull(publicAccessors, "Public accessors required");
 
-		this.memberHoldingTypeDetails = memberHoldingTypeDetails;
+		this.publicAccessors = publicAccessors;
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooToString.class.getName()));
@@ -65,31 +63,6 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
-	}
-
-	private List<MethodMetadata> getPublicAccessors(boolean sortByAccessorName) {
-		// We keep these in a TreeMap so the methods are output in alphabetic order
-		/** key: string based method name, value: MethodMetadata */
-		TreeMap<String, MethodMetadata> map = new TreeMap<String, MethodMetadata>();
-		List<MethodMetadata> sortedByDetectionOrder = new ArrayList<MethodMetadata>();
-
-		for (MemberHoldingTypeDetails holder : memberHoldingTypeDetails) {
-			for (MethodMetadata method : holder.getDeclaredMethods()) {
-				String accessorName = method.getMethodName().getSymbolName();
-				if (Modifier.isPublic(method.getModifier()) && method.getParameterTypes().size() == 0 && (accessorName.startsWith("get") || accessorName.startsWith("is"))) {
-					// We've got a public, no parameter, get|is method
-					if (sortByAccessorName) {
-						map.put(accessorName, method);
-					} else {
-						sortedByDetectionOrder.add(method);
-					}
-				}
-			}
-		}
-		if (sortByAccessorName) {
-			return new ArrayList<MethodMetadata>(map.values());
-		}
-		return sortedByDetectionOrder;
 	}
 
 	/**
@@ -128,7 +101,7 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				Collections.addAll(excludeFieldsSet, excludeFields);
 			}
 
-			for (MethodMetadata accessor : getPublicAccessors(false)) {
+			for (MethodMetadata accessor : publicAccessors) {
 				String accessorName = accessor.getMethodName().getSymbolName();
 				String fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor).getSymbolName();
 				if (!excludeFieldsSet.contains(StringUtils.uncapitalize(fieldName))) {
