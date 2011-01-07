@@ -169,8 +169,10 @@
             <excludes>
                 <exclude>org.springframework.roo.bootstrap-*.jar</exclude>
                 <exclude>org.apache.felix.framework-*.jar</exclude>
-                <!--  Ensure EBR-sourced JDBC drivers (ie Oracle) are not included in the distribution ZIP -->
-                <exclude>com.springsource.*.jar</exclude>
+                <exclude>org.springframework.roo.addon.op4j-*.jar</exclude>
+                <exclude>org.springframework.roo.addon.git-*.jar</exclude>
+                <exclude>org.springframework.roo.wrapping.jgit-*.jar</exclude>
+                <exclude>org.springframework.roo.wrapping.jsch-*.jar</exclude>
             </excludes>
         </fileSet>
 	</fileSets>
