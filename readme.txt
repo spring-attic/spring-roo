@@ -177,11 +177,13 @@ need to "mvn install" from the root directory so internal build
 dependencies are preserved. You can use "mvn package" from the root if
 you prefer. "mvn install" just gives you more flexibility.
 
-Roo ships with a command line tool called "roo-dev". This is only
-maintained for *nix. It copies all relevant JARs from the Roo
+Roo ships with a command line tool called "roo-dev". This is also a
+Windows equivalent. It copies all relevant JARs from the Roo
 directories into ~/roo/bootstrap/target/osgi. This directory
 represents a configured Roo OSGi instance. "roo-dev" also launches the
-OSGi container, which is currently Apache Felix.
+OSGi container, which is currently Apache Felix. It also activates
+"development mode", which gives fuller exceptions, more file activity
+reporting, extra flash messages related to OSGi events etc.
 
 Be aware that Felix will cache the bundles you have installed each
 run (in /roo/bootstrap/target/osgi/cache). It's therefore more
@@ -194,106 +196,6 @@ The above guarantees your Felix instance is fully cleaned. The
 wish to test the operation of other bundles with Roo core.
 
 ======================================================================
-DEBUGGING VIA ECLIPSE
-======================================================================
-
-       **** Note as of ROO-728 this section is out of date ****
-
-Most of the time we just use the roo-dev command line tool directly
-from the command line. This we have found is the fastest approach and
-also lets us see exactly what a user would see, including the TAB
-completion features. Still, sometimes you have a tricky issue you'd
-prefer to work through via the STS/Eclipse debugger. When you do this
-you need to be aware that you lose the full capabilities of the shell,
-as the JLine library (used for command line parsing) is unable to
-fully hook into your operating system's keyboard and ANSI services.
-Anyhow, for some issues a debugger is worth the minor price of losing
-your full keyboard and colour services! :-)
-
-To setup debugging, open org.springframework.roo.bootstrap.Main.
-Note it has a Java "main" method. Execute the class using Run As >
-Java Application. Note the "Console" tab in Eclipse/STS will open.
-Type "quit" then hit enter. Now select Run > Debug Configurations.
-Select the Java Application > Main entry. Click on Arguments
-and then add the following VM Arguments:
-
-*nix machines:
-  -Djline.terminal=org.springframework.roo.shell.jline.EclipseTerminal
-
-Windows machines:
-  -Djline.WindowsTerminal.directConsole=false
-  -Djline.terminal=jline.UnsupportedTerminal
-
-Finally, set the working directory to "Other" and a location on your
-disk where you'd like the Roo shell to be loaded. This is usually a
-project you're intending to test with.
-
-======================================================================
-SHELL DIAGNOSTIC FEATURES
-======================================================================
-
-The Roo shell includes several commands especially for Roo developers.
-
-Firstly, any exception thrown by Roo or one of its add-ons is always
-caught by the shell infrastructure and a simplified message displayed
-to the user. This is generally what is desired, as it allows you to
-simply throw exceptions whenever something is in an incorrect state.
-However, full exceptions can be displayed by typing this command:
-
-  development mode
-
-There is also a "development mode -enabled false" to deactivate.
-
-There are also several metadata-related commands:
-
-  metadata summary
-  metadata trace -level x
-  metadata for type -type com.foo.bar.TypeName
-  metadata for id -metadataId MID:com.metadata.Class#theIdentifier
-
-The most practical command is "metadata for type", which shows you how
-Roo internally sees a particular Java type. It will also show you all
-of the downstream dependencies of a particular type, complete with the
-various metadata identifiers (strings starting with "MID:"). You can
-present those strings to the "metadata for id" command and see extra
-information about how Roo internally understands that metadata.
-
-The "metadata trace -level 1" command is useful for seeing how changes
-to metadata are notified to downstream dependencies, including any
-nested notifications that are taking place. You can also use level 2
-if you would like even more verbose details, or level 0 to switch off
-the metadata tracing. An example of a condensed level 1 log follows:
-
-roo> add field string -fieldName test
-Managed SRC_MAIN_JAVA/com/hello/Foo.java
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000009  MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.FinderMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000009  MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.ToStringMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.PluralMetadata#SRC_MAIN_JAVA?com.hello.Foo
-0000000c  MID:xxx.PluralMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.EntityMetadata#SRC_MAIN_JAVA?com.hello.Foo
-0000000d   MID:xxx.EntityMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo
-0000000e    MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.FinderMetadata#SRC_MAIN_JAVA?com.hello.Foo
-0000000e    MID:xxx.BeanInfoMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.ToStringMetadata#SRC_MAIN_JAVA?com.hello.Foo
-0000000d   MID:xxx.EntityMetadata#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.FinderMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.ConfigurableMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.FinderMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.ToStringMetadata#SRC_MAIN_JAVA?com.hello.Foo
-00000008 MID:xxx.PhysicalTypeIdentifier#SRC_MAIN_JAVA?com.hello.Foo -> MID:xxx.JavaBeanMetadata#SRC_MAIN_JAVA?com.hello.Foo
-Created SRC_MAIN_JAVA/com/hello/Foo_Roo_JavaBean.aj
-
-The numbers in the very first column are in hex format and increment
-by one for each metadata notification. There are then one or more
-spaces, with the spaces being used to denote nested notifications. The
-metadata identification (MID) on the left hand side of the "->" token
-is the "upstream" dependency which is notifying of a change, and the
-metadata identification (MID) on the right hand side of the "->" token
-is the downstream dependency that is receiving the notification. This
-continues until all notifications have been delivered. Circular loops
-are automatically avoided by the system, and string-based MID keys are
-used to ensure metadata remains immutable, cachable and memory
-efficient even in a large project.
-
-======================================================================
 GIT POLICIES
 ======================================================================
 
@@ -303,8 +205,10 @@ be in the form "ROO-xxx: Title of the Jira Issue". For example:
 
   ROO-1234: Name of the task as stated in Jira
 
-You are free to place whatever text you like under this prefix. The
-prefix ensures FishEye is able to correlate the commit with Jira.
+You are free to place whatever text you like after this prefix. The
+prefix ensures FishEye is able to correlate the commit with Jira. eg:
+
+  ROO-1234: Name of the task as stated in Jira - add extra file
 
 You should not commit any IDE or Maven-generated files into Git.
 
@@ -386,12 +290,6 @@ The following command is used from the root checkout location:
   mvn clean package site assembly:assembly deploy site:deploy
 
 This will create a ZIP in the "target" directory.
-
-The org.springframework.roo.annotations JAR should be uploaded to
-repository.springsource.com/maven/bundles/release/org/springframework/
-roo/org.springframework.roo/org.sfw.roo.annotations/<version>. Ensure
-SHA1/MD5 files, plus the POM and JAR is uploaded. Set public read ACL.
-Use the mvn-hash.sh if required to create the SHA1/MD5 files.
 
 The target/spring-roo-<version>.zip should be uploaded to
 /dist.springframework.org/milestone/ROO/. Also upload an SHA1 file.

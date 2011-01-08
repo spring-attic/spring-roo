@@ -2,7 +2,7 @@
 LEGAL NOTICES
 ======================================================================
 
-Roo is copyright (C) 2008-2010 SpringSource Inc. All Rights Reserved. 
+Roo is copyright (C) 2008-2011 SpringSource Inc. All Rights Reserved. 
 
 Roo is licensed under the GPLv3: http://www.gnu.org/copyleft/gpl.html
 

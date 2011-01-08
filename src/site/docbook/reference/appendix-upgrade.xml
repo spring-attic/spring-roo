@@ -219,7 +219,7 @@
         linkend="command-index-perform-eclipse">perform eclipse</link> command
         at the <code>roo&gt;</code> shell prompt. You can skip this step if
         you use m2eclipse, as would be the case for any SpringSource Tool
-        Sutie user.</para>
+        Suite user.</para>
       </listitem>
     </itemizedlist>
 
@@ -230,6 +230,21 @@
     <para>If you experience any difficulty with upgrading your projects,
     please use the <link linkend="resources-forums">community support
     forum</link> for assistance.</para>
+  </section>
+
+  <section xml:id="upgrade-1.1.2.RELEASE">
+    <title>Upgrading to 1.1.2.RELEASE</title>
+
+    <para>The main changes you need to be aware of when upgrading from Spring
+    Roo 1.1.1.RELEASE to Spring Roo 1.1.2.RELEASE are as follows:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Complete the steps recommended in the <link
+        linkend="upgrade-any">Upgrading To Any New Release</link>
+        section.</para>
+      </listitem>
+    </itemizedlist>
   </section>
 
   <section xml:id="upgrade-1.1.1.RELEASE">
