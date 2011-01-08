@@ -8,7 +8,15 @@
          xmlns:ns="http://docbook.org/ns/docbook">
   <title>Web MVC Add-On</title>
 
-  <para>The Web MVC addons allow you to conveniently scaffold Spring MVC
+  <para><sidebar>
+      <para><emphasis>CSS considerations</emphasis>: The Web UI has been
+      tested successfully with FireFox, Opera, Safari, Chrome, and IE. Given
+      that IE6 is not supported any more by most players in the market, it has
+      a number of severe technical limitations and it has a <link
+      xlink:href="http://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism">fast
+      declining user base</link> Spring Roo does not support IE6. Your mileage
+      may vary - there will likely be issues with CSS support. </para>
+    </sidebar>The Web MVC addons allow you to conveniently scaffold Spring MVC
   controllers and JSP(X) views for an existing domain model. Currently this
   domain model is derived from the Roo supported JPA integration through the
   entity and related field commands. As shown in the <link

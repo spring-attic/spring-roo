@@ -86,15 +86,6 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>CSS considerations</emphasis>: The Web UI has been
-        tested successfully with FireFox, Opera, Safari, Chrome, IE8 and IE6.
-        Due to a CSS issue with IE6 the layout will appear 'stretched' if
-        JavaScript is disabled. We therefore do not recommend to run IE6
-        without JavaScript when displaying the default scaffolded Roo Web
-        interface.</para>
-      </listitem>
-
-      <listitem>
         <para><emphasis>Tomcat 5.5</emphasis>: Tomcat 5.5 can not be supported
         by the scaffolded Spring MVC Web UI. Tomcat 5.5 does not support the
         JSP 2.1 API. Roo makes extensive use of the JSP 2.1 API in the
