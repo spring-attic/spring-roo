@@ -1228,7 +1228,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		Map<JavaSymbolName, DateTimeFormat> dates = new HashMap<JavaSymbolName, DateTimeFormat>();
 		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
 			// Not interested in identifiers and version fields
-			if (accessor.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) || accessor.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())) {
+			if (accessor.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) || (entityMetadata.getVersionAccessor() != null && accessor.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName()))) {
 				continue;
 			}
 			// Not interested in fields that are not exposed via a mutator
