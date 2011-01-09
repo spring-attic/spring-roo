@@ -762,26 +762,24 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-
 	private MethodMetadata getAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
-
-		// Compute the accessor method name
-		String requiredAccessorName = getRequiredAccessorName(field);
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return this." + field.getFieldName().getSymbolName() + ";");
-
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), field.getFieldType(), bodyBuilder);
-		return methodBuilder.build();
+		String methodBody = "return this." + field.getFieldName().getSymbolName() + ";";
+		return getAccessor(field.getFieldType(), getRequiredAccessorName(field), methodBody);
 	}
 
 	private MethodMetadata getBooleanPrimitiveAccessor(FieldMetadata field) {
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		Assert.notNull(field, "Field required");
 		String fieldName = field.getFieldName().getSymbolName();
-		bodyBuilder.appendFormalLine("return this." + fieldName + " == null ? false : this." + fieldName + ".booleanValue();");
-		
-		JavaSymbolName methodName = new JavaSymbolName(getBooleanPrimitiveAccessorName(field));
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		String methodBody = "return this." + fieldName + " == null ? false : this." + fieldName + ".booleanValue();";
+		return getAccessor(field.getFieldType(), getBooleanPrimitiveAccessorName(field), methodBody);
+	}
+
+	private MethodMetadata getAccessor(JavaType fieldType, String requiredAccessorName, String methodBody) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(methodBody);
+
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, new JavaSymbolName(requiredAccessorName), fieldType, bodyBuilder);
 		return methodBuilder.build();
 	}
 
