@@ -142,7 +142,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 
 		List<FieldMetadata> elegibleFields = getElegibleFields();
 
-		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, finderMetadata, webScaffoldMetadata.getAnnotationValues(), typeLocationService);
+		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, webScaffoldMetadata.getAnnotationValues(), typeLocationService);
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 
@@ -230,7 +230,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 				if (listPath.length() > 244) {
 					continue;
 				}
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderName));
+				
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
 				// Add 'Find by' menu item
 				menuOperations.addMenuItem(categoryName, finderLabel, finderLabel.getReadableSymbolName(), "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);

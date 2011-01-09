@@ -78,14 +78,14 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private Logger log = Logger.getLogger(getClass().getName());
 	private MemberDetailsScanner detailsScanner;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, MemberDetailsScanner detailsScanner, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, ControllerOperations controllerOperations) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, MemberDetailsScanner detailsScanner, WebScaffoldAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, List<MethodMetadata> finderMetadataList, ControllerOperations controllerOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
-		Assert.notNull(finderMetadata, "Finder metadata required");
+		Assert.notNull(finderMetadataList, "Finder metadata required");
 		Assert.notNull(controllerOperations, "Controller operations required");
 		Assert.notNull(detailsScanner, "Member details scanner required");
 		if (!isValid()) {
@@ -119,10 +119,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (annotationValues.delete) {
 			builder.addMethod(getDeleteMethod());
 		}
-		if (annotationValues.exposeFinders) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
-			for (String finderName : entityMetadata.getDynamicFinders()) {
-				builder.addMethod(getFinderFormMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
-				builder.addMethod(getFinderMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
+		if (annotationValues.exposeFinders && finderMetadataList.size() > 0) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
+			for (MethodMetadata finder : finderMetadataList) {
+				builder.addMethod(getFinderFormMethod(finder));
+				builder.addMethod(getFinderMethod(finder));
 			}
 		}
 		if (specialDomainTypes.size() > 0) {
@@ -144,9 +144,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 				builder.addMethod(getJsonUpdateMethod());
 				builder.addMethod(getUpdateFromJsonArrayMethod());
 				builder.addMethod(getJsonDeleteMethod());
-				if (annotationValues.exposeFinders) {
-					for (String finderName : entityMetadata.getDynamicFinders()) {
-						builder.addMethod(getFinderJsonMethod(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
+				if (annotationValues.exposeFinders && finderMetadataList.size() > 0) {
+					for (MethodMetadata finder : finderMetadataList) {
+						builder.addMethod(getFinderJsonMethod(finder));
 					}
 				}
 			}

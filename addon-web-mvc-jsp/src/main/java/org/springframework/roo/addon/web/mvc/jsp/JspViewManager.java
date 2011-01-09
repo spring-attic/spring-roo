@@ -15,7 +15,6 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.addon.entity.RooIdentifier;
-import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
@@ -58,18 +57,16 @@ public class JspViewManager {
 	private BeanInfoMetadata beanInfoMetadata; 
 	private EntityMetadata entityMetadata;
 	private MetadataService metadataService;
-	private FinderMetadata finderMetadata;
 	private WebScaffoldAnnotationValues webScaffoldAnnotationValues;
 	private final String entityName;
 	private final String controllerPath;
 	private Map<JavaType, String> pluralCache;
 	private TypeLocationService typeLocationService;
 	
-	public JspViewManager(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, FinderMetadata finderMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues, TypeLocationService typeLocationService) {
+	public JspViewManager(MetadataService metadataService, List<FieldMetadata> fields, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, WebScaffoldAnnotationValues webScaffoldAnnotationValues, TypeLocationService typeLocationService) {
 		Assert.notNull(fields, "List of fields required");
 		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(entityMetadata, "Entity metadata required");
-		Assert.notNull(finderMetadata, "Finder metadata required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		Assert.notNull(typeLocationService, "Type location service required");
@@ -79,7 +76,6 @@ public class JspViewManager {
 		this.beanInfoMetadata = beanInfoMetadata;
 		this.entityMetadata = entityMetadata;
 		this.metadataService = metadataService;
-		this.finderMetadata = finderMetadata;
 		this.webScaffoldAnnotationValues = webScaffoldAnnotationValues;
 		this.typeLocationService = typeLocationService;
 
@@ -304,7 +300,7 @@ public class JspViewManager {
 		return document;
 	}
 	
-	public Document getFinderDocument(String finderName) {
+	public Document getFinderDocument(MethodMetadata finder) {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 			
@@ -321,16 +317,14 @@ public class JspViewManager {
 		Element formFind = new XmlElementBuilder("form:find", document)
 								.addAttribute("id", XmlUtils.convertId("ff:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName()))
 								.addAttribute("path", controllerPath)
-								.addAttribute("finderName", finderName.replace("find" + entityMetadata.getPlural(), ""))
+								.addAttribute("finderName", finder.getMethodName().getSymbolName().replace("find" + entityMetadata.getPlural(), ""))
 							.build();
 		formFind.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formFind));
 		
 		div.appendChild(formFind);
 		
-		MethodMetadata methodMetadata = finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase());
-		
-		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes());
-		List<JavaSymbolName> paramNames = methodMetadata.getParameterNames();
+		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(finder.getParameterTypes());
+		List<JavaSymbolName> paramNames = finder.getParameterNames();
 		
 		for (int i = 0; i < types.size(); i++) {
 			JavaType type = types.get(i);

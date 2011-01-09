@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -24,6 +26,7 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link WebScaffoldMetadata}.
@@ -58,12 +61,11 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		Path path = Path.SRC_MAIN_JAVA;
 		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
-		String finderMetdadataKey = FinderMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
 		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetdadataKey);
+		
 
 		// We need to abort if we couldn't find dependent metadata
 		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
@@ -79,11 +81,24 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
 		
+		List<String> dynamicFinders = entityMetadata.getDynamicFinders();
+		List<MethodMetadata> dynamicFinderMdList = new ArrayList<MethodMetadata>();
+		if (dynamicFinders.size() > 0) {
+			String finderMetdadataKey = FinderMetadata.createIdentifier(javaType, path);
+			FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetdadataKey);
+			if (finderMetadata == null) { //cannot get metdata yet, aborting
+				return null;
+			}
+			for (String finderName : dynamicFinders) {
+				dynamicFinderMdList.add(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
+			}
+		}
+		
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, memberDetailsScanner, annotationValues, beanInfoMetadata, entityMetadata, finderMetadata, controllerOperations);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, memberDetailsScanner, annotationValues, beanInfoMetadata, entityMetadata, dynamicFinderMdList, controllerOperations);
 	}
 
 	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType) {
