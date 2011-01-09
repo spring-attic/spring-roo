@@ -652,6 +652,11 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 				builder.addMethod(getAccessor(field));
 			}
 
+			// Add boolean accessor for Boolean object fields
+			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) && !hasBooleanPrimitiveAccessor(field)) {
+				builder.addMethod(getBooleanPrimitiveAccessor(field));
+			}
+
 			// Check for an existing mutator in the governor or in the entity metadata
 			if (!hasMutator(field)) {
 				builder.addMethod(getMutator(field));
@@ -736,7 +741,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(requiredAccessorName), new ArrayList<JavaType>()) != null) {
 			return true;
 		}
-
+		
 		// Check entity ITD for accessor method
 		List<? extends MethodMetadata> itdMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
 		for (MethodMetadata method : itdMethods) {
@@ -747,6 +752,16 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		return false;
 	}
+	
+	private boolean hasBooleanPrimitiveAccessor(FieldMetadata field) {
+		// Check governor for boolean accessor method for Boolean object fields 
+		if (MemberFindingUtils.getMethod(governorTypeDetails, new JavaSymbolName(getBooleanPrimitiveAccessorName(field)), new ArrayList<JavaType>()) != null) {
+			return true;
+		}
+
+		return false;
+	}
+
 
 	private MethodMetadata getAccessor(FieldMetadata field) {
 		Assert.notNull(field, "Field required");
@@ -760,14 +775,28 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return methodBuilder.build();
 	}
 
+	private MethodMetadata getBooleanPrimitiveAccessor(FieldMetadata field) {
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		String fieldName = field.getFieldName().getSymbolName();
+		bodyBuilder.appendFormalLine("return this." + fieldName + " == null ? false : this." + fieldName + ".booleanValue();");
+		
+		JavaSymbolName methodName = new JavaSymbolName(getBooleanPrimitiveAccessorName(field));
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.BOOLEAN_PRIMITIVE, AnnotatedJavaType.convertFromJavaTypes(new ArrayList<JavaType>()), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		return methodBuilder.build();
+	}
+
 	private String getRequiredAccessorName(FieldMetadata field) {
 		String methodName;
 		if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE)) {
-			methodName = "is" + StringUtils.capitalize(field.getFieldName().getSymbolName());
+			methodName = getBooleanPrimitiveAccessorName(field);
 		} else {
 			methodName = "get" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 		}
 		return methodName;
+	}
+
+	private String getBooleanPrimitiveAccessorName(FieldMetadata field) {
+		return "is" + StringUtils.capitalize(field.getFieldName().getSymbolName());
 	}
 
 	private boolean hasMutator(FieldMetadata field) {
