@@ -56,10 +56,12 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>Hibernate issues</emphasis>: Hibernate is the main JPA
-        provider we test with and is recommended. However, Hibernate has
-        issues with <code>--mappedSuperclass</code> as detailed in <link
-        xlink:href="https://jira.springsource.org/browse/ROO-292">ROO-292</link>.
+        <para><emphasis>Hibernate issues</emphasis>: Hibernate is one of the
+        JPA providers we test with, however, Hibernate has issues with
+        <code>--mappedSuperclass</code> as detailed in <link
+        xlink:href="https://jira.springsource.org/browse/ROO-292">ROO-292</link>
+        and <link
+        xlink:href="https://jira.springsource.org/browse/ROO-747">ROO-747</link>.
         We recommend you do not use <code>--mappedSuperclass</code> in
         combination with Hibernate. We have found OpenJPA works reliably in
         all cases, so you might want to consider switching to OpenJPA if you
@@ -73,8 +75,7 @@
         <para><emphasis>Integration testing limitations</emphasis>: The data
         on demand mechanism (which is used for integration tests) has limited
         JSR 303 (Bean Validator) compatibility. Roo supports fields using
-        @NotNull, @Past and @Future. There is experimental support for some of
-        the minimum and maximum range annotations as well. No other validator
+        @NotNull, @Past and @Future, @Size, @Min, and @Max. No other validator
         annotations are formally supported, although many will work. To use
         other validator annotations, you may need to edit your
         DataOnDemand.java file and add a manual
