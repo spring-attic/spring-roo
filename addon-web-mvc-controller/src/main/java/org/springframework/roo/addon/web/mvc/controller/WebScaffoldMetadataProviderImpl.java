@@ -2,7 +2,6 @@ package org.springframework.roo.addon.web.mvc.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -17,7 +16,9 @@ import org.springframework.roo.addon.finder.FinderMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
@@ -26,7 +27,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link WebScaffoldMetadata}.
@@ -146,9 +146,8 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			return;
 		}
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(rooWebScaffold);
-		for (JavaType controller : controllers) {
-			AnnotationMetadata annotation = new JavaTypeWrapper(controller, metadataService).getTypeAnnotation(rooWebScaffold);
+		for (ClassOrInterfaceTypeDetails controller : typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(rooWebScaffold)) {
+			AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(controller, rooWebScaffold);
 			AnnotationAttributeValue<?> attr = annotation.getAttribute(new JavaSymbolName("registerConverters"));
 			if (attr != null) {
 				if (Boolean.FALSE.equals(attr.getValue())) {

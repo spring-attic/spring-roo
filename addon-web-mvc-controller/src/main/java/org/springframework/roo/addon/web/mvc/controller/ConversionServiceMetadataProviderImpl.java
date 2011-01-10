@@ -1,40 +1,46 @@
 package org.springframework.roo.addon.web.mvc.controller;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
+import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
+import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.support.logging.HandlerUtils;
+import org.springframework.roo.support.util.Assert;
 
 /**
- * Metadata provider for {@link ConversionServiceMetadata}. Monitors notifications for {@link RooConversionService} and 
- * {@link RooWebScaffold} annotated types. Also listens for changes to the scaffolded domain types and their associated 
- * domain types.
+ * Metadata provider for {@link ConversionServiceMetadata}. Monitors
+ * notifications for {@link RooConversionService} and {@link RooWebScaffold}
+ * annotated types. Also listens for changes to the scaffolded domain types and
+ * their associated domain types.
  * 
  * @author Rossen Stoyanchev
+ * @author Stefan Schmidt
  * @since 1.1.1
  */
-@Component(immediate = true) 
+@Component(immediate = true)
 @Service
 public final class ConversionServiceMetadataProviderImpl extends AbstractItdMetadataProvider implements ItdTriggerBasedMetadataProvider {
-
-	private static final Logger logger = HandlerUtils.getLogger(ConversionServiceMetadataProviderImpl.class);
 
 	@Reference private TypeLocationService typeLocationService;
 
@@ -50,11 +56,8 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 
 	@Override
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		LinkedHashSet<JavaTypeWrapper> rooJavaTypes = findFormBackingObjectTypes();
-		if (! registerDependencies(rooJavaTypes, metadataIdentificationString)) {
-			logger.finer("Failed to register for one or form backing object type notifications. Postponing ConversionService Metadata creation!");
-			return null;
-		}
+		Set<JavaTypeMetadataHolder> rooJavaTypes = findDomainTypesRequiringAConverter();
+		registerDependencies(rooJavaTypes, metadataIdentificationString);
 		return new ConversionServiceMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, rooJavaTypes);
 	}
 
@@ -76,42 +79,95 @@ public final class ConversionServiceMetadataProviderImpl extends AbstractItdMeta
 		JavaType javaType = PhysicalTypeIdentifierNamingUtils.getJavaType(ConversionServiceMetadata.class.getName(), metadataId);
 		Path path = PhysicalTypeIdentifierNamingUtils.getPath(ConversionServiceMetadata.class.getName(), metadataId);
 		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
- 	}
+	}
 
 	/* Private helper methods */
 
-	LinkedHashSet<JavaTypeWrapper> findFormBackingObjectTypes() {
+	Set<JavaTypeMetadataHolder> findDomainTypesRequiringAConverter() {
 		JavaType rooWebScaffold = new JavaType(RooWebScaffold.class.getName());
-		LinkedHashSet<JavaTypeWrapper> formBackingObjects = new LinkedHashSet<JavaTypeWrapper>();
-		Set<JavaType> controllers = typeLocationService.findTypesWithAnnotation(rooWebScaffold);
-		for (JavaType controller : controllers) {
-			AnnotationMetadata annotation = new JavaTypeWrapper(controller, metadataService).getTypeAnnotation(rooWebScaffold);
-			JavaType javaType = (JavaType) annotation.getAttribute(new JavaSymbolName("formBackingObject")).getValue();
-			formBackingObjects.add(new JavaTypeWrapper(javaType , metadataService));
+		Set<JavaTypeMetadataHolder> javaTypes = new HashSet<JavaTypeMetadataHolder>();
+		for (JavaType controller : typeLocationService.findTypesWithAnnotation(rooWebScaffold)) {
+			PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(controller, Path.SRC_MAIN_JAVA));
+			Assert.notNull(physicalTypeMetadata, "Unable to obtain physical type metdata for type " + controller.getFullyQualifiedTypeName());
+			WebScaffoldAnnotationValues webScaffoldAnnotationValues = new WebScaffoldAnnotationValues(physicalTypeMetadata);
+			JavaTypeMetadataHolder formBackingType = getJavaTypeMdHolder(webScaffoldAnnotationValues.getFormBackingObject());
+			if (formBackingType != null) {
+				javaTypes.add(formBackingType);
+				javaTypes.addAll(findRelatedDomainTypes(formBackingType));
+			}
 		}
-		return formBackingObjects;
+		return javaTypes;
+	}
+	
+	private JavaTypeMetadataHolder getJavaTypeMdHolder(JavaType javaType) {
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
+		if (physicalTypeMetadata == null || beanInfoMetadata == null || physicalTypeMetadata == null) {
+			return null;
+		}
+		MemberHoldingTypeDetails memberHoldingTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
+		return new JavaTypeMetadataHolder(javaType, beanInfoMetadata, entityMetadata, memberHoldingTypeDetails!= null ? memberHoldingTypeDetails.getPhysicalTypeCategory().equals(PhysicalTypeCategory.ENUMERATION) : false);
+	}
+	
+	private void registerDependencies(Set<JavaTypeMetadataHolder> domainTypes, String metadataId) {
+		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), metadataId);
+		for (JavaTypeMetadataHolder domainJavaType : domainTypes) {
+			metadataDependencyRegistry.registerDependency(domainJavaType.getBeanInfoMetadata().getId(), metadataId);
+			metadataDependencyRegistry.registerDependency(domainJavaType.getEntityMetadata().getId(), metadataId);
+		}
 	}
 
-	boolean registerDependencies(LinkedHashSet<JavaTypeWrapper> domainJavaTypes, String metadataId) {
-		boolean isSuccessful = true;
-		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), metadataId);
-		for (JavaTypeWrapper domainJavaType : domainJavaTypes) {
-			if (! domainJavaType.isValidMetadata()) {
-				logger.finer("No BeanInfo or Entity metadata found for " + domainJavaType);
-				isSuccessful = false;
-			}
-			metadataDependencyRegistry.registerDependency(domainJavaType.getBeanInfoMetadataId(), metadataId);
-			metadataDependencyRegistry.registerDependency(domainJavaType.getEntityMetadataId(), metadataId);
-			Set<JavaTypeWrapper> relatedDomainTypes = domainJavaType.getRelatedDomainTypes();
-			if (relatedDomainTypes == null) {
+	private Set<JavaTypeMetadataHolder> findRelatedDomainTypes(JavaTypeMetadataHolder javaTypeInfo) {
+		LinkedHashSet<JavaTypeMetadataHolder> relatedDomainTypes = new LinkedHashSet<JavaTypeMetadataHolder>();
+		BeanInfoMetadata beanInfoMetadata = javaTypeInfo.getBeanInfoMetadata();
+		EntityMetadata entityMetadata = javaTypeInfo.getEntityMetadata();
+		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors(false)) {
+			// Not interested in identifiers and version fields
+			if (accessor.equals(entityMetadata.getIdentifierAccessor()) || accessor.equals(entityMetadata.getVersionAccessor())) {
 				continue;
 			}
-			for (JavaTypeWrapper relatedType : relatedDomainTypes) {
-				metadataDependencyRegistry.registerDependency(relatedType.getBeanInfoMetadataId(), metadataId);
-				metadataDependencyRegistry.registerDependency(relatedType.getEntityMetadataId(), metadataId);
+			// Not interested in fields that are not exposed via a mutator
+			FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
+			if (fieldMetadata == null || !hasMutator(fieldMetadata, beanInfoMetadata)) {
+				continue;
+			}
+			JavaType type = accessor.getReturnType();
+			if (type.isCommonCollectionType()) {
+				for (JavaType genericType : type.getParameters()) {
+					if (isApplicationType(genericType)) {
+						JavaTypeMetadataHolder jtMd = getJavaTypeMdHolder(genericType);
+						if (jtMd != null) {
+							relatedDomainTypes.add(jtMd);
+						}
+					}
+				}
+			} else {
+				if (isApplicationType(type) && (!isEmbeddedFieldType(fieldMetadata))) {
+					JavaTypeMetadataHolder jtMd = getJavaTypeMdHolder(type);
+					if (jtMd != null) {
+						relatedDomainTypes.add(jtMd);
+					}
+				}
 			}
 		}
-		return isSuccessful;
+		return relatedDomainTypes;
 	}
 
+	private boolean isApplicationType(JavaType javaType) {
+		return (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null);
+	}
+
+	private boolean isEmbeddedFieldType(FieldMetadata field) {
+		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
+	}
+
+	private boolean hasMutator(FieldMetadata fieldMetadata, BeanInfoMetadata bim) {
+		for (MethodMetadata mutator : bim.getPublicMutators()) {
+			if (fieldMetadata.equals(bim.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) {
+				return true;
+			}
+		}
+		return false;
+	}
 }
