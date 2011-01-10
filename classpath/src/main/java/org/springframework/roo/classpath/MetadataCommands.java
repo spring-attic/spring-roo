@@ -10,6 +10,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.model.JavaType;
@@ -26,17 +27,17 @@ public class MetadataCommands implements CommandMarker {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataLogger metadataLogger;
 	
 	@CliCommand(value="metadata trace", help="Traces metadata event delivery notifications")
 	public void metadataTrace(@CliOption(key={"","level"}, mandatory=true, help="The verbosity of notifications (0=none, 1=some, 2=all)") int level) {
-		metadataDependencyRegistry.setTrace(level);
+		metadataLogger.setTraceLevel(level);
 	}
 	
 	@CliCommand(value="metadata status", help="Shows metadata statistics")
 	public String metadataTimings() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Notification count: ").append(metadataDependencyRegistry.getNotificationCount()).append(System.getProperty("line.separator"));
-		for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
+		for (MetadataTimingStatistic stat : metadataLogger.getTimings()) {
 			sb.append(stat.toString()).append(System.getProperty("line.separator"));
 		}
 		sb.append(metadataService.toString());

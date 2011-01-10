@@ -5,20 +5,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataNotificationListener;
 import org.springframework.roo.metadata.MetadataService;
-import org.springframework.roo.metadata.MetadataTimingStatistic;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -36,17 +32,8 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public final class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
 
-	private static final Logger logger = HandlerUtils.getLogger(DefaultMetadataDependencyRegistry.class);
-	private int trace = 0;
-	private int level = 0;
-	private int notificationNumber = 0;
-	private long started;
-	private String responsibleClass;
-	private Map<String,Long> timings = new HashMap<String, Long>();
+	@Reference private MetadataLogger metadataLogger;
 	
-	protected void activate(ComponentContext context) {
-	}
-
 	/** key: upstream dependency; value: list<downstream dependencies> */
 	private Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();
 	
@@ -192,56 +179,26 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		this.listeners.remove(listener);
 	}
 
-	private void log(int currentNotification, String message) {
-		if (trace == 0) {
-			return;
-		}
-		StringBuilder sb = new StringBuilder("00000000");
-		String hex = Integer.toHexString(currentNotification);
-		sb.replace(8-hex.length(), 8, hex);
-		for (int i = 0; i < level; i++) {
-			sb.append(" ");
-		}
-		sb.append(message);
-		logger.fine(sb.toString());
-	}
 
-	private void stopCounting(long duration) {
-		Long existing = timings.get(responsibleClass);
-		if (existing == null) {
-			existing = duration;
-		} else {
-			existing = existing + duration;
-		}
-		timings.put(responsibleClass, existing);
-	}
-	
 	public void notifyDownstream(String upstreamDependency) {
 		try {
-			notificationNumber++;
-			
-			long now = System.nanoTime();
-
-			if (level > 0) {
-				long duration = (now - started)/1000000;
-				stopCounting(duration);
-			}
-			
-			started = now;
-			level++;
-
-			int currentNotification = notificationNumber;
+			metadataLogger.startEvent();
 			
 			if (metadataService != null) {
 				// First dispatch the fine-grained, instance-specific dependencies.
 				Set<String> notifiedDownstreams = new HashSet<String>();
 				for (String downstream : getDownstream(upstreamDependency)) {
-					if (trace > 0) {
-						log(currentNotification, upstreamDependency + " -> " + downstream);
+					if (metadataLogger.getTraceLevel() > 0) {
+						metadataLogger.log(upstreamDependency + " -> " + downstream);
 					}
 					// No need to ensure upstreamDependency is different from downstream, as that's taken care of in the isValidDependency() method
-					responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
-					metadataService.notify(upstreamDependency, downstream);
+					try {
+						String responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
+						metadataLogger.startTimer(responsibleClass);
+						metadataService.notify(upstreamDependency, downstream);
+					} finally {
+						metadataLogger.stopTimer();
+					}
 					notifiedDownstreams.add(downstream);
 				}
 				
@@ -255,11 +212,16 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 						// (such a condition is only possible if an instance registered to receive class-specific notifications and that instance
 						// caused an event to fire)
 						if (!notifiedDownstreams.contains(downstream) && !upstreamDependency.equals(downstream)) {
-							if (trace > 0) {
-								log(currentNotification, upstreamDependency + " -> " + downstream + " [via class]");
+							if (metadataLogger.getTraceLevel() > 0) {
+								metadataLogger.log(upstreamDependency + " -> " + downstream + " [via class]");
 							}
-							responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
-							metadataService.notify(upstreamDependency, downstream);
+							try {
+								String responsibleClass = MetadataIdentificationUtils.getMetadataClass(downstream);
+								metadataLogger.startTimer(responsibleClass);
+								metadataService.notify(upstreamDependency, downstream);
+							} finally {
+								metadataLogger.stopTimer();
+							}
 						}
 					}
 				}
@@ -269,38 +231,21 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			
 			// Finally dispatch the general-purpose additional listeners
 			for (MetadataNotificationListener listener : listeners) {
-				if (trace > 1) {
-					log(currentNotification, upstreamDependency + " -> " + upstreamDependency + " [" + listener.getClass().getSimpleName() + "]");
+				if (metadataLogger.getTraceLevel() > 1) {
+					metadataLogger.log(upstreamDependency + " -> " + upstreamDependency + " [" + listener.getClass().getSimpleName() + "]");
 				}
-				responsibleClass = listener.getClass().getName();
-				listener.notify(upstreamDependency, null);
+				try {
+					String responsibleClass = listener.getClass().getName();
+					metadataLogger.startTimer(responsibleClass);
+					listener.notify(upstreamDependency, null);
+				} finally {
+					metadataLogger.stopTimer();
+				}
 			}
 		} finally {
-			level--;
-			
-			if (level == 0) {
-				long now = System.nanoTime();
-				long duration = (now - started)/1000000;
-				stopCounting(duration);
-				started = 0;
-			}
+			metadataLogger.stopEvent();
 		}
 	}
 
-	public void setTrace(int trace) {
-		this.trace = trace;
-	}
-
-	public SortedSet<MetadataTimingStatistic> getTimings() {
-		SortedSet<MetadataTimingStatistic> result = new TreeSet<MetadataTimingStatistic>();
-		for (String key : timings.keySet()) {
-			result.add(new StandardMetadataTimingStatistic(key, timings.get(key)));
-		}
-		return result;
-	}
-
-	public int getNotificationCount() {
-		return notificationNumber;
-	}
 
 }

@@ -12,6 +12,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataLogger;
 import org.springframework.roo.metadata.MetadataTimingStatistic;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
 
@@ -25,7 +26,7 @@ import org.springframework.roo.support.osgi.BundleFindingUtils;
  */
 @Component(enabled=true)
 public class MetadataPollingUaaRegistrationFacility {
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataLogger metadataLogger;
 	@Reference private UaaRegistrationService uaaRegistrationService;
 	private BundleContext bundleContext;
 	private Timer timer = new Timer();
@@ -48,7 +49,7 @@ public class MetadataPollingUaaRegistrationFacility {
 			// Try..catch used to avoid unexpected problems terminating the timer thread
 			try {
 				// Deal with modules being used via the add-on infrastructure
-				for (MetadataTimingStatistic stat : metadataDependencyRegistry.getTimings()) {
+				for (MetadataTimingStatistic stat : metadataLogger.getTimings()) {
 					String typeName = stat.getName();
 					String bundleSymbolicName = typeToBsnMap.get(typeName);
 					if (bundleSymbolicName == null) {

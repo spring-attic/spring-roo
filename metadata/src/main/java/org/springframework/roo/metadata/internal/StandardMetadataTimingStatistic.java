@@ -13,11 +13,13 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
 	private String name;
 	private long time;
+	private long invocations;
 	
-	public StandardMetadataTimingStatistic(String name, long time) {
+	public StandardMetadataTimingStatistic(String name, long time, long invocations) {
 		Assert.hasText(name, "Name required");
 		this.name = name;
 		this.time = time;
+		this.invocations = invocations;
 	}
 
 	public String getName() {
@@ -28,8 +30,15 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 		return time;
 	}
 
+	public long getInvocations() {
+		return invocations;
+	}
+
 	public int compareTo(MetadataTimingStatistic o) {
 		int result = new Long(time).compareTo(o.getTime());
+		if (result == 0) {
+			result = new Long(invocations).compareTo(o.getInvocations());
+		}
 		if (result == 0) {
 			result = name.compareTo(o.getName());
 		}
@@ -43,12 +52,22 @@ public class StandardMetadataTimingStatistic implements MetadataTimingStatistic 
 
 	@Override
 	public int hashCode() {
-		return new Long(time).hashCode() * name.hashCode();
+		return new Long(time).hashCode() * new Long(invocations).hashCode() * name.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return time + ": " + name;
+		StringBuilder sb = new StringBuilder();
+		if (time < 1000000) {
+			// nanosecond precision
+			sb.append(String.format("%06d", time)).append(" ns; ");
+		} else {
+			// millisecond precision
+			sb.append(String.format("%06d", time/1000000)).append(" ms; ");
+		}
+		sb.append(String.format("%06d", invocations)).append(" call(s): ");
+		sb.append(name);
+		return sb.toString();
 	}
 
 }

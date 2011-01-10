@@ -8,9 +8,14 @@ package org.springframework.roo.metadata;
  */
 public interface MetadataTimingStatistic extends Comparable<MetadataTimingStatistic> {
 	/**
-	 * @return the number of milliseconds associated with this {@link #getName()}.
+	 * @return the number of nanoseconds associated with this {@link #getName()}.
 	 */
 	long getTime();
+	
+	/**
+	 * @return the number of invocations associated with this {@link #getName()}.
+	 */
+	long getInvocations();
 	
 	/**
 	 * @return an identifier to differentiate this timing statistic from another (never null or empty)

@@ -1,7 +1,6 @@
 package org.springframework.roo.metadata;
 
 import java.util.Set;
-import java.util.SortedSet;
 
 /**
  * Registers the dependencies between different metadata identification strings.
@@ -38,23 +37,6 @@ import java.util.SortedSet;
  * @since 1.0
  */
 public interface MetadataDependencyRegistry {
-	
-	/**
-	 * @return a snapshot of timing statistics that have been collated so far (never null, but may be empty)
-	 */
-	public SortedSet<MetadataTimingStatistic> getTimings();
-	
-	/**
-	 * @return how many notifications have taken place so far
-	 */
-	public int getNotificationCount();
-	
-	/**
-	 * Enable low-level tracing of event delivery information. Defaults to level 0 (none).
-	 * 
-	 * @param trace the level (0 = none, 1 = major events, 2 = all events)
-	 */
-	public void setTrace(int trace);
 	
 	/**
 	 * Indicates whether the indicated downstream dependency is legally permitted to depend

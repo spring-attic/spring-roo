@@ -34,6 +34,7 @@ import org.springframework.roo.support.util.Assert;
 @Reference(name = "metadataProvider", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = MetadataProvider.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DefaultMetadataService extends AbstractMetadataCache implements MetadataService {
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataLogger metadataLogger;
 	private int validGets = 0;
 	private int recursiveGets = 0;
 	private int cachePuts = 0;
@@ -88,9 +89,14 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 			validGets++;
 
 			try {
+				metadataLogger.startEvent();
+				
 				// Do some cache eviction if the caller requested it
 				if (evictCache) {
 					evict(metadataIdentificationString);
+					if (metadataLogger.getTraceLevel() > 0) {
+						metadataLogger.log("Evicting " + metadataIdentificationString);
+					}
 					cacheEvictions++;
 				}
 				
@@ -100,27 +106,27 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 					MetadataItem result = getFromCache(metadataIdentificationString);
 					if (result != null) {
 						cacheHits++;
+						if (metadataLogger.getTraceLevel() > 0) {
+							metadataLogger.log("Cache hit " + metadataIdentificationString);
+						}
 						return result;
 					}
 				}
 				
+				if (metadataLogger.getTraceLevel() > 0) {
+					metadataLogger.log("Cache miss " + metadataIdentificationString);
+				}
 				cacheMisses++;
 
 				// Determine if this MID was already requested earlier. We need to stop these infinite requests from occurring.
 				if (activeRequests.contains(metadataIdentificationString)) {
 					recursiveGets++;
 					if (!keysToRetry.contains(metadataIdentificationString)) {
+						if (metadataLogger.getTraceLevel() > 0) {
+							metadataLogger.log("Blocked recursive request for " + metadataIdentificationString);
+						}
 						keysToRetry.add(metadataIdentificationString);
 					}
-					/*
-					System.out.println("Blocked recursive request for " + metadataIdentificationString + "");
-					List<String> reversed = new ArrayList<String>();
-					reversed.addAll(activeRequests);
-					Collections.reverse(reversed);
-					for (String midStackMember : reversed) {
-						System.out.println("  " + midStackMember);
-					}
-					*/
 					return null;
 				}
 				
@@ -133,37 +139,67 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 				Assert.notNull(p, "No metadata provider is currently registered to provide metadata for identifier '" + metadataIdentificationString + "' (class '" + mdClassId + "')");
 				
 				// Obtain the item
-				MetadataItem result = p.get(metadataIdentificationString);
+				if (metadataLogger.getTraceLevel() > 0) {
+					metadataLogger.log("Get " + metadataIdentificationString + " from " + p.getClass().getName());
+				}
+				MetadataItem result = null;
+				try {
+					metadataLogger.startTimer(p.getClass().getName());
+					result = p.get(metadataIdentificationString);
+				} finally {
+					metadataLogger.stopTimer();
+				}
 				
 				// If the item isn't available, evict it from the cache (unless we did so at the start of the method already)
 				if (result == null && !evictCache) {
+					if (metadataLogger.getTraceLevel() > 0) {
+						metadataLogger.log("Evicting unavailable item " + metadataIdentificationString);
+					}
 					evict(metadataIdentificationString);
 					cacheEvictions++;
 				}
 				
 				// Put into the cache, provided it isn't null
 				if (result != null) {
+					if (metadataLogger.getTraceLevel() > 0) {
+						metadataLogger.log("Caching " + metadataIdentificationString);
+					}
 					super.put(result);
 					cachePuts++;
 				}
 				
 				activeRequests.remove(metadataIdentificationString);
 
+				if (metadataLogger.getTraceLevel() > 0) {
+					metadataLogger.log("Returning " + metadataIdentificationString);
+				}
 				return result;
 
 			} finally {
-				// Have we processed all requests? If so, handle any retries we recorded
-				if (activeRequests.size() == 0) {
-					List<String> thisRetry = new ArrayList<String>();
-					thisRetry.addAll(keysToRetry);
-					keysToRetry.clear();
-					for (String retryMid : thisRetry) {
-						// Important: we should not evict any prior version from the cache (an interim version is acceptable).
-						// We discard the result of the get; this is purely to facilitate updating metadata stored in memory and on-disk
-//						System.out.println("**** Retrying " + retryMid);
-						getInternal(retryMid, false, false);
+				// We use another try..finally block as we want to ensure exceptions don't prevent our metadataLogger.stopEvent()
+				try {
+					// Have we processed all requests? If so, handle any retries we recorded
+					if (activeRequests.size() == 0) {
+						List<String> thisRetry = new ArrayList<String>();
+						thisRetry.addAll(keysToRetry);
+						keysToRetry.clear();
+						if (metadataLogger.getTraceLevel() > 0 && thisRetry.size() > 0) {
+							metadataLogger.log(thisRetry.size() + " keys to retry: " + thisRetry);
+						}
+						for (String retryMid : thisRetry) {
+							// Important: we should not evict any prior version from the cache (an interim version is acceptable).
+							// We discard the result of the get; this is purely to facilitate updating metadata stored in memory and on-disk
+							if (metadataLogger.getTraceLevel() > 0) {
+								metadataLogger.log("Retrying " + retryMid);
+							}
+							getInternal(retryMid, false, false);
+						}
+						if (metadataLogger.getTraceLevel() > 0 && thisRetry.size() > 0) {
+							metadataLogger.log("Retry group completed " + metadataIdentificationString);
+						}
 					}
-//					System.out.println("Done " + metadataIdentificationString);
+				} finally {
+					metadataLogger.stopEvent();
 				}
 			}
 		}
@@ -240,7 +276,6 @@ public class DefaultMetadataService extends AbstractMetadataCache implements Met
 
 	public final String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("providers", providers);
 		tsc.append("validGets", validGets);
 		tsc.append("recursiveGets", recursiveGets);
 		tsc.append("cachePuts", cachePuts);
