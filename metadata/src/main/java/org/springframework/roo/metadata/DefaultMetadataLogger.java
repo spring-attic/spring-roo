@@ -25,7 +25,7 @@ import org.springframework.roo.support.util.Assert;
 public class DefaultMetadataLogger implements MetadataLogger {
 	private int traceLevel = 0;
 	private long eventNumber = 0;
-    private FileWriter fileLog;
+	private FileWriter fileLog;
 	private Stack<Long> eventStack = new Stack<Long>();
 	private Stack<TimerEntry> timerStack = new Stack<TimerEntry>();
 	/** key: responsible class, value: nanos occupied */
@@ -90,6 +90,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 			TimerEntry timerEntry = timerStack.get(timerStack.size()-1);
 			// Add the duration it ran to any existing duration
 			timerEntry.duration = timerEntry.duration + (now - timerEntry.clockStartedOrResumed);
+			timerEntry.clockStartedOrResumed = now;
 		}
 		// Start a new timer
 		TimerEntry timerEntry = new TimerEntry();
