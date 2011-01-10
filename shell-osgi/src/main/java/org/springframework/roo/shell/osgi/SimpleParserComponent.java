@@ -15,6 +15,7 @@ import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.shell.Converter;
+import org.springframework.roo.shell.Parser;
 import org.springframework.roo.shell.SimpleParser;
 import org.springframework.roo.support.api.AddOnSearch;
 
@@ -25,7 +26,7 @@ import org.springframework.roo.support.api.AddOnSearch;
  * @since 1.1
  */
 @Component
-@Service
+@Service(value=Parser.class) // important, as auto-detection includes CommandMarker which is unacceptable as we'd have a circular dependency to ourself
 @References(value = {
 	@Reference(name = "converter", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = Converter.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE), 
 	@Reference(name = "command", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = CommandMarker.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE),

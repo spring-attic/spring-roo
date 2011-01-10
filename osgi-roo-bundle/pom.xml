@@ -21,7 +21,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.4.2</version>
+                <version>1.4.4</version> <!-- do not use 1.6.0: see https://jira.springsource.org/browse/ROO-1955 -->
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>

@@ -54,23 +54,11 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
-            <version>1.4.3</version>
+            <version>1.6.4</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.osgi</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.service.obr</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.apache.felix.shell</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.sf.kxml</groupId>
-                    <artifactId>kxml2</artifactId>
+                    <groupId>org.easymock</groupId>
+                    <artifactId>easymock</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
