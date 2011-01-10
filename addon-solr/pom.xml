@@ -31,85 +31,71 @@
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.classpath</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.file.monitor</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.file.undo</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.metadata</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.model</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.process.manager</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.project</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.shell</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.entity</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.addon.plural</artifactId>
 			<version>${roo.version}</version>
-			<type>bundle</type>
 		</dependency>
 	</dependencies>
 </project>

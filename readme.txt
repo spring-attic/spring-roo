@@ -27,7 +27,7 @@ Next double-check you meet the installation requirements:
 
  * A *nix machine (Windows users should be OK if they write a .bat)
  * A proper installation of Java 5 or above
- * Maven 2.2.x+ properly installed and working with your Java 5+
+ * Maven 3.0.x+ properly installed and working with your Java 5+
  * Internet access so that Maven can download required dependencies
 
 Next you need to setup an environment variable called MAVEN_OPTS.

@@ -16,17 +16,11 @@
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.support</artifactId>
 			<version>${roo.version}</version>
-            <type>bundle</type>
 		</dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support.osgi</artifactId>
             <version>${roo.version}</version>
-            <type>bundle</type>
         </dependency>
 	</dependencies>
-    <build>
-        <plugins>
-        </plugins>
-    </build>
 </project>
