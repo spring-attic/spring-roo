@@ -664,6 +664,12 @@ public class JavaParserUtils  {
 			}
 		}
 
+		if (addImport && ImportRegistrationResolverImpl.isPartOfJavaLang(typeToImport.getSimpleTypeName())) {
+			// This simple type name would be part of java.lang if left as the simple name. We want a fully-qualified use.
+			addImport = false;
+			useSimpleTypeName = false;
+		}
+
 		if (addImport && "java.lang".equals(typeToImport.getPackage().getFullyQualifiedPackageName())) {
 			// So we would have imported, but we don't need to
 			addImport = false;
