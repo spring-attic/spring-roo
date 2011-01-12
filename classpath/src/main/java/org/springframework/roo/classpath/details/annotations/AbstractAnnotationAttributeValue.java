@@ -3,6 +3,12 @@ package org.springframework.roo.classpath.details.annotations;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Abstract base class for annotation attribute values.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ */
 public abstract class AbstractAnnotationAttributeValue<T extends Object> implements AnnotationAttributeValue<T> {
 	private JavaSymbolName name;
 

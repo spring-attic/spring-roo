@@ -2,7 +2,6 @@ package org.springframework.roo.classpath.details.annotations;
 
 import org.springframework.roo.model.JavaSymbolName;
 
-
 /**
  * Represents a char annotation attribute value.
  * 

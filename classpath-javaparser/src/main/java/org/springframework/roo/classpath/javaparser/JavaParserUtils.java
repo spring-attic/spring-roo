@@ -17,11 +17,11 @@ import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.expr.SingleMemberAnnotationExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.PrimitiveType;
+import japa.parser.ast.type.PrimitiveType.Primitive;
 import japa.parser.ast.type.ReferenceType;
 import japa.parser.ast.type.Type;
 import japa.parser.ast.type.VoidType;
 import japa.parser.ast.type.WildcardType;
-import japa.parser.ast.type.PrimitiveType.Primitive;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -44,9 +44,9 @@ import org.springframework.roo.support.util.StringUtils;
  *
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class JavaParserUtils  {
+
 	/**
 	 * Converts the presented class name into a name expression (either a {@link NameExpr} or
 	 * {@link QualifiedNameExpr} depending on whether a package was presented).
@@ -123,7 +123,7 @@ public class JavaParserUtils  {
 			result = ModifierSet.addModifier(ModifierSet.FINAL, result);
 		}
 		if (Modifier.isInterface(modifiers)) {
-			// unsupported by Java Parser ModifierSet
+			// Unsupported by Java Parser ModifierSet
 		}
 		if (Modifier.isNative(modifiers)) {
 			result = ModifierSet.addModifier(ModifierSet.NATIVE, result);
@@ -230,9 +230,9 @@ public class JavaParserUtils  {
 
 		Type internalType = type;
 		if (internalType instanceof ReferenceType) {
-			array = ((ReferenceType)internalType).getArrayCount();
+			array = ((ReferenceType) internalType).getArrayCount();
 			if (array > 0) {
-				internalType = ((ReferenceType)internalType).getType();
+				internalType = ((ReferenceType) internalType).getType();
 			}
 		}
 
@@ -288,7 +288,7 @@ public class JavaParserUtils  {
 		if (internalType instanceof ClassOrInterfaceType) {
 			cit = (ClassOrInterfaceType) internalType;
 		} else if (internalType instanceof ReferenceType) {
-			cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
+			cit = (ClassOrInterfaceType) ((ReferenceType) type).getType();
 		} else {
 			throw new IllegalStateException("The presented type '" + internalType.getClass() + "' with value '" + internalType + "' is unsupported by JavaParserUtils");
 		}
@@ -337,7 +337,7 @@ public class JavaParserUtils  {
 		if (nameToFind instanceof QualifiedNameExpr) {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameToFind;
 
-			// handle qualified name expressions that are related to inner types (eg Foo.Bar)
+			// Handle qualified name expressions that are related to inner types (eg Foo.Bar)
 			NameExpr qneQualifier = qne.getQualifier();
 			NameExpr enclosedBy = getNameExpr(compilationUnitServices.getEnclosingTypeName().getSimpleTypeName());
 			if (isEqual(qneQualifier, enclosedBy)) {
@@ -346,18 +346,18 @@ public class JavaParserUtils  {
 				return new JavaType(name);
 			}
 
-			// refers to a different enclosing type, so calculate the package name based on convention of an uppercase letter denotes same package (ROO-1210)
+			// Refers to a different enclosing type, so calculate the package name based on convention of an uppercase letter denotes same package (ROO-1210)
 			if (qne.toString().length() > 1 && Character.isUpperCase(qne.toString().charAt(0))) {
 				// First letter is uppercase, so this likely requires prepending of some package name
 				ImportDeclaration importDeclaration = getImportDeclarationFor(compilationUnitServices, qne.getQualifier());
-				if (importDeclaration  == null) {
-                    if ( !compilationUnitPackage.getFullyQualifiedPackageName().equals("")) {
-					// It was not imported, so let's assume it's in the same package
-					    return new JavaType(compilationUnitServices.getCompilationUnitPackage().getFullyQualifiedPackageName() + "." + qne.toString());
-                    }
+				if (importDeclaration == null) {
+					if (!compilationUnitPackage.getFullyQualifiedPackageName().equals("")) {
+						// It was not imported, so let's assume it's in the same package
+						return new JavaType(compilationUnitServices.getCompilationUnitPackage().getFullyQualifiedPackageName() + "." + qne.toString());
+					}
 				} else {
-                    return new JavaType(importDeclaration.getName() + "." + qne.getName());
-                }
+					return new JavaType(importDeclaration.getName() + "." + qne.getName());
+				}
 
 				// This name expression (which contains a dot) had its qualifier imported, so let's use the import
 
@@ -367,11 +367,11 @@ public class JavaParserUtils  {
 			}
 		}
 
-        String symbolName = nameToFind.getName();
-        if (symbolName.equals("?")) {
-            symbolName = JavaType.WILDCARD_NEITHER.getSymbolName();
+		String symbolName = nameToFind.getName();
+		if (symbolName.equals("?")) {
+			symbolName = JavaType.WILDCARD_NEITHER.getSymbolName();
 			return new JavaType("java.lang.Object", 0, DataType.TYPE, JavaType.WILDCARD_NEITHER, null);
-        }
+		}
 
 		// Unqualified name detected, so check if it's in the type parameter list
 		if (typeParameters != null && typeParameters.contains(new JavaSymbolName(nameToFind.getName()))) {
@@ -389,7 +389,7 @@ public class JavaParserUtils  {
 		}
 
 		ImportDeclaration importDeclaration = getImportDeclarationFor(compilationUnitServices, nameToFind);
-		if (importDeclaration  == null) {
+		if (importDeclaration == null) {
 			if (ImportRegistrationResolverImpl.isPartOfJavaLang(nameToFind.getName())) {
 				return new JavaType("java.lang." + nameToFind.getName());
 			}
@@ -427,11 +427,11 @@ public class JavaParserUtils  {
 		Assert.notNull(nameExpr, "Java type required");
 		if (nameExpr instanceof QualifiedNameExpr) {
 			QualifiedNameExpr qne = (QualifiedNameExpr) nameExpr;
-            if (StringUtils.hasText(qne.getQualifier().getName())) {
-			    return new ClassOrInterfaceType(qne.getQualifier().getName() + "." + qne.getName());
-            } else {
-                return new ClassOrInterfaceType( qne.getName());
-            }
+			if (StringUtils.hasText(qne.getQualifier().getName())) {
+				return new ClassOrInterfaceType(qne.getQualifier().getName() + "." + qne.getName());
+			} else {
+				return new ClassOrInterfaceType(qne.getName());
+			}
 		}
 		return new ClassOrInterfaceType(nameExpr.getName());
 	}
@@ -470,7 +470,6 @@ public class JavaParserUtils  {
 			return new PrimitiveType(Primitive.Short);
 		}
 		throw new IllegalStateException("Unknown primitive " + javaType);
-
 	}
 
 	/**
@@ -569,16 +568,16 @@ public class JavaParserUtils  {
 
 		for (ImportDeclaration candidate : imports) {
 			NameExpr candidateNameExpr = candidate.getName();
-            if (!candidate.toString().contains("*")) {
-			    Assert.isInstanceOf(QualifiedNameExpr.class, candidateNameExpr, "Expected import '" + candidate + "' to use a fully-qualified type name");
-            }
+			if (!candidate.toString().contains("*")) {
+				Assert.isInstanceOf(QualifiedNameExpr.class, candidateNameExpr, "Expected import '" + candidate + "' to use a fully-qualified type name");
+			}
 			if (nameExpr instanceof QualifiedNameExpr) {
-				// user is asking for a fully-qualified name; let's see if there is a full match
+				// User is asking for a fully-qualified name; let's see if there is a full match
 				if (isEqual(nameExpr, candidateNameExpr)) {
 					return candidate;
 				}
 			} else {
-				// user is not asking for a fully-qualified name, so let's do a simple name comparison that discards the import's qualified-name package
+				// User is not asking for a fully-qualified name, so let's do a simple name comparison that discards the import's qualified-name package
 				if (candidateNameExpr.getName().equals(nameExpr.getName())) {
 					return candidate;
 				}
@@ -592,7 +591,7 @@ public class JavaParserUtils  {
 		Assert.notNull(imports, "Compilation unit imports required");
 		Assert.notNull(typeToImport, "Java type to import is required");
 
-		// TODO: do the import magic, but we'll defer that
+		// TODO: Do the import magic, but we'll defer that
 		return new ReferenceType(getClassOrInterfaceType(new NameExpr(typeToImport.toString())));
 	}
 
@@ -636,7 +635,7 @@ public class JavaParserUtils  {
 			return new NameExpr(typeToImport.getSimpleTypeName());
 		}
 
-        if (typeToImport.isDefaultPackage()) {
+		if (typeToImport.isDefaultPackage()) {
 			return new NameExpr(typeToImport.getSimpleTypeName());
 		}
 
@@ -653,10 +652,10 @@ public class JavaParserUtils  {
 		boolean useSimpleTypeName = false;
 		for (ImportDeclaration existingImport : imports) {
 			if (existingImport.getName().getName().equals(newImport.getName().getName())) {
-				// do not import, as there is already an import with the simple type name
+				// Do not import, as there is already an import with the simple type name
 				addImport = false;
 
-				// if this is a complete match, it indicates we can use the simple type name
+				// If this is a complete match, it indicates we can use the simple type name
 				if (isEqual(existingImport.getName(), newImport.getName())) {
 					useSimpleTypeName = true;
 					break;
@@ -665,7 +664,7 @@ public class JavaParserUtils  {
 		}
 
 		if (addImport && ImportRegistrationResolverImpl.isPartOfJavaLang(typeToImport.getSimpleTypeName())) {
-			// This simple type name would be part of java.lang if left as the simple name. We want a fully-qualified use.
+			// This simple type name would be part of java.lang if left as the simple name. We want a fully-qualified name.
 			addImport = false;
 			useSimpleTypeName = false;
 		}
@@ -681,8 +680,8 @@ public class JavaParserUtils  {
 		if (addImport && typeToImport.getPackage().equals(compilationUnitPackage)) {
 			// It is not theoretically necessary to add an import for something in the same package,
 			// but we elect to explicitly perform an import so future conflicting types are not imported
-			 //addImport = true;
-			 //useSimpleTypeName = false;
+			// addImport = true;
+			// useSimpleTypeName = false;
 		}
 
 		if (addImport && targetType.getSimpleTypeName().equals(typeToImport.getSimpleTypeName())) {
@@ -696,7 +695,7 @@ public class JavaParserUtils  {
 			useSimpleTypeName = true;
 		}
 
-        // This is pretty crude, but at least it emits source code for people (forget imports, though!)
+		// This is pretty crude, but at least it emits source code for people (forget imports, though!)
 		if (typeToImport.getArgName() != null) {
 			return new NameExpr(typeToImport.toString());
 		}
@@ -729,8 +728,8 @@ public class JavaParserUtils  {
 		Assert.notNull(value, "Expression value required");
 
 		if (value instanceof FieldAccessExpr) {
-			Expression scope = ((FieldAccessExpr)value).getScope();
-			String field = ((FieldAccessExpr)value).getField();
+			Expression scope = ((FieldAccessExpr) value).getScope();
+			String field = ((FieldAccessExpr) value).getField();
 			if (scope instanceof QualifiedNameExpr) {
 				String packageName = ((QualifiedNameExpr) scope).getQualifier().getName();
 				String simpleName = ((QualifiedNameExpr) scope).getName();
@@ -742,15 +741,15 @@ public class JavaParserUtils  {
 				}
 			}
 		} else if (value instanceof ClassExpr) {
-			Type type = ((ClassExpr)value).getType();
+			Type type = ((ClassExpr) value).getType();
 			if (type instanceof ClassOrInterfaceType) {
-				JavaType javaType = new JavaType(((ClassOrInterfaceType)type).getName());
+				JavaType javaType = new JavaType(((ClassOrInterfaceType) type).getName());
 				NameExpr nameToUse = importTypeIfRequired(targetType, imports, javaType);
 				if (!(nameToUse instanceof QualifiedNameExpr)) {
 					return new ClassExpr(new ClassOrInterfaceType(javaType.getSimpleTypeName()));
 				}
-			} else if (type instanceof ReferenceType && ((ReferenceType)type).getType() instanceof ClassOrInterfaceType) {
-				ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType)type).getType();
+			} else if (type instanceof ReferenceType && ((ReferenceType) type).getType() instanceof ClassOrInterfaceType) {
+				ClassOrInterfaceType cit = (ClassOrInterfaceType) ((ReferenceType) type).getType();
 				JavaType javaType = new JavaType(cit.getName());
 				NameExpr nameToUse = importTypeIfRequired(targetType, imports, javaType);
 				if (!(nameToUse instanceof QualifiedNameExpr)) {

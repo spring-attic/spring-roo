@@ -20,6 +20,7 @@ import org.springframework.roo.classpath.details.annotations.LongAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Automatically populates the {@link AutoPopulate} annotated fields on a 
@@ -27,10 +28,8 @@ import org.springframework.roo.model.JavaType;
  *  
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AutoPopulationUtils {
-	
 	private static final Map<Class<?>,List<Field>> cachedIntrospections = new HashMap<Class<?>, List<Field>>();
 	private static final Map<Field, JavaSymbolName> attributeNameForEachField = new HashMap<Field, JavaSymbolName>();
 	
@@ -40,15 +39,13 @@ public abstract class AutoPopulationUtils {
 	 * locate the value from the passed {@link AnnotationMetadata}. The annotation value
 	 * will be converted into the required field type, or silently skipped if this is not
 	 * possible (eg the user edited source code and made a formatting error). As such it 
-	 * is important that the caller 
+	 * is important that the caller.
 	 * 
 	 * @param target to put values into (mandatory, cannot be null)
 	 * @param annotation to obtain values from (can be null, for convenience of the caller)
 	 */
 	public static final void populate(Object target, AnnotationMetadata annotation) {
-		if (target == null) {
-			throw new IllegalArgumentException("Target required");
-		}
+		Assert.notNull(target, "Target required");
 		
 		if (annotation == null) {
 			return;

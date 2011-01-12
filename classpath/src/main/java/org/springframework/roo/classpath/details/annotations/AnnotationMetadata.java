@@ -5,13 +5,11 @@ import java.util.List;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 
-
 /**
  * Metadata concerning a particular annotation appearing on a member.
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public interface AnnotationMetadata {
 	
@@ -31,5 +29,4 @@ public interface AnnotationMetadata {
 	 * @return the requested attribute (or null if not found)
 	 */
 	AnnotationAttributeValue<?> getAttribute(JavaSymbolName attributeName);
-	
 }

@@ -162,7 +162,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 				} else if (current.getRight() instanceof NameExpr) {
 					right = ((NameExpr) current.getRight()).getName();
 				}
-				
+
 				result = right + result;
 				if (current.getLeft() instanceof StringLiteralExpr) {
 					String left = ((StringLiteralExpr) current.getLeft()).getValue();
@@ -207,7 +207,7 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			NameExpr field = (NameExpr) expression;
 			String name = field.getName();
 
-			JavaType fieldType = new JavaType("unknown.Object"); // as we have no way of finding out the real type
+			JavaType fieldType = new JavaType("unknown.Object"); // As we have no way of finding out the real type
 
 			EnumDetails enumDetails = new EnumDetails(fieldType, new JavaSymbolName(name));
 			return new EnumAttributeValue(annotationName, enumDetails);
@@ -308,14 +308,14 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 			// We have a number of pairs being presented
 			annotationExpression = new NormalAnnotationExpr(nameToUse, new ArrayList<MemberValuePair>());
 		}
-
+		
 		// Add our AnnotationExpr to the actual annotations that will eventually be flushed through to the compilation unit
 		annotations.add(annotationExpression);
 
 		// Add member-value pairs to our AnnotationExpr
 		if (memberValuePairs != null && memberValuePairs.size() > 0) {
 
-			// have to check here for cases where we need to change an existing MarkerAnnotationExpr to a NormalAnnotationExpr or SingleMemberAnnotationExpr
+			// Have to check here for cases where we need to change an existing MarkerAnnotationExpr to a NormalAnnotationExpr or SingleMemberAnnotationExpr
 			if (annotationExpression instanceof MarkerAnnotationExpr) {
 				MarkerAnnotationExpr mae = (MarkerAnnotationExpr) annotationExpression;
 
@@ -335,12 +335,12 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 				// Potentially upgrade this expression to a NormalAnnotationExpr
 				SingleMemberAnnotationExpr smae = (SingleMemberAnnotationExpr) annotationExpression;
 				if (memberValuePairs.size() == 1 && memberValuePairs.get(0).getName() == null || memberValuePairs.get(0).getName().equals("value") || memberValuePairs.get(0).getName().equals("")) {
-					// they specified only a single member-value pair, and it is the default anyway, so we need not do anything except update the value
+					// They specified only a single member-value pair, and it is the default anyway, so we need not do anything except update the value
 					Expression toUse = JavaParserUtils.importExpressionIfRequired(compilationUnitServices.getEnclosingTypeName(), compilationUnitServices.getImports(), memberValuePairs.get(0).getValue());
 					smae.setMemberValue(toUse);
 					return;
 				} else {
-					// There is >1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
+					// There is > 1 expression, or they have provided some sort of non-default value, so it's time to upgrade the expression
 					// (whilst retaining any potentially existing expression values)
 					Expression existingValue = smae.getMemberValue();
 					annotationExpression = new NormalAnnotationExpr(smae.getName(), new ArrayList<MemberValuePair>());
@@ -448,14 +448,14 @@ public final class JavaParserAnnotationMetadata implements AnnotationMetadata {
 
 		if (value instanceof EnumAttributeValue) {
 			EnumDetails castValue = ((EnumAttributeValue) value).getValue();
-			// this isn't as elegant as it could be (ie loss of type parameters), but it will do for now
+			// This isn't as elegant as it could be (ie loss of type parameters), but it will do for now
 			FieldAccessExpr convertedValue = new FieldAccessExpr(JavaParserUtils.getNameExpr(castValue.getType().getFullyQualifiedTypeName()), castValue.getField().getSymbolName());
 			return new MemberValuePair(value.getName().getSymbolName(), convertedValue);
 		}
 
 		if (value instanceof ClassAttributeValue) {
 			JavaType castValue = ((ClassAttributeValue) value).getValue();
-			// this doesn't preserve type parameters
+			// This doesn't preserve type parameters
 			NameExpr nameExpr = JavaParserUtils.getNameExpr(castValue.getFullyQualifiedTypeName());
 			ClassExpr convertedValue = new ClassExpr(JavaParserUtils.getReferenceType(nameExpr));
 			return new MemberValuePair(value.getName().getSymbolName(), convertedValue);

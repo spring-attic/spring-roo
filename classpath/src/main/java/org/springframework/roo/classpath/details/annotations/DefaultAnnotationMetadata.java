@@ -55,5 +55,4 @@ public final class DefaultAnnotationMetadata implements AnnotationMetadata {
 		tsc.append("attributes", attributes);
 		return tsc.toString();
 	}
-
 }

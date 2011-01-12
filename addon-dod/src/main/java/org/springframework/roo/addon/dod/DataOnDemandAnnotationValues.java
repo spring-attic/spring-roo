@@ -11,10 +11,8 @@ import org.springframework.roo.model.JavaType;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class DataOnDemandAnnotationValues extends AbstractAnnotationValues {
-	
 	// From annotation
 	@AutoPopulate private JavaType entity = null;
 	@AutoPopulate private int quantity = 10;
@@ -31,6 +29,4 @@ public class DataOnDemandAnnotationValues extends AbstractAnnotationValues {
 	public int getQuantity() {
 		return quantity;
 	}
-
-
 }

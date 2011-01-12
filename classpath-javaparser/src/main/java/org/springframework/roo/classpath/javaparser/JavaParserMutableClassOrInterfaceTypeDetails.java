@@ -47,7 +47,6 @@ import org.springframework.roo.support.util.FileCopyUtils;
  * @since 1.0
  */
 public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClassOrInterfaceTypeDetails implements MutableClassOrInterfaceTypeDetails {
-	
 	private FileManager fileManager;
 	private String fileIdentifier;
 	

@@ -80,7 +80,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (!annotationValues.isAnnotationFound() || annotationValues.getEntity() == null) {
 			return null;
 		}
-		
+	
 		// Remember that this entity JavaType matches up with this DOD's metadata identification string
 		// Start by clearing the previous association
 		JavaType oldEntity = dodMidToEntityMap.get(metadataIdentificationString);
@@ -95,7 +95,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		Path entityPath = Path.SRC_MAIN_JAVA;
 		String entityMetadataKey = EntityMetadata.createIdentifier(entityJavaType, entityPath);
 		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(entityJavaType, entityPath);
-		
+	
 		// We need to lookup the metadata we depend on
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 		PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(entityClassOrInterfaceMetadataKey);
@@ -104,7 +104,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (entityMetadata == null || !entityMetadata.isValid() || entityPhysicalTypeMetadata == null) {
 			return null;
 		}
-		
+	
 		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		
 		// Abort if the entity's class details aren't available (parse error etc)
