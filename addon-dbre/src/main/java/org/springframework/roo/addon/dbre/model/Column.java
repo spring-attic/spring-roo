@@ -28,7 +28,6 @@ public class Column implements Serializable {
 	private int columnSize;
 	private int scale = 0;
 	private String description;
-	private Table table;
 	private boolean primaryKey;
 	private boolean required;
 	private boolean unique;
@@ -207,14 +206,6 @@ public class Column implements Serializable {
 		this.description = description;
 	}
 
-	public Table getTable() {
-		return table;
-	}
-
-	public void setTable(Table table) {
-		this.table = table;
-	}
-
 	public boolean isPrimaryKey() {
 		return primaryKey;
 	}
@@ -287,6 +278,6 @@ public class Column implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, table=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, columnSize, scale, description, table, primaryKey, required, unique, autoIncrement, jdbcType, javaType, defaultValue);
+		return String.format("Column [name=%s, dataType=%s, typeName=%s, columnSize=%s, scale=%s, description=%s, primaryKey=%s, required=%s, unique=%s, autoIncrement=%s, jdbcType=%s, javaType=%s, defaultValue=%s]", name, dataType, typeName, columnSize, scale, description, primaryKey, required, unique, autoIncrement, jdbcType, javaType, defaultValue);
 	}
 }
