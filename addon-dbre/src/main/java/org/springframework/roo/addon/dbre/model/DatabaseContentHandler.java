@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre.model;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Stack;
 
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils.IndexType;
@@ -18,26 +20,27 @@ import org.xml.sax.helpers.DefaultHandler;
  * @since 1.1
  */
 public final class DatabaseContentHandler extends DefaultHandler {
+	private Stack<Object> stack = new Stack<Object>();
 	private Database database;
-	private Stack<Object> stack;
+	private String name;
+	private Set<Table> tables = new LinkedHashSet<Table>();
+	private JavaPackage destinationPackage;
 
 	public DatabaseContentHandler() {
 		super();
-		stack = new Stack<Object>();
 	}
 
 	public Database getDatabase() {
-		database.initialize();
 		return database;
 	}
 
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (qName.equals("database")) {
-			stack.push(new Database());
-			((Database) stack.peek()).setName(attributes.getValue(DatabaseXmlUtils.NAME));
+			stack.push(new Object()); 
+			name = attributes.getValue(DatabaseXmlUtils.NAME);
 			if (StringUtils.hasText(attributes.getValue("package"))) {
-				((Database) stack.peek()).setDestinationPackage(new JavaPackage(attributes.getValue("package")));
+				destinationPackage = new JavaPackage(attributes.getValue("package"));
 			}
 		} else if (qName.equals("option")) {
 			stack.push(new Option(attributes.getValue("key"), attributes.getValue("value")));
@@ -62,24 +65,13 @@ public final class DatabaseContentHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		Object tmp = stack.pop();
 
-		if (qName.equals("database")) {
-			database = (Database) tmp;
-		} else if (qName.equals("option")) {
+		if (qName.equals("option")) {
 			Option option = (Option) tmp;
-			if (stack.peek() instanceof ForeignKey) {
-				if (option.getKey().equals("exported")) {
-					((ForeignKey) stack.peek()).setExported(new Boolean(option.getValue()));
-				}
-			} else if (stack.peek() instanceof Database) {
-				if (option.getKey().equals(DatabaseXmlUtils.INCLUDED_TABLES)) {
-					((Database) stack.peek()).setIncludeTables(option.getValue());
-				}
-				if (option.getKey().equals(DatabaseXmlUtils.EXCLUDED_TABLES)) {
-					((Database) stack.peek()).setExcludeTables(option.getValue());
-				}
+			if (stack.peek() instanceof ForeignKey && option.getKey().equals("exported")) {
+				((ForeignKey) stack.peek()).setExported(new Boolean(option.getValue()));
 			}
 		} else if (qName.equals("table")) {
-			((Database) stack.peek()).addTable((Table) tmp);
+			tables.add((Table) tmp);
 		} else if (qName.equals("column")) {
 			((Table) stack.peek()).addColumn((Column) tmp);
 		} else if (qName.equals("foreign-key")) {
@@ -96,6 +88,9 @@ public final class DatabaseContentHandler extends DefaultHandler {
 			((Table) stack.peek()).addIndex((Index) tmp);
 		} else if (qName.equals("unique-column") || qName.equals("index-column")) {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
+		} else if (qName.equals("database")) {
+			database = new Database(name, tables);
+			database.setDestinationPackage(destinationPackage);
 		} else {
 			stack.push(tmp);
 		}

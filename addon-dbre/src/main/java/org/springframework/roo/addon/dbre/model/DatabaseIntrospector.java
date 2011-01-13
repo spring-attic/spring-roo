@@ -104,18 +104,12 @@ public class DatabaseIntrospector {
 
 	public Database createDatabase() throws SQLException {
 		String name = StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
-		Database database = new Database();
-		database.setName(name);
-		database.setTables(readTables());
-		database.setIncludeTables(includeTables);
-		database.setExcludeTables(excludeTables);
-		database.initialize();
-		return database;
+		return new Database(name, getTables());
 	}
 	
-	private Set<Table> readTables() throws SQLException {
+	private Set<Table> getTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-
+		
 		String[] types = view ? new String[] { TableType.TABLE.name(), TableType.VIEW.name() } : new String[] { TableType.TABLE.name() };
 		ResultSet rs = databaseMetaData.getTables(getCatalog(), getSchemaPattern(), getTableNamePattern(), types);
 		try {
@@ -136,10 +130,10 @@ public class DatabaseIntrospector {
 					table.setSchema(schema);
 					table.setDescription(rs.getString("REMARKS"));
 
-					table.addColumns(readColumns());
-					table.addImportedKeys(readForeignKeys(false));
-					table.addExportedKeys(readForeignKeys(true));
-					table.addIndices(readIndices());
+					readColumns(table);
+					readForeignKeys(table, false);
+					readForeignKeys(table, true);
+					readIndices(table);
 
 					for (String columnName : readPrimaryKeyNames()) {
 						Column column = table.findColumn(columnName);
@@ -154,7 +148,7 @@ public class DatabaseIntrospector {
 		} finally {
 			rs.close();
 		}
-
+		
 		return tables;
 	}
 
@@ -169,9 +163,7 @@ public class DatabaseIntrospector {
 		return ignore;
 	}
 
-	private Set<Column> readColumns() throws SQLException {
-		Set<Column> columns = new LinkedHashSet<Column>();
-
+	private void readColumns(Table table) throws SQLException {
 		ResultSet rs = databaseMetaData.getColumns(catalogName, getSchemaName(), tableName, getColumnNamePattern());
 		try {
 			while (rs.next()) {
@@ -180,16 +172,14 @@ public class DatabaseIntrospector {
 				column.setDefaultValue(rs.getString("COLUMN_DEF"));
 				column.setRequired("NO".equalsIgnoreCase(rs.getString("IS_NULLABLE")));
 
-				columns.add(column);
+				table.addColumn(column);
 			}
 		} finally {
 			rs.close();
 		}
-
-		return columns;
 	}
 
-	private Set<ForeignKey> readForeignKeys(boolean exported) throws SQLException {
+	private void readForeignKeys(Table table, boolean exported) throws SQLException {
 		Map<String, ForeignKey> foreignKeys = new LinkedHashMap<String, ForeignKey>();
 
 		ResultSet rs;
@@ -227,7 +217,13 @@ public class DatabaseIntrospector {
 			rs.close();
 		}
 
-		return new LinkedHashSet<ForeignKey>(foreignKeys.values());
+		for (ForeignKey foreignKey : foreignKeys.values()) {
+			if (exported) {
+				table.addExportedKey(foreignKey);
+			} else {
+				table.addImportedKey(foreignKey);
+			}
+		}
 	}
 
 	private CascadeAction getCascadeAction(Short actionValue) {
@@ -279,7 +275,7 @@ public class DatabaseIntrospector {
 		return false;
 	}
 	
-	private Set<Index> readIndices() throws SQLException {
+	private void readIndices(Table table) throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 
 		ResultSet rs;
@@ -287,7 +283,7 @@ public class DatabaseIntrospector {
 			// Catching SQLException here due to Oracle throwing exception when attempting to retrieve indices for deleted tables that exist in Oracle's recycle bin
 			rs = databaseMetaData.getIndexInfo(catalogName, getSchemaName(), tableName, false, false);
 		} catch (SQLException e) {
-			return indices;
+			return;
 		}
 
 		if (rs != null) {
@@ -317,7 +313,9 @@ public class DatabaseIntrospector {
 			}
 		}
 
-		return indices;
+		for (Index index : indices) {
+			table.addIndex(index);
+		}
 	}
 
 	private Index findIndex(String name, Set<Index> indices) {

@@ -2,7 +2,6 @@ package org.springframework.roo.addon.dbre.model;
 
 import java.io.Serializable;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.roo.support.util.Assert;
@@ -16,7 +15,6 @@ import org.springframework.roo.support.util.Assert;
 public class Index implements Serializable {
 	private static final long serialVersionUID = -4874675730241979824L;
 	private String name;
-	private Table table;
 	private boolean unique;
 	private Set<IndexColumn> columns = new LinkedHashSet<IndexColumn>();
 
@@ -30,14 +28,6 @@ public class Index implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Table getTable() {
-		return table;
-	}
-
-	public void setTable(Table table) {
-		this.table = table;
 	}
 
 	public boolean isUnique() {
@@ -55,25 +45,6 @@ public class Index implements Serializable {
 	public boolean addColumn(IndexColumn indexColumn) {
 		Assert.notNull(indexColumn, "Column required");
 		return columns.add(indexColumn);
-	}
-
-	public boolean addColumns(List<IndexColumn> indexColumns) {
-		Assert.notNull(indexColumns, "Columns required");
-		return columns.addAll(indexColumns);
-	}
-
-	public boolean removeColumn(IndexColumn indexColumn) {
-		Assert.notNull(indexColumn, "Column required");
-		return columns.remove(indexColumn);
-	}
-	
-	public boolean hasColumn(Column column) {
-		for (IndexColumn indexColumn : columns) {
-			if (indexColumn.getColumn().equals(column)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public int hashCode() {

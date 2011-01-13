@@ -23,9 +23,6 @@ public class ForeignKey implements Serializable {
 	/** Whether the foreign key is an imported or exported key */
 	private boolean exported;
 
-	/** The owning table. */
-	private Table table;
-
 	/** The target table. */
 	private Table foreignTable;
 
@@ -59,14 +56,6 @@ public class ForeignKey implements Serializable {
 
 	public void setExported(boolean exported) {
 		this.exported = exported;
-	}
-
-	public Table getTable() {
-		return table;
-	}
-
-	public void setTable(Table table) {
-		this.table = table;
 	}
 
 	public Table getForeignTable() {

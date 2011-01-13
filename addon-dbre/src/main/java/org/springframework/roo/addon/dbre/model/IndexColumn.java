@@ -11,7 +11,6 @@ import java.io.Serializable;
 public class IndexColumn implements Serializable {
 	private static final long serialVersionUID = 4206711649555220093L;
 	private String name;
-	private Column column;
 	private int size;
 
 	IndexColumn(String name) {
@@ -24,14 +23,6 @@ public class IndexColumn implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public Column getColumn() {
-		return column;
-	}
-
-	public void setColumn(Column column) {
-		this.column = column;
 	}
 
 	public int getSize() {
@@ -71,6 +62,6 @@ public class IndexColumn implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("IndexColumn [name=%s, column=%s, size=%s]", name, (column != null ? column.getName() : null), size);
+		return String.format("IndexColumn [name=%s, size=%s]", name, size);
 	}
 }

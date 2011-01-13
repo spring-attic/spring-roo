@@ -3,6 +3,7 @@ package org.springframework.roo.addon.dbre.model;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.EmptyStackException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,8 +35,6 @@ public abstract class DatabaseXmlUtils {
 	public static final String REFERENCE = "reference";
 	public static final String ON_UPDATE = "onUpdate";
 	public static final String ON_DELETE = "onDelete";
-	public static final String EXCLUDED_TABLES = "excludedTables";
-	public static final String INCLUDED_TABLES = "includedTables";
 
 	public static enum IndexType {
 		INDEX, UNIQUE
@@ -51,12 +50,6 @@ public abstract class DatabaseXmlUtils {
 
 		if (database.getDestinationPackage() != null) {
 			databaseElement.setAttribute("package", database.getDestinationPackage().getFullyQualifiedPackageName());
-		}
-		if (database.getIncludeTables() != null) {
-			databaseElement.appendChild(createOptionElement(INCLUDED_TABLES, database.getIncludeTablesStr(), document));
-		}
-		if (database.getExcludeTables() != null) {
-			databaseElement.appendChild(createOptionElement(EXCLUDED_TABLES, database.getExcludeTablesStr(), document));
 		}
 
 		for (Table table : database.getTables()) {
@@ -159,22 +152,8 @@ public abstract class DatabaseXmlUtils {
 		Document document = getDocument(inputStream);
 		Element databaseElement = document.getDocumentElement();
 
-		Database database = new Database();
-		database.setName(databaseElement.getAttribute(NAME));
-		if (StringUtils.hasText(databaseElement.getAttribute("package"))) {
-			database.setDestinationPackage(new JavaPackage(databaseElement.getAttribute("package")));
-		}
-
-		List<Element> optionElements = XmlUtils.findElements("option", databaseElement);
-		for (Element optionElement : optionElements) {
-			if (optionElement.getAttribute("key").equals(EXCLUDED_TABLES)) {
-				database.setExcludeTables(StringUtils.commaDelimitedListToSet(optionElement.getAttribute("value")));
-			}
-			if (optionElement.getAttribute("key").equals(INCLUDED_TABLES)) {
-				database.setIncludeTables(StringUtils.commaDelimitedListToSet(optionElement.getAttribute("value")));
-			}
-		}
-
+		Set<Table> tables = new LinkedHashSet<Table>();
+		
 		List<Element> tableElements = XmlUtils.findElements("table", databaseElement);
 		for (Element tableElement : tableElements) {
 			Table table = new Table();
@@ -215,7 +194,7 @@ public abstract class DatabaseXmlUtils {
 				foreignKey.setOnDelete(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute(ON_DELETE)));
 				foreignKey.setOnUpdate(CascadeAction.getCascadeAction(foreignKeyElement.getAttribute(ON_UPDATE)));
 
-				optionElements = XmlUtils.findElements("option", foreignKeyElement);
+				List<Element> optionElements = XmlUtils.findElements("option", foreignKeyElement);
 				for (Element optionElement : optionElements) {
 					if (optionElement.getAttribute("key").equals("exported")) {
 						foreignKey.setExported(Boolean.parseBoolean(optionElement.getAttribute("value")));
@@ -234,11 +213,15 @@ public abstract class DatabaseXmlUtils {
 			addIndices(table, tableElement, IndexType.INDEX);
 			addIndices(table, tableElement, IndexType.UNIQUE);
 
-			database.addTable(table);
+			tables.add(table);
+		}
+		
+		Database database = new Database(databaseElement.getAttribute(NAME), tables);
+		
+		if (StringUtils.hasText(databaseElement.getAttribute("package"))) {
+			database.setDestinationPackage(new JavaPackage(databaseElement.getAttribute("package")));
 		}
 
-		database.initialize();
-		
 		return database;
 	}
 

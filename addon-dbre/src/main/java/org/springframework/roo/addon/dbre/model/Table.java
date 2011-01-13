@@ -18,6 +18,7 @@ public class Table implements Serializable {
 	private Schema schema;
 	private String name;
 	private String description;
+	private boolean joinTable;
 	private Set<Column> columns = new LinkedHashSet<Column>();
 	private Set<ForeignKey> importedKeys = new LinkedHashSet<ForeignKey>();
 	private Set<ForeignKey> exportedKeys = new LinkedHashSet<ForeignKey>();
@@ -58,17 +59,20 @@ public class Table implements Serializable {
 		this.description = description;
 	}
 
+	public boolean isJoinTable() {
+		return joinTable;
+	}
+
+	public void setJoinTable(boolean joinTable) {
+		this.joinTable = joinTable;
+	}
+
 	public Set<Column> getColumns() {
 		return columns;
 	}
 
 	public int getColumnCount() {
 		return columns.size();
-	}
-
-	public boolean addColumns(Set<Column> columns) {
-		Assert.notNull(columns, "Columns required");
-		return this.columns.addAll(columns);
 	}
 
 	public boolean addColumn(Column column) {
@@ -126,11 +130,6 @@ public class Table implements Serializable {
 		return count;
 	}
 
-	public boolean addImportedKeys(Set<ForeignKey> foreignKeys) {
-		Assert.notNull(foreignKeys, "Foreign keys required");
-		return this.importedKeys.addAll(foreignKeys);
-	}
-
 	public boolean addImportedKey(ForeignKey foreignKey) {
 		Assert.notNull(foreignKey, "Foreign key required");
 		return importedKeys.add(foreignKey);
@@ -151,10 +150,6 @@ public class Table implements Serializable {
 		return exportedKeys;
 	}
 
-	public int getExportedKeyCount() {
-		return exportedKeys.size();
-	}
-
 	public int getExportedKeyCountByForeignTableName(String foreignTableName) {
 		int count = 0;
 		for (ForeignKey exportedKey : exportedKeys) {
@@ -165,25 +160,9 @@ public class Table implements Serializable {
 		return count;
 	}
 
-	public boolean addExportedKeys(Set<ForeignKey> exportedKeys) {
-		Assert.notNull(exportedKeys, "Exported keys required");
-		return this.exportedKeys.addAll(exportedKeys);
-	}
-
 	public boolean addExportedKey(ForeignKey exportedKey) {
 		Assert.notNull(exportedKey, "Exported key required");
 		return exportedKeys.add(exportedKey);
-	}
-
-	public ForeignKey findExportedKeyByLocalColumnName(String localColumnName) {
-		for (ForeignKey exportedKey : exportedKeys) {
-			for (Reference reference : exportedKey.getReferences()) {
-				if (reference.getLocalColumnName().equalsIgnoreCase(localColumnName)) {
-					return exportedKey;
-				}
-			}
-		}
-		return null;
 	}
 
 	public Set<Index> getIndices() {
@@ -194,36 +173,7 @@ public class Table implements Serializable {
 		Assert.notNull(index, "Index required");
 		return indices.add(index);
 	}
-
-	public boolean addIndices(Set<Index> indices) {
-		Assert.notNull(indices, "Indices required");
-		return this.indices.addAll(indices);
-	}
-
-//	public Index findUniqueReference(String uniqueColumnName) {
-//		for (Index index : indices) {
-//			if (index.isUnique()) {
-//				for (IndexColumn column : index.getColumns()) {
-//					if (column.getName().equalsIgnoreCase(uniqueColumnName)) {
-//						return index;
-//					}
-//				}
-//			}
-//		}
-//		return null;
-//	}
 	
-	public boolean isPrimaryKeyIndex(Index index) {
-		Set<Column> primaryKeys = getPrimaryKeys();
-		boolean primaryKeyIndex = index.isUnique() && index.getColumns().size() == primaryKeys.size();
-		if (primaryKeyIndex) {
-			for (Column column : primaryKeys) {
-				primaryKeyIndex &= index.hasColumn(column);
-			}
-		}
-		return primaryKeyIndex;
-	}
-
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

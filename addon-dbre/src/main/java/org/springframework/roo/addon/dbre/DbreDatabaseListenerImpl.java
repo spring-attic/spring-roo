@@ -85,18 +85,16 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		if (database == null) {
 			return;
 		}
-		if (database != null && database.hasTables()) {
+		if (database.hasTables()) {
 			identifierResults = new HashMap<JavaType, List<Identifier>>();
 			reverseEngineer(database);
-		} else {
-			identifierResults = null;
 		}
 	}
 
 	private void reverseEngineer(Database database) {
 		// Lookup the relevant destination package if not explicitly given
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
-	
+		
 		if (destinationPackage == null) {
 			if (!managedEntities.isEmpty()) {
 				// Take the package of the first one
@@ -104,7 +102,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			}
 		}
 
-		// Fallback to project's top level package
+		// Fall back to project's top level package
 		if (destinationPackage == null) {
 			ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 			destinationPackage = projectMetadata.getTopLevelPackage();
@@ -126,8 +124,8 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Create new entities from tables
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
-			if (!database.isJoinTable(table)) {
-				createNewManagedEntityFromTable(table, destinationPackage);
+			if (!table.isJoinTable()) {
+				createNewManagedEntityFromTable(table);
 			}
 		}
 
@@ -173,7 +171,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		Assert.notNull(tableAttribute, errMsg);
 		String tableName = (String) tableAttribute.getValue();
 		Assert.hasText(tableName, errMsg);
-		Table table = database.findTable(tableName);
+		Table table = database.getTable(tableName);
 		if (table == null) {
 			// Table has been dropped so delete managed type, and its identifier if applicable
 			deleteManagedType(managedEntity);
@@ -205,8 +203,8 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return table;
 	}
 
-	private void createNewManagedEntityFromTable(Table table, JavaPackage javaPackage) {
-		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), javaPackage);
+	private void createNewManagedEntityFromTable(Table table) {
+		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
 
 		// Create type annotations for new entity
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();

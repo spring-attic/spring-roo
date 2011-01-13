@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Represents the database model, ie. the tables in the database.
@@ -28,26 +27,18 @@ public class Database implements Serializable {
 	private JavaPackage destinationPackage;
 
 	/** All tables. */
-	private Set<Table> tables = new LinkedHashSet<Table>();
+	private Set<Table> tables;
 
-	/** Many-to-many join tables. */
-	private Set<JoinTable> joinTables = new LinkedHashSet<JoinTable>();
-
-	/** Included tables */
-	private Set<String> includeTables;
-
-	/** Excluded tables */
-	private Set<String> excludeTables;
-
-	Database() {
+	Database(String name, Set<Table> tables) {
+		Assert.hasText(name, "Database name required");
+		Assert.notNull(tables, "Tables required");
+		this.name = name;
+		this.tables = tables;
+		initialize();
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public JavaPackage getDestinationPackage() {
@@ -66,29 +57,11 @@ public class Database implements Serializable {
 		return Collections.unmodifiableSet(tables);
 	}
 
-	public Set<String> getTableNames() {
-		Set<String> tableNames = new LinkedHashSet<String>();
-		for (Table table : tables) {
-			tableNames.add(table.getName());
-		}
-		return Collections.unmodifiableSet(tableNames);
-	}
-
-	public void setTables(Set<Table> tables) {
-		Assert.notNull(tables, "tables required");
-		this.tables = tables;
-	}
-
-	public boolean addTable(Table table) {
-		Assert.notNull(table, "table required");
-		return tables.add(table);
-	}
-
 	public boolean hasTables() {
 		return !tables.isEmpty();
 	}
 
-	public Table findTable(String name) {
+	public Table getTable(String name) {
 		for (Table table : tables) {
 			if (table.getName().equals(name)) {
 				return table;
@@ -97,67 +70,15 @@ public class Database implements Serializable {
 		return null;
 	}
 
-	public Set<String> getIncludeTables() {
-		return includeTables;
-	}
-
-	public String getIncludeTablesStr() {
-		return StringUtils.collectionToCommaDelimitedString(includeTables);
-	}
-
-	void setIncludeTables(Set<String> includeTables) {
-		this.includeTables = includeTables;
-	}
-	
-	void setIncludeTables(String includeTablesStr) {
-		this.includeTables = StringUtils.commaDelimitedListToSet(includeTablesStr);
-	}
-
-	public Set<String> getExcludeTables() {
-		return excludeTables;
-	}
-
-	public String getExcludeTablesStr() {
-		return StringUtils.collectionToCommaDelimitedString(excludeTables);
-	}
-
-	void setExcludeTables(Set<String> excludeTables) {
-		this.excludeTables = excludeTables;
-	}
-
-	void setExcludeTables(String excludeTablesStr) {
-		this.excludeTables = StringUtils.commaDelimitedListToSet(excludeTablesStr);
-	}
-
-	public Set<JoinTable> getJoinTables() {
-		return Collections.unmodifiableSet(joinTables);
-	}
-
-	public boolean isJoinTable(Table table) {
-		for (JoinTable joinTable : joinTables) {
-			if (joinTable.getTable().equals(table)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/**
 	 * Initialises the model by establishing the relationships between elements in this model eg. in foreign keys etc.
 	 */
-	void initialize() {
+	private void initialize() {
 		for (Table table : tables) {
-			initializeColumns(table);
 			initializeImportedKeys(table);
 			initializeExportedKeys(table);
 			initializeIndices(table);
-			addJoinTables(table);
-		}
-	}
-
-	private void initializeColumns(Table table) {
-		for (Column column : table.getColumns()) {
-			column.setTable(table);
+			initializeJoinTable(table);
 		}
 	}
 
@@ -167,23 +88,22 @@ public class Database implements Serializable {
 		Map<Column, Set<ForeignKey>> repeatedColumns = new LinkedHashMap<Column, Set<ForeignKey>>();
 
 		for (ForeignKey foreignKey : table.getImportedKeys()) {
-			foreignKey.setTable(table);
-
-			if (foreignKey.getForeignTable() == null) {
-				String foreignTableName = foreignKey.getForeignTableName();
-				Table targetTable = findTable(foreignTableName);
-				if (targetTable != null) {
-					keySequence = keySequenceMap.get(foreignTableName);
-					if (keySequence == null) {
-						keySequence = 0;
-						keySequenceMap.put(foreignTableName, keySequence);
-					}
-					foreignKey.setForeignTable(targetTable);
-					if (table.getImportedKeyCountByForeignTableName(foreignTableName) > 1) {
-						keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
-					}
-					foreignKey.setKeySequence(keySequence);
+			if (foreignKey.getForeignTable() != null) {
+				continue;
+			}
+			String foreignTableName = foreignKey.getForeignTableName();
+			Table targetTable = getTable(foreignTableName);
+			if (targetTable != null) {
+				keySequence = keySequenceMap.get(foreignTableName);
+				if (keySequence == null) {
+					keySequence = 0;
+					keySequenceMap.put(foreignTableName, keySequence);
 				}
+				foreignKey.setForeignTable(targetTable);
+				if (table.getImportedKeyCountByForeignTableName(foreignTableName) > 1) {
+					keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+				}
+				foreignKey.setKeySequence(keySequence);
 			}
 
 			for (Reference reference : foreignKey.getReferences()) {
@@ -209,18 +129,19 @@ public class Database implements Serializable {
 		// Mark repeated columns with insertable = false and updatable = false
 		for (Map.Entry<Column, Set<ForeignKey>> entrySet : repeatedColumns.entrySet()) {
 			Set<ForeignKey> foreignKeys = entrySet.getValue();
-			if (foreignKeys.size() > 1) {
-				fk: for (ForeignKey foreignKey : foreignKeys) {
-					if (foreignKey.getReferenceCount() == 1) {
-						Reference reference = foreignKey.getReferences().iterator().next();
+			if (foreignKeys.size() <= 1) {
+				continue;
+			}
+			fk: for (ForeignKey foreignKey : foreignKeys) {
+				if (foreignKey.getReferenceCount() == 1) {
+					Reference reference = foreignKey.getReferences().iterator().next();
+					reference.setInsertableOrUpdatable(false);
+					break fk;
+				} else {
+					for (Reference reference : foreignKey.getReferences()) {
 						reference.setInsertableOrUpdatable(false);
-						break fk;
-					} else {
-						for (Reference reference : foreignKey.getReferences()) {
-							reference.setInsertableOrUpdatable(false);
-						}
-						break fk;
 					}
+					break fk;
 				}
 			}
 		}
@@ -231,23 +152,22 @@ public class Database implements Serializable {
 		Short keySequence = null;
 
 		for (ForeignKey exportedKey : table.getExportedKeys()) {
-			exportedKey.setTable(table);
-
-			if (exportedKey.getForeignTable() == null) {
-				String foreignTableName = exportedKey.getForeignTableName();
-				Table targetTable = findTable(foreignTableName);
-				if (targetTable != null) {
-					exportedKey.setForeignTable(targetTable);
-					keySequence = keySequenceMap.get(foreignTableName);
-					if (keySequence == null) {
-						keySequence = 0;
-						keySequenceMap.put(foreignTableName, keySequence);
-					}
-					if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
-						keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
-					}
-					exportedKey.setKeySequence(keySequence);
+			if (exportedKey.getForeignTable() != null) {
+				continue;
+			}
+			String foreignTableName = exportedKey.getForeignTableName();
+			Table targetTable = getTable(foreignTableName);
+			if (targetTable != null) {
+				exportedKey.setForeignTable(targetTable);
+				keySequence = keySequenceMap.get(foreignTableName);
+				if (keySequence == null) {
+					keySequence = 0;
+					keySequenceMap.put(foreignTableName, keySequence);
 				}
+				if (table.getExportedKeyCountByForeignTableName(foreignTableName) > 1) {
+					keySequenceMap.put(foreignTableName, new Short((short) (keySequence.shortValue() + 1)));
+				}
+				exportedKey.setKeySequence(keySequence);
 			}
 
 			for (Reference reference : exportedKey.getReferences()) {
@@ -269,15 +189,10 @@ public class Database implements Serializable {
 
 	private void initializeIndices(Table table) {
 		for (Index index : table.getIndices()) {
-			index.setTable(table);
-
 			for (IndexColumn indexColumn : index.getColumns()) {
 				Column column = table.findColumn(indexColumn.getName());
-				if (column != null) {
-					indexColumn.setColumn(column);
-					if (index.isUnique()) {
-						column.setUnique(true);
-					}
+				if (column != null && index.isUnique()) {
+					column.setUnique(true);
 				}
 			}
 		}
@@ -286,9 +201,11 @@ public class Database implements Serializable {
 	/**
 	 * Determines if a table is a many-to-many join table.
 	 * <p>
-	 * To be identified as a many-to-many join table, the table must have have exactly two primary keys and have exactly two foreign-keys pointing to other entity tables and have no other columns.
+	 * To be identified as a many-to-many join table, the table must have have exactly 
+	 * two primary keys and have exactly two foreign-keys pointing to other 
+	 * entity tables and have no other columns.
 	 */
-	private void addJoinTables(Table table) {
+	private void initializeJoinTable(Table table) {
 		boolean equals = table.getColumnCount() == 2 && table.getPrimaryKeyCount() == 2 && table.getImportedKeyCount() == 2 && table.getPrimaryKeyCount() == table.getImportedKeyCount();
 		Iterator<Column> iter = table.getColumns().iterator();
 		while (equals && iter.hasNext()) {
@@ -296,7 +213,7 @@ public class Database implements Serializable {
 			equals &= table.findImportedKeyByLocalColumnName(column.getName()) != null;
 		}
 		if (equals) {
-			joinTables.add(new JoinTable(table));
+			table.setJoinTable(true);
 		}
 	}
 }

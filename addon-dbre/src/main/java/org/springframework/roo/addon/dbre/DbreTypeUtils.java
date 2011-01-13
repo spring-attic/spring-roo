@@ -2,6 +2,7 @@ package org.springframework.roo.addon.dbre;
 
 import java.util.Set;
 
+import org.springframework.roo.addon.dbre.model.Table;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -15,8 +16,8 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
- * Provides methods to find types based on table names and to suggest 
- * type and field names from table and column names respectively.
+ * Provides methods to find types based on table names and to suggest type and field 
+ * names from table and column names respectively.
  * 
  * @author Alan Stewart
  * @since 1.1
@@ -32,7 +33,7 @@ public abstract class DbreTypeUtils {
 	 */
 	public static JavaType findTypeForTableName(Set<ClassOrInterfaceTypeDetails> managedEntities, String tableNamePattern) {
 		Assert.hasText(tableNamePattern, "Table name required");
-		
+
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
 			String tableName = getTableName(managedEntity);
 			if (tableNamePattern.equals(tableName)) {
@@ -42,22 +43,34 @@ public abstract class DbreTypeUtils {
 
 		return null;
 	}
-	
+
+	/**
+	 * Locates the type associated with the presented table.
+	 * 
+	 * @param managedEntities a set of database-managed entities to search.
+	 * @param table the table to locate (required).
+	 * @return the type (if known) or null (if not found).
+	 */
+	public static JavaType findTypeForTable(Set<ClassOrInterfaceTypeDetails> managedEntities, Table table) {
+		Assert.notNull(table, "Table required");
+		return findTypeForTableName(managedEntities, table.getName());
+	}
+
 	/**
 	 * Locates the table name using the presented ClassOrInterfaceTypeDetails.
 	 * 
 	 * <p>
-	 * The search for the table names starts on the @Table annotation and if not present, the 
+	 * The search for the table names starts on the @Table annotation and if not present, the
 	 * @RooEntity "table" attribute is checked. If not present on either, the method returns null.
 	 * 
 	 * @param classOrInterfaceTypeDetails the type to search.
 	 * @return the table name (if known) or null (if not found).
 	 */
-	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {	
-		// Try to locate a table name, which can be specified either via the "name" attribute on 
+	public static String getTableName(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
+		// Try to locate a table name, which can be specified either via the "name" attribute on
 		// @Table, eg @Table(name = "foo") or via the "table" attribute on @RooEntity, eg @RooEntity(table = "foo")
 		String tableName = null;
-		
+
 		AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("javax.persistence.Table"));
 		if (annotation != null) {
 			AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName("name"));
@@ -65,7 +78,7 @@ public abstract class DbreTypeUtils {
 				tableName = (String) nameAttribute.getValue();
 			}
 		}
-		
+
 		if (!StringUtils.hasText(tableName)) {
 			// The search continues...
 			annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType(RooEntity.class.getName()));
@@ -76,10 +89,10 @@ public abstract class DbreTypeUtils {
 				}
 			}
 		}
-		
+
 		return StringUtils.trimToNull(tableName);
 	}
-	
+
 	/**
 	 * Returns a JavaType given a table identity.
 	 * 
@@ -110,6 +123,17 @@ public abstract class DbreTypeUtils {
 		return getName(name, true);
 	}
 
+	/**
+	 * Returns a field name for a given database table;
+	 * 
+	 * @param table the the table.
+	 * @return a String representing the table or column.
+	 */
+	public static String suggestFieldName(Table table) {
+		Assert.notNull(table, "Table required");
+		return getName(table.getName(), true);
+	}
+
 	private static String getName(String str, boolean isField) {
 		StringBuilder result = new StringBuilder();
 		boolean isDelimChar = false;
@@ -135,7 +159,7 @@ public abstract class DbreTypeUtils {
 			}
 		}
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(result.toString())) {
-			result.append("1"); 
+			result.append("1");
 		}
 		return result.toString();
 	}
