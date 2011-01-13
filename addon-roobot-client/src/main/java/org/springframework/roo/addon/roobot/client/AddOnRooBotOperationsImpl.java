@@ -21,7 +21,6 @@ import java.util.zip.ZipInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -45,7 +44,6 @@ import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
  * Implementation of commands that are available via the Roo shell.
@@ -68,6 +66,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private ComponentContext context;
 	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	private final Class<AddOnRooBotOperationsImpl> mutex = AddOnRooBotOperationsImpl.class;
 	
 	protected void activate(ComponentContext context) {
 		this.context = context;
@@ -75,9 +74,11 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		searchResultCache = new HashMap<String, Bundle>();
 		Thread t = new Thread(new Runnable() {
 			public void run() {
-				populateBundleCache(true);
+				synchronized (mutex) {
+					populateBundleCache(true);
+				}
 			}
-		}, "Roo Add-on Index XML Eager Download");
+		}, "Spring Roo RooBot Add-In Index Eager Download");
 		t.start();
 		props = new Properties();
 		try {
@@ -89,29 +90,33 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	public void addOnInfo(AddOnBundleSymbolicName bsn) {
 		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		String bsnString = bsn.getKey();
-		if (bsnString.contains(";")) {
-			bsnString = bsnString.split(";")[0];
+		synchronized (mutex) {
+			String bsnString = bsn.getKey();
+			if (bsnString.contains(";")) {
+				bsnString = bsnString.split(";")[0];
+			}
+			Bundle bundle = bundleCache.get(bsnString);
+			if (bundle == null) {
+				log.warning("Unable to find specified bundle with symbolic name: " + bsn.getKey());
+				return;
+			} 
+			addOnInfo(bundle, bundle.getBundleVersion(bsn.getKey()));
 		}
-		Bundle bundle = bundleCache.get(bsnString);
-		if (bundle == null) {
-			log.warning("Unable to find specified bundle with symbolic name: " + bsn.getKey());
-			return;
-		} 
-		addOnInfo(bundle, bundle.getBundleVersion(bsn.getKey()));
 	}
 	
 	public void addOnInfo(String bundleKey) {
 		Assert.hasText(bundleKey, "A valid bundle ID is required");
-		Bundle bundle = null;
-		if (searchResultCache != null) {
-			bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
+		synchronized (mutex) {
+			Bundle bundle = null;
+			if (searchResultCache != null) {
+				bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
+			}
+			if (bundle == null) {
+				log.warning("A valid bundle ID is required");
+				return;
+			} 
+			addOnInfo(bundle, bundle.getBundleVersion(bundleKey));
 		}
-		if (bundle == null) {
-			log.warning("A valid bundle ID is required");
-			return;
-		} 
-		addOnInfo(bundle, bundle.getBundleVersion(bundleKey));
 	}
 	
 	private void addOnInfo(Bundle bundle, BundleVersion bundleVersion) {
@@ -144,30 +149,34 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 
 	public void installAddOn(AddOnBundleSymbolicName bsn) {
-		Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
-		String bsnString = bsn.getKey();
-		if (bsnString.contains(";")) {
-			bsnString = bsnString.split(";")[0];
+		synchronized (mutex) {
+			Assert.notNull(bsn, "A valid add-on bundle symbolic name is required");
+			String bsnString = bsn.getKey();
+			if (bsnString.contains(";")) {
+				bsnString = bsnString.split(";")[0];
+			}
+			Bundle bundle = bundleCache.get(bsnString);
+			if (bundle == null) {
+				log.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
+				return;
+			} 
+			installAddon(bundle.getBundleVersion(bsn.getKey()), bsn.getKey());
 		}
-		Bundle bundle = bundleCache.get(bsnString);
-		if (bundle == null) {
-			log.warning("Could not find specified bundle with symbolic name: " + bsn.getKey());
-			return;
-		} 
-		installAddon(bundle.getBundleVersion(bsn.getKey()), bsn.getKey());
 	}
 	
 	public void installAddOn(String bundleKey) {
-		Assert.hasText(bundleKey, "A valid bundle ID is required");
-		Bundle bundle = null;
-		if (searchResultCache != null) {
-			bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
+		synchronized (mutex) {
+			Assert.hasText(bundleKey, "A valid bundle ID is required");
+			Bundle bundle = null;
+			if (searchResultCache != null) {
+				bundle = searchResultCache.get(String.format("%02d", Integer.parseInt(bundleKey)));
+			}
+			if (bundle == null) {
+				log.warning("To install an addon a valid bundle ID is required");
+				return;
+			} 
+			installAddon(bundle.getBundleVersion(bundleKey), bundle.getSymbolicName());
 		}
-		if (bundle == null) {
-			log.warning("To install an addon a valid bundle ID is required");
-			return;
-		} 
-		installAddon(bundle.getBundleVersion(bundleKey), bundle.getSymbolicName());
 	}
 	
 	private void installAddon(BundleVersion bundleVersion, String bsn) {
@@ -206,81 +215,87 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 
 	public void removeAddOn(BundleSymbolicName bsn) {
-		Assert.notNull(bsn, "Bundle symbolic name required");
-		boolean success = false;
-		int count = countBundles();
-		success = shell.executeCommand("osgi uninstall --bundleSymbolicName " + bsn.getKey());
-		if (count == countBundles() || !success) {
-			log.warning("Unable to remove add-on: " + bsn.getKey());
-		} else {
-			log.info("Successfully removed add-on: " + bsn.getKey());
+		synchronized (mutex) {
+			Assert.notNull(bsn, "Bundle symbolic name required");
+			boolean success = false;
+			int count = countBundles();
+			success = shell.executeCommand("osgi uninstall --bundleSymbolicName " + bsn.getKey());
+			if (count == countBundles() || !success) {
+				log.warning("Unable to remove add-on: " + bsn.getKey());
+			} else {
+				log.info("Successfully removed add-on: " + bsn.getKey());
+			}
 		}
 	}
 	
 	public Integer searchAddOns(boolean showFeedback, String searchTerms, boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
-		if (maxResults > 99) {
-			maxResults = 99;
-		}
-		if (maxResults < 1) {
-			maxResults = 10;
-		}
-		if (bundleCache.size() == 0) {
-			// We should refresh regardless in this case
-			refresh = true;
-		}
-		if (refresh && populateBundleCache(false)) {
-			if (showFeedback) {
-				log.info("Successfully downloaded Roo add-on Data");
+		synchronized (mutex) {
+			if (maxResults > 99) {
+				maxResults = 99;
 			}
-		}
-		if (bundleCache.size() != 0) {
-			boolean onlyRelevantBundles = false;
-			if (searchTerms != null && !"".equals(searchTerms)) {
-				onlyRelevantBundles = true;
-				String [] terms = searchTerms.split(",");
-				for (Bundle bundle: bundleCache.values()) {
-					//first set relevance of all bundles to zero
-					bundle.setSearchRelevance(0f);
-					int hits = 0;
-					BundleVersion latest = bundle.getLatestVersion();
-					for (String term: terms) {
-						if ((bundle.getSymbolicName() + ";" + latest.getSummary()).toLowerCase().contains(term.trim().toLowerCase())) {
-							hits++;
-						}
-					}
-					bundle.setSearchRelevance(hits / terms.length);
+			if (maxResults < 1) {
+				maxResults = 10;
+			}
+			if (bundleCache.size() == 0) {
+				// We should refresh regardless in this case
+				refresh = true;
+			}
+			if (refresh && populateBundleCache(false)) {
+				if (showFeedback) {
+					log.info("Successfully downloaded Roo add-on Data");
 				}
 			}
-			List<Bundle> bundles = Bundle.orderBySearchRelevance(new ArrayList<Bundle>(bundleCache.values()));
-			LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
-			if (showFeedback) {
-				printResultList(filteredSearchResults, maxResults, linesPerResult);
+			if (bundleCache.size() != 0) {
+				boolean onlyRelevantBundles = false;
+				if (searchTerms != null && !"".equals(searchTerms)) {
+					onlyRelevantBundles = true;
+					String [] terms = searchTerms.split(",");
+					for (Bundle bundle: bundleCache.values()) {
+						//first set relevance of all bundles to zero
+						bundle.setSearchRelevance(0f);
+						int hits = 0;
+						BundleVersion latest = bundle.getLatestVersion();
+						for (String term: terms) {
+							if ((bundle.getSymbolicName() + ";" + latest.getSummary()).toLowerCase().contains(term.trim().toLowerCase())) {
+								hits++;
+							}
+						}
+						bundle.setSearchRelevance(hits / terms.length);
+					}
+				}
+				List<Bundle> bundles = Bundle.orderBySearchRelevance(new ArrayList<Bundle>(bundleCache.values()));
+				LinkedList<Bundle> filteredSearchResults = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, onlyRelevantBundles);
+				if (showFeedback) {
+					printResultList(filteredSearchResults, maxResults, linesPerResult);
+				}
+				return filteredSearchResults.size();
 			}
-			return filteredSearchResults.size();
+			
+			// There is a problem with the add-on index
+			if (showFeedback) {
+				log.info("No add-ons known. Are you online? Try the 'download status' command");
+			}
+			
+			return null;
 		}
-		
-		// There is a problem with the add-on index
-		if (showFeedback) {
-			log.info("No add-ons known. Are you online? Try the 'download status' command");
-		}
-		
-		return null;
 	}
 
 	public void listAddOns(boolean refresh, int linesPerResult, int maxResults, boolean trustedOnly, boolean compatibleOnly, String requiresCommand) {
-		if (bundleCache.size() == 0) {
-			// We should refresh regardless in this case
-			refresh = true;
-		}
-		if (refresh && populateBundleCache(false)) {
-			log.info("Successfully downloaded Roo add-on Data");
-		}
-		if (bundleCache.size() != 0) {
-			List<Bundle> bundles = Bundle.orderByRanking(new ArrayList<Bundle>(bundleCache.values()));
-			LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
-			printResultList(filteredList, maxResults, linesPerResult);
-		} else {
-			log.info("No add-ons known. Are you online? Try the 'download status' command");
+		synchronized (mutex) {
+			if (bundleCache.size() == 0) {
+				// We should refresh regardless in this case
+				refresh = true;
+			}
+			if (refresh && populateBundleCache(false)) {
+				log.info("Successfully downloaded Roo add-on Data");
+			}
+			if (bundleCache.size() != 0) {
+				List<Bundle> bundles = Bundle.orderByRanking(new ArrayList<Bundle>(bundleCache.values()));
+				LinkedList<Bundle> filteredList = filterList(bundles, trustedOnly, compatibleOnly, requiresCommand, false);
+				printResultList(filteredList, maxResults, linesPerResult);
+			} else {
+				log.info("No add-ons known. Are you online? Try the 'download status' command");
+			}
 		}
 	}
 	
@@ -378,10 +393,12 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	}
 
 	public Map<String, Bundle> getAddOnCache(boolean refresh) {
-		if (refresh) {
-			populateBundleCache(false);
+		synchronized (mutex) {
+			if (refresh) {
+				populateBundleCache(false);
+			}
+			return Collections.unmodifiableMap(bundleCache);
 		}
-		return Collections.unmodifiableMap(bundleCache);
 	}
 
 	private boolean populateBundleCache(boolean startupTime) {

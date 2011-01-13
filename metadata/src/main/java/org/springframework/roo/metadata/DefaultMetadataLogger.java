@@ -32,6 +32,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 	private Map<String, Long> timings = new HashMap<String, Long>();
 	/** key: responsible class, value: number of times a timing record was created for the responsible class */
 	private Map<String, Long> invocations = new HashMap<String, Long>();
+	private final Class<DefaultMetadataLogger> mutex = DefaultMetadataLogger.class;
 	
 	public DefaultMetadataLogger() {
 		if (System.getProperty("roo.metadata.trace") != null) {
@@ -49,8 +50,10 @@ public class DefaultMetadataLogger implements MetadataLogger {
 
 	public SortedSet<MetadataTimingStatistic> getTimings() {
 		SortedSet<MetadataTimingStatistic> result = new TreeSet<MetadataTimingStatistic>();
-		for (String key : timings.keySet()) {
-			result.add(new StandardMetadataTimingStatistic(key, timings.get(key), invocations.get(key)));
+		synchronized (mutex) {
+			for (String key : timings.keySet()) {
+				result.add(new StandardMetadataTimingStatistic(key, timings.get(key), invocations.get(key)));
+			}
 		}
 		return result;
 	}
@@ -107,21 +110,23 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		String responsibleClass = timerEntry.responsibleClass;
 		
 		// Update the timings summary
-		Long existingSummary = timings.get(responsibleClass);
-		if (existingSummary == null) {
-			existingSummary = timerEntry.duration;
-		} else {
-			existingSummary = existingSummary + timerEntry.duration;
+		synchronized (mutex) {
+			Long existingSummary = timings.get(responsibleClass);
+			if (existingSummary == null) {
+				existingSummary = timerEntry.duration;
+			} else {
+				existingSummary = existingSummary + timerEntry.duration;
+			}
+			timings.put(responsibleClass, existingSummary);
+			
+			// Update the invocation count
+			Long existingInvocations = invocations.get(responsibleClass);
+			if (existingInvocations == null) {
+				existingInvocations = new Long(0);
+			}
+			existingInvocations++;
+			invocations.put(responsibleClass, existingInvocations);
 		}
-		timings.put(responsibleClass, existingSummary);
-		
-		// Update the invocation count
-		Long existingInvocations = invocations.get(responsibleClass);
-		if (existingInvocations == null) {
-			existingInvocations = new Long(0);
-		}
-		existingInvocations++;
-		invocations.put(responsibleClass, existingInvocations);
 	}
 	
 	private void logToFile(String line) {

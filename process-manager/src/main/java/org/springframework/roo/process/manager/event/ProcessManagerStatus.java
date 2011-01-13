@@ -16,6 +16,7 @@ import org.springframework.roo.process.manager.ProcessManager;
  */
 public enum ProcessManagerStatus {
 	STARTING,
+	COMPLETING_STARTUP,
 	AVAILABLE,
 	BUSY_POLLING,
 	BUSY_EXECUTING,

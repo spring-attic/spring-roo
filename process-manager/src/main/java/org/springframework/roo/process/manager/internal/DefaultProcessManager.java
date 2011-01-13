@@ -1,7 +1,5 @@
 package org.springframework.roo.process.manager.internal;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,7 +39,6 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	@Reference private UndoManager undoManager;
 	@Reference private FileMonitorService fileMonitorService;
 	@Reference private StartLevel startLevel;
-	private Timer t = new Timer(true);
 	private boolean developmentMode = false;
 	private long minimumDelayBetweenPoll = -1; // how many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
 	private long lastPollTime = 0; // what time the last poll was completed
@@ -54,26 +51,32 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		workingDir = context.getBundleContext().getProperty("roo.working.directory");
 		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
 			public void frameworkEvent(FrameworkEvent event) {
-				if (event.getType() == FrameworkEvent.STARTLEVEL_CHANGED) {
-					if (startLevel.getStartLevel() >= 99) {
-						if (getProcessManagerStatus().equals(ProcessManagerStatus.STARTING)) {
-							completeStartup();
-						} else {
-						}
+				if (startLevel.getStartLevel() >= 99) {
+					// We check we haven't already started, as this event listener will be called several times at SL >= 99
+					if (getProcessManagerStatus() == ProcessManagerStatus.STARTING) {
+						// A proper synchronized process manager status check will take place in the completeStartup() method
+						completeStartup();
 					}
 				}
 			}
 		});
 		
 		// Now start a thread that will undertake a background poll every second
-		t.scheduleAtFixedRate(new TimerTask() {
-			@Override
+		Thread t = new Thread(new Runnable() {
 			public void run() {
-				if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
-					timerBasedPoll();
+				// Unsynchonized lookup of terminated status to avoid anything blocking the termination of the thread
+				while (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
+					// We only bother doing a poll if we seem to be available (a proper synchronized check happens later)
+					if (getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE) {
+						timerBasedPoll();
+					}
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException ignoreAndContinue) {}
 				}
 			}
-		}, 0, 1000);
+		}, "Spring Roo Process Manager Background Polling Thread");
+		t.start();
 	}
 
 	protected void deactivate(ComponentContext context) {
@@ -83,18 +86,20 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	
 	public void terminate() {
 		synchronized (processManagerStatus) {
-			// To get this far this thread has a lock on process manager status, so we control process manager and can terminate it
+			// To get this far this thread has a lock on process manager status, so we control process manager and can terminate its background timer thread
 			if (getProcessManagerStatus() != ProcessManagerStatus.TERMINATED) {
-				t.cancel();
+				// The thread started above will terminate of its own accord, given we are shutting down
 				setProcessManagerStatus(ProcessManagerStatus.TERMINATED);
 			}
 		}
 	}
 
-	public void completeStartup() {
-		// Quick sanity check that we're being called at the correct time; we don't need to get a synchronization lock if the method shouldn't even run
-		Assert.isTrue(getProcessManagerStatus() == ProcessManagerStatus.STARTING, "Process manager must have a status of STARTING to complete startup");
+	private void completeStartup() {
 		synchronized (processManagerStatus) {
+			if (getProcessManagerStatus() != ProcessManagerStatus.STARTING) {
+				throw new IllegalStateException("Process manager status " + getProcessManagerStatus() + " but should be STARTING");
+			}
+			setProcessManagerStatus(ProcessManagerStatus.COMPLETING_STARTUP);
 			try {
 				// Register the initial monitoring request
 				doTransactionally(new MonitoringRequestCommand(fileMonitorService, MonitoringRequest.getInitialMonitoringRequest(workingDir), true));
@@ -106,7 +111,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		}
 	}
 
-	public boolean backgroundPoll() {
+	private boolean backgroundPoll() {
 		// Quickly determine if another thread is running; we don't need to sit around and wait (we'll get called again in a few hundred milliseconds anyway)
 		if (getProcessManagerStatus() != ProcessManagerStatus.AVAILABLE) {
 			return false;

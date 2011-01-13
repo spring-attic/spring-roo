@@ -57,31 +57,6 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatusProvide
 public interface ProcessManager extends ProcessManagerStatusProvider {
 	
 	/**
-	 * Change the status from {@link ProcessManagerStatus#STARTING} to {@link ProcessManagerStatus#AVAILABLE}
-	 * and then immediately register the current working directory for monitoring. These functions should
-	 * occur within the scope of a "transaction".
-	 * 
-	 * <p>
-	 * This method may not throw any {@link RuntimeException}, as this will generally cause the dependency management
-	 * container to abort. If there was a failure, a normal roll-back should occur and the message be logged.
-	 * 
-	 * <p>
-	 * This method should throw an exception if the status is not {@link ProcessManagerStatus#STARTING}.
-	 */
-	void completeStartup();
-	
-	/**
-	 * Perform a file system poll within a "transaction". This method returns immediately if the
-	 * status is not {@link ProcessManagerStatus#AVAILABLE}.
-	 * 
-	 * <p>
-	 * This method may throw {@link RuntimeException}s that occurred while background processing.
-	 * 
-	 * @return whether the poll was actually performed or not
-	 */
-	boolean backgroundPoll();
-	
-	/**
 	 * Execute a user command within a "transaction". This method blocks until
      * {@link ProcessManagerStatus#AVAILABLE}.
 	 * 

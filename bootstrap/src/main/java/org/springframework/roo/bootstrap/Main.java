@@ -231,7 +231,7 @@ public class Main {
 		// cleanly shutdown when the VM exits.
 		String enableHook = configProps.getProperty(SHUTDOWN_HOOK_PROP);
 		if ((enableHook == null) || !enableHook.equalsIgnoreCase("false")) {
-			Runtime.getRuntime().addShutdownHook(new Thread("Felix Shutdown Hook") {
+			Runtime.getRuntime().addShutdownHook(new Thread("Spring Roo Felix Shutdown Hook") { // **** CHANGE FROM ORIGINAL FELIX VERSION ****
 				public void run() {
 					try {
 						if (m_fwk != null) {
@@ -264,7 +264,7 @@ public class Main {
 			m_fwk.waitForStop(0);
 
 			// **** CHANGE FROM ORIGINAL FELIX VERSION ****
-			int exitCode = System.getProperty("roo.exit") == null ? 0 : new Integer(System.getProperty("roo.exit")).intValue();
+			int exitCode = System.getProperty("roo.exit") == null ? 99 : new Integer(System.getProperty("roo.exit")).intValue();
 			boolean devModeAtShutdown = System.getProperty("developmentMode") == null ? false : System.getProperty("developmentMode").equals(Boolean.TRUE.toString());
 			if (devModeAtShutdown) {
 				long uptimeNanoseconds = System.nanoTime() - startedNanoseconds;

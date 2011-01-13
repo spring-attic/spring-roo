@@ -55,7 +55,8 @@ public class ProcessManagerHostedExecutionStrategy implements ExecutionStrategy 
 	public boolean isReadyForCommands() {
 		synchronized (mutex) {
 			if (processManager != null) {
-				return !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.STARTING) && !processManager.getProcessManagerStatus().equals(ProcessManagerStatus.BUSY_POLLING);
+				// BUSY_EXECUTION needed in case of recursive commands, such as if executing a script
+				return processManager.getProcessManagerStatus() == ProcessManagerStatus.AVAILABLE || processManager.getProcessManagerStatus() == ProcessManagerStatus.BUSY_EXECUTING;
 			}
 		}
 		return false;

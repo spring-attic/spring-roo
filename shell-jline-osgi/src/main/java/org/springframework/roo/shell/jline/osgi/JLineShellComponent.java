@@ -29,7 +29,7 @@ public class JLineShellComponent extends JLineShell {
 
 	protected void activate(ComponentContext context) {
 		this.context = context;
-        Thread thread = new Thread(this, "JLine Shell");
+        Thread thread = new Thread(this, "Spring Roo JLine Shell");
         thread.start();
 	}
 	

@@ -109,12 +109,12 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
         setShellStatus(Status.STARTED);
 
 		// Monitor CTRL+C initiated shutdowns (ROO-1599)
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				shutdownHookFired = true;
+				// We don't need to closeShell(), as the shutdown hook in o.s.r.bootstrap.Main calls stop() which calls JLineShellComponent.deactivate() and that calls closeShell()
 			}
-		});
+		}, "Spring Roo JLine Shutdown Hook"));
         
         // Handle any "execute-then-quit" operation
         String rooArgs = System.getProperty("roo.args");
@@ -222,7 +222,7 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 					} catch (InterruptedException ignore) {}
 				}
 			}
-		}, "Flash message manager");
+		}, "Spring Roo JLine Flash Message Manager");
 		t.start();
 	}
 	
@@ -427,6 +427,8 @@ public abstract class JLineShell extends AbstractShell implements CommandMarker,
 	 * Should be called by a subclass before deactivating the shell.
 	 */
 	protected void closeShell() {
+		// Notify we're closing down (normally our status is already shutting_down, but if it was a CTRL+C via the o.s.r.bootstrap.Main hook)
+		setShellStatus(Status.SHUTTING_DOWN);
 		if (statusListener != null) {
 			removeShellStatusListener(statusListener);
 		}
