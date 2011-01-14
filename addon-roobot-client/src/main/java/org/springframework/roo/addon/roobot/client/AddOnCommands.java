@@ -28,7 +28,7 @@ public class AddOnCommands implements CommandMarker {
 	protected void activate(ComponentContext context) {
 		staticFieldConverter.add(Rating.class);
 	}
-
+	
 	protected void deactivate(ComponentContext context) {
 		staticFieldConverter.remove(Rating.class);
 	}
@@ -79,11 +79,35 @@ public class AddOnCommands implements CommandMarker {
 		operations.removeAddOn(bsn);
 	}
 	
+	@CliCommand(value = "addon update bundle", help="Update a specific Spring Roo Add-on / Component")
+	public void udateBundle(@CliOption(key="bundleSymbolicName", mandatory=true, help="The bundle symbolic name for the add-on to update") AddOnBundleSymbolicName bsn) {
+		operations.updateAddOn(bsn);
+	}
+	
+	@CliCommand(value="addon update id", help="Update a specific Spring Roo Add-on / Component from a search result ID")
+	public void udateId(@CliOption(key={"", "searchResultId"}, mandatory=true, help="The bundle ID as presented via the addon list or addon search command") String bundleId) {
+		operations.updateAddOn(bundleId);
+	}
+	
+	@CliCommand(value="addon update all", help="Update all relevant Spring Roo Add-ons / Components")
+	public void udateAll(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons / components being updated. Using this flag applies to this command only and will not change the default setting") AddOnStabilityLevel level) {
+		operations.updateAddOns(level);
+	}
+	
+	@CliCommand(value="addon update info", help="Update a specific Spring Roo Add-on / Component")
+	public void udateInfo(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading (default: ANY)") AddOnStabilityLevel level) {
+		operations.updateInfo(level);
+	}
+	
+	@CliCommand(value="addon update settings", help="Settings for Add-on update operations")
+	public void udateSettings(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading") AddOnStabilityLevel level) {
+		operations.updateSettings(level);
+	}
+	
 	@CliCommand(value="addon feedback bundle", help="Provide anonymous ratings and comments on a Spring Roo Add-on (your feedback will be published publicly)")
 	public void feedbackBundle(@CliOption(key="bundleSymbolicName", mandatory=true, help="The bundle symbolic name for the add-on of interest") BundleSymbolicName bsn,
 			@CliOption(key="rating", mandatory=true, help="How much did you like this add-on?") Rating rating,
 			@CliOption(key="comment", mandatory=false, help="Your comments on this add-on eg \"this is my comment!\"; limit of 140 characters") String comment) {
 		feedbackOperations.feedbackBundle(bsn, rating, comment);
 	}
-	
 }
