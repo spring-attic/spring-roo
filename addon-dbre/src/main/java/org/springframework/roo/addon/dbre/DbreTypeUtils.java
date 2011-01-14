@@ -138,7 +138,7 @@ public abstract class DbreTypeUtils {
 		StringBuilder result = new StringBuilder();
 		boolean isDelimChar = false;
 		for (int i = 0; i < str.length(); i++) {
-			Character c = str.charAt(i);
+			char c = str.charAt(i);
 			if (i == 0) {
 				if (c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') {
 					result.append(isField ? "f" : "T");
@@ -151,11 +151,16 @@ public abstract class DbreTypeUtils {
 				isDelimChar = true;
 				continue;
 			}
+			
 			if (isDelimChar) {
 				result.append(Character.toUpperCase(c));
 				isDelimChar = false;
 			} else {
-				result.append(Character.toLowerCase(c));
+				if (i > 1 && Character.isLowerCase(str.charAt(i - 1)) && Character.isUpperCase(c)) {
+					result.append(c);
+				} else {
+					result.append(Character.toLowerCase(c));
+				}
 			}
 		}
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(result.toString())) {
