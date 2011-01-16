@@ -347,7 +347,7 @@ public class JspViewManager {
 					fieldElement = new XmlElementBuilder("field:select", document)
 										.addAttribute("items", "${" + getPlural(type.getParameters().get(0)).toLowerCase() + "}")
 										.addAttribute("itemValue", typeEntityMetadata.getIdentifierField().getFieldName().getSymbolName())
-										.addAttribute("path", "/" + getPathForType(type))
+										.addAttribute("path", "/" + getPathForType(type.getParameters().get(0)))
 									.build();
 					
 					FieldMetadata fieldMetadata = beanInfoMetadata.getFieldForPropertyName(paramName);
@@ -640,9 +640,7 @@ public class JspViewManager {
 			return pluralCache.get(type);
 		}
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		if (pluralMetadata == null) {
-			return null;
-		}
+		Assert.notNull(pluralMetadata, "Unable to determine plural for type " + type.getFullyQualifiedTypeName());
 		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
 			pluralCache.put(type, pluralMetadata.getPlural());
 			return pluralMetadata.getPlural();
