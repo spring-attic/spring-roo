@@ -120,7 +120,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 			char c = value[i];
 			if ('/' == c || ' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
 				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
-				'|' == c || '\\' == c || '\'' == c || '+' == c)  {
+				'|' == c || '\\' == c || '\'' == c || '+' == c || '-' == c)  {
 				throw new IllegalArgumentException("Illegal name '" + name + "' (illegal character)");
 			}
 			if (i == 0) {

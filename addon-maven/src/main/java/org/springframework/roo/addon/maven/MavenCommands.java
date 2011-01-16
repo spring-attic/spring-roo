@@ -11,7 +11,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.ActiveProcessManager;
 import org.springframework.roo.process.manager.ProcessManager;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
@@ -39,7 +38,6 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
 		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
 		
-		Assert.isTrue(!topLevelPackage.getFullyQualifiedPackageName().contains("-"), "Illegal name '" + topLevelPackage.getFullyQualifiedPackageName() + "' (cannot contain a dash)");
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion);
 	}
 
@@ -50,7 +48,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = "dependency add", help = "Adds a new dependency to the Maven project object model (POM)")
 	public void addDependency(
-		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") JavaPackage groupId, 
+		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version) {
 		
@@ -59,7 +57,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = "dependency remove", help = "Removes an existing dependency from the Maven project object model (POM)")
 	public void removeDependency(
-		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") JavaPackage groupId, 
+		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") String groupId, 
 		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version) {
 		
@@ -73,7 +71,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliCommand(value = { "perform package" }, help = "Packages the application using Maven, but does not execute any tests")
 	public void runPackage() throws IOException {
-		mvn("-Dmaven.test.skip=true package");
+		mvn("-DskipTests=true package");
 	}
 
 	@CliCommand(value = { "perform eclipse" }, help = "Sets up Eclipse configuration via Maven (only necessary if you have not installed the m2eclipse plugin in Eclipse)")

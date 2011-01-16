@@ -40,8 +40,8 @@ import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.uaa.client.DetectedProducts;
-import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.DetectedProducts.ProductInfo;
+import org.springframework.uaa.client.VersionHelper;
 import org.springframework.uaa.client.protobuf.UaaClient.Product;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -299,7 +299,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element artifactId = document.createElement("artifactId");
 		Element version = document.createElement("version");
 
-		groupId.setTextContent(dependency.getGroupId().getFullyQualifiedPackageName());
+		groupId.setTextContent(dependency.getGroupId());
 		artifactId.setTextContent(dependency.getArtifactId());
 		version.setTextContent(dependency.getVersionId());
 
@@ -338,7 +338,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				Element exclusionElement = document.createElement("exclusion");
 
 				Element exclusionGroupId = document.createElement("groupId");
-				exclusionGroupId.setTextContent(exclusion.getGroupId().getFullyQualifiedPackageName());
+				exclusionGroupId.setTextContent(exclusion.getGroupId());
 				exclusionElement.appendChild(exclusionGroupId);
 
 				Element exclusionArtifactId = document.createElement("artifactId");
@@ -382,8 +382,8 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element artifactId = document.createElement("artifactId");
 		Element version = document.createElement("version");
 
-		groupId.setTextContent(plugin.getGroupId().getFullyQualifiedPackageName());
-		artifactId.setTextContent(plugin.getArtifactId().getSymbolName());
+		groupId.setTextContent(plugin.getGroupId());
+		artifactId.setTextContent(plugin.getArtifactId());
 		version.setTextContent(plugin.getVersion());
 
 		pluginElement.appendChild(groupId);
@@ -442,7 +442,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 
 		plugins.appendChild(pluginElement);
 
-		mutableFile.setDescriptionOfChange("Added plugin " + plugin.getArtifactId().getSymbolName());
+		mutableFile.setDescriptionOfChange("Added plugin " + plugin.getArtifactId());
 
 		XmlUtils.writeXml(mutableFile.getOutputStream(), document);
 	}
@@ -916,7 +916,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 			if (plugin.equals(new Plugin(candidate))) {
 				// Found it
 				plugins.removeChild(candidate);
-				mutableFile.setDescriptionOfChange("Removed plugin " + plugin.getArtifactId().getSymbolName());
+				mutableFile.setDescriptionOfChange("Removed plugin " + plugin.getArtifactId());
 				// We will not break the loop (even though we could theoretically), just in case it was declared in the POM more than once
 			}
 		}

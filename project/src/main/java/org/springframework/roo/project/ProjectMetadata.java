@@ -312,7 +312,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isGaeEnabled() {
 		for (Plugin buildPlugin : buildPlugins) {
-			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId().getSymbolName())) {
+			if ("maven-gae-plugin".equals(buildPlugin.getArtifactId())) {
 				return true;
 			}
 		}
@@ -326,7 +326,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isDataNucleusEnabled() {
 		for (Plugin buildPlugin : buildPlugins) {
-			if ("maven-datanucleus-plugin".equals(buildPlugin.getArtifactId().getSymbolName())) {
+			if ("maven-datanucleus-plugin".equals(buildPlugin.getArtifactId())) {
 				return true;
 			}
 		}
@@ -340,7 +340,7 @@ public class ProjectMetadata extends AbstractMetadataItem {
 	 */
 	public boolean isVMforceEnabled() {
 		for (Dependency dependency : dependencies) {
-			if ("com.force.sdk".equals(dependency.getGroupId().getFullyQualifiedPackageName())) {
+			if ("com.force.sdk".equals(dependency.getGroupId())) {
 				return true;
 			}
 		}

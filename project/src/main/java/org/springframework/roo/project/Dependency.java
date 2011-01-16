@@ -3,7 +3,6 @@ package org.springframework.roo.project;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -22,13 +21,35 @@ import org.w3c.dom.NodeList;
  * @since 1.0
  */
 public class Dependency implements Comparable<Dependency> {
-	private JavaPackage groupId;
+	private String groupId;
 	private String artifactId;
 	private String version;
 	private DependencyType type;
 	private DependencyScope scope;
 	private List<Dependency> exclusions = new ArrayList<Dependency>();
 	private String systemPath;
+
+	/**
+	 * Creates an immutable {@link Dependency}.
+	 * 
+	 * @param groupId the group ID (required)
+	 * @param artifactId the artifact ID (required)
+	 * @param version the version ID (required)
+	 * @param type the dependency type (required)
+	 * @param scope the dependency scope (required)
+	 */
+	public Dependency(String groupId, String artifactId, String version, DependencyType type, DependencyScope scope) {
+		XmlUtils.assertElementLegal(groupId);
+		XmlUtils.assertElementLegal(artifactId);
+		Assert.notNull(version, "Version required");
+		Assert.notNull(type, "Dependency type required");
+		Assert.notNull(scope, "Dependency scope required");
+		this.groupId = groupId;
+		this.artifactId = artifactId;
+		this.version = version;
+		this.type = type;
+		this.scope = scope;
+	}
 
 	/**
 	 * Convenience constructor for producing a JAR dependency.
@@ -38,14 +59,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param version the version (required)
 	 */
 	public Dependency(String groupId, String artifactId, String version) {
-		Assert.hasText(groupId, "Group ID required");
-		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		this.groupId = new JavaPackage(groupId);
-		this.artifactId = artifactId;
-		this.version = version;
-		this.type = DependencyType.JAR;
-		this.scope = DependencyScope.COMPILE;
+		this(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
 	}
 
 	/**
@@ -57,15 +71,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param exclusions the exclusions for this dependency
 	 */
 	public Dependency(String groupId, String artifactId, String version, List<Dependency> exclusions) {
-		Assert.hasText(groupId, "Group ID required");
-		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		Assert.notNull(exclusions, "Exclusions required");
-		this.groupId = new JavaPackage(groupId);
-		this.artifactId = artifactId;
-		this.version = version;
-		this.type = DependencyType.JAR;
-		this.scope = DependencyScope.COMPILE;
+		this(groupId, artifactId, version, DependencyType.JAR, DependencyScope.COMPILE);
 		this.exclusions = exclusions;
 	}
 
@@ -77,9 +83,9 @@ public class Dependency implements Comparable<Dependency> {
 	public Dependency(Element dependency) {
 		// Test if it has Maven format
 		if (dependency.hasChildNodes() && dependency.getElementsByTagName("artifactId").getLength() > 0) {
-			this.groupId = new JavaPackage("org.apache.maven.plugins");
+			this.groupId = "org.apache.maven.plugins";
 			if (dependency.getElementsByTagName("groupId").getLength() > 0) {
-				this.groupId = new JavaPackage(dependency.getElementsByTagName("groupId").item(0).getTextContent());
+				this.groupId = dependency.getElementsByTagName("groupId").item(0).getTextContent();
 			}
 
 			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
@@ -154,7 +160,7 @@ public class Dependency implements Comparable<Dependency> {
 		}
 		// Otherwise test for Ivy format
 		else if (dependency.hasAttribute("org") && dependency.hasAttribute("name") && dependency.hasAttribute("rev")) {
-			this.groupId = new JavaPackage(dependency.getAttribute("org"));
+			this.groupId = dependency.getAttribute("org");
 			this.artifactId = dependency.getAttribute("name");
 			this.version = dependency.getAttribute("rev");
 			this.type = DependencyType.JAR;
@@ -165,29 +171,7 @@ public class Dependency implements Comparable<Dependency> {
 		}
 	}
 
-	/**
-	 * Creates an immutable {@link Dependency}.
-	 * 
-	 * @param groupId the group ID (required)
-	 * @param artifactId the artifact ID (required)
-	 * @param versionId the version ID (required)
-	 * @param type the dependency type (required)
-	 * @param scope the dependency scope (required)
-	 */
-	public Dependency(JavaPackage groupId, String artifactId, String versionId, DependencyType type, DependencyScope scope) {
-		Assert.notNull(groupId, "Group ID required");
-		Assert.notNull(artifactId, "Artifact ID required");
-		Assert.notNull(versionId, "Version required");
-		Assert.notNull(type, "Dependency type required");
-		Assert.notNull(scope, "Dependency scope required");
-		this.groupId = groupId;
-		this.artifactId = artifactId;
-		this.version = versionId;
-		this.type = type;
-		this.scope = scope;
-	}
-
-	public JavaPackage getGroupId() {
+	public String getGroupId() {
 		return groupId;
 	}
 

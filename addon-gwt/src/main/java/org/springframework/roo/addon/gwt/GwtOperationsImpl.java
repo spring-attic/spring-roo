@@ -161,7 +161,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
-			if ("maven-datanucleus-plugin".equals(plugin.getArtifactId().getSymbolName()) && "org.datanucleus".equals(plugin.getGroupId().getFullyQualifiedPackageName())) {
+			if ("maven-datanucleus-plugin".equals(plugin.getArtifactId()) && "org.datanucleus".equals(plugin.getGroupId())) {
 				Element configElement = plugin.getConfiguration().getConfiguration();
 				configElement.appendChild(new XmlElementBuilder("mappingExcludes", pomXmlDoc).setText("**/GaeAuthFilter.class").build());
 			}
@@ -262,7 +262,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		List<Element> pluginElements = XmlUtils.findElements("/project/build/plugins/plugin", pomRoot);
 		for (Element pluginElement : pluginElements) {
 			Plugin plugin = new Plugin(pluginElement);
-			if ("maven-eclipse-plugin".equals(plugin.getArtifactId().getSymbolName()) && "org.apache.maven.plugins".equals(plugin.getGroupId().getFullyQualifiedPackageName())) {
+			if ("maven-eclipse-plugin".equals(plugin.getArtifactId()) && "org.apache.maven.plugins".equals(plugin.getGroupId())) {
 				// Add in the builder configuration
 				Element newEntry = new XmlElementBuilder("buildCommand", pomDoc).addChild(new XmlElementBuilder("name", pomDoc).setText("com.google.gwt.eclipse.core.gwtProjectValidator").build()).build();
 				Element ctx = XmlUtils.findRequiredElement("configuration/additionalBuildcommands/buildCommand[last()]", pluginElement);

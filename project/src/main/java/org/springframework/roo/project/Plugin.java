@@ -3,8 +3,6 @@ package org.springframework.roo.project;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -21,8 +19,8 @@ import org.w3c.dom.NodeList;
  * @since 1.1
  */
 public class Plugin implements Comparable<Plugin> {
-	private JavaPackage groupId;
-	private JavaSymbolName artifactId;
+	private String groupId;
+	private String artifactId;
 	private String version;
 	private Configuration configuration;
 	private List<Dependency> dependencies = new ArrayList<Dependency>();
@@ -35,7 +33,7 @@ public class Plugin implements Comparable<Plugin> {
 	 * @param artifactId the artifact ID (required)
 	 * @param version the version (required)
 	 */
-	public Plugin(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+	public Plugin(String groupId, String artifactId, String version) {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.notNull(version, "Version required");
@@ -43,23 +41,6 @@ public class Plugin implements Comparable<Plugin> {
 		this.artifactId = artifactId;
 		this.version = version;
 	}
-
-	/**
-	 * Convenience constructor.
-	 * 
-	 * @param groupId the group ID (required)
-	 * @param artifactId the artifact ID (required)
-	 * @param version the version (required)
-	 */
-	public Plugin(String groupId, String artifactId, String version) {
-		Assert.hasText(groupId, "Group ID required");
-		Assert.hasText(artifactId, "Artifact ID required");
-		Assert.hasText(version, "Version required");
-		this.groupId = new JavaPackage(groupId);
-		this.artifactId = new JavaSymbolName(artifactId);
-		this.version = version;
-	}
-
 	/**
 	 * Convenience constructor.
 	 * 
@@ -74,8 +55,8 @@ public class Plugin implements Comparable<Plugin> {
 		Assert.hasText(groupId, "Group ID required");
 		Assert.hasText(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
-		this.groupId = new JavaPackage(groupId);
-		this.artifactId = new JavaSymbolName(artifactId);
+		this.groupId = groupId;
+		this.artifactId = artifactId;
 		this.version = version;
 		this.configuration = configuration;
 		this.dependencies = dependencies;
@@ -88,12 +69,12 @@ public class Plugin implements Comparable<Plugin> {
 	 * @param plugin to parse (required)
 	 */
 	public Plugin(Element plugin) {
-		this.groupId = new JavaPackage("org.apache.maven.plugins");
+		this.groupId = "org.apache.maven.plugins";
 		if (plugin.getElementsByTagName("groupId").getLength() > 0) {
-			this.groupId = new JavaPackage(plugin.getElementsByTagName("groupId").item(0).getTextContent());
+			this.groupId = plugin.getElementsByTagName("groupId").item(0).getTextContent();
 		}
 
-		this.artifactId = new JavaSymbolName(plugin.getElementsByTagName("artifactId").item(0).getTextContent());
+		this.artifactId = plugin.getElementsByTagName("artifactId").item(0).getTextContent();
 
 		NodeList versionElements = plugin.getElementsByTagName("version");
 		if (versionElements.getLength() > 0) {
@@ -182,11 +163,11 @@ public class Plugin implements Comparable<Plugin> {
 		}
 	}
 
-	public JavaPackage getGroupId() {
+	public String getGroupId() {
 		return groupId;
 	}
 
-	public JavaSymbolName getArtifactId() {
+	public String getArtifactId() {
 		return artifactId;
 	}
 

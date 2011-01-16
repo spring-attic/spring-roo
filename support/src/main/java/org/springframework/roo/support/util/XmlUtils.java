@@ -361,4 +361,27 @@ public final class XmlUtils {
 	public static String convertId(String proposed) {
 		return proposed.replaceAll("[:\\.-]", "_");
 	}
+	
+	/**
+	 * Checks the presented element for illegal characters that could cause malformed XML.
+	 * 
+	 * @param element the content of the XML element
+	 * @throws IllegalArgumentException if the element is null, has no text or contains illegal characters 
+	 */
+	public static void assertElementLegal(String element) {
+		if (!StringUtils.hasText(element)) {
+			throw new IllegalArgumentException("Element required");
+		}
+		
+		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
+		char[] value = element.toCharArray();
+		for (int i = 0; i < value.length; i++) {
+			char c = value[i];
+			if (' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
+				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
+				'|' == c || '\\' == c || '\'' == c || '+' == c)  {
+				throw new IllegalArgumentException("Illegal name '" + element + "' (illegal character)");
+			}
+		}
+	}
 }
