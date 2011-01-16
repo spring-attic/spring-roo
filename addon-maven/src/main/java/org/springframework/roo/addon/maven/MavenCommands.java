@@ -39,6 +39,7 @@ public class MavenCommands implements CommandMarker {
 		@CliOption(key = "projectName", mandatory = false, help = "The name of the project (last segment of package name used as default)") String projectName, 
 		@CliOption(key = "java", mandatory = false, help = "Forces a particular major version of Java to be used (will be auto-detected if unspecified; specify 5 or 6 or 7 only)") Integer majorJavaVersion) {
 		
+		Assert.isTrue(!topLevelPackage.getFullyQualifiedPackageName().contains("-"), "Illegal name '" + topLevelPackage.getFullyQualifiedPackageName() + "' (cannot contain a dash)");
 		mavenOperations.createProject(topLevelPackage, projectName, majorJavaVersion);
 	}
 

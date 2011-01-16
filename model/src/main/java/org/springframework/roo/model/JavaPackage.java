@@ -30,7 +30,6 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 	public JavaPackage(String fullyQualifiedPackageName) {
 		Assert.notNull(fullyQualifiedPackageName, "Fully qualified package name required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedPackageName);
-		Assert.isTrue(!fullyQualifiedPackageName.contains("-"), "Illegal name '" + fullyQualifiedPackageName + "' (cannot contain a dash)");
 		Assert.isTrue(fullyQualifiedPackageName.toLowerCase().equals(fullyQualifiedPackageName), "The entire package name must be lowercase (received '" + fullyQualifiedPackageName + "')");
 		this.fullyQualifiedPackageName = fullyQualifiedPackageName;
 	}
