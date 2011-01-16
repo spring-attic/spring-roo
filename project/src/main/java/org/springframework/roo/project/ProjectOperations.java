@@ -3,7 +3,6 @@ package org.springframework.roo.project;
 import java.util.List;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 
 /**
  * Specifies methods for various project-related operations.
@@ -125,7 +124,7 @@ public interface ProjectOperations {
 	 * @param artifactId the artifact id of the dependency (required)
 	 * @param version the version of the dependency (required)
 	 */
-	void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
+	void addDependency(JavaPackage groupId, String artifactId, String version);
 
 	/**
 	 * Allows removal of a JAR dependency to the POM. 
@@ -149,7 +148,7 @@ public interface ProjectOperations {
 	 * @param artifactId the artifact id of the dependency (required)
 	 * @param version the version of the dependency (required)
 	 */
-	void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version);
+	void removeDependency(JavaPackage groupId, String artifactId, String version);
 
 	/**
 	 * Verifies if the specified dependency is present. If it is present, silently returns. If it is not

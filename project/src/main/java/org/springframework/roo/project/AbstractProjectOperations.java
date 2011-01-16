@@ -8,7 +8,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -202,7 +201,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyAdditionNotifications(dependency);		
 	}
 	
-	public final void addDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+	public final void addDependency(JavaPackage groupId, String artifactId, String version) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
@@ -219,7 +218,7 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 		sendDependencyAdditionNotifications(dependency);		
 	}
 
-	public final void removeDependency(JavaPackage groupId, JavaSymbolName artifactId, String version) {
+	public final void removeDependency(JavaPackage groupId, String artifactId, String version) {
 		Assert.isTrue(isDependencyModificationAllowed(), "Dependency modification prohibited at this time");
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -24,7 +23,7 @@ import org.w3c.dom.NodeList;
  */
 public class Dependency implements Comparable<Dependency> {
 	private JavaPackage groupId;
-	private JavaSymbolName artifactId;
+	private String artifactId;
 	private String version;
 	private DependencyType type;
 	private DependencyScope scope;
@@ -43,7 +42,7 @@ public class Dependency implements Comparable<Dependency> {
 		Assert.hasText(artifactId, "Artifact ID required");
 		Assert.hasText(version, "Version required");
 		this.groupId = new JavaPackage(groupId);
-		this.artifactId = new JavaSymbolName(artifactId);
+		this.artifactId = artifactId;
 		this.version = version;
 		this.type = DependencyType.JAR;
 		this.scope = DependencyScope.COMPILE;
@@ -63,7 +62,7 @@ public class Dependency implements Comparable<Dependency> {
 		Assert.hasText(version, "Version required");
 		Assert.notNull(exclusions, "Exclusions required");
 		this.groupId = new JavaPackage(groupId);
-		this.artifactId = new JavaSymbolName(artifactId);
+		this.artifactId = artifactId;
 		this.version = version;
 		this.type = DependencyType.JAR;
 		this.scope = DependencyScope.COMPILE;
@@ -83,7 +82,7 @@ public class Dependency implements Comparable<Dependency> {
 				this.groupId = new JavaPackage(dependency.getElementsByTagName("groupId").item(0).getTextContent());
 			}
 
-			this.artifactId = new JavaSymbolName(dependency.getElementsByTagName("artifactId").item(0).getTextContent());
+			this.artifactId = dependency.getElementsByTagName("artifactId").item(0).getTextContent();
 
 			NodeList versionElements = dependency.getElementsByTagName("version");
 			if (versionElements.getLength() > 0) {
@@ -156,7 +155,7 @@ public class Dependency implements Comparable<Dependency> {
 		// Otherwise test for Ivy format
 		else if (dependency.hasAttribute("org") && dependency.hasAttribute("name") && dependency.hasAttribute("rev")) {
 			this.groupId = new JavaPackage(dependency.getAttribute("org"));
-			this.artifactId = new JavaSymbolName(dependency.getAttribute("name"));
+			this.artifactId = dependency.getAttribute("name");
 			this.version = dependency.getAttribute("rev");
 			this.type = DependencyType.JAR;
 			this.scope = DependencyScope.COMPILE;
@@ -175,7 +174,7 @@ public class Dependency implements Comparable<Dependency> {
 	 * @param type the dependency type (required)
 	 * @param scope the dependency scope (required)
 	 */
-	public Dependency(JavaPackage groupId, JavaSymbolName artifactId, String versionId, DependencyType type, DependencyScope scope) {
+	public Dependency(JavaPackage groupId, String artifactId, String versionId, DependencyType type, DependencyScope scope) {
 		Assert.notNull(groupId, "Group ID required");
 		Assert.notNull(artifactId, "Artifact ID required");
 		Assert.notNull(versionId, "Version required");
@@ -192,7 +191,7 @@ public class Dependency implements Comparable<Dependency> {
 		return groupId;
 	}
 
-	public JavaSymbolName getArtifactId() {
+	public String getArtifactId() {
 		return artifactId;
 	}
 

@@ -300,7 +300,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		Element version = document.createElement("version");
 
 		groupId.setTextContent(dependency.getGroupId().getFullyQualifiedPackageName());
-		artifactId.setTextContent(dependency.getArtifactId().getSymbolName());
+		artifactId.setTextContent(dependency.getArtifactId());
 		version.setTextContent(dependency.getVersionId());
 
 		depElement.appendChild(groupId);
@@ -342,7 +342,7 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 				exclusionElement.appendChild(exclusionGroupId);
 
 				Element exclusionArtifactId = document.createElement("artifactId");
-				exclusionArtifactId.setTextContent(exclusion.getArtifactId().getSymbolName());
+				exclusionArtifactId.setTextContent(exclusion.getArtifactId());
 				exclusionElement.appendChild(exclusionArtifactId);
 
 				exclusionsElement.appendChild(exclusionElement);

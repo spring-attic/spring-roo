@@ -51,7 +51,7 @@ public class MavenCommands implements CommandMarker {
 	@CliCommand(value = "dependency add", help = "Adds a new dependency to the Maven project object model (POM)")
 	public void addDependency(
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") JavaPackage groupId, 
-		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") JavaSymbolName artifactId, 
+		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version) {
 		
 		mavenOperations.addDependency(groupId, artifactId, version);
@@ -60,7 +60,7 @@ public class MavenCommands implements CommandMarker {
 	@CliCommand(value = "dependency remove", help = "Removes an existing dependency from the Maven project object model (POM)")
 	public void removeDependency(
 		@CliOption(key = "groupId", mandatory = true, help = "The group ID of the dependency") JavaPackage groupId, 
-		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") JavaSymbolName artifactId, 
+		@CliOption(key = "artifactId", mandatory = true, help = "The artifact ID of the dependency") String artifactId, 
 		@CliOption(key = "version", mandatory = true, help = "The version of the dependency") String version) {
 		
 		mavenOperations.removeDependency(groupId, artifactId, version);
