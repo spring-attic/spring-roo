@@ -14,11 +14,12 @@ import org.springframework.roo.support.util.StringUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public final class JavaSymbolName implements Comparable<JavaSymbolName> {
+
 	/** Constant for keyword "true" */
 	public static final JavaSymbolName TRUE = new JavaSymbolName("true");
+
 	/** Constant for keyword "false" */
 	public static final JavaSymbolName FALSE = new JavaSymbolName("false");
 	
@@ -118,8 +119,8 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 		for (int i = 0; i < value.length; i++) {
 			char c = value[i];
 			if ('/' == c || ' ' == c || '*' == c || '>' == c || '<' == c || '!' == c || '@' == c || '%' == c || '^' == c ||
-					'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
-					'|' == c || '\\' == c || '\'' == c || '+' == c)  {
+				'?' == c || '(' == c || ')' == c || '~' == c || '`' == c || '{' == c || '}' == c || '[' == c || ']' == c ||
+				'|' == c || '\\' == c || '\'' == c || '+' == c)  {
 				throw new IllegalArgumentException("Illegal name '" + name + "' (illegal character)");
 			}
 			if (i == 0) {
@@ -127,7 +128,7 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 					throw new IllegalArgumentException("Illegal name '" + name + "' (cannot start with a number)");
 				}
 			}
-			if (i+1 == value.length || i == 0) {
+			if (i + 1 == value.length || i == 0) {
 				if ('.' == c) {
 					throw new IllegalArgumentException("Illegal name '" + name + "' (cannot start or end with a period)");
 				}
