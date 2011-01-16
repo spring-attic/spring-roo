@@ -53,39 +53,37 @@ public interface AddOnRooBotOperations extends AddOnSearch {
 	void removeAddOn(BundleSymbolicName bsn);
 	
 	/**
-	 * Display information about the available updates
+	 * Display information about the available upgrades
 	 * 
-	 * @param addonStabilityLevel the add-on stability level taken into account for the update 
+	 * @param addonStabilityLevel the add-on stability level taken into account for the upgrade 
 	 */
-	void updateInfo(AddOnStabilityLevel addonStabilityLevel);
+	void upgradesAvailable(AddOnStabilityLevel addonStabilityLevel);
 	
 	/**
-	 * Update all add-ons according to the user defined add-on stability level. 
-	 * 
-	 * @param addonStabilityLevel the add-on stability level taken into account for the update 
+	 * Upgrade all add-ons according to the user defined add-on stability level. 
 	 */
-	void updateAddOns(AddOnStabilityLevel addonStabilityLevel);
+	void upgradeAddOns();
 	
 	/**
-	 * Update specific add-on only.
+	 * Upgrade specific add-on only.
 	 * 
 	 * @param bsn the bundle symbolic name (required)
 	 */
-	void updateAddOn(AddOnBundleSymbolicName bsn);
+	void upgradeAddOn(AddOnBundleSymbolicName bsn);
 	
 	/**
-	 * Update specific add-on only.
+	 * Upgrade specific add-on only.
 	 * 
 	 * @param bundleId the bundle id (required)
 	 */
-	void updateAddOn(String bundleId);
+	void upgradeAddOn(String bundleId);
 	
 	/**
-	 * Define the stability level for add-on updates
+	 * Define the stability level for add-on upgrades
 	 * 
-	 * @param addOnStabilityLevel the stability level for add-on updates (required)
+	 * @param addOnStabilityLevel the stability level for add-on upgrades (required)
 	 */
-	void updateSettings(AddOnStabilityLevel addOnStabilityLevel);
+	void upgradeSettings(AddOnStabilityLevel addOnStabilityLevel);
 	
 	/**
 	 * Get a list of all cached addon bundles. 

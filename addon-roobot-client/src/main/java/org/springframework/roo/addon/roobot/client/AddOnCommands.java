@@ -79,29 +79,29 @@ public class AddOnCommands implements CommandMarker {
 		operations.removeAddOn(bsn);
 	}
 	
-	@CliCommand(value = "addon update bundle", help="Update a specific Spring Roo Add-on / Component")
-	public void udateBundle(@CliOption(key="bundleSymbolicName", mandatory=true, help="The bundle symbolic name for the add-on to update") AddOnBundleSymbolicName bsn) {
-		operations.updateAddOn(bsn);
+	@CliCommand(value = "addon upgrade bundle", help="Upgrade a specific Spring Roo Add-on / Component")
+	public void ugradeBundle(@CliOption(key="bundleSymbolicName", mandatory=true, help="The bundle symbolic name for the add-on to upgrade") AddOnBundleSymbolicName bsn) {
+		operations.upgradeAddOn(bsn);
 	}
 	
-	@CliCommand(value="addon update id", help="Update a specific Spring Roo Add-on / Component from a search result ID")
-	public void udateId(@CliOption(key={"", "searchResultId"}, mandatory=true, help="The bundle ID as presented via the addon list or addon search command") String bundleId) {
-		operations.updateAddOn(bundleId);
+	@CliCommand(value="addon upgrade id", help="Upgrade a specific Spring Roo Add-on / Component from a search result ID")
+	public void ugradeId(@CliOption(key={"", "searchResultId"}, mandatory=true, help="The bundle ID as presented via the addon list or addon search command") String bundleId) {
+		operations.upgradeAddOn(bundleId);
 	}
 	
-	@CliCommand(value="addon update all", help="Update all relevant Spring Roo Add-ons / Components")
-	public void udateAll(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons / components being updated. Using this flag applies to this command only and will not change the default setting") AddOnStabilityLevel level) {
-		operations.updateAddOns(level);
+	@CliCommand(value="addon upgrade all", help="Upgrade all relevant Spring Roo Add-ons / Components for the current stability level")
+	public void ugradeAll() {
+		operations.upgradeAddOns();
 	}
 	
-	@CliCommand(value="addon update info", help="Update a specific Spring Roo Add-on / Component")
-	public void udateInfo(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading (default: ANY)") AddOnStabilityLevel level) {
-		operations.updateInfo(level);
+	@CliCommand(value="addon upgrade available", help="List available Spring Roo Add-on / Component upgrades")
+	public void ugradeAvailable(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading (default: ANY)") AddOnStabilityLevel level) {
+		operations.upgradesAvailable(level);
 	}
 	
-	@CliCommand(value="addon update settings", help="Settings for Add-on update operations")
-	public void udateSettings(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading") AddOnStabilityLevel level) {
-		operations.updateSettings(level);
+	@CliCommand(value="addon upgrade settings", help="Settings for Add-on upgrade operations")
+	public void ugradeSettings(@CliOption(key="addonStabilityLevel", mandatory=false, help="The stability level of add-ons or components which are presented for upgrading") AddOnStabilityLevel level) {
+		operations.upgradeSettings(level);
 	}
 	
 	@CliCommand(value="addon feedback bundle", help="Provide anonymous ratings and comments on a Spring Roo Add-on (your feedback will be published publicly)")
