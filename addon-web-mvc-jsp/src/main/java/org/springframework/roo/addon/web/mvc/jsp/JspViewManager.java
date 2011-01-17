@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
 import java.beans.Introspector;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -234,7 +235,7 @@ public class JspViewManager {
 			formCreate.setAttribute("path", controllerPath);
 		}
 		
-		List<FieldMetadata> formFields = fields;
+		List<FieldMetadata> formFields = new ArrayList<FieldMetadata>(fields);
 		JavaType idType = entityMetadata.getIdentifierField().getFieldType();
 		// Handle Roo identifiers
 		if (isRooIdentifier(idType)) {
