@@ -161,7 +161,7 @@ public abstract class MemberFindingUtils {
 	 * 
 	 * @param classOrInterfaceTypeDetails to search (required)
 	 * @param annotationType annotation to locate (required)
-	 * @return the annotation, if ever found (or null if not found)
+	 * @return the annotation, or null if not found
 	 */
 	public static final AnnotationMetadata getTypeAnnotation(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails, JavaType annotationType) {
 		Assert.notNull(classOrInterfaceTypeDetails, "Class or interface type details required");
@@ -260,6 +260,20 @@ public abstract class MemberFindingUtils {
 				return result;
 			}
 			current = current.getSuperclass();
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
+	 * 
+	 * @param memberDetails the {@link MemberDetails} object to search. (required)
+	 * @return the JavaType, or null if not found
+	 */
+	public static JavaType getJavaType(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
+			return typeDetails.getName();
 		}
 		return null;
 	}
