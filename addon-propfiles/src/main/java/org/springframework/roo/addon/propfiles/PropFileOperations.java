@@ -48,6 +48,17 @@ public interface PropFileOperations {
 	void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value);
 	
 	/**
+	 * Adds the contents of the properties map to the given properties file.
+	 * 
+	 * @param propertyFilePath the location of the property file (required)
+	 * @param propertyFilename the name of the property file within the specified path (required)
+	 * @param properties the map of properties to add
+	 * @param sorted indicates if the resulting properties should be sorted alphabetically
+	 * @param changeExisting indicates if an existing value for a given key should be replaced or not
+	 */
+	void addProperties(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting);
+	
+	/**
 	 * Adds a property only if the given key (and value) does not exist already.
 	 * 
 	 * @param propertyFilePath the location of the property file (required)

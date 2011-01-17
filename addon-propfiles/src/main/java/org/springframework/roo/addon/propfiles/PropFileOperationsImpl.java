@@ -44,28 +44,31 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	public boolean isPropertiesCommandAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
+	
+	public void addProperties(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
+		manageProperty(propertyFilePath, propertyFilename, properties, sorted, changeExisting);
+	}
 
 	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value) {
-		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, !CHANGE_EXISTING);
+		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, !CHANGE_EXISTING);
 	}
 
 	public void addPropertyIfNotExists(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
-		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, !CHANGE_EXISTING);
+		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, !CHANGE_EXISTING);
 	}
 
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value) {
-		manageProperty(propertyFilePath, propertyFilename, key, value, !SORTED, CHANGE_EXISTING);
+		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), !SORTED, CHANGE_EXISTING);
 	}
 
 	public void changeProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted) {
-		manageProperty(propertyFilePath, propertyFilename, key, value, sorted, CHANGE_EXISTING);
+		manageProperty(propertyFilePath, propertyFilename, asMap(key, value), sorted, CHANGE_EXISTING);
 	}
 
-	private void manageProperty(Path propertyFilePath, String propertyFilename, String key, String value, boolean sorted, boolean changeExisting) {
+	private void manageProperty(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
-		Assert.hasText(key, "Key required");
-		Assert.hasText(value, "Value required");
+		Assert.notNull(properties, "Property map required");
 
 		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
@@ -104,9 +107,17 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			throw new IllegalStateException("Properties file not found");
 		}
 
-		String propValue = props.getProperty(key);
-		if (propValue == null || (!propValue.equals(value) && changeExisting)) {
-			props.setProperty(key, value);
+		boolean saveNeeded = false;
+		for (String key: properties.keySet()) {
+			String existingValue = props.getProperty(key);
+			String newValue = properties.get(key);
+			if (existingValue == null || (!existingValue.equals(newValue) && changeExisting)) {
+				props.setProperty(key, newValue);
+				saveNeeded = true;
+			}
+		}
+		
+		if (saveNeeded) {
 			storeProps(props, mutableFile.getOutputStream(), "Updated at " + new Date());
 		}
 	}
@@ -216,6 +227,12 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			} catch (IOException ignore) {
 			}
 		}
+	}
+	
+	private Map<String, String> asMap(String key, String value) {
+		Map<String, String> properties = new HashMap<String, String>();
+		properties.put(key, value);
+		return properties;
 	}
 
 	private void storeProps(Properties props, OutputStream os, String comment) {
