@@ -34,21 +34,26 @@
 
     <c:set var="typeName" value="${fn:split(id,'_')[fn:length(fn:split(id,'_')) - 1]}" />
     <c:set var="lengths" value="${fn:split(columnMaxLengths, ',')}" scope="request" />
-
+    
+    <spring:eval var="colCounter" expression="1" />
+    
     <table>
       <thead>
         <tr>
           <c:forTokens items="${columnLabels}" delims="," var="columnHeading">
             <th>
               <c:out value="${columnHeading}" />
+              <spring:eval var="colCounter" expression="colCounter  + 1" />
             </th>
           </c:forTokens>
           <th></th>
           <c:if test="${update}">
             <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
           </c:if>
           <c:if test="${delete}">
             <th></th>
+            <spring:eval var="colCounter" expression="colCounter  + 1" />
           </c:if>
         </tr>
       </thead>
@@ -112,7 +117,7 @@
         </tr>
       </c:forEach>
       <tr class="footer">
-        <td colspan="10">
+        <td colspan="${colCounter}">
           <c:if test="${empty create or create}">
             <span class="new">
               <spring:url value="/${path}" var="create_url">
