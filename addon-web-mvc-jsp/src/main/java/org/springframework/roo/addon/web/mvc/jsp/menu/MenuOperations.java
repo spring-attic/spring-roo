@@ -23,11 +23,6 @@ public interface MenuOperations {
 	 * <p>
 	 * Addons can determine their own category and menu item identifiers so that there are no clashes 
 	 * with other addons. 
-	 * <p>
-	 * The recommended category identifier naming convention is <i>addon-name_intention_category</i> where 
-	 * intention represents a further identifier to diffentiate between different categories provided
-	 * by the same addon. Similarly, the recommended menu item identifier naming convention is
-	 * <i>addon-name_intention_menu_item</i>.
 	 *  
 	 * 
 	 * @param menuCategoryName the identifier for the menu category (required)
@@ -38,6 +33,29 @@ public interface MenuOperations {
 	 */
 	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix);
 
+	/**
+	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
+	 * given identifier exists then it will <b>not</b> be overwritten or replaced.
+	 * <p>
+	 * Addons can determine their own category and menu item identifiers so that there are no clashes 
+	 * with other addons. 
+	 * <p>
+	 * This method will <i>not</i> write i18n message codes. This means the caller will manage the properties himself 
+	 * - allowing for better efficiency.
+	 * 
+	 * 	 * <p>
+	 * The recommended category identifier naming convention is <i>menu_category_the-name_label</i> where 
+	 * intention represents a further identifier to diffentiate between different categories provided
+	 * by the same addon. Similarly, the recommended menu item identifier naming convention is
+	 * <i>menu_item_the-name_the-category_label</i>.
+	 * 
+	 * @param menuCategoryName
+	 * @param menuItemId
+	 * @param globalMessageCode
+	 * @param link
+	 * @param idPrefix
+	 */
+	void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix);
 	/**
 	 * Attempts to locate a unused finder menu items and remove them. 
 	 * 

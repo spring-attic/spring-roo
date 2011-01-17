@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
@@ -44,30 +46,20 @@ public class MenuOperationsImpl implements MenuOperations {
 		menuFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/menu.jspx");
 	}
 
-	/**
-	 * Allows for the addition of menu categories and menu items. If a category or menu item with the
-	 * given identifier exists then it will <b>not</b> be overwritten or replaced.
-	 * <p>
-	 * Addons can determine their own category and menu item identifiers so that there are no clashes 
-	 * with other addons. 
-	 * <p>
-	 * The recommended category identifier naming convention is <i>addon-name_intention_category</i> where 
-	 * intention represents a further identifier to diffentiate between different categories provided
-	 * by the same addon. Similarly, the recommended menu item identifier naming convention is
-	 * <i>addon-name_intention_menu_item</i>.
-	 *  
-	 * 
-	 * @param menuCategoryName the identifier for the menu category (required)
-	 * @param menuItemId the menu item identifier (required)
-	 * @param menuItemLabel the menu item label (required)
-	 * @param globalMessageCode the global message code
-	 * @param link the menu item link (required)
-	 * @param idPrefix the prefix to be used for this menu item (optional, MenuOperations.DEFAULT_MENU_ITEM_PREFIX is default)
-	 */
+	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String globalMessageCode, String link, String idPrefix) {
+		addMenuItem(menuCategoryName, menuItemId, "", globalMessageCode, link, idPrefix, false);
+	}
+	
 	public void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix) {
+		addMenuItem(menuCategoryName, menuItemId, menuItemLabel, globalMessageCode, link, idPrefix, true);
+	}
+	
+	private void addMenuItem(JavaSymbolName menuCategoryName, JavaSymbolName menuItemId, String menuItemLabel, String globalMessageCode, String link, String idPrefix, boolean writeProps) {
 		Assert.notNull(menuCategoryName, "Menu category name required");
 		Assert.notNull(menuItemId, "Menu item name required");
 		Assert.hasText(link, "Link required");
+		
+		Map<String, String> properties = new HashMap<String, String>();
 		
 		if (idPrefix == null || idPrefix.length() == 0) {
 			idPrefix = DEFAULT_MENU_ITEM_PREFIX;
@@ -97,7 +89,7 @@ public class MenuOperationsImpl implements MenuOperations {
 															.addAttribute("id", "c_" + menuCategoryName.getSymbolName().toLowerCase())
 														.build());
 			category.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(category));
-			propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName(), true);
+			properties.put("menu_category_" + menuCategoryName.getSymbolName().toLowerCase() + "_label", menuCategoryName.getReadableSymbolName());
 		}
 		
 		//check for existence of menu item by looking for the indentifier provided
@@ -112,7 +104,10 @@ public class MenuOperationsImpl implements MenuOperations {
 			menuItem.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(menuItem));
 			category.appendChild(menuItem);	
 		}
-		propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel, true);
+		if (writeProps) {
+			properties.put("menu_item_" + menuCategoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", menuItemLabel);
+			propFileOperations.addProperties(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", properties, true, false);
+		}
 		writeToDiskIfNecessary(document);
 	}
 	
