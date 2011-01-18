@@ -271,7 +271,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 						int hits = 0;
 						BundleVersion latest = bundle.getLatestVersion();
 						for (String term: terms) {
-							if ((bundle.getSymbolicName() + ";" + latest.getSummary()).toLowerCase().contains(term.trim().toLowerCase())) {
+							if ((bundle.getSymbolicName() + ";" + latest.getSummary()).toLowerCase().contains(term.trim().toLowerCase()) || term.equals("*")) {
 								hits++;
 							}
 						}

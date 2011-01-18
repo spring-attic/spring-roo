@@ -51,10 +51,10 @@ public class AddOnCommands implements CommandMarker {
 			@CliOption(key="compatibleOnly", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Only display compatible add-ons in search results") boolean compatibleOnly) {
 		// A list is really just a search without criteria. We keep some criteria to allow reasonable filtering and display logic to take place.
 		operations.searchAddOns(true, null, refresh, linesPerResult, maxResults, trustedOnly, compatibleOnly, null);
-	}
+	}	
 	
 	@CliCommand(value="addon search", help="Search all known Spring Roo Add-ons")
-	public void search(@CliOption(key="requiresDescription", mandatory=false, help="A comma separated list of search terms") String searchTerms,
+	public void search(@CliOption(key= { "", "requiresDescription" }, mandatory=false, specifiedDefaultValue="*", unspecifiedDefaultValue="*", help="A comma separated list of search terms") String searchTerms,
 			@CliOption(key="refresh", mandatory=false, unspecifiedDefaultValue="false", specifiedDefaultValue="true", help="Refresh the add-on index from the Internet") boolean refresh,
 			@CliOption(key="linesPerResult", mandatory=false, unspecifiedDefaultValue="2", specifiedDefaultValue="2", help="The maximum number of lines displayed per add-on") int linesPerResult,
 			@CliOption(key="maxResults", mandatory=false, unspecifiedDefaultValue="20", specifiedDefaultValue="20", help="The maximum number of add-ons to list") int maxResults,
