@@ -46,5 +46,12 @@ public @interface RooJson {
 	 * @return the name of the "toJsonArray" method to generate (defaults to "toJsonArray"; mandatory)
 	 */
 	String toJsonArrayMethod() default "toJsonArray";
+	
+	/**
+	 * Specify the root name of the JSON document.
+	 * 
+	 * @return the custom root name (optional)
+	 */
+	String rootName() default "";
 }
 

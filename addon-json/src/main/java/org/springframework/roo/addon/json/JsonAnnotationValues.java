@@ -17,6 +17,7 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 	@AutoPopulate String fromJsonMethod = "fromJsonTo<TypeName>";
 	@AutoPopulate String fromJsonArrayMethod = "fromJsonArrayTo<TypeNamePlural>";
 	@AutoPopulate String toJsonArrayMethod = "toJsonArray";
+	@AutoPopulate String rootName = "";
 
 	public JsonAnnotationValues(PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(governorPhysicalTypeMetadata, new JavaType(RooJson.class.getName()));
@@ -37,5 +38,9 @@ public class JsonAnnotationValues extends AbstractAnnotationValues {
 
 	public String getFromJsonArrayMethod() {
 		return fromJsonArrayMethod;
+	}
+	
+	public String getRootName() {
+		return rootName;
 	}
 }
