@@ -2,15 +2,15 @@
   <jsp:output omit-xml-declaration="yes" />
 
   <jsp:directive.attribute name="id" type="java.lang.String" required="true" description="The identifier for this tag (do not change!)" />
-  <jsp:directive.attribute name="object" type="java.lang.Object" required="true" description="The form backing object" />
-  <jsp:directive.attribute name="path" type="java.lang.String" required="true" description="Specify the URL path" />
-  <jsp:directive.attribute name="list" type="java.lang.Boolean" required="false" description="Include 'list' link into table (default true)" />
-  <jsp:directive.attribute name="create" type="java.lang.Boolean" required="false" description="Include 'create' link into table (default true)" />
-  <jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" description="Include 'update' link into table (default true)" />
-  <jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" description="Include 'delete' link into table (default true)" />
-  <jsp:directive.attribute name="label" type="java.lang.String" required="false" description="The label used for this object, will default to a message bundle if not supplied" />
-  <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
-  <jsp:directive.attribute name="openPane" type="java.lang.Boolean" required="false" description="Control if the title pane is opened or closed by default (default: true)" />
+  <jsp:directive.attribute name="object" type="java.lang.Object" required="true" rtexprvalue="true" description="The form backing object" />
+  <jsp:directive.attribute name="path" type="java.lang.String" required="true" rtexprvalue="true" description="Specify the URL path" />
+  <jsp:directive.attribute name="list" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'list' link into table (default true)" />
+  <jsp:directive.attribute name="create" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'create' link into table (default true)" />
+  <jsp:directive.attribute name="update" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'update' link into table (default true)" />
+  <jsp:directive.attribute name="delete" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Include 'delete' link into table (default true)" />
+  <jsp:directive.attribute name="label" type="java.lang.String" required="false" rtexprvalue="true" description="The label used for this object, will default to a message bundle if not supplied" />
+  <jsp:directive.attribute name="render" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Indicate if the contents of this tag and all enclosed tags should be rendered (default 'true')" />
+  <jsp:directive.attribute name="openPane" type="java.lang.Boolean" required="false" rtexprvalue="true" description="Control if the title pane is opened or closed by default (default: true)" />
   <jsp:directive.attribute name="z" type="java.lang.String" required="false" description="Used for checking if element has been modified (to recalculate simply provide empty string value)" />
 
   <c:if test="${empty render or render}">
