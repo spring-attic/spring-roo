@@ -16,7 +16,7 @@ public interface JmsOperations {
 
 	void installJms(JmsProvider jmsProvider, String name, JmsDestinationType destinationType);
 
-	void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName);
+	void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async);
 
 	void addJmsListener(JavaType targetType, String name, JmsDestinationType destinationType);
 }

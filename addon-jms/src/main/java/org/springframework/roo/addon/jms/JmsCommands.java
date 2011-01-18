@@ -56,9 +56,10 @@ public class JmsCommands implements CommandMarker {
 	@CliCommand(value = "field jms template", help = "insert a JmsTemplate field into an existing type") 
 	public void injectJmsProducer(
 		@CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "jmsTemplate", unspecifiedDefaultValue = "jmsTemplate", help = "The name of the field to add") JavaSymbolName fieldName, 
-		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName) {
+		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName,
+		@CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue="true", help = "Indicates if the injected method should be executed asynchronously") boolean async) {
 		
-		jmsOperations.injectJmsTemplate(typeName, fieldName);
+		jmsOperations.injectJmsTemplate(typeName, fieldName, async);
 	}
 
 	@CliCommand(value = "jms listener class", help = "Create a new class which is a asynchronous JMS consumer")

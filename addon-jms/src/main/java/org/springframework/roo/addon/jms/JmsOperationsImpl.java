@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -36,6 +37,7 @@ import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -55,6 +57,7 @@ public class JmsOperationsImpl implements JmsOperations {
 	@Reference private MetadataService metadataService;
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 
 	public boolean isInstallJmsAvailable() {
 		return getPathResolver() != null;
@@ -113,7 +116,7 @@ public class JmsOperationsImpl implements JmsOperations {
 		updateConfiguration(jmsProvider);
 	}
 
-	public void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName) {
+	public void injectJmsTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async) {
 		Assert.notNull(targetType, "Java type required");
 		Assert.notNull(fieldName, "Field name required");
 
@@ -142,6 +145,38 @@ public class JmsOperationsImpl implements JmsOperations {
 		mutableTypeDetails.addField(fieldBuilder.build());
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		
+		if (async) {
+			String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+			MutableFile contextMutableFile = null;
+
+			Document appCtx = null;
+			try {
+				if (fileManager.exists(contextPath)) {
+					contextMutableFile = fileManager.updateFile(contextPath);
+					appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
+				} else {
+					new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				}
+			} catch (Exception e) {
+				throw new IllegalStateException(e);
+			}
+
+			Element root = (Element) appCtx.getFirstChild();
+			
+			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+				if (root.getAttribute("xmlns:task").length() == 0) {
+					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
+					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
+				}
+				root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+				root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), contextMutableFile.getOutputStream(), appCtx);
+				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "jms.properties", "executor.poolSize", "10", true);
+			}
+			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+		}
+		
 		mutableTypeDetails.addMethod(methodBuilder.build());
 	}
 

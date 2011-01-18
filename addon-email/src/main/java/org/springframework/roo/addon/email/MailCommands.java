@@ -59,7 +59,6 @@ public class MailCommands implements CommandMarker {
 		@CliOption(key = { "", "fieldName" }, mandatory = false, specifiedDefaultValue = "mailTemplate", unspecifiedDefaultValue = "mailTemplate", help = "The name of the field to add") JavaSymbolName fieldName, 
 		@CliOption(key = "class", mandatory = false, unspecifiedDefaultValue = "*", optionContext = "update,project", help = "The name of the class to receive this field") JavaType typeName,
 		@CliOption(key = "async", mandatory = false, unspecifiedDefaultValue = "false", specifiedDefaultValue="true", help = "Indicates if the injected method should be executed asynchronously") boolean async) {
-
 		
 		mailOperations.injectEmailTemplate(typeName, fieldName, async);
 	}
