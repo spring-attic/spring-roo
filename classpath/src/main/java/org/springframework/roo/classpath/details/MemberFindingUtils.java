@@ -121,7 +121,7 @@ public abstract class MemberFindingUtils {
 	 * Locates a method with the name and parameter signature presented. Searches all {@link MemberDetails} until the first such method is located
 	 * or none can be found.
 	 * 
-	 * @param memberDetails to search (required)
+	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @param methodName the method name to locate (required)
 	 * @param parameters the method parameter signature to locate (can be null if no parameters are required)
 	 * @return the first located method, or null if such a method cannot be found
@@ -265,15 +265,36 @@ public abstract class MemberFindingUtils {
 	}
 	
 	/**
+	 * Searches all {@link MemberDetails} and returns all methods.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @return zero or more methods (never null)
+	 */
+	public static final List<MethodMetadata> getMethods(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		List<MethodMetadata> result = new ArrayList<MethodMetadata>();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (memberHoldingTypeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) { 
+				continue;
+			}
+			result.addAll(memberHoldingTypeDetails.getDeclaredMethods());
+		}
+		return result;
+	}
+	
+	/**
 	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
 	 * 
-	 * @param memberDetails the {@link MemberDetails} object to search. (required)
+	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return the JavaType, or null if not found
 	 */
 	public static JavaType getJavaType(MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
-		for (MemberHoldingTypeDetails typeDetails : memberDetails.getDetails()) {
-			return typeDetails.getName();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (memberHoldingTypeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) { 
+				continue;
+			}
+			return memberHoldingTypeDetails.getName();
 		}
 		return null;
 	}
