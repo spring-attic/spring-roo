@@ -3,7 +3,7 @@ package org.springframework.roo.addon.json;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
@@ -38,17 +38,16 @@ public final class JsonMetadataProvider extends AbstractItdMetadataProvider {
 		JavaType javaType = JsonMetadata.getJavaType(metadataIdentificationString);
 		Path path = JsonMetadata.getPath(metadataIdentificationString);
 
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(javaType, path));
-
-		// Abort if we don't have getter information available or if the target type is abstract
-		if (beanInfoMetadata == null) {
-			return null;
-		}
-
 		// We need to parse the annotation, if it is not present we will simply get the default annotation values
 		JsonAnnotationValues annotationValues = new JsonAnnotationValues(governorPhysicalTypeMetadata);
+		
+		String plural = javaType.getSimpleTypeName() + "s";
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
+		if (pluralMetadata != null) {
+			plural = pluralMetadata.getPlural();
+		}
 
-		return new JsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, beanInfoMetadata);
+		return new JsonMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, plural, annotationValues);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

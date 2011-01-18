@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -16,7 +14,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -33,24 +30,22 @@ import org.springframework.roo.support.util.Assert;
 public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = JsonMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private BeanInfoMetadata beanInfoMetadata;
 	private JsonAnnotationValues annotationValues;
-	private MetadataService metadataService;
+	private String typeNamePlural;
+	private JavaType governorType;
 
-	public JsonMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, JsonAnnotationValues annotationValues, BeanInfoMetadata beanInfoMetadata) {
+	public JsonMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String typeNamePlural, JsonAnnotationValues annotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(annotationValues, "Annotation values required");
-		Assert.notNull(metadataService, "Metadata service values required");
+		Assert.hasText(typeNamePlural, "Plural of the target type required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
 		if (!isValid()) {
 			return;
 		}
-
-		this.beanInfoMetadata = beanInfoMetadata;
 		this.annotationValues = annotationValues;
-		this.metadataService = metadataService;
+		this.typeNamePlural = typeNamePlural;
+		this.governorType = governorTypeDetails.getName();
 
 		builder.addMethod(getToJsonMethod());
 		builder.addMethod(getFromJsonMethod());
@@ -85,7 +80,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		String root = annotationValues.getRootName() != null ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
+		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(this);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, new JavaType("java.lang.String"), bodyBuilder);
@@ -109,7 +104,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		List<JavaType> typeParams = new ArrayList<JavaType>();
-		typeParams.add(beanInfoMetadata.getJavaBean());
+		typeParams.add(governorType);
 		List<AnnotatedJavaType> parameters = new ArrayList<AnnotatedJavaType>();
 		parameters.add(new AnnotatedJavaType(new JavaType(Collection.class.getName(), 0, DataType.TYPE, null, typeParams), null));
 
@@ -124,7 +119,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String serializer = new JavaType("flexjson.JSONSerializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		String root = annotationValues.getRootName() != null ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
+		String root = annotationValues.getRootName() != null && annotationValues.getRootName().length() > 0 ? ".rootName(\"" + annotationValues.getRootName() + "\")" : "";
 		bodyBuilder.appendFormalLine("return new " + serializer + "()" + root + ".exclude(\"*.class\").serialize(collection);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, new JavaType("java.lang.String"), parameters, paramNames, bodyBuilder);
@@ -137,12 +132,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			return null;
 		}
 
-		String pluralTerm = beanInfoMetadata.getJavaBean().getSimpleTypeName() + "s";
-		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
-		if (plural != null) {
-			pluralTerm = plural.getPlural();
-		}
-		return new JavaSymbolName(methodLabel.replace("<TypeNamePlural>", pluralTerm));
+		return new JavaSymbolName(methodLabel.replace("<TypeNamePlural>", typeNamePlural));
 	}
 
 	private MethodMetadata getFromJsonArrayMethod() {
@@ -164,7 +154,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		String list = new JavaType("java.util.List").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 		String arrayList = new JavaType("java.util.ArrayList").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		String bean = beanInfoMetadata.getJavaBean().getSimpleTypeName();
+		String bean = governorType.getSimpleTypeName();
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
@@ -174,7 +164,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		paramNames.add(new JavaSymbolName("json"));
 
 		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(beanInfoMetadata.getJavaBean());
+		params.add(governorType);
 		JavaType collection = new JavaType("java.util.Collection", 0, DataType.TYPE, null, params);
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, collection, parameters, paramNames, bodyBuilder);
@@ -188,7 +178,7 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Compute the relevant method name
-		return new JavaSymbolName(methodLabel.replace("<TypeName>", beanInfoMetadata.getJavaBean().getSimpleTypeName()));
+		return new JavaSymbolName(methodLabel.replace("<TypeName>", governorType.getSimpleTypeName()));
 	}
 
 	private MethodMetadata getFromJsonMethod() {
@@ -208,12 +198,12 @@ public class JsonMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String deserializer = new JavaType("flexjson.JSONDeserializer").getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
-		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + beanInfoMetadata.getJavaBean().getSimpleTypeName() + ">().use(null, " + beanInfoMetadata.getJavaBean().getSimpleTypeName() + ".class).deserialize(json);");
+		bodyBuilder.appendFormalLine("return new " + deserializer + "<" + governorType.getSimpleTypeName() + ">().use(null, " + governorType.getSimpleTypeName() + ".class).deserialize(json);");
 
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("json"));
 
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, beanInfoMetadata.getJavaBean(), parameters, paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, governorType, parameters, paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
