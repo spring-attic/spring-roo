@@ -1,16 +1,15 @@
 package org.springframework.roo.addon.email;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -32,6 +31,7 @@ import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -49,6 +49,7 @@ public class MailOperationsImpl implements MailOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
+	@Reference private PropFileOperations propFileOperations;
 
 	public boolean isInstallEmailAvailable() {
 		return getPathResolver() != null;
@@ -61,23 +62,8 @@ public class MailOperationsImpl implements MailOperations {
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
 		Assert.hasText(hostServer, "Host server name required");
 
-		String emailPropsPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "email.properties");
-		MutableFile databaseMutableFile = null;
-
-		Properties props = new Properties();
-
-		try {
-			if (fileManager.exists(emailPropsPath)) {
-				databaseMutableFile = fileManager.updateFile(emailPropsPath);
-				props.load(databaseMutableFile.getInputStream());
-			} else {
-				databaseMutableFile = fileManager.createFile(emailPropsPath);
-				props.load(databaseMutableFile.getInputStream());
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-
+		Map<String, String> props = new HashMap<String, String>();
+		
 		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
@@ -177,33 +163,12 @@ public class MailOperationsImpl implements MailOperations {
 			updateConfiguration();
 		}
 
-		try {
-			OutputStream outputStream = databaseMutableFile.getOutputStream();
-			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
+		propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, false);
 	}
 
 	public void configureTemplateMessage(String from, String subject) {
-		String emailPropsPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "email.properties");
-		MutableFile databaseMutableFile = null;
-
-		Properties props = new Properties();
-
-		try {
-			if (fileManager.exists(emailPropsPath)) {
-				databaseMutableFile = fileManager.updateFile(emailPropsPath);
-				props.load(databaseMutableFile.getInputStream());
-			} else {
-				databaseMutableFile = fileManager.createFile(emailPropsPath);
-				props.load(databaseMutableFile.getInputStream());
-			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
-		}
-
+		Map<String, String> props = new HashMap<String, String>();
+		
 		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
@@ -258,16 +223,12 @@ public class MailOperationsImpl implements MailOperations {
 			XmlUtils.writeXml(contextMutableFile.getOutputStream(), appCtx);
 		}
 
-		try {
-			OutputStream outputStream = databaseMutableFile.getOutputStream();
-			props.store(outputStream, "Updated at " + new Date());
-			outputStream.close();
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		if (props.size() > 0) {
+			propFileOperations.addProperties(Path.SPRING_CONFIG_ROOT, "email.properties", props, true, false);
 		}
 	}
 
-	public void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName) {
+	public void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async) {
 		Assert.notNull(targetType, "Java type required");
 		Assert.notNull(fieldName, "Field name required");
 
@@ -340,6 +301,21 @@ public class MailOperationsImpl implements MailOperations {
 		bodyBuilder.appendFormalLine(fieldName + ".send(simpleMailMessage);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("sendMessage"), JavaType.VOID_PRIMITIVE, paramTypes, paramNames, bodyBuilder);
+		
+		if (async) {
+			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
+				if (root.getAttribute("xmlns:task").length() == 0) {
+					root.setAttribute("xmlns:task", "http://www.springframework.org/schema/task");
+					root.setAttribute("xsi:schemaLocation", root.getAttribute("xsi:schemaLocation") + "  http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd");
+				}
+				root.appendChild(new XmlElementBuilder("task:annotation-driven", appCtx).addAttribute("executor", "asyncExecutor").addAttribute("mode", "aspectj").build());
+				root.appendChild(new XmlElementBuilder("task:executor", appCtx).addAttribute("id", "asyncExecutor").addAttribute("pool-size", "${executor.poolSize}").build());
+				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), contextMutableFile.getOutputStream(), appCtx);
+				propFileOperations.addPropertyIfNotExists(Path.SPRING_CONFIG_ROOT, "email.properties", "executor.poolSize", "10", true);
+			}
+			methodBuilder.addAnnotation(new AnnotationMetadataBuilder(new JavaType("org.springframework.scheduling.annotation.Async")));
+		}
+		
 		mutableTypeDetails.addMethod(methodBuilder.build());
 	}
 

@@ -18,5 +18,5 @@ public interface MailOperations {
 
 	void configureTemplateMessage(String from, String subject);
 
-	void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName);
+	void injectEmailTemplate(JavaType targetType, JavaSymbolName fieldName, boolean async);
 }
