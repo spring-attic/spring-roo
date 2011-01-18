@@ -104,7 +104,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			mutableFile = fileManager.updateFile(filePath);
 			loadProps(props, mutableFile.getInputStream());
 		} else {
-			throw new IllegalStateException("Properties file not found");
+			//unable to find the file, so let's create it
+			mutableFile = fileManager.createFile(filePath);
 		}
 
 		boolean saveNeeded = false;
