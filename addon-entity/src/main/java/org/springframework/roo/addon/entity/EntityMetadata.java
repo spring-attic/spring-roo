@@ -877,7 +877,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
 			// Create an anonymous inner class that extends the abstract class (no-arg constructor is available as this is a JPA entity)
-			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "(){");
+			bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = new " + governorTypeDetails.getName().getSimpleTypeName() + "() {");
 			// Handle any abstract methods in this class
 			bodyBuilder.indent();
 			for (MethodMetadata method : MemberFindingUtils.getMethods(governorTypeDetails)) {
