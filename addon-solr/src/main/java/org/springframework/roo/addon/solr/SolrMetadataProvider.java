@@ -1,16 +1,31 @@
 package org.springframework.roo.addon.solr;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
+import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.EntityMetadataProvider;
+import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
@@ -23,7 +38,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate=true)
 @Service
-public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
+public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMetadataProvider {
 	
 	@Reference private EntityMetadataProvider entityMetadataProvider;
 
@@ -38,13 +53,12 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 		entityMetadataProvider.removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));
 		removeMetadataTrigger(new JavaType(RooSolrSearchable.class.getName()));	
 	}
-	
+
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// Acquire bean info (we need getters details, specifically)
 		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
 		Path path = SolrMetadata.getPath(metadataIdentificationString);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
-		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 
 		// We need to parse the annotation, which we expect to be present
 		SolrSearchAnnotationValues annotationValues = new SolrSearchAnnotationValues(governorPhysicalTypeMetadata);
@@ -54,22 +68,77 @@ public final class SolrMetadataProvider extends AbstractItdMetadataProvider {
 		
 		// We want to be notified if the getter info changes in any way 
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		
 		// Abort if we don't have getter information available
-		if (entityMetadata == null || beanInfoMetadata == null) {
+		if (entityMetadata == null) {
 			return null;
 		}
+		
+		String beanPlural = javaType.getSimpleTypeName() + "s";
+		PluralMetadata plural = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(javaType, path));
+		if (plural != null) {
+			beanPlural = plural.getPlural();
+		}
+		
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
+		Map<MethodMetadata, FieldMetadata> accessorDetails = new HashMap<MethodMetadata, FieldMetadata>();
+		
+		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
+		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
+			// avoid BIM; deprecating
+			if (memberHolder.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) continue;
+			
+			// Add the methods we care about
+			for (MethodMetadata method : memberHolder.getDeclaredMethods()) {
+				if (isMethodOfInterest(method)) {
+					locatedAccessors.add(method);
+					// Track any changes to that method (eg it goes away)
+					metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+				}
+			}
+		}
+		
+		for (MethodMetadata methodMetadata: locatedAccessors) {
+			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(methodMetadata));
+			if (fieldMetadata != null) {
+				accessorDetails.put(methodMetadata, fieldMetadata);
+			}
+		}
 		// Otherwise go off and create the to Solr metadata
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, beanInfoMetadata, metadataService);
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, accessorDetails, beanPlural);
+	}
+	
+	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
+		// Determine if this ITD presents a method we're interested in (namely accessors)
+		for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
+			if (isMethodOfInterest(method)) {
+				// We care about this ITD, so formally request an update so we can scan for it and process it
+				
+				// Determine the governor for this ITD, and the Path the ITD is stored within
+				JavaType governorType = itdTypeDetails.getName();
+				String providesType = MetadataIdentificationUtils.getMetadataClass(itdTypeDetails.getDeclaredByMetadataId());
+				Path itdPath = PhysicalTypeIdentifierNamingUtils.getPath(providesType, itdTypeDetails.getDeclaredByMetadataId());
+				
+				//  Produce the local MID we're going to use to make the request
+				String localMid = createLocalIdentifier(governorType, itdPath);
+				
+				// Request the local MID
+				return localMid;
+			}
+		}
+		
+		return null;
+	}
+	
+	private boolean isMethodOfInterest(MethodMetadata method) {
+		return method.getMethodName().getSymbolName().startsWith("get") && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
 		return "SolrSearch";
 	}
-
+	
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = SolrMetadata.getJavaType(metadataIdentificationString);
 		Path path = SolrMetadata.getPath(metadataIdentificationString);
