@@ -45,11 +45,8 @@ public class ConversionServiceOperationsImplTests {
 		
 		operations.manageWebMvcConfig(new JavaPackage(getClass().getPackage().getName()));
 		String output = webMvcConfigFile.getOutputAsString();
-		assertThat(output, containsString(
-				"<mvc:annotation-driven conversion-service=\"applicationConversionService\"/>"));
-		assertThat(output, containsString(
-				"\t<!--Installs application converters and formatters-->\n" +
-				"\t<bean class=\"org.springframework.roo.addon.web.mvc.controller.ApplicationConversionServiceFactoryBean\" id=\"applicationConversionService\"/>\n"));
+		assertThat(output, containsString("<mvc:annotation-driven conversion-service=\"applicationConversionService\"/>"));
+		assertThat(output, containsString("<bean class=\"org.springframework.roo.addon.web.mvc.controller.ApplicationConversionServiceFactoryBean\" id=\"applicationConversionService\"/>"));
 	}
 	
 	@Test
@@ -93,21 +90,15 @@ public class ConversionServiceOperationsImplTests {
 		
 		operations.installJavaClass(javaType.getPackage());
 		String output = file.getOutputAsString();
-		assertThat(output, containsString(
-				"package org.springframework.roo.addon.web.mvc.controller;\n"));
-		assertThat(output, containsString(
-				"import org.springframework.format.FormatterRegistry;\n" +
-				"import org.springframework.format.support.FormattingConversionServiceFactoryBean;\n" +
-				"import org.springframework.roo.addon.web.mvc.controller.RooConversionService;\n"));
-		assertThat(output, containsString(
-				"@RooConversionService\n" +
-				"public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {\n"));
-		assertThat(output, containsString(
-				"\t@Override\n" +
-				"\tprotected void installFormatters(FormatterRegistry registry) {\n" +
-				"\t\tsuper.installFormatters(registry);\n" +
-				"\t\t// Register application converters and formatters\n" +
-				"\t}\n"));
+		assertThat(output, containsString("package org.springframework.roo.addon.web.mvc.controller;"));
+		assertThat(output, containsString("import org.springframework.format.FormatterRegistry;"));
+		assertThat(output, containsString("import org.springframework.format.support.FormattingConversionServiceFactoryBean;"));
+		assertThat(output, containsString("import org.springframework.roo.addon.web.mvc.controller.RooConversionService;"));
+		assertThat(output, containsString("@RooConversionService"));
+		assertThat(output, containsString("public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {"));
+		assertThat(output, containsString("@Override"));
+		assertThat(output, containsString("protected void installFormatters(FormatterRegistry registry) {"));
+		assertThat(output, containsString("super.installFormatters(registry);"));
 	}
 
 }
