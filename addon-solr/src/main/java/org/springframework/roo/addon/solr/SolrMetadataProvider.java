@@ -1,9 +1,7 @@
 package org.springframework.roo.addon.solr;
 
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -20,7 +18,7 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
@@ -83,26 +81,14 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 		
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(SolrMetadataProvider.class.getName(), (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails());
 		Map<MethodMetadata, FieldMetadata> accessorDetails = new HashMap<MethodMetadata, FieldMetadata>();
-		
-		List<MethodMetadata> locatedAccessors = new ArrayList<MethodMetadata>();
-		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
-			// avoid BIM; deprecating
-			if (memberHolder.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) continue;
-			
-			// Add the methods we care about
-			for (MethodMetadata method : memberHolder.getDeclaredMethods()) {
-				if (isMethodOfInterest(method)) {
-					locatedAccessors.add(method);
-					// Track any changes to that method (eg it goes away)
-					metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+		for (MethodMetadata methodMetadata : MemberFindingUtils.getMethods(memberDetails)) {
+			if (isMethodOfInterest(methodMetadata)) {
+				FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(methodMetadata));
+				if (fieldMetadata != null) {
+					accessorDetails.put(methodMetadata, fieldMetadata);
 				}
-			}
-		}
-		
-		for (MethodMetadata methodMetadata: locatedAccessors) {
-			FieldMetadata fieldMetadata = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(methodMetadata));
-			if (fieldMetadata != null) {
-				accessorDetails.put(methodMetadata, fieldMetadata);
+				// Track any changes to that method (eg it goes away)
+				metadataDependencyRegistry.registerDependency(methodMetadata.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
 		}
 		// Otherwise go off and create the to Solr metadata
