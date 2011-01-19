@@ -7,9 +7,12 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.IdentifiableJavaStructure;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
@@ -342,6 +345,25 @@ public abstract class AbstractItdMetadataProvider extends AbstractHashCodeTracki
 	 */
 	public void setDependsOnGovernorBeingAClass(boolean dependsOnGovernorBeingAClass) {
 		this.dependsOnGovernorBeingAClass = dependsOnGovernorBeingAClass;
+	}
+	
+	/**
+	 * Assists creating a local metadata identification string (MID) from any presented {@link MemberHoldingTypeDetails} implementation.
+	 * This is achieved by extracting the {@link IdentifiableJavaStructure#getDeclaredByMetadataId()} and converting it into a {@link JavaType}
+	 * and {@link Path}, then calling {@link #createLocalIdentifier(JavaType, Path)}.
+	 * 
+	 * @param memberHoldingTypeDetails the member holder from which the declaring type information should be extracted (required)
+	 * @return a MID produced by {@link #createLocalIdentifier(JavaType, Path)} for the extracted Java type in the extract Path (never null)
+	 */
+	protected String getLocalMid(MemberHoldingTypeDetails memberHoldingTypeDetails) {
+		JavaType governorType = memberHoldingTypeDetails.getName();
+		
+		// Extract out the metadata provider class (we need this later to extract just the Path it is located in)
+		String providesType = MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetails.getDeclaredByMetadataId());
+		Path path = PhysicalTypeIdentifierNamingUtils.getPath(providesType, memberHoldingTypeDetails.getDeclaredByMetadataId());
+		
+		//  Produce the local MID we're going to use to make the request
+		return createLocalIdentifier(governorType, path);
 	}
 
 }
