@@ -155,7 +155,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClas
 			clazz.setAnnotations(annotations);
 		}
 		JavaParserAnnotationMetadata.removeAnnotationFromList(this, annotations, annotationType);
-		flush();
 	}
 
 	public void addField(FieldMetadata fieldMetadata) {
