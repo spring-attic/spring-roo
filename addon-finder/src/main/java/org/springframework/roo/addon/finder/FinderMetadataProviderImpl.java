@@ -39,11 +39,13 @@ public final class FinderMetadataProviderImpl extends AbstractMemberDiscoveringI
 	@Reference private DynamicFinderServices dynamicFinderServices;
 
 	protected void activate(ComponentContext context) {
+		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
 	
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.removeNotificationListener(this);
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
