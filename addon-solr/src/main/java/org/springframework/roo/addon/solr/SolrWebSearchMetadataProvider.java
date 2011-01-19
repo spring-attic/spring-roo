@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Provides {@link SolrWebSearchMetadata}.
@@ -52,9 +53,15 @@ public final class SolrWebSearchMetadataProvider extends AbstractItdMetadataProv
 		if (webScaffoldMetadata == null) {
 			return null;
 		}
+		
+		JavaType targetObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
+		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + WebScaffoldMetadata.getJavaType(webScaffoldMetadata.getId()).getFullyQualifiedTypeName() + "' controller");
+		
+		SolrMetadata solrMetadata = (SolrMetadata) metadataService.get(SolrMetadata.createIdentifier(targetObject, Path.SRC_MAIN_JAVA));
+		Assert.notNull(solrMetadata, "Could not determine SolrMetadata for type '" + targetObject.getFullyQualifiedTypeName() + "'");
 
 		// Otherwise go off and create the to String metadata
-		return new SolrWebSearchMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, annotationValues, webScaffoldMetadata);
+		return new SolrWebSearchMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, webScaffoldMetadata.getAnnotationValues(), solrMetadata.getAnnotationValues());
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

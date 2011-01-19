@@ -4,7 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
+import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.MethodMetadata;
@@ -18,7 +18,6 @@ import org.springframework.roo.classpath.details.annotations.StringAttributeValu
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
@@ -34,43 +33,34 @@ import org.springframework.roo.support.util.Assert;
 public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = SolrWebSearchMetadata.class.getName(); 
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private String controllerPath;
-	private MetadataService metadataService;
-	private WebScaffoldMetadata webScaffoldMetadata;
-	private SolrWebSearchAnnotationValues annotationValues;
 
-	public SolrWebSearchMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, SolrWebSearchAnnotationValues annotationValues, WebScaffoldMetadata webScaffoldMetadata) {
+	public SolrWebSearchMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, SolrWebSearchAnnotationValues annotationValues, WebScaffoldAnnotationValues webScaffoldAnnotationValues, SolrSearchAnnotationValues solrSearchAnnotationValues) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
+		Assert.notNull(webScaffoldAnnotationValues, "Web scaffold annotation values required");
 		Assert.notNull(annotationValues, "Solr web searchable annotation values required");
+		Assert.notNull(solrSearchAnnotationValues, "Solr search annotation values required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
 		if (!isValid()) {
 			return;
 		}
-
-		controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
-		this.webScaffoldMetadata = webScaffoldMetadata;
-		this.metadataService = metadataService;
-		this.annotationValues = annotationValues;
 		
 		if (annotationValues.getSearchMethod() != null && annotationValues.getSearchMethod().length() > 0) {
-			builder.addMethod(getSearchMethod());
+			builder.addMethod(getSearchMethod(annotationValues, solrSearchAnnotationValues, webScaffoldAnnotationValues));
 		}
 		if (annotationValues.getAutoCompleteMethod() != null && annotationValues.getAutoCompleteMethod().length() > 0) {
-			builder.addMethod(getAutocompleteMethod());
+			builder.addMethod(getAutocompleteMethod(annotationValues, solrSearchAnnotationValues, webScaffoldAnnotationValues));
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
 	
-	private MethodMetadata getSearchMethod() {
-		JavaType targetObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + WebScaffoldMetadata.getJavaType(webScaffoldMetadata.getId()).getFullyQualifiedTypeName() + "' controller");
+	private MethodMetadata getSearchMethod(SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, SolrSearchAnnotationValues searchAnnotationValues, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+		JavaType targetObject = webScaffoldAnnotationValues.getFormBackingObject();
+		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + webScaffoldAnnotationValues.getGovernorTypeDetails().getName().getFullyQualifiedTypeName() + "' controller");
 		
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getSearchMethod());
+		JavaSymbolName methodName = new JavaSymbolName(solrWebSearchAnnotationValues.getSearchMethod());
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
 
@@ -103,22 +93,22 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder(); 	
 		bodyBuilder.appendFormalLine("if (q != null && q.length() != 0) {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine(solrQuerySimpleName + " solrQuery = new " + solrQuerySimpleName + "(\"" + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + q.toLowerCase());");
+		bodyBuilder.appendFormalLine(solrQuerySimpleName + " solrQuery = new " + solrQuerySimpleName + "(\"" + webScaffoldAnnotationValues.getFormBackingObject().getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + q.toLowerCase());");
 
 		bodyBuilder.appendFormalLine("if (page != null) solrQuery.setStart(page);");
 		bodyBuilder.appendFormalLine("if (size != null) solrQuery.setRows(size);");		
-		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"searchResults\", " + targetObject.getFullyQualifiedTypeName() + "." + getSolrMetadata().getAnnotationValues().getSearchMethod() + "(solrQuery).getResults());");
+		bodyBuilder.appendFormalLine("modelMap.addAttribute(\"searchResults\", " + targetObject.getFullyQualifiedTypeName() + "." + searchAnnotationValues.getSearchMethod() + "(solrQuery).getResults());");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/search\";");
+		bodyBuilder.appendFormalLine("return \"" + webScaffoldAnnotationValues.getPath() + "/search\";");
 		
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
 	}
 	
-	private MethodMetadata getAutocompleteMethod() {
-		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getAutoCompleteMethod());		
+	private MethodMetadata getAutocompleteMethod(SolrWebSearchAnnotationValues solrWebSearchAnnotationValues, SolrSearchAnnotationValues searchAnnotationValues, WebScaffoldAnnotationValues webScaffoldAnnotationValues) {
+		JavaSymbolName methodName = new JavaSymbolName(solrWebSearchAnnotationValues.getAutoCompleteMethod());		
 		
 		MethodMetadata method = methodExists(methodName);
 		if (method != null) return method;
@@ -153,7 +143,7 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		bodyBuilder.appendFormalLine("solrQuery.setRows(rows == null ? 10 : rows);");
 		bodyBuilder.appendFormalLine("solrQuery.setFacetMinCount(1);");
 		bodyBuilder.appendFormalLine("solrQuery.addFacetField(facetFields.split(\",\"));");
-		bodyBuilder.appendFormalLine(queryResponseSimpleName + " response = " + webScaffoldMetadata.getAnnotationValues().getFormBackingObject().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + getSolrMetadata().getAnnotationValues().getSearchMethod() + "(solrQuery);");
+		bodyBuilder.appendFormalLine(queryResponseSimpleName + " response = " + webScaffoldAnnotationValues.getFormBackingObject().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + searchAnnotationValues.getSearchMethod() + "(solrQuery);");
 		bodyBuilder.appendFormalLine("for (" + facetFieldSimpleName + " field: response.getFacetFields()) {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (response.getResults().get(0) != null) {");
@@ -174,15 +164,6 @@ public class SolrWebSearchMetadata extends AbstractItdTypeDetailsProvidingMetada
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.STRING_OBJECT, paramTypes, paramNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		return methodBuilder.build();
-	}
-	
-	private SolrMetadata getSolrMetadata() {
-		JavaType targetObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
-		Assert.notNull(targetObject, "Could not aquire form backing object for the '" + WebScaffoldMetadata.getJavaType(webScaffoldMetadata.getId()).getFullyQualifiedTypeName() + "' controller");
-		
-		SolrMetadata solrMetadata = (SolrMetadata) metadataService.get(SolrMetadata.createIdentifier(targetObject, Path.SRC_MAIN_JAVA));
-		Assert.notNull(solrMetadata, "Could not determine SolrMetadata for type '" + targetObject.getFullyQualifiedTypeName() + "'");
-		return solrMetadata;
 	}
 	
 	private List<AnnotationMetadata> getRequestParamAnnotation(String paramName, boolean required) {
