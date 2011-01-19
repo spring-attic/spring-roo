@@ -53,8 +53,4 @@ public class QueryHolder {
 	List<Token> getTokens() {
 		return tokens;
 	}
-
-	@Override public String toString() {
-		return String.format("QueryHolder [jpaQuery=%s, parameterTypes=%s, parameterNames=%s, tokens=%s]", jpaQuery, parameterTypes, parameterNames, tokens);
-	}
 }
