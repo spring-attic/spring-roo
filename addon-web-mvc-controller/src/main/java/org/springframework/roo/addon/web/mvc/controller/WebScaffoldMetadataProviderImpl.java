@@ -81,24 +81,19 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);
 		}
 		
-		List<String> dynamicFinders = entityMetadata.getDynamicFinders();
-		List<MethodMetadata> dynamicFinderMdList = new ArrayList<MethodMetadata>();
-		if (dynamicFinders.size() > 0) {
-			String finderMetdadataKey = FinderMetadata.createIdentifier(javaType, path);
-			FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetdadataKey);
-			if (finderMetadata == null) { //cannot get metdata yet, aborting
-				return null;
-			}
-			for (String finderName : dynamicFinders) {
-				dynamicFinderMdList.add(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
-			}
+		// We want the methods that represent dynamic finders, if there are any
+		List<MethodMetadata> dynamicFinderMethods = new ArrayList<MethodMetadata>();
+		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, path);
+		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
+		if (finderMetadata != null) {
+			dynamicFinderMethods = finderMetadata.getAllDynamicFinders();
 		}
 		
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
-		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, memberDetailsScanner, annotationValues, beanInfoMetadata, entityMetadata, dynamicFinderMdList, controllerOperations);
+		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, metadataService, memberDetailsScanner, annotationValues, beanInfoMetadata, entityMetadata, dynamicFinderMethods, controllerOperations);
 	}
 
 	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType) {

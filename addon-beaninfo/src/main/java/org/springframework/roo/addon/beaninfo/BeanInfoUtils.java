@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.beaninfo;
 
+import java.lang.reflect.Modifier;
+
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -62,6 +64,26 @@ public abstract class BeanInfoUtils {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Indicates if the presented method compiles with the JavaBean conventions around mutator methods (public, "set", 1 arg etc).
+	 * 
+	 * @param method to evaluate (required)
+	 * @return true if the presented method is a mutator, otherwise false
+	 */
+	public static boolean isMutatorMethod(MethodMetadata method) {
+		return method.getMethodName().getSymbolName().startsWith("set") && method.getParameterTypes().size() == 1 && Modifier.isPublic(method.getModifier());
+	}
+
+	/**
+	 * Indicates if the presented method compiles with the JavaBean conventions around accessor methods (public, "set" or "is", 0 args etc).
+	 * 
+	 * @param method to evaluate (required)
+	 * @return true if the presented method is an accessor, otherwise false
+	 */
+	public static boolean isAccessorMethod(MethodMetadata method) {
+		return (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is")) && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
 	}
 
 }

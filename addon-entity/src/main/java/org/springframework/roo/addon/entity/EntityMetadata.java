@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -1116,7 +1117,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		for (String finder : finders) {
 			result.add(finder);
 		}
-		return result;
+		return Collections.unmodifiableList(result);
 	}
 
 	/**

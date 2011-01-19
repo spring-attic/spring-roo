@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
@@ -26,6 +25,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ArrayAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
+import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
@@ -37,7 +37,7 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Provides Finder addon operations. 
+ * Provides Finder add-on operations. 
  * 
  * @author Stefan Schmidt
  * @since 1.0
@@ -46,11 +46,13 @@ import org.springframework.roo.support.util.Assert;
 @Service
 public class FinderOperationsImpl implements FinderOperations {
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
+	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
-	@Reference private MemberDetailsScanner detailsScanner;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private DynamicFinderServices dynamicFinderServices;
 	
 	public boolean isFinderCommandAvailable() {
 		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
@@ -58,7 +60,6 @@ public class FinderOperationsImpl implements FinderOperations {
 	
 	public SortedSet<String> listFindersFor(JavaType typeName, Integer depth) {
 		Assert.notNull(typeName, "Java type required");
-		Assert.notNull(detailsScanner, "Member details scanner required");
 		
 		String id = physicalTypeMetadataProvider.findIdentifier(typeName);
 		if (id == null) {
@@ -76,11 +77,7 @@ public class FinderOperationsImpl implements FinderOperations {
 			throw new IllegalArgumentException("Cannot provide finders because '" + typeName.getFullyQualifiedTypeName() + "' is not a entity");
 		}
 		
-		// We also need the Bean Info metadata
-		String beanInfoMid = BeanInfoMetadata.createIdentifier(javaType, path);
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMid);
-		Assert.notNull(beanInfoMetadata, "Bean info ('" + beanInfoMid +"') was unexpectedly unavailable when entity metadata was available for '" + entityMetadata + "'");
-
+		// Get the member details
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata == null) {
 			throw new IllegalStateException("Could not determine physical type metadata for type " + javaType);
@@ -89,34 +86,36 @@ public class FinderOperationsImpl implements FinderOperations {
 		if (cid == null) {
 			throw new IllegalStateException("Could not determine class or interface type details for type " + javaType);
 		}
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), cid);
+		
 		// Compute the finders
-		DynamicFinderServices finderService = new DynamicFinderServicesImpl();
 		Set<JavaSymbolName> exclusions = new HashSet<JavaSymbolName>();
 		exclusions.add(entityMetadata.getIdentifierField().getFieldName());
 		exclusions.add(entityMetadata.getEntityManagerField().getFieldName());
 		if (entityMetadata.getVersionField() != null) {
 			exclusions.add(entityMetadata.getVersionField().getFieldName());
 		}
-		List<JavaSymbolName> finders = finderService.getFindersFor(detailsScanner.getMemberDetails(getClass().getName(), cid), entityMetadata.getPlural(), depth, exclusions);
 
 		SortedSet<String> result = new TreeSet<String>();
+
+		List<JavaSymbolName> finders = dynamicFinderServices.getFinders(memberDetails, entityMetadata.getPlural(), depth, exclusions);
 		for (JavaSymbolName finder : finders) {
 			// Avoid displaying problematic finders
 			try {
-				List<JavaSymbolName> paramNames = finderService.getParameterNames(finder, entityMetadata.getPlural(), beanInfoMetadata);
-				List<JavaType> paramTypes = finderService.getParameterTypes(finder, entityMetadata.getPlural(), beanInfoMetadata);
+				QueryHolder queryHolder = dynamicFinderServices.getQueryHolder(memberDetails, finder, entityMetadata.getPlural());
+				List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
+				List<JavaType> parameterTypes = queryHolder.getParameterTypes();
 				StringBuilder signature = new StringBuilder();
 				int x = -1;
-				for (JavaType param : paramTypes) {
+				for (JavaType param : parameterTypes) {
 					x++;
 					if (x > 0) {
 						signature.append(", ");
 					}
-					signature.append(param.getSimpleTypeName()).append(" ").append(paramNames.get(x).getSymbolName());
+					signature.append(param.getSimpleTypeName()).append(" ").append(parameterNames.get(x).getSymbolName());
 				}
 				result.add(finder.getSymbolName() + "(" + signature + ")" /* query: '" + query + "'"*/);
-			} catch (RuntimeException ex) {
-				logger.warning("failure");
+			} catch (RuntimeException e) {
 				result.add(finder.getSymbolName() + " - failure");
 			}
 		}
@@ -145,11 +144,6 @@ public class FinderOperationsImpl implements FinderOperations {
 			return;
 		}
 
-		// We also need the Bean Info metadata
-		String beanInfoMid = BeanInfoMetadata.createIdentifier(javaType, path);
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMid);
-		Assert.notNull(beanInfoMetadata, "Bean info ('" + beanInfoMid + "') was unexpectedly unavailable when entity metadata was available for '" + entityMetadata + "'");
-
 		// We know the file exists, as there's already entity metadata for it
 		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(id);
 		if (physicalTypeMetadata == null) {
@@ -161,22 +155,19 @@ public class FinderOperationsImpl implements FinderOperations {
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd);
 		MutableClassOrInterfaceTypeDetails mutable = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		// We know there should be an existing Entity annotation
+		// We know there should be an existing RooEntity annotation
 		List<? extends AnnotationMetadata> annotations = mutable.getAnnotations();
-		AnnotationMetadata found = MemberFindingUtils.getAnnotationOfType(annotations, new JavaType(RooEntity.class.getName()));
-		if (found == null) {
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(annotations, ROO_ENTITY);
+		if (rooEntityAnnotation == null) {
 			logger.warning("Unable to find the entity annotation on '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
 
 		// Confirm they typed a valid finder name
-		DynamicFinderServices finderService = new DynamicFinderServicesImpl();
-		try {
-			finderService.getJpaQueryFor(finderName, entityMetadata.getPlural(), beanInfoMetadata);
-		} catch (RuntimeException ex) {
-			// TODO: Improve detection of invalid finder names
-			logger.warning("The finder name '" + finderName.getSymbolName() + "' contains an error");
-			throw ex;
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), mutable);
+		if (dynamicFinderServices.getQueryHolder(memberDetails, finderName, entityMetadata.getPlural()) == null) {
+			logger.warning("Finder name '" + finderName.getSymbolName() + "' either does not exist or contains an error");
+			return;
 		}
 
 		// Make a destination list to store our final attributes
@@ -185,17 +176,17 @@ public class FinderOperationsImpl implements FinderOperations {
 
 		// Copy the existing attributes, excluding the "finder" attribute
 		boolean alreadyAdded = false;
-		AnnotationAttributeValue<?> val = found.getAttribute(new JavaSymbolName("finders"));
+		AnnotationAttributeValue<?> val = rooEntityAnnotation.getAttribute(new JavaSymbolName("finders"));
 		if (val != null) {
 			// Ensure we have an array of strings
 			if (!(val instanceof ArrayAttributeValue<?>)) {
-				logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
+				logger.warning(getErrorMsg());
 				return;
 			}
 			ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) val;
 			for (Object o : arrayVal.getValue()) {
 				if (!(o instanceof StringAttributeValue)) {
-					logger.warning("Annotation " + RooEntity.class.getSimpleName() + " attribute 'finders' must be an array of strings");
+					logger.warning(getErrorMsg());
 					return;
 				}
 				StringAttributeValue sv = (StringAttributeValue) o;
@@ -211,10 +202,14 @@ public class FinderOperationsImpl implements FinderOperations {
 			desiredFinders.add(new StringAttributeValue(new JavaSymbolName("ignored"), finderName.getSymbolName()));
 		}
 
-		// Now let's add the "finder" attribute
+		// Now let's add the "finders" attribute
 		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("finders"), desiredFinders));
 
-		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(new JavaType(RooEntity.class.getName()), attributes);
+		AnnotationMetadataBuilder annotation = new AnnotationMetadataBuilder(ROO_ENTITY, attributes);
 		mutable.updateTypeAnnotation(annotation.build(), new HashSet<JavaSymbolName>());
+	}
+
+	private String getErrorMsg() {
+		return "Annotation " + ROO_ENTITY.getSimpleTypeName() + " attribute 'finders' must be an array of strings";
 	}
 }

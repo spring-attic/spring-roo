@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.addon.finder;
 
 /**
@@ -9,9 +6,8 @@ package org.springframework.roo.addon.finder;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public interface Token {
-	
+
 	String getValue();
 }

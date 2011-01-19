@@ -9,7 +9,7 @@ import org.springframework.roo.model.JavaType;
  * Interface to {@link FinderOperationsImpl}.
  * 
  * @author Ben Alex
- *
+ * @since 1.0
  */
 public interface FinderOperations {
 
@@ -18,5 +18,4 @@ public interface FinderOperations {
 	SortedSet<String> listFindersFor(JavaType typeName, Integer depth);
 
 	void installFinder(JavaType typeName, JavaSymbolName finderName);
-
 }

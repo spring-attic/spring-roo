@@ -230,21 +230,22 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(pluralMetadata, "Could not determine plural for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
 
 		List<String> allowedMenuItems = new ArrayList<String>();
-		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
-			for (String finderName : entityMetadata.getDynamicFinders()) {
+		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders() && finderMetadata != null) {
+			for (MethodMetadata methodMetadata : finderMetadata.getAllDynamicFinders()) {
+				String finderName = methodMetadata.getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
 				// finders only get scaffolded if the finder name is not too long (see ROO-1027)
 				if (listPath.length() > 244) {
 					continue;
 				}
 				
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase())));
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(methodMetadata));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
 				// Add 'Find by' menu item
 				menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
-				for (JavaSymbolName paramName : finderMetadata.getDynamicFinderMethod(finderName, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).getParameterNames()) {
+				for (JavaSymbolName paramName : methodMetadata.getParameterNames()) {
 					properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
 				}
 				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName + ".jspx");

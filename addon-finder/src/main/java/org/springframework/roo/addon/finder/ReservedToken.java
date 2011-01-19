@@ -28,11 +28,10 @@ public class ReservedToken implements Token, Comparable<ReservedToken> {
 
 	public int compareTo(ReservedToken o) {
 		int l = o.getValue().length() - this.getValue().length();
-		if(l == 0) return  -1;
-		else return l;
+		return l == 0 ? -1 : l;
 	}
 
-	@Override
+	@Override 
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -40,7 +39,7 @@ public class ReservedToken implements Token, Comparable<ReservedToken> {
 		return result;
 	}
 
-	@Override
+	@Override 
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;

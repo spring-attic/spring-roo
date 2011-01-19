@@ -2,10 +2,11 @@ package org.springframework.roo.addon.finder;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
 
 import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -19,7 +20,6 @@ import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
@@ -37,32 +37,49 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	private static final String PROVIDES_TYPE_STRING = FinderMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
 	private static final JavaType ENTITY_MANAGER = new JavaType("javax.persistence.EntityManager");
-	private BeanInfoMetadata beanInfoMetadata;
-	private EntityMetadata entityMetadata;
+	private MethodMetadata entityManagerMethod;
+	private SortedMap<JavaSymbolName, QueryHolder> queryHolders;
 	private boolean isDataNucleusEnabled;
+	private List<MethodMetadata> dynamicFinderMethods;
 	
-	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata, ProjectMetadata projectMetadata) {
+	public FinderMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean isDataNucleusEnabled, MethodMetadata entityManagerMethod, SortedMap<JavaSymbolName, QueryHolder> queryHolders) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
-		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(entityManagerMethod, "EntityManager method required");
+		Assert.notNull(queryHolders, "Query holders required");
 		
 		if (!isValid()) {
 			return;
 		}
 		
-		this.beanInfoMetadata = beanInfoMetadata;
-		this.entityMetadata = entityMetadata;
-		this.isDataNucleusEnabled = projectMetadata.isDataNucleusEnabled();
-		
-		for (String method : entityMetadata.getDynamicFinders()) {
-			builder.addMethod(getDynamicFinderMethod(method, beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()));
+		this.entityManagerMethod = entityManagerMethod;
+		this.queryHolders = queryHolders;
+		this.isDataNucleusEnabled = isDataNucleusEnabled;
+				
+		List<MethodMetadata> dynamicFinderMethods = new ArrayList<MethodMetadata>();
+		for (JavaSymbolName finderName : queryHolders.keySet()) {
+			MethodMetadata methodMetadata = getDynamicFinderMethod(finderName);
+			builder.addMethod(methodMetadata);
+			dynamicFinderMethods.add(methodMetadata);
 		}
 		
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
+		this.dynamicFinderMethods = Collections.unmodifiableList(dynamicFinderMethods);
 	}
 	
+	/**
+	 * Obtains all the currently-legal dynamic finders known to this metadata instance. This may be a subset (or even completely empty)
+	 * versus those requested via the {@link RooEntity} annotation, as the user may have made a typing error in representing the
+	 * requested dynamic finder, the field may have been deleted by the user, or an add-on which produces the field (or its mutator)
+	 * might not yet be loaded or in error or other similar conditions.
+	 * 
+	 * @return a non-null, immutable representation of currently-available finder methods (never returns null, but may be empty)
+	 */
+	public List<MethodMetadata> getAllDynamicFinders() {
+		return dynamicFinderMethods;
+	}
+		
 	/**
 	 * Locates a dynamic finder method of the specified name, or creates one on demand if not present.
 	 * 
@@ -70,86 +87,83 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * It is required that the requested name was defined in the {@link RooEntity#finders()}. If it is not
 	 * present, an exception is thrown.
 	 * 
+	 * @param the dynamic finder method name
 	 * @return the user-defined method, or an ITD-generated method (never returns null)
 	 */
-	public MethodMetadata getDynamicFinderMethod(String dynamicFinderMethodName, String tableName) {
-		Assert.hasText(dynamicFinderMethodName, "Dynamic finder method name is required");
-		Assert.isTrue(entityMetadata.getDynamicFinders().contains(dynamicFinderMethodName), "Undefined method name '" + dynamicFinderMethodName + "'");
-		
-		JavaSymbolName methodName = new JavaSymbolName(dynamicFinderMethodName);
-
-		List<JavaType> parameters = new ArrayList<JavaType>();
-		parameters.add(governorTypeDetails.getName());
-		JavaType queryType = new JavaType("javax.persistence.Query");
-		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
-		
+	public MethodMetadata getDynamicFinderMethod(JavaSymbolName finderName) {
+		Assert.notNull(finderName, "Dynamic finder method name is required");
+		Assert.isTrue(queryHolders.containsKey(finderName), "Undefined method name '" + finderName.getSymbolName() + "'");
+				
 		// We have no access to method parameter information, so we scan by name alone and treat any match as authoritative
 		// We do not scan the superclass, as the caller is expected to know we'll only scan the current class
 		for (MethodMetadata method : governorTypeDetails.getDeclaredMethods()) {
-			if (method.getMethodName().equals(methodName)) {
+			if (method.getMethodName().equals(finderName)) {
 				// Found a method of the expected name; we won't check method parameters though
 				return method;
 			}
 		}
 		
 		// To get this far we need to create the method...
-		DynamicFinderServices dynamicFinderServices = new DynamicFinderServicesImpl();
-		String jpaQuery = dynamicFinderServices.getJpaQueryFor(methodName, entityMetadata.getPlural(), beanInfoMetadata);
-		List<JavaSymbolName> paramNames = dynamicFinderServices.getParameterNames(methodName, entityMetadata.getPlural(), beanInfoMetadata);
-		List<JavaType> paramTypes = dynamicFinderServices.getParameterTypes(methodName, entityMetadata.getPlural(), beanInfoMetadata);
+		List<JavaType> parameters = new ArrayList<JavaType>();
+		parameters.add(governorTypeDetails.getName());
+		JavaType queryType = new JavaType("javax.persistence.Query");
+		JavaType typedQueryType = new JavaType("javax.persistence.TypedQuery", 0, DataType.TYPE, null, parameters);
+
+		QueryHolder queryHolder = queryHolders.get(finderName);
+		String jpaQuery = queryHolder.getJpaQuery();
+		List<JavaType> parameterTypes = queryHolder.getParameterTypes();
+		List<JavaSymbolName> parameterNames = queryHolder.getParameterNames();
 		
 		// We declared the field in this ITD, so produce a public accessor for it
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		
+		String methodName = finderName.getSymbolName();		
 		boolean containsCollectionType = false;
 
-		for (int i = 0; i < paramTypes.size(); i++) {
-			String name = paramNames.get(i).getSymbolName();
+		for (int i = 0; i < parameterTypes.size(); i++) {
+			String name = parameterNames.get(i).getSymbolName();
 			
 			StringBuilder length = new StringBuilder();
-			if (paramTypes.get(i).equals(new JavaType("java.lang.String"))) {
-				length.append(" || ").append(paramNames.get(i)).append(".length() == 0");
+			if (parameterTypes.get(i).equals(new JavaType("java.lang.String"))) {
+				length.append(" || ").append(parameterNames.get(i)).append(".length() == 0");
 			}
 			
-			if (!paramTypes.get(i).isPrimitive()) {
+			if (!parameterTypes.get(i).isPrimitive()) {
 				bodyBuilder.appendFormalLine("if (" + name + " == null" + length.toString() + ") throw new IllegalArgumentException(\"The " + name + " argument is required\");");
 			}
 			
-			if (length.length() > 0 && dynamicFinderMethodName.substring(dynamicFinderMethodName.indexOf(paramNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")){
+			if (length.length() > 0 && methodName.substring(methodName.indexOf(parameterNames.get(i).getSymbolNameCapitalisedFirstLetter()) + name.length()).startsWith("Like")){
 				bodyBuilder.appendFormalLine(name + " = " + name + ".replace('*', '%');");
 				bodyBuilder.appendFormalLine("if (" + name + ".charAt(0) != '%') {");
 				bodyBuilder.indent();
 				bodyBuilder.appendFormalLine(name + " = \"%\" + " + name + ";");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
-				bodyBuilder.appendFormalLine("if (" + name + ".charAt(" + name + ".length() -1) != '%') {");
+				bodyBuilder.appendFormalLine("if (" + name + ".charAt(" + name + ".length() - 1) != '%') {");
 				bodyBuilder.indent();
 				bodyBuilder.appendFormalLine(name + " = " + name + " + \"%\";");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 			}
 			
-			if (paramTypes.get(i).isCommonCollectionType()) {
+			if (parameterTypes.get(i).isCommonCollectionType()) {
 				containsCollectionType = true;
 			}
 		}
 		
 		// Get the entityManager() method (as per ROO-216)
-		MethodMetadata entityManagerMethod = entityMetadata.getEntityManagerMethod();
-		Assert.notNull(entityManagerMethod, "Entity manager method incorrectly returned null");
 		bodyBuilder.appendFormalLine(ENTITY_MANAGER.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " em = " + governorTypeDetails.getName().getSimpleTypeName() + "." + entityManagerMethod.getMethodName().getSymbolName() + "();");
 
 		List<JavaSymbolName> collectionTypeNames = new ArrayList<JavaSymbolName>();
 		if (containsCollectionType) {
 			bodyBuilder.appendFormalLine("StringBuilder queryBuilder = new StringBuilder(\"" + jpaQuery + "\");");
 			boolean jpaQueryComplete = false;
-			for (int i = 0; i < paramTypes.size(); i++) {
+			for (int i = 0; i < parameterTypes.size(); i++) {
 				if (!jpaQueryComplete && !jpaQuery.trim().endsWith("WHERE") && !jpaQuery.trim().endsWith("AND") && !jpaQuery.trim().endsWith("OR")) {
-					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(paramNames.get(i).getSymbolName().toLowerCase()) + paramNames.get(i).getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (methodName.substring(methodName.toLowerCase().indexOf(parameterNames.get(i).getSymbolName().toLowerCase()) + parameterNames.get(i).getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
 					jpaQueryComplete = true;
 				}
-				if (paramTypes.get(i).isCommonCollectionType()) {
-					collectionTypeNames.add(paramNames.get(i));
+				if (parameterTypes.get(i).isCommonCollectionType()) {
+					collectionTypeNames.add(parameterNames.get(i));
 				} 
 			}
 			int position = 0;
@@ -157,11 +171,11 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.appendFormalLine("for (int i = 0; i < " + name + ".size(); i++) {");
 				bodyBuilder.indent();
 				bodyBuilder.appendFormalLine("if (i > 0) queryBuilder.append(\" AND\");");
-				bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + name + "_item\").append(i).append(\" MEMBER OF " + tableName + "." + name + "\");");
+				bodyBuilder.appendFormalLine("queryBuilder.append(\" :" + name + "_item\").append(i).append(\" MEMBER OF " + governorTypeDetails.getName().getSimpleTypeName().toLowerCase() + "." + name + "\");");
 				bodyBuilder.indentRemove();
 				bodyBuilder.appendFormalLine("}");
 				if (collectionTypeNames.size() > ++position) {
-					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (dynamicFinderMethodName.substring(dynamicFinderMethodName.toLowerCase().indexOf(name.getSymbolName().toLowerCase()) + name.getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
+					bodyBuilder.appendFormalLine("queryBuilder.append(\"" + (methodName.substring(methodName.toLowerCase().indexOf(name.getSymbolName().toLowerCase()) + name.getSymbolName().length()).startsWith("And") ? " AND" : " OR") + "\");");
 				}
 			}		
 			if (isDataNucleusEnabled) {
@@ -170,16 +184,16 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(queryBuilder.toString(), " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
 			}
 			
-			for (int i = 0; i < paramTypes.size(); i++) {
-				if (paramTypes.get(i).isCommonCollectionType()) {
-					bodyBuilder.appendFormalLine("int " + paramNames.get(i) + "Index = 0;");
-					bodyBuilder.appendFormalLine("for (" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName() + " _" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + paramNames.get(i) + ") {");
+			for (int i = 0; i < parameterTypes.size(); i++) {
+				if (parameterTypes.get(i).isCommonCollectionType()) {
+					bodyBuilder.appendFormalLine("int " + parameterNames.get(i) + "Index = 0;");
+					bodyBuilder.appendFormalLine("for (" + parameterTypes.get(i).getParameters().get(0).getSimpleTypeName() + " _" + parameterTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ": " + parameterNames.get(i) + ") {");
 					bodyBuilder.indent();
-					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "_item\" + " + paramNames.get(i) + "Index++, _" + paramTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + parameterNames.get(i) + "_item\" + " + parameterNames.get(i) + "Index++, _" + parameterTypes.get(i).getParameters().get(0).getSimpleTypeName().toLowerCase() + ");");
 					bodyBuilder.indentRemove();
 					bodyBuilder.appendFormalLine("}");
 				} else {
-					bodyBuilder.appendFormalLine("q.setParameter(\"" + paramNames.get(i) + "\", " + paramNames.get(i) + ");");
+					bodyBuilder.appendFormalLine("q.setParameter(\"" + parameterNames.get(i) + "\", " + parameterNames.get(i) + ");");
 				}
 			}				
 		} else {
@@ -189,14 +203,14 @@ public class FinderMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 				bodyBuilder.appendFormalLine(typedQueryType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + " q = em.createQuery(\"" + jpaQuery + "\", " + governorTypeDetails.getName().getSimpleTypeName() + ".class);");
 			}
 		
-			for (JavaSymbolName name : paramNames) {
+			for (JavaSymbolName name : parameterNames) {
 				bodyBuilder.appendFormalLine("q.setParameter(\"" + name + "\", " + name + ");");
 			}
 		}
 		
 		bodyBuilder.appendFormalLine("return q;");
 		
-		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, (isDataNucleusEnabled ? queryType : typedQueryType), AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
+		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, finderName, (isDataNucleusEnabled ? queryType : typedQueryType), AnnotatedJavaType.convertFromJavaTypes(parameterTypes), parameterNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 	

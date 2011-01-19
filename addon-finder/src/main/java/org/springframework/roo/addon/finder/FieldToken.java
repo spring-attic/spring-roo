@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.springframework.roo.addon.finder;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -13,16 +10,12 @@ import org.springframework.roo.support.util.Assert;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 public class FieldToken implements Token, Comparable<FieldToken> {
-	
 	private FieldMetadata field;	
-	
 	private JavaSymbolName fieldName;
 
 	public FieldToken(FieldMetadata field) {
-		super();
 		Assert.notNull(field, "FieldMetadata required");
 		this.field = field;
 		this.fieldName = field.getFieldName();
@@ -46,8 +39,6 @@ public class FieldToken implements Token, Comparable<FieldToken> {
 	
 	public int compareTo(FieldToken o) {
 		int l = o.getValue().length() - this.getValue().length();
-		if(l == 0) return  -1;
-		else return l;
+		return l == 0 ? -1 : l;
 	}
-
 }
