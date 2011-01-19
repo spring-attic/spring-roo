@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.model.JavaPackage;
 
 /**
  * Specifies methods to retrieve database metadata.
@@ -79,6 +80,13 @@ public interface DbreModelService {
 	 */
 	Database refreshDatabaseSafely(Schema schema);
 		
+	/**
+	 * Specifies the {@link JavaPackage} to create entities in.
+	 * 
+	 * @param destinationPackage the JavaPackage
+	 */
+	void setDestinationPackage(JavaPackage destinationPackage);
+	
 	/**
 	 * Sets the boolean flag to bring back database view information.
 	 * 

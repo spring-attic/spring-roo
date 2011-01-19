@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -25,26 +26,28 @@ public class DatabaseIntrospector {
 	private DatabaseMetaData databaseMetaData;
 	private String catalogName;
 	private Schema schema;
+	private JavaPackage destinationPackage;
 	private boolean view;
 	private Set<String> includeTables = null;
 	private Set<String> excludeTables = null;
 	private String tableName;
 	private String columnName;
 
-	public DatabaseIntrospector(Connection connection, Schema schema, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
-		Assert.notNull(connection, "Connection must not be null");
-		this.connection = connection;
+	public DatabaseIntrospector(Connection connection, Schema schema, JavaPackage destinationPackage, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
+		this(connection);
 		catalogName = this.connection.getCatalog();
 		databaseMetaData = this.connection.getMetaData();
 		Assert.notNull(databaseMetaData, "Database metadata is null");
 		this.schema = schema;
+		this.destinationPackage = destinationPackage;
 		this.view = view;
 		this.includeTables = includeTables;
 		this.excludeTables = excludeTables;
 	}
 
 	public DatabaseIntrospector(Connection connection) throws SQLException {
-		this(connection, null, false, null, null);
+		Assert.notNull(connection, "Connection must not be null");
+		this.connection = connection;
 	}
 
 	public Connection getConnection() {
@@ -104,12 +107,12 @@ public class DatabaseIntrospector {
 
 	public Database createDatabase() throws SQLException {
 		String name = StringUtils.hasText(schema.getName()) ? schema.getName() : catalogName;
-		return new Database(name, getTables());
+		return new Database(name, getTables(), destinationPackage);
 	}
-	
+
 	private Set<Table> getTables() throws SQLException {
 		Set<Table> tables = new LinkedHashSet<Table>();
-		
+
 		String[] types = view ? new String[] { TableType.TABLE.name(), TableType.VIEW.name() } : new String[] { TableType.TABLE.name() };
 		ResultSet rs = databaseMetaData.getTables(getCatalog(), getSchemaPattern(), getTableNamePattern(), types);
 		try {
@@ -148,7 +151,7 @@ public class DatabaseIntrospector {
 		} finally {
 			rs.close();
 		}
-		
+
 		return tables;
 	}
 
@@ -158,8 +161,7 @@ public class DatabaseIntrospector {
 			if ("Oracle".equalsIgnoreCase(databaseMetaData.getDatabaseProductName()) && tableName.startsWith("BIN$")) {
 				ignore = true;
 			}
-		} catch (SQLException ignored) {
-		}
+		} catch (SQLException ignored) {}
 		return ignore;
 	}
 
@@ -256,7 +258,7 @@ public class DatabaseIntrospector {
 		}
 		return hasTable(includeTables, tableName);
 	}
-	
+
 	private boolean hasExcludedTable(String tableName) {
 		if (excludeTables == null || excludeTables.isEmpty()) {
 			return false;
@@ -274,7 +276,7 @@ public class DatabaseIntrospector {
 		}
 		return false;
 	}
-	
+
 	private void readIndices(Table table) throws SQLException {
 		Set<Index> indices = new LinkedHashSet<Index>();
 
@@ -382,8 +384,7 @@ public class DatabaseIntrospector {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private Dialect getDialect() {
+	@SuppressWarnings("unused") private Dialect getDialect() {
 		try {
 			String productName = databaseMetaData.getDatabaseProductName();
 			return (Dialect) Class.forName("org.springframework.roo.addon.dbre.model.dialect." + productName + "Dialect").newInstance();

@@ -66,9 +66,9 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables) {
-		dbreDatabaseListener.setDestinationPackage(destinationPackage);
 		dbreDatabaseListener.setTestAutomatically(testAutomatically);
 		
+		dbreModelService.setDestinationPackage(destinationPackage);
 		dbreModelService.setView(view);
 		dbreModelService.setIncludeTables(includeTables);
 		dbreModelService.setExcludeTables(excludeTables);

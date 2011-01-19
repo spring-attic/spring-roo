@@ -65,7 +65,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	@Reference private DbreModelService dbreModelService;
 	@Reference private Shell shell;
 	private Map<JavaType, List<Identifier>> identifierResults = null;
-	private JavaPackage destinationPackage = null;
 	private boolean testAutomatically;
 
 	// This method will be called when the database becomes available for the first time and the rest of Roo has started up OK
@@ -73,10 +72,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		processDatabase(newDatabase);
 	}
 
-	public void setDestinationPackage(JavaPackage destinationPackage) {
-		this.destinationPackage = destinationPackage;
-	}
-	
 	public void setTestAutomatically(boolean testAutomatically) {
 		this.testAutomatically = testAutomatically;
 	}
@@ -95,6 +90,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		// Lookup the relevant destination package if not explicitly given
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
 		
+		JavaPackage destinationPackage = database.getDestinationPackage();
 		if (destinationPackage == null) {
 			if (!managedEntities.isEmpty()) {
 				// Take the package of the first one
@@ -125,7 +121,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				createNewManagedEntityFromTable(table);
+				createNewManagedEntityFromTable(table, destinationPackage);
 			}
 		}
 
@@ -203,7 +199,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return table;
 	}
 
-	private void createNewManagedEntityFromTable(Table table) {
+	private void createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
 		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
 
 		// Create type annotations for new entity

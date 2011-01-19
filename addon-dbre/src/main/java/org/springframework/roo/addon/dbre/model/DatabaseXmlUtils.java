@@ -216,13 +216,12 @@ public abstract class DatabaseXmlUtils {
 			tables.add(table);
 		}
 		
-		Database database = new Database(databaseElement.getAttribute(NAME), tables);
-		
+		JavaPackage destinationJavaPackage = null;
 		if (StringUtils.hasText(databaseElement.getAttribute("package"))) {
-			database.setDestinationPackage(new JavaPackage(databaseElement.getAttribute("package")));
+			destinationJavaPackage = new JavaPackage(databaseElement.getAttribute("package"));
 		}
-
-		return database;
+		
+		return new Database(databaseElement.getAttribute(NAME), tables, destinationJavaPackage);
 	}
 
 	private static void addIndices(Table table, Element tableElement, IndexType indexType) {

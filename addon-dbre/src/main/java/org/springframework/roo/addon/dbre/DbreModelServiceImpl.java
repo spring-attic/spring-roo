@@ -31,6 +31,7 @@ import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusListener;
@@ -60,6 +61,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
 	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
 	private Schema lastSchema = null;
+	private JavaPackage destinationPackage;
 	private boolean view;
 	private Set<String> includeTables;
 	private Set<String> excludeTables;
@@ -159,6 +161,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		return getDatabase(schema, true, true);
 	}
 
+	public void setDestinationPackage(JavaPackage destinationPackage) {
+		this.destinationPackage = destinationPackage;
+	}
+
 	public void setView(boolean view) {
 		this.view = view;
 	}
@@ -212,7 +218,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection(true);
-			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, view, includeTables, excludeTables);
+			DatabaseIntrospector introspector = new DatabaseIntrospector(connection, schema, destinationPackage, view, includeTables, excludeTables);
 			Database database = introspector.createDatabase();
 
 			if (safeMode) {

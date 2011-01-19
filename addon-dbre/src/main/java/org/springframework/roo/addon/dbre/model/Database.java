@@ -29,9 +29,10 @@ public class Database implements Serializable {
 	/** All tables. */
 	private Set<Table> tables;
 
-	Database(String name, Set<Table> tables) {
+	Database(String name, Set<Table> tables, JavaPackage destinationPackage) {
 		Assert.hasText(name, "Database name required");
 		Assert.notNull(tables, "Tables required");
+		this.destinationPackage = destinationPackage;
 		this.name = name;
 		this.tables = tables;
 		initialize();
@@ -43,10 +44,6 @@ public class Database implements Serializable {
 
 	public JavaPackage getDestinationPackage() {
 		return destinationPackage;
-	}
-
-	public void setDestinationPackage(JavaPackage destinationPackage) {
-		this.destinationPackage = destinationPackage;
 	}
 
 	public Schema getSchema() {

@@ -89,8 +89,7 @@ public final class DatabaseContentHandler extends DefaultHandler {
 		} else if (qName.equals("unique-column") || qName.equals("index-column")) {
 			((Index) stack.peek()).addColumn((IndexColumn) tmp);
 		} else if (qName.equals("database")) {
-			database = new Database(name, tables);
-			database.setDestinationPackage(destinationPackage);
+			database = new Database(name, tables, destinationPackage);
 		} else {
 			stack.push(tmp);
 		}
