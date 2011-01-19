@@ -28,11 +28,6 @@
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-            <version>${roo.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.configurable</artifactId>
             <version>${roo.version}</version>
         </dependency>

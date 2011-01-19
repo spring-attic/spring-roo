@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ConstructorMetadata;
@@ -39,10 +38,7 @@ import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Metadata for {@link RooEntity}.
- * 
- * <p>
- * Any getter produced by this metadata is automatically included in the {@link BeanInfoMetadata}.
- * 
+ *  
  * @author Ben Alex
  * @author Stefan Schmidt
  * @author Alan Stewart
@@ -565,7 +561,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			}
 		}
 		
-		// Try to locate an existing field with @javax.persistence.Version
+		// Try to locate an existing field with @Version
 		List<FieldMetadata> found = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, new JavaType("javax.persistence.Version"));
 		if (found.size() > 0) {
 			Assert.isTrue(found.size() == 1, "More than 1 field was annotated with @Version in '" + governorTypeDetails.getName().getFullyQualifiedTypeName() + "'");

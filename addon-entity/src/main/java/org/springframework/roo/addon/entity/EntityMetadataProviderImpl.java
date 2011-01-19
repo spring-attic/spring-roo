@@ -6,7 +6,6 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.plural.PluralMetadataProvider;
@@ -30,7 +29,6 @@ import org.springframework.roo.project.ProjectMetadata;
 public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceAwareMetadataProvider implements EntityMetadataProvider {
 	@Reference private ConfigurableMetadataProvider configurableMetadataProvider;
 	@Reference private PluralMetadataProvider pluralMetadataProvider;
-	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
 	
 	private boolean noArgConstructor = true;
 	
@@ -38,14 +36,12 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		addMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
 	
 	protected void deactivate(ComponentContext context) {
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 		pluralMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
-		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooEntity.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -66,13 +62,13 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 		JavaType javaType = EntityMetadata.getJavaType(metadataIdentificationString);
 		Path path = EntityMetadata.getPath(metadataIdentificationString);
 		String key = PluralMetadata.createIdentifier(javaType, path);
-		PluralMetadata beanInfo = (PluralMetadata) metadataService.get(key);
-		metadataDependencyRegistry.registerDependency(key, metadataIdentificationString);
-		if (beanInfo == null) {
+		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(key);
+		if (pluralMetadata == null) {
 			// Can't acquire the plural
 			return null;
 		}
-		
+		metadataDependencyRegistry.registerDependency(key, metadataIdentificationString);
+	
 		// If the project itself changes, we want a chance to refresh this item
 		metadataDependencyRegistry.registerDependency(ProjectMetadata.getProjectIdentifier(), metadataIdentificationString);
 		
@@ -86,7 +82,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 
 		List<Identifier> identifierServiceResult = getIdentifiersForType(javaType);
 		
-		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, beanInfo.getPlural(), projectMetadata, memberDetails, identifierServiceResult);
+		return new EntityMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, parent, noArgConstructor, pluralMetadata.getPlural(), projectMetadata, memberDetails, identifierServiceResult);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {

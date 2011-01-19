@@ -6,13 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.beaninfo.RooBeanInfo;
-
 /**
  * Provides services related to JPA.
- * 
- * <p>
- * Using this annotation also triggers {@link RooBeanInfo}.
  * 
  * @author Ben Alex
  * @since 1.0
