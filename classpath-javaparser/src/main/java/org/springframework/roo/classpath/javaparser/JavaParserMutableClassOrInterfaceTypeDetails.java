@@ -59,6 +59,11 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClas
 	}
 	
 	public void addTypeAnnotation(AnnotationMetadata annotation) {
+		doAddTypeAnnotation(annotation);
+		flush();
+	}
+	
+	private void doAddTypeAnnotation(AnnotationMetadata annotation) {
 		List<AnnotationExpr> annotations = clazz == null ? enumClazz.getAnnotations() : clazz.getAnnotations();
 		if (annotations == null) {
 			annotations = new ArrayList<AnnotationExpr>();
@@ -69,7 +74,6 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClas
 			}
 		}
 		JavaParserAnnotationMetadata.addAnnotationToList(this, annotations, annotation);
-		flush();
 	}
 
 	public boolean updateTypeAnnotation(AnnotationMetadata annotation, Set<JavaSymbolName> attributesToDeleteIfPresent) {
@@ -132,13 +136,19 @@ public class JavaParserMutableClassOrInterfaceTypeDetails extends JavaParserClas
 		
 		// Make a new AnnotationMetadata representing the replacement
 		AnnotationMetadataBuilder replacement = new AnnotationMetadataBuilder(annotation.getAnnotationType(), new ArrayList<AnnotationAttributeValue<?>>(replacementAttributeValues.values()));
-		removeTypeAnnotation(replacement.getAnnotationType());
-		addTypeAnnotation(replacement.build());
+		doRemoveTypeAnnotation(replacement.getAnnotationType());
+		doAddTypeAnnotation(replacement.build());
+		flush();
 		
 		return true;
 	}
-
+	
 	public void removeTypeAnnotation(JavaType annotationType) {
+		doRemoveTypeAnnotation(annotationType);
+		flush();
+	}
+	
+	private void doRemoveTypeAnnotation(JavaType annotationType) {
 		List<AnnotationExpr> annotations = clazz.getAnnotations();
 		if (annotations == null) {
 			annotations = new ArrayList<AnnotationExpr>();
