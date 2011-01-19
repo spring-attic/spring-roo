@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.roo.addon.dbre.model.dialect.Dialect;
 import org.springframework.roo.model.JavaPackage;
-import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
 /**
@@ -21,9 +20,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Alan Stewart
  * @since 1.1
  */
-public class DatabaseIntrospector {
-	private Connection connection;
-	private DatabaseMetaData databaseMetaData;
+public class DatabaseIntrospector extends AbstractIntrospector {
 	private String catalogName;
 	private Schema schema;
 	private JavaPackage destinationPackage;
@@ -34,10 +31,7 @@ public class DatabaseIntrospector {
 	private String columnName;
 
 	public DatabaseIntrospector(Connection connection, Schema schema, JavaPackage destinationPackage, boolean view, Set<String> includeTables, Set<String> excludeTables) throws SQLException {
-		this(connection);
-		catalogName = this.connection.getCatalog();
-		databaseMetaData = this.connection.getMetaData();
-		Assert.notNull(databaseMetaData, "Database metadata is null");
+		super(connection);
 		this.schema = schema;
 		this.destinationPackage = destinationPackage;
 		this.view = view;
@@ -45,21 +39,8 @@ public class DatabaseIntrospector {
 		this.excludeTables = excludeTables;
 	}
 
-	public DatabaseIntrospector(Connection connection) throws SQLException {
-		Assert.notNull(connection, "Connection must not be null");
-		this.connection = connection;
-	}
-
-	public Connection getConnection() {
-		return connection;
-	}
-
 	public String getCatalogName() {
 		return catalogName;
-	}
-
-	public void setCatalogName(String catalogName) {
-		this.catalogName = catalogName;
 	}
 
 	public Schema getSchema() {
@@ -70,24 +51,12 @@ public class DatabaseIntrospector {
 		return schema != null ? schema.getName() : null;
 	}
 
-	public void setSchema(Schema schema) {
-		this.schema = schema;
-	}
-
 	public String getTableName() {
 		return tableName;
 	}
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
 	public String getColumnName() {
 		return columnName;
-	}
-
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
 	}
 
 	public Set<Schema> getSchemas() throws SQLException {
@@ -384,7 +353,8 @@ public class DatabaseIntrospector {
 		}
 	}
 
-	@SuppressWarnings("unused") private Dialect getDialect() {
+	@SuppressWarnings("unused") 
+	private Dialect getDialect() {
 		try {
 			String productName = databaseMetaData.getDatabaseProductName();
 			return (Dialect) Class.forName("org.springframework.roo.addon.dbre.model.dialect." + productName + "Dialect").newInstance();

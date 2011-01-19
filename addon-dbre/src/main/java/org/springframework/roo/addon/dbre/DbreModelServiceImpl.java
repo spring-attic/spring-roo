@@ -29,6 +29,7 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DatabaseIntrospector;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.dbre.model.SchemaIntrospector;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.model.JavaPackage;
@@ -129,7 +130,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 		Connection connection = null;
 		try {
 			connection = getConnection(displayAddOns);
-			DatabaseIntrospector introspector = new DatabaseIntrospector(connection);
+			SchemaIntrospector introspector = new SchemaIntrospector(connection);
 			return introspector.getSchemas();
 		} catch (Exception e) {
 			return Collections.emptySet();
