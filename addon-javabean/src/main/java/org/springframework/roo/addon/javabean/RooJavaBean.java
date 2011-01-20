@@ -5,17 +5,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.roo.addon.beaninfo.RooBeanInfo;
-
 /**
  * Creates JavaBean accessors and mutators for fields declared against this type.
  * 
- * <p>
- * Using this annotation also triggers {@link RooBeanInfo}.
- * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
@@ -30,6 +24,4 @@ public @interface RooJavaBean {
 	 * @return whether to generate setters for each non-transient field declared in this class (defaults to true)
 	 */
 	boolean settersByDefault() default true;
-	
-
 }

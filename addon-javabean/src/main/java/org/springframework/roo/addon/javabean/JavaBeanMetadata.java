@@ -41,8 +41,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
 
-    private boolean isGaeEnabled = false;
-    private ClasspathOperations classpathOperations;
+	private boolean isGaeEnabled = false;
+	private ClasspathOperations classpathOperations;
 
 	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, ClasspathOperations classpathOperations) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
@@ -52,11 +52,11 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			return;
 		}
 
-        this.classpathOperations = classpathOperations;
+		this.classpathOperations = classpathOperations;
 
-        ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-        Assert.notNull(projectMetadata, "Project could not be retrieved");
-        isGaeEnabled = projectMetadata.isGaeEnabled();
+		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		Assert.notNull(projectMetadata, "Project could not be retrieved");
+		isGaeEnabled = projectMetadata.isGaeEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooJavaBean.class.getName()));
@@ -66,33 +66,32 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 
 		// Add getters and setters
 		for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
+			MethodMetadata accessorMethod = getDeclaredGetter(field);
+			MethodMetadata mutatorMethod = getDeclaredSetter(field);
 
-            MethodMetadata accessorMethod = getDeclaredGetter(field);
-            MethodMetadata mutatorMethod = getDeclaredSetter(field);
+			if (isGaeEnabled && isGaeInterested(field)) {
+				JavaSymbolName hiddenIdFieldName;
+				if (field.getFieldType().isCommonCollectionType()) {
+					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
+					builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
+					builder.addField(getMultipleEntityIdField(hiddenIdFieldName));
+				} else {
+					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Id");
+					builder.addField(getSingularEntityIdField(hiddenIdFieldName));
+				}
 
-            if (isGaeEnabled && isGaeInterested(field)) {
-                JavaSymbolName hiddenIdFieldName;
-                if (field.getFieldType().isCommonCollectionType()) {
-                    hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
-                    builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
-                    builder.addField(getMultipleEntityIdField(hiddenIdFieldName));
-                } else {
-                    hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Id");
-                    builder.addField(getSingularEntityIdField(hiddenIdFieldName));
-                }
+				processGaeAnnotations(field);
 
-                processGaeAnnotations(field);
+				MethodMetadataBuilder accessorMethodBuilder = new MethodMetadataBuilder(accessorMethod);
+				accessorMethodBuilder.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
+				accessorMethod = accessorMethodBuilder.build();
 
-                MethodMetadataBuilder accessorMethodBuilder = new MethodMetadataBuilder(accessorMethod);
-                accessorMethodBuilder.setBodyBuilder(getGaeAccessorBody(field, hiddenIdFieldName));
-                accessorMethod = accessorMethodBuilder.build();
+				MethodMetadataBuilder mutatorMethodBuilder = new MethodMetadataBuilder(mutatorMethod);
+				mutatorMethodBuilder.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
+				mutatorMethod = mutatorMethodBuilder.build();
+			}
 
-                MethodMetadataBuilder mutatorMethodBuilder = new MethodMetadataBuilder(mutatorMethod);
-                mutatorMethodBuilder.setBodyBuilder(getGaeMutatorBody(field, hiddenIdFieldName));
-                mutatorMethod = mutatorMethodBuilder.build();
-            }
-
-            builder.addMethod(accessorMethod);
+			builder.addMethod(accessorMethod);
 			builder.addMethod(mutatorMethod);
 		}
 
@@ -101,8 +100,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	/**
-	 * Obtains the specific accessor method that is either contained within the normal Java compilation unit or will
-	 * be introduced by this add-on via an ITD.
+	 * Obtains the specific accessor method that is either contained within the normal Java compilation unit or will be introduced by this add-on via an ITD.
 	 * 
 	 * @param field that already exists on the type either directly or via introduction (required; must be declared by this type to be located)
 	 * @return the method corresponding to an accessor, or null if not found
@@ -138,8 +136,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	/**
-	 * Obtains the specific mutator method that is either contained within the normal Java compilation unit or will
-	 * be introduced by this add-on via an ITD.
+	 * Obtains the specific mutator method that is either contained within the normal Java compilation unit or will be introduced by this add-on via an ITD.
 	 * 
 	 * @param field that already exists on the type either directly or via introduction (required; must be declared by this type to be located)
 	 * @return the method corresponding to a mutator, or null if not found
@@ -207,97 +204,80 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-    private InvocableMemberBodyBuilder getGaeAccessorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
+	private InvocableMemberBodyBuilder getGaeAccessorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 
-        InvocableMemberBodyBuilder bodyBuilder;
+		InvocableMemberBodyBuilder bodyBuilder;
 
-        if (field.getFieldType().isCommonCollectionType()) {
-            bodyBuilder = getEntityCollectionAccessorBody(field, hiddenIdFieldName);
-        } else {
-            bodyBuilder = getSingularEntityAccessor(field, hiddenIdFieldName);
-        }
+		if (field.getFieldType().isCommonCollectionType()) {
+			bodyBuilder = getEntityCollectionAccessorBody(field, hiddenIdFieldName);
+		} else {
+			bodyBuilder = getSingularEntityAccessor(field, hiddenIdFieldName);
+		}
 
-        return bodyBuilder;
-    }
+		return bodyBuilder;
+	}
 
-    private InvocableMemberBodyBuilder getGaeMutatorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
+	private InvocableMemberBodyBuilder getGaeMutatorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 
-        InvocableMemberBodyBuilder bodyBuilder;
+		InvocableMemberBodyBuilder bodyBuilder;
 
-        if (field.getFieldType().isCommonCollectionType()) {
-            bodyBuilder = getEntityCollectionMutatorBody(field, hiddenIdFieldName);
-        } else {
-            bodyBuilder = getSingularEntityMutator(field, hiddenIdFieldName);
-        }
+		if (field.getFieldType().isCommonCollectionType()) {
+			bodyBuilder = getEntityCollectionMutatorBody(field, hiddenIdFieldName);
+		} else {
+			bodyBuilder = getSingularEntityMutator(field, hiddenIdFieldName);
+		}
 
-        return bodyBuilder;
-    }
+		return bodyBuilder;
+	}
 
-    private void processGaeAnnotations(FieldMetadata field) {
-        for (AnnotationMetadata annotation : field.getAnnotations()) {
-            if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToOne")) ||
-                    annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToOne")) ||
-                    annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToMany")) ||
-                    annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToMany"))) {
-                builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, annotation, true));
-                builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(new JavaType("javax.persistence.Transient")).build()));
-            }
-        }
-    }
+	private void processGaeAnnotations(FieldMetadata field) {
+		for (AnnotationMetadata annotation : field.getAnnotations()) {
+			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToMany")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToMany"))) {
+				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, annotation, true));
+				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(new JavaType("javax.persistence.Transient")).build()));
+			}
+		}
+	}
 
-    private boolean isGaeInterested(FieldMetadata field) {
-        boolean gaeInterested = false;
+	private boolean isGaeInterested(FieldMetadata field) {
+		boolean gaeInterested = false;
+		boolean isTransient = false;
+		
+		// Check to see that the field is to the persisted and is not transient
+		for (AnnotationMetadata annotation : field.getAnnotations()) {
+			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Transient"))) {
+				isTransient = true;
+				break;
+			}
+		}
 
-        boolean isTransient = false;
-            //Check to see that the field is to the persisted and is not transient
-        for (AnnotationMetadata annotation : field.getAnnotations()) {
-            if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Transient"))) {
-               isTransient = true;
-               break;
-            }
-        }
+		// Check to see that the field type is one that supports a relationship
+		JavaType fieldType = field.getFieldType();
+		if (!isTransient && !fieldType.isPrimitive() && !isBasicJavaType(fieldType)) {
+			if (fieldType.isCommonCollectionType()) {
+				fieldType = field.getFieldType().getParameters().get(0);
+			}
 
-        JavaType fieldType = field.getFieldType();
-        //check to see that the field type is one that supports a relationship
-        if (!isTransient && !fieldType.isPrimitive() && !isBasicJavaType(fieldType)) {
+			ClassOrInterfaceTypeDetails fieldTypeDetails = classpathOperations.getClassOrInterface(fieldType);
+			for (AnnotationMetadata annotation : fieldTypeDetails.getAnnotations()) {
+				// have to check to see if field type is a RooEntity
+				if (annotation.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.entity.RooEntity"))) {
+					gaeInterested = true;
+				}
 
-            if (fieldType.isCommonCollectionType()) {
-                fieldType = field.getFieldType().getParameters().get(0);
-            }
+			}
+		}
 
-            ClassOrInterfaceTypeDetails fieldTypeDetails = classpathOperations.getClassOrInterface(fieldType);
-            for (AnnotationMetadata annotation : fieldTypeDetails.getAnnotations()) {
-                //have to check to see if field type is a RooEntity
-                if (annotation.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.entity.RooEntity"))) {
-                    gaeInterested = true;
-                }
+		return gaeInterested;
+	}
 
-            }
-        }
+	private boolean isBasicJavaType(JavaType javaType) {
+		return JavaType.BOOLEAN_OBJECT.equals(javaType) || JavaType.CHAR_OBJECT.equals(javaType) || JavaType.STRING_OBJECT.equals(javaType) || JavaType.BYTE_OBJECT.equals(javaType) || JavaType.SHORT_OBJECT.equals(javaType) || JavaType.INT_OBJECT.equals(javaType) || JavaType.LONG_OBJECT.equals(javaType) || JavaType.FLOAT_OBJECT.equals(javaType) || JavaType.DOUBLE_OBJECT.equals(javaType) || new JavaType("java.util.Date").equals(javaType) || new JavaType("java.math.BigDecimal").equals(javaType);
+	}
 
-        return gaeInterested;
-    }
-
-    private boolean isBasicJavaType(JavaType javaType) {
-
-        return JavaType.BOOLEAN_OBJECT.equals(javaType) ||
-               JavaType.CHAR_OBJECT.equals(javaType) ||
-                JavaType.STRING_OBJECT.equals(javaType) ||
-                JavaType.BYTE_OBJECT.equals(javaType) ||
-                JavaType.SHORT_OBJECT.equals(javaType) ||
-                JavaType.INT_OBJECT.equals(javaType) ||
-                JavaType.LONG_OBJECT.equals(javaType) ||
-                JavaType.FLOAT_OBJECT.equals(javaType) ||
-                JavaType.DOUBLE_OBJECT.equals(javaType) ||
-                new JavaType("java.util.Date").equals(javaType) ||
-                new JavaType("java.math.BigDecimal").equals(javaType);
-
-    }
-
-    private JavaSymbolName getFieldName(String fieldName) {
-
-        int index = -1;
-        while (true) {
+	private JavaSymbolName getFieldName(String fieldName) {
+		int index = -1;
+		while (true) {
 			// Compute the required field name
 			index++;
 			String tempString = "";
@@ -312,153 +292,151 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				return field;
 			}
 		}
-    }
+	}
 
-    private FieldMetadata getSingularEntityIdField(JavaSymbolName fieldName) {
-        FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, JavaType.LONG_OBJECT, null);
-        return fieldMetadataBuilder.build();
-    }
+	private FieldMetadata getSingularEntityIdField(JavaSymbolName fieldName) {
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, JavaType.LONG_OBJECT, null);
+		return fieldMetadataBuilder.build();
+	}
 
-    private FieldMetadata getMultipleEntityIdField(JavaSymbolName fieldName) {
-        //builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
-        FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType("java.util.Set", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
-        return fieldMetadataBuilder.build();
-    }
+	private FieldMetadata getMultipleEntityIdField(JavaSymbolName fieldName) {
+		// builder.getImportRegistrationResolver().addImport(new JavaType("com.google.appengine.api.datastore.KeyFactory"));
+		FieldMetadataBuilder fieldMetadataBuilder = new FieldMetadataBuilder(getId(), Modifier.PRIVATE, fieldName, new JavaType("java.util.Set", 0, DataType.TYPE, null, Collections.singletonList(new JavaType("com.google.appengine.api.datastore.Key"))), "new HashSet<Key>()");
+		return fieldMetadataBuilder.build();
+	}
 
-    private InvocableMemberBodyBuilder getEntityCollectionMutatorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
+	private InvocableMemberBodyBuilder getEntityCollectionMutatorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
+		String entityCollectionName = field.getFieldName().getSymbolName();
+		String entityIdsName = entityIdsFieldName.getSymbolName();
+		JavaType collectionElementType = field.getFieldType().getParameters().get(0);
+		String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
 
-        String entityCollectionName = field.getFieldName().getSymbolName();
-        String entityIdsName = entityIdsFieldName.getSymbolName();
-        JavaType collectionElementType = field.getFieldType().getParameters().get(0);
-        String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
+		JavaType collectionType = field.getFieldType();
+		builder.getImportRegistrationResolver().addImport(collectionType);
 
-        JavaType collectionType = field.getFieldType();
-        builder.getImportRegistrationResolver().addImport(collectionType);
+		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
+		String instantiableCollection = collectionName;
+		if (collectionType.equals(new JavaType("java.util.List"))) {
+			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		} else if (collectionType.equals(new JavaType("java.util.Set"))) {
+			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		}
 
-        String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
-        String instantiableCollection = collectionName;
-        if (collectionType.equals(new JavaType("java.util.List"))) {
-            collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
-            instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-        } else if (collectionType.equals(new JavaType("java.util.Set"))) {
-            collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
-            instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-        }
+		builder.getImportRegistrationResolver().addImport(collectionType);
+		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.List"));
+		builder.getImportRegistrationResolver().addImport(new JavaType("java.util.ArrayList"));
 
-        builder.getImportRegistrationResolver().addImport(collectionType);
-        builder.getImportRegistrationResolver().addImport(new JavaType("java.util.List"));
-        builder.getImportRegistrationResolver().addImport(new JavaType("java.util.ArrayList"));
-
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
-        bodyBuilder.appendFormalLine("List<Long> longIds = new ArrayList<Long>();");
-        bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("if (!longIds.contains(key.getId())) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("longIds.add(key.getId());");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("for (Employee entity : " + entityCollectionName +") {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("if (!longIds.contains(entity.getId())) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("longIds.add(entity.getId());");
-        bodyBuilder.appendFormalLine(entityIdsName + ".add(KeyFactory.createKey(" + collectionElementType.getSimpleTypeName() + ".class.getName(), entity.getId()));");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
-
-        return bodyBuilder;
-    }
-
-    private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
-
-        String entityCollectionName = field.getFieldName().getSymbolName();
-        String entityIdsName = entityIdsFieldName.getSymbolName();
-        String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
-
-        JavaType collectionElementType = field.getFieldType().getParameters().get(0);
-        String simpleCollectionElementTypeName = collectionElementType.getSimpleTypeName();
-
-        JavaType collectionType = field.getFieldType();
-        builder.getImportRegistrationResolver().addImport(collectionType);
-
-        String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
-        String instantiableCollection = collectionName;
-        if (collectionType.equals(new JavaType("java.util.List"))) {
-            collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
-            instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-        } else if (collectionType.equals(new JavaType("java.util.Set"))) {
-            collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
-            instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
-        }
-
-        builder.getImportRegistrationResolver().addImport(collectionType);
-
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
-        bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(collectionElementType + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
-        bodyBuilder.appendFormalLine("if (entity != null) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
-        bodyBuilder.appendFormalLine("return " + localEnitiesName + ";");
-
-        return bodyBuilder;
-    }
-
-    private InvocableMemberBodyBuilder getSingularEntityMutator(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
-        String entityName = field.getFieldName().getSymbolName();
-        String entityIdName = hiddenIdFieldName.getSymbolName();
-
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("if (" + entityName + ".getId() == null) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine(entityName + ".persist();");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("this." + entityIdName  + " = " + entityName + ".getId();");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("} else {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("this." + entityIdName + " = null;");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
+		bodyBuilder.appendFormalLine("List<Long> longIds = new ArrayList<Long>();");
+		bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("if (!longIds.contains(key.getId())) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("longIds.add(key.getId());");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("for (Employee entity : " + entityCollectionName + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("if (!longIds.contains(entity.getId())) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("longIds.add(entity.getId());");
+		bodyBuilder.appendFormalLine(entityIdsName + ".add(KeyFactory.createKey(" + collectionElementType.getSimpleTypeName() + ".class.getName(), entity.getId()));");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
 
 		return bodyBuilder;
-    }
+	}
 
-    private InvocableMemberBodyBuilder getSingularEntityAccessor(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
-        String entityName = field.getFieldName().getSymbolName();
-        String entityIdName = hiddenIdFieldName.getSymbolName();
-        String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
+	private InvocableMemberBodyBuilder getEntityCollectionAccessorBody(FieldMetadata field, JavaSymbolName entityIdsFieldName) {
+		String entityCollectionName = field.getFieldName().getSymbolName();
+		String entityIdsName = entityIdsFieldName.getSymbolName();
+		String localEnitiesName = "local" + StringUtils.capitalize(entityCollectionName);
 
-        InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-        bodyBuilder.appendFormalLine("if (this." + entityIdName + " != null) {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find" + simpleFieldTypeName + "(this." + entityIdName + ");");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("} else {");
-        bodyBuilder.indent();
-        bodyBuilder.appendFormalLine("this." + entityName + " = null;");
-        bodyBuilder.indentRemove();
-        bodyBuilder.appendFormalLine("}");
-        bodyBuilder.appendFormalLine("return this."+ entityName + ";");
+		JavaType collectionElementType = field.getFieldType().getParameters().get(0);
+		String simpleCollectionElementTypeName = collectionElementType.getSimpleTypeName();
 
-        return bodyBuilder;
-    }
+		JavaType collectionType = field.getFieldType();
+		builder.getImportRegistrationResolver().addImport(collectionType);
+
+		String collectionName = field.getFieldType().getNameIncludingTypeParameters().replaceAll(field.getFieldType().getPackage().getFullyQualifiedPackageName() + ".", "");
+		String instantiableCollection = collectionName;
+		if (collectionType.equals(new JavaType("java.util.List"))) {
+			collectionType = new JavaType("java.util.ArrayList", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		} else if (collectionType.equals(new JavaType("java.util.Set"))) {
+			collectionType = new JavaType("java.util.HashSet", 0, DataType.TYPE, null, collectionType.getParameters());
+			instantiableCollection = collectionType.getNameIncludingTypeParameters().replaceAll(collectionType.getPackage().getFullyQualifiedPackageName() + ".", "");
+		}
+
+		builder.getImportRegistrationResolver().addImport(collectionType);
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine(collectionName + " " + localEnitiesName + " = new " + instantiableCollection + "();");
+		bodyBuilder.appendFormalLine("for (Key key : " + entityIdsName + ") {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(collectionElementType + " entity = " + simpleCollectionElementTypeName + ".find" + simpleCollectionElementTypeName + "(key.getId());");
+		bodyBuilder.appendFormalLine("if (entity != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(localEnitiesName + ".add(entity);");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("this." + entityCollectionName + " = " + localEnitiesName + ";");
+		bodyBuilder.appendFormalLine("return " + localEnitiesName + ";");
+
+		return bodyBuilder;
+	}
+
+	private InvocableMemberBodyBuilder getSingularEntityMutator(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
+		String entityName = field.getFieldName().getSymbolName();
+		String entityIdName = hiddenIdFieldName.getSymbolName();
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("if (" + entityName + " != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("if (" + entityName + ".getId() == null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine(entityName + ".persist();");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("this." + entityIdName + " = " + entityName + ".getId();");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} else {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("this." + entityIdName + " = null;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+
+		return bodyBuilder;
+	}
+
+	private InvocableMemberBodyBuilder getSingularEntityAccessor(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
+		String entityName = field.getFieldName().getSymbolName();
+		String entityIdName = hiddenIdFieldName.getSymbolName();
+		String simpleFieldTypeName = field.getFieldType().getSimpleTypeName();
+
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("if (this." + entityIdName + " != null) {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("this." + entityName + " = " + simpleFieldTypeName + ".find" + simpleFieldTypeName + "(this." + entityIdName + ");");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("} else {");
+		bodyBuilder.indent();
+		bodyBuilder.appendFormalLine("this." + entityName + " = null;");
+		bodyBuilder.indentRemove();
+		bodyBuilder.appendFormalLine("}");
+		bodyBuilder.appendFormalLine("return this." + entityName + ";");
+
+		return bodyBuilder;
+	}
 }
