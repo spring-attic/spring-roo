@@ -72,8 +72,8 @@ public class JavaTypeConverter implements Converter {
 		}
 
 		// If the user did not provide a java type name containing a dot, it's taken as relative to the current package directory
-		if (lastUsed.getJavaPackage() != null && !newValue.contains(".")) {
-			newValue = lastUsed.getJavaPackage().getFullyQualifiedPackageName() + "." + newValue;
+		if (!newValue.contains(".")) {
+			newValue = (lastUsed.getJavaPackage() == null ? lastUsed.getTopLevelPackage().getFullyQualifiedPackageName() : lastUsed.getJavaPackage().getFullyQualifiedPackageName()) + "." + newValue;
 		}
 
 		// Automatically capitalize the first letter of the last name segment (ie capitalize the type name, but not the package)
