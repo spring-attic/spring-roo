@@ -12,7 +12,7 @@ import org.springframework.roo.support.util.Assert;
  * @author Alan Stewart
  * @since 1.1.2
  */
-public class AbstractIntrospector {
+public abstract class AbstractIntrospector {
 	protected DatabaseMetaData databaseMetaData;
 
 	AbstractIntrospector(Connection connection) throws SQLException {
