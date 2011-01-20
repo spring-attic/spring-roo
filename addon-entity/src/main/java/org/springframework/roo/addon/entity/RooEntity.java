@@ -82,6 +82,11 @@ public @interface RooEntity {
 	String flushMethod() default "flush";
 
 	/**
+	 * @return the name of the "clear" method to generate (defaults to "clear"; mandatory)
+	 */
+	String clearMethod() default "clear";
+
+	/**
 	 * @return the name of the "merge" method to generate (defaults to "merge"; mandatory)
 	 */
 	String mergeMethod() default "merge";

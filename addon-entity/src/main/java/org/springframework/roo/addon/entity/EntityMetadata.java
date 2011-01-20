@@ -73,6 +73,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	@AutoPopulate private String versionColumn = "version";
 	@AutoPopulate private String persistMethod = "persist";
 	@AutoPopulate private String flushMethod = "flush";
+	@AutoPopulate private String clearMethod = "clear";
 	@AutoPopulate private String mergeMethod = "merge";
 	@AutoPopulate private String removeMethod = "remove";
 	@AutoPopulate private String countMethod = "count";
@@ -156,6 +157,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		builder.addMethod(getPersistMethod());
 		builder.addMethod(getRemoveMethod());
 		builder.addMethod(getFlushMethod());
+		builder.addMethod(getClearMethod());
 		builder.addMethod(getMergeMethod());
 		
 		// Add static methods
@@ -714,7 +716,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
-	 * @return the merge method (may return null)
+	 * @return the persist method (may return null)
 	 */
 	public MethodMetadata getPersistMethod() {
 		if (parent != null) {
@@ -730,7 +732,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
-	 * @return the merge method (may return null)
+	 * @return the remove method (may return null)
 	 */
 	public MethodMetadata getRemoveMethod() {
 		if (parent != null) {
@@ -746,7 +748,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	}
 	
 	/**
-	 * @return the merge method (never returns null)
+	 * @return the flush method (never returns null)
 	 */
 	public MethodMetadata getFlushMethod() {
 		if (parent != null) {
@@ -761,6 +763,22 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return getDelegateMethod(new JavaSymbolName(flushMethod), "flush");
 	}
 	
+	/**
+	 * @return the clear method (never returns null)
+	 */
+	public MethodMetadata getClearMethod() {
+		if (parent != null) {
+			MethodMetadata found = parent.getClearMethod();
+			if (found != null) {
+				return found;
+			}
+		}
+		if ("".equals(clearMethod)) {
+			return null;
+		}
+		return getDelegateMethod(new JavaSymbolName(clearMethod), "clear");
+	}
+
 	/**
 	 * @return the merge method (never returns null)
 	 */
@@ -803,6 +821,9 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if ("flush".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
 			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".flush();");
+		} else if ("clear".equals(entityManagerDelegate)) {
+			addTransactionalAnnotation(annotations);
+			bodyBuilder.appendFormalLine("this." + getEntityManagerField().getFieldName().getSymbolName() + ".clear();");
 		} else if ("merge".equals(entityManagerDelegate)) {
 			addTransactionalAnnotation(annotations);
 			returnType = new JavaType(governorTypeDetails.getName().getSimpleTypeName());
