@@ -35,6 +35,11 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		addMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
 	}
 
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		removeMetadataTrigger(new JavaType(RooDbManaged.class.getName()));
+	}
+
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
 		return DbreMetadata.createIdentifier(javaType, path);
 	}
