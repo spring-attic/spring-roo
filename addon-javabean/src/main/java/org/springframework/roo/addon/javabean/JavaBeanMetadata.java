@@ -205,7 +205,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private InvocableMemberBodyBuilder getGaeAccessorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
-
 		InvocableMemberBodyBuilder bodyBuilder;
 
 		if (field.getFieldType().isCommonCollectionType()) {
@@ -218,7 +217,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	}
 
 	private InvocableMemberBodyBuilder getGaeMutatorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
-
 		InvocableMemberBodyBuilder bodyBuilder;
 
 		if (field.getFieldType().isCommonCollectionType()) {
