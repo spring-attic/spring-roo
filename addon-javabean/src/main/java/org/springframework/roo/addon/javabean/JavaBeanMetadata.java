@@ -7,7 +7,12 @@ import java.util.List;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.DeclaredFieldAnnotationDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -15,14 +20,11 @@ import org.springframework.roo.classpath.details.annotations.populator.AutoPopul
 import org.springframework.roo.classpath.details.annotations.populator.AutoPopulationUtils;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
@@ -41,22 +43,13 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
 
-	private boolean isGaeEnabled = false;
-	private ClasspathOperations classpathOperations;
-
-	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, MetadataService metadataService, ClasspathOperations classpathOperations) {
+	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<JavaSymbolName> gaeFieldsOfInterest) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
 		if (!isValid()) {
 			return;
 		}
-
-		this.classpathOperations = classpathOperations;
-
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project could not be retrieved");
-		isGaeEnabled = projectMetadata.isGaeEnabled();
 
 		// Process values from the annotation, if present
 		AnnotationMetadata annotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType(RooJavaBean.class.getName()));
@@ -69,7 +62,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			MethodMetadata accessorMethod = getDeclaredGetter(field);
 			MethodMetadata mutatorMethod = getDeclaredSetter(field);
 
-			if (isGaeEnabled && isGaeInterested(field)) {
+			// Check to see if GAE is interested
+			if (!gaeFieldsOfInterest.isEmpty() && gaeFieldsOfInterest.contains(field.getFieldName())) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
 					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
@@ -235,42 +229,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(new JavaType("javax.persistence.Transient")).build()));
 			}
 		}
-	}
-
-	private boolean isGaeInterested(FieldMetadata field) {
-		boolean gaeInterested = false;
-		boolean isTransient = false;
-		
-		// Check to see that the field is to the persisted and is not transient
-		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Transient"))) {
-				isTransient = true;
-				break;
-			}
-		}
-
-		// Check to see that the field type is one that supports a relationship
-		JavaType fieldType = field.getFieldType();
-		if (!isTransient && !fieldType.isPrimitive() && !isBasicJavaType(fieldType)) {
-			if (fieldType.isCommonCollectionType()) {
-				fieldType = field.getFieldType().getParameters().get(0);
-			}
-
-			ClassOrInterfaceTypeDetails fieldTypeDetails = classpathOperations.getClassOrInterface(fieldType);
-			for (AnnotationMetadata annotation : fieldTypeDetails.getAnnotations()) {
-				// have to check to see if field type is a RooEntity
-				if (annotation.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.entity.RooEntity"))) {
-					gaeInterested = true;
-				}
-
-			}
-		}
-
-		return gaeInterested;
-	}
-
-	private boolean isBasicJavaType(JavaType javaType) {
-		return JavaType.BOOLEAN_OBJECT.equals(javaType) || JavaType.CHAR_OBJECT.equals(javaType) || JavaType.STRING_OBJECT.equals(javaType) || JavaType.BYTE_OBJECT.equals(javaType) || JavaType.SHORT_OBJECT.equals(javaType) || JavaType.INT_OBJECT.equals(javaType) || JavaType.LONG_OBJECT.equals(javaType) || JavaType.FLOAT_OBJECT.equals(javaType) || JavaType.DOUBLE_OBJECT.equals(javaType) || new JavaType("java.util.Date").equals(javaType) || new JavaType("java.math.BigDecimal").equals(javaType);
 	}
 
 	private JavaSymbolName getFieldName(String fieldName) {
