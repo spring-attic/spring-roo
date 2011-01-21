@@ -288,7 +288,7 @@ public abstract class MemberFindingUtils {
 	 * @param memberDetails the {@link MemberDetails} to search (required)
 	 * @return the JavaType, or null if not found
 	 */
-	public static JavaType getJavaType(MemberDetails memberDetails) {
+	public static final JavaType getJavaType(MemberDetails memberDetails) {
 		Assert.notNull(memberDetails, "Member details required");
 		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
 			if (memberHoldingTypeDetails.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) { 
