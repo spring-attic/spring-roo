@@ -37,11 +37,13 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		beanInfoMetadataProvider.addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
+		addMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
 
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		beanInfoMetadataProvider.removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
+		removeMetadataTrigger(new JavaType(RooJavaBean.class.getName()));
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
