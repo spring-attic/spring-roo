@@ -75,9 +75,9 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		EntityMetadata em = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(entity, Path.SRC_MAIN_JAVA));
 		if (em != null) {
-			MethodMetadata mm = em.getCountMethod();
-			if (mm != null) {
-				String countMethod = entity.getSimpleTypeName() + "." + mm.getMethodName().getSymbolName() + "()";
+			MethodMetadata methodMetadata = em.getCountMethod();
+			if (methodMetadata != null) {
+				String countMethod = entity.getSimpleTypeName() + "." + methodMetadata.getMethodName().getSymbolName() + "()";
 				bodyBuilder.appendFormalLine("int expectedCount = 13;");
 				bodyBuilder.appendFormalLine(countMethod + ";");
 				bodyBuilder.appendFormalLine("org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn(expectedCount);");

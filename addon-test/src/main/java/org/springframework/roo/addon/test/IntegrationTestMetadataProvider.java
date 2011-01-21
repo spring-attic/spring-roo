@@ -21,7 +21,6 @@ import org.springframework.roo.project.ProjectMetadata;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 @Component(immediate = true)
 @Service
@@ -36,7 +35,9 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 	}
 	
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
+		removeMetadataTrigger(new JavaType(RooIntegrationTest.class.getName()));
 	}
 	
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -50,8 +51,7 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 			return null;
 		}
 		
-		// Lookup the DOD's metadata
-		// The DOD must conform to the DOD naming conventions
+		// Lookup the DOD's metadata. The DOD must conform to the DOD naming conventions
 		JavaType dodJavaType = new JavaType(annotationValues.getEntity().getFullyQualifiedTypeName() + "DataOnDemand");
 		String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dodJavaType, Path.SRC_TEST_JAVA);
 		DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
@@ -65,7 +65,6 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		// We need to abort if we couldn't find dependent metadata
 		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
-			// throw new IllegalStateException("Integration test provider unable to locate details for persistent type '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
 		
 		MethodMetadata identifierAccessorMethod = entityMetadata.getIdentifierAccessor();
@@ -82,10 +81,7 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(dataOnDemandMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-		
-		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
-		// the governing java type
-		
+				
 		return new IntegrationTestMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, projectMetadata, annotationValues, dataOnDemandMetadata, identifierAccessorMethod, versionAccessorMethod, countMethod, findMethod, findAllMethod, findEntriesMethods, flushMethod, mergeMethod, persistMethod, removeMethod);
 	}
 	
@@ -96,8 +92,7 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = IntegrationTestMetadata.getJavaType(metadataIdentificationString);
 		Path path = IntegrationTestMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {

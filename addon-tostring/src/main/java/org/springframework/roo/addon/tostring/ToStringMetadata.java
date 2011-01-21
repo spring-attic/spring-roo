@@ -90,10 +90,10 @@ public class ToStringMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 			bodyBuilder.appendFormalLine("StringBuilder sb = new StringBuilder();");
 
-			/** key: field name, value: accessor name */
+			/** Key: field name, Value: accessor name */
 			Map<String, String> map = new LinkedHashMap<String, String>();
 
-			/** field names */
+			/** Field names */
 			List<String> order = new ArrayList<String>();
 
 			Set<String> excludeFieldsSet = new LinkedHashSet<String>();

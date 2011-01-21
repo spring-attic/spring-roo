@@ -22,9 +22,12 @@ public final class PluralMetadataProviderImpl extends AbstractItdMetadataProvide
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
-		// Ensure we're notified of all metadata related to physical Java types, in particular their initial creation
 		setIgnoreTriggerAnnotations(true);
 		setDependsOnGovernorBeingAClass(false);
+	}
+
+	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
@@ -38,8 +41,7 @@ public final class PluralMetadataProviderImpl extends AbstractItdMetadataProvide
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = PluralMetadata.getJavaType(metadataIdentificationString);
 		Path path = PluralMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {

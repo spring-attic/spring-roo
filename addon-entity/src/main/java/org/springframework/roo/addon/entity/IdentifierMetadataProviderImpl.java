@@ -35,8 +35,10 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 	}
 
 	protected void deactivate(ComponentContext context) {
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 		serializableMetadataProvider.removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
+		removeMetadataTrigger(new JavaType(RooIdentifier.class.getName()));
 	}
 
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
