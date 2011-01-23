@@ -11,6 +11,7 @@
 	<artifactId>org.springframework.roo.addon.git</artifactId>
 	<packaging>bundle</packaging>
 	<name>Spring Roo - Addon - GIT</name>
+	<description>Offers GIT integration in the project. Each successfully executed command will be automatically committed to a local GIT repository. Tags: #git, #scm, #wrappedCoreDependency</description>
 	<repositories>
 		<repository>
 			<id>jgit-repository</id>
