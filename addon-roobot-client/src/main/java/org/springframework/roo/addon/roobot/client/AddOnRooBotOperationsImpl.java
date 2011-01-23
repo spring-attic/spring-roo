@@ -71,7 +71,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	private final Class<AddOnRooBotOperationsImpl> mutex = AddOnRooBotOperationsImpl.class;
 	private Preferences prefs;
 	
-	public static final String ADDON_UPgrade_STABILITY_LEVEL = "ADDON_UPgrade_STABILITY_LEVEL";
+	public static final String ADDON_UPGRADE_STABILITY_LEVEL = "ADDON_UPGRADE_STABILITY_LEVEL";
 	
 	protected void activate(ComponentContext context) {
 		this.context = context;
@@ -410,7 +410,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			log.info("Current Add-on Stability Level: " + addOnStabilityLevel.name());
 		} else {
 			boolean success = true;
-			prefs.putInt(ADDON_UPgrade_STABILITY_LEVEL, addOnStabilityLevel.getLevel());
+			prefs.putInt(ADDON_UPGRADE_STABILITY_LEVEL, addOnStabilityLevel.getLevel());
 			try {
 				prefs.flush();
 			} catch (BackingStoreException ignore) {
@@ -656,7 +656,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private void printAddonStats() {
 		String msg = null;
-		AddOnStabilityLevel currentLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPgrade_STABILITY_LEVEL, AddOnStabilityLevel.RELEASE.getLevel()));
+		AddOnStabilityLevel currentLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPGRADE_STABILITY_LEVEL, AddOnStabilityLevel.RELEASE.getLevel()));
 		Map<String, Bundle> currentLevelBundles = getUpgradableBundles(currentLevel);
 		if (currentLevelBundles.size() > 0) {
 			msg = currentLevelBundles.size() + " upgrade" + (currentLevelBundles.size() > 1 ? "s" : "") + " available";
@@ -771,7 +771,7 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	
 	private AddOnStabilityLevel checkAddOnStabilityLevel(AddOnStabilityLevel addOnStabilityLevel) {
 		if (addOnStabilityLevel == null) {
-			addOnStabilityLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPgrade_STABILITY_LEVEL, /* default */ AddOnStabilityLevel.RELEASE.getLevel()));
+			addOnStabilityLevel = AddOnStabilityLevel.fromLevel(prefs.getInt(ADDON_UPGRADE_STABILITY_LEVEL, /* default */ AddOnStabilityLevel.RELEASE.getLevel()));
 		}
 		return addOnStabilityLevel;
 	}
