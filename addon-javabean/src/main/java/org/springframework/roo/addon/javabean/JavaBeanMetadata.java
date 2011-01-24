@@ -43,7 +43,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
 
-	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, boolean isGaeEnabled) {
+	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<JavaSymbolName> gaeFieldsOfInterest) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -63,7 +63,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 			MethodMetadata mutatorMethod = getDeclaredSetter(field);
 
 			// Check to see if GAE is interested
-			if (isGaeEnabled && isGaeInterested(field)) {
+			if (!gaeFieldsOfInterest.isEmpty() && gaeFieldsOfInterest.contains(field.getFieldName())) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
 					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
@@ -165,22 +165,6 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 
 		return result;
-	}
-
-	private boolean isGaeInterested(FieldMetadata field) {
-		// Check to see that the field is to the persisted and is not transient
-		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Transient"))) {
-				return false;
-			}
-		}
-		for (AnnotationMetadata annotation : field.getAnnotations()) {
-			if (annotation.getAnnotationType().equals(new JavaType("org.springframework.roo.addon.entity.RooEntity"))) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public String toString() {
