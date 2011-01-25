@@ -112,7 +112,7 @@ log "Short Version..: $SHORT_VERSION"
 case $VERSION in
     *BUILD-SNAPSHOT) TYPE=snapshot;;
     *RC*) TYPE=milestone;;
-    *MILESTONE*) TYPE=milestone;;
+    *M*) TYPE=milestone;;
     *RELEASE) TYPE=release;;
     *) l_error "Unsupported release type ($VERSION). Aborting." >&2; exit 1;;
 esac
