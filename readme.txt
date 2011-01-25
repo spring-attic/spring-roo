@@ -23,11 +23,14 @@ the paths in the following instructions accordingly):
   cd ~
   git clone git://git.springsource.org/roo/roo.git
 
+In the instructions below, $ROO_HOME refers to the location where you
+checked out Roo (in this case it would be ROO_HOME="~/roo"). You do NOT
+need to add a $ROO_HOME variable. It is simply used in these docs.
+
 Next double-check you meet the installation requirements:
 
- * A *nix machine (Windows users should be OK if they write a .bat)
- * A proper installation of Java 5 or above
- * Maven 3.0.x+ properly installed and working with your Java 5+
+ * A proper installation of Java 6 or above
+ * Maven 3.0.1+ properly installed and working with your Java 5+
  * Internet access so that Maven can download required dependencies
 
 Next you need to setup an environment variable called MAVEN_OPTS.
@@ -40,13 +43,11 @@ instructions above and are on a *nix machine, you can just type:
   echo $MAVEN_OPTS
      (example result: MAVEN_OPTS=-Xmx1024m -XX:MaxPermSize=512m)
 
-You're almost finished. You just need to wrap up with a symbolic link:
+You're almost finished. You just need to wrap up with a symbolic link
+(Windows users instead add $ROO_HOME/bootstrap to your path):
 
-  sudo ln -s ~/roo/bootstrap/roo-dev /usr/bin/roo-dev
+  sudo ln -s $ROO_HOME/bootstrap/roo-dev /usr/bin/roo-dev
   sudo chmod +x /usr/bin/roo-dev
-
-Note: You do not need a ROO_CLASSPATH_FILE environment variable. This
-was only required for the Roo 1.0.x development series.
 
 ======================================================================
 GPG (PGP) SETUP
@@ -110,7 +111,7 @@ If you don't do this, you'll see errors which state Maven cannot find
 
 To create the wrapped JARs, from the root Roo checkout location type:
 
-  cd wrapping
+  cd $ROO_HOME/wrapping
   mvn clean install
   cd ..
 
@@ -122,28 +123,12 @@ repeat the above commands and you should be fine.
 DEVELOPING WITHIN ECLIPSE
 ======================================================================
 
-The Spring Roo team use SpringSource Tool Suite to develop Roo, which
-is our free IDE. While you can use any IDE at all, these instructions
-assume you're using STS. The main difference to be aware of is STS has
-setup the M2_REPO variable correctly, and thus the Maven paths work
-out of the box. You can setup M2_REPO manually within a normal Eclipse
-if you wish; just use Window > Preferences > Java > Build Path >
-Classpath Variables and set M2_REPO to the ~/.m2/repository directory.
-
-First of all change into the directory where you checked out Roo. Now
-you need to instruct Maven to produce .classpath and .project files
-for Eclipse:
-
-  mvn clean eclipse:clean eclipse:eclipse
-
-If this fails, please review the "OSGi Wrapping JARs" section above.
-
-You should now be able to import the projects into STS/Eclipse. Click
-File > Import > Existing Projects into Workspace, and select the
-same directory as where you ran the "mvn" command from. Several dozen
-Spring Roo projects will be listed and can be imported.
-
-At this stage you're free to open any class and edit it as normal.
+Spring Roo itself does not use AspectJ and therefore any standard IDE
+can be used for development. No extra plugins are needed and the team
+use "mvn clean eclipse:clean eclipse:eclipse" to produce Eclipse
+project files that can be imported via File > Import > Existing
+Projects into Workspace. In theory you could use the m2eclipse plugin.
+The Roo team just tends to use eclipse:clean eclipse:eclipse instead.
 
 ======================================================================
 RUNNING THE COMMAND LINE TOOL
@@ -159,23 +144,21 @@ dependencies. These are mostly emitted when you use "mvn package".
 
 To try Roo out, you should type the following:
 
-  mvn install   (from the root Roo checkout location)
+  cd $ROO_HOME
+  mvn install
   cd ~/some-directory
   roo-dev
 
 It's important that you run roo-dev from a directory that you'd like
 to eventually contain a Roo-created project. Don't try to run roo-dev
-unless your current working directory is empty or contains a
-previously-created Roo project.
+from your $ROO_HOME directory.
 
 If this fails, please review the "OSGi Wrapping JARs" section above.
 
 Notice we used "mvn install" rather than "mvn package". This is simply
-for convenience, as it will allow you to change into any Roo module
-subdirectory and "mvn install". If you never "mvn install", you will
-need to "mvn install" from the root directory so internal build
-dependencies are preserved. You can use "mvn package" from the root if
-you prefer. "mvn install" just gives you more flexibility.
+for convenience, as it will allow you to "cd" into any Roo module
+subdirectory and "mvn install". This saves considerable build time if
+changes are only being made in a single module.
 
 Roo ships with a command line tool called "roo-dev". This is also a
 Windows equivalent. It copies all relevant JARs from the Roo
@@ -189,11 +172,12 @@ Be aware that Felix will cache the bundles you have installed each
 run (in /roo/bootstrap/target/osgi/cache). It's therefore more
 common that instead of using "roo-dev", you will type a command like:
 
-  rm -rf ~/roo/bootstrap/target/osgi; roo-dev
+  rm -rf $ROO_HOME/bootstrap/target/osgi; roo-dev
 
 The above guarantees your Felix instance is fully cleaned. The
 "roo-dev" command line tool doesn't do this for you, as you might
-wish to test the operation of other bundles with Roo core.
+wish to test the operation of other bundles with Roo core (ie bundles
+you have installed via the "addon install" commands etc).
 
 ======================================================================
 GIT POLICIES
@@ -271,42 +255,133 @@ Learn more about this at http://sysmonblog.co.uk/misc/git_by_example/.
 RELEASING
 ======================================================================
 
-Roo is released on a regular basis by the Roo project team.
+Roo is released on a regular basis by the Roo project team. To perform
+releases and make the associated announcements you require appropriate
+permissions to many systems (as listed below). As such these notes are
+intended to assist developers with such permissions complete releases.
 
-To release you should edit your ~/.m2/settings.xml so it includes:
+Our release procedure may seem long, but that's because it includes
+many steps related to final testing and staging releases with other
+teams.
 
-<settings>
-  <servers>
-    <server>
-      <id>spring-roo-repository</id>
-      <username>the_amazon_s3_main_account_access_id</username>
-      <passphrase>the_amazon_s3_main_account_secret_key</passphrase>
-    </server>
-  </servers>
-</settings>
+PREREQUISITES:
 
-The following command is used from the root checkout location:
+   * GPG setup (probably already setup if you followed notes above)
+   * Git push privileges (if you can commit, you have this)
+   * SSH keypair for auto login into static.springframework.org
+   * s3cmd setup (so "s3cmd ls" lists spring-roo-repository.s2.org)
+   * ~/.m2/settings.xml for spring-roo-repository-release and
+     spring-roo-repository-snapshot IDs with S3 username/password
+   * @SpringRoo twitter account credentials
+   * forum.springsource.org moderator privileges
+   * www.springsource.org editor privileges
+   * JIRA project administrator privileges
 
-  mvn clean package site assembly:assembly deploy site:deploy
+RELEASE PROCEDURE:
 
-This will create a ZIP in the "target" directory.
+1. Complete a thorough testing build and assembly ZIP:
 
-The target/spring-roo-<version>.zip should be uploaded to
-/dist.springframework.org/milestone/ROO/. Also upload an SHA1 file.
-The following S3 properties must be set on the upload release ZIP:
+   cd $ROO_HOME
+   git pull
+   mvn clean package
+   cd $ROO_HOME/deployment-support
+   mvn clean site:site
+   ./roo-deploy -c assembly (use -v for verbose logging)
 
-x-amz-meta-bundle.version:1.1.0.M1
-x-amz-meta-release.type:milestone
-x-amz-meta-package.file.name:spring-roo-1.1.0.M1.zip
-x-amz-meta-project.name:Spring Roo
+2. Verify the assembly ZIP looks good:
 
-If performing a GA release (ie *.RELEASE) upload the ZIP to
-/dist.springframework.org/release/ROO/ and change the S3 props to:
+   * Assembly ZIP unzips and is of a sensible size
+   * Assembly ZIP contains both PDF and HTML documentation
+   * Assembly ZIP runs correctly when installed on major platforms
+   * Run the "reference guide" command, copy the resulting XML file
+     into $ROO_HOME/deployment-support/src/site/docbook/reference,
+     git commit and then git push (so the appendix is updated)
 
-x-amz-meta-release.type:release
+3. Tag the release (update the key ID, Jira ID and tag ID):
 
-In addition, a Git tag should be created in the form w.x.y.zzzz (note
-there is no prefix or suffix to the Git tag).
+   cd $ROO_HOME
+   git tag -u 00B5050F -a -m "ROO-XXXX: Release" 3.4.5.RELEASE
+
+4. Build JARs:
+
+   cd $ROO_HOME
+   mvn clean package
+
+5. Build the reference guide and deploy to the static staging server
+   (http://www.springsource.org/roo is updated bi-hourly from static):
+
+   cd $ROO_HOME/deployment-support
+   mvn clean site site:deploy
+
+6. Create the final assembly ZIP (must happen *after* site built):
+
+   cd $ROO_HOME/deployment-support
+   ./roo-deploy -c assembly (use -v for verbose logging)
+
+7. Repeat the verification tests on the assembly ZIP (see above). See
+   note below if coordinating a release with the STS team.
+
+8. If the verifications pass, push the Git tag up to the server:
+
+   cd $ROO_HOME
+   git push --tags
+
+9. Deploy the JARs and assembly ZIP to the production download servers
+   (it takes up to an hour for these to be made fully downloadable):
+
+   cd $ROO_HOME
+   mvn deploy
+   cd $ROO_HOME/deployment-support
+   ./roo-deploy -c deploy (use -dv for a dry-run and verbose logging)
+
+10. Increment the version number to the next BUILD-SNAPSHOT number:
+
+    cd $ROO_HOME/deployment-support
+    ./roo-deploy -c next -n 4.5.6.BUILD-SNAPSHOT (use -v for logging)
+    cd $ROO_HOME
+    mvn clean install eclipse:clean eclipse:eclipse
+    cd ~/some-directory; roo-dev script clinic.roo; mvn test
+    cd $ROO_HOME
+    git diff
+    git commit -a -m "ROO-XXXX: Update to next version"
+    git push
+
+Typically after step 7 you'll send the tested assembly ZIP to the STS
+team for a concurrent release. Allow time for them to test the ZIP
+before starting step 8. This allows verification of STS embeddeding.
+Keep your ROO_HOME intact during this time, as you need the **/target
+and /.git directories for steps 8 and 9 to be completed.
+
+If any problems are detected before step 8, simply fix, push and start
+from step 1 again. You have not deployed anything substantial (ie only
+the reference guide) until step 8, so some corrections and re-tagging
+can be performed without any difficulty. The critical requirement is
+to defer step 8 (and beyond) until you're sure everything is fine.
+
+PRE-NOTIFICATION TESTING:
+
+   * Visit http://www.springsource.org/roo/start, click "DOWNLOAD!"
+   * Ensure it unzips OK and the sha1sum matches the downloaded .sha
+   * rm -rf ~/.m2/repository/org/springframework/roo
+   * Use "roo script clinic.roo" to build a new Roo project
+   * Use "mvn clean test" to verify Roo's annotation JAR downloads
+
+NOTIFICATIONS AND ADMINISTRATION:
+
+Once the release is completed (ie all steps above) you'll typically:
+
+   * Mark the version as "released" in JIRA (Admin > JIRA Admin...)
+   * Publish a blog.springsource.com entry explaining what's new
+   * Update http://en.wikipedia.org/wiki/Spring_Roo with the version
+   * Update http://www.springsource.org/node/2/ with the version
+   * Add a "News" announcement http://www.springsource.org
+   * Add a "News" announcement http://forum.springframework.org
+   * Add a "Roo" forum announcement http://forum.springframework.org
+   * Edit http://forum.springsource.org/showthread.php?t=71985
+   * Tweet from @SpringRoo (NB: ensure #SpringRoo is in the message)
+   * Tweet from your personal account
+   * Email dev list
+   * Resolve the "release ticket" in JIRA
 
 ======================================================================
 HELP

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.roo</groupId>
+		<artifactId>org.springframework.roo.root</artifactId>
+		<version>1.1.2.BUILD-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>org.springframework.roo.deployment.support</artifactId>
+	<packaging>pom</packaging>
+	<name>Spring Roo - Deployment Support</name>
+	<url>http://static.springframework.org/spring-roo/site/index.html</url>
+    <distributionManagement>
+        <site>
+            <id>static.springframework.org</id>
+            <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo</url>
+        </site>
+    </distributionManagement>
+    <build>
+        <plugins>
+            <!-- DocBook (with thanks to Spring Batch's config!) -->
+            <plugin>
+                <groupId>com.agilejava.docbkx</groupId>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <version>2.0.8</version> <!-- 2.0.9 -->
+                <executions>
+                    <execution>
+                        <id>single-page</id>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <htmlCustomization>${project.basedir}/src/docbkx/resources/xsl/html.xsl</htmlCustomization>
+                            <postProcess>
+                                <move todir="${project.build.directory}/site/reference/html-single">
+                                    <fileset dir="${project.build.directory}/docbkx/html">
+                                        <include name="index.html" />
+                                    </fileset>
+                                </move>
+                                <copy todir="${project.build.directory}/site/reference/html-single">
+                                    <fileset dir="${project.basedir}/src/docbkx/resources">
+                                        <include name="**/*.css" />
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/site/reference/html-single">
+                                    <fileset dir="${project.basedir}/src/site/docbook/reference">
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                    <execution>
+                        <id>single-pdf</id>
+                        <goals>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <configuration>
+                            <imgSrcPath>src/site/docbook/reference/</imgSrcPath>
+                            <admonGraphicsPath>src/docbkx/resources/images/</admonGraphicsPath>
+                            <postProcess>
+                                <copy file="${project.build.directory}/docbkx/pdf/index.pdf" tofile="${project.build.directory}/site/reference/pdf/spring-roo-docs.pdf" failonerror="false" />
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                    <execution>
+                        <id>multi-page</id>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <chunkedOutput>true</chunkedOutput>
+                            <htmlCustomization>${project.basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
+                            <postProcess>
+                                <move todir="${project.build.directory}/site/reference">
+                                    <fileset dir="${project.build.directory}/docbkx">
+                                        <include name="**/*.html" />
+                                    </fileset>
+                                </move>
+                                <copy todir="${project.build.directory}/site/reference/html">
+                                    <fileset dir="${project.basedir}/src/docbkx/resources">
+                                        <include name="**/*.css" />
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${project.build.directory}/site/reference/html">
+                                    <fileset dir="${project.basedir}/src/site/docbook/reference">
+                                        <include name="**/*.png" />
+                                        <include name="**/*.gif" />
+                                        <include name="**/*.jpg" />
+                                    </fileset>
+                                </copy>
+                            </postProcess>
+                        </configuration>
+                        <phase>pre-site</phase>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.docbook</groupId>
+                        <artifactId>docbook-xml</artifactId>
+                        <version>4.4</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.xmlgraphics</groupId>
+                        <artifactId>fop</artifactId>
+                        <version>0.93</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <includes>index.xml</includes>
+                    <chunkedOutput>false</chunkedOutput>
+                    <draftWatermarkImage />
+                    <htmlStylesheet>css/html.css</htmlStylesheet>
+                    <sourceDirectory>${project.basedir}/src/site/docbook/reference</sourceDirectory>
+                    <foCustomization>${project.basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
+                    <xincludeSupported>true</xincludeSupported>
+                    <entities>
+                        <entity>
+                            <name>version</name>
+                            <value>${project.version}</value>
+                        </entity>
+                    </entities>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.0-beta-3</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <reporting>
+        <excludeDefaults>true</excludeDefaults>
+    </reporting>
+</project>

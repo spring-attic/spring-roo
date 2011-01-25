@@ -35,10 +35,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-Activator>${pom.artifactId}.Activator</Bundle-Activator>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Bundle-Copyright>Copyright ${pom.organization.name}. All Rights Reserved.</Bundle-Copyright>
-                        <Bundle-DocURL>${pom.url}</Bundle-DocURL>
+                        <Bundle-Activator>${project.artifactId}.Activator</Bundle-Activator>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Bundle-Copyright>Copyright ${project.organization.name}. All Rights Reserved.</Bundle-Copyright>
+                        <Bundle-DocURL>${project.url}</Bundle-DocURL>
                     </instructions>
                 </configuration><!--
                 <executions>

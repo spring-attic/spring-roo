@@ -39,8 +39,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.bouncycastle.*;version=${pom.version}</Export-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>org.bouncycastle.*;version=${project.version}</Export-Package>
                         <Import-Package>javax.crypto,javax.crypto.interfaces,javax.crypto.spec,javax.naming,javax.naming.directory,javax.security.auth.x500,junit.framework;version="[3.8.2, 4.0.0)";resolution:=optional,junit.textui;version="[3.8.2, 4.0.0)";resolution:=optional</Import-Package>
                         <Bundle-Vendor>${pkgVendor} (wrapped into an OSGi bundle by the Spring Roo project build system)</Bundle-Vendor>
                         <Bundle-DocURL>${pkgDocUrl}</Bundle-DocURL>

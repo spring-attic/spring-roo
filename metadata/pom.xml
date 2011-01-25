@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
 	</dependencies>
 </project>

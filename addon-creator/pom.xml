@@ -29,52 +29,52 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.monitor</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.undo</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.metadata</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.model</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.process.manager</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
         	<groupId>org.springframework.roo</groupId>
         	<artifactId>org.springframework.roo.url.stream</artifactId>
-        	<version>${roo.version}</version>
+        	
         </dependency>
 	</dependencies>
 </project>

@@ -39,8 +39,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>org.bouncycastle.apache.bzip2.*;version=${pom.version},org.bouncycastle.bcpg.*;version=${pom.version},org.bouncycastle.openpgp.*;version=${pom.version}</Export-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>org.bouncycastle.apache.bzip2.*;version=${project.version},org.bouncycastle.bcpg.*;version=${project.version},org.bouncycastle.openpgp.*;version=${project.version}</Export-Package>
                         <Import-Package>*;resolution:=optional</Import-Package>
                         <Bundle-Vendor>${pkgVendor} (wrapped into an OSGi bundle by the Spring Roo project build system)</Bundle-Vendor>
                         <Bundle-DocURL>${pkgDocUrl}</Bundle-DocURL>

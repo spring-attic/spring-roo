@@ -44,90 +44,77 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.configurable</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.entity</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.finder</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.plural</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.json</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.classpath</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.monitor</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.file.undo</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.metadata</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.model</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.process.manager</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.project</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
-        <!-- Test -->
-        <dependency>
-               <groupId>junit</groupId>
-               <artifactId>junit</artifactId>
-               <version>4.7</version>
-               <scope>test</scope>
-        </dependency>
-        <dependency>
-               <groupId>org.mockito</groupId>
-               <artifactId>mockito-all</artifactId>
-               <version>1.8.2</version>
-               <scope>test</scope>
-        </dependency>        
 	</dependencies>
 </project>

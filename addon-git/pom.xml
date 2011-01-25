@@ -37,58 +37,56 @@
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.classpath</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.file.monitor</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.file.undo</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.metadata</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.model</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.process.manager</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.project</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.shell</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo</groupId>
 			<artifactId>org.springframework.roo.support</artifactId>
-			<version>${roo.version}</version>
+			
 		</dependency>
 		<!-- JGit -->
 		<dependency>
 			<groupId>org.springframework.roo.wrapping</groupId>
 			<artifactId>org.springframework.roo.wrapping.jsch</artifactId>
-			<version>0.1.42.0001</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.roo.wrapping</groupId>
 			<artifactId>org.springframework.roo.wrapping.jgit</artifactId>
-			<version>0.9.3.0001</version>
 		</dependency>
 	</dependencies>
 </project>

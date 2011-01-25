@@ -8,12 +8,10 @@
     <name>Spring Roo</name>
     <description>Spring Roo is a next-generation rapid application development tool for Java developers. It focuses on higher productivity, stock-standard Java APIs, high usability, avoiding engineering trade-offs and facilitating easy Roo removal.</description>
     <inceptionYear>2009</inceptionYear>
-    <url>http://static.springframework.org/spring-roo/site/index.html</url>
 
     <modules>
-        <!-- Wrapping cannot be included in the reactor, as mvn eclipse:eclipse will fail - instead: cd wrapping; mvn install; cd ..
-        <module>wrapping</module>
-        -->
+        <!-- NB: Update the <dependencyManagement> section in this pom.xml if you add/remove/rename any module below! -->
+        <module>deployment-support</module>
         <module>osgi-bundle</module>
         <module>osgi-roo-bundle</module>
         <module>bootstrap</module>
@@ -57,20 +55,20 @@
         <module>addon-backup</module>
         <module>addon-serializable</module>
         <module>addon-web-mvc-controller</module>
-	<module>addon-web-mvc-embedded</module>
+        <module>addon-web-mvc-embedded</module>
         <module>addon-web-mvc-jsp</module>
         <module>addon-security</module>
-	<module>addon-solr</module>
+        <module>addon-solr</module>
         <module>addon-web-flow</module>
         <module>addon-web-selenium</module>
-	<module>addon-gwt</module>
-	<module>addon-jdbc</module> 
-	<module>addon-dbre</module> 
-	<module>addon-creator</module>
+        <module>addon-gwt</module>
+        <module>addon-jdbc</module> 
+        <module>addon-dbre</module> 
+        <module>addon-creator</module>
         <module>addon-roobot-client</module>
-	<module>addon-json</module>
-	<module>addon-op4j</module>
-	    <module>addon-git</module>  
+        <module>addon-json</module>
+        <module>addon-op4j</module>
+        <module>addon-git</module>
         <module>annotations</module>
     </modules>
 
@@ -79,50 +77,30 @@
         <url>http://www.vmware.com/</url>
     </organization>
 
-    <licenses>
-        <license>
-            <name>>GNU General Public License (GPL), Version 3.0</name>
-            <url>http://www.gnu.org/copyleft/gpl.html</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <!-- Note when doing releases: tagBase is set in release plugin configuration below -->
-    <scm>
-        <connection>scm:svn:https://src.springsource.com/svn/roo/trunk</connection>
-        <developerConnection>scm:svn:https://src.springsource.com/svn/roo/trunk</developerConnection>
-    </scm>
-
-    <issueManagement>
-        <system>jira</system>
-        <url>http://jira.springframework.org/browse/ROO</url>
-    </issueManagement>
-    <ciManagement>
-        <system>bamboo</system>
-        <url>https://build.springframework.org/browse/ROO</url>
-    </ciManagement>
-
     <distributionManagement>
-        <!-- Effective Roo 1.1.0.M2, spring-roo-repository is the only repository in which Roo JARs are published. -->
         <repository>
-            <id>spring-roo-repository</id>
+            <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>s3://spring-roo-repository.springsource.org/release</url>
         </repository>
-        <site>
-            <id>static.springframework.org</id>
-            <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo</url>
-        </site>
+        <snapshotRepository>
+            <id>spring-roo-repository-snapshot</id>
+            <name>Spring Roo Repository</name>
+            <url>s3://spring-roo-repository.springsource.org/snapshot</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <repositories>
-        <!-- spring-roo-repository contains only OSGi-verified JARs suitable for Roo core, Roo add-on and Roo-based user project usage.
-             Those dependencies already in OSGi form (like Apache Felix) are automatically acquired from Maven Central.
-             Non-OSGi items are wrapped via the "wrapping" module, with wrapping/pom.xml declaring a non-OSGi Maven repository. -->
         <repository>
-            <id>spring-roo-repository</id>
+            <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+        <repository>
+            <id>spring-roo-repository-snapshot</id>
+            <name>Spring Roo Repository</name>
+            <url>http://spring-roo-repository.springsource.org/snapshot</url>
         </repository>
     </repositories>
 
@@ -133,7 +111,7 @@
             <url>http://maven.springframework.org/release</url>
         </pluginRepository>
         <pluginRepository>
-            <id>spring-roo-repository</id>
+            <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
         </pluginRepository>
@@ -164,18 +142,32 @@
     </developers>
 
     <dependencies>
-        <!-- JUnits with repo1 artifact/groupId required due to SureFire hard-coded dependency -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.7</version>
-            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
 
     <dependencyManagement>
       <dependencies>
-        <!-- OSGi -->
+        <!-- Test-scoped dependencies (not OSGi, but not included in any assemblies either) -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- OSGi APIs -->
          <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -189,14 +181,444 @@
         <!-- Apache Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <version>1.6.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.easymock</groupId>
+                    <artifactId>easymock</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <version>3.0.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.compendium</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo</artifactId>
+            <version>1.6.8</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.compendium</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.ipojo.metadata</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>asm</groupId>
+                    <artifactId>asm-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.log</artifactId>
+            <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.osgi.compendium</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <version>1.6.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.osgi</groupId>
+                    <artifactId>org.osgi.compendium</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <version>1.4.0</version>
         </dependency>
-        <!-- Spring User Agent Analysis (UAA) -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.shell</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+        <!-- External OSGi Bundles (ie not wrapped) -->
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>1.5</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.uaa</groupId>
             <artifactId>org.springframework.uaa.client</artifactId>
             <version>1.0.0.RELEASE</version>
+        </dependency>
+        <!-- Wrapped JARs -->
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.bcpg-jdk15</artifactId>
+            <version>1.45.0.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
+            <version>1.45.0.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.javaparser</artifactId>
+            <version>1.0.7.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.hapax</artifactId>
+            <version>2.3.4.0002</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.inflector</artifactId>
+            <version>0.7.0.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.jsch</artifactId>
+            <version>0.1.42.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.jgit</artifactId>
+            <version>0.9.3.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.json-simple</artifactId>
+            <version>1.1.0.0001</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo.wrapping</groupId>
+            <artifactId>org.springframework.roo.wrapping.jline</artifactId>
+            <version>0.9.94.0001</version>
+        </dependency>
+        <!-- Roo Modules -->
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.backup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.configurable</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.creator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.dbre</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.dod</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.email</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.entity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.finder</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.git</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.gwt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.javabean</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.jdbc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.jms</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.maven</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.op4j</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.plural</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.property.editor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.propfiles</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.roobot.client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.serializable</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.solr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.tostring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.embedded</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.jsp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.addon.web.mvc.selenium</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.bootstrap</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.classpath</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.classpath.javaparser</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.deployment.support</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.felix</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.monitor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.monitor.polling</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.monitor.polling.roo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.undo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.metadata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.osgi.bundle</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.osgi.roo.bundle</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.process.manager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.project</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell.jline</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell.jline.osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell.osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.startlevel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.support.osgi</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.uaa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.url.stream</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.url.stream.jdk</artifactId>
+            <version>${project.version}</version>
         </dependency>
       </dependencies>
     </dependencyManagement>
@@ -226,7 +648,7 @@
             </plugin>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
-				<version>1.3</version>
+				<version>1.6</version>
 				<dependencies>
 					<dependency>
 						<groupId>ant-contrib</groupId>
@@ -243,17 +665,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-help-plugin</artifactId>
-                <version>2.1</version>
+                <version>2.1.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.4.1</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.2</version>
+                <version>2.4.3</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -261,12 +683,15 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>2.7.1</version>
+                <configuration>
+                    <printSummary>false</printSummary>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
+                <version>2.3.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -275,7 +700,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.0.4</version>
+                <version>2.1.2</version>
                 <configuration>
                     <attach>true</attach>
                 </configuration>
@@ -287,131 +712,26 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- DocBook (with thanks to Spring Batch's config!) -->
-            <plugin>
-                <groupId>com.agilejava.docbkx</groupId>
-                <artifactId>docbkx-maven-plugin</artifactId>
-                <version>2.0.8</version>
-                <executions>
-                    <execution>
-                        <id>single-page</id>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                        <configuration>
-                            <htmlCustomization>${basedir}/src/docbkx/resources/xsl/html.xsl</htmlCustomization>
-                            <postProcess>
-                                <move todir="${basedir}/target/site/reference/html-single">
-                                    <fileset dir="${basedir}/target/docbkx/html">
-                                        <include name="index.html" />
-                                    </fileset>
-                                </move>
-                                <copy todir="${basedir}/target/site/reference/html-single">
-                                    <fileset dir="${basedir}/src/docbkx/resources">
-                                        <include name="**/*.css" />
-                                        <include name="**/*.png" />
-                                        <include name="**/*.gif" />
-                                        <include name="**/*.jpg" />
-                                    </fileset>
-                                </copy>
-                                <copy todir="${basedir}/target/site/reference/html-single">
-                                    <fileset dir="${basedir}/src/site/docbook/reference">
-                                        <include name="**/*.png" />
-                                        <include name="**/*.gif" />
-                                        <include name="**/*.jpg" />
-                                    </fileset>
-                                </copy>
-                            </postProcess>
-                        </configuration>
-                        <phase>pre-site</phase>
-                    </execution>
-                    <execution>
-                        <id>single-pdf</id>
-                        <goals>
-                            <goal>generate-pdf</goal>
-                        </goals>
-                        <configuration>
-                            <imgSrcPath>src/site/docbook/reference/</imgSrcPath>
-                            <admonGraphicsPath>src/docbkx/resources/images/</admonGraphicsPath>
-                            <postProcess>
-                                <copy file="${basedir}/target/docbkx/pdf/index.pdf" tofile="${basedir}/target/site/reference/pdf/spring-roo-docs.pdf" failonerror="false" />
-                            </postProcess>
-                        </configuration>
-                        <phase>pre-site</phase>
-                    </execution>
-                    <execution>
-                        <id>multi-page</id>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                        <configuration>
-                            <chunkedOutput>true</chunkedOutput>
-                            <htmlCustomization>${basedir}/src/docbkx/resources/xsl/html_chunk.xsl</htmlCustomization>
-                            <postProcess>
-                                <move todir="${basedir}/target/site/reference">
-                                    <fileset dir="${basedir}/target/docbkx">
-                                        <include name="**/*.html" />
-                                    </fileset>
-                                </move>
-                                <copy todir="${basedir}/target/site/reference/html">
-                                    <fileset dir="${basedir}/src/docbkx/resources">
-                                        <include name="**/*.css" />
-                                        <include name="**/*.png" />
-                                        <include name="**/*.gif" />
-                                        <include name="**/*.jpg" />
-                                    </fileset>
-                                </copy>
-                                <copy todir="${basedir}/target/site/reference/html">
-                                    <fileset dir="${basedir}/src/site/docbook/reference">
-                                        <include name="**/*.png" />
-                                        <include name="**/*.gif" />
-                                        <include name="**/*.jpg" />
-                                    </fileset>
-                                </copy>
-                            </postProcess>
-                        </configuration>
-                        <phase>pre-site</phase>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.docbook</groupId>
-                        <artifactId>docbook-xml</artifactId>
-                        <version>4.4</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.apache.xmlgraphics</groupId>
-                        <artifactId>fop</artifactId>
-                        <version>0.93</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <includes>index.xml</includes>
-                    <chunkedOutput>false</chunkedOutput>
-                    <draftWatermarkImage />
-                    <htmlStylesheet>css/html.css</htmlStylesheet>
-                    <sourceDirectory>${basedir}/src/site/docbook/reference</sourceDirectory>
-                    <foCustomization>${basedir}/src/docbkx/resources/xsl/fopdf.xsl</foCustomization>
-                    <xincludeSupported>true</xincludeSupported>
-                    <entities>
-                        <entity>
-                            <name>version</name>
-                            <value>${project.version}</value>
-                        </entity>
-                    </entities>
-                </configuration>
-            </plugin>
-            <!-- Other -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-3</version>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.0</version>
                 <configuration>
-                    <descriptors>
-                        <descriptor>bootstrap/src/main/assembly/assembly.xml</descriptor>
-                    </descriptors>
+                    <rules>
+                        <DependencyConvergence/>
+                        <requireMavenVersion><version>3.0.1</version></requireMavenVersion>
+                        <requireJavaVersion><version>1.6.0</version></requireJavaVersion>
+                        <requirePluginVersions/>
+                    </rules>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -444,63 +764,10 @@
                     <dependenciesAsLibraries>true</dependenciesAsLibraries>
                 </configuration>
             </plugin>
-            <!-- Site -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>2.0-beta-7</version>
-            </plugin>
         </plugins>
     </build>
 
-    <reporting>
-        <excludeDefaults>true</excludeDefaults>
-        <plugins>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <id>html</id>
-                        <reports>
-                            <report>javadoc</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-                <configuration>
-                    <breakiterator>true</breakiterator>
-                    <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
-                        <link>http://junit.sourceforge.net/javadoc/</link>
-                        <link>http://static.springsource.org/spring/docs/3.0.x/javadoc-api/</link>
-                        <link>http://jline.sourceforge.net/javadoc/</link>
-                        <link>http://jansi.fusesource.org/maven/1.1/apidocs/</link>
-                    </links>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jdepend-maven-plugin</artifactId>
-                <version>2.0-beta-2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.1</version>
-                <reportSets>
-                  <reportSet>
-                  </reportSet>
-                </reportSets>
-            </plugin>           
-        </plugins>
-    </reporting>
-
     <properties>
-        <roo.version>1.1.2.BUILD-SNAPSHOT</roo.version>
     </properties>
 
 </project>

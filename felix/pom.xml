@@ -28,76 +28,51 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell</artifactId>
-            <version>1.4.2</version>
         </dependency>
         <!-- Apache Felix: OSGi Logging support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.log</artifactId>
-            <version>1.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>org.osgi.compendium</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>javax.servlet</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- Apache Felix: OSGi Bundle Repository (OBR) support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
-            <version>1.6.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.easymock</groupId>
-                    <artifactId>easymock</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!-- Roo -->
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.support.osgi</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.url.stream</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.shell.osgi</artifactId>
-            <version>${roo.version}</version>
+            
         </dependency>
         <!-- GPG Management (PGP) via Bouncy Castle -->
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.bcpg-jdk15</artifactId>
-            <version>1.45.0.0001</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.roo.wrapping</groupId>
             <artifactId>org.springframework.roo.wrapping.bcprov-jdk15</artifactId>
-            <version>1.45.0.0001</version>
         </dependency>
     </dependencies>
 </project>
