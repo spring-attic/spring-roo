@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <appendix xmlns="http://docbook.org/ns/docbook" version="5.0" xml:id="command-index">
     <title>Command Index</title>
-    <para>This appendix was automatically built from Roo 1.1.1.RELEASE [rev 1222d72].</para>
+    <para>This appendix was automatically built from Roo 1.1.2.BUILD-SNAPSHOT [rev 3984ee4].</para>
     <para>Commands are listed in alphabetic order, and are shown in monospaced font with any mandatory options you must specify when using the command. Most commands accept a large number of options, and all of the possible options for each command are presented in this appendix.</para>
     <section xml:id="command-index-add-on-commands">
         <title>Add On Commands</title>
@@ -141,7 +141,7 @@
                 <varlistentry>
                     <term>--requiresDescription</term>
                     <listitem>
-                        <para>A comma separated list of search terms; no default value</para>
+                        <para>A comma separated list of search terms; default: '*'</para>
                     </listitem>
                 </varlistentry>
                 <varlistentry>
@@ -178,6 +178,64 @@
                     <term>--requiresCommand</term>
                     <listitem>
                         <para>Only display add-ons in search results that offer this command; no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-upgrade-all">
+            <title>addon upgrade all</title>
+            <para>Upgrade all relevant Spring Roo Add-ons / Components for the current stability level</para>
+            <programlisting><![CDATA[addon upgrade all]]></programlisting>
+            <para>This command does not accept any options.</para>
+        </section>
+        <section xml:id="command-index-addon-upgrade-available">
+            <title>addon upgrade available</title>
+            <para>List available Spring Roo Add-on / Component upgrades</para>
+            <programlisting><![CDATA[addon upgrade available]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--addonStabilityLevel</term>
+                    <listitem>
+                        <para>The stability level of add-ons or components which are presented for upgrading (default: ANY); no default value</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-upgrade-bundle">
+            <title>addon upgrade bundle</title>
+            <para>Upgrade a specific Spring Roo Add-on / Component</para>
+            <programlisting><![CDATA[addon upgrade bundle --bundleSymbolicName]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--bundleSymbolicName</term>
+                    <listitem>
+                        <para>The bundle symbolic name for the add-on to upgrade; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-upgrade-id">
+            <title>addon upgrade id</title>
+            <para>Upgrade a specific Spring Roo Add-on / Component from a search result ID</para>
+            <programlisting><![CDATA[addon upgrade id --searchResultId]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--searchResultId</term>
+                    <listitem>
+                        <para>The bundle ID as presented via the addon list or addon search command; no default value (mandatory) </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </section>
+        <section xml:id="command-index-addon-upgrade-settings">
+            <title>addon upgrade settings</title>
+            <para>Settings for Add-on upgrade operations</para>
+            <programlisting><![CDATA[addon upgrade settings]]></programlisting>
+            <variablelist>
+                <varlistentry>
+                    <term>--addonStabilityLevel</term>
+                    <listitem>
+                        <para>The stability level of add-ons or components which are presented for upgrading; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2204,35 +2262,6 @@
             <para>This command does not accept any options.</para>
         </section>
     </section>
-    <section xml:id="command-index-hades-commands">
-        <title>Hades Commands</title>
-        <para>Hades Commands are contained in org.synyx.hades.roo.addon.HadesCommands.</para>
-        <section xml:id="command-index-hades-install">
-            <title>hades install</title>
-            <para>Installs Hades for the project</para>
-            <programlisting><![CDATA[hades install]]></programlisting>
-            <para>This command does not accept any options.</para>
-        </section>
-        <section xml:id="command-index-hades-repository">
-            <title>hades repository</title>
-            <para>Creates a Hades repository interface</para>
-            <programlisting><![CDATA[hades repository --entity]]></programlisting>
-            <variablelist>
-                <varlistentry>
-                    <term>--entity</term>
-                    <listitem>
-                        <para>The entity you want to create the repository for; default if option present: '*' (mandatory) </para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>--package</term>
-                    <listitem>
-                        <para>No help available; no default value</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </section>
-    </section>
     <section xml:id="command-index-hint-commands">
         <title>Hint Commands</title>
         <para>Hint Commands are contained in org.springframework.roo.classpath.operations.HintCommands.</para>
@@ -2382,6 +2411,12 @@
                     <term>--class</term>
                     <listitem>
                         <para>The name of the class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--async</term>
+                    <listitem>
+                        <para>Indicates if the injected method should be executed asynchronously; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2552,6 +2587,12 @@
                     <term>--class</term>
                     <listitem>
                         <para>The java type to apply this annotation to; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--rootName</term>
+                    <listitem>
+                        <para>The root name which should be used to wrap the JSON document; no default value</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
@@ -2727,6 +2768,12 @@
                     <term>--class</term>
                     <listitem>
                         <para>The name of the class to receive this field; default if option not present: '*'</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>--async</term>
+                    <listitem>
+                        <para>Indicates if the injected method should be executed asynchronously; default if option present: 'true'; default if option not present: 'false'</para>
                     </listitem>
                 </varlistentry>
             </variablelist>
