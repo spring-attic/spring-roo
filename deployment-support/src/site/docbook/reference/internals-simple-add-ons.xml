@@ -782,9 +782,9 @@
 
     <para>If all tests pass, RooBot will publish your add-on in a publicly
     accessible XML registry <link
-    xlink:href="http://spring-roo-repository.springsource.org/roobot.xml">http://spring-roo-repository.springsource.org/roobot/roobot.xml</link>.
+    xlink:href="http://spring-roo-repository.springsource.org/roobot/roobot.xml">http://spring-roo-repository.springsource.org/roobot/roobot.xml</link>.
     This registry is available to RooBot client which is integrated into the
-    Spring Roo Shell. </para>
+    Spring Roo Shell.</para>
   </section>
 
   <section>
