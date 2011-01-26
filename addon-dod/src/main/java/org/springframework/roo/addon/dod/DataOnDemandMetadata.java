@@ -717,7 +717,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
 
 				DataOnDemandMetadata otherMetadata = collaboratingDataOnDemandMetadata.get(field);
-				if (!otherMetadata.isValid()) {
+				if (otherMetadata == null || !otherMetadata.isValid()) {
 					// There is no metadata around, so we'll just make some basic assumptions
 					if (oneToOneAnnotation != null) {
 						initializer = collaboratingFieldName + ".getSpecific" + field.getFieldType().getSimpleTypeName() + "(index)";
