@@ -742,6 +742,33 @@ Successfully installed add-on: org.synyx.hades.roo.addon
     properly initialized. This theoretically isn't necessary in most cases,
     but it doesn't hurt.</para>
 
+    <para>You can also upgrade your existing add-ons by using the addon
+    upgrade commands. To do this you should first run the <link
+    linkend="command-index-addon-upgrade-settings">addon upgrade
+    settings</link> command which allows you to define the desired stability
+    level which is taken into account when performing the <link
+    linkend="command-index-addon-upgrade-all">addon upgrade all</link>
+    command:<programlisting>roo&gt; addon upgrade settings --addonStabilityLevel ANY|MILESTONE|<emphasis
+          role="bold">RELEASE</emphasis>|RELEASE_CANDIDATE</programlisting></para>
+
+    <para>If you don't define a stability level through the addon upgrade
+    settings command it defaults to RELEASE - meaning only release versions
+    will be upgraded (if upgrades for this level are available). Other
+    stability levels to choose from are RELEASE_CANDIDATE, MILESTONE, and ANY
+    (ie snapshots).</para>
+
+    <para>To list all available upgrades for currently installed add-ons you
+    can use the <link linkend="command-index-addon-upgrade-available">addon
+    upgrade available</link> command. This will provide an overview of add-ons
+    which can be upgraded and their respective stability levels. Furthermore,
+    you can also upgrade individual add-ons by using the <link
+    linkend="command-index-addon-upgrade-bundle">addon upgrade bundle</link>
+    command which allows you to specify the add-on bundle symbolic name (and
+    the add-on version in case multiple versions are available). Finally, you
+    can use the <link linkend="command-index-addon-upgrade-id">addon upgrade
+    id</link> command to upgrade a specific add-on which has appeared in a
+    search result to the latest version available. </para>
+
     <para>Of course, you can remove add-ons as well. To uninstall any given
     add-on, just use the <link linkend="command-index-addon-remove">addon
     remove</link> command. On this occasion we'll use the bundle symbolic name
