@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -25,9 +24,7 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.itd.AbstractItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -58,35 +55,19 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	private DataOnDemandAnnotationValues annotationValues;
 	private MethodMetadata identifierAccessorMethod;
 	private MethodMetadata findMethod;
-	
-	/** The "findEntityEntries(Integer,Integer):List<Entity>" static method for the entity (required) */
 	private MethodMetadata findEntriesMethod;
-
-	/** The "persist():void" instance method for the entity we are to create (required) */
 	private MethodMetadata persistMethod;
-	
-	/** The "flush():void" instance method for the entity we are to create (required) */
 	private MethodMetadata flushMethod;
-
-	/** Mandatory methods, in order of discovery (so we can guarantee the ITD is generated in a consistent manner for SCM compatibility) */
 	private List<MethodMetadata> mandatoryMutators = new ArrayList<MethodMetadata>();
-
-	/** key: mandatory setter to invoke; value: the argument to present to the mutator method, expressed as a string */
 	private Map<MethodMetadata, String> mutatorArguments = new HashMap<MethodMetadata, String>();
-
-	/** Other entities requiring a data on demand instance; fields must exist for each of these in the class */
 	private List<JavaType> requiredDataOnDemandCollaborators = new ArrayList<JavaType>();
 
-	// Needed to lookup other DataOnDemand metadata we depend on
-	private MetadataService metadataService;
-	private MetadataDependencyRegistry metadataDependencyRegistry;
-	private Map<MethodMetadata, FieldMetadata> locatedSetters;
+	private Map<MethodMetadata, FieldMetadata> locatedMutators;
+	private Map<FieldMetadata, DataOnDemandMetadata> collaboratingDataOnDemandMetadata;
 	private ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails;
 
-	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, MetadataService metadataService, MetadataDependencyRegistry metadataDependencyRegistry, Map<MethodMetadata, FieldMetadata> locatedSetters, ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails) {
+	public DataOnDemandMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, DataOnDemandAnnotationValues annotationValues, MethodMetadata identifierAccessor, MethodMetadata findMethod, MethodMetadata findEntriesMethod, MethodMetadata persistMethod, MethodMetadata flushMethod, Map<MethodMetadata, FieldMetadata> locatedMutators, ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails, Map<FieldMetadata, DataOnDemandMetadata> collaboratingDataOnDemandMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		entityClassOrInterfaceTypeDetails.getName().getSimpleTypeName();
-		entityClassOrInterfaceTypeDetails.getName().getSimpleTypeName();
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
 		Assert.notNull(identifierAccessor, "Identifier accessor method required");
@@ -94,9 +75,8 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		Assert.notNull(findEntriesMethod, "Find entries method required");
 		Assert.notNull(persistMethod, "Persist method required");
 		Assert.notNull(flushMethod, "Flush method required");
-		Assert.notNull(metadataService, "Metadata service required");
-		Assert.notNull(metadataDependencyRegistry, "Metadata dependency registry required");
-		Assert.notNull(locatedSetters, "Located mutator methods required");
+		Assert.notNull(locatedMutators, "Located mutator methods required");
+		Assert.notNull(collaboratingDataOnDemandMetadata, "Collaborating DataOnDemandMetadata required");
 		Assert.notNull(entityClassOrInterfaceTypeDetails, "Entity ClassOrInterfaceTypeDetails required");
 
 		if (!isValid()) {
@@ -109,12 +89,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		this.findEntriesMethod = findEntriesMethod;
 		this.persistMethod = persistMethod;
 		this.flushMethod = flushMethod;
-		this.metadataService = metadataService;
-		this.metadataDependencyRegistry = metadataDependencyRegistry;
-		this.locatedSetters = locatedSetters;
+		this.locatedMutators = locatedMutators;
+		this.collaboratingDataOnDemandMetadata = collaboratingDataOnDemandMetadata;
 		this.entityClassOrInterfaceTypeDetails = entityClassOrInterfaceTypeDetails;
 
-		mutatorDiscovery();
+		storeFieldInitializers();
 
 		if (isComponentAnnotationIntroduced()) {
 			builder.addAnnotation(getComponentAnnotation());
@@ -283,10 +262,13 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	public MethodMetadata getNewTransientEntityMethod() {
 		// Method definition to find or build
 		JavaSymbolName methodName = new JavaSymbolName("getNewTransient" + entityClassOrInterfaceTypeDetails.getName().getSimpleTypeName());
+		
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
 		paramTypes.add(JavaType.INT_PRIMITIVE);
+		
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
 		paramNames.add(new JavaSymbolName("index"));
+		
 		JavaType returnType = entityClassOrInterfaceTypeDetails.getName();
 
 		// Locate user-defined method
@@ -305,7 +287,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			String mutatorName = mutator.getMethodName().getSymbolName();
 			Assert.hasText(initializer, "Internal error: unable to locate initializer for " + mutatorName);
 
-			FieldMetadata field = locatedSetters.get(mutator);
+			FieldMetadata field = locatedMutators.get(mutator);
 			String fieldType = field.getFieldType().getFullyQualifiedTypeName();
 			String fieldName = field.getFieldName().getSymbolName();
 			
@@ -522,7 +504,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 		// Create method
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		// TODO: We should port this more fully from original code base
 		bodyBuilder.appendFormalLine("return false;");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
@@ -604,9 +585,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			return userMethod;
 		}
 
-		// Create the method
-
-		// Create the body
+		// Create the method body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		String dataField = getDataField().getFieldName().getSymbolName();
 		bodyBuilder.appendFormalLine(dataField + " = " + entityClassOrInterfaceTypeDetails.getName().getFullyQualifiedTypeName() + "." + findEntriesMethod.getMethodName().getSymbolName() + "(0, " + annotationValues.getQuantity() + ");");
@@ -627,18 +606,14 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 
+		// Create the method
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private void mutatorDiscovery() {
-		for (MethodMetadata mutatorMethod : locatedSetters.keySet()) {
-			// Check if mutator method
-			if (!BeanInfoUtils.isMutatorMethod(mutatorMethod)) {
-				continue;
-			}
-			
-			FieldMetadata field = locatedSetters.get(mutatorMethod);
+	private void storeFieldInitializers() {
+		for (MethodMetadata mutatorMethod : locatedMutators.keySet()) {
+			FieldMetadata field = locatedMutators.get(mutatorMethod);
 
 			// Never include id or version fields (they shouldn't normally have a mutator anyway, but the user might have added one)
 			if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
@@ -654,9 +629,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			if (field.getFieldType().isCommonCollectionType() || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToMany")) != null || MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToMany")) != null) {
 				continue;
 			}
-
-			AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
-			AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
 
 			String initializer = "null";
 
@@ -731,39 +703,33 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (field.getFieldType().equals(JavaType.SHORT_PRIMITIVE)) {
 				initializer = "new Integer(index).shortValue()";
 			} else if (field.getFieldType().equals(BIG_DECIMAL)) {
-				initializer = "new " + BIG_DECIMAL.getFullyQualifiedTypeName() + "(index)";
-			} else if (field.getFieldType().equals(new JavaType("java.math.BigInteger"))) {
+				initializer = BIG_DECIMAL.getFullyQualifiedTypeName() + ".valueOf(index)";
+			} else if (field.getFieldType().equals(BIG_INTEGER)) {
 				initializer = BIG_INTEGER.getFullyQualifiedTypeName() + ".valueOf(index)";
-			} else if (manyToOneAnnotation != null || oneToOneAnnotation != null) {
-				if (field.getFieldType().equals(this.getAnnotationValues().getEntity())) {
-					// Avoid circular references (ROO-562)
-					initializer = "obj";
-				} else {
-					requiredDataOnDemandCollaborators.add(field.getFieldType());
-					String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
+			} else if (field.getFieldType().equals(annotationValues.getEntity())) {
+				// Avoid circular references (ROO-562)
+				initializer = "obj";
+			} else if (collaboratingDataOnDemandMetadata.containsKey(field)) {
+				requiredDataOnDemandCollaborators.add(field.getFieldType());
+				String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 
-					// Look up the metadata we are relying on
-					String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+				// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
+				AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
 
-					// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
-					boolean oneToOne = oneToOneAnnotation != null;
-
-					metadataDependencyRegistry.registerDependency(otherProvider, getId());
-					DataOnDemandMetadata otherMd = (DataOnDemandMetadata) metadataService.get(otherProvider);
-					if (otherMd == null || !otherMd.isValid()) {
-						// There is no metadata around, so we'll just make some basic assumptions
-						if (oneToOne) {
-							initializer = collaboratingFieldName + ".getSpecific" + field.getFieldType().getSimpleTypeName() + "(index)";
-						} else {
-							initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
-						}
+				DataOnDemandMetadata otherMetadata = collaboratingDataOnDemandMetadata.get(field);
+				if (!otherMetadata.isValid()) {
+					// There is no metadata around, so we'll just make some basic assumptions
+					if (oneToOneAnnotation != null) {
+						initializer = collaboratingFieldName + ".getSpecific" + field.getFieldType().getSimpleTypeName() + "(index)";
 					} else {
-						// We can use the correct name
-						if (oneToOne) {
-							initializer = collaboratingFieldName + "." + otherMd.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
-						} else {
-							initializer = collaboratingFieldName + "." + otherMd.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
-						}
+						initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
+					}
+				} else {
+					// We can use the correct name
+					if (oneToOneAnnotation != null) {
+						initializer = collaboratingFieldName + "." + otherMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
+					} else {
+						initializer = collaboratingFieldName + "." + otherMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
 					}
 				}
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
@@ -789,13 +755,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 
 	private JavaType getCollaboratingType(JavaType entity) {
 		return new JavaType(entity.getFullyQualifiedTypeName() + "DataOnDemand");
-	}
-
-	/**
-	 * @return the annotation values specified via {@link RooDataOnDemand} (never null unless the metadata itself is invalid)
-	 */
-	public DataOnDemandAnnotationValues getAnnotationValues() {
-		return annotationValues;
 	}
 
 	public String toString() {

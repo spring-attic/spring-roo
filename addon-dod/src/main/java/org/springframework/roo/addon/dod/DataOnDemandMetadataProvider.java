@@ -16,8 +16,10 @@ import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.classpath.scanner.MemberDetails;
@@ -41,6 +43,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.addNotificationListener(this);
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
+		
 		// DOD classes are @Configurable because they may need DI of other DOD classes that provide M:1 relationships
 		configurableMetadataProvider.addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
 		addMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
@@ -48,7 +51,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	
 	protected void deactivate(ComponentContext context) {
 		metadataDependencyRegistry.removeNotificationListener(this);
+		metadataDependencyRegistry.deregisterDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
 		configurableMetadataProvider.removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
+		removeMetadataTrigger(new JavaType(RooDataOnDemand.class.getName()));
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {
@@ -62,7 +67,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		
 		// We have some DOD metadata, so let's check if we care if any methods match our requirements
 		for (MethodMetadata method : itdTypeDetails.getDeclaredMethods()) {
-			if (isMethodOfInterest(method)) {
+			if (BeanInfoUtils.isMutatorMethod(method)) {
 				// A DOD cares about the JavaType, and an ITD offers a method likely of interest, so let's formally trigger it to run.
 				// Note that it will re-scan and discover this ITD, and register a direct dependency on it for the future.
 				return localMid;
@@ -106,29 +111,37 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		}
 	
 		ClassOrInterfaceTypeDetails entityClassOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) entityPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		
-		// Abort if the entity's class details aren't available (parse error etc)
 		if (entityClassOrInterfaceTypeDetails == null) {
+			// Abort if the entity's class details aren't available (parse error etc)
 			return null;
 		}
 		
-		// Identify all the setters we care about on the entity
-		Map<MethodMetadata, FieldMetadata> locatedSetters = new LinkedHashMap<MethodMetadata, FieldMetadata>();
+		Map<FieldMetadata, DataOnDemandMetadata> collaboratingDataOnDemandMetadata = new HashMap<FieldMetadata, DataOnDemandMetadata>();
+
+		// Identify all the mutators we care about on the entity
+		Map<MethodMetadata, FieldMetadata> locatedMutators = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceTypeDetails);
 		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
 			// avoid BIM; deprecating
 			if (memberHolder.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) continue;
 			
-			// Add the methods we care to the locatedSetters
+			// Add the methods we care to the locatedMutators
 			for (MethodMetadata method : memberHolder.getDeclaredMethods()) {
-				if (isMethodOfInterest(method)) {
-					JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-					FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
-					if (field == null) continue;
-					locatedSetters.put(method, field);
-					// Track any changes to that method (eg it goes away)
-					metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+				if (!BeanInfoUtils.isMutatorMethod(method)) {
+					continue;
 				}
+
+				JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+				if (field == null) continue;
+				locatedMutators.put(method, field);
+				
+				// Track any changes to that method (eg it goes away)
+				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+
+				// Look up collaborating metadata
+				DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
+				collaboratingDataOnDemandMetadata.put(field, otherMetadata);
 			}
 		}
 		
@@ -146,11 +159,24 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		metadataDependencyRegistry.registerDependency(entityClassOrInterfaceMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, metadataService, metadataDependencyRegistry, locatedSetters, entityClassOrInterfaceTypeDetails);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, entityClassOrInterfaceTypeDetails, collaboratingDataOnDemandMetadata);
 	}
-
-	private boolean isMethodOfInterest(MethodMetadata method) {
-		return method.getMethodName().getSymbolName().startsWith("set");
+	
+	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
+		AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
+		AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
+		if (manyToOneAnnotation == null && oneToOneAnnotation == null) {
+			return null;
+		}
+		
+		// Look up the metadata we are relying on
+		String otherProvider = DataOnDemandMetadata.createIdentifier(new JavaType(field.getFieldType() + "DataOnDemand"), Path.SRC_TEST_JAVA);
+		if (otherProvider.equals(metadataIdentificationString)) {
+			return null;
+		}
+		
+		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
+		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}
 	
 	public String getItdUniquenessFilenameSuffix() {
@@ -160,8 +186,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = DataOnDemandMetadata.getJavaType(metadataIdentificationString);
 		Path path = DataOnDemandMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {
