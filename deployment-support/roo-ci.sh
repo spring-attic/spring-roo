@@ -96,7 +96,7 @@ VERSION=`grep "<version>" $ROO_HOME/pom.xml | head -n 1 | sed 's/<version>//' | 
 log "Version........: $VERSION"
 SHORT_VERSION=`echo $VERSION | sed 's/\([0-9].[0-9].[0-9]\).*\.BUILD-SNAPSHOT/\1/'`
 log "Short Version..: $SHORT_VERSION"
-TIMESTAMP=$(date +"%Y%m%d.%H%M%S")
+TIMESTAMP=$(date --utc +"%Y%m%d.%H%M%S")
 log "Timestamp......: $TIMESTAMP"
 
 # Determine the assembly filename (we don't rely on Hudson variables, as we'd like this to work for normal developers as well)
