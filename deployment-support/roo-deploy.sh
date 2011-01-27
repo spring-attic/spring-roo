@@ -7,6 +7,7 @@ usage: $0 options
 OPTIONS:
     -c CMD   Command name (CMD = assembly|deploy|next)
     -n VER   Next version number (for "next" command)
+    -s ID    Add suffix to assembly filename (for "assembly" command)
     -d       Dry run (for "deploy" command)
     -v       Verbose
     -h       Show this message
@@ -20,9 +21,11 @@ DESCRIPTION:
     Automates building deployment ZIPs and allow later deployment.
     Use "-c deploy -vd" to see what will happen, but without uploading.
     Use "-c next -n 3.4.5.RC1" to change next version to 3.4.5.RC1.
+    Use "-c deploy -s _12-24" to add "_12-24" to the assembly filename.
 
 REQUIRES:
     s3cmd (ls should list the SpringSource buckets)
+    ~/.m2/settings.xml contains a <gpg.passphrase> for the GPG key
 EOF
 }
 
@@ -40,7 +43,8 @@ COMMAND=
 NEXT=
 VERBOSE='0'
 DRY_RUN='0'
-while getopts "h:c:n:vd" OPTION
+SUFFIX=''
+while getopts "s:c:n:vdh" OPTION
 do
     case $OPTION in
         h)
@@ -52,6 +56,9 @@ do
             ;;
         n)
             NEXT=$OPTARG
+            ;;
+        s)
+            SUFFIX=$OPTARG
             ;;
         d)
             DRY_RUN=1
@@ -129,10 +136,12 @@ WORK_DIR="$ROO_HOME/target/roo-deploy/work/$RELEASE_IDENTIFIER"
 log "Work Dir.......: $WORK_DIR"
 DIST_DIR="$ROO_HOME/target/roo-deploy/dist"
 log "Output Dir.....: $DIST_DIR"
-ASSEMBLY_ZIP="$DIST_DIR/$RELEASE_IDENTIFIER.zip"
+ASSEMBLY_ZIP="$DIST_DIR/$RELEASE_IDENTIFIER$SUFFIX.zip"
 log "Assembly Zip...: $ASSEMBLY_ZIP"
-ASSEMBLY_SHA="$DIST_DIR/$RELEASE_IDENTIFIER.zip.sha1"
+ASSEMBLY_SHA="$DIST_DIR/$RELEASE_IDENTIFIER$SUFFIX.zip.sha1"
 log "Assembly SHA...: $ASSEMBLY_SHA"
+ASSEMBLY_ASC="$DIST_DIR/$RELEASE_IDENTIFIER$SUFFIX.zip.asc"
+log "Assembly ASC...: $ASSEMBLY_ASC"
 
 if [[ "$COMMAND" = "assembly" ]]; then
     if [ ! -f $ROO_HOME/target/all/org.springframework.roo.bootstrap-*.jar ]; then
@@ -185,7 +194,17 @@ if [[ "$COMMAND" = "assembly" ]]; then
     sha1sum $ASSEMBLY_ZIP > $ASSEMBLY_SHA
 
     # Sign the ZIP
-    # gpg -a --detach-sign $ASSEMBLY_ZIP
+    grep "<gpg.passphrase>" ~/.m2/settings.xml &>/dev/null
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "~/.m2/settings.xml does not contain a <gpg.passphrase> (grep exit code $EXITED)." >&2; exit 1;
+    fi
+    PASSPHRASE=`grep "<gpg.passphrase>" ~/.m2/settings.xml | sed 's/<gpg.passphrase>//' | sed 's/<\/gpg.passphrase>//' | sed 's/ //g'`
+    GPG_OPTS='-q'
+    if [ "$VERBOSE" = "1" ]; then
+        GPG_OPTS='-v'
+    fi
+    echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
     
     # Return to the original directory
     popd &>/dev/null
@@ -222,6 +241,7 @@ if [[ "$COMMAND" = "deploy" ]]; then
         "--add-header=x-amz-meta-project.name:$PROJECT_NAME" \
         $ASSEMBLY_ZIP $AWS_PATH
     s3cmd put $S3CMD_OPTS --acl-public $ASSEMBLY_SHA $AWS_PATH
+    s3cmd put $S3CMD_OPTS --acl-public $ASSEMBLY_ASC $AWS_PATH
 fi
 
 if [[ "$COMMAND" = "next" ]]; then
