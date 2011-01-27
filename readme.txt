@@ -268,6 +268,7 @@ PREREQUISITES:
 
    * GPG setup (probably already setup if you followed notes above)
    * Git push privileges (if you can commit, you have this)
+   * VPN access for SSH into static.springframework.org
    * SSH keypair for auto login into static.springframework.org
    * s3cmd setup (so "s3cmd ls" lists spring-roo-repository.s2.org)
    * ~/.m2/settings.xml for spring-roo-repository-release and
@@ -307,8 +308,9 @@ RELEASE PROCEDURE:
    cd $ROO_HOME
    mvn clean package
 
-5. Build the reference guide and deploy to the static staging server
-   (http://www.springsource.org/roo is updated bi-hourly from static):
+5. Build the reference guide and deploy to the static staging server.
+   You must be connected to the VPN for deployment to work. Note that
+   http://www.springsource.org/roo is updated bi-hourly from staging:
 
    cd $ROO_HOME/deployment-support
    mvn clean site site:deploy
