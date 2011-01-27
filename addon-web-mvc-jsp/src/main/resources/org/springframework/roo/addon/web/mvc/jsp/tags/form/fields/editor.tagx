@@ -36,10 +36,24 @@
         <c:out value="${fn:escapeXml(label)}" />
         :
       </label>
-      <form:textarea id="_${sec_field}_id" path="${sec_field}" disabled="${disabled}" />
+      <form:hidden id="_${sec_field}_id" path="${sec_field}" />
+      <div>
+      	<div id="_${sec_field}_id_"></div>
+        <script type="text/javascript">
+           Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id_', widgetType : 'dijit.Editor', widgetAttrs : {disabled: ${disabled}}}));
+           dojo.addOnLoad(function () {
+        	  var src = dojo.byId('_${sec_field}_id');
+              var rte = dijit.byId('_${sec_field}_id_');
+              rte.disabled = ${disabled};
+              rte.onLoadDeferred.addCallback(function(){
+                rte.setValue(src.value);
+                dojo.connect(rte, 'onBlur', function(){src.value = rte.getValue();});
+              });
+            });
+        </script>
+      </div>
       <br />
       <form:errors cssClass="errors" id="_${sec_field}_error_id" path="${sec_field}" />
-      <script type="text/javascript">Spring.addDecoration(new Spring.ElementDecoration({elementId : '_${sec_field}_id', widgetType : 'dijit.Editor', widgetAttrs : {disabled: ${disabled}}})); </script>
     </div>
     <br />
   </c:if>
