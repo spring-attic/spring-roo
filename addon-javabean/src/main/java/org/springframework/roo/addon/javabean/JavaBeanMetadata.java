@@ -4,7 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -44,7 +43,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	@AutoPopulate private boolean gettersByDefault = true;
 	@AutoPopulate private boolean settersByDefault = true;
 
-	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<FieldMetadata, Boolean> declaredFields) {
+	public JavaBeanMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<JavaSymbolName> gaeFieldsOfInterest) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 
@@ -59,12 +58,12 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		}
 
 		// Add getters and setters
-		for (FieldMetadata field : declaredFields.keySet()) {
+		for (FieldMetadata field : governorTypeDetails.getDeclaredFields()) {
 			MethodMetadata accessorMethod = getDeclaredGetter(field);
 			MethodMetadata mutatorMethod = getDeclaredSetter(field);
 
 			// Check to see if GAE is interested
-			if (declaredFields.get(field)) {
+			if (!gaeFieldsOfInterest.isEmpty() && gaeFieldsOfInterest.contains(field.getFieldName())) {
 				JavaSymbolName hiddenIdFieldName;
 				if (field.getFieldType().isCommonCollectionType()) {
 					hiddenIdFieldName = getFieldName(field.getFieldName().getSymbolName() + "Keys");
@@ -168,6 +167,37 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		return result;
 	}
 
+	public String toString() {
+		ToStringCreator tsc = new ToStringCreator(this);
+		tsc.append("identifier", getId());
+		tsc.append("valid", valid);
+		tsc.append("aspectName", aspectName);
+		tsc.append("destinationType", destination);
+		tsc.append("governor", governorPhysicalTypeMetadata.getId());
+		tsc.append("itdTypeDetails", itdTypeDetails);
+		return tsc.toString();
+	}
+
+	public static final String getMetadataIdentiferType() {
+		return PROVIDES_TYPE;
+	}
+
+	public static final String createIdentifier(JavaType javaType, Path path) {
+		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
+	}
+
+	public static final JavaType getJavaType(String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+
+	public static final Path getPath(String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+
+	public static boolean isValid(String metadataIdentificationString) {
+		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
+	}
+
 	private InvocableMemberBodyBuilder getGaeAccessorBody(FieldMetadata field, JavaSymbolName hiddenIdFieldName) {
 		InvocableMemberBodyBuilder bodyBuilder;
 
@@ -195,9 +225,8 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 	private void processGaeAnnotations(FieldMetadata field) {
 		for (AnnotationMetadata annotation : field.getAnnotations()) {
 			if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToOne")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.OneToMany")) || annotation.getAnnotationType().equals(new JavaType("javax.persistence.ManyToMany"))) {
-				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(annotation.getAnnotationType()).build(), true));
+				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, annotation, true));
 				builder.addFieldAnnotation(new DeclaredFieldAnnotationDetails(field, new AnnotationMetadataBuilder(new JavaType("javax.persistence.Transient")).build()));
-				break;
 			}
 		}
 	}
@@ -365,36 +394,5 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		bodyBuilder.appendFormalLine("return this." + entityName + ";");
 
 		return bodyBuilder;
-	}
-	
-	public String toString() {
-		ToStringCreator tsc = new ToStringCreator(this);
-		tsc.append("identifier", getId());
-		tsc.append("valid", valid);
-		tsc.append("aspectName", aspectName);
-		tsc.append("destinationType", destination);
-		tsc.append("governor", governorPhysicalTypeMetadata.getId());
-		tsc.append("itdTypeDetails", itdTypeDetails);
-		return tsc.toString();
-	}
-
-	public static final String getMetadataIdentiferType() {
-		return PROVIDES_TYPE;
-	}
-
-	public static final String createIdentifier(JavaType javaType, Path path) {
-		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
-	}
-
-	public static final JavaType getJavaType(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static final Path getPath(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
-	}
-
-	public static boolean isValid(String metadataIdentificationString) {
-		return PhysicalTypeIdentifierNamingUtils.isValid(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 }
