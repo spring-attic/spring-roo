@@ -101,21 +101,23 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 		if (declaredFieldAnnotationDetails == null) {
 			return;
 		}
-        JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredFieldAnnotationDetails.getFieldMetadata().getDeclaredByMetadataId());
-        if (!declaredFieldAnnotationDetails.isRemoveAnnotation()) {
-		    Assert.isTrue(!declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations().contains(declaredFieldAnnotationDetails.getFieldAnnotation()), "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-        } else {
-            Assert.isTrue(declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations().contains(declaredFieldAnnotationDetails.getFieldAnnotation()), "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' cannot be removed as it is not present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
-        }
-        fieldAnnotations.add(declaredFieldAnnotationDetails);
+		JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredFieldAnnotationDetails.getFieldMetadata().getDeclaredByMetadataId());
+		boolean hasAnnotation = MemberFindingUtils.getAnnotationOfType(declaredFieldAnnotationDetails.getFieldMetadata().getAnnotations(), declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType()) != null;
+		if (!declaredFieldAnnotationDetails.isRemoveAnnotation()) {
+			Assert.isTrue(!hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		} else {
+			Assert.isTrue(hasAnnotation, "Field annotation '@" + declaredFieldAnnotationDetails.getFieldAnnotation().getAnnotationType().getSimpleTypeName() + "' cannot be removed as it is not present on the target field '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredFieldAnnotationDetails.getFieldMetadata().getFieldName().getSymbolName() + "' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		}
+		fieldAnnotations.add(declaredFieldAnnotationDetails);
 	}
 
 	public void addMethodAnnotation(DeclaredMethodAnnotationDetails declaredMethodAnnotationDetails) {
 		if (declaredMethodAnnotationDetails == null) {
 			return;
 		}
-        JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredMethodAnnotationDetails.getMethodMetadata().getDeclaredByMetadataId());
-		Assert.isTrue(!declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations().contains(declaredMethodAnnotationDetails.getMethodAnnotation()), "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target method '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName() + "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
+		JavaType declaredBy = PhysicalTypeIdentifier.getJavaType(declaredMethodAnnotationDetails.getMethodMetadata().getDeclaredByMetadataId());
+		boolean hasAnnotation = MemberFindingUtils.getAnnotationOfType(declaredMethodAnnotationDetails.getMethodMetadata().getAnnotations(), declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType()) != null;
+		Assert.isTrue(!hasAnnotation, "Method annotation '@" + declaredMethodAnnotationDetails.getMethodAnnotation().getAnnotationType().getSimpleTypeName() + "' is already present on the target method '" + declaredBy.getFullyQualifiedTypeName() + "." + declaredMethodAnnotationDetails.getMethodMetadata().getMethodName().getSymbolName() + "()' (ITD target '" + aspect.getFullyQualifiedTypeName() + "')");
 		methodAnnotations.add(declaredMethodAnnotationDetails);
 	}
 
@@ -128,7 +130,7 @@ public final class ItdTypeDetailsBuilder extends AbstractMemberHoldingTypeDetail
 	}
 
 	@Deprecated
-	// should use addAnnotation() instead
+	// Should use addAnnotation() instead
 	public void addTypeAnnotation(AnnotationMetadata annotationMetadata) {
 		addAnnotation(annotationMetadata);
 	}
