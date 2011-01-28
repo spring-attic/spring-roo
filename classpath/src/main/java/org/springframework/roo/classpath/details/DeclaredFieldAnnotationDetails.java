@@ -11,11 +11,8 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1
  */
 public final class DeclaredFieldAnnotationDetails {
-	
 	private FieldMetadata fieldMetadata;
-	
 	private AnnotationMetadata fieldAnnotation;
-	
 	private boolean removeAnnotation;
 
 	/**
@@ -30,6 +27,9 @@ public final class DeclaredFieldAnnotationDetails {
 	public DeclaredFieldAnnotationDetails(FieldMetadata fieldMetadata, AnnotationMetadata fieldAnnotation, boolean removeAnnotation) {
 		Assert.notNull(fieldMetadata, "Field metadata required");
 		Assert.notNull(fieldAnnotation, "Field annotation required");
+		if (removeAnnotation) {
+			Assert.isTrue(fieldAnnotation.getAttributeNames().isEmpty(), "Field annotation '@" + fieldAnnotation.getAnnotationType().getSimpleTypeName() + "' (on the target field '" + fieldMetadata.getFieldType().getFullyQualifiedTypeName() + "." + fieldMetadata.getFieldName().getSymbolName() + ") must not have any attributes when requesting its removal");
+		}
 		this.fieldMetadata = fieldMetadata;
 		this.fieldAnnotation = fieldAnnotation;
 		this.removeAnnotation = removeAnnotation;
