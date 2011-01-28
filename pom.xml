@@ -95,12 +95,17 @@
             <id>spring-roo-repository-release</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/release</url>
-            <snapshots><enabled>false</enabled></snapshots>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>spring-roo-repository-snapshot</id>
             <name>Spring Roo Repository</name>
             <url>http://spring-roo-repository.springsource.org/snapshot</url>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
         </repository>
     </repositories>
 
