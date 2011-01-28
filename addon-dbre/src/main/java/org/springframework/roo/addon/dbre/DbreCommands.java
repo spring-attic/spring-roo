@@ -38,7 +38,7 @@ public class DbreCommands implements CommandMarker {
 		dbreOperations.displayDatabaseMetadata(schema, file, view);
 	}
 
-	@CliCommand(value = "database reverse engineer", help = "Create and updates entities based on te database metadata")
+	@CliCommand(value = "database reverse engineer", help = "Create and update entities based on database metadata")
 	public void serializeDatabaseMetadata(
 		@CliOption(key = "schema", mandatory = true, help = "The database schema name") Schema schema, 
 		@CliOption(key = "package", mandatory = false, help = "The package in which new entities will be placed") JavaPackage destinationPackage,
