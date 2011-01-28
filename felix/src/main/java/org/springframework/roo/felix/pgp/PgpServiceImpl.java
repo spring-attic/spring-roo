@@ -62,10 +62,10 @@ public class PgpServiceImpl implements PgpService {
 	private boolean automaticTrust = false;
 	private BundleContext context;
 	private static final File ROO_PGP_FILE = new File(System.getProperty("user.home") + File.separatorChar + ".spring_roo_pgp.bpg");
-	private static final String DEFAULT_KEYSERVER_URL = "http://pgpkeys.pca.dfn.de/pks/lookup?op=get&search=";
-//	private static final String DEFAULT_KEYSERVER_URL = "http://pgp.mit.edu:11371/pks/lookup?op=get&search=";
+	private static final String DEFAULT_KEYSERVER_URL = "http://keyserver.ubuntu.com/pks/lookup?op=get&search=";
+	// private static final String DEFAULT_KEYSERVER_URL = "http://pgp.mit.edu/pks/lookup?op=get&search=";
     private static final int BUFFER_SIZE = 1024;
-    private SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();
+    private SortedSet<PgpKeyId> discoveredKeyIds = new TreeSet<PgpKeyId>();	
     
     static {
 		Security.addProvider(new BouncyCastleProvider());
