@@ -13,8 +13,8 @@
 	<url>http://static.springframework.org/spring-roo/site/index.html</url>
     <distributionManagement>
         <site>
-            <id>static.springframework.org</id>
-            <url>scp://static.springframework.org/var/www/domains/springframework.org/static/htdocs/spring-roo</url>
+            <id>static.springsource.org</id>
+            <url>scp://static.springsource.org/var/www/domains/springframework.org/static/htdocs/spring-roo</url>
         </site>
     </distributionManagement>
     <build>

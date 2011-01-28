@@ -160,6 +160,7 @@ if [[ ! "$EXITED" = "0" ]]; then
     l_error "roo-deploy -c assembly failed (exit code $EXITED)." >&2; exit 1;
 fi
 ./roo-deploy.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
+EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "roo-deploy -c deploy failed (exit code $EXITED)." >&2; exit 1;
 fi

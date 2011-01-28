@@ -184,14 +184,21 @@ if [[ "$COMMAND" = "assembly" ]]; then
 
     # Change directories to avoid absolute paths
     pushd $WORK_DIR/.. &>/dev/null
+    log "Running ZIP from `pwd`"
     ZIP_OPTS='-q'
     if [ "$VERBOSE" = "1" ]; then
         ZIP_OPTS='-v'
     fi
-    zip $ZIP_OPTS $ASSEMBLY_ZIP -r -xi $RELEASE_IDENTIFIER
+    log "ZIP command: zip $ZIP_OPTS $ASSEMBLY_ZIP -r $RELEASE_IDENTIFIER"
+    zip $ZIP_OPTS $ASSEMBLY_ZIP -r $RELEASE_IDENTIFIER
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "ZIP process failed (zip exit code $EXITED)." >&2; exit 1;
+    fi
 
-    # Hash it
-    sha1sum $ASSEMBLY_ZIP > $ASSEMBLY_SHA
+    # Hash the ZIP
+    pushd $DIST_DIR &>/dev/null
+    sha1sum *.zip > $ASSEMBLY_SHA
 
     # Sign the ZIP
     grep "<gpg.passphrase>" ~/.m2/settings.xml &>/dev/null
@@ -205,8 +212,13 @@ if [[ "$COMMAND" = "assembly" ]]; then
         GPG_OPTS='-v'
     fi
     echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "GPG process failed (gpg exit code $EXITED)." >&2; exit 1;
+    fi
     
     # Return to the original directory
+    popd &>/dev/null
     popd &>/dev/null
 fi
 
