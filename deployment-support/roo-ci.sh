@@ -123,7 +123,7 @@ fi
 # Setup correct options for a dry run vs normal run
 if [[ "$DRY_RUN" = "0" ]]; then
     MAVEN_MAIN_OPTS='-e -B clean package deploy'
-    MAVEN_SITE_OPTS='-e -B clean site'  # should be site site:deploy (deferred until SSH server inside VPN)
+    MAVEN_SITE_OPTS='-e -B clean site site:deploy'
     ROO_DEPLOY_OPTS=''
 else
     MAVEN_MAIN_OPTS='-e clean package'
