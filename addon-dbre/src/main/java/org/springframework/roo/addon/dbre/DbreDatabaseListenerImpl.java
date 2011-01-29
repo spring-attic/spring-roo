@@ -118,10 +118,18 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Create new entities from tables
+		List<JavaType> entities = new ArrayList<JavaType>();
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				createNewManagedEntityFromTable(table, destinationPackage);
+				entities.add(createNewManagedEntityFromTable(table, destinationPackage));
+			}
+		}
+
+		// Create integration tests if required
+		if (testAutomatically) {
+			for (JavaType entity : entities) {
+				classpathOperations.newIntegrationTest(entity);
 			}
 		}
 
@@ -199,7 +207,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return table;
 	}
 
-	private void createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
+	private JavaType createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
 		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
 
 		// Create type annotations for new entity
@@ -241,13 +249,10 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
 		classpathOperations.generateClassFile(entityType);
 		
-		// Create integration test class
-		if (testAutomatically) {
-			classpathOperations.newIntegrationTest(entityType.getName());
-		}
-
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
+		
+		return entityType.getName();
 	}
 
 	private boolean hasVersionField(Table table) {

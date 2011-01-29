@@ -216,7 +216,7 @@ public class ClasspathOperationsImpl implements ClasspathOperations {
 		Assert.isTrue(classOrInterfaceTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS, "Type " + entity.getFullyQualifiedTypeName() + " is not a class");
 
 		// Check if the requested entity is a JPA @Entity
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(this.getClass().getName(), classOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(ClasspathOperationsImpl.class.getName(), classOrInterfaceTypeDetails);
 		AnnotationMetadata entityAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(memberDetails, new JavaType("javax.persistence.Entity"));
 		Assert.notNull(entityAnnotation, "Type " + entity.getFullyQualifiedTypeName() + " must be an @Entity");
 
