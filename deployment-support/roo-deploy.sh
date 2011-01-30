@@ -39,6 +39,22 @@ l_error() {
     echo "### ERROR: $@"
 }
 
+s3_execute() {
+    type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
+    S3CMD_OPTS=''
+    if [ "$DRY_RUN" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS --dry-run"
+    fi
+    if [ "$VERBOSE" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS -v"
+    fi
+    s3cmd $S3CMD_OPTS $@
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "s3cmd failed (exit code $EXITED)." >&2; exit 1;
+    fi
+}
+
 COMMAND=
 NEXT=
 VERBOSE='0'
@@ -86,7 +102,6 @@ else
 fi
 
 type -P gpg &>/dev/null || { l_error "gpg not found. Aborting." >&2; exit 1; }
-type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
 
 PRG="$0"
 
@@ -167,6 +182,10 @@ if [[ "$COMMAND" = "assembly" ]]; then
     mkdir -p $WORK_DIR/legal
     cp $ROO_HOME/annotations/target/*-$VERSION.jar $WORK_DIR/annotations
     cp $ROO_HOME/target/all/*.jar $WORK_DIR/bundle
+    rm $WORK_DIR/bundle/*jsch*.jar
+    rm $WORK_DIR/bundle/*jgit*.jar
+    rm $WORK_DIR/bundle/*git*.jar
+    rm $WORK_DIR/bundle/*op4j*.jar
     mv $WORK_DIR/bundle/org.springframework.roo.bootstrap-*.jar $WORK_DIR/bin
     mv $WORK_DIR/bundle/org.apache.felix.framework-*.jar $WORK_DIR/bin
     cp $ROO_HOME/bootstrap/src/main/bin/* $WORK_DIR/bin
@@ -239,21 +258,27 @@ if [[ "$COMMAND" = "deploy" ]]; then
     log "AWS pkg.f.name.: $ZIP_FILENAME"
     log "AWS proj.name..: $PROJECT_NAME"
     log "AWS Path.......: $AWS_PATH"
-    S3CMD_OPTS=''
-    if [ "$DRY_RUN" = "1" ]; then
-        S3CMD_OPTS="$S3CMD_OPTS --dry-run"
-    fi
-    if [ "$VERBOSE" = "1" ]; then
-        S3CMD_OPTS="$S3CMD_OPTS -v"
-    fi
-    s3cmd put $S3CMD_OPTS --acl-public \
+    s3_execute put --acl-public \
         "--add-header=x-amz-meta-bundle.version:$VERSION" \
         "--add-header=x-amz-meta-release.type:$TYPE" \
         "--add-header=x-amz-meta-package.file.name:$ZIP_FILENAME" \
         "--add-header=x-amz-meta-project.name:$PROJECT_NAME" \
         $ASSEMBLY_ZIP $AWS_PATH
-    s3cmd put $S3CMD_OPTS --acl-public $ASSEMBLY_SHA $AWS_PATH
-    s3cmd put $S3CMD_OPTS --acl-public $ASSEMBLY_ASC $AWS_PATH
+    s3_execute put --acl-public $ASSEMBLY_SHA $AWS_PATH
+    s3_execute put --acl-public $ASSEMBLY_ASC $AWS_PATH
+
+    # Clean up old snapshot releases (if we just performed a snapshot release)
+    if [[ "$TYPE" = "snapshot" ]]; then
+        s3_execute ls s3://dist.springframework.org/snapshot/ROO/ | grep '.zip$' | cut -c "30-"> /tmp/dist_all.txt
+        tail -n 5 /tmp/dist_all.txt > /tmp/dist_to_keep.txt
+        cat /tmp/dist_all.txt /tmp/dist_to_keep.txt | sort | uniq -u > /tmp/dist_to_delete.txt
+        for url in `cat /tmp/dist_to_delete.txt`; do
+            s3_execute del "$url"
+            s3_execute del "$url.asc"
+            s3_execute del "$url.sha1"
+        done
+        rm /tmp/dist_*.txt
+    fi
 fi
 
 if [[ "$COMMAND" = "next" ]]; then
