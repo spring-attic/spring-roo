@@ -118,22 +118,23 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		}
 
 		// Create new entities from tables
-		List<JavaType> entities = new ArrayList<JavaType>();
+		List<ClassOrInterfaceTypeDetails> newEntities = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (Table table : tables) {
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
-				entities.add(createNewManagedEntityFromTable(table, destinationPackage));
+				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
 			}
 		}
 
 		// Create integration tests if required
 		if (testAutomatically) {
-			for (JavaType entity : entities) {
-				classpathOperations.newIntegrationTest(entity);
+			for (ClassOrInterfaceTypeDetails entity : newEntities) {
+				classpathOperations.newIntegrationTest(entity.getName());
 			}
 		}
 
 		// Notify
+		managedEntities.addAll(newEntities);
 		for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
 			MetadataItem metadataItem = metadataService.get(managedEntity.getDeclaredByMetadataId(), true);
 			if (metadataItem != null) {
@@ -207,7 +208,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		return table;
 	}
 
-	private JavaType createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
+	private ClassOrInterfaceTypeDetails createNewManagedEntityFromTable(Table table, JavaPackage destinationPackage) {
 		JavaType javaType = DbreTypeUtils.suggestTypeNameForNewTable(table.getName(), destinationPackage);
 
 		// Create type annotations for new entity
@@ -252,7 +253,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
 		
-		return entityType.getName();
+		return entityType;
 	}
 
 	private boolean hasVersionField(Table table) {
