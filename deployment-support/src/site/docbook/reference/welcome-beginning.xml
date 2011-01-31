@@ -146,13 +146,11 @@
     <title>Step 1: Starting a Typical Project</title>
 
     <para>Now that we have spoken with our client (the Pizza Shop owner) to
-    gather the first idea</para>
-
-    <para>s and requirements for the project we can get started with the
-    development of the project. After <link
+    gather the first ideas and requirements for the project we can get started
+    with the development of the project. After <link
     linkend="intro-installation">installing</link> a JDK, <link
-    linkend="intro">Spring Roo</link> and Maven, we prepare a clean workspace
-    for our project we first create a new directory:</para>
+    linkend="intro">Spring Roo</link> and Maven, we create a new directory for
+    our project:</para>
 
     <para><programlisting>&gt; mkdir pizza
 &gt; cd pizza
@@ -160,7 +158,7 @@ pizza&gt;</programlisting></para>
 
     <para>Next, we start Spring Roo and type <emphasis role="bold">'<link
     linkend="command-index-hint-commands">hint</link>'</emphasis> to obtain
-    contexts sensitive guidance from the Roo shell:<programlisting>pizza&gt; <emphasis
+    context-sensitive guidance from the Roo shell:<programlisting>pizza&gt; <emphasis
           role="bold">roo</emphasis>
     ____  ____  ____  
    / __ \/ __ \/ __ \ 
@@ -189,7 +187,7 @@ roo&gt;
 </programlisting>There are quite a few usability features within the Roo
     shell. After typing<emphasis role="bold"> <link
     linkend="command-index-hint-commands">hint</link> </emphasis>you may have
-    noticed that this commands guides you in a step-by-step style towards the
+    noticed that this command guides you in a step-by-step style towards the
     completion of your first project. Or if you type<emphasis role="bold">
     <link linkend="command-index-help">help</link></emphasis> you will see a
     list of all commands available to you in the particular context you are
@@ -235,7 +233,7 @@ com.springsource.roo.pizzashop roo&gt;
     this folder structure follows standard Maven conventions by creating
     separate folders for your main project resources and tests. Roo also
     installs a default application context and a log4j configuration for you.
-    Finally, The project pom file contains all required dependencies and
+    Finally, the project pom file contains all required dependencies and
     configurations to get started with our Pizza Shop project.</para>
 
     <para>Once the project structure is created by Roo you can go ahead and
@@ -246,7 +244,7 @@ com.springsource.roo.pizzashop roo&gt;
     To install or change the persistence configuration in your project you can
     use the <emphasis role="bold"><link
     linkend="command-index-persistence-setup">persistence
-    setup</link></emphasis> command (note: utry using the <emphasis
+    setup</link></emphasis> command (note: try using the <emphasis
     role="bold">&lt;TAB&gt;</emphasis> as often as you can to auto-complete
     your commands, options and even obtain contextual help):</para>
 
@@ -270,14 +268,14 @@ Created SRC_MAIN_RESOURCES/META-INF/spring/database.properties
 Managed SRC_MAIN_RESOURCES/META-INF/spring/applicationContext.xml
 Managed ROOT/pom.xml
 com.springsource.roo.pizzashop roo&gt; 
-</programlisting>So in this case we have installed Hibernate as
+</programlisting>So in this case we have installed Hibernate as the
     object-relational mapping (ORM)-provider. Hibernate is one of three ORM
     providers which Roo currently offers. EclipseLink and OpenJPA represent
     the alternative choices. In a similar fashion we have chosen the
-    Hypersonic in-memory database database as our target database. Hypersonic
-    is a convenient database for Roo application development because it
-    relieves the developer from having to install and configure a production
-    scale database.</para>
+    Hypersonic in-memory database as our target database. Hypersonic is a
+    convenient database for Roo application development because it relieves
+    the developer from having to install and configure a production scale
+    database.</para>
 
     <para>When you are ready to test or install your application in a
     production setting, the <emphasis role="bold"><link
@@ -439,7 +437,7 @@ field number --fieldName price --type java.lang.Float </programlisting>After
     <para><programlisting>~.domain.Pizza roo&gt; <emphasis role="bold">field set --fieldName toppings --type ~.domain.Topping</emphasis></programlisting>As
     you can see it is easy to define this relationship even without knowing
     about the exact JPA annotations needed to create this mapping in our
-    <code>Pizza</code> domain entity. In a similar way you can define the 1:1
+    <code>Pizza</code> domain entity. In a similar way you can define the m:1
     relationship between the <code>Pizza</code> and <code>Base</code> domain
     entities by using the <emphasis role="bold"><link
     linkend="command-index-field-reference">field reference</link></emphasis>
@@ -469,10 +467,10 @@ field set --fieldName pizzas --type ~.domain.Pizza
     <title>Step 3: Integration Tests</title>
 
     <para>Once you are done with creating the first iteration of your domain
-    model you naturally want to see if it works. Lucky we have instructed Roo
-    to create integration tests for our domain objects all along. Hint: if you
-    have not created any integration tests while developing your domain model
-    you can still easily create them using the <link
+    model you naturally want to see if it works. Luckily we have instructed
+    Roo to create integration tests for our domain objects all along. Hint: if
+    you have not created any integration tests while developing your domain
+    model you can still easily create them using the <link
     linkend="command-index-test-integration"><emphasis role="bold">test
     integration</emphasis></link> command. Once your tests are in place it is
     time to run them using the <emphasis role="bold"><link
@@ -526,7 +524,7 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 
     <para>By default Roo projects do not contain any IDE-specific workspace
     configuration artifacts. This means your IDE won't be able to import your
-    Pizza Shop project by default. The Roo shell can helps us creating
+    Pizza Shop project by default. The Roo shell can help us create
     IDE-specific workspace configuration artifacts by means of the <link
     linkend="command-index-perform-eclipse"><emphasis role="bold">perform
     eclipse</emphasis></link> command. However, you should not use this
@@ -555,9 +553,9 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Final Memory: 24M/79M
 [INFO] ------------------------------------------------------------------------
 </programlisting>Note, when issuing this command for the first time you can
-    expect delays while Maven downloads the dependencies and it's sources into
-    your local repository. Once this command has completed you are ready to
-    import your project into STS by clicking 'File &gt; Import &gt; General
+    expect delays while Maven downloads the dependencies and their sources
+    into your local repository. Once this command has completed you are ready
+    to import your project into STS by clicking 'File &gt; Import &gt; General
     &gt; Existing Projects into Workspace'. Once your project is imported into
     STS you can take a look at the Java sources. For example you can run the
     included JUnit tests by right clicking the pizzashop project and then
@@ -572,7 +570,7 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
 
     <para>As detailed in the <link linkend="architecture">Application
     Architecture</link> chapter of this documentation Roo projects leverage
-    AspectJ Intertype declarations extensively. This does, however, not affect
+    AspectJ Intertype declarations extensively. This does not, however, affect
     your ability to use code completion features offered by STS. To see code
     completion working in action you can open an existing integration test and
     use the <code>testMarkerMethod()</code> method to test it. For example you
@@ -642,7 +640,7 @@ Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
   <section xml:id="beginning-step-6">
     <title>Step 6: Loading the Web Server</title>
 
-    <para>To deploy your application in a Web container during the project
+    <para>To deploy your application in a Web container during project
     development you have several options available:</para>
 
     <para><itemizedlist>
@@ -726,7 +724,7 @@ Managed SRC_MAIN_WEBAPP/WEB-INF/spring/webmvc-config.xml
     addition of Spring Security to your project).</para>
 
     <para>In order to secure the views for the <code>Topping</code>,
-    <code>Base</code> and <code>Pizza</code> resource in the Pizza Shop
+    <code>Base, </code>and <code>Pizza</code> resources in the Pizza Shop
     application you need to open the
     <code>applicationContext-security.xml</code> file in the
     <code>src/main/resources/META-INF/spring</code> folder:</para>

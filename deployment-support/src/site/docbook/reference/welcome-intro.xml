@@ -434,7 +434,7 @@
 
       <listitem>
         <para>Apache Maven 2.0.9 or above installed and in the path (for use
-        with Roo-created projects; Roo itself do not require Maven)</para>
+        with Roo-created projects; Roo itself does require Maven)</para>
       </listitem>
     </itemizedlist>
 
@@ -680,7 +680,7 @@ $ <emphasis role="bold">mvn tomcat:run</emphasis></programlisting>
         <para><emphasis>vote.roo</emphasis>: The Voting sample script was
         built live on-stage during SpringOne Europe 2009, as detailed in the
         project <link linkend="background-history">history</link> section.
-        This is nice sample script because it's quite small and only has two
+        This is a nice sample script because it's quite small and only has two
         entities. It also demonstrates Spring Security usage.</para>
       </listitem>
 

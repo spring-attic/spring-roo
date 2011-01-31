@@ -420,7 +420,7 @@ public class Choice {
     mutator (getter and setter) to automatically be generated for each field
     in the class. These accessors and mutators are automatically maintained in
     an AspectJ ITD by Roo. If you write your own accessor or mutator in the
-    normal .java file and Roo will automatically remove the corresponding
+    normal .java file, Roo will automatically remove the corresponding
     generated method from the ITD. You can also remove the
     <code>@RooJavaBean</code> annotation if you don't want any generated
     accessors or mutators (although those related to the version and
@@ -569,7 +569,7 @@ public class Choice {
           <para><emphasis>Testing</emphasis>: In a normal application a DAO
           provides an interface that could be easily stubbed as part of unit
           testing. The interesting point about testing is that most people use
-          mocking instead of stubbing in modern application, making it
+          mocking instead of stubbing in modern applications, making it
           attractive to simply mock the persistence method or two that you
           actually require for a test (rather than the crudeness of stubbing
           an entire DAO interface). In Roo-based applications you simply mock
@@ -614,7 +614,7 @@ public class Choice {
           ITDs could not be provided by the user in order to maintain
           conceptual parity with the remainder of the Roo application (which
           probably does have some JPA). If a large number of entities are
-          effected, the project would probably benefit from the user writing a
+          affected, the project would probably benefit from the user writing a
           Roo add-on which will automatically manage the ITDs just as Roo does
           for JPA.</para>
         </listitem>
