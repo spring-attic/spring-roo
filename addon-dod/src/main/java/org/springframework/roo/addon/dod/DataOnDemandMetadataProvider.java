@@ -115,11 +115,9 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			// Abort if the entity's class details aren't available (parse error etc)
 			return null;
 		}
-		
-		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>(); 
-		 
+
 		// Identify all the mutators we care about on the entity
-	//	Map<MethodMetadata, FieldMetadata> locatedMutators = new LinkedHashMap<MethodMetadata, FieldMetadata>();
+		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceTypeDetails);
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
