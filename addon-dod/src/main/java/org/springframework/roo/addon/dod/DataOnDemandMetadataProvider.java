@@ -11,6 +11,7 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -115,10 +116,10 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			return null;
 		}
 		
-		Map<FieldMetadata, DataOnDemandMetadata> collaboratingDataOnDemandMetadata = new HashMap<FieldMetadata, DataOnDemandMetadata>();
-
+		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>(); 
+		 
 		// Identify all the mutators we care about on the entity
-		Map<MethodMetadata, FieldMetadata> locatedMutators = new LinkedHashMap<MethodMetadata, FieldMetadata>();
+	//	Map<MethodMetadata, FieldMetadata> locatedMutators = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceTypeDetails);
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
@@ -129,14 +130,13 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
 			if (field == null) continue;
-			locatedMutators.put(method, field);
 
 			// Track any changes to that method (eg it goes away)
 			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 
 			// Look up collaborating metadata
 			DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
-			collaboratingDataOnDemandMetadata.put(field, otherMetadata);
+			locatedMutators.put(method, new CollaboratingDataOnDemandMetadataHolder(field, otherMetadata));
 		}
 		
 		MethodMetadata findEntriesMethod = entityMetadata.getFindEntriesMethod();
@@ -153,13 +153,15 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		metadataDependencyRegistry.registerDependency(entityClassOrInterfaceMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 		
-		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, entityClassOrInterfaceTypeDetails, collaboratingDataOnDemandMetadata);
+		return new DataOnDemandMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, identifierAccessor, findMethod, findEntriesMethod, persistMethod, flushMethod, locatedMutators, entityClassOrInterfaceTypeDetails.getName());
 	}
 	
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
 		AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
 		AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
-		if (manyToOneAnnotation == null && oneToOneAnnotation == null) {
+		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType(RooEntity.class.getName()));
+		
+		if (manyToOneAnnotation == null && oneToOneAnnotation == null && rooEntityAnnotation == null) {
 			return null;
 		}
 		
