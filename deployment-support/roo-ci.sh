@@ -5,9 +5,11 @@ cat << EOF
 usage: $0 options
 
 OPTIONS:
-    -d       Dry run (ie do not deploy)
-    -f       Force execution, ignoring version checks
+    -d       Dry run (ie do not deploy or prune older releases)
+    -t       Test assembly with default Maven repo (slow)
+    -T       Test assembly with empty Maven repo (very slow, but thorough)
     -v       Verbose
+    -f       Force execution, ignoring normal version checks
     -h       Show this message
 
 DESCRIPTION:
@@ -17,9 +19,12 @@ DESCRIPTION:
     reflect local system time and a Git hash for easy identification. The
     overall process is as follow, with any failure causing an early exit:
       * Aborts if version != *.BUILD-SNAPSHOT (unless -f was indicated)
-      * Performs a "mvn clean package deploy" from the project root
+      * Performs a "mvn clean package" from the project root
       * Performs a "mvn clean site" from deployment-support
-      * Performs "roo-deploy.sh" assembly and deploy processes
+      * Performs "roo-deploy.sh assembly" (with -T/t if requested)
+      * Performs "mvn deploy" from the project root
+      * Performs "roo-deploy.sh deploy" to release the assembly
+      * Removes older snapshot releases from S3
 
 RETURNS:
     0 if successful or the version was != *.BUILD-SNAPSHOT
@@ -40,10 +45,27 @@ l_error() {
     echo "### ERROR: $@"
 }
 
+s3_execute() {
+    type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
+    S3CMD_OPTS=''
+    if [ "$DRY_RUN" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS --dry-run"
+    fi
+    if [ "$VERBOSE" = "1" ]; then
+        S3CMD_OPTS="$S3CMD_OPTS -v"
+    fi
+    s3cmd $S3CMD_OPTS $@
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "s3cmd failed (exit code $EXITED)." >&2; exit 1;
+    fi
+}
+
 VERBOSE='0'
 DRY_RUN='0'
 FORCE='0'
-while getopts "vdhf" OPTION
+TEST=''
+while getopts "vdhftT" OPTION
 do
     case $OPTION in
         h)
@@ -55,6 +77,12 @@ do
             ;;
         v)
             VERBOSE=1
+            ;;
+        t)
+            TEST="-t"
+            ;;
+        T)
+            TEST="-T"
             ;;
         f)
             FORCE=1
@@ -122,12 +150,14 @@ fi
 
 # Setup correct options for a dry run vs normal run
 if [[ "$DRY_RUN" = "0" ]]; then
-    MAVEN_MAIN_OPTS='-e -B clean package deploy'
+    MAVEN_MAIN_OPTS='-e -B clean package'
     MAVEN_SITE_OPTS='-e -B clean site site:deploy'
+    MAVEN_DEPLOY_OPTS='-e -B deploy'
     ROO_DEPLOY_OPTS=''
 else
-    MAVEN_MAIN_OPTS='-e clean package'
-    MAVEN_SITE_OPTS='-e clean site'
+    MAVEN_MAIN_OPTS='-e -B clean package'
+    MAVEN_SITE_OPTS='-e -B clean site'
+    MAVEN_DEPLOY_OPTS='never_invoked'
     ROO_DEPLOY_OPTS='-d'
 fi
 
@@ -135,18 +165,20 @@ fi
 if [[ "$VERBOSE" = "0" ]]; then
     MAVEN_MAIN_OPTS="$MAVEN_MAIN_OPTS -q"
     MAVEN_SITE_OPTS="$MAVEN_SITE_OPTS -q"
+    MAVEN_DEPLOY_OPTS="$MAVEN_DEPLOY_OPTS -q"
 else
     ROO_DEPLOY_OPTS="$ROO_DEPLOY_OPTS -v"
 fi
 
 pushd $ROO_HOME/ &>/dev/null
+# Do the initial mvn packaging (but don't dpeloy)
 mvn $MAVEN_MAIN_OPTS
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "Maven main build failed (exit code $EXITED)." >&2; exit 1;
 fi
 
-# Build (and probably deploy) reference guide docs
+# Build reference guide docs (and deploy them; it's not a big deal if the later tests fail but the docs were updated)
 pushd $ROO_HOME/deployment-support &>/dev/null
 mvn $MAVEN_SITE_OPTS
 EXITED=$?
@@ -154,16 +186,46 @@ if [[ ! "$EXITED" = "0" ]]; then
     l_error "Maven site build failed (exit code $EXITED)." >&2; exit 1;
 fi
 
-./roo-deploy.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS
+# Build (and test if user used -T or -t) the assembly
+./roo-deploy.sh -c assembly -s $SUFFIX $ROO_DEPLOY_OPTS $TEST
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "roo-deploy -c assembly failed (exit code $EXITED)." >&2; exit 1;
 fi
+
+# Deploy the Maven JARs (we do this first to avoid people getting the latest snapshot assembly ZIP before the latest annotation JAR is visible)
+if [[ "$DRY_RUN" = "0" ]]; then
+    pushd $ROO_HOME/ &>/dev/null
+    mvn $MAVEN_DEPLOY_OPTS
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "Maven deploy failed (exit code $EXITED)." >&2; exit 1;
+    fi
+    popd &>/dev/null
+fi
+
+# Deploy the assembly so people can download it (note roo-deploy.sh will prune old snapshots from the download site automatically)
 ./roo-deploy.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
 EXITED=$?
 if [[ ! "$EXITED" = "0" ]]; then
     l_error "roo-deploy -c deploy failed (exit code $EXITED)." >&2; exit 1;
 fi
+
+# Prune some old releases. We can rely on the fact CI runs at least every 24 hours and thus we can prune anything older than say 3 days
+OK_DATE_0=`date +%Y-%m-%d`
+OK_DATE_1=`date --date '-1 day' +%Y-%m-%d`
+OK_DATE_2=`date --date '-2 day' +%Y-%m-%d`
+log "Obtaining listing of all snapshot resources on S3"
+s3_execute ls -r s3://spring-roo-repository.springsource.org/snapshot > /tmp/dist_snapshots.txt
+log "Retain Dates...: $OK_DATE_0 $OK_DATE_1 $OK_DATE_2"
+log "S3 Found.......: `cat /tmp/dist_snapshots.txt | wc -l`"
+grep -v -e $OK_DATE_0 -e $OK_DATE_1 -e $OK_DATE_2 /tmp/dist_snapshots.txt > /tmp/dist_delete.txt
+log "S3 To Delete...: `cat /tmp/dist_delete.txt | wc -l`"
+cat /tmp/dist_delete.txt | cut -c "30-" > /tmp/dist_delete_cut.txt
+for filename in `cat /tmp/dist_delete_cut.txt`; do
+    s3_execute del "$filename"
+done
+log "Pruning old snapshots completed successfully"
 
 # Return to the original directory
 popd &>/dev/null

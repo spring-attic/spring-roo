@@ -286,8 +286,8 @@ RELEASE PROCEDURE:
    git pull
    mvn clean package
    cd $ROO_HOME/deployment-support
-   mvn clean site:site
-   ./roo-deploy -c assembly (use -v for verbose logging)
+   mvn clean site
+   ./roo-deploy -c assembly -tv (use -t for extra tests)
 
 2. Verify the assembly ZIP looks good:
 
@@ -315,10 +315,13 @@ RELEASE PROCEDURE:
    cd $ROO_HOME/deployment-support
    mvn clean site site:deploy
 
-6. Create the final assembly ZIP (must happen *after* site built):
+6. Create the final assembly ZIP (must happen *after* site built). We
+   run full tests here, even ensuring all the Maven artifacts used by
+   user projects are available. This takes a lot of time, but it is
+   very helpful for our users:
 
    cd $ROO_HOME/deployment-support
-   ./roo-deploy -c assembly (use -v for verbose logging)
+   ./roo-deploy -c assembly -Tv (-T means Maven tests with empty repo)
 
 7. Repeat the verification tests on the assembly ZIP (see above). See
    note below if coordinating a release with the STS team.

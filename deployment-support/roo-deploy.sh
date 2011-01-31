@@ -8,6 +8,8 @@ OPTIONS:
     -c CMD   Command name (CMD = assembly|deploy|next)
     -n VER   Next version number (for "next" command)
     -s ID    Add suffix to assembly filename (for "assembly" command)
+    -t       Test assembly with default Maven repo (for "assembly" command)
+    -T       Test assembly with empty Maven repo (for "assembly" command)
     -d       Dry run (for "deploy" command)
     -v       Verbose
     -h       Show this message
@@ -19,13 +21,19 @@ COMMAND NAMES:
 
 DESCRIPTION:
     Automates building deployment ZIPs and allow later deployment.
+    Note "assembly" and "deploy" always test ZIP integrity via GPG and SHA.
+    The -t and -T options are both slow as they make and run user projects.
+    The -T option is extremely slow as it forces Maven to download everything.
+    Use "-c assembly -tv" to build and test the assembly in most cases.
+    Use "-c assembly -s _12-24" to add "_12-24" to the assembly filename.
     Use "-c deploy -vd" to see what will happen, but without uploading.
     Use "-c next -n 3.4.5.RC1" to change next version to 3.4.5.RC1.
-    Use "-c deploy -s _12-24" to add "_12-24" to the assembly filename.
 
 REQUIRES:
     s3cmd (ls should list the SpringSource buckets)
     ~/.m2/settings.xml contains a <gpg.passphrase> for the GPG key
+    mvn and wget (only required if using -t or -T)
+    sha1sum, zip, unzip and other common *nix commands
 EOF
 }
 
@@ -55,12 +63,99 @@ s3_execute() {
     fi
 }
 
+quick_zip_gpg_tests() {
+    pushd $DIST_DIR &>/dev/null
+
+    # Test the hash worked OK
+    # (for script testing purposes only:) sed -i 's/0/1/g' $ASSEMBLY_SHA
+    sha1sum --check --status $ASSEMBLY_SHA
+    if [[ ! "$?" = "0" ]]; then
+        l_error "sha1sum verification of $ASSEMBLY_SHA failed" >&2; exit 1;
+    fi
+    log "sha1sum test pass: $ASSEMBLY_SHA"
+
+    # Test the signature is OK
+    # (for script testing purposes only:) sed -i 's/0/1/g' $ASSEMBLY_ASC
+    if [ "$VERBOSE" = "1" ]; then
+        gpg -v --batch --verify $ASSEMBLY_ASC
+        EXITED=$?
+    else
+        gpg --batch --verify $ASSEMBLY_ASC &>/dev/null
+        EXITED=$?
+    fi
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "GPG detached signature verification failed (gpg exit code $EXITED)." >&2; exit 1;
+    fi
+    log "gpg signature verification test pass: $ASSEMBLY_ASC"
+
+    popd &>/dev/null
+}
+
+load_roo_build_and_test() {
+    type -P mvn &>/dev/null || { l_error "mvn not found. Aborting." >&2; exit 1; }
+    log "Beginning test script: $@"
+    rm -rf /tmp/rootest
+    mkdir -p /tmp/rootest
+    pushd /tmp/rootest &>/dev/null
+    if [ "$VERBOSE" = "1" ]; then
+        $ROO_CMD $@
+        EXITED=$?
+    else
+        $ROO_CMD $@ &>/dev/null
+        EXITED=$?
+    fi
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "Test failed: $ROO_CMD $@" >&2; exit 1;
+    fi
+    if [ -f /tmp/rootest/src/main/resources/log4j.properties ]; then
+        sed -i 's/org.apache.log4j.ConsoleAppender/org.apache.log4j.varia.NullAppender/g' /tmp/rootest/src/main/resources/log4j.properties
+    fi
+    $MVN_CMD -e -B clean test
+    if [[ ! "$?" = "0" ]]; then
+        l_error "Test failed: $MVN_CMD -e -B clean test" >&2; exit 1;
+    fi
+    popd &>/dev/null
+}
+
+tomcat_stop_start_get_stop() {
+    type -P wget &>/dev/null || { l_error "wget not found. Aborting." >&2; exit 1; }
+    log "Performing MVC testing; expecting GET success for URL: $@"
+    pushd /tmp/rootest &>/dev/null
+    MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    if [ ! "$MVN_TOMCAT_PID" = "" ]; then
+        # doing a kill -9 as it was hanging around for some reason, when it really should have been killed by now
+        log "kill -9 of old mvn tomcat:run with PID $MVN_TOMCAT_PID"
+        kill -9 $MVN_TOMCAT_PID
+        sleep 5
+    fi
+    log "Invoking mvn tomcat:run in background"
+    $MVN_CMD -e -B tomcat:run &>/dev/null 2>&1 &
+    WGET_OPTS="-q"
+    if [ "$VERBOSE" = "1" ]; then
+        WGET_OPTS="-v"
+    fi
+    wget $WGET_OPTS --retry-connrefused --tries=30 -O /tmp/rootest/wget.html $@
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "wget failed: $@ (returned code $EXITED)" >&2; exit 1;
+    fi
+    MVN_TOMCAT_PID=`ps -eo "%p %c %a" | grep Launcher | grep tomcat:run | cut -b "1-6" | sed "s/ //g"`
+    if [ ! "$MVN_TOMCAT_PID" = "" ]; then
+        log "Terminating background mvn tomcat:run process with PID $MVN_TOMCAT_PID"
+        kill $MVN_TOMCAT_PID
+        # no need to sleep, as we'll be at least running Roo between now and the next Tomcat start
+    fi
+    popd &>/dev/null
+}
+
+
 COMMAND=
 NEXT=
 VERBOSE='0'
 DRY_RUN='0'
+TEST='0'
 SUFFIX=''
-while getopts "s:c:n:vdh" OPTION
+while getopts "s:c:n:tTvdh" OPTION
 do
     case $OPTION in
         h)
@@ -78,6 +173,12 @@ do
             ;;
         d)
             DRY_RUN=1
+            ;;
+        t)
+            TEST=1
+            ;;
+        T)
+            TEST=2
             ;;
         v)
             VERBOSE=1
@@ -102,6 +203,9 @@ else
 fi
 
 type -P gpg &>/dev/null || { l_error "gpg not found. Aborting." >&2; exit 1; }
+type -P zip &>/dev/null || { l_error "zip not found. Aborting." >&2; exit 1; }
+type -P unzip &>/dev/null || { l_error "unzip not found. Aborting." >&2; exit 1; }
+type -P sha1sum &>/dev/null || { l_error "sha1sum not found. Aborting." >&2; exit 1; }
 
 PRG="$0"
 
@@ -180,6 +284,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     mkdir -p $WORK_DIR/docs/pdf
     mkdir -p $WORK_DIR/docs/html
     mkdir -p $WORK_DIR/legal
+    mkdir -p $WORK_DIR/samples
     cp $ROO_HOME/annotations/target/*-$VERSION.jar $WORK_DIR/annotations
     cp $ROO_HOME/target/all/*.jar $WORK_DIR/bundle
     rm $WORK_DIR/bundle/*jsch*.jar
@@ -193,6 +298,7 @@ if [[ "$COMMAND" = "assembly" ]]; then
     cp $ROO_HOME/bootstrap/src/main/conf/* $WORK_DIR/conf
     cp $ROO_HOME/bootstrap/readme.txt $WORK_DIR/
     cp `find $ROO_HOME -iname legal-\*.txt` $WORK_DIR/legal
+    cp `find $ROO_HOME -iname \*.roo | grep -v "/target/"` $WORK_DIR/samples
     cp -r $ROO_HOME/deployment-support/target/site/reference/pdf $WORK_DIR/docs/pdf
     cp -r $ROO_HOME/deployment-support/target/site/reference/html $WORK_DIR/docs/html
 
@@ -233,12 +339,56 @@ if [[ "$COMMAND" = "assembly" ]]; then
     echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
     EXITED=$?
     if [[ ! "$EXITED" = "0" ]]; then
-        l_error "GPG process failed (gpg exit code $EXITED)." >&2; exit 1;
+        l_error "GPG detached signature creation failed (gpg exit code $EXITED)." >&2; exit 1;
     fi
-    
+
     # Return to the original directory
     popd &>/dev/null
     popd &>/dev/null
+
+    quick_zip_gpg_tests
+
+    if [ ! "$TEST" = "0" ]; then
+        log "Unzipping Roo distribution to test area"
+        rm -rf /tmp/$RELEASE_IDENTIFIER
+        ZIP_OPTS='-qq'
+        if [ "$VERBOSE" = "1" ]; then
+            ZIP_OPTS=''
+        fi
+        unzip $ZIP_OPTS $ASSEMBLY_ZIP -d /tmp/
+        ROO_CMD="/tmp/$RELEASE_IDENTIFIER/bin/roo.sh"
+        log "Roo command....: $ROO_CMD"
+
+        # Setup Maven and the active repository (we must ensure the annotation JAR matches that in the assembly; it may not have yet been deployed publicly as it's just being tested at present)
+        MVN_CMD='mvn'
+        if [[ "$TEST" = "2" ]]; then
+            MVN_CMD="mvn -gs /tmp/settings.xml"
+            echo "<settings><localRepository>/tmp/repository</localRepository></settings>" > /tmp/settings.xml
+            rm -rf /tmp/repository
+            mkdir -p /tmp/repository/org/springframework/roo/org.springframework.roo.annotations/$VERSION/
+            cp /tmp/$RELEASE_IDENTIFIER/annotations/* /tmp/repository/org/springframework/roo/org.springframework.roo.annotations/$VERSION/
+        else
+            cp /tmp/$RELEASE_IDENTIFIER/annotations/* ~/.m2/repository/org/springframework/roo/org.springframework.roo.annotations/$VERSION/
+        fi
+        if [ "$VERBOSE" = "0" ]; then
+            MVN_CMD="$MVN_CMD -q"
+        fi
+
+        load_roo_build_and_test script vote.roo
+        tomcat_stop_start_get_stop http://localhost:8080/vote
+
+        load_roo_build_and_test script clinic.roo
+        tomcat_stop_start_get_stop http://localhost:8080/petclinic
+
+        load_roo_build_and_test script wedding.roo
+        tomcat_stop_start_get_stop http://localhost:8080/wedding
+
+        load_roo_build_and_test script expenses.roo
+
+        log "Removing Roo distribution from test area"
+        rm -rf /tmp/$RELEASE_IDENTIFIER
+        log "Completed tests successfully"
+    fi
 fi
 
 if [[ "$COMMAND" = "deploy" ]]; then
@@ -250,6 +400,9 @@ if [[ "$COMMAND" = "deploy" ]]; then
         l_error "Unable to find $ASSEMBLY_SHA"
         exit 1
     fi
+
+    quick_zip_gpg_tests
+
     ZIP_FILENAME=`basename $ASSEMBLY_ZIP`
     PROJECT_NAME="Spring Roo"
     AWS_PATH="s3://dist.springframework.org/$TYPE/ROO/"

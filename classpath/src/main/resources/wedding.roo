@@ -11,13 +11,10 @@ field number attending --type java.lang.Integer
 field string specialRequests --sizeMax 100
 field date confirmed --type java.util.Date
 
-test integration
 controller scaffold ~.web.RsvpController
 selenium test --controller ~.web.RsvpController
 
-perform test
-
-// (OPTION: quit, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
+// (OPTION: quit, mvn test, mvn tomcat:run, localhost:8080/wedding, mvn selenium:selenese)
 
 logging setup --level DEBUG --package WEB
 security setup
@@ -28,8 +25,6 @@ finder add --finderName findRsvpsByCodeEquals
 
 email sender setup --hostServer 127.0.0.1
 field email template --class ~.web.PublicRsvpController
-
-perform eclipse
 
 // complete manual configuration as described at http://blog.springsource.com/roo-part-2/
 // start from the "Final Steps" section, towards the bottom of the blog entry
