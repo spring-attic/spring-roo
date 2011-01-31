@@ -129,7 +129,7 @@ tomcat_stop_start_get_stop() {
         sleep 5
     fi
     log "Invoking mvn tomcat:run in background"
-    $MVN_CMD -e -B tomcat:run &>/dev/null 2>&1 &
+    $MVN_CMD -e -B -Dmaven.tomcat.port=8888 tomcat:run &>/dev/null 2>&1 &
     WGET_OPTS="-q"
     if [ "$VERBOSE" = "1" ]; then
         WGET_OPTS="-v"
@@ -375,13 +375,13 @@ if [[ "$COMMAND" = "assembly" ]]; then
         fi
 
         load_roo_build_and_test script vote.roo
-        tomcat_stop_start_get_stop http://localhost:8080/vote
+        tomcat_stop_start_get_stop http://localhost:8888/vote
 
         load_roo_build_and_test script clinic.roo
-        tomcat_stop_start_get_stop http://localhost:8080/petclinic
+        tomcat_stop_start_get_stop http://localhost:8888/petclinic
 
         load_roo_build_and_test script wedding.roo
-        tomcat_stop_start_get_stop http://localhost:8080/wedding
+        tomcat_stop_start_get_stop http://localhost:8888/wedding
 
         load_roo_build_and_test script expenses.roo
 
