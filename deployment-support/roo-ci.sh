@@ -218,11 +218,11 @@ OK_DATE_2=`date --date '-2 day' +%Y-%m-%d`
 log "Obtaining listing of all snapshot resources on S3"
 s3_execute ls -r s3://spring-roo-repository.springsource.org/snapshot > /tmp/dist_snapshots.txt
 log "Retain Dates...: $OK_DATE_0 $OK_DATE_1 $OK_DATE_2"
-log "S3 Found.......: `cat /tmp/dist_snapshots.txt | wc -l`"
+log "S3 Found.......: `grep -v "/$" /tmp/dist_snapshots.txt | wc -l`"
 grep -v -e $OK_DATE_0 -e $OK_DATE_1 -e $OK_DATE_2 /tmp/dist_snapshots.txt > /tmp/dist_delete.txt
-log "S3 To Delete...: `cat /tmp/dist_delete.txt | wc -l`"
+log "S3 To Delete...: `grep -v "/$" /tmp/dist_delete.txt | wc -l`"
 cat /tmp/dist_delete.txt | cut -c "30-" > /tmp/dist_delete_cut.txt
-for filename in `cat /tmp/dist_delete_cut.txt`; do
+for filename in `grep -v "/$" /tmp/dist_delete_cut.txt`; do
     s3_execute del "$filename"
 done
 log "Pruning old snapshots completed successfully"
