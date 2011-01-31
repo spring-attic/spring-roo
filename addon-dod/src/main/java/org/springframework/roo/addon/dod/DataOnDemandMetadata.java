@@ -709,7 +709,9 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 			} else if (field.getFieldType().equals(annotationValues.getEntity())) {
 				// Avoid circular references (ROO-562)
 				initializer = "obj";
-			} else if (collaboratingDataOnDemandMetadata.containsKey(field)) {
+			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
+				initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
+			} else if (collaboratingDataOnDemandMetadata.get(field) != null) {
 				requiredDataOnDemandCollaborators.add(field.getFieldType());
 				String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 
@@ -732,8 +734,6 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 						initializer = collaboratingFieldName + "." + otherMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
 					}
 				}
-			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
-				initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
 			}
 
 			mandatoryMutators.add(mutatorMethod);

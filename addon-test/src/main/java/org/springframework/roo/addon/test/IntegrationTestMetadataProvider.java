@@ -44,6 +44,9 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		// We know governor type details are non-null and can be safely cast
 		
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
+		if (projectMetadata == null || !projectMetadata.isValid()) {
+			return null;
+		}
 		
 		// We need to parse the annotation, which we expect to be present
 		IntegrationTestAnnotationValues annotationValues = new IntegrationTestAnnotationValues(governorPhysicalTypeMetadata);
@@ -55,15 +58,16 @@ public final class IntegrationTestMetadataProvider extends AbstractItdMetadataPr
 		JavaType dodJavaType = new JavaType(annotationValues.getEntity().getFullyQualifiedTypeName() + "DataOnDemand");
 		String dataOnDemandMetadataKey = DataOnDemandMetadata.createIdentifier(dodJavaType, Path.SRC_TEST_JAVA);
 		DataOnDemandMetadata dataOnDemandMetadata = (DataOnDemandMetadata) metadataService.get(dataOnDemandMetadataKey);
-		
+		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid()) {
+			return null;
+		}
+	
 		// Lookup the entity's metadata
 		JavaType javaType = annotationValues.getEntity();
 		Path path = Path.SRC_MAIN_JAVA;
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
- 		
-		// We need to abort if we couldn't find dependent metadata
-		if (dataOnDemandMetadata == null || !dataOnDemandMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
+		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
 		

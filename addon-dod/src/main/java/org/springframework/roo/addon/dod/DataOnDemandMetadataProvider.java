@@ -17,7 +17,6 @@ import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractMemberDiscoveringItdMetadataProvider;
@@ -121,28 +120,23 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, FieldMetadata> locatedMutators = new LinkedHashMap<MethodMetadata, FieldMetadata>();
 		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceTypeDetails);
-		for (MemberHoldingTypeDetails memberHolder : memberDetails.getDetails()) {
-			// avoid BIM; deprecating
-			if (memberHolder.getDeclaredByMetadataId().startsWith("MID:org.springframework.roo.addon.beaninfo.BeanInfoMetadata#")) continue;
-			
-			// Add the methods we care to the locatedMutators
-			for (MethodMetadata method : memberHolder.getDeclaredMethods()) {
-				if (!BeanInfoUtils.isMutatorMethod(method)) {
-					continue;
-				}
-
-				JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
-				if (field == null) continue;
-				locatedMutators.put(method, field);
-				
-				// Track any changes to that method (eg it goes away)
-				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
-
-				// Look up collaborating metadata
-				DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
-				collaboratingDataOnDemandMetadata.put(field, otherMetadata);
+		// Add the methods we care to the locatedMutators
+		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			if (!BeanInfoUtils.isMutatorMethod(method)) {
+				continue;
 			}
+
+			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
+			if (field == null) continue;
+			locatedMutators.put(method, field);
+
+			// Track any changes to that method (eg it goes away)
+			metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
+
+			// Look up collaborating metadata
+			DataOnDemandMetadata otherMetadata = locateCollaboratingMetadata(metadataIdentificationString, field);
+			collaboratingDataOnDemandMetadata.put(field, otherMetadata);
 		}
 		
 		MethodMetadata findEntriesMethod = entityMetadata.getFindEntriesMethod();
