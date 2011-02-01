@@ -16,8 +16,6 @@ import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.ForeignKey;
 import org.springframework.roo.addon.dbre.model.Reference;
 import org.springframework.roo.addon.dbre.model.Table;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.IdentifierMetadata;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
@@ -83,18 +81,25 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String MAPPED_BY = "mappedBy";
 	private static final String REFERENCED_COLUMN = "referencedColumnName";
 
-	private EntityMetadata entityMetadata;
-	private IdentifierMetadata identifierMetadata;
+	private List<? extends FieldMetadata> entityFields;
+	private List<? extends MethodMetadata> entityMethods;
+	private FieldMetadata versionField; 
+	private List<FieldMetadata> identifierFields;
 	private Set<ClassOrInterfaceTypeDetails> managedEntities;
 
-	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, IdentifierMetadata identifierMetadata, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
+	public DbreMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, List<? extends FieldMetadata> entityFields, List<? extends MethodMetadata> entityMethods, FieldMetadata versionField, List<FieldMetadata> identifierFields, Set<ClassOrInterfaceTypeDetails> managedEntities, Database database) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(entityFields, "Entity fields required");
+		Assert.notNull(entityMethods, "EntityW methods required");
+		Assert.notNull(identifierFields, "Identifier fields required");
 		Assert.notNull(managedEntities, "Managed entities required");
+		Assert.notNull(database, "Database required");
 
-		this.entityMetadata = entityMetadata;
-		this.identifierMetadata = identifierMetadata;
+		this.entityFields = entityFields;
+		this.entityMethods = entityMethods;
+		this.versionField = versionField;
+		this.identifierFields = identifierFields;
 		this.managedEntities = managedEntities;
 
 		// Process values from the annotation, if present
@@ -126,7 +131,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
 	}
-
+	
 	private void addManyToManyFields(Database database, Table table) {
 		Map<Table, Integer> owningSideTables = new LinkedHashMap<Table, Integer>();
 
@@ -405,43 +410,47 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 
 		JavaType toStringType = new JavaType("org.springframework.roo.addon.tostring.RooToString");
 		AnnotationMetadata toStringAnnotation = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, toStringType);
-		if (toStringAnnotation != null) {
-			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			List<StringAttributeValue> ignoreFields = new ArrayList<StringAttributeValue>();
-
-			// Copy the existing attributes, excluding the "ignoreFields" attribute
-			boolean alreadyAdded = false;
-			AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(new JavaSymbolName("excludeFields"));
-			if (value != null) {
-				// Ensure we have an array of strings
-				final String errMsg = "Annotation RooToString attribute 'excludeFields' must be an array of strings";
-				if (!(value instanceof ArrayAttributeValue<?>)) {
-					throw new IllegalStateException(errMsg);
-				}
-
-				ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
-				for (Object obj : arrayVal.getValue()) {
-					if (!(obj instanceof StringAttributeValue)) {
-						throw new IllegalStateException(errMsg);
-					}
-
-					StringAttributeValue sv = (StringAttributeValue) obj;
-					if (sv.getValue().equals(fieldName)) {
-						alreadyAdded = true;
-					}
-					ignoreFields.add(sv);
-				}
-			}
-
-			// Add the desired field to ignore to the end
-			if (!alreadyAdded) {
-				ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
-			}
-
-			attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
-			AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(toStringType, attributes);
-			mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
+		if (toStringAnnotation == null) {
+			return;
 		}
+		
+		List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
+		List<StringAttributeValue> ignoreFields = new ArrayList<StringAttributeValue>();
+
+		// Copy the existing attributes, excluding the "ignoreFields" attribute
+		boolean alreadyAdded = false;
+		AnnotationAttributeValue<?> value = toStringAnnotation.getAttribute(new JavaSymbolName("excludeFields"));
+		if (value == null) {
+			return;
+		}
+
+		// Ensure we have an array of strings
+		final String errMsg = "Annotation RooToString attribute 'excludeFields' must be an array of strings";
+		if (!(value instanceof ArrayAttributeValue<?>)) {
+			throw new IllegalStateException(errMsg);
+		}
+
+		ArrayAttributeValue<?> arrayVal = (ArrayAttributeValue<?>) value;
+		for (Object obj : arrayVal.getValue()) {
+			if (!(obj instanceof StringAttributeValue)) {
+				throw new IllegalStateException(errMsg);
+			}
+
+			StringAttributeValue sv = (StringAttributeValue) obj;
+			if (sv.getValue().equals(fieldName)) {
+				alreadyAdded = true;
+			}
+			ignoreFields.add(sv);
+		}
+
+		// Add the desired field to ignore to the end
+		if (!alreadyAdded) {
+			ignoreFields.add(new StringAttributeValue(new JavaSymbolName("ignored"), fieldName));
+		}
+
+		attributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("excludeFields"), ignoreFields));
+		AnnotationMetadataBuilder toStringAnnotationBuilder = new AnnotationMetadataBuilder(toStringType, attributes);
+		mutable.updateTypeAnnotation(toStringAnnotationBuilder.build(), new HashSet<JavaSymbolName>());
 	}
 
 	private FieldMetadata getOneToManyMappedByField(JavaSymbolName fieldName, JavaSymbolName mappedByFieldName, String foreignTableName) {
@@ -480,8 +489,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		if (fieldType != null) {
-			boolean isCompositeKeyColumn = isCompositeKeyColumn(reference.getLocalColumn(), fieldType);
-			if (isCompositeKeyColumn || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
+			if (isCompositeKeyColumn(reference.getLocalColumn()) || reference.getLocalColumn().isPrimaryKey() || !reference.isInsertableOrUpdatable()) {
 				addOtherJoinColumnAttributes(joinColumnBuilder);
 			}
 		}
@@ -518,7 +526,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addOtherFields(Table table) {
-        Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
+		Map<JavaSymbolName, FieldMetadata> uniqueFields = new LinkedHashMap<JavaSymbolName, FieldMetadata>();
 
 		for (Column column : table.getColumns()) {
 			FieldMetadata field = null;
@@ -549,7 +557,6 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private boolean isCompositeKeyField(JavaSymbolName fieldName) {
-		List<FieldMetadata> identifierFields = getIdentifierFields(destination);
 		for (FieldMetadata field : identifierFields) {
 			if (fieldName.equals(field.getFieldName())) {
 				return true;
@@ -558,17 +565,17 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private boolean isCompositeKeyColumn(Column column, JavaType javaType) {
-		List<FieldMetadata> identifierFields = getIdentifierFields(javaType);
+	private boolean isCompositeKeyColumn(Column column) {
 		for (FieldMetadata field : identifierFields) {
 			for (AnnotationMetadata annotation : field.getAnnotations()) {
-				if (annotation.getAnnotationType().equals(COLUMN)) {
-					AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName(NAME));
-					if (nameAttribute != null) {
-						String name = (String) nameAttribute.getValue();
-						if (column.getName().equals(name)) {
-							return true;
-						}
+				if (!annotation.getAnnotationType().equals(COLUMN)) {
+					continue;
+				}
+				AnnotationAttributeValue<?> nameAttribute = annotation.getAttribute(new JavaSymbolName(NAME));
+				if (nameAttribute != null) {
+					String name = (String) nameAttribute.getValue();
+					if (column.getName().equals(name)) {
+						return true;
 					}
 				}
 			}
@@ -576,12 +583,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return false;
 	}
 
-	private List<FieldMetadata> getIdentifierFields(JavaType javaType) {
-		return identifierMetadata != null ? identifierMetadata.getFields() : new ArrayList<FieldMetadata>();
-	}
-
 	private boolean isVersionField(String columnName) {
-		FieldMetadata versionField = entityMetadata.getVersionField();
 		return versionField != null && versionField.getFieldName().getSymbolName().equals(columnName);
 	}
 
@@ -657,23 +659,25 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	}
 
 	private void addToBuilder(FieldMetadata field) {
-		if (field != null && !hasField(field)) {
-			builder.addField(field);
+		if (field == null || hasField(field)) {
+			return;
+		}
+		
+		builder.addField(field);
 
-			// Check for an existing accessor in the governor or in the entity metadata
-			if (!hasAccessor(field)) {
-				builder.addMethod(getAccessor(field));
-			}
+		// Check for an existing accessor in the governor or in the entity metadata
+		if (!hasAccessor(field)) {
+			builder.addMethod(getAccessor(field));
+		}
 
-			// Add boolean accessor for Boolean object fields
-			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) && !hasBooleanPrimitiveAccessor(field)) {
-				builder.addMethod(getBooleanPrimitiveAccessor(field));
-			}
+		// Add boolean accessor for Boolean object fields
+		if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) && !hasBooleanPrimitiveAccessor(field)) {
+			builder.addMethod(getBooleanPrimitiveAccessor(field));
+		}
 
-			// Check for an existing mutator in the governor or in the entity metadata
-			if (!hasMutator(field)) {
-				builder.addMethod(getMutator(field));
-			}
+		// Check for an existing mutator in the governor or in the entity metadata
+		if (!hasMutator(field)) {
+			builder.addMethod(getMutator(field));
 		}
 	}
 
@@ -708,17 +712,19 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<FieldMetadata> governorFields = MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, COLUMN);
 		governorFields.addAll(MemberFindingUtils.getFieldsWithAnnotation(governorTypeDetails, JOIN_COLUMN));
 		for (FieldMetadata governorField : governorFields) {
-			for (AnnotationMetadata governorAnnotation : governorField.getAnnotations()) {
+			governorAnnotations: for (AnnotationMetadata governorAnnotation : governorField.getAnnotations()) {
 				if (governorAnnotation.getAnnotationType().equals(COLUMN) || governorAnnotation.getAnnotationType().equals(JOIN_COLUMN)) {
 					AnnotationAttributeValue<?> name = governorAnnotation.getAttribute(new JavaSymbolName(NAME));
-					if (name != null) {
-						for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
-							if (annotationMetadata.getAnnotationType().equals(JOIN_COLUMN)) {
-								AnnotationAttributeValue<?> columnName = annotationMetadata.getAttribute(new JavaSymbolName(NAME));
-								if (columnName != null && columnName.equals(name)) {
-									return true;
-								}
-							}
+					if (name == null) {
+						continue governorAnnotations;
+					}
+					fieldAnnotations: for (AnnotationMetadata annotationMetadata : field.getAnnotations()) {
+						if (!annotationMetadata.getAnnotationType().equals(JOIN_COLUMN)) {
+							continue fieldAnnotations;
+						}
+						AnnotationAttributeValue<?> columnName = annotationMetadata.getAttribute(new JavaSymbolName(NAME));
+						if (columnName != null && columnName.equals(name)) {
+							return true;
 						}
 					}
 				}
@@ -726,8 +732,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check entity ITD for field
-		List<? extends FieldMetadata> itdFields = entityMetadata.getMemberHoldingTypeDetails().getDeclaredFields();
-		for (FieldMetadata itdField : itdFields) {
+		for (FieldMetadata itdField : entityFields) {
 			if (itdField.getFieldName().equals(field.getFieldName())) {
 				return true;
 			}
@@ -756,8 +761,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 		
 		// Check entity ITD for accessor method
-		List<? extends MethodMetadata> itdMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
-		for (MethodMetadata method : itdMethods) {
+		for (MethodMetadata method : entityMethods) {
 			if (method.getMethodName().equals(new JavaSymbolName(requiredAccessorName))) {
 				return true;
 			}
@@ -819,8 +823,7 @@ public class DbreMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		}
 
 		// Check entity ITD for mutator method
-		List<? extends MethodMetadata> itdMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
-		for (MethodMetadata method : itdMethods) {
+		for (MethodMetadata method : entityMethods) {
 			if (method.getMethodName().equals(new JavaSymbolName(requiredMutatorName))) {
 				return true;
 			}

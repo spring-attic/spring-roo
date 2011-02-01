@@ -1,5 +1,7 @@
 package org.springframework.roo.addon.dbre;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
@@ -13,6 +15,8 @@ import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
@@ -58,9 +62,15 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 		if (entityMetadata == null) {
 			return null;
 		}
+		List<? extends FieldMetadata> entityFields = entityMetadata.getMemberHoldingTypeDetails().getDeclaredFields();
+		List<? extends MethodMetadata> entityMethods = entityMetadata.getMemberHoldingTypeDetails().getDeclaredMethods();
 		
+		List<FieldMetadata> identifierFields = new LinkedList<FieldMetadata>();
 		String identifierMetadataMid = IdentifierMetadata.createIdentifier(entityMetadata.getIdentifierField().getFieldType(), Path.SRC_MAIN_JAVA);
 		IdentifierMetadata identifierMetadata = (IdentifierMetadata) metadataService.get(identifierMetadataMid);
+		if (identifierMetadata != null) {
+			identifierFields.addAll(identifierMetadata.getFields());
+		}
 
 		// Abort if the database couldn't be deserialized. This can occur if the dbre xml file has been deleted or is empty.
 		Database database = dbreModelService.getDatabase(null);
@@ -68,9 +78,10 @@ public class DbreMetadataProviderImpl extends AbstractItdMetadataProvider implem
 			return null;
 		}
 
+		// Search for database-managed entities
 		Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
 
-		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityMetadata, identifierMetadata, managedEntities, database);
+		return new DbreMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, entityFields, entityMethods, entityMetadata.getVersionField(), identifierFields, managedEntities, database);
 	}
 
 	public String getItdUniquenessFilenameSuffix() {
