@@ -566,16 +566,16 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			byte[] buffer = new byte[8192];
 			int length = -1;
-			    while (zip.available() > 0) {
-			    length = zip.read(buffer, 0, 8192);
-			         if (length > 0) {
-			         baos.write(buffer, 0, length);
-			    }
+			while (zip.available() > 0) {
+				length = zip.read(buffer, 0, 8192);
+				if (length > 0) {
+					baos.write(buffer, 0, length);
+				}
 			}
-
+			
 			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 			Document roobotXml = db.parse(bais);
-
+			
 			if (roobotXml != null) {
 				bundleCache.clear();
 				for (Element bundleElement : XmlUtils.findElements("/roobot/bundles/bundle", roobotXml.getDocumentElement())) {
@@ -602,31 +602,31 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 								commands.put(shell.getAttribute("command"), shell.getAttribute("help"));
 							}
 							
-					    	StringBuilder versionBuilder = new StringBuilder();
-					    	versionBuilder.append(versionElement.getAttribute("major")).append(".").append(versionElement.getAttribute("minor"));
-					    	String versionMicro = versionElement.getAttribute("micro");
-					    	if (versionMicro != null && versionMicro.length() > 0) {
-					    		versionBuilder.append(".").append(versionMicro);
-					    	}
-					    	String versionQualifier = versionElement.getAttribute("qualifier");
-					    	if (versionQualifier != null && versionQualifier.length() > 0) {
-					    		versionBuilder.append(".").append(versionQualifier);
-					    	}   
-					    	
-					    	String rooVersion = versionElement.getAttribute("roo-version");
-					    	if (rooVersion.equals("*") || rooVersion.length() == 0) {
-					    		rooVersion = getVersionForCompatibility();
-					    	} else {
-					    		String[] split = rooVersion.split("\\.");
-					    		if (split.length > 2) {
-					    			//only interested in major.minor
-					    			rooVersion = split[0] + "." + split[1];
-					    		}
-					    	}
+							StringBuilder versionBuilder = new StringBuilder();
+							versionBuilder.append(versionElement.getAttribute("major")).append(".").append(versionElement.getAttribute("minor"));
+							String versionMicro = versionElement.getAttribute("micro");
+							if (versionMicro != null && versionMicro.length() > 0) {
+								versionBuilder.append(".").append(versionMicro);
+							}
+							String versionQualifier = versionElement.getAttribute("qualifier");
+							if (versionQualifier != null && versionQualifier.length() > 0) {
+								versionBuilder.append(".").append(versionQualifier);
+							}
 							
-					    	BundleVersion version = new BundleVersion(versionElement.getAttribute("url"), versionElement.getAttribute("obr-url"), versionBuilder.toString(), versionElement.getAttribute("name"), new Long(versionElement.getAttribute("size")).longValue(), versionElement.getAttribute("description"), pgpKey, signedBy, rooVersion, commands);
-					    	// For security reasons we ONLY accept httppgp:// add-on versions
-					    	if (!version.getUri().startsWith("httppgp://")) {
+							String rooVersion = versionElement.getAttribute("roo-version");
+							if (rooVersion.equals("*") || rooVersion.length() == 0) {
+								rooVersion = getVersionForCompatibility();
+							} else {
+								String[] split = rooVersion.split("\\.");
+								if (split.length > 2) {
+									//only interested in major.minor
+									rooVersion = split[0] + "." + split[1];
+								}
+							}
+							
+							BundleVersion version = new BundleVersion(versionElement.getAttribute("url"), versionElement.getAttribute("obr-url"), versionBuilder.toString(), versionElement.getAttribute("name"), new Long(versionElement.getAttribute("size")).longValue(), versionElement.getAttribute("description"), pgpKey, signedBy, rooVersion, commands);
+							// For security reasons we ONLY accept httppgp:// add-on versions
+							if (!version.getUri().startsWith("httppgp://")) {
 								continue;
 							}
 							bundle.addVersion(version);
@@ -730,7 +730,24 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			URL obrUrl = null;
 			obrUrl = new URL(repoUrl);
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			doc = db.parse(obrUrl.openStream());
+			if (obrUrl.toExternalForm().endsWith(".zip")) {
+				ZipInputStream zip = new ZipInputStream(obrUrl.openStream());
+				zip.getNextEntry();
+				
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				byte[] buffer = new byte[8192];
+				int length = -1;
+				while (zip.available() > 0) {
+					length = zip.read(buffer, 0, 8192);
+					if (length > 0) {
+						baos.write(buffer, 0, length);
+					}
+				}
+				ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+				doc = db.parse(bais);
+			} else {
+				doc = db.parse(obrUrl.openStream());
+			}
 			Assert.notNull(doc, "RooBot was unable to parse the repository document of this add-on");
 			for (Element resource: XmlUtils.findElements("resource", doc.getDocumentElement())) {
 				if (resource.hasAttribute("uri")) {
