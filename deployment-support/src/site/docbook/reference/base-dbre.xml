@@ -170,7 +170,7 @@ ID T R DESCRIPTION -------------------------------------------------------------
 [HINT] use 'addon install bundle --bundleSymbolicName TAB' to install a specific add-on version
 JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
-    <para>You can get further information about the search result by with the
+    <para>You can get further information about the search result with the
     following command:<programlisting>roo&gt; addon info id --searchResultId 01</programlisting></para>
 
     <para>This may list several versions of a driver if available.</para>
@@ -202,7 +202,7 @@ JDBC driver not available for 'com.mysql.jdbc.Driver'</programlisting></para>
 
     <para>After you have configured your persistence layer with the <link
     linkend="command-index-persistence-setup">persistence setup</link> command
-    and installed all the JDBC drivers and you can introspect and reverse
+    and installed all the JDBC drivers, you can introspect and reverse
     engineer the database configured for your project. DBRE contains two
     commands:</para>
 
