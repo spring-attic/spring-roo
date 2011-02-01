@@ -344,16 +344,20 @@ fieldset th {
 	color:#888888;
 }
 
+.dijitArrowButton {
+	height: 20px;
+}
+
 .dijitTextArea{
-        min-height:5.5em !important;
-        max-height:22em !important;
-        overflow-y: auto !important;
-        max-width: 175px;
+	min-height:5.5em !important;
+	max-height:22em !important;
+	overflow-y: auto !important;
+	max-width: 175px;
 }
 
 .RichTextEditable{
-    min-height:18em !important;
-    max-height:18em !important;
+	min-height:18em !important;
+	max-height:18em !important;
 }
 
 .flag {
