@@ -82,13 +82,13 @@
     type exists and the corresponding add-on requests an ITD for that target
     type. Nearly all add-ons will only create an ITD if there is a "trigger
     annotation" on the target type, with the trigger annotation always
-    incorporation an @Roo prefix. As such, if you never put any @Roo
+    incorporating an @Roo prefix. As such, if you never put any @Roo
     annotation on a given .java file, you can be assured Roo will never create
     any AspectJ ITD for that target type. Refer to the <link
     linkend="usage-file-system">file system conventions</link> section for
     related information.</para>
 
-    <para>You'll also notice when using Roo that is automatically responds to
+    <para>You'll also notice when using Roo that it automatically responds to
     changes you make outside Roo. This is achieved by an <link
     linkend="command-index-poll-status">auto-scaling file system
     monitoring</link> mechanism. This basically allows you to create, edit or
@@ -134,7 +134,7 @@
 
     <para>This talk of exceptions also lets us cover the related usability
     feature of being forgiving. Every time Roo changes your file system or
-    receive a shell command, it is executed within a quasi-transactional
+    receives a shell command, it is executed within a quasi-transactional
     context that supports rollback. As a result, if anything goes wrong (such
     as you made a mistake when entering a command or an add-on has a problem
     for whatever reason) the file system will automatically rollback to the
@@ -227,7 +227,8 @@
           listed just before the completion options. To save screen space, we
           only list the inline help once for a given command option. So if you
           type <code>project --template TAB TAB TAB</code>, the first time you
-          press TAB you'd see the inline help and the completio options</para>
+          press TAB you'd see the inline help and the completion
+          options</para>
         </listitem>
 
         <listitem>
@@ -313,7 +314,7 @@ quit
     the release cycle of STS and Roo differ, when you download STS you'll
     generally find it includes a version of Roo that might not be the absolute
     latest. This is not a problem. All you need to do is ensure you're using
-    the latest releases STS and then within the IDE select Window &gt;
+    the latest release of STS and then within the IDE select Window &gt;
     Preferences &gt; Spring &gt; Roo Support. Next select "Add..." and find
     the directory which contains the latest Roo release. You probably also
     want to tick the newly-selected Roo release, making it the default for
@@ -325,7 +326,7 @@ quit
     (AJDT) plugin. This will ensure code assist and incremental compilation
     works well. We also recommend you go into Window &gt; Preferences &gt;
     General &gt; Workspace and switch on the "Refresh automatically" box. That
-    way Eclipse will detect changes made to the file systme by the
+    way Eclipse will detect changes made to the file system by the
     externally-running Roo shell. It's also recommended to install the
     m2eclipse plugin, which is automatically included if you use STS and is
     particularly suitable for Roo-based projects.</para>
@@ -425,7 +426,7 @@ quit
     xlink:href="https://jira.springsource.org/browse/ROO-91">ROO-91</link>.
     The internals of Roo do not rely on Maven at all. Nonetheless we have
     deferred it until we see sufficient community interest to justify
-    maintaining two build system environment.</para>
+    maintaining two build system environments.</para>
   </section>
 
   <section xml:id="usage-file-system">
@@ -580,8 +581,8 @@ disable by typing 'pgp automatic trust' again</programlisting></para>
     information in <link linkend="internals">Part III</link> of this reference
     guide.</para>
 
-    <para>First of all, it's important to recognize the Roo ships with a large
-    number of base add-ons. These built-in add-ons may be all you ever
+    <para>First of all, it's important to recognize that Roo ships with a
+    large number of base add-ons. These built-in add-ons may be all you ever
     require. Nevertheless, there is a growing community of add-ons written by
     people outside the core Roo team. Because the core Roo team do not write
     these add-ons, we've needed to implement an infrastructure so that
@@ -590,15 +591,15 @@ disable by typing 'pgp automatic trust' again</programlisting></para>
 
     <para>Roo's add-on distribution system encourages individual add-on
     developers to host their add-on web site (we don't believe in a central
-    model where we require must host add-ons on our servers). The main
-    requirement an add-on developer needs to fulfill is their add-ons must be
-    in OSGi format and their web site must include an OSGi Bundle Repository
-    (OBR) index file. While Roo internally uses OSGi and all modules are
-    managed as OSGi bundles, this is transparent and you do not need any
-    familiarity with OSGi or bundles to work with the Roo add-on installation
-    system. An OBR file is usually named <code>repository.xml</code> and it is
-    available over HTTP. If you're curious what these OBR files look like, you
-    can view the Spring Roo OBR repository at <link
+    model where we must host add-ons on our servers). The main requirement an
+    add-on developer needs to fulfill is their add-ons must be in OSGi format
+    and their web site must include an OSGi Bundle Repository (OBR) index
+    file. While Roo internally uses OSGi and all modules are managed as OSGi
+    bundles, this is transparent and you do not need any familiarity with OSGi
+    or bundles to work with the Roo add-on installation system. An OBR file is
+    usually named <code>repository.xml</code> and it is available over HTTP.
+    If you're curious what these OBR files look like, you can view the Spring
+    Roo OBR repository at <link
     xlink:href="http://spring-roo-repository.springsource.org/repository.xml">http://spring-roo-repository.springsource.org/repository.xml</link>.
     Within an OBR file each available Roo-related add-on is listed, along with
     the URL where it is published. The URLs look similar to normal URLs,
@@ -708,7 +709,7 @@ Comment 1....: Rating [GOOD], Date [17/12/10], Comment [Nice add-on for those
     think you might need and find out which add-ons offer them without
     performing an explicit search. A similar feature exists for JDBC
     resolution if you try to reverse engineer a database for which there is no
-    installed JDBC driver (Roo will automatically suggest the add-on your need
+    installed JDBC driver (Roo will automatically suggest the add-on you need
     and instruct you which command to use to install it).</para>
 
     <para>If you decide to install a specific add-on, simply use the <link
@@ -767,7 +768,7 @@ Successfully installed add-on: org.synyx.hades.roo.addon
     the add-on version in case multiple versions are available). Finally, you
     can use the <link linkend="command-index-addon-upgrade-id">addon upgrade
     id</link> command to upgrade a specific add-on which has appeared in a
-    search result to the latest version available. </para>
+    search result to the latest version available.</para>
 
     <para>Of course, you can remove add-ons as well. To uninstall any given
     add-on, just use the <link linkend="command-index-addon-remove">addon
@@ -789,8 +790,8 @@ Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
     installation. This command is typically followed by an "<link
     linkend="command-index-osgi-obr-start">osgi obr start</link>" command to
     download and start the add-on. Importantly, the additional security
-    verificatons performed by RooBot are skipped given RooBot is not used with
-    these commands (or other related commands such as <link
+    verifications performed by RooBot are skipped given RooBot is not used
+    with these commands (or other related commands such as <link
     linkend="command-index-osgi-start">osgi start</link>). That means bundles
     you start using the "osgi obr start" command may not use
     <code>httppgp://</code> for PGP signature verification. As such you should
@@ -798,7 +799,7 @@ Successfully removed add-on: de.saxsys.roo.equals.addon</programlisting></para>
     start with "addon", as such commands do not use resources subject to the
     RooBot security verifications. Noneless there remain legitimate use cases
     for such distribution styles, so it's good to know Roo supports them as
-    well as the more common, user-friendly and more security "addon"
+    well as the more common, user-friendly and more secure "addon"
     commands.</para>
   </section>
 </chapter>
