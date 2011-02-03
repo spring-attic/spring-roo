@@ -41,13 +41,17 @@ public class JavaTypeConverter implements Converter {
 	@Reference private LastUsed lastUsed;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
+	private static final List<String> NUMBER_PRIMITIVES = Arrays.asList("byte", "short", "int", "long", "float", "double");
 
 	public Object convertFromText(String value, Class<?> requiredType, String optionContext) {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
 		
-		// TODO Check for number primitives
+		// Check for number primitives
+		if (NUMBER_PRIMITIVES.contains(value)) {
+			return getNumberPrimitiveType(value);
+		}
 
 		if ("*".equals(value)) {
 			JavaType result = lastUsed.getJavaType();
@@ -231,6 +235,24 @@ public class JavaTypeConverter implements Converter {
 				}
 				completions.add(candidate);
 			}
+		}
+	}
+	
+	private JavaType getNumberPrimitiveType(String value) {
+		if ("byte".equals(value)) {
+			return JavaType.BYTE_PRIMITIVE;
+		} else if ("short".equals(value)) {
+			return JavaType.SHORT_PRIMITIVE;
+		} else if ("int".equals(value)) {
+			return JavaType.INT_PRIMITIVE;
+		} else if ("long".equals(value)) {
+			return JavaType.LONG_PRIMITIVE;
+		} else if ("float".equals(value)) {
+			return JavaType.FLOAT_PRIMITIVE;
+		} else if ("double".equals(value)) {
+			return JavaType.DOUBLE_PRIMITIVE;
+		} else {
+			return null;
 		}
 	}
 }
