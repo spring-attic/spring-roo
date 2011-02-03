@@ -13,8 +13,12 @@ import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.dbre.model.Database;
 import org.springframework.roo.addon.dbre.model.DatabaseXmlUtils;
 import org.springframework.roo.addon.dbre.model.Schema;
+import org.springframework.roo.addon.entity.EntityOperations;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
@@ -36,11 +40,12 @@ import org.w3c.dom.Element;
 @Service
 public class DbreOperationsImpl implements DbreOperations {
 	private static final Logger logger = HandlerUtils.getLogger(DbreOperationsImpl.class);
-	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
 	@Reference private DbreModelService dbreModelService;
-	@Reference private DbreDatabaseListener dbreDatabaseListener;
+	@Reference private EntityOperations entityOperations; 
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private PathResolver pathResolver;
+	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isDbreAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties")) || fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml")));
@@ -66,8 +71,6 @@ public class DbreOperationsImpl implements DbreOperations {
 	}
 
 	public void reverseEngineerDatabase(Schema schema, JavaPackage destinationPackage, boolean testAutomatically, boolean view, Set<String> includeTables, Set<String> excludeTables) {
-		dbreDatabaseListener.setTestAutomatically(testAutomatically);
-		
 		dbreModelService.setDestinationPackage(destinationPackage);
 		dbreModelService.setView(view);
 		dbreModelService.setIncludeTables(includeTables);
@@ -81,6 +84,14 @@ public class DbreOperationsImpl implements DbreOperations {
 			logEmptyDatabase(schema);
 		}
 
+		// Create integration tests if required
+		if (testAutomatically) {
+			Set<ClassOrInterfaceTypeDetails> managedEntities = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooDbManaged.class.getName()));
+			for (ClassOrInterfaceTypeDetails managedEntity : managedEntities) {
+				entityOperations.newIntegrationTest(managedEntity.getName());
+			}
+		}
+		
 		// Change the persistence.xml file to prevent tables being created and dropped.
 		updatePersistenceXml();
 	}

@@ -31,12 +31,16 @@ public abstract class AbstractProjectOperations implements ProjectOperations {
 	private Set<FilterListener> filterListeners = new HashSet<FilterListener>();
 	private Set<ResourceListener> resourceListeners = new HashSet<ResourceListener>();
 
-	public final boolean isDependencyModificationAllowed() {
+	public final boolean isProjectAvailable() {
 		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 
+	public final boolean isDependencyModificationAllowed() {
+		return isProjectAvailable();
+	}
+
 	public final boolean isPerformCommandAllowed() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return isProjectAvailable();
 	}
 	
 	public void addDependencyListener(DependencyListener listener) {

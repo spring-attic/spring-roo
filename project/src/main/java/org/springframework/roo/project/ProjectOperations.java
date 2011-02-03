@@ -10,6 +10,8 @@ import java.util.List;
  */
 public interface ProjectOperations {
 
+	boolean isProjectAvailable();
+
 	boolean isDependencyModificationAllowed();
 
 	boolean isPerformCommandAllowed();

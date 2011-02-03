@@ -18,7 +18,7 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * Adds a new type-level annotation. There must not already be an existing annotation of this
 	 * {@link JavaType} defined on the type.
 	 * 
-	 * @param annotation to add (required)
+	 * @param annotation the annotation to add (required)
 	 */
 	void addTypeAnnotation(AnnotationMetadata annotation);
 	
@@ -44,7 +44,7 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * If there are attributes in the presented attributesToDeleteIfPresent Set, these attributes are
 	 * removed from the annotation regardless of any attribute values that may have changed.
 	 * 
-	 * @param annotation to update (required)
+	 * @param annotation the annotation to update (required)
 	 * @param attributesToDeleteIfPresent attributes to delete from annotation
 	 * @return true if the disk was changed, false otherwise
 	 */
@@ -54,30 +54,35 @@ public interface MutableClassOrInterfaceTypeDetails extends ClassOrInterfaceType
 	 * Removes the type-level annotation of the {@link JavaType} indicated. This annotation must
 	 * already exist.
 	 * 
-	 * @param annotationType to remove (required)
+	 * @param annotationType the annotation type to remove (required)
 	 */
 	void removeTypeAnnotation(JavaType annotationType);
 	
 	/**
 	 * Adds a new field. There must not be a field of this name already existing.
 	 * 
-	 * @param fieldMetadata to add (required)
+	 * @param fieldMetadata the field to add (required)
 	 */
 	void addField(FieldMetadata fieldMetadata);
 	
 	/**
 	 * Removes an existing field. A field with the specified name must already exist.
 	 * 
-	 * @param fieldName to remove (required)
+	 * @param fieldName the field name to remove (required)
 	 */
 	void removeField(JavaSymbolName fieldName);
 	
+	/**
+	 * Inserts a new enum constant into an enum.
+	 * 
+	 * @param name the enum constant to add.
+	 */
 	void addEnumConstant(JavaSymbolName name);
 	
 	/**
 	 * Adds a new method. A method with the same name are parameter types must not already exist.
 	 * 
-	 * @param methodMetadata to add (required)
+	 * @param methodMetadata the method to add (required)
 	 */
 	void addMethod(MethodMetadata methodMetadata);
 }

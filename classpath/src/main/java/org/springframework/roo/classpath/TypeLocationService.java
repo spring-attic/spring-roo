@@ -5,14 +5,28 @@ import java.util.Set;
 
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.model.JavaType;
+import org.springframework.roo.project.Path;
 
 /**
- * Locates types that have the specified annotations.
+ * Locates types.
  * 
  * @author Alan Stewart
  * @since 1.1
  */
 public interface TypeLocationService {
+		
+	String getPhysicalLocationCanonicalPath(JavaType javaType, Path path);
+
+	String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier);
+
+	/**
+	 * Obtains the requested {@link JavaType}, assuming it is a class or interface that exists at this time and can be parsed.
+	 * If these assumption are not met, an exception will be thrown.
+	 * 
+	 * @param requiredClassOrInterface that should be parsed (required)
+	 * @return the details (never returns null)
+	 */
+	ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface);
 
 	/**
 	 * Processes types with the specified list of annotations and uses the supplied 

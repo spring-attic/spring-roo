@@ -55,11 +55,11 @@ import org.w3c.dom.Element;
 @Service
 @Reference(name = "databaseListener", strategy = ReferenceStrategy.EVENT, policy = ReferencePolicy.DYNAMIC, referenceInterface = DatabaseListener.class, cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE)
 public class DbreModelServiceImpl implements DbreModelService, ProcessManagerStatusListener {
-	@Reference private PropFileOperations propFileOperations;
-	@Reference private PathResolver pathResolver;
-	@Reference private FileManager fileManager;
 	@Reference private ConnectionProvider connectionProvider;
+	@Reference private FileManager fileManager;
+	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
+	@Reference private PropFileOperations propFileOperations;
 	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
 	private Schema lastSchema = null;
 	private JavaPackage destinationPackage;

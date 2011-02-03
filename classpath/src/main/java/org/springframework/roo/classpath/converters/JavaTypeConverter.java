@@ -3,6 +3,7 @@ package org.springframework.roo.classpath.converters;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -45,6 +46,8 @@ public class JavaTypeConverter implements Converter {
 		if (value == null || "".equals(value)) {
 			return null;
 		}
+		
+		// TODO Check for number primitives
 
 		if ("*".equals(value)) {
 			JavaType result = lastUsed.getJavaType();
@@ -135,6 +138,12 @@ public class JavaTypeConverter implements Converter {
 			types.add(Long.class.getName());
 			types.add(Float.class.getName());
 			types.add(Double.class.getName());
+			types.add(Byte.TYPE.getName());
+			types.add(Short.TYPE.getName());
+			types.add(Integer.TYPE.getName());
+			types.add(Long.TYPE.getName());
+			types.add(Float.TYPE.getName());
+			types.add(Double.TYPE.getName());
 		}
 
 		if (optionContext.contains("java-all") || optionContext.contains("java-number")) {

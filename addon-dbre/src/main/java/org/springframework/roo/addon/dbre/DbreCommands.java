@@ -14,7 +14,7 @@ import org.springframework.roo.shell.CliOption;
 import org.springframework.roo.shell.CommandMarker;
 
 /**
- * Commands for the DBRE addon to be used by the ROO shell.
+ * Shell commands for {@link DbreOperations}.
  * 
  * @author Alan Stewart
  * @since 1.1
