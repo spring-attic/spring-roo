@@ -205,10 +205,12 @@ if [[ "$DRY_RUN" = "0" ]]; then
 fi
 
 # Deploy the assembly so people can download it (note roo-deploy.sh will prune old snapshots from the download site automatically)
-./roo-deploy.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
-EXITED=$?
-if [[ ! "$EXITED" = "0" ]]; then
-    l_error "roo-deploy -c deploy failed (exit code $EXITED)." >&2; exit 1;
+if [[ "$DRY_RUN" = "0" ]]; then
+    ./roo-deploy.sh -c deploy -s $SUFFIX $ROO_DEPLOY_OPTS
+    EXITED=$?
+    if [[ ! "$EXITED" = "0" ]]; then
+        l_error "roo-deploy -c deploy failed (exit code $EXITED)." >&2; exit 1;
+    fi
 fi
 
 # Prune some old releases. We can rely on the fact CI runs at least every 24 hours and thus we can prune anything older than say 3 days
