@@ -11,7 +11,7 @@ import org.springframework.roo.addon.beaninfo.BeanInfoMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -21,7 +21,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.util.StringUtils;
 
 /**
  * Provides {@link JavaBeanMetadata}.
@@ -33,7 +32,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Service 
 public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider {
 	@Reference private BeanInfoMetadataProvider beanInfoMetadataProvider;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	@Reference private TypeLocationService typeLocationService;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(PhysicalTypeIdentifier.getMetadataIdentiferType(), getProvidesType());
@@ -67,20 +66,16 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	private boolean isGaeInterested(FieldMetadata field) {
-		String physicalTypeIdentifier = physicalTypeMetadataProvider.findIdentifier(field.getFieldType());
-		if (!StringUtils.hasText(physicalTypeIdentifier)) return false;
-		
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(physicalTypeIdentifier);
-		if (physicalTypeMetadata == null) return false;
-		
-		PhysicalTypeDetails physicalTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (physicalTypeDetails == null || !(physicalTypeDetails instanceof ClassOrInterfaceTypeDetails)) return false;
-		
-		ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = (ClassOrInterfaceTypeDetails) physicalTypeDetails;
-		AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-		return annotation != null;
+		try {
+			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(field.getFieldType());
+			AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
+			return annotation != null;
+		} catch (Exception e) {
+			// Don't need to know what happened so just return false;
+			return false;
+		}
 	}
-
+	
 	public String getItdUniquenessFilenameSuffix() {
 		return "JavaBean";
 	}

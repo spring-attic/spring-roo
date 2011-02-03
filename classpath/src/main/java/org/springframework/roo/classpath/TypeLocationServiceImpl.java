@@ -24,6 +24,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.support.util.Assert;
 
 /**
  * Implementation of {@link TypeLocationService}.
@@ -59,6 +60,31 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 			// Change to Java, so drop the cache
 			cache.clear();
 		}
+	}
+
+	public String getPhysicalLocationCanonicalPath(JavaType javaType, Path path) {
+		Assert.notNull(javaType, "Java type required");
+		Assert.notNull(path, "Path required");
+		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
+		return pathResolver.getIdentifier(path, relativePath);
+	}
+	
+	public String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
+		Assert.isTrue(PhysicalTypeIdentifier.isValid(physicalTypeIdentifier), "Physical type identifier is invalid");
+		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
+		Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
+		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
+		return pathResolver.getIdentifier(path, relativePath);
+	}
+
+	public ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface) {
+		String metadataIdentificationString = physicalTypeMetadataProvider.findIdentifier(requiredClassOrInterface);
+		Assert.notNull(metadataIdentificationString, "Unable to locate requested type'" + requiredClassOrInterface.getFullyQualifiedTypeName() + "'");
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(metadataIdentificationString);
+		PhysicalTypeDetails physicalTypeDetails = physicalTypeMetadata.getMemberHoldingTypeDetails();
+		Assert.notNull(physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' exists on disk but cannot be parsed");
+		Assert.isInstanceOf(ClassOrInterfaceTypeDetails.class, physicalTypeDetails, "Type '" + requiredClassOrInterface.getFullyQualifiedTypeName() + "' is not an interface or class");
+		return (ClassOrInterfaceTypeDetails) physicalTypeDetails;
 	}
 
 	public void processTypesWithAnnotation(List<JavaType> annotationsToDetect, LocatedTypeCallback callback) {

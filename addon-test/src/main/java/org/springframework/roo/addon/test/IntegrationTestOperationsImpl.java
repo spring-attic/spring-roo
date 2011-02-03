@@ -11,6 +11,7 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
@@ -21,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationAttribute
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
@@ -40,7 +40,7 @@ import org.springframework.roo.support.util.StringUtils;
 @Component
 @Service
 public class IntegrationTestOperationsImpl implements IntegrationTestOperations {
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	
@@ -93,7 +93,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, name, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setDeclaredMethods(methods);
 
-		classpathOperations.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 	}
 	
 	public void newTestStub(JavaType entity) {
@@ -156,7 +156,7 @@ public class IntegrationTestOperationsImpl implements IntegrationTestOperations 
 			
 			typeDetailsBuilder.setDeclaredMethods(methods);
 
-			classpathOperations.generateClassFile(typeDetailsBuilder.build());
+			typeManagementService.generateClassFile(typeDetailsBuilder.build());
 		}
 	}
 }

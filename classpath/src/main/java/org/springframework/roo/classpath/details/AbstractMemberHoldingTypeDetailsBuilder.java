@@ -16,11 +16,10 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	private List<ConstructorMetadataBuilder> declaredConstructors = new ArrayList<ConstructorMetadataBuilder>();
 	private List<FieldMetadataBuilder> declaredFields = new ArrayList<FieldMetadataBuilder>();
 	private List<MethodMetadataBuilder> declaredMethods = new ArrayList<MethodMetadataBuilder>();
-    private List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
-    private List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
+	private List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes = new ArrayList<ClassOrInterfaceTypeDetailsBuilder>();
+	private List<InitializerMetadataBuilder> declaredInitializers = new ArrayList<InitializerMetadataBuilder>();
 	private List<JavaType> extendsTypes = new ArrayList<JavaType>();
 	private List<JavaType> implementsTypes = new ArrayList<JavaType>();
-
 
 	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
@@ -37,10 +36,10 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		for (MethodMetadata element : existing.getDeclaredMethods()) {
 			declaredMethods.add(new MethodMetadataBuilder(element));
 		}
-        for (ClassOrInterfaceTypeDetails element : existing.getDeclaredInnerTypes()) {
+		for (ClassOrInterfaceTypeDetails element : existing.getDeclaredInnerTypes()) {
 			declaredInnerTypes.add(new ClassOrInterfaceTypeDetailsBuilder(element));
 		}
-        for (InitializerMetadata element : existing.getDeclaredInitializers()) {
+		for (InitializerMetadata element : existing.getDeclaredInitializers()) {
 			declaredInitializers.add(new InitializerMetadataBuilder(element));
 		}
 		extendsTypes.addAll(existing.getExtendsTypes());
@@ -79,13 +78,13 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
         this.declaredInnerTypes = declaredInnerTypes;
     }
 
-    public List<InitializerMetadataBuilder> getDeclaredInitializers() {
-        return declaredInitializers;
-    }
+	public List<InitializerMetadataBuilder> getDeclaredInitializers() {
+		return declaredInitializers;
+	}
 
-    public void setDeclaredInitializers(List<InitializerMetadataBuilder> declaredInitializers) {
-        this.declaredInitializers = declaredInitializers;
-    }
+	public void setDeclaredInitializers(List<InitializerMetadataBuilder> declaredInitializers) {
+		this.declaredInitializers = declaredInitializers;
+	}
 
 	public final List<JavaType> getExtendsTypes() {
 		return extendsTypes;

@@ -3,9 +3,9 @@ package org.springframework.roo.addon.test;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -21,11 +21,11 @@ import org.springframework.roo.shell.CommandMarker;
 @Service
 public class IntegrationTestCommands implements CommandMarker {
 	@Reference private IntegrationTestOperations integrationTestOperations;
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private ProjectOperations projectOperations;
 
 	@CliAvailabilityIndicator({ "test mock", "test stub" })
 	public boolean isAvailable() {
-		return classpathOperations.isProjectAvailable();
+		return projectOperations.isProjectAvailable();
 	}
 	
 	@CliCommand(value = "test mock", help = "Creates a mock test for the specified entity")

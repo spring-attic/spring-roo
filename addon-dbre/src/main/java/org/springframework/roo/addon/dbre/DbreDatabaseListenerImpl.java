@@ -24,6 +24,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -31,7 +32,6 @@ import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.AbstractHashCodeTrackingMetadataNotifier;
 import org.springframework.roo.metadata.MetadataItem;
 import org.springframework.roo.model.JavaPackage;
@@ -59,21 +59,17 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 	private static final String VERSION_FIELD = "versionField";
 	private static final String VERSION = "version";
 	private static final String PRIMARY_KEY_SUFFIX = "PK";
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private DbreModelService dbreModelService;
 	@Reference private FileManager fileManager;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private DbreModelService dbreModelService;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private Shell shell;
+	
 	private Map<JavaType, List<Identifier>> identifierResults = null;
-	private boolean testAutomatically;
 
 	// This method will be called when the database becomes available for the first time and the rest of Roo has started up OK
 	public void notifyDatabaseRefreshed(Database newDatabase) {
 		processDatabase(newDatabase);
-	}
-
-	public void setTestAutomatically(boolean testAutomatically) {
-		this.testAutomatically = testAutomatically;
 	}
 
 	private void processDatabase(Database database) {
@@ -123,13 +119,6 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 			// Don't create types from join tables in many-to-many associations
 			if (!table.isJoinTable()) {
 				newEntities.add(createNewManagedEntityFromTable(table, destinationPackage));
-			}
-		}
-
-		// Create integration tests if required
-		if (testAutomatically) {
-			for (ClassOrInterfaceTypeDetails entity : newEntities) {
-				classpathOperations.newIntegrationTest(entity.getName());
 			}
 		}
 
@@ -248,7 +237,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		typeDetailsBuilder.setAnnotations(annotations);
 
 		ClassOrInterfaceTypeDetails entityType = typeDetailsBuilder.build();
-		classpathOperations.generateClassFile(entityType);
+		typeManagementService.generateClassFile(entityType);
 		
 		shell.flash(Level.FINE, "Created " + javaType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());
@@ -323,7 +312,7 @@ public class DbreDatabaseListenerImpl extends AbstractHashCodeTrackingMetadataNo
 		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(identifierType, Path.SRC_MAIN_JAVA);
 		ClassOrInterfaceTypeDetailsBuilder idTypeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC | Modifier.FINAL, identifierType, PhysicalTypeCategory.CLASS);
 		idTypeDetailsBuilder.setAnnotations(identifierAnnotations);
-		classpathOperations.generateClassFile(idTypeDetailsBuilder.build());
+		typeManagementService.generateClassFile(idTypeDetailsBuilder.build());
 
 		shell.flash(Level.FINE, "Created " + identifierType.getFullyQualifiedTypeName(), DbreDatabaseListenerImpl.class.getName());
 		shell.flash(Level.FINE, "", DbreDatabaseListenerImpl.class.getName());

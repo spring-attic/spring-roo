@@ -93,15 +93,16 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * 
 	 * @param fullyQualifiedTypeName the name (as per the rules above)
 	 * @param array number of array indicies (0 = not an array, 1 = single dimensional array etc)
-	 * @param primitive whether this type is representing the equivalent primitive
+	 * @param dataType the {@link DataType}
 	 * @param argName the type argument name to this particular Java type (can be null if unassigned)
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
-	public JavaType(String fullyQualifiedTypeName, int array, DataType primitive, JavaSymbolName argName, List<JavaType> parameters) {
+	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, List<JavaType> parameters) {
 		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
 			throw new IllegalArgumentException("Fully qualified type name required");
 		}
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
+		Assert.notNull(dataType, "Data type required");
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
 		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
 		if (defaultPackage) {
@@ -119,7 +120,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 //		}
 
 		this.array = array;
-		this.dataType = primitive;
+		this.dataType = dataType;
 		if (parameters != null) {
 			this.parameters = parameters;
 		}
@@ -305,10 +306,6 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return defaultPackage;
 	}
 
-	public final int hashCode() {
-		return this.fullyQualifiedTypeName.hashCode();
-	}
-
 	public boolean isPrimitive() {
 		return DataType.PRIMITIVE == dataType;
 	}
@@ -340,15 +337,27 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		return sb.toString();
 	}
 
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fullyQualifiedTypeName == null) ? 0 : fullyQualifiedTypeName.hashCode());
+		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
+		return result;
+	}
+
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && this.fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType;
+		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType;
 	}
 
 	public final int compareTo(JavaType o) {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
-		return this.fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
+		int cmp = fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
+		if (cmp == 0) {
+			cmp = dataType.compareTo(o.dataType);
+		}
+		return cmp;
 	}
 
 	public final String toString() {

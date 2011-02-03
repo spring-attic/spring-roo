@@ -14,6 +14,7 @@ import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeDetails;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -39,6 +40,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.model.ReservedWords;
 import org.springframework.roo.project.Path;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.CliAvailabilityIndicator;
 import org.springframework.roo.shell.CliCommand;
 import org.springframework.roo.shell.CliOption;
@@ -47,7 +49,7 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * Additional shell commands for {@link ClasspathOperationsImpl}.
+ * Additional shell commands for the purpose of creating fields.
  * 
  * @author Ben Alex
  * @author Alan Stewart
@@ -56,10 +58,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public class FieldCommands implements CommandMarker {
-	@Reference private ClasspathOperations classpathOperations;
-	@Reference private MetadataService metadataService;
-	@Reference private StaticFieldConverter staticFieldConverter;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
+	@Reference private StaticFieldConverter staticFieldConverter;
+	@Reference private TypeManagementService typeManagementService;
+
 	private final Set<String> legalNumericPrimitives = new HashSet<String>();
 
 	protected void activate(ComponentContext context) {
@@ -84,13 +88,13 @@ public class FieldCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "field other", "field number", "field string", "field date", "field boolean", "field enum", "field embedded" })	
 	public boolean isJdkFieldManagementAvailable() {
-		return classpathOperations.isProjectAvailable();
+		return projectOperations.isProjectAvailable();
 	}
 
 	@CliAvailabilityIndicator({"field reference", "field set"})
 	public boolean isJpaFieldManagementAvailable() {
 		// in a separate method in case we decide to check for JPA registration in the future
-		return classpathOperations.isProjectAvailable();
+		return projectOperations.isProjectAvailable();
 	}
 
 	@CliCommand(value = "field other", help = "Inserts a private field into the specified file")	
@@ -136,7 +140,7 @@ public class FieldCommands implements CommandMarker {
 		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(fieldDetails.getPhysicalTypeIdentifier(), modifier, annotations, fieldDetails.getFieldName(), fieldDetails.getFieldType());
 		fieldBuilder.setFieldInitializer(initializer);
-		classpathOperations.addField(fieldBuilder.build());
+		typeManagementService.addField(fieldBuilder.build());
 	}
 	
 	@CliCommand(value = "field number", help = "Adds a private numeric field to an existing Java source file")	

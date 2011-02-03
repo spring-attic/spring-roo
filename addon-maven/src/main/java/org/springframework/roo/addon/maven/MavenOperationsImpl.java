@@ -15,7 +15,6 @@ import org.springframework.roo.project.AbstractProjectOperations;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
@@ -43,7 +42,7 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 	}
 
 	public boolean isCreateProjectAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
+		return !isProjectAvailable();
 	}
 	
 	public String getProjectRoot() {
