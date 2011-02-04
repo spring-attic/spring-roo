@@ -171,10 +171,6 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		itdTypeDetails = builder.build();
 	}
 
-	public boolean isGovernorAbstract() {
-		return Modifier.isAbstract(governorTypeDetails.getModifier());
-	}
-	
 	public AnnotationMetadata getEntityAnnotation() {
 		return getTypeAnnotation(new JavaType("javax.persistence.Entity"));
 	}

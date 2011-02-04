@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.dod;
 
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -96,9 +97,8 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		
 		// Lookup the entity's metadata
 		JavaType entityJavaType = annotationValues.getEntity();
-		Path entityPath = Path.SRC_MAIN_JAVA;
-		String entityMetadataKey = EntityMetadata.createIdentifier(entityJavaType, entityPath);
-		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(entityJavaType, entityPath);
+		String entityMetadataKey = EntityMetadata.createIdentifier(entityJavaType, Path.SRC_MAIN_JAVA);
+		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(entityJavaType, Path.SRC_MAIN_JAVA);
 	
 		// We need to lookup the metadata we depend on
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
@@ -156,8 +156,12 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
 		// Check field type to ensure it is an entity and is not abstract
 		String entityMetadataKey = EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA);
+		String entityClassOrInterfaceMetadataKey = PhysicalTypeIdentifier.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA);
+
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		if (entityMetadata == null || entityMetadata.isGovernorAbstract()) {
+		PhysicalTypeMetadata entityPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(entityClassOrInterfaceMetadataKey);
+
+		if (entityMetadata == null || entityPhysicalTypeMetadata == null || Modifier.isAbstract(entityPhysicalTypeMetadata.getMemberHoldingTypeDetails().getModifier())) {
 			return null;
 		}
 
