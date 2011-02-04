@@ -11,7 +11,6 @@ import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.configurable.ConfigurableMetadataProvider;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
@@ -118,7 +117,7 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 
 		// Identify all the mutators we care about on the entity
 		Map<MethodMetadata, CollaboratingDataOnDemandMetadataHolder> locatedMutators = new LinkedHashMap<MethodMetadata, CollaboratingDataOnDemandMetadataHolder>();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), entityClassOrInterfaceTypeDetails);
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(DataOnDemandMetadataProvider.class.getName(), entityClassOrInterfaceTypeDetails);
 		// Add the methods we care to the locatedMutators
 		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
 			if (!BeanInfoUtils.isMutatorMethod(method)) {
@@ -155,11 +154,17 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 	}
 	
 	private DataOnDemandMetadata locateCollaboratingMetadata(String metadataIdentificationString, FieldMetadata field) {
+		// Check field type to ensure it is an entity and is not abstract
+		String entityMetadataKey = EntityMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA);
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
+		if (entityMetadata == null || entityMetadata.isGovernorAbstract()) {
+			return null;
+		}
+
+		// Check field for @ManyToOne or @OneToOne annotation
 		AnnotationMetadata manyToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.ManyToOne"));
 		AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
-		AnnotationMetadata rooEntityAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType(RooEntity.class.getName()));
-		
-		if (manyToOneAnnotation == null && oneToOneAnnotation == null && rooEntityAnnotation == null) {
+		if (manyToOneAnnotation == null && oneToOneAnnotation == null) {
 			return null;
 		}
 		
@@ -168,8 +173,8 @@ public final class DataOnDemandMetadataProvider extends AbstractMemberDiscoverin
 		if (otherProvider.equals(metadataIdentificationString)) {
 			return null;
 		}
-		
 		metadataDependencyRegistry.registerDependency(otherProvider, metadataIdentificationString);
+		
 		return (DataOnDemandMetadata) metadataService.get(otherProvider);
 	}
 	

@@ -705,28 +705,17 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 				initializer = "obj";
 			} else if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Enumerated")) != null) {
 				initializer = field.getFieldType().getFullyQualifiedTypeName() + ".class.getEnumConstants()[0]";
-			} else {
+			} else if (metadataHolder.getDataOnDemandMetadata() != null) {
 				requiredDataOnDemandCollaborators.add(field.getFieldType());
-				String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
 
 				// Decide if we're dealing with a one-to-one and therefore should _try_ to keep the same id (ROO-568)
 				AnnotationMetadata oneToOneAnnotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.OneToOne"));
-
 				DataOnDemandMetadata otherMetadata = metadataHolder.getDataOnDemandMetadata();
-				if (otherMetadata == null || !otherMetadata.isValid()) {
-					// There is no metadata around, so we'll just make some basic assumptions
-					if (oneToOneAnnotation != null) {
-						initializer = collaboratingFieldName + ".getSpecific" + field.getFieldType().getSimpleTypeName() + "(index)";
-					} else {
-						initializer = collaboratingFieldName + ".getRandom" + field.getFieldType().getSimpleTypeName() + "()";
-					}
+				String collaboratingFieldName = getCollaboratingFieldName(field.getFieldType()).getSymbolName();
+				if (oneToOneAnnotation != null) {
+					initializer = collaboratingFieldName + "." + otherMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
 				} else {
-					// We can use the correct name
-					if (oneToOneAnnotation != null) {
-						initializer = collaboratingFieldName + "." + otherMetadata.getSpecificPersistentEntityMethod().getMethodName().getSymbolName() + "(index)";
-					} else {
-						initializer = collaboratingFieldName + "." + otherMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
-					}
+					initializer = collaboratingFieldName + "." + otherMetadata.getRandomPersistentEntityMethod().getMethodName().getSymbolName() + "()";
 				}
 			}
 
