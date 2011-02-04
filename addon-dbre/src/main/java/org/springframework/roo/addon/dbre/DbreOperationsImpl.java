@@ -31,7 +31,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * Provides database reverse engineering operations.
+ * Implementation of {@link DbreOperations}.
  * 
  * @author Alan Stewart
  * @since 1.1

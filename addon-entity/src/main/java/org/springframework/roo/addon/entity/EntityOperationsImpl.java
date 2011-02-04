@@ -32,6 +32,12 @@ import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Implementation of {@link EntityOperations}.
+ * 
+ * @author Alan Stewart
+ * @since 1.1.2
+ */
 @Component
 @Service
 public class EntityOperationsImpl implements EntityOperations {

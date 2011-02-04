@@ -7,7 +7,7 @@ import org.springframework.roo.addon.dbre.model.Schema;
 import org.springframework.roo.model.JavaPackage;
 
 /**
- * Interface to commands available in {@link DbreOperationsImpl}.
+ * Provides database reverse engineering operations.
  * 
  * @author Alan Stewart
  * @since 1.1
