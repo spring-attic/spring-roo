@@ -75,7 +75,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		// We need to be informed if our dependent metadata changes
 		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-
+		
 		// We also need to be informed if a referenced type is changed
 		for (JavaType type : getSpecialDomainTypes(beanInfoMetadata.getJavaBean())) {
 			metadataDependencyRegistry.registerDependency(BeanInfoMetadata.createIdentifier(type, path), metadataIdentificationString);

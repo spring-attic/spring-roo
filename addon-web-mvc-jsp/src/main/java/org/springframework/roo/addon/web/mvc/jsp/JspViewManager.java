@@ -637,11 +637,13 @@ public class JspViewManager {
 	}
 	
 	private String getPlural(JavaType type) {
-		if (pluralCache.get(type) != null) {
+		if (pluralCache.containsKey(type)) {
 			return pluralCache.get(type);
 		}
 		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		Assert.notNull(pluralMetadata, "Unable to determine plural for type " + type.getFullyQualifiedTypeName());
+		if (pluralMetadata == null) {
+			return type.getSimpleTypeName() + "s";
+		}
 		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
 			pluralCache.put(type, pluralMetadata.getPlural());
 			return pluralMetadata.getPlural();

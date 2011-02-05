@@ -3,13 +3,11 @@ package org.springframework.roo.addon.web.mvc.controller;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeSet;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
@@ -34,34 +32,26 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1.1
  */
 public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
-	
-	private Set<JavaType> domainTypes;
-	private Set<JavaType> domainEnumTypes;
 
 	ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		// For testing
 	}
 
-	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Set<JavaTypeMetadataHolder> domainJavaTypes) {
+	public ConversionServiceMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, Map<JavaType, List<MethodMetadata>> domainJavaTypes) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
-		domainTypes = new HashSet<JavaType>();
-		domainEnumTypes = new HashSet<JavaType>();
+		
 		if (!isValid()) {
 			return;
 		}
-		for (JavaTypeMetadataHolder domainJavaType: domainJavaTypes) {
-			domainTypes.add(domainJavaType.getType());
-			if (domainJavaType.isEnumType()) {
-				domainEnumTypes.add(domainJavaType.getType());
-			}
-		}
 
 		MethodMetadataBuilder installMethodBuilder = getInstallMethodBuilder();
-		for (JavaTypeMetadataHolder domainJavaType : domainJavaTypes) {
-			String converterMethodName = "get" + domainJavaType.getType().getSimpleTypeName() + "Converter";
+		
+		//loading the keyset of the domain type map into a TreeSet to create a consistent ordering of the generated methods across shell restarts
+		for (JavaType type: new TreeSet<JavaType>(domainJavaTypes.keySet())) {
+			String converterMethodName = "get" + type.getSimpleTypeName() + "Converter";
 			if (getGovernorMethod(converterMethodName, new ArrayList<AnnotatedJavaType>()) == null) {
-				builder.addMethod(getConverterMethod(domainJavaType, converterMethodName));
+				builder.addMethod(getConverterMethod(type, domainJavaTypes.get(type), converterMethodName));
 			}
 			installMethodBuilder.getBodyBuilder().appendFormalLine("registry.addConverter(" + converterMethodName + "());");
 		}
@@ -74,29 +64,28 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		new ItdSourceFileComposer(itdTypeDetails);
 	}
 
-	private MethodMetadata getConverterMethod(JavaTypeMetadataHolder rooJavaType, String converterMethodName) {
+	private MethodMetadata getConverterMethod(JavaType type, List<MethodMetadata> methods, String methodName) {
 		List<JavaType> params = new ArrayList<JavaType>();
-		params.add(rooJavaType.getType());
+		params.add(type);
 		params.add(JavaType.STRING_OBJECT);
 		JavaType converterJavaType = new JavaType("org.springframework.core.convert.converter.Converter", 0, DataType.TYPE, null, params);
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("return new " + converterJavaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "() {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("public String convert(" + rooJavaType.getType().getSimpleTypeName() + " source) {");
+		bodyBuilder.appendFormalLine("public String convert(" + type.getSimpleTypeName() + " " + type.getSimpleTypeName().toLowerCase() + ") {");
 		bodyBuilder.indent();
 		
 		StringBuilder sb = new StringBuilder("return new StringBuilder()");
-		List<MethodMetadata> labelMethods = getLabelMethodsForDomainType(rooJavaType);
-		for (int i=0; i < labelMethods.size(); i++) {
+		for (int i=0; i < methods.size(); i++) {
 			if (i > 0) {
 				sb.append(".append(\" \")");
 			}
-			sb.append(".append(source." + labelMethods.get(i).getMethodName().getSymbolName() + "()");
+			sb.append(".append(" + type.getSimpleTypeName().toLowerCase() + "." + methods.get(i).getMethodName().getSymbolName() + "()");
 			
-			if (domainEnumTypes.contains(labelMethods.get(i).getReturnType())) {
-				sb.append(".name()");
-			}
+//			if (domainEnumTypes.contains(methods.get(i).getReturnType())) {
+//				sb.append(".name()");
+//			}
 			sb.append(")");
 		}
 		sb.append(".toString();");
@@ -107,7 +96,7 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("};");
 		
-		return (new MethodMetadataBuilder(getId(), 0, new JavaSymbolName(converterMethodName), converterJavaType, bodyBuilder)).build();
+		return (new MethodMetadataBuilder(getId(), 0, new JavaSymbolName(methodName), converterJavaType, bodyBuilder)).build();
 	}
 	
 	private MethodMetadataBuilder getInstallMethodBuilder() {
@@ -141,46 +130,5 @@ public class ConversionServiceMetadata extends AbstractItdTypeDetailsProvidingMe
 
 	private MethodMetadata getGovernorMethod(String methodName, List<AnnotatedJavaType> parameters) {
 		return MemberFindingUtils.getDeclaredMethod(governorTypeDetails, new JavaSymbolName(methodName), AnnotatedJavaType.convertFromAnnotatedJavaTypes(parameters));
-	}
-	
-	/**
-	 * Selects up to 3 methods that can be used to build up a label that represents the 
-	 * domain object. Only methods returning non-domain types, non-collections, and non-arrays
-	 * are considered. Accessors for the id and the version fields are also excluded.
-	 * @param memberDetailsScanner 
-	 * 
-	 * @return a list containing between 1 and 3 methods. 
-	 *		If no methods could be selected the toString() method is added.
-	 */
-	private List<MethodMetadata> getLabelMethodsForDomainType(JavaTypeMetadataHolder javaTypeMetadataHolder) {
-		int fieldCount = 0;
-		List<MethodMetadata> methods = new ArrayList<MethodMetadata>();
-		for (MethodMetadata accessor : javaTypeMetadataHolder.getBeanInfoMetadata().getPublicAccessors()) {
-			if (accessor.getMethodName().equals(javaTypeMetadataHolder.getEntityMetadata().getIdentifierAccessor().getMethodName())) {
-				continue;
-			}
-			MethodMetadata versionAccessor = javaTypeMetadataHolder.getEntityMetadata().getVersionAccessor();
-			if (versionAccessor != null && accessor.getMethodName().equals(versionAccessor.getMethodName())) {
-				continue;
-			}
-			FieldMetadata field = javaTypeMetadataHolder.getBeanInfoMetadata().getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
-			if (field != null // Should not happen
-					&& !field.getFieldType().isCommonCollectionType() && !field.getFieldType().isArray() // Exclude collections and arrays
-					&& !domainTypes.contains(accessor.getReturnType()) // Exclude references to other domain objects as they are too verbose
-					&& !field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) 
-					&& !field.getFieldType().equals(JavaType.BOOLEAN_OBJECT) /* Exclude boolean values as they would not be meaningful in this presentation */ ) {
-
-				methods.add(accessor);
-				fieldCount++;
-				if (fieldCount == 3) {
-					break;
-				}
-			}
-		}
-		if (methods.size() == 0) {
-			methods.add(new MethodMetadataBuilder(javaTypeMetadataHolder.getBeanInfoMetadata().getId(), Modifier.PUBLIC, new JavaSymbolName("toString"), 
-					new JavaType("java.lang.String"), null, null, new InvocableMemberBodyBuilder()).build());
-		}
-		return Collections.unmodifiableList(methods);
 	}
 }

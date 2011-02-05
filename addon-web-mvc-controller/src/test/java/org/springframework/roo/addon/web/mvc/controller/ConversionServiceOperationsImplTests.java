@@ -12,7 +12,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -27,12 +27,12 @@ public class ConversionServiceOperationsImplTests {
 	
 	@Mock private FileManager fileManager;
 	@Mock private PathResolver pathResolver;
-	@Mock private ClasspathOperations classpathOperations;
+	@Mock private TypeLocationService typeLocationService;
 
 	@Before
 	public void setUp() {
 		initMocks(this);
-		operations = new ConversionServiceOperationsImpl(fileManager, pathResolver, classpathOperations);
+		operations = new ConversionServiceOperationsImpl(fileManager, pathResolver, typeLocationService);
 	}
 	
 	@Test
@@ -83,7 +83,7 @@ public class ConversionServiceOperationsImplTests {
 	public void testInstallJavaClass() throws Exception {
 		JavaType javaType = new JavaType(getClass().getPackage().getName() + ".ApplicationConversionServiceFactoryBean");
 		String targetPath = "doesntMatter";
-		when(classpathOperations.getPhysicalLocationCanonicalPath(javaType , Path.SRC_MAIN_JAVA)).thenReturn(targetPath);
+		when(typeLocationService.getPhysicalLocationCanonicalPath(javaType , Path.SRC_MAIN_JAVA)).thenReturn(targetPath);
 		when(pathResolver.getPath(targetPath)).thenReturn(new Path(targetPath));
 		StubMutableFile file = new StubMutableFile();
 		when(fileManager.createFile(targetPath)).thenReturn(file);

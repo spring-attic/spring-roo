@@ -8,7 +8,7 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.XmlTemplate.DomElementCallback;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
+import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
@@ -38,16 +38,16 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 	
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private TypeLocationService typeLocationService;
 
 	public ConversionServiceOperationsImpl() {
 		// For testing
 	}
 
-	public ConversionServiceOperationsImpl(FileManager fileManager, PathResolver pathResolver, ClasspathOperations classpathOperations) {
+	public ConversionServiceOperationsImpl(FileManager fileManager, PathResolver pathResolver, TypeLocationService typeLocationService) {
 		this.fileManager = fileManager;
 		this.pathResolver = pathResolver;
-		this.classpathOperations = classpathOperations;
+		this.typeLocationService = typeLocationService;
 	}
 
 	public void installConversionService(JavaPackage thePackage) {
@@ -60,7 +60,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 	
 	void installJavaClass(JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
-		String physicalPath = classpathOperations.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
+		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
 		if (fileManager.exists(physicalPath)) {
 			return;
 		}

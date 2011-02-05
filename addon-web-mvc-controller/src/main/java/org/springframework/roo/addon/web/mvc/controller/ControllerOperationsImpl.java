@@ -14,6 +14,7 @@ import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
@@ -21,7 +22,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.BooleanAttributeValue;
 import org.springframework.roo.classpath.details.annotations.ClassAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
@@ -44,7 +44,7 @@ import org.springframework.roo.support.util.Assert;
 public class ControllerOperationsImpl implements ControllerOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private TypeManagementService typeManagementService;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
@@ -89,7 +89,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		Assert.notNull(disallowedOperations, "Set of disallowed operations required");
 		Assert.hasText(path, "Controller base path required");
 
-		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
+		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 
 		if (fileManager.exists(resourceIdentifier)) {
 			return; //type exists already - nothing to do
@@ -119,7 +119,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 
-		classpathOperations.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 
 		webMvcOperations.installAllWebMvcArtifacts();
 	}
