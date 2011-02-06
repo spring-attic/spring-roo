@@ -37,6 +37,7 @@ import org.w3c.dom.Element;
 @Component 
 @Service 
 public class SecurityOperationsImpl implements SecurityOperations {
+	private static final String SECURITY_VERSION = "3.0.5.RELEASE";
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
@@ -55,7 +56,7 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		}
 
 		// Only permit installation if they don't already have some version of Spring Security installed
-		return project.getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", "3.0.2.RELEASE")).size() == 0;
+		return project.getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).size() == 0;
 	}
 
 	public void installSecurity() {
