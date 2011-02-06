@@ -21,9 +21,9 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
  * 
  * @since 1.1.1
  */
-@Component //use these Apache Felix annotations to register your commands class in the Roo container
+@Component // Use these Apache Felix annotations to register your commands class in the Roo container
 @Service
-public class __APP_NAME__Commands implements CommandMarker { //all command types must implement the CommandMarker interface
+public class __APP_NAME__Commands implements CommandMarker { // All command types must implement the CommandMarker interface
 	
 	/**
 	 * Get hold of a JDK Logger
@@ -77,19 +77,21 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 */
 	@CliAvailabilityIndicator("say hello")
 	public boolean isSayHelloAvailable() {
-		return true; //this command is always available!
+		return true; // This command is always available!
 	}
 	
 	/**
-	 * This method registeres a command with the Roo shell. It also offers two command attributes, a mandatory one and an
+	 * This method registers a command with the Roo shell. It also offers two command attributes, a mandatory one and an
 	 * optional command which has a default value.
 	 * 
 	 * @param name 
 	 * @param country
 	 */
-	@CliCommand(value="say hello", help="Prints welcome message to the Roo shell")
-	public void sayHello(@CliOption(key="name", mandatory=true, help="State your name") String name, // a mandatory command attribute
-			@CliOption(key="contryOfOrigin", mandatory=false, help="Country of orgin") __APP_NAME__PropertyName country) {
+	@CliCommand(value = "say hello", help = "Prints welcome message to the Roo shell")
+	public void sayHello(
+		@CliOption(key = "name", mandatory = true, help = "State your name") String name, // A mandatory command attribute
+		@CliOption(key = "contryOfOrigin", mandatory = false, help = "Country of orgin") __APP_NAME__PropertyName country) {
+		
 		log.info("Welcome " + name + "!");
 		log.warning("Country of origin: " + (country == null ? __APP_NAME__PropertyName.NOT_SPECIFIED.getPropertyName() : country.getPropertyName()));
 		log.severe("It seems you are a running JDK " + operations.getProperty("java.version"));
@@ -106,7 +108,7 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 * 
 	 * @return true (default) if the command should be visible at this stage, false otherwise
 	 */
-	@CliAvailabilityIndicator("web mvc install tags") // define the exact command name
+	@CliAvailabilityIndicator("web mvc install tags") // Define the exact command name
 	public boolean isInstallTagsCommandAvailable() {
 		return operations.isInstallTagsCommandAvailable();
 	}
@@ -114,7 +116,7 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	/**
 	 * Replace existing MVC tagx files in the target project
 	 */
-	@CliCommand(value="web mvc install tags", help="Replace default Roo MVC tags used for scaffolding")
+	@CliCommand(value = "web mvc install tags", help="Replace default Roo MVC tags used for scaffolding")
 	public void installTags() {
 		operations.installTags();
 	}

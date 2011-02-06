@@ -7,9 +7,9 @@
 			
 			<!-- Maven-style dependency definition (should be used if exclusions need to be defined) -->
 			<dependency>
-			        <groupId>org.springframework.batch</groupId>
-			        <artifactId>spring-batch-admin-manager</artifactId>
-			        <version>1.0.0.RELEASE</version>
+				<groupId>org.springframework.batch</groupId>
+				<artifactId>spring-batch-admin-manager</artifactId>
+				 <version>1.0.0.RELEASE</version>
 			</dependency>
 		</dependencies>
 	</batch>

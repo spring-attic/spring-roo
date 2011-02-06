@@ -9,7 +9,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.1.1
  */
 public enum __APP_NAME__PropertyName {
-
 	AUSTRALIA("Australia"),
 	UNITED_STATES("United States"),
 	GERMANY("Germany"),

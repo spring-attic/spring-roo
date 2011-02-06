@@ -22,7 +22,7 @@ import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
 /**
- * This type produces Metadata for a new ITD. It uses an {@link ItdTypeDetailsBuilder} provided by 
+ * This type produces metadata for a new ITD. It uses an {@link ItdTypeDetailsBuilder} provided by 
  * {@link AbstractItdTypeDetailsProvidingMetadataItem} to register a field in the ITD and a new method.
  * 
  * @since 1.1.0
@@ -34,15 +34,11 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 	public __APP_NAME__Metadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		
-		if (!isValid()) {
-			return;
-		}
-		
-		// adding a new sample field definition
+
+		// Adding a new sample field definition
 		builder.addField(getSampleField());
 			
-		// adding a new sample method definition
+		// Adding a new sample method definition
 		builder.addMethod(getSampleMethod());
 		
 		// Create a representation of the desired output ITD
@@ -52,55 +48,55 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 	/**
 	 * Create metadata for a field definition. 
 	 *
-	 * @return
+	 * @return a FieldMetadata object
 	 */
 	private FieldMetadata getSampleField() {
-	    // Note private fields are private to the ITD, not the target type, this is undesirable if a dependent method is pushed in to the target type
-	    int modifier = 0;
+		// Note private fields are private to the ITD, not the target type, this is undesirable if a dependent method is pushed in to the target type
+		int modifier = 0;
 		
 		// Using the FieldMetadataBuilder to create the field definition. 
-		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), // metadata ID provided by supertype
-																	modifier,  // using package protection rather than private
-																	new ArrayList<AnnotationMetadataBuilder>(),  //no annotations for this field
-																	new JavaSymbolName("sampleField"), //field name
-																	JavaType.STRING_OBJECT); //field type
+		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(getId(), // Metadata ID provided by supertype
+			modifier, // Using package protection rather than private
+			new ArrayList<AnnotationMetadataBuilder>(), // No annotations for this field
+			new JavaSymbolName("sampleField"), // Field name
+			JavaType.STRING_OBJECT); // Field type
 		
-		return fieldBuilder.build(); //build and return a FieldMetadata instance
+		return fieldBuilder.build(); // Build and return a FieldMetadata instance
 	}
 	
 	private MethodMetadata getSampleMethod() {
-		// specify the desired method name
+		// Specify the desired method name
 		JavaSymbolName methodName = new JavaSymbolName("sampleMethod");
 		
-		// check if a method with the same signature already exists in the target type
+		// Check if a method with the same signature already exists in the target type
 		MethodMetadata method = methodExists(methodName, new ArrayList<AnnotatedJavaType>());
 		if (method != null) {
-			// if it already exists, just return the method and omit its generation via the ITD
+			// If it already exists, just return the method and omit its generation via the ITD
 			return method;
 		}
 		
-		// define method annotations (none in this case)
+		// Define method annotations (none in this case)
 		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
 		
-		// define method throws types (none in this case)
+		// Define method throws types (none in this case)
 		List<JavaType> throwsTypes = new ArrayList<JavaType>();
 		
-		// define method parameter types (none in this case)
+		// Define method parameter types (none in this case)
 		List<AnnotatedJavaType> parameterTypes = new ArrayList<AnnotatedJavaType>();
 		
-		// define method parameter names (none in this case)
+		// Define method parameter names (none in this case)
 		List<JavaSymbolName> parameterNames = new ArrayList<JavaSymbolName>();
 		
-		// create the method body
+		// Create the method body
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("System.out.println(\"Hello World\");");
 		
-		// use the MethodMetadataBuilder for easy creation of MethodMetadata
+		// Use the MethodMetadataBuilder for easy creation of MethodMetadata
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, JavaType.VOID_PRIMITIVE, parameterTypes, parameterNames, bodyBuilder);
 		methodBuilder.setAnnotations(annotations);
 		methodBuilder.setThrowsTypes(throwsTypes);
 		
-		return methodBuilder.build(); //build and return a MethodMetadata instance
+		return methodBuilder.build(); // Build and return a MethodMetadata instance
 	}
 		
 	private MethodMetadata methodExists(JavaSymbolName methodName, List<AnnotatedJavaType> paramTypes) {
@@ -115,9 +111,7 @@ public class __APP_NAME__Metadata extends AbstractItdTypeDetailsProvidingMetadat
 		return null;
 	}
 	
-	//*****************************************************************
-	// 		Typicaly, no changes are required beyond this point
-	//*****************************************************************
+	// Typically, no changes are required beyond this point
 	
 	public String toString() {
 		ToStringCreator tsc = new ToStringCreator(this);

@@ -11,9 +11,8 @@ import org.springframework.roo.support.util.TemplateUtils;
 /** 
  * __APP_NAME__ language support.
  *
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class __APP_NAME__Language extends AbstractLanguage {
 

@@ -10,7 +10,6 @@ import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 
-
 /**
  * Provides {@link __APP_NAME__Metadata}. This type is called by Roo to retrieve the metadata for this add-on.
  * Use this type to reference external types and services needed by the metadata type. Register metadata triggers and
@@ -48,13 +47,12 @@ public final class __APP_NAME__MetadataProvider extends AbstractItdMetadataProvi
 	 * Return an instance of the Metadata offered by this add-on
 	 */
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
-		
-		// pass dependencies required by the metadata in through its constructor
+		// Pass dependencies required by the metadata in through its constructor
 		return new __APP_NAME__Metadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata);
 	}
 	
 	/**
-	 * define the unique ITD file name extension, here the resulting file name will be **_ROO___APP_NAME__.aj
+	 * Define the unique ITD file name extension, here the resulting file name will be **_ROO___APP_NAME__.aj
 	 */
 	public String getItdUniquenessFilenameSuffix() {
 		return "__APP_NAME__";

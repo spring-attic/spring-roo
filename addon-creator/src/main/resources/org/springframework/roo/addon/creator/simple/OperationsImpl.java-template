@@ -22,8 +22,7 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component
 @Service
 public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
-
-	private char separator = File.separatorChar;
+	private static final char SEPARATOR = File.separatorChar;
 
 	/**
 	 * Get a reference to the FileManager from the underlying OSGi container. Make sure you
@@ -45,7 +44,7 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 
 	 /** {@inheritDoc} */
 	public boolean isInstallTagsCommandAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags"));
+		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags"));
 	}
 
 	 /** {@inheritDoc} */
@@ -56,9 +55,9 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 
 	 /** {@inheritDoc} */
 	public void installTags() {
-		//use PathResolver to get canonical resource names for a given artifact
-		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags" + separator + "util"), "info.tagx");
-		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + separator + "tags" + separator + "form"), "show.tagx");
+		// Use PathResolver to get canonical resource names for a given artifact
+		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "util"), "info.tagx");
+		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "form"), "show.tagx");
 	}
 	
 	/**
@@ -69,22 +68,17 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 	 * @param fileName
 	 */
 	private void createOrReplaceFile(String path, String fileName) {
-		String targetFile = path + separator + fileName;
+		String targetFile = path + SEPARATOR + fileName;
 		
-		//use MutableFile in combination with FileManager to take advantage of Roos transactional file handling which 
-		//offers automatic rollback if an exception occurs
-		MutableFile mutableFile;
-		if (fileManager.exists(targetFile)) {
-			mutableFile = fileManager.updateFile(targetFile);
-		} else {
-			mutableFile = fileManager.createFile(targetFile);
-		}
+		// Use MutableFile in combination with FileManager to take advantage of Roo's transactional file handling which 
+		// offers automatic rollback if an exception occurs
+		MutableFile mutableFile = fileManager.exists(targetFile) ? fileManager.updateFile(targetFile) : fileManager.createFile(targetFile);
 		try {
-			//use FileCopyUtils for copying resources from your add-on to the target project
-			//use TemplateUtils to open an InputStream to a resource located in your bundle
+			// Use FileCopyUtils for copying resources from your add-on to the target project
+			// Use TemplateUtils to open an InputStream to a resource located in your bundle
 			FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), fileName), mutableFile.getOutputStream());
-		} catch (IOException ioe) {
-			throw new IllegalStateException(ioe);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 }

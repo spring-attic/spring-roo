@@ -18,9 +18,9 @@ import org.springframework.roo.shell.CommandMarker;
  * 
  * @since 1.1
  */
-@Component //use these Apache Felix annotations to register your commands class in the Roo container
+@Component // Use these Apache Felix annotations to register your commands class in the Roo container
 @Service
-public class __APP_NAME__Commands implements CommandMarker { //all command types must implement the CommandMarker interface
+public class __APP_NAME__Commands implements CommandMarker { // All command types must implement the CommandMarker interface
 	
 	/**
 	 * Get a reference to the __APP_NAME__Operations from the underlying OSGi container
@@ -37,7 +37,7 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 * 
 	 * @return true (default) if the command should be visible at this stage, false otherwise
 	 */
-	@CliAvailabilityIndicator({"__APP_NAME_LWR_CASE__ setup", "__APP_NAME_LWR_CASE__ add", "__APP_NAME_LWR_CASE__ all"})
+	@CliAvailabilityIndicator({ "__APP_NAME_LWR_CASE__ setup", "__APP_NAME_LWR_CASE__ add", "__APP_NAME_LWR_CASE__ all" })
 	public boolean isCommandAvailable() {
 		return operations.isCommandAvailable();
 	}
@@ -47,8 +47,8 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 * 
 	 * @param type 
 	 */
-	@CliCommand(value="__APP_NAME_LWR_CASE__ add", help="Some helpful description")
-	public void add(@CliOption(key="type", mandatory=true, help="The java type to apply this annotation to") JavaType target) {
+	@CliCommand(value = "__APP_NAME_LWR_CASE__ add", help = "Some helpful description")
+	public void add(@CliOption(key = "type", mandatory = true, help = "The java type to apply this annotation to") JavaType target) {
 		operations.annotateType(target);
 	}
 	
@@ -56,7 +56,7 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 * This method registers a command with the Roo shell. It has no command attribute.
 	 * 
 	 */
-	@CliCommand(value="__APP_NAME_LWR_CASE__ all", help="Some helpful description")
+	@CliCommand(value = "__APP_NAME_LWR_CASE__ all", help = "Some helpful description")
 	public void all() {
 		operations.annotateAll();
 	}
@@ -65,7 +65,7 @@ public class __APP_NAME__Commands implements CommandMarker { //all command types
 	 * This method registers a command with the Roo shell. It has no command attribute.
 	 * 
 	 */
-	@CliCommand(value="__APP_NAME_LWR_CASE__ setup", help="Setup __APP_NAME__ addon")
+	@CliCommand(value = "__APP_NAME_LWR_CASE__ setup", help = "Setup __APP_NAME__ addon")
 	public void setup() {
 		operations.setup();
 	}

@@ -6,7 +6,7 @@ import java.util.Locale;
 import org.springframework.roo.model.JavaPackage;
 
 /**
- * Provides an interface to {@link CreatorOperationsImpl}.
+ * Provides add-on creation operations.
  * 
  * @author Stefan Schmidt
  */

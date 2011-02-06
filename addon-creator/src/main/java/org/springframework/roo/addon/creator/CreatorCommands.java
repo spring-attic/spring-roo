@@ -21,11 +21,11 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class CreatorCommands implements CommandMarker {
-	@Reference private CreatorOperations generatorOperations;
+	@Reference private CreatorOperations creatorOperations;
 		
 	@CliAvailabilityIndicator({ "addon create i18n", "addon create simple", "addon create advanced" })
 	public boolean isCreateAddonAvailable() {
-		return generatorOperations.isCommandAvailable();
+		return creatorOperations.isCommandAvailable();
 	}
 	
 	@CliCommand(value = "addon create i18n", help = "Create a new Internationalization add-on for Spring Roo")
@@ -41,7 +41,7 @@ public class CreatorCommands implements CommandMarker {
 		if (locale == null) {
 			throw new IllegalStateException("Could not read provided locale. Please use correct format (ie: en, or more specific like en_AU, or de_DE)");
 		}
-		generatorOperations.createI18nAddon(tlp, language, locale, messageBundle, flagGraphic, description, projectName);
+		creatorOperations.createI18nAddon(tlp, language, locale, messageBundle, flagGraphic, description, projectName);
 	}
 	
 	@CliCommand(value = "addon create simple", help = "Create a new simple add-on for Spring Roo (commands + operations)")
@@ -50,7 +50,7 @@ public class CreatorCommands implements CommandMarker {
 		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
 		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
-		generatorOperations.createSimpleAddon(tlp, description, projectName);
+		creatorOperations.createSimpleAddon(tlp, description, projectName);
 	}
 	
 	@CliCommand(value = "addon create advanced", help = "Create a new advanced add-on for Spring Roo (commands + operations + metadata + trigger annotation + dependencies)")
@@ -59,7 +59,7 @@ public class CreatorCommands implements CommandMarker {
 		@CliOption(key = "description", mandatory = false, help = "Description of your addon (surround text with double quotes)") String description,
 		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName) {
 		
-		generatorOperations.createAdvancedAddon(tlp, description, projectName);
+		creatorOperations.createAdvancedAddon(tlp, description, projectName);
 	}
 	
 	@CliCommand(value = "addon create wrapper", help = "Create a new add-on for Spring Roo which wraps a maven artifact to create a OSGi compliant bundle")
@@ -75,6 +75,6 @@ public class CreatorCommands implements CommandMarker {
 		@CliOption(key = "projectName", mandatory = false, help = "Provide a custom project name (if not provided the top level package name will be used instead)") String projectName,
 		@CliOption(key = "osgiImports", mandatory = false, help = "Contents of Import-Package in OSGi manifest") String osgiImports) {
 		
-		generatorOperations.createWrapperAddon(tlp, groupId, artifactId, version, vendorName, lincenseUrl, docUrl, osgiImports, description, projectName);
+		creatorOperations.createWrapperAddon(tlp, groupId, artifactId, version, vendorName, lincenseUrl, docUrl, osgiImports, description, projectName);
 	}
 }
