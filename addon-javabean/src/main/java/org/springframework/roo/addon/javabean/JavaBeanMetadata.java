@@ -267,7 +267,7 @@ public class JavaBeanMetadata extends AbstractItdTypeDetailsProvidingMetadataIte
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("for (Employee entity : " + entityCollectionName + ") {");
+		bodyBuilder.appendFormalLine("for (" + collectionElementType.getSimpleTypeName() + " entity : " + entityCollectionName +") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine("if (!longIds.contains(entity.getId())) {");
 		bodyBuilder.indent();
