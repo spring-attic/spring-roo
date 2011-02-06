@@ -3,8 +3,7 @@ package __TOP_LEVEL_PACKAGE__;
 import org.springframework.roo.model.JavaType;
 
 /**
- * Interface of operations this add-on offers. Typically used by a command type 
- * or an external add-on
+ * Interface of operations this add-on offers. Typically used by a command type or an external add-on.
  *
  * @since 1.1
  */
