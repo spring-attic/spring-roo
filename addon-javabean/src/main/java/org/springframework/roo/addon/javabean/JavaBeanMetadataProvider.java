@@ -15,7 +15,6 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.AbstractItdMetadataProvider;
 import org.springframework.roo.classpath.itd.ItdTypeDetailsProvidingMetadataItem;
 import org.springframework.roo.model.JavaType;
@@ -66,10 +65,14 @@ public final class JavaBeanMetadataProvider extends AbstractItdMetadataProvider 
 	}
 
 	private boolean isGaeInterested(FieldMetadata field) {
+		JavaType fieldType = field.getFieldType();
+		if (fieldType.isCommonCollectionType()) {
+			fieldType = field.getFieldType().getParameters().get(0);
+		}
+		
 		try {
-			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(field.getFieldType());
-			AnnotationMetadata annotation = MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-			return annotation != null;
+			ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails = typeLocationService.getClassOrInterface(fieldType);
+			return MemberFindingUtils.getTypeAnnotation(classOrInterfaceTypeDetails, new JavaType("org.springframework.roo.addon.entity.RooEntity")) != null;
 		} catch (Exception e) {
 			// Don't need to know what happened so just return false;
 			return false;
