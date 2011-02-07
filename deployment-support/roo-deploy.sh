@@ -263,6 +263,7 @@ ASSEMBLY_ASC="$DIST_DIR/$RELEASE_IDENTIFIER$SUFFIX.zip.asc"
 log "Assembly ASC...: $ASSEMBLY_ASC"
 
 if [[ "$COMMAND" = "assembly" ]]; then
+
     if [ ! -f $ROO_HOME/target/all/org.springframework.roo.bootstrap-*.jar ]; then
         l_error "JARs missing; you must run mvn package before attempting assembly"
         exit 1
@@ -326,17 +327,20 @@ if [[ "$COMMAND" = "assembly" ]]; then
     sha1sum *.zip > $ASSEMBLY_SHA
 
     # Sign the ZIP
-    grep "<gpg.passphrase>" ~/.m2/settings.xml &>/dev/null
-    EXITED=$?
-    if [[ ! "$EXITED" = "0" ]]; then
-        l_error "~/.m2/settings.xml does not contain a <gpg.passphrase> (grep exit code $EXITED)." >&2; exit 1;
-    fi
-    PASSPHRASE=`grep "<gpg.passphrase>" ~/.m2/settings.xml | sed 's/<gpg.passphrase>//' | sed 's/<\/gpg.passphrase>//' | sed 's/ //g'`
     GPG_OPTS='-q'
     if [ "$VERBOSE" = "1" ]; then
         GPG_OPTS='-v'
     fi
-    echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
+    grep "<gpg.passphrase>" ~/.m2/settings.xml &>/dev/null
+    EXITED=$?
+    if [[ ! "$EXITED" = "1" ]]; then
+        log "Found gpg.passphrase in ~/.m2/settings.xml..."
+        PASSPHRASE=`grep "<gpg.passphrase>" ~/.m2/settings.xml | sed 's/<gpg.passphrase>//' | sed 's/<\/gpg.passphrase>//' | sed 's/ //g'`
+        echo "$PASSPHRASE" | gpg $GPG_OPTS --batch --passphrase-fd 0 -a --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
+    else
+        log "gpg.passphrase NOT found in ~/.m2/settings.xml. Trying with gpg agent."
+        gpg $GPG_OPTS -a --use-agent --output $ASSEMBLY_ASC --detach-sign $ASSEMBLY_ZIP
+    fi
     EXITED=$?
     if [[ ! "$EXITED" = "0" ]]; then
         l_error "GPG detached signature creation failed (gpg exit code $EXITED)." >&2; exit 1;
@@ -392,6 +396,8 @@ if [[ "$COMMAND" = "assembly" ]]; then
 fi
 
 if [[ "$COMMAND" = "deploy" ]]; then
+    type -P s3cmd &>/dev/null || { l_error "s3cmd not found. Aborting." >&2; exit 1; }
+
     if [ ! -f $ASSEMBLY_ZIP ]; then
         l_error "Unable to find $ASSEMBLY_ZIP"
         exit 1
