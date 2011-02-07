@@ -44,6 +44,7 @@ import org.springframework.roo.support.util.StringUtils;
 public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = DataOnDemandMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
+	private static final JavaType COMPONENT = new JavaType("org.springframework.stereotype.Component");
 	private static final JavaType MAX = new JavaType("javax.validation.constraints.Max");
 	private static final JavaType MIN = new JavaType("javax.validation.constraints.Min");
 	private static final JavaType SIZE = new JavaType("javax.validation.constraints.Size");
@@ -144,12 +145,11 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return the annotation is already exists or will be created, or null if it will not be created (required)
 	 */
 	public AnnotationMetadata getComponentAnnotation() {
-		JavaType javaType = new JavaType("org.springframework.stereotype.Component");
 		if (isComponentAnnotationIntroduced()) {
-			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(javaType);
+			AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(COMPONENT);
 			return annotationBuilder.build();
 		}
-		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, COMPONENT);
 	}
 
 	/**
@@ -158,9 +158,7 @@ public class DataOnDemandMetadata extends AbstractItdTypeDetailsProvidingMetadat
 	 * @return true if it will be introduced, false otherwise
 	 */
 	public boolean isComponentAnnotationIntroduced() {
-		JavaType javaType = new JavaType("org.springframework.stereotype.Component");
-		AnnotationMetadata result = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, javaType);
-		return result == null;
+		return MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, COMPONENT) == null;
 	}
 
 	/**
