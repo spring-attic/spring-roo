@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,8 +51,8 @@ import org.springframework.roo.support.util.Assert;
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
 	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
-	private Set<MonitoringRequest> requests = new HashSet<MonitoringRequest>();
-	private Map<MonitoringRequest,Map<File,Long>> priorExecution =new WeakHashMap<MonitoringRequest,Map<File,Long>>();
+	private Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
+	private Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();
 	private Set<String> notifyChanged = new HashSet<String>();
 	private Set<String> notifyCreated = new HashSet<String>();
 	private Set<String> notifyDeleted = new HashSet<String>();
