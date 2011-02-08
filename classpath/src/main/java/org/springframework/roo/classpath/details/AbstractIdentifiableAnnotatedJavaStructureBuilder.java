@@ -22,13 +22,15 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 
 	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(IdentifiableAnnotatedJavaStructure existing) {
 		super(existing);
-		for (AnnotationMetadata element : existing.getAnnotations()) {
-			this.annotations.add(new AnnotationMetadataBuilder(element));
-		}
+		init(existing);
 	}
 	
 	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId, IdentifiableAnnotatedJavaStructure existing) {
 		super(declaredbyMetadataId, existing);
+		init(existing);
+	}
+
+	private void init(IdentifiableAnnotatedJavaStructure existing) {
 		for (AnnotationMetadata element : existing.getAnnotations()) {
 			this.annotations.add(new AnnotationMetadataBuilder(element));
 		}

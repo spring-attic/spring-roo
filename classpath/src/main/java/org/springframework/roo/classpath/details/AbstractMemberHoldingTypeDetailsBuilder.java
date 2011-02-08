@@ -27,6 +27,15 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 	
 	protected AbstractMemberHoldingTypeDetailsBuilder(MemberHoldingTypeDetails existing) {
 		super(existing);
+		init(existing);
+	}
+
+	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId, ClassOrInterfaceTypeDetails existing) {
+		super(declaredbyMetadataId, existing);
+		init(existing);
+	}
+
+	private void init(MemberHoldingTypeDetails existing) {
 		for (ConstructorMetadata element : existing.getDeclaredConstructors()) {
 			declaredConstructors.add(new ConstructorMetadataBuilder(element));
 		}
@@ -70,13 +79,13 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		this.declaredMethods = declaredMethods;
 	}
 
-    public List<ClassOrInterfaceTypeDetailsBuilder> getDeclaredInnerTypes() {
-        return declaredInnerTypes;
-    }
+	public List<ClassOrInterfaceTypeDetailsBuilder> getDeclaredInnerTypes() {
+		return declaredInnerTypes;
+	}
 
-    public void setDeclaredInnerTypes(List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
-        this.declaredInnerTypes = declaredInnerTypes;
-    }
+	public void setDeclaredInnerTypes(List<ClassOrInterfaceTypeDetailsBuilder> declaredInnerTypes) {
+		this.declaredInnerTypes = declaredInnerTypes;
+	}
 
 	public List<InitializerMetadataBuilder> getDeclaredInitializers() {
 		return declaredInitializers;

@@ -28,13 +28,12 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 
 	public ClassOrInterfaceTypeDetailsBuilder(ClassOrInterfaceTypeDetails existing) {
 		super(existing);
-		this.name = existing.getName();
-		this.physicalTypeCategory = existing.getPhysicalTypeCategory();
-		if (existing.getSuperclass() != null) {
-			superclass = new ClassOrInterfaceTypeDetailsBuilder(existing.getSuperclass());
-		}
-		enumConstants.addAll(existing.getEnumConstants());
-		registeredImports = existing.getRegisteredImports();
+		init(existing);
+	}
+
+	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, ClassOrInterfaceTypeDetails existing) {
+		super(declaredbyMetadataId, existing);
+		init(existing);
 	}
 
 	public ClassOrInterfaceTypeDetailsBuilder(String declaredbyMetadataId, int modifier, JavaType name, PhysicalTypeCategory physicalTypeCategory) {
@@ -44,6 +43,16 @@ public final class ClassOrInterfaceTypeDetailsBuilder extends AbstractMemberHold
 		this.physicalTypeCategory = physicalTypeCategory;
 	}
 	
+	private void init(ClassOrInterfaceTypeDetails existing) {
+		this.name = existing.getName();
+		this.physicalTypeCategory = existing.getPhysicalTypeCategory();
+		if (existing.getSuperclass() != null) {
+			superclass = new ClassOrInterfaceTypeDetailsBuilder(existing.getSuperclass());
+		}
+		enumConstants.addAll(existing.getEnumConstants());
+		registeredImports = existing.getRegisteredImports();
+	}
+
 	public JavaType getName() {
 		return name;
 	}

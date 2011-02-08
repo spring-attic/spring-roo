@@ -24,14 +24,12 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 	
 	public MethodMetadataBuilder(MethodMetadata existing) {
 		super(existing);
-		this.methodName = existing.getMethodName();
-		this.returnType = existing.getReturnType();
+		init(existing.getMethodName(), existing.getReturnType());
 	}
 	
 	public MethodMetadataBuilder(String declaredbyMetadataId, MethodMetadata existing) {
 		super(declaredbyMetadataId, existing);
-		this.methodName = existing.getMethodName();
-		this.returnType = existing.getReturnType();
+		init(existing.getMethodName(), existing.getReturnType());
 	}
 
 	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
@@ -39,8 +37,7 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		setModifier(modifier);
 		setParameterTypes(parameterTypes);
 		setParameterNames(parameterNames);
-		this.methodName = methodName;
-		this.returnType = returnType;
+		init(methodName, returnType);
 		setBodyBuilder(bodyBuilder);
 	}
 
@@ -50,6 +47,11 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 
 	public MethodMetadata build() {
 		return new DefaultMethodMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getMethodName(), getReturnType(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
+	}
+	
+	private void init(JavaSymbolName methodName, JavaType returnType) {
+		this.methodName = methodName;
+		this.returnType = returnType;
 	}
 
 	public JavaSymbolName getMethodName() {

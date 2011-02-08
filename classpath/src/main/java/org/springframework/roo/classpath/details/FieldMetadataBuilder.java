@@ -13,9 +13,9 @@ import org.springframework.roo.model.JavaType;
  * @since 1.1
  */
 public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJavaStructureBuilder<FieldMetadata> {
-	private String fieldInitializer;
 	private JavaSymbolName fieldName;
 	private JavaType fieldType;
+	private String fieldInitializer;
 	
 	public FieldMetadataBuilder(String declaredbyMetadataId) {
 		super(declaredbyMetadataId);
@@ -23,24 +23,18 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 	
 	public FieldMetadataBuilder(FieldMetadata existing) {
 		super(existing);
-		this.fieldInitializer = existing.getFieldInitializer();
-		this.fieldName = existing.getFieldName();
-		this.fieldType = existing.getFieldType();
+		init(existing.getFieldName(), existing.getFieldType(), existing.getFieldInitializer());
 	}
 	
 	public FieldMetadataBuilder(String declaredbyMetadataId, FieldMetadata existing) {
 		super(declaredbyMetadataId, existing);
-		this.fieldInitializer = existing.getFieldInitializer();
-		this.fieldName = existing.getFieldName();
-		this.fieldType = existing.getFieldType();
+		init(existing.getFieldName(), existing.getFieldType(), existing.getFieldInitializer());
 	}
 
 	public FieldMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
-		this.fieldName = fieldName;
-		this.fieldType = fieldType;
-		this.fieldInitializer = fieldInitializer;
+		init(fieldName, fieldType, fieldInitializer);
 	}
 
 	public FieldMetadataBuilder(String declaredbyMetadataId, int modifier, List<AnnotationMetadataBuilder> annotations, JavaSymbolName fieldName, JavaType fieldType) {
@@ -53,6 +47,12 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 	
 	public FieldMetadata build() {
 		return new DefaultFieldMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getFieldName(), getFieldType(), getFieldInitializer());
+	}
+
+	private void init(JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
+		this.fieldName = fieldName;
+		this.fieldType = fieldType;
+		this.fieldInitializer = fieldInitializer;
 	}
 
 	public String getFieldInitializer() {
