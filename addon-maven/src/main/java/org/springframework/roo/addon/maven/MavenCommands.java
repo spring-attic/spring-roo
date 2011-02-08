@@ -20,10 +20,16 @@ import org.springframework.roo.shell.CommandMarker;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
+/**
+ * Shell commands for {@link MavenOperations} and also to launch native mvn commands.
+ * 
+ * @author Ben Alex
+ * @since 1.0
+ */
 @Component
 @Service
 public class MavenCommands implements CommandMarker {
-	protected final Logger logger = HandlerUtils.getLogger(getClass());
+	private static final Logger logger = HandlerUtils.getLogger(MavenCommands.class);
 	@Reference private MavenOperations mavenOperations;
 	@Reference private ProcessManager processManager;
 
@@ -108,9 +114,10 @@ public class MavenCommands implements CommandMarker {
 		LoggingInputStream input = new LoggingInputStream(p.getInputStream(), processManager);
 		LoggingInputStream errors = new LoggingInputStream(p.getErrorStream(), processManager);
 
+		p.getOutputStream().close(); // Close OutputStream to avoid blocking by Maven commands that expect input, as per ROO-2034
 		input.start();
 		errors.start();
-
+ 
 		try {
 			p.waitFor();
 		} catch (InterruptedException e) {
@@ -119,11 +126,11 @@ public class MavenCommands implements CommandMarker {
 	}
 
 	private class LoggingInputStream extends Thread {
-		private BufferedReader inputStream;
+		private BufferedReader reader;
 		private ProcessManager processManager;
 
 		public LoggingInputStream(InputStream inputStream, ProcessManager processManager) {
-			this.inputStream = new BufferedReader(new InputStreamReader(inputStream));
+			this.reader = new BufferedReader(new InputStreamReader(inputStream));
 			this.processManager = processManager;
 		}
 
@@ -132,7 +139,7 @@ public class MavenCommands implements CommandMarker {
 			ActiveProcessManager.setActiveProcessManager(processManager);
 			String line;
 			try {
-				while ((line = inputStream.readLine()) != null) {
+				while ((line = reader.readLine()) != null) {
 					if (line.startsWith("[ERROR]")) {
 						logger.severe(line);
 					} else if (line.startsWith("[WARNING]")) {
@@ -141,16 +148,16 @@ public class MavenCommands implements CommandMarker {
 						logger.info(line);
 					}
 				}
-			} catch (IOException ioe) {
-				if (ioe.getMessage().contains("No such file or directory") || // For *nix/Mac
-					ioe.getMessage().contains("CreateProcess error=2")) { // For Windows
+			} catch (IOException e) {
+				if (e.getMessage().contains("No such file or directory") || // For *nix/Mac
+					e.getMessage().contains("CreateProcess error=2")) { // For Windows
 					logger.severe("Could not locate Maven executable; please ensure mvn command is in your path");
 				}
 			} finally {
-				if (inputStream != null) {
+				if (reader != null) {
 					try {
-						inputStream.close();
-					} catch (IOException ignore) {
+						reader.close();
+					} catch (IOException ignored) {
 					}
 				}
 				ActiveProcessManager.clearActiveProcessManager();
