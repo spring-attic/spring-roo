@@ -26,6 +26,12 @@ public abstract class AbstractIdentifiableJavaStructureBuilder<T extends Identif
 		this.modifier = existing.getModifier();
 	}
 
+	protected AbstractIdentifiableJavaStructureBuilder(String declaredbyMetadataId, IdentifiableJavaStructure existing) {
+		super(existing);
+		this.declaredByMetadataId = declaredbyMetadataId;
+		this.modifier = existing.getModifier();		
+	}
+
 	public final String getDeclaredByMetadataId() {
 		return declaredByMetadataId;
 	}

@@ -32,6 +32,14 @@ public abstract class AbstractInvocableMemberMetadataBuilder<T extends Invocable
 		bodyBuilder.append(existing.getBody());
 	}
 
+	protected AbstractInvocableMemberMetadataBuilder(String declaredbyMetadataId, InvocableMemberMetadata existing) {
+		super(declaredbyMetadataId, existing);
+		this.parameterNames = new ArrayList<JavaSymbolName>(existing.getParameterNames());
+		this.parameterTypes = new ArrayList<AnnotatedJavaType>(existing.getParameterTypes());
+		this.throwsTypes = new ArrayList<JavaType>(existing.getThrowsTypes());
+		bodyBuilder.append(existing.getBody());
+	}
+
 	public boolean addParameterName(JavaSymbolName parameterName) {
 		return parameterNames.add(parameterName);
 	}

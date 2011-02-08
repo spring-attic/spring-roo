@@ -16,8 +16,11 @@ public final class ConstructorMetadataBuilder extends AbstractInvocableMemberMet
 		super(existing);
 	}
 
+	public ConstructorMetadataBuilder(String declaredbyMetadataId, ConstructorMetadata existing) {
+		super(declaredbyMetadataId, existing);
+	}
+
 	public ConstructorMetadata build() {
 		return new DefaultConstructorMetadata(getCustomData().build(), getDeclaredByMetadataId(), getModifier(), buildAnnotations(), getParameterTypes(), getParameterNames(), getThrowsTypes(), getBodyBuilder().getOutput());
 	}
-
 }

@@ -27,6 +27,13 @@ public abstract class AbstractIdentifiableAnnotatedJavaStructureBuilder<T extend
 		}
 	}
 	
+	protected AbstractIdentifiableAnnotatedJavaStructureBuilder(String declaredbyMetadataId, IdentifiableAnnotatedJavaStructure existing) {
+		super(declaredbyMetadataId, existing);
+		for (AnnotationMetadata element : existing.getAnnotations()) {
+			this.annotations.add(new AnnotationMetadataBuilder(element));
+		}
+	}
+
 	public final boolean addAnnotation(AnnotationMetadata annotationMetadata) {
 		if (annotationMetadata == null) return false;
 		return addAnnotation(new AnnotationMetadataBuilder(annotationMetadata));

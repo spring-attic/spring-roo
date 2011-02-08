@@ -28,6 +28,12 @@ public final class MethodMetadataBuilder extends AbstractInvocableMemberMetadata
 		this.returnType = existing.getReturnType();
 	}
 	
+	public MethodMetadataBuilder(String declaredbyMetadataId, MethodMetadata existing) {
+		super(declaredbyMetadataId, existing);
+		this.methodName = existing.getMethodName();
+		this.returnType = existing.getReturnType();
+	}
+
 	public MethodMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName methodName, JavaType returnType, List<AnnotatedJavaType> parameterTypes, List<JavaSymbolName> parameterNames, InvocableMemberBodyBuilder bodyBuilder) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);

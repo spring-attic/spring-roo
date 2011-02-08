@@ -28,6 +28,13 @@ public final class FieldMetadataBuilder extends AbstractIdentifiableAnnotatedJav
 		this.fieldType = existing.getFieldType();
 	}
 	
+	public FieldMetadataBuilder(String declaredbyMetadataId, FieldMetadata existing) {
+		super(declaredbyMetadataId, existing);
+		this.fieldInitializer = existing.getFieldInitializer();
+		this.fieldName = existing.getFieldName();
+		this.fieldType = existing.getFieldType();
+	}
+
 	public FieldMetadataBuilder(String declaredbyMetadataId, int modifier, JavaSymbolName fieldName, JavaType fieldType, String fieldInitializer) {
 		this(declaredbyMetadataId);
 		setModifier(modifier);
