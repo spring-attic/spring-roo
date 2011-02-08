@@ -16,8 +16,7 @@ import org.springframework.roo.shell.CommandMarker;
 @Component
 @Service
 public class GwtCommands implements CommandMarker {
-	@Reference
-	private GwtOperations gwtOperations;
+	@Reference private GwtOperations gwtOperations;
 
 	@CliAvailabilityIndicator("gwt setup")
 	public boolean isInstallSecurityAvailable() {

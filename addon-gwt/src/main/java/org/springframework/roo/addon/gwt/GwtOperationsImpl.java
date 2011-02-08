@@ -76,7 +76,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	public void setupGwt() {
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		Assert.notNull(projectMetadata, "Project could not be retrieved");
-		isGaeEnabled = isGaeEnabled();
+		isGaeEnabled = projectMetadata.isGaeEnabled();
 
 		// Install web pieces if not already installed
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
@@ -85,36 +85,22 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		// Add GWT natures and builder names to maven eclipse plugin
 		updateMavenEclipsePlugin();
-
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
-		// Add dependencies
-		List<Dependency> dependencies = new ArrayList<Dependency>();
 		
-		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
-		for (Element dependencyElement : gwtDependencies) {
-			dependencies.add(new Dependency(dependencyElement));
-		}
-
 		if (isGaeEnabled) {
-			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
-			List<Element> gaeDependencies = XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration);
-			for (Element dependencyElement : gaeDependencies) {
-				dependencies.add(new Dependency(dependencyElement));
-			}
-
 			updateDataNulcueusPlugin();
 		}
 
-		projectOperations.addDependencies(dependencies);
+		// Get configuration.xml as document
+		Element configuration = XmlUtils.getConfiguration(getClass());
+
+		// Add dependencies
+		updateDependencies(configuration);
 		
 		// Add POM plugin
-		List<Element> plugins = XmlUtils.findElements(isGaeEnabled ? "/configuration/gwt/gae-plugins/plugin" : "/configuration/gwt/plugins/plugin", configuration);
-		for (Element pluginElement : plugins) {
-			projectOperations.addBuildPlugin(new Plugin(pluginElement));
-		}
+		updatePlugins(configuration);
 
-		updateRepositories();
+		// Add POM repositories
+		updateRepositories(configuration);
 
 		// Update web.xml
 		updateWebXml(projectMetadata);
@@ -139,6 +125,44 @@ public class GwtOperationsImpl implements GwtOperations {
 		}
 	}
 
+	private void updateDependencies(Element configuration) {
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		
+		List<Element> gwtDependencies = XmlUtils.findElements("/configuration/gwt/dependencies/dependency", configuration);
+		for (Element dependencyElement : gwtDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
+		}
+
+		if (isGaeEnabled) {
+			// Add GAE SDK specific JARs using systemPath to make AppEngineLauncher happy
+			List<Element> gaeDependencies = XmlUtils.findElements("/configuration/gwt/gae-dependencies/dependency", configuration);
+			for (Element dependencyElement : gaeDependencies) {
+				dependencies.add(new Dependency(dependencyElement));
+			}
+		}
+
+		projectOperations.addDependencies(dependencies);
+	}
+
+	private void updateRepositories(Element configuration) {
+		List<Element> repositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
+		for (Element repositoryElement : repositories) {
+			projectOperations.addRepository(new Repository(repositoryElement));
+		}
+
+		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
+		for (Element repositoryElement : pluginRepositories) {
+			projectOperations.addPluginRepository(new Repository(repositoryElement));
+		}
+	}
+
+	private void updatePlugins(Element configuration) {
+		List<Element> plugins = XmlUtils.findElements(isGaeEnabled ? "/configuration/gwt/gae-plugins/plugin" : "/configuration/gwt/plugins/plugin", configuration);
+		for (Element pluginElement : plugins) {
+			projectOperations.addBuildPlugin(new Plugin(pluginElement));
+		}
+	}
+	
 	private void updateDataNulcueusPlugin() {
 		String pomXml = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pomXml), "pom.xml not found; cannot continue");
@@ -180,7 +204,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		String sourceAntPath = gwtPath.sourceAntPath();
 		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
 
-		if (!isGaeEnabled() && targetDirectory.contains("/gae")) {
+		if (!isGaeEnabled && targetDirectory.contains("/gae")) {
 			return;
 		}
 
@@ -303,26 +327,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
-	private boolean isGaeEnabled() {
-		ProjectMetadata projectMetadata = getProjectMetadata();
-		Assert.notNull(projectMetadata, "Project could not be retrieved");
-		return projectMetadata.isGaeEnabled();
-	}
-
-	private void updateRepositories() {
-		Element configuration = XmlUtils.getConfiguration(getClass());
-
-		List<Element> repositories = XmlUtils.findElements("/configuration/gwt/repositories/repository", configuration);
-		for (Element repositoryElement : repositories) {
-			projectOperations.addRepository(new Repository(repositoryElement));
-		}
-
-		List<Element> pluginRepositories = XmlUtils.findElements("/configuration/gwt/pluginRepositories/pluginRepository", configuration);
-		for (Element repositoryElement : pluginRepositories) {
-			projectOperations.addPluginRepository(new Repository(repositoryElement));
-		}
-	}
-
 	private void updateWebXml(ProjectMetadata projectMetadata) {
 		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXml), "web.xml not found; cannot continue");
@@ -339,7 +343,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		Element webXmlRoot = webXmlDoc.getDocumentElement();
 
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
-		if (isGaeEnabled()) {
+		if (isGaeEnabled) {
 			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectMetadata) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, "This filter makes GAE authentication services visible to a RequestFactory client.");
 			String displayName = "Redirect to the login page if needed before showing any html pages";
 			WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
