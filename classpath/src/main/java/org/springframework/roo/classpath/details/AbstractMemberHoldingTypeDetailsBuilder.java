@@ -30,7 +30,7 @@ public abstract class AbstractMemberHoldingTypeDetailsBuilder<T extends MemberHo
 		init(existing);
 	}
 
-	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId, ClassOrInterfaceTypeDetails existing) {
+	protected AbstractMemberHoldingTypeDetailsBuilder(String declaredbyMetadataId, MemberHoldingTypeDetails existing) {
 		super(declaredbyMetadataId, existing);
 		init(existing);
 	}
