@@ -120,6 +120,9 @@ public class MavenCommands implements CommandMarker {
  
 		try {
 			p.waitFor();
+			if (p.exitValue() != 0) {
+				logger.warning("The command '" + cmd + "' failed to complete");
+			}
 		} catch (InterruptedException e) {
 			throw new IllegalStateException(e);
 		}
