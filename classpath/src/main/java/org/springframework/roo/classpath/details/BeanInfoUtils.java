@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.beaninfo;
+package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
 
@@ -14,13 +14,10 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * Provides utility methods historically in BeanInfoMetadata.
  * 
- * This class is deprecated - please use the class of thye same name in classpath
- * 
  * @author Ben Alex
  * @since 1.1.1
  *
  */
-@Deprecated
 public abstract class BeanInfoUtils {
 
 	/**
@@ -30,7 +27,6 @@ public abstract class BeanInfoUtils {
 	 * @param methodMetadata to search (required, and must be a "get", "set" or "is" method)
 	 * @return the name of the property (never returned null)
 	 */
-	@Deprecated
 	public static JavaSymbolName getPropertyNameForJavaBeanMethod(MethodMetadata methodMetadata) {
 		Assert.notNull(methodMetadata, "Method metadata is required");
 		String name = methodMetadata.getMethodName().getSymbolName();
@@ -53,7 +49,6 @@ public abstract class BeanInfoUtils {
 	 * @param propertyName the property name (required)
 	 * @return the field if found, or null if it could not be found
 	 */
-	@Deprecated
 	public static FieldMetadata getFieldForPropertyName(MemberDetails memberDetails, JavaSymbolName propertyName) {
 		Assert.notNull(propertyName, "Property name required");
 		for (MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
@@ -77,7 +72,6 @@ public abstract class BeanInfoUtils {
 	 * @param method to evaluate (required)
 	 * @return true if the presented method is a mutator, otherwise false
 	 */
-	@Deprecated
 	public static boolean isMutatorMethod(MethodMetadata method) {
 		return method.getMethodName().getSymbolName().startsWith("set") && method.getParameterTypes().size() == 1 && Modifier.isPublic(method.getModifier());
 	}
@@ -88,7 +82,6 @@ public abstract class BeanInfoUtils {
 	 * @param method to evaluate (required)
 	 * @return true if the presented method is an accessor, otherwise false
 	 */
-	@Deprecated
 	public static boolean isAccessorMethod(MethodMetadata method) {
 		return (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is")) && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
 	}

@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.RooEntity;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
