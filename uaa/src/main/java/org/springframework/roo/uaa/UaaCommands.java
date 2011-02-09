@@ -71,7 +71,7 @@ public class UaaCommands implements CommandMarker {
 	@CliCommand(value="download privacy level", help="Changes the Spring User Agent Analysis (UAA) privacy level")
 	public String privacyLevel(@CliOption(key = "privacyLevel", mandatory = true, help = "The new UAA privacy level to use") PrivacyLevel privacyLevel) {
 		uaaService.setPrivacyLevel(privacyLevel);
-		return "UAA privacy level updated " + uaaService.getPrivacyLevelLastChanged() + " (use 'uaa view' to view the new data)";
+		return "UAA privacy level updated " + uaaService.getPrivacyLevelLastChanged() + " (use 'download view' to view the new data)";
 	}
 	
 	@CliCommand(value="download view", help="Displays the Spring User Agent Analysis (UAA) header content in plain text")
