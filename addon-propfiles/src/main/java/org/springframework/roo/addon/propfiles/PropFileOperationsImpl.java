@@ -78,8 +78,8 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			props = new Properties() {
 				private static final long serialVersionUID = 1L;
 
-				// override the keys() method to order the keys alphabetically
-				@SuppressWarnings({ "unchecked" })
+				// Override the keys() method to order the keys alphabetically
+				@SuppressWarnings("all")
 				public synchronized Enumeration keys() {
 					final Object[] keys = keySet().toArray();
 					Arrays.sort(keys);
@@ -104,7 +104,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 			mutableFile = fileManager.updateFile(filePath);
 			loadProps(props, mutableFile.getInputStream());
 		} else {
-			//unable to find the file, so let's create it
+			// Unable to find the file, so let's create it
 			mutableFile = fileManager.createFile(filePath);
 		}
 
@@ -182,11 +182,9 @@ public class PropFileOperationsImpl implements PropFileOperations {
 
 		SortedSet<String> result = new TreeSet<String>();
 		for (Object key : props.keySet()) {
-			String info;
+			String info = key.toString();
 			if (includeValues) {
-				info = key.toString() + " = " + props.getProperty(key.toString());
-			} else {
-				info = key.toString();
+				info += " = " + props.getProperty(key.toString());
 			}
 			result.add(info);
 		}
@@ -244,7 +242,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		} finally {
 			try {
 				os.close();
-			} catch (IOException ignore) {
+			} catch (IOException ignored) {
 			}
 		}
 	}
