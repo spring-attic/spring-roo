@@ -23,7 +23,6 @@ public enum GwtPath {
 	SCAFFOLD_GAE("/client/scaffold/gae", "module/client/scaffold/gae/" + GwtPath.templateSelector),
 	IMAGES("/client/style/images", "module/client/style/images/" + GwtPath.wildCardSelector),
 	WEB("", "webapp/" + GwtPath.wildCardSelector),
-	//MOBILE("/client/managed/mobile", "module/client/mobile/" + GwtPath.templateSelector),//MOBILE
 	MANAGED_ACTIVITY("/client/managed/activity", "module/client/managed/activity/" + GwtPath.templateSelector),
 	SCAFFOLD_ACTIVITY("/client/scaffold/activity", "module/client/scaffold/activity/" + GwtPath.templateSelector);
 
