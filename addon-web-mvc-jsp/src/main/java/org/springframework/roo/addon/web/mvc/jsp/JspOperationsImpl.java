@@ -245,39 +245,50 @@ public class JspOperationsImpl implements JspOperations {
 		} else {
 			folderName = folderName.replace("/**", "");
 		}
+		
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
+		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
+		
+		// Add HTTP get method
+		methods.add(getHttpGetMethod(declaredByMetadataId));
 
-		List<AnnotationMetadataBuilder> annotations = new ArrayList<AnnotationMetadataBuilder>();
+		// Add HTTP post method
+		methods.add(getHttpPostMethod(declaredByMetadataId));
+		
+		// Add index method
+		methods.add(getIndexMethod(folderName, declaredByMetadataId));
+
+		// Create Type definition
+		List<AnnotationMetadataBuilder> typeAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 
 		requestMappingAttributes.add(new StringAttributeValue(new JavaSymbolName("value"), preferredMapping));
 		AnnotationMetadataBuilder requestMapping = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), requestMappingAttributes);
-		annotations.add(requestMapping);
+		typeAnnotations.add(requestMapping);
 
 		// Create annotation @Controller
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		AnnotationMetadataBuilder controllerAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes);
-		annotations.add(controllerAnnotation);
-
-		List<MethodMetadataBuilder> methods = new ArrayList<MethodMetadataBuilder>();
-
-		List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		getMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
+		typeAnnotations.add(controllerAnnotation);
 		
-		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
-		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
-		
-		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
-		getParamNames.add(new JavaSymbolName("modelMap"));
-		getParamNames.add(new JavaSymbolName("request"));
-		getParamNames.add(new JavaSymbolName("response"));
+		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
+		typeDetailsBuilder.setAnnotations(typeAnnotations);
+		typeDetailsBuilder.setDeclaredMethods(methods);
+		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
-		MethodMetadataBuilder getMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, new InvocableMemberBodyBuilder());
-		getMethodBuilder.setAnnotations(getMethodAnnotations);
-		methods.add(getMethodBuilder);
+		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
+	}
 
+	private MethodMetadataBuilder getIndexMethod(String folderName, String declaredByMetadataId) {
+		List<AnnotationMetadataBuilder> indexMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		indexMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), new ArrayList<AnnotationAttributeValue<?>>()));
+		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
+		bodyBuilder.appendFormalLine("return \"" + folderName + "/index\";");
+		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, new ArrayList<AnnotatedJavaType>(), new ArrayList<JavaSymbolName>(), bodyBuilder);
+		indexMethodBuilder.setAnnotations(indexMethodAnnotations);
+		return indexMethodBuilder;
+	}
+
+	private MethodMetadataBuilder getHttpPostMethod(String declaredByMetadataId) {
 		List<AnnotationMetadataBuilder> postMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
 		List<AnnotationAttributeValue<?>> postMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		postMethodAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("POST"))));
@@ -300,25 +311,28 @@ public class JspOperationsImpl implements JspOperations {
 		postParamNames.add(new JavaSymbolName("response"));
 
 		MethodMetadataBuilder postMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("post"), JavaType.VOID_PRIMITIVE, postParamTypes, postParamNames, new InvocableMemberBodyBuilder());
-		getMethodBuilder.setAnnotations(postMethodAnnotations);
-		methods.add(postMethodBuilder);
+		postMethodBuilder.setAnnotations(postMethodAnnotations);
+		return postMethodBuilder;
+	}
 
-		List<AnnotationMetadataBuilder> indexMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
-		List<AnnotationAttributeValue<?>> indexMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
-		indexMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), indexMethodAttributes));
-		List<AnnotatedJavaType> indexParamTypes = new ArrayList<AnnotatedJavaType>();
-		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return \"" + folderName + "/index\";");
-		MethodMetadataBuilder indexMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("index"), JavaType.STRING_OBJECT, indexParamTypes, postParamNames, bodyBuilder);
-		indexMethodBuilder.setAnnotations(indexMethodAnnotations);
-		methods.add(indexMethodBuilder);
+	private MethodMetadataBuilder getHttpGetMethod(String declaredByMetadataId) {
+		List<AnnotationMetadataBuilder> getMethodAnnotations = new ArrayList<AnnotationMetadataBuilder>();
+		List<AnnotationAttributeValue<?>> getMethodAttributes = new ArrayList<AnnotationAttributeValue<?>>();
+		getMethodAnnotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestMapping"), getMethodAttributes));
+		
+		List<AnnotatedJavaType> getParamTypes = new ArrayList<AnnotatedJavaType>();
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.ModelMap"), null));
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletRequest"), null));
+		getParamTypes.add(new AnnotatedJavaType(new JavaType("javax.servlet.http.HttpServletResponse"), null));
+		
+		List<JavaSymbolName> getParamNames = new ArrayList<JavaSymbolName>();
+		getParamNames.add(new JavaSymbolName("modelMap"));
+		getParamNames.add(new JavaSymbolName("request"));
+		getParamNames.add(new JavaSymbolName("response"));
 
-		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
-		typeDetailsBuilder.setAnnotations(annotations);
-		typeDetailsBuilder.setDeclaredMethods(methods);
-		typeManagementService.generateClassFile(typeDetailsBuilder.build());
-
-		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
+		MethodMetadataBuilder getMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, new InvocableMemberBodyBuilder());
+		getMethodBuilder.setAnnotations(getMethodAnnotations);
+		return getMethodBuilder;
 	}
 
 	/**
