@@ -1,18 +1,3 @@
-/*
- * Copyright 2010 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package org.springframework.roo.addon.gwt;
 
 import org.springframework.roo.classpath.PhysicalTypeCategory;
@@ -41,8 +26,7 @@ class GwtProxyProperty {
 		this.ptmd = ptmd;
 		this.getter = getterMethod.getMethodName().getSymbolName();
 
-		String prefix = null;
-		prefix = "get";
+		String prefix = "get";
 
 		this.name = getter.substring(prefix.length(), prefix.length() + 1).toLowerCase() + getter.substring(prefix.length() + 1);
 	}
@@ -53,6 +37,14 @@ class GwtProxyProperty {
 		this.ptmd = ptmd;
 		this.getter = null;
 		this.name = null;
+	}
+
+	public GwtProxyProperty(ProjectMetadata projectMetadata, JavaType type, PhysicalTypeMetadata ptmd, String name, String accessorMethodName) {
+		this.projectMetadata = projectMetadata;
+		this.type = type;
+		this.ptmd = ptmd;
+		this.getter = accessorMethodName;
+		this.name = name;
 	}
 
 	public static boolean isAccessor(MethodMetadata method) {
@@ -133,14 +125,14 @@ class GwtProxyProperty {
 
 	private String getSetEditor() {
 		String typeName = type.getParameters().get(0).getSimpleTypeName();
-		if (typeName.endsWith(MirrorType.PROXY.getSuffix())) {
-			typeName = typeName.substring(0, typeName.length() - MirrorType.PROXY.getSuffix().length());
+		if (typeName.endsWith(GwtType.PROXY.getSuffix())) {
+			typeName = typeName.substring(0, typeName.length() - GwtType.PROXY.getSuffix().length());
 		}
-		return typeName + (type.getSimpleTypeName().equals("Set") ? MirrorType.SET_EDITOR.getSuffix() : MirrorType.LIST_EDITOR.getSuffix());
+		return typeName + (type.getSimpleTypeName().equals("Set") ? GwtType.SET_EDITOR.getSuffix() : GwtType.LIST_EDITOR.getSuffix());
 	}
 
 	public JavaType getSetEditorType() {
-		return new JavaType(MirrorType.SET_EDITOR.getPath().packageName(projectMetadata) + "." + getSetEditor());
+		return new JavaType(GwtType.SET_EDITOR.getPath().packageName(projectMetadata) + "." + getSetEditor());
 	}
 
 	private String getEditor() {
@@ -192,7 +184,7 @@ class GwtProxyProperty {
 	}
 
 	public static String getProxyRendererType(ProjectMetadata pmd, JavaType javaType) {
-		return MirrorType.EDIT_RENDERER.getPath().packageName(pmd) + "." + javaType.getSimpleTypeName() + "Renderer";
+		return GwtType.EDIT_RENDERER.getPath().packageName(pmd) + "." + javaType.getSimpleTypeName() + "Renderer";
 	}
 
 	public String getCheckboxSubtype() {
@@ -242,7 +234,7 @@ class GwtProxyProperty {
 	public boolean isEmbeddable() {
 		if (ptmd != null && ptmd.getMemberHoldingTypeDetails() != null) {
 			if (ptmd.getMemberHoldingTypeDetails() instanceof ClassOrInterfaceTypeDetails) {
-				List<AnnotationMetadata> annotations = ((ClassOrInterfaceTypeDetails) ptmd.getMemberHoldingTypeDetails()).getAnnotations();
+				List<AnnotationMetadata> annotations = ptmd.getMemberHoldingTypeDetails().getAnnotations();
 				for (AnnotationMetadata annotation : annotations) {
 					if (annotation.getAnnotationType().equals(new JavaType("javax.persistence.Embeddable"))) {
 						return true;
