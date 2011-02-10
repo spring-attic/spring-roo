@@ -3,7 +3,6 @@ package org.springframework.roo.addon.property.editor;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -39,26 +38,23 @@ public final class EditorMetadataProvider extends AbstractItdMetadataProvider {
 		// Lookup the form backing object's metadata
 		JavaType javaType = annotationValues.providePropertyEditorFor;
 		Path path = Path.SRC_MAIN_JAVA;
-		String beanInfoMetadataKey = BeanInfoMetadata.createIdentifier(javaType, path);
 		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
 
 		// We need to lookup the metadata we depend on
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
 
 		// We need to abort if we couldn't find dependent metadata
-		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
+		if (entityMetadata == null || !entityMetadata.isValid()) {
 			return null;
 		}
 
 		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
 		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
 
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to
 		// the governing java type
 
-		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, beanInfoMetadata, entityMetadata);
+		return new EditorMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, javaType, entityMetadata.getIdentifierField(), entityMetadata.getIdentifierAccessor(), entityMetadata.getFindMethod());
 	}
 
 	public String getItdUniquenessFilenameSuffix() {

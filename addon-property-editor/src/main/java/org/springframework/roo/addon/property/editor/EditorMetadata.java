@@ -4,8 +4,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -34,16 +32,15 @@ import org.springframework.roo.support.util.Assert;
 public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = EditorMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private BeanInfoMetadata beanInfoMetadata;
-	private EntityMetadata entityMetadata;
 
-	public EditorMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, BeanInfoMetadata beanInfoMetadata, EntityMetadata entityMetadata) {
+	public EditorMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, JavaType javaType, FieldMetadata identifierField, MethodMetadata identifierAccessorMethod, MethodMetadata findMethod) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
-		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(javaType, "Java type required");
+		Assert.notNull(identifierField, "Identifier field metadata required");
+		Assert.notNull(identifierAccessorMethod, "Identifier accessor metadata required");
 
-		if (!isValid()) {
+		if (!isValid() || findMethod == null) {
 			return;
 		}
 
@@ -53,9 +50,6 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			AutoPopulationUtils.populate(this, annotation);
 		}
 
-		this.beanInfoMetadata = beanInfoMetadata;
-		this.entityMetadata = entityMetadata;
-
 		// Only make the ITD cause PropertyEditorSupport to be subclasses if the governor doesn't already subclass it
 		JavaType requiredSuperclass = new JavaType("java.beans.PropertyEditorSupport");
 		if (!governorTypeDetails.getExtendsTypes().contains(requiredSuperclass)) {
@@ -63,8 +57,8 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		}
 
 		builder.addField(getField());
-		builder.addMethod(getGetAsTextMethod());
-		builder.addMethod(getSetAsTextMethod());
+		builder.addMethod(getGetAsTextMethod(javaType, identifierAccessorMethod));
+		builder.addMethod(getSetAsTextMethod(javaType, identifierField, findMethod));
 
 		// Create a representation of the desired output ITD
 		itdTypeDetails = builder.build();
@@ -85,7 +79,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return fieldBuilder.build();
 	}
 
-	private MethodMetadata getGetAsTextMethod() {
+	private MethodMetadata getGetAsTextMethod(JavaType javaType, MethodMetadata identifierAccessorMethod) {
 		JavaType returnType = JavaType.STRING_OBJECT;
 		JavaSymbolName methodName = new JavaSymbolName("getAsText");
 		List<JavaType> paramTypes = new ArrayList<JavaType>();
@@ -105,13 +99,13 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.appendFormalLine("return null;");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
-		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + entityMetadata.getIdentifierAccessor().getMethodName() + "(), String.class);");
+		bodyBuilder.appendFormalLine("return (String) typeConverter.convertIfNecessary(((" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + ") obj)." + identifierAccessorMethod.getMethodName() + "(), String.class);");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getSetAsTextMethod() {
+	private MethodMetadata getSetAsTextMethod(JavaType javaType, FieldMetadata identifierField, MethodMetadata findMethod) {
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(JavaType.STRING_OBJECT, null));
 
@@ -128,7 +122,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			return userMethod;
 		}
 
-		String identifierTypeName = entityMetadata.getIdentifierField().getFieldType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+		String identifierTypeName = identifierField.getFieldType().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		bodyBuilder.appendFormalLine("if (text == null || 0 == text.length()) {");
@@ -146,7 +140,7 @@ public class EditorMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("}");
 		bodyBuilder.newLine();
-		bodyBuilder.appendFormalLine("setValue(" + beanInfoMetadata.getJavaBean().getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + entityMetadata.getFindMethod().getMethodName() + "(identifier));");
+		bodyBuilder.appendFormalLine("setValue(" + javaType.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver()) + "." + findMethod.getMethodName() + "(identifier));");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC, methodName, returnType, paramTypes, paramNames, bodyBuilder);
 		return methodBuilder.build();
