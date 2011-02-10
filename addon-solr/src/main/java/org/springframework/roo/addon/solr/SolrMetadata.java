@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.details.FieldMetadata;
@@ -37,17 +36,16 @@ import org.springframework.roo.support.util.Assert;
 public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = SolrMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);
-	private EntityMetadata entityMetadata;
 	private SolrSearchAnnotationValues annotationValues;
 	private String beanPlural;
 	private String javaBeanFieldName;
 	private JavaType javaType;
 
-	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, EntityMetadata entityMetadata, Map<MethodMetadata, FieldMetadata> accessorDetails, String javaTypePlural) {
+	public SolrMetadata(String identifier, JavaType aspectName, SolrSearchAnnotationValues annotationValues, PhysicalTypeMetadata governorPhysicalTypeMetadata, MethodMetadata identifierAccessor, FieldMetadata versionField, Map<MethodMetadata, FieldMetadata> accessorDetails, String javaTypePlural) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.notNull(annotationValues, "Solr search annotation values required");
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(entityMetadata, "Entity metadata required");
+		Assert.notNull(identifierAccessor, "Persistence identifier method metadata required");
 		Assert.notNull(accessorDetails, "Metadata for public accessors requred");
 		Assert.hasText(javaTypePlural, "Plural representation of java type required");
 
@@ -59,7 +57,6 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		if (ReservedWords.RESERVED_JAVA_KEYWORDS.contains(javaBeanFieldName)) {
 			this.javaBeanFieldName = "_" + javaBeanFieldName;
 		}
-		this.entityMetadata = entityMetadata;
 		this.annotationValues = annotationValues;
 		this.beanPlural = javaTypePlural;
 		
@@ -75,10 +72,10 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 			}
 			if (annotationValues.getIndexMethod() != null && annotationValues.getIndexMethod().length() > 0) {
 				builder.addMethod(getIndexEntityMethod());
-				builder.addMethod(getIndexEntitiesMethod(accessorDetails));
+				builder.addMethod(getIndexEntitiesMethod(accessorDetails, identifierAccessor, versionField));
 			}
 			if (annotationValues.getDeleteIndexMethod() != null && annotationValues.getDeleteIndexMethod().length() > 0) {
-				builder.addMethod(getDeleteIndexMethod());
+				builder.addMethod(getDeleteIndexMethod(identifierAccessor));
 			}
 			if (annotationValues.getPostPersistOrUpdateMethod() != null && annotationValues.getPostPersistOrUpdateMethod().length() > 0) {
 				builder.addMethod(getPostPersistOrUpdateMethod());
@@ -144,7 +141,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getIndexEntitiesMethod(Map<MethodMetadata, FieldMetadata> accessorDetails) {
+	private MethodMetadata getIndexEntitiesMethod(Map<MethodMetadata, FieldMetadata> accessorDetails, MethodMetadata identifierAccessor, FieldMetadata versionField) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getIndexMethod() + beanPlural);
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(javaType);
@@ -162,13 +159,12 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine("for (" + javaType.getSimpleTypeName() + " " + javaBeanFieldName + " : " + beanPlural.toLowerCase() + ") {");
 		bodyBuilder.indent();
 		bodyBuilder.appendFormalLine(sid + " sid = new " + sid + "();");
-		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + javaType.getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + entityMetadata.getIdentifierAccessor().getMethodName() + "());");
+		bodyBuilder.appendFormalLine("sid.addField(\"id\", \"" + javaType.getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + identifierAccessor.getMethodName() + "());");
 		StringBuilder textField = new StringBuilder("new StringBuilder()");
 
 		for (MethodMetadata method : accessorDetails.keySet()) {
 			FieldMetadata field = accessorDetails.get(method);
-			FieldMetadata version = entityMetadata.getVersionField();
-			if (version != null && field.getFieldName().equals(version.getFieldName())) {
+			if (versionField != null && field.getFieldName().equals(versionField.getFieldName())) {
 				continue;
 			}
 			if (field.getFieldType().isCommonCollectionType()) {
@@ -213,7 +209,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getDeleteIndexMethod() {
+	private MethodMetadata getDeleteIndexMethod(MethodMetadata identifierAccessor) {
 		JavaSymbolName methodName = new JavaSymbolName(annotationValues.getDeleteIndexMethod());
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		paramTypes.add(new AnnotatedJavaType(javaType, new ArrayList<AnnotationMetadata>()));
@@ -224,7 +220,7 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		bodyBuilder.appendFormalLine(getSimpleName(new JavaType("org.apache.solr.client.solrj.SolrServer")) + " solrServer = solrServer();");
 		bodyBuilder.appendFormalLine("try {");
 		bodyBuilder.indent();
-		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + javaType.getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + entityMetadata.getIdentifierAccessor().getMethodName().getSymbolName() + "());");
+		bodyBuilder.appendFormalLine("solrServer.deleteById(\"" + javaType.getSimpleTypeName().toLowerCase() + "_\" + " + javaBeanFieldName + "." + identifierAccessor.getMethodName().getSymbolName() + "());");
 		bodyBuilder.appendFormalLine("solrServer.commit();");
 		bodyBuilder.indentRemove();
 		bodyBuilder.appendFormalLine("} catch (Exception e) {");

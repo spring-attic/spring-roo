@@ -8,13 +8,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.entity.EntityMetadataProvider;
 import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.ItdTypeDetails;
@@ -92,7 +92,7 @@ public final class SolrMetadataProvider extends AbstractMemberDiscoveringItdMeta
 			}
 		}
 		// Otherwise go off and create the to Solr metadata
-		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata, accessorDetails, beanPlural);
+		return new SolrMetadata(metadataIdentificationString, aspectName, annotationValues, governorPhysicalTypeMetadata, entityMetadata.getIdentifierAccessor(), entityMetadata.getVersionField(), accessorDetails, beanPlural);
 	}
 	
 	protected String getLocalMidToRequest(ItdTypeDetails itdTypeDetails) {

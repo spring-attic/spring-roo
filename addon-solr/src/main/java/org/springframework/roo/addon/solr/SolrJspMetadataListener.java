@@ -10,15 +10,20 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperationsImpl;
+import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -57,11 +62,13 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	@Reference private PathResolver pathResolver;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private MenuOperations menuOperations;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	
 	private WebScaffoldMetadata webScaffoldMetadata;
-	private BeanInfoMetadata beanInfoMetadata;
+//	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
 	private JavaType javaType;
+	private JavaType formbackingObject;
 	
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(SolrWebSearchMetadata.getMetadataIdentiferType(), getProvidesType());
@@ -81,10 +88,9 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 		
-		beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(webScaffoldMetadata.getAnnotationValues().getFormBackingObject(), path));
-		Assert.notNull(beanInfoMetadata, "Could not determine bean info metadata for type: " + javaType.getFullyQualifiedTypeName());
+		formbackingObject = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		
-		entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(webScaffoldMetadata.getAnnotationValues().getFormBackingObject(), path));
+		entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(formbackingObject, path));
 		Assert.notNull(entityMetadata, "Could not determine entity metadata for type: " + javaType.getFullyQualifiedTypeName());
 		
 		installMvcArtifacts(javaType, path);
@@ -102,7 +108,7 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
-		menuOperations.addMenuItem(new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
+		menuOperations.addMenuItem(new JavaSymbolName(formbackingObject.getSimpleTypeName()), new JavaSymbolName("solr"), new JavaSymbolName(entityMetadata.getPlural()).getReadableSymbolName(), "global.menu.find", "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?search", "s:");
 	}
 	
 	private Document getSearchDocument() {
@@ -135,26 +141,36 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 									.addAttribute("delete", "false")
 									.addAttribute("update", "false")
 									.addAttribute("path", webScaffoldMetadata.getAnnotationValues().getPath())
-									.addAttribute("typeIdFieldName", beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(entityMetadata.getIdentifierField().getFieldType()))
+									.addAttribute("typeIdFieldName", formbackingObject.getSimpleTypeName().toLowerCase() + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(entityMetadata.getIdentifierField().getFieldType()))
 								.build();
 		resultTable.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(resultTable));
 					
 		StringBuilder facetFields = new StringBuilder();
 		int fieldCounter = 0;
-		for (MethodMetadata accessor : beanInfoMetadata.getPublicAccessors()) {
+		
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formbackingObject, Path.SRC_MAIN_JAVA));
+		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formbackingObject.getFullyQualifiedTypeName());
+		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
+		
+		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			// Only interested in accessors
+			if (!BeanInfoUtils.isAccessorMethod(method)) {
+				continue;
+			}
 			if(++fieldCounter < 7) {
-				if (accessor.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) ||
-						accessor.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())) {
+				if (method.getMethodName().equals(entityMetadata.getIdentifierAccessor().getMethodName()) ||
+						method.getMethodName().equals(entityMetadata.getVersionAccessor().getMethodName())) {
 					continue;
 				}
-				FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(accessor));
-				Assert.notNull(field, "Could not determine field for accessor: " + accessor);
+				FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, BeanInfoUtils.getPropertyNameForJavaBeanMethod(method));
+				Assert.notNull(field, "Could not determine field for accessor: " + method.getMethodName());
 				
-				facetFields.append(beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
+				facetFields.append(formbackingObject.getSimpleTypeName().toLowerCase()).append(".").append(field.getFieldName()).append(SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType())).append(",");
 				
 				Element columnElement = new XmlElementBuilder("fields:column", document)
-											.addAttribute("id", XmlUtils.convertId("c:" + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
-											.addAttribute("property", beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType()))
+											.addAttribute("id", XmlUtils.convertId("c:" + formbackingObject.getFullyQualifiedTypeName() + "." + field.getFieldName().getSymbolName()))
+											.addAttribute("property", formbackingObject.getSimpleTypeName().toLowerCase() + "." + field.getFieldName().getSymbolName().toLowerCase() + SolrUtils.getSolrDynamicFieldPostFix(field.getFieldType()))
 										.build();
 				columnElement.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(columnElement));
 				resultTable.appendChild(columnElement);
