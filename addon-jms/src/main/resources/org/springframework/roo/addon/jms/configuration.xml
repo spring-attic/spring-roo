@@ -26,6 +26,21 @@
 					</exclusions>
 				</dependency>
 				<dependency>
+					<groupId>org.apache.activemq</groupId>
+					<artifactId>activemq-core</artifactId>
+					<version>5.3.3</version>
+					<exclusions>
+						<exclusion>
+							<groupId>commons-logging</groupId>
+							<artifactId>commons-logging</artifactId>
+						</exclusion>
+						<exclusion>
+							<groupId>commons-logging</groupId>
+							<artifactId>commons-logging-api</artifactId>
+						</exclusion>
+					</exclusions>
+				</dependency>
+				<dependency>
 					<groupId>org.apache.xbean</groupId>
 					<artifactId>xbean-spring</artifactId>
 					<version>3.6</version>

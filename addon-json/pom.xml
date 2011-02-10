@@ -27,11 +27,6 @@
 			<artifactId>org.apache.felix.scr.annotations</artifactId>
 		</dependency>
 		<!-- Spring Roo modules -->
-		<dependency>
-			<groupId>org.springframework.roo</groupId>
-			<artifactId>org.springframework.roo.addon.beaninfo</artifactId>
-			
-		</dependency>
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.plural</artifactId>

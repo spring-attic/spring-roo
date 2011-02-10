@@ -10,6 +10,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -34,17 +35,14 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 	@Reference private FileManager fileManager;
 	
 	/**
-	 * Get a reference to the PathResolver from the underlying OSGi container. Make sure you
+	 * Get a reference to the ProjectOperations from the underlying OSGi container. Make sure you
 	 * are referencing the Roo bundle which contains this service in your add-on pom.xml.
-	 * 
-	 * Using the PathResolver allows us reference resources in the project without a need to 
-	 * know the project layout (ie Maven project layout)
 	 */
-	@Reference private PathResolver pathResolver;
+	@Reference private ProjectOperations projectOperations;
 
 	 /** {@inheritDoc} */
 	public boolean isInstallTagsCommandAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getProjectMetadata().getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags"));
 	}
 
 	 /** {@inheritDoc} */
@@ -56,6 +54,7 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 	 /** {@inheritDoc} */
 	public void installTags() {
 		// Use PathResolver to get canonical resource names for a given artifact
+		PathResolver pathResolver = projectOperations.getProjectMetadata().getPathResolver();
 		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "util"), "info.tagx");
 		createOrReplaceFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF" + SEPARATOR + "tags" + SEPARATOR + "form"), "show.tagx");
 	}

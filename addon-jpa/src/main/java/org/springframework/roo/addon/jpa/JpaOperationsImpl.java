@@ -53,19 +53,18 @@ public class JpaOperationsImpl implements JpaOperations {
 	private static final String GAE_PERSISTENCE_UNIT_NAME = "transactions-optional";
 	private static final String PERSISTENCE_UNIT_NAME = "persistenceUnit";
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 
 	public boolean isJpaInstallationPossible() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && !fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable() && !fileManager.exists(getPersistencePath());
 	}
 
 	public boolean isJpaInstalled() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null && fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(getPersistencePath());
 	}
-
+	
 	public boolean hasDatabaseProperties() {
 		return fileManager.exists(getDatabasePropertiesPath());
 	}
@@ -78,8 +77,12 @@ public class JpaOperationsImpl implements JpaOperations {
 		}
 	}
 
+	private String getPersistencePath() {
+		return projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+	}
+
 	private String getDatabasePropertiesPath() {
-		return pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
+		return projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties");
 	}
 
 	public void configureJpa(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String applicationId, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
@@ -112,7 +115,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateApplicationContext(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String jndi, String persistenceUnit) {
-		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
 		Document appCtx;
@@ -233,7 +236,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updatePersistenceXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String hostName, String databaseName, String userName, String password, String persistenceUnit) {
-		String persistencePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		String persistencePath = getPersistencePath();
 		MutableFile persistenceMutableFile = null;
 
 		Document persistence;
@@ -403,6 +406,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateGaeXml(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String applicationId) {
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		String appenginePath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/appengine-web.xml");
 		boolean appenginePathExists = fileManager.exists(appenginePath);
 		String loggingPropertiesPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/logging.properties");
@@ -499,7 +503,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateVMforceConfigProperties(OrmProvider ormProvider, JdbcDatabase jdbcDatabase, String userName, String password) {
-		String configPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "config.properties");
+		String configPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "config.properties");
 		boolean configExists = fileManager.exists(configPath);
 
 		if (jdbcDatabase != JdbcDatabase.VMFORCE) {
@@ -540,7 +544,7 @@ public class JpaOperationsImpl implements JpaOperations {
 
 	private void updateLog4j(OrmProvider ormProvider) {
 		try {
-			String log4jPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+			String log4jPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 			if (fileManager.exists(log4jPath)) {
 				MutableFile log4jMutableFile = fileManager.updateFile(log4jPath);
 				Properties props = new Properties();
@@ -705,7 +709,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void updateEclipsePlugin(boolean addBuildCommand) {
-		String pomPath = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		MutableFile mutableFile = null;
 
 		Document pom;
@@ -749,7 +753,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private void cleanup(Element configuration, OrmProvider ormProvider, JdbcDatabase jdbcDatabase) {
-		String pomPath = pathResolver.getIdentifier(Path.ROOT, "/pom.xml");
+		String pomPath = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "/pom.xml");
 		MutableFile mutableFile = fileManager.updateFile(pomPath);
 
 		Document pom;
@@ -881,7 +885,7 @@ public class JpaOperationsImpl implements JpaOperations {
 	}
 
 	private SortedSet<String> getPropertiesFromDataNucleusConfiguration() {
-		String persistenceXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		if (!fileManager.exists(persistenceXmlPath)) {
 			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
 		}

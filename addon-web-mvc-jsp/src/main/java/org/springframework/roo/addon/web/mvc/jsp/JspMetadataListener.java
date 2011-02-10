@@ -43,6 +43,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -60,16 +61,16 @@ import org.w3c.dom.Document;
 @Component(immediate = true) 
 @Service 
 public final class JspMetadataListener implements MetadataProvider, MetadataNotificationListener {
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private MenuOperations menuOperations;
 	@Reference private JspOperations jspOperations;
-	@Reference private PathResolver pathResolver;
-	@Reference private TilesOperations tilesOperations;
-	@Reference private PropFileOperations propFileOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MenuOperations menuOperations;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private MetadataService metadataService;
+	@Reference private PropFileOperations propFileOperations;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
+	@Reference private TilesOperations tilesOperations;
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
@@ -98,6 +99,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
 			jspOperations.installCommonViewArtefacts();
 		}
@@ -307,6 +309,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	}
 
 	private void installImage(String imagePath) {
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		String imageFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, imagePath);
 		if (!fileManager.exists(imageFile)) {
 			try {

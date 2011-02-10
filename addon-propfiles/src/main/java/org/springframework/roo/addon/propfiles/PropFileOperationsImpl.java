@@ -17,12 +17,10 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -38,11 +36,10 @@ public class PropFileOperationsImpl implements PropFileOperations {
 	private static final boolean SORTED = true;
 	private static final boolean CHANGE_EXISTING = true;
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
+	@Reference private ProjectOperations projectOperations;
 
 	public boolean isPropertiesCommandAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isProjectAvailable();
 	}
 	
 	public void addProperties(Path propertyFilePath, String propertyFilename, Map<String, String> properties, boolean sorted, boolean changeExisting) {
@@ -70,7 +67,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.notNull(properties, "Property map required");
 
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		String filePath = projectOperations.getPathResolver().getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 
 		Properties props;
@@ -128,7 +125,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
 
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		String filePath = projectOperations.getPathResolver().getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
 
@@ -149,7 +146,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.hasText(propertyFilename, "Property filename required");
 		Assert.hasText(key, "Key required");
 
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		String filePath = projectOperations.getPathResolver().getIdentifier(propertyFilePath, propertyFilename);
 		MutableFile mutableFile = null;
 		Properties props = new Properties();
 
@@ -167,7 +164,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		String filePath = projectOperations.getPathResolver().getIdentifier(propertyFilePath, propertyFilename);
 		Properties props = new Properties();
 
 		try {
@@ -195,7 +192,7 @@ public class PropFileOperationsImpl implements PropFileOperations {
 		Assert.notNull(propertyFilePath, "Property file path required");
 		Assert.hasText(propertyFilename, "Property filename required");
 
-		String filePath = pathResolver.getIdentifier(propertyFilePath, propertyFilename);
+		String filePath = projectOperations.getPathResolver().getIdentifier(propertyFilePath, propertyFilename);
 		Properties props = new Properties();
 
 		try {

@@ -35,7 +35,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -52,20 +52,18 @@ import org.w3c.dom.Element;
  * @since 1.1
  *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public final class SolrJspMetadataListener implements MetadataProvider, MetadataNotificationListener {
-	
 	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private ProjectOperations projectOperations;
 	
 	private WebScaffoldMetadata webScaffoldMetadata;
-//	private BeanInfoMetadata beanInfoMetadata;
 	private EntityMetadata entityMetadata;
 	private JavaType javaType;
 	private JavaType formbackingObject;
@@ -75,12 +73,10 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {
-		
 		javaType = SolrJspMetadata.getJavaType(metadataIdentificationString);
 		Path path = SolrJspMetadata.getPath(metadataIdentificationString);
 		String solrWebSearchMetadataKeyString = SolrWebSearchMetadata.createIdentifier(javaType, path);
 		SolrWebSearchMetadata webSearchMetadata = (SolrWebSearchMetadata) metadataService.get(solrWebSearchMetadataKeyString);
-		
 		if (webSearchMetadata == null || !webSearchMetadata.isValid()) {
 			return null;
 		}
@@ -99,12 +95,11 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	}
 	
 	public void installMvcArtifacts(JavaType javaType, Path path) {
-		
 		copyArtifacts("form/search.tagx", "WEB-INF/tags/form/search.tagx");
 		copyArtifacts("form/fields/search-facet.tagx", "WEB-INF/tags/form/fields/search-facet.tagx");
 		copyArtifacts("form/fields/search-field.tagx", "WEB-INF/tags/form/fields/search-field.tagx");
 		
-		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
+		writeToDiskIfNecessary(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx"), getSearchDocument());
 		
 		String folderName = webScaffoldMetadata.getAnnotationValues().getPath();
 		tilesOperations.addViewDefinition(folderName, folderName + "/search", TilesOperationsImpl.DEFAULT_TEMPLATE, "/WEB-INF/views/" + webScaffoldMetadata.getAnnotationValues().getPath() + "/search.jspx");
@@ -112,14 +107,14 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	}
 	
 	private Document getSearchDocument() {
-		//next install search.jspx
+		// Next install search.jspx
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(WebScaffoldMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 				
-		//add document namespaces
+		// Add document namespaces
 		Element div = new XmlElementBuilder("div", document)
 								.addAttribute("xmlns:page", "urn:jsptagdir:/WEB-INF/tags/form")
 								.addAttribute("xmlns:fields", "urn:jsptagdir:/WEB-INF/tags/form/fields")
@@ -200,7 +195,6 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	
 	/** return indicates if disk was changed (ie updated or created) */
 	private boolean writeToDiskIfNecessary(String jspFilename, Document proposed) {
-		
 		Document original = null;
 		
 		// If mutableFile becomes non-null, it means we need to use it to write out the contents of jspContent to the file
@@ -271,8 +265,8 @@ public final class SolrJspMetadataListener implements MetadataProvider, Metadata
 	}
 	
 	private void copyArtifacts(String relativeTemplateLocation, String relativeProjectFileLocation) {
-		//first install search.tagx
-		String projectFileLocation = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
+		// First install search.tagx
+		String projectFileLocation = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeProjectFileLocation);
 		if (!fileManager.exists(projectFileLocation)) {
 			try {
 				FileCopyUtils.copy(TemplateUtils.getTemplate(getClass(), relativeTemplateLocation), fileManager.createFile(projectFileLocation).getOutputStream());

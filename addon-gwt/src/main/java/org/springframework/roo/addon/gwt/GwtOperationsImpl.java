@@ -1,5 +1,15 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -10,21 +20,21 @@ import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.*;
+import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.Path;
+import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.Plugin;
+import org.springframework.roo.project.ProjectOperations;
+import org.springframework.roo.project.Repository;
 import org.springframework.roo.support.osgi.UrlFindingUtils;
-import org.springframework.roo.support.util.*;
+import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.FileCopyUtils;
+import org.springframework.roo.support.util.TemplateUtils;
+import org.springframework.roo.support.util.WebXmlUtils;
+import org.springframework.roo.support.util.XmlElementBuilder;
+import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Provides GWT installation services.
@@ -40,7 +50,6 @@ import java.util.Set;
 @Service
 public class GwtOperationsImpl implements GwtOperations {
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations mvcOperations;
@@ -51,20 +60,15 @@ public class GwtOperationsImpl implements GwtOperations {
 		this.context = context;
 	}
 
-	private ProjectMetadata getProjectMetadata() {
-		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-	}
-
 	public boolean isSetupGwtAvailable() {
-		ProjectMetadata projectMetadata = getProjectMetadata();
-		if (projectMetadata == null) {
+		if (!projectOperations.isProjectAvailable()) {
 			return false;
 		}
 
 		// Do not permit installation if they have a gwt package already in their project shared is allowed
 		for (GwtPath path : GwtPath.values()) {
 			if (path == GwtPath.MANAGED_REQUEST || path == GwtPath.SCAFFOLD || path == GwtPath.MANAGED || path == GwtPath.MANAGED_UI) {
-				String fPath = path.canonicalFileSystemPath(projectMetadata);
+				String fPath = path.canonicalFileSystemPath(projectOperations.getProjectMetadata());
 				if (fileManager.exists(fPath)) {
 					return false;
 				}
@@ -74,12 +78,10 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	public void setupGwt() {
-		ProjectMetadata projectMetadata = getProjectMetadata();
-		Assert.notNull(projectMetadata, "Project could not be retrieved");
-		isGaeEnabled = projectMetadata.isGaeEnabled();
+		isGaeEnabled = projectOperations.getProjectMetadata().isGaeEnabled();
 
 		// Install web pieces if not already installed
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
+		if (!fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
 			mvcOperations.installAllWebMvcArtifacts();
 		}
 
@@ -103,17 +105,18 @@ public class GwtOperationsImpl implements GwtOperations {
 		updateRepositories(configuration);
 
 		// Update web.xml
-		updateWebXml(projectMetadata);
+		updateWebXml();
 
 		// Update webmvc-config.xml
 		updateSpringWebCtx();
 
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
-			copyDirectoryContents(path, projectMetadata);
+			copyDirectoryContents(path);
 		}
 
 		// Do a "get" for every .java file, thus ensuring the metadata is fired
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 		String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 		for (FileDetails fd : fileManager.findMatchingAntPath(antPath)) {
@@ -164,7 +167,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 	
 	private void updateDataNulcueusPlugin() {
-		String pomXml = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		String pomXml = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pomXml), "pom.xml not found; cannot continue");
 
 		MutableFile mutablePomXml = null;
@@ -200,9 +203,9 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePomXml.getOutputStream(), pomXmlDoc);
 	}
 
-	private void copyDirectoryContents(GwtPath gwtPath, ProjectMetadata projectMetadata) {
+	private void copyDirectoryContents(GwtPath gwtPath) {
 		String sourceAntPath = gwtPath.sourceAntPath();
-		String targetDirectory = gwtPath.canonicalFileSystemPath(projectMetadata);
+		String targetDirectory = gwtPath.canonicalFileSystemPath(projectOperations.getProjectMetadata());
 
 		if (!isGaeEnabled && targetDirectory.contains("/gae")) {
 			return;
@@ -231,10 +234,10 @@ public class GwtOperationsImpl implements GwtOperations {
 					} else {
 						// Read template and insert the user's package
 						String input = FileCopyUtils.copyToString(new InputStreamReader(url.openStream()));
-						String topLevelPackage = projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName();
+						String topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName();
 						input = input.replace("__TOP_LEVEL_PACKAGE__", topLevelPackage);
 						input = input.replace("__SEGMENT_PACKAGE__", gwtPath.segmentPackage());
-						input = input.replace("__PROJECT_NAME__", projectMetadata.getProjectName());
+						input = input.replace("__PROJECT_NAME__", projectOperations.getProjectMetadata().getProjectName());
 
 						if (isGaeEnabled) {
 							input = input.replace("__GAE_IMPORT__", "import " + topLevelPackage + ".client.scaffold.gae.*;\n");
@@ -264,7 +267,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	private void updateMavenEclipsePlugin() {
-		String pom = pathResolver.getIdentifier(Path.ROOT, "pom.xml");
+		String pom = projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml");
 		Assert.isTrue(fileManager.exists(pom), "pom.xml not found; cannot continue");
 
 		Document pomDoc;
@@ -327,8 +330,8 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutablePom.getOutputStream(), pomDoc);
 	}
 
-	private void updateWebXml(ProjectMetadata projectMetadata) {
-		String webXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
+	private void updateWebXml() {
+		String webXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
 		Assert.isTrue(fileManager.exists(webXml), "web.xml not found; cannot continue");
 
 		MutableFile mutableWebXml = null;
@@ -344,7 +347,7 @@ public class GwtOperationsImpl implements GwtOperations {
 
 		WebXmlUtils.addServlet("requestFactory", "com.google.gwt.requestfactory.server.RequestFactoryServlet", "/gwtRequest", null, webXmlDoc, null);
 		if (isGaeEnabled) {
-			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectMetadata) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, "This filter makes GAE authentication services visible to a RequestFactory client.");
+			WebXmlUtils.addFilter("GaeAuthFilter", GwtPath.SERVER_GAE.packageName(projectOperations.getProjectMetadata()) + ".GaeAuthFilter", "/gwtRequest/*", webXmlDoc, "This filter makes GAE authentication services visible to a RequestFactory client.");
 			String displayName = "Redirect to the login page if needed before showing any html pages";
 			WebXmlUtils.WebResourceCollection webResourceCollection = new WebXmlUtils.WebResourceCollection("Login required", null, Collections.singletonList("*.html"), new ArrayList<String>());
 			ArrayList<String> roleNames = new ArrayList<String>();
@@ -359,7 +362,7 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	private void updateSpringWebCtx() {
-		String mvcXml = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String mvcXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(mvcXml), "webmvc-config.xml not found; cannot continue");
 
 		MutableFile mutableMvcXml = null;

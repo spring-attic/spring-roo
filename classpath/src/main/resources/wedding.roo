@@ -26,5 +26,5 @@ finder add --finderName findRsvpsByCodeEquals
 email sender setup --hostServer 127.0.0.1
 field email template --class ~.web.PublicRsvpController
 
-// complete manual configuration as described at http://blog.springsource.com/roo-part-2/
-// start from the "Final Steps" section, towards the bottom of the blog entry
+// Complete manual configuration as described at http://blog.springsource.com/roo-part-2/
+// Start from the "Final Steps" section, towards the bottom of the blog entry

@@ -30,8 +30,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -43,13 +42,17 @@ import org.springframework.roo.support.util.Assert;
 @Component 
 @Service 
 public class ControllerOperationsImpl implements ControllerOperations {
-	@Reference private PathResolver pathResolver;
+	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private TypeManagementService typeManagementService;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private TypeLocationService typeLocationService;
-	@Reference private FileManager fileManager;
+	@Reference private TypeManagementService typeManagementService;
+
+	public boolean isNewControllerAvailable() {
+		return projectOperations.isProjectAvailable();
+	}
 
 	public void generateAll(final JavaPackage javaPackage) {
 		Set<ClassOrInterfaceTypeDetails> cids = typeLocationService.findClassesOrInterfaceDetailsWithAnnotation(new JavaType(RooEntity.class.getName()));
@@ -78,10 +81,6 @@ public class ControllerOperationsImpl implements ControllerOperations {
 			createAutomaticController(controller, javaType, new HashSet<String>(), entityMetadata.getPlural().toLowerCase());
 		}
 		return;
-	}
-
-	public boolean isNewControllerAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
 	}
 
 	public void createAutomaticController(JavaType controller, JavaType entity, Set<String> disallowedOperations, String path) {
@@ -116,7 +115,7 @@ public class ControllerOperationsImpl implements ControllerOperations {
 		List<AnnotationAttributeValue<?>> controllerAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		annotations.add(new AnnotationMetadataBuilder(new JavaType("org.springframework.stereotype.Controller"), controllerAttributes));
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 

@@ -27,10 +27,9 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlElementBuilder;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Document;
@@ -46,17 +45,16 @@ import org.w3c.dom.Element;
 @Service 
 public class MailOperationsImpl implements MailOperations {
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 
 	public boolean isInstallEmailAvailable() {
-		return getPathResolver() != null;
+		return projectOperations.isProjectAvailable();
 	}
 
 	public boolean isManageEmailAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));
 	}
 
 	public void installEmail(String hostServer, MailProtocol protocol, String port, String encoding, String username, String password) {
@@ -64,7 +62,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		Map<String, String> props = new HashMap<String, String>();
 		
-		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
 		Document appCtx = null;
@@ -83,8 +81,7 @@ public class MailOperationsImpl implements MailOperations {
 
 		boolean installDependencies = true;
 
-		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.javamail.JavaMailSenderImpl']", root);
-
+		Element mailBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.javamail.JavaMailSenderImpl']", root);
 		if (mailBean != null) {
 			root.removeChild(mailBean);
 			installDependencies = false;
@@ -109,7 +106,7 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("email.protocol", protocol.getProtocol());
 		}
 
-		if (port != null && port.length() > 0) {
+		if (StringUtils.hasText(port)) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "port");
 			pElement.setAttribute("value", "${email.port}");
@@ -117,7 +114,7 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("email.port", port);
 		}
 
-		if (encoding != null && encoding.length() > 0) {
+		if (StringUtils.hasText(encoding)) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "defaultEncoding");
 			pElement.setAttribute("value", "${email.encoding}");
@@ -125,7 +122,7 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("email.encoding", encoding);
 		}
 
-		if (username != null && username.length() > 0) {
+		if (StringUtils.hasText(username)) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "username");
 			pElement.setAttribute("value", "${email.username}");
@@ -133,7 +130,7 @@ public class MailOperationsImpl implements MailOperations {
 			props.put("email.username", username);
 		}
 
-		if (password != null && password.length() > 0) {
+		if (StringUtils.hasText(password)) {
 			Element pElement = appCtx.createElement("property");
 			pElement.setAttribute("name", "password");
 			pElement.setAttribute("value", "${email.password}");
@@ -169,7 +166,7 @@ public class MailOperationsImpl implements MailOperations {
 	public void configureTemplateMessage(String from, String subject) {
 		Map<String, String> props = new HashMap<String, String>();
 		
-		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
 		Document appCtx = null;
@@ -186,15 +183,15 @@ public class MailOperationsImpl implements MailOperations {
 
 		Element root = (Element) appCtx.getFirstChild();
 
-		if ((null != from && from.length() > 0) || (null != subject && subject.length() > 0)) {
-			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class='org.springframework.mail.SimpleMailMessage']", root);
+		if (StringUtils.hasText(from) || StringUtils.hasText(subject)) {
+			Element smmBean = XmlUtils.findFirstElement("/beans/bean[@class = 'org.springframework.mail.SimpleMailMessage']", root);
 			if (smmBean == null) {
 				smmBean = appCtx.createElement("bean");
 				smmBean.setAttribute("class", "org.springframework.mail.SimpleMailMessage");
 				smmBean.setAttribute("id", "templateMessage");
 			}
 
-			if (null != from && from.length() > 0) {
+			if (StringUtils.hasText(from)) {
 				Element smmProperty = XmlUtils.findFirstElement("//property[@name='from']", smmBean);
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
@@ -206,7 +203,7 @@ public class MailOperationsImpl implements MailOperations {
 				props.put("email.from", from);
 			}
 
-			if (null != subject && subject.length() > 0) {
+			if (StringUtils.hasText(subject)) {
 				Element smmProperty = XmlUtils.findFirstElement("//property[@name='subject']", smmBean);
 				if (smmProperty != null) {
 					smmBean.removeChild(smmProperty);
@@ -245,10 +242,11 @@ public class MailOperationsImpl implements MailOperations {
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
 		int modifier = Modifier.PRIVATE | Modifier.TRANSIENT;
+		
 		FieldMetadataBuilder fieldBuilder = new FieldMetadataBuilder(declaredByMetadataId, modifier, annotations, fieldName, new JavaType("org.springframework.mail.MailSender"));
 		mutableTypeDetails.addField(fieldBuilder.build());
 
-		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
 		Document appCtx = null;
@@ -322,17 +320,11 @@ public class MailOperationsImpl implements MailOperations {
 	private void updateConfiguration() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Element> dependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
-		for (Element dependency : dependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependency));
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		List<Element> emailDependencies = XmlUtils.findElements("/configuration/email/dependencies/dependency", configuration);
+		for (Element dependencyElement : emailDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
-	}
-
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
+		projectOperations.addDependencies(dependencies);
 	}
 }

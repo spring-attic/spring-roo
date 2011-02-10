@@ -32,12 +32,10 @@ import org.w3c.dom.Element;
 @Component 
 @Service
 public class ConversionServiceOperationsImpl implements ConversionServiceOperations {
-
 	public static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
 	public static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
-	
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
+	@Reference private PathResolver pathResolver; 
 	@Reference private TypeLocationService typeLocationService;
 
 	public ConversionServiceOperationsImpl() {

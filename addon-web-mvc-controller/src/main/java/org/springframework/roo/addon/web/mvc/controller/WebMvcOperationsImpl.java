@@ -6,18 +6,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.support.util.Assert;
@@ -39,8 +38,6 @@ import org.w3c.dom.Element;
 @Service
 public class WebMvcOperationsImpl implements WebMvcOperations {
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 
 	public void installMinmalWebArtefacts() {
@@ -56,8 +53,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void copyWebXml() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata required");
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		
 		// Verify the servlet application context already exists
 		String servletCtxFilename = "WEB-INF/spring/webmvc-config.xml";
@@ -76,8 +73,9 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			throw new IllegalStateException(ex);
 		}
 
-		WebXmlUtils.setDisplayName(projectMetadata.getProjectName(), webXml, null);
-		WebXmlUtils.setDescription("Roo generated " + projectMetadata.getProjectName() + " application", webXml, null);
+		String projectName = projectOperations.getProjectMetadata().getProjectName();
+		WebXmlUtils.setDisplayName(projectName, webXml, null);
+		WebXmlUtils.setDescription("Roo generated " + projectName + " application", webXml, null);
 
 		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"), webXml);
 		try {
@@ -88,8 +86,8 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void manageWebXml() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata required");
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
+		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Verify that the web.xml already exists
 		String webXmlFile = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml");
@@ -110,7 +108,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			WebXmlUtils.addFilter(WebMvcOperations.OPEN_ENTITYMANAGER_IN_VIEW_FILTER_NAME, "org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter", "/*", webXml, null);
 		}
 		WebXmlUtils.addListener("org.springframework.web.context.ContextLoaderListener", webXml, "Creates the Spring Container shared by all Servlets and Filters");
-		WebXmlUtils.addServlet(projectMetadata.getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
+		WebXmlUtils.addServlet(projectOperations.getProjectMetadata().getProjectName(), "org.springframework.web.servlet.DispatcherServlet", "/", new Integer(1), webXml, "Handles Spring requests", new WebXmlUtils.WebXmlParam("contextConfigLocation", "/WEB-INF/spring/webmvc-config.xml"));
 		WebXmlUtils.setSessionTimeout(new Integer(10), webXml, null);
 		// WebXmlUtils.addWelcomeFile("/", webXml, null);
 		WebXmlUtils.addExceptionType("java.lang.Exception", "/uncaughtException", webXml, null);
@@ -120,11 +118,10 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	}
 
 	private void createWebApplicationContext() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata required");
+		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Verify the middle tier application context already exists
-		PathResolver pathResolver = projectMetadata.getPathResolver();
 		Assert.isTrue(fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml")), "Application context does not exist");
 
 		if (fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"))) {
@@ -141,7 +138,7 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 		}
 
 		Element rootElement = (Element) webMvcConfig.getFirstChild();
-		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectOperations.getProjectMetadata().getTopLevelPackage().getFullyQualifiedPackageName());
 		writeToDiskIfNecessary(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml"), webMvcConfig);
 		try {
 			templateInputStream.close();
@@ -153,11 +150,13 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 	private void updateConfiguration() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
+		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/springWebMvc/dependencies/dependency", configuration);
 		for (Element dependency : springDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependency));
+			dependencies.add(new Dependency(dependency));
 		}
-
+		projectOperations.addDependencies(dependencies);
+		
 		projectOperations.updateProjectType(ProjectType.WAR);
 	}
 

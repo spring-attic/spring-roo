@@ -32,6 +32,7 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
@@ -49,17 +50,15 @@ import org.w3c.dom.Node;
 @Component
 @Service
 public class SeleniumOperationsImpl implements SeleniumOperations {
-	
+	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private MenuOperations menuOperations;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
-	
-	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
+	@Reference private ProjectOperations projectOperations;
 	
 	public boolean isProjectAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/web.xml"));
 	}
 	
 	/**
@@ -89,7 +88,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		JavaType formBackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
 		
 		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
-		String seleniumPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
+		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 		MutableFile seleniumMutableFile = null;
 		
 		name = (name != null ? name : "Selenium test for " + controller.getSimpleTypeName());
@@ -125,7 +124,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
 		
 		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));							
-//		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
+		// tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
 		
 		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
 		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
@@ -136,7 +135,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
 			} else {				
-//				tbody.appendChild(typeKeyCommand(selenium, field));
+				// tbody.appendChild(typeKeyCommand(selenium, field));
 			}
 		}
 
@@ -150,9 +149,8 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	}
 	
 	private void manageTestSuite(String testPath, String name, String serverURL) {
-		
 		String relativeTestFilePath = "selenium/test-suite.xhtml";
-		String seleniumPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
+		String seleniumPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 		MutableFile seleniumMutableFile = null;
 		
 		Document suite;
@@ -199,6 +197,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	}
 	
 	private void installMavenPlugin(){
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		String pomFilePath = "pom.xml";
 		String pomPath = pathResolver.getIdentifier(Path.ROOT, pomFilePath);
 		MutableFile pomMutableFile = null;

@@ -1,5 +1,6 @@
 package org.springframework.roo.addon.op4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -15,8 +16,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
@@ -36,7 +35,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 	@Reference private ProjectOperations projectOperations;
 
 	public boolean isOp4jAvailable() {
-		return getPathResolver() != null;
+		return projectOperations.isProjectAvailable();
 	}
 
 	public void annotateType(JavaType javaType) {
@@ -55,7 +54,7 @@ public class Op4jOperationsImpl implements Op4jOperations{
 		Assert.isInstanceOf(MutableClassOrInterfaceTypeDetails.class, ptd, "Java source code is immutable for type " + PhysicalTypeIdentifier.getFriendlyName(id));
 		MutableClassOrInterfaceTypeDetails mutableTypeDetails = (MutableClassOrInterfaceTypeDetails) ptd;
 
-		if (null == MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooOp4j.class.getName()))) {
+		if (MemberFindingUtils.getAnnotationOfType(mutableTypeDetails.getAnnotations(), new JavaType(RooOp4j.class.getName())) == null) {
 			JavaType rooOp4j = new JavaType(RooOp4j.class.getName());
 			if (!mutableTypeDetails.getAnnotations().contains(rooOp4j)) {
 				AnnotationMetadataBuilder annotationBuilder = new AnnotationMetadataBuilder(rooOp4j);
@@ -67,20 +66,11 @@ public class Op4jOperationsImpl implements Op4jOperations{
 	public void setup() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
 
-		List<Element> dependencies = XmlUtils.findElements("/configuration/op4j/dependencies/dependency", configuration);
-		for (Element dependency : dependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependency));
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		List<Element> op4jDependencies = XmlUtils.findElements("/configuration/op4j/dependencies/dependency", configuration);
+		for (Element dependencyElement : op4jDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
-	}
-	
-	/**
-	 * @return the path resolver or null if there is no user project
-	 */
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
+		projectOperations.addDependencies(dependencies);
 	}
 }

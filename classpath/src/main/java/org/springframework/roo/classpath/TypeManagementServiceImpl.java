@@ -16,7 +16,6 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
@@ -32,7 +31,6 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	
 	public void generateClassFile(ClassOrInterfaceTypeDetails classOrInterfaceTypeDetails) {
@@ -43,7 +41,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		String physicalLocationCanonicalPath = getPhysicalLocationCanonicalPath(classOrInterfaceTypeDetails.getDeclaredByMetadataId());
 	
 		// Check the file doesn't already exist
-		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), pathResolver.getFriendlyName(physicalLocationCanonicalPath) + " already exists");
+		Assert.isTrue(!fileManager.exists(physicalLocationCanonicalPath), projectOperations.getPathResolver().getFriendlyName(physicalLocationCanonicalPath) + " already exists");
 		
 		// Compute physical location
 		PhysicalTypeMetadata toCreate = new DefaultPhysicalTypeMetadata(classOrInterfaceTypeDetails.getDeclaredByMetadataId(), physicalLocationCanonicalPath, classOrInterfaceTypeDetails);
@@ -92,7 +90,7 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		
 		if (jsr303Required) {
 			// It's more likely the version below represents a later version than any specified in the user's own dependency list
-			projectOperations.dependencyUpdate(new Dependency("javax.validation", "validation-api", "1.0.0.GA"));
+			projectOperations.addDependency(new Dependency("javax.validation", "validation-api", "1.0.0.GA"));
 		}
 		
 		mutableTypeDetails.addField(fieldMetadata);
@@ -103,6 +101,6 @@ public class TypeManagementServiceImpl implements TypeManagementService {
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
 		Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return pathResolver.getIdentifier(path, relativePath);
+		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
 	}
 }

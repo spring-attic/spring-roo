@@ -28,7 +28,7 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ClasspathProvidingProjectMetadata;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -42,32 +42,23 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true) 
 @Service
 public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataProvider, FileEventListener {
+	@Reference private FileManager fileManager;
+	@Reference private MetadataService metadataService;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
+	@Reference private ProjectOperations projectOperations;
+	private Map<JavaType, String> cache = new HashMap<JavaType, String>();
 
 	public String getProvidesType() {
 		return PhysicalTypeIdentifier.getMetadataIdentiferType();
 	}
-
-	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	private PathResolver pathResolver = null;
-	private Map<JavaType, String> cache = new HashMap<JavaType, String>();
 	
 	private PathResolver getPathResolver() {
-		if (pathResolver != null) {
-			return pathResolver;
-		}
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
-		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.notNull(pathResolver, "Path resolver unavailable because valid project metadata not currently available");
-		this.pathResolver = pathResolver;
-		return pathResolver;
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata unavailable");
+		return projectOperations.getPathResolver();
 	}
 	
 	public String findIdentifier(JavaType javaType) {
@@ -148,8 +139,7 @@ public class JavaParserMetadataProvider implements MutablePhysicalTypeMetadataPr
 		JavaType type = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
 		PathResolver pathResolver = getPathResolver();
 		String relativePath = type.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		String fileIdentifier = pathResolver.getIdentifier(path, relativePath);
-		return fileIdentifier;
+		return pathResolver.getIdentifier(path, relativePath);
 	}
 
 	public MetadataItem get(String metadataIdentificationString) {

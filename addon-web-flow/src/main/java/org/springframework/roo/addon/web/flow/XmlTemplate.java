@@ -14,7 +14,6 @@ import org.w3c.dom.Element;
  * @author Rossen Stoyanchev
  */
 public class XmlTemplate {
-
 	private FileManager fileManager;
 
 	public XmlTemplate(FileManager fileManager) {
@@ -52,7 +51,5 @@ public class XmlTemplate {
 		 * @return true if any changes were made that require saving, false otherwise
 		 */
 		boolean doWithElement(Document document, Element rootElement);
-	
 	}
-
 }

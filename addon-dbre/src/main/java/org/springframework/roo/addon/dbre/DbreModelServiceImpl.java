@@ -38,7 +38,7 @@ import org.springframework.roo.process.manager.event.ProcessManagerStatus;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusListener;
 import org.springframework.roo.process.manager.event.ProcessManagerStatusProvider;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.XmlUtils;
@@ -57,8 +57,8 @@ import org.w3c.dom.Element;
 public class DbreModelServiceImpl implements DbreModelService, ProcessManagerStatusListener {
 	@Reference private ConnectionProvider connectionProvider;
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private ProcessManagerStatusProvider processManagerStatusProvider;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private PropFileOperations propFileOperations;
 	private Map<Schema, Database> cachedIntrospections = new HashMap<Schema, Database>();
 	private Schema lastSchema = null;
@@ -267,10 +267,10 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	 */
 	private void serializeDatabaseMetadataToFile(Database database) {
 		Assert.notNull(database, "Database required");
-		String path = getDbreXmlPath();
+		String dbreXmlPath = getDbreXmlPath();
 		OutputStream outputStream = new ByteArrayOutputStream();
 		DatabaseXmlUtils.writeDatabaseStructureToOutputStream(database, outputStream);
-		fileManager.createOrUpdateTextFileIfRequired(path, outputStream.toString(), false);
+		fileManager.createOrUpdateTextFileIfRequired(dbreXmlPath, outputStream.toString(), false);
 	}
 
 	/**
@@ -283,7 +283,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	 */
 	private Schema deserializeSchemaMetadataIfPossible() {
 		String dbreXmlPath = getDbreXmlPath();
-		if (!fileManager.exists(dbreXmlPath)) {
+		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
 		}
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
@@ -305,7 +305,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	 */
 	private Database deserializeDatabaseMetadataIfPossible() {
 		String dbreXmlPath = getDbreXmlPath();
-		if (!fileManager.exists(dbreXmlPath)) {
+		if (!StringUtils.hasText(dbreXmlPath) || !fileManager.exists(dbreXmlPath)) {
 			return null;
 		}
 		FileDetails fileDetails = fileManager.readFile(dbreXmlPath);
@@ -319,7 +319,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	private Connection getConnection(boolean displayAddOns) throws SQLException {
-		if (fileManager.exists(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
+		if (fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "database.properties"))) {
 			Map<String, String> connectionProperties = propFileOperations.getProperties(Path.SPRING_CONFIG_ROOT, "database.properties");
 			return connectionProvider.getConnection(connectionProperties, displayAddOns);
 		} else {
@@ -329,7 +329,7 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	private Properties getConnectionPropertiesFromDataNucleusConfiguration() {
-		String persistenceXmlPath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
+		String persistenceXmlPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml");
 		if (!fileManager.exists(persistenceXmlPath)) {
 			throw new IllegalStateException("Failed to find " + persistenceXmlPath);
 		}
@@ -374,6 +374,6 @@ public class DbreModelServiceImpl implements DbreModelService, ProcessManagerSta
 	}
 
 	private String getDbreXmlPath() {
-		return pathResolver.getIdentifier(Path.ROOT, DbreModelService.DBRE_FILE);
+		return projectOperations.isProjectAvailable() ? projectOperations.getPathResolver().getIdentifier(Path.ROOT, DbreModelService.DBRE_FILE) : null;
 	}
 }

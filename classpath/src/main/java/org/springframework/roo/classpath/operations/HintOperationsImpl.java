@@ -10,11 +10,10 @@ import java.util.TreeSet;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.shell.AbstractShell;
 
 /**
@@ -33,8 +32,8 @@ import org.springframework.roo.shell.AbstractShell;
 public class HintOperationsImpl implements HintOperations {
 	private static final String ANT_MATCH_DIRECTORY_PATTERN = File.separator + "**" + File.separator;
 	private static ResourceBundle bundle = ResourceBundle.getBundle(HintCommands.class.getName());
-	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
+	@Reference private ProjectOperations projectOperations;
 
 	public String hint(String topic) {
 		if (topic == null || "".equals(topic)) {
@@ -46,14 +45,6 @@ public class HintOperationsImpl implements HintOperations {
 		} catch (MissingResourceException exception) {
 			return "Cannot find topic '" + topic + "'";
 		}
-	}
-
-	private PathResolver getPathResolver() {
-		ProjectMetadata metadata = (ProjectMetadata) this.metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (metadata == null) {
-			return null;
-		}
-		return metadata.getPathResolver();
 	}
 
 	public SortedSet<String> getCurrentTopics() {
@@ -71,12 +62,12 @@ public class HintOperationsImpl implements HintOperations {
 	}
 
 	private String determineTopic() {
-		PathResolver pathResolver = getPathResolver();
-
-		if (pathResolver == null) {
+		if (!projectOperations.isProjectAvailable()) {
 			return "start";
 		}
 
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"))) {
 			return "jpa";
 		}

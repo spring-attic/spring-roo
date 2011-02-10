@@ -24,6 +24,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -40,11 +41,11 @@ import org.springframework.roo.support.util.Assert;
 @Component(immediate = true) 
 @Service 
 public class TypeLocationServiceImpl implements TypeLocationService, MetadataNotificationListener {
-	@Reference private PathResolver pathResolver;
 	@Reference private FileManager fileManager;
+	@Reference private MetadataDependencyRegistry dependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private MetadataDependencyRegistry dependencyRegistry;
+	@Reference private ProjectOperations projectOperations;
 	private Map<List<JavaType>, List<String>> cache = new HashMap<List<JavaType>, List<String>>();
 
 	protected void activate(ComponentContext context) {
@@ -59,6 +60,27 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		if (upstreamDependency.startsWith("MID:org.springframework.roo.classpath.PhysicalTypeIdentifier#")) {
 			// Change to Java, so drop the cache
 			cache.clear();
+			/*
+			PTM ptm = mdservice.get(upstream)
+			
+			List<Annotations> incomingAnnotations = ptm.getTypeAnnotatios()
+			// adding incoming type to any searches it would match
+			for (List<JavaType> annotationsSearchedFor : cache.keySet()) {
+			     if (annotationsSearchedFor.contains(oneOfTheIncomingAnnotations) {
+			          // edit that cache element so this ptm.getName() is part of the list
+			     }
+			}
+			
+			// removing the incoming type from any sarches it would no longer match on
+			for (List<JavaType> annotationsSearchedFor : cache.keySet()) {
+			     if (cache.get(annotationssarchedFor).contains(ptm.getName()) {
+			          // found one we used to \match on
+			          // remove me from that element if i no longer have that annotaiton
+			     }
+			}
+			incomingType
+			
+			*/
 		}
 	}
 
@@ -66,7 +88,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(path, "Path required");
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return pathResolver.getIdentifier(path, relativePath);
+		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
 	}
 	
 	public String getPhysicalLocationCanonicalPath(String physicalTypeIdentifier) {
@@ -74,7 +96,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(physicalTypeIdentifier);
 		Path path = PhysicalTypeIdentifier.getPath(physicalTypeIdentifier);
 		String relativePath = javaType.getFullyQualifiedTypeName().replace('.', File.separatorChar) + ".java";
-		return pathResolver.getIdentifier(path, relativePath);
+		return projectOperations.getPathResolver().getIdentifier(path, relativePath);
 	}
 
 	public ClassOrInterfaceTypeDetails getClassOrInterface(JavaType requiredClassOrInterface) {
@@ -92,6 +114,7 @@ public class TypeLocationServiceImpl implements TypeLocationService, MetadataNot
 
 		if (locatedPhysicalTypeMids == null) {
 			locatedPhysicalTypeMids = new ArrayList<String>();
+			PathResolver pathResolver = projectOperations.getPathResolver();
 			FileDetails srcRoot = new FileDetails(new File(pathResolver.getRoot(Path.SRC_MAIN_JAVA)), null);
 			String antPath = pathResolver.getRoot(Path.SRC_MAIN_JAVA) + File.separatorChar + "**" + File.separatorChar + "*.java";
 

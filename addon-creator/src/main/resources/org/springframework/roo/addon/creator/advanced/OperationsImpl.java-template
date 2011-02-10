@@ -57,7 +57,7 @@ public class __APP_NAME__OperationsImpl implements __APP_NAME__Operations{
 	/** {@inheritDoc} */
 	public boolean isCommandAvailable() {
 		// Check if a project has been created
-		return projectOperations.isDependencyModificationAllowed();
+		return projectOperations.isProjectAvailable();
 	}
 
 	/** {@inheritDoc} */

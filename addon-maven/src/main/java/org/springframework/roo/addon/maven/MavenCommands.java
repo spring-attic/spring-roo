@@ -49,7 +49,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "dependency add", "dependency remove" })
 	public boolean isDependencyModificationAllowed() {
-		return mavenOperations.isDependencyModificationAllowed();
+		return mavenOperations.isProjectAvailable();
 	}
 
 	@CliCommand(value = "dependency add", help = "Adds a new dependency to the Maven project object model (POM)")
@@ -72,7 +72,7 @@ public class MavenCommands implements CommandMarker {
 
 	@CliAvailabilityIndicator({ "perform package", "perform eclipse", "perform tests", "perform clean", "perform assembly", "perform command" })
 	public boolean isPerformCommandAllowed() {
-		return mavenOperations.isPerformCommandAllowed();
+		return mavenOperations.isProjectAvailable();
 	}
 
 	@CliCommand(value = { "perform package" }, help = "Packages the application using Maven, but does not execute any tests")
@@ -117,11 +117,10 @@ public class MavenCommands implements CommandMarker {
 		p.getOutputStream().close(); // Close OutputStream to avoid blocking by Maven commands that expect input, as per ROO-2034
 		input.start();
 		errors.start();
- 
+
 		try {
-			p.waitFor();
-			if (p.exitValue() != 0) {
-				logger.warning("The command '" + cmd + "' failed to complete");
+			if (p.waitFor() != 0) {
+				logger.warning("The command '" + cmd + "' did not complete successfully");
 			}
 		} catch (InterruptedException e) {
 			throw new IllegalStateException(e);

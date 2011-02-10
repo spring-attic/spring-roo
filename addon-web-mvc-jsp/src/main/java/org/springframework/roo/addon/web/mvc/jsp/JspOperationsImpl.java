@@ -34,7 +34,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -43,7 +42,6 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.osgi.BundleFindingUtils;
@@ -70,11 +68,9 @@ import org.w3c.dom.Node;
 public class JspOperationsImpl implements JspOperations {
 	private static Logger logger = HandlerUtils.getLogger(JspOperationsImpl.class);
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private TypeManagementService typeManagementService;
 	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
-	@Reference private PathResolver pathResolver;
 	@Reference private MenuOperations menuOperations;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private ProjectOperations projectOperations;
@@ -89,19 +85,16 @@ public class JspOperationsImpl implements JspOperations {
 	}
 
 	public boolean isProjectAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isProjectAvailable();
 	}
 
 	public boolean isInstallLanguageCommandAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/footer.jspx"));
+		return isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views/footer.jspx"));
 	}
 
 	public void installCommonViewArtefacts() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
-
-		PathResolver pathResolver = projectMetadata.getPathResolver();
-		Assert.notNull(projectMetadata, "Unable to obtain path resolver");
+		Assert.isTrue(isProjectAvailable(), "Project metadata required");
+		PathResolver pathResolver = projectOperations.getPathResolver();
 
 		// Install tiles config
 		updateConfiguration();
@@ -135,8 +128,9 @@ public class JspOperationsImpl implements JspOperations {
 		String i18nDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/i18n/application.properties");
 		if (!fileManager.exists(i18nDirectory)) {
 			try {
+				String projectName = projectOperations.getProjectMetadata().getProjectName();
 				fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties"));
-				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectMetadata.getProjectName().substring(0, 1).toUpperCase() + projectMetadata.getProjectName().substring(1), true);
+				propFileOperations.addPropertyIfNotExists(Path.SRC_MAIN_WEBAPP, "/WEB-INF/i18n/application.properties", "application_name", projectName.substring(0, 1).toUpperCase() + projectName.substring(1), true);
 			} catch (Exception e) {
 				new IllegalStateException("Encountered an error during copying of resources for MVC JSP addon.", e);
 			}
@@ -167,7 +161,7 @@ public class JspOperationsImpl implements JspOperations {
 				new IllegalStateException("Encountered an error during copying of resources for controller class.", e);
 			}
 		}
-		XmlUtils.writeXml(fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
+		XmlUtils.writeXml(fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/views" + path + "/" + lcViewName + ".jspx")).getOutputStream(), document);
 		installView(new JavaSymbolName(viewName), path, title, category, registerStaticController);
 	}
 
@@ -179,6 +173,8 @@ public class JspOperationsImpl implements JspOperations {
 	 */
 	private void installView(JavaSymbolName viewName, String folderName, String title, String category, boolean registerStaticController) {
 		// Probe if common web artifacts exist, and install them if needed
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/layouts/default.jspx"))) {
 			webMvcOperations.installAllWebMvcArtifacts();
 			installCommonViewArtefacts();
@@ -277,7 +273,7 @@ public class JspOperationsImpl implements JspOperations {
 		getParamNames.add(new JavaSymbolName("request"));
 		getParamNames.add(new JavaSymbolName("response"));
 
-		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, pathResolver.getPath(resourceIdentifier));
+		String declaredByMetadataId = PhysicalTypeIdentifier.createIdentifier(controller, projectOperations.getPathResolver().getPath(resourceIdentifier));
 		MethodMetadataBuilder getMethodBuilder = new MethodMetadataBuilder(declaredByMetadataId, Modifier.PUBLIC, new JavaSymbolName("get"), JavaType.VOID_PRIMITIVE, getParamTypes, getParamNames, new InvocableMemberBodyBuilder());
 		getMethodBuilder.setAnnotations(getMethodAnnotations);
 		methods.add(getMethodBuilder);
@@ -332,13 +328,15 @@ public class JspOperationsImpl implements JspOperations {
 		// Add tiles dependencies to pom
 		Element configuration = XmlUtils.getConfiguration(getClass(), "tiles/configuration.xml");
 
+		List<Dependency> dependencies = new ArrayList<Dependency>();
 		List<Element> springDependencies = XmlUtils.findElements("/configuration/tiles/dependencies/dependency", configuration);
-		for (Element dependency : springDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependency));
+		for (Element dependencyElement : springDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
+		projectOperations.addDependencies(dependencies);
 
 		// Add config to MVC app context
-		String mvcConfig = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String mvcConfig = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		MutableFile mutableMvcConfigFile = fileManager.updateFile(mvcConfig);
 		Document mvcConfigDocument;
 		try {
@@ -418,9 +416,9 @@ public class JspOperationsImpl implements JspOperations {
 			return;
 		}
 
-		String targetDirectory = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "");
+		String targetDirectory = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "");
 		
-		//country locale parts currently not supported due to default lowercasing of all files in Roo shell
+//country locale parts currently not supported due to default lowercasing of all files in Roo shell
 		
 //		String country = "";
 //		if (i18n.getLocale().getCountry() != null && i18n.getLocale().getCountry().length() > 0) {

@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.maven;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -98,8 +99,10 @@ public class MavenOperationsImpl extends AbstractProjectOperations implements Ma
 
 		// Java 5 needs the javax.annotation library (it's included in Java 6 and above), and the jaxb-api for Hibernate
 		if (majorJavaVersion == 5) {
-			dependencyUpdate(new Dependency("javax.annotation", "jsr250-api", "1.0"));
-			dependencyUpdate(new Dependency("javax.xml.bind", "jaxb-api", "2.1"));
+			List<Dependency> dependencies = new ArrayList<Dependency>();
+			dependencies.add(new Dependency("javax.annotation", "jsr250-api", "1.0"));
+			dependencies.add(new Dependency("javax.xml.bind", "jaxb-api", "2.1"));
+			addDependencies(dependencies);
 		}
 
 		fileManager.scan();

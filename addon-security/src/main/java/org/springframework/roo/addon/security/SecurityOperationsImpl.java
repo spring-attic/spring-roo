@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.security;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -8,13 +9,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.Property;
 import org.springframework.roo.support.util.Assert;
@@ -39,24 +38,13 @@ import org.w3c.dom.Element;
 public class SecurityOperationsImpl implements SecurityOperations {
 	private static final String SECURITY_VERSION = "3.0.5.RELEASE";
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TilesOperations tilesOperations;
 
 	public boolean isInstallSecurityAvailable() {
-		ProjectMetadata project = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (project == null) {
-			return false;
-		}
-
 		// Do not permit installation unless they have a web project (as per ROO-342)
-		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml"))) {
-			return false;
-		}
-
-		// Only permit installation if they don't already have some version of Spring Security installed
-		return project.getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).size() == 0;
+		// and only permit installation if they don't already have some version of Spring Security installed
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/web.xml")) && projectOperations.getProjectMetadata().getDependenciesExcludingVersion(new Dependency("org.springframework.security", "spring-security-core", SECURITY_VERSION)).size() == 0;
 	}
 
 	public void installSecurity() {
@@ -69,6 +57,8 @@ public class SecurityOperationsImpl implements SecurityOperations {
 		// Add dependencies to POM
 		updateDependencies(configuration);
 
+		PathResolver pathResolver = projectOperations.getPathResolver();
+		
 		// Copy the template across
 		String destination = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext-security.xml");
 		if (!fileManager.exists(destination)) {
@@ -139,9 +129,11 @@ public class SecurityOperationsImpl implements SecurityOperations {
 	}
 
 	private void updateDependencies(Element configuration) {
-		List<Element> databaseDependencies = XmlUtils.findElements("/configuration/spring-security/dependencies/dependency", configuration);
-		for (Element dependencyElement : databaseDependencies) {
-			projectOperations.dependencyUpdate(new Dependency(dependencyElement));
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		List<Element> securityDependencies = XmlUtils.findElements("/configuration/spring-security/dependencies/dependency", configuration);
+		for (Element dependencyElement : securityDependencies) {
+			dependencies.add(new Dependency(dependencyElement));
 		}
+		projectOperations.addDependencies(dependencies);
 	}
 }

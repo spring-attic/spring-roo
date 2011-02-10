@@ -10,11 +10,26 @@ import java.util.List;
  */
 public interface ProjectOperations {
 
+	/** 
+	 * Determines where is project is available.
+	 * 
+	 * @return true if the project exists, otherwise false
+	 */
 	boolean isProjectAvailable();
-
-	boolean isDependencyModificationAllowed();
-
-	boolean isPerformCommandAllowed();
+	
+	/**
+	 * Returns the {@link ProjectMetadata} for the project.
+	 * 
+	 * @return the {@link ProjectMetadata} object;
+	 */
+	ProjectMetadata getProjectMetadata();
+	
+	/**
+	 * Convenience method to return the {@link PathResolver} from the project's {@link ProjectMetadata}.
+	 * 
+	 * @return the {@link PathResolver}, or null if the project is unavailable
+	 */
+	PathResolver getPathResolver();
 
 	/**
 	 * Register a listener to track changes in build dependencies.
@@ -149,15 +164,6 @@ public interface ProjectOperations {
 	 * @param version the version of the dependency (required)
 	 */
 	void removeDependency(String groupId, String artifactId, String version);
-
-	/**
-	 * Verifies if the specified dependency is present. If it is present, silently returns. If it is not
-	 * present, removes any dependency which matches {@link ProjectMetadata#getDependenciesExcludingVersion(Dependency)}.
-	 * Always adds the presented dependency.
-	 * 
-	 * @param dependency the dependency to add (required)
-	 */
-	void dependencyUpdate(Dependency dependency);
 
 	/**
 	 * Allows addition of repositories to the POM. 

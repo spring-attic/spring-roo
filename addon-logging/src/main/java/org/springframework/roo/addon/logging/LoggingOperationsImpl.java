@@ -9,13 +9,11 @@ import java.util.Properties;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.TemplateUtils;
 
@@ -28,13 +26,11 @@ import org.springframework.roo.support.util.TemplateUtils;
 @Component
 @Service
 public class LoggingOperationsImpl implements LoggingOperations {
-	
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;	
+	@Reference private ProjectOperations projectOperations;
 	
 	public boolean isConfigureLoggingAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isProjectAvailable();
 	}
 	
 	public void configureLogging(LogLevel logLevel, LoggerPackage loggerPackage) {
@@ -46,7 +42,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 	}
 	
 	private void setupProperties(LogLevel logLevel, LoggerPackage loggerPackage) {
-		String filePath = pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
+		String filePath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "log4j.properties");
 		MutableFile log4jMutableFile = null;
 		Properties props = new Properties();
 		
@@ -64,9 +60,7 @@ public class LoggingOperationsImpl implements LoggingOperations {
 			throw new IllegalStateException(ioe);
 		}
 
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata is unavailable");
-		JavaPackage topLevelPackage = projectMetadata.getTopLevelPackage();
+		JavaPackage topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage();
 		
 		for (String packageName : loggerPackage.getPackageNames()) {
 			if (LoggerPackage.ROOT.equals(loggerPackage)) {

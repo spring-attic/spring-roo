@@ -83,8 +83,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 				annotationValues.isExposeJson() && MemberFindingUtils.getTypeAnnotation(formbackingClassOrInterfaceDetails, new JavaType("org.springframework.roo.addon.json.RooJson")) != null);
 	}
 	
-	
-
 //	private SortedSet<JavaType> getSpecialDomainTypes(JavaType javaType, String metadataIdentificationString, MemberDetails memberDetails) {
 //		Path path = Path.SRC_MAIN_JAVA;		
 //		SortedSet<JavaType> specialTypes = new TreeSet<JavaType>();
@@ -138,8 +136,6 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		}
 		conversionServiceOperations.installConversionService(governor.getPackage());
 	}
-	
-	
 	
 	public String getItdUniquenessFilenameSuffix() {
 		return "Controller";

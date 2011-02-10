@@ -16,12 +16,10 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -37,16 +35,15 @@ import org.springframework.roo.support.util.Assert;
 @Service 
 public class BackupOperationsImpl implements BackupOperations {
 	private static Logger logger = HandlerUtils.getLogger(BackupOperationsImpl.class);
-	@Reference private MetadataService metadataService;
 	@Reference private FileManager fileManager;
+	@Reference private ProjectOperations projectOperations;
 
 	public boolean isBackupAvailable() {
-		return getPathResolver() != null;
+		return projectOperations.isProjectAvailable();
 	}
 
 	public String backup() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Unable to obtain project metadata");
+		Assert.isTrue(isBackupAvailable(), "Project metadata unavailable");
 
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 
@@ -57,9 +54,9 @@ public class BackupOperationsImpl implements BackupOperations {
 
 		long start = System.nanoTime();
 		try {
-			File projectDirectory = new File(getPathResolver().getIdentifier(Path.ROOT, "."));
+			File projectDirectory = new File(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "."));
 
-			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectMetadata.getProjectName() + "_" + df.format(new Date()) + ".zip")));
+			MutableFile file = fileManager.createFile(FileDetails.getCanonicalPath(new File(projectDirectory, projectOperations.getProjectMetadata().getProjectName() + "_" + df.format(new Date()) + ".zip")));
 			ZipOutputStream zos = new ZipOutputStream(file.getOutputStream());
 
 			zip(projectDirectory, projectDirectory, zos);
@@ -114,13 +111,5 @@ public class BackupOperationsImpl implements BackupOperations {
 				in.close();
 			}
 		}
-	}
-
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
 	}
 }

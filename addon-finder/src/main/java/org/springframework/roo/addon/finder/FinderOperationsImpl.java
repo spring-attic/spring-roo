@@ -32,7 +32,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
@@ -47,15 +47,15 @@ import org.springframework.roo.support.util.Assert;
 public class FinderOperationsImpl implements FinderOperations {
 	private static final Logger logger = HandlerUtils.getLogger(FinderOperationsImpl.class);
 	private static final JavaType ROO_ENTITY = new JavaType(RooEntity.class.getName());
-	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
-	@Reference private MetadataService metadataService;
-	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private DynamicFinderServices dynamicFinderServices;
+	@Reference private FileManager fileManager;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private MetadataService metadataService;
+	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
+	@Reference private ProjectOperations projectOperations;
 	
 	public boolean isFinderCommandAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 	
 	public SortedSet<String> listFindersFor(JavaType typeName, Integer depth) {

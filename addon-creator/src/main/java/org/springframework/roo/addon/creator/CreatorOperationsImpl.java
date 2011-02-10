@@ -16,13 +16,12 @@ import java.util.zip.ZipInputStream;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -43,10 +42,9 @@ import org.w3c.dom.Element;
 @Service
 public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private FileManager fileManager;
-	@Reference private MetadataService metadataService;
 	@Reference private PathResolver pathResolver;
+	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
-	
 	private static final char SEPARATOR = File.separatorChar;
 
 	private enum Type {
@@ -54,7 +52,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	};
 	
 	public boolean isCommandAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) == null;
+		return !projectOperations.isProjectAvailable();
 	}
 	
 	public void createAdvancedAddon(JavaPackage topLevelPackage, String description, String projectName) {
@@ -88,7 +86,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	
 	public void createWrapperAddon(JavaPackage topLevelPackage, String groupId, String artifactId, String version, String vendorName, String lincenseUrl, String docUrl, String osgiImports, String description, String projectName) {
 		Assert.notNull(topLevelPackage, "Top Level Package required");
-		if (projectName == null || projectName.length() == 0) {
+		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		Document pom;
@@ -129,7 +127,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		Assert.notNull(locale, "Locale required");
 		Assert.notNull(messageBundle, "Message Bundle required");
 
-		if (language == null || language.length() == 0) {
+		if (!StringUtils.hasText(language)) {
 			language = "";
 			InputStreamReader is = new InputStreamReader(TemplateUtils.getTemplate(getClass(), Type.I18N.name().toLowerCase() +  "/iso3166.txt"));
 			BufferedReader br = new BufferedReader(is);
@@ -166,7 +164,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		String languageName = b.toString();
 		String packagePath = topLevelPackage.getFullyQualifiedPackageName().replace('.', SEPARATOR);
 		
-		if (description == null || description.length() == 0) {
+		if (!StringUtils.hasText(description)) {
 			description = languageName + " language support for Spring Roo Web MVC JSP Scaffolding";
 		}
 		if (!description.contains("#mvc") || !description.contains("#localization") || !description.contains("locale:")) {
@@ -175,6 +173,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		createProject(topLevelPackage, Type.I18N, description, projectName);
 
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + SEPARATOR + messageBundle.getName())).getOutputStream());
@@ -215,7 +214,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	}
 
 	private void createProject(JavaPackage topLevelPackage, Type type, String description, String projectName) {
-		if (projectName == null || projectName.length() == 0) {
+		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
 		
@@ -235,14 +234,13 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);
 		}
 
+		// Create new project
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
-		
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.notNull(projectMetadata, "Project metadata unavailable");
+		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata unavailable");
 
-		writeTextFile("readme.txt", "Welcome to my addon!", projectMetadata);
-		writeTextFile("legal" + SEPARATOR + "LICENSE.TXT", "Your license goes here", projectMetadata);
+		writeTextFile("readme.txt", "Welcome to my addon!");
+		writeTextFile("legal" + SEPARATOR + "LICENSE.TXT", "Your license goes here");
 
 		fileManager.scan();
 	}
@@ -251,6 +249,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
+		PathResolver pathResolver = projectOperations.getPathResolver();
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = topLevelPackageName.replace('.', SEPARATOR);
 		String destinationFile = "";
@@ -286,11 +285,10 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		}
 	}
 	
-	private void writeTextFile(String fullPathFromRoot, String message, ProjectMetadata projectMetadata) {
+	private void writeTextFile(String fullPathFromRoot, String message) {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
-		Assert.notNull(projectMetadata, "Project metadata required");
-		String path = projectMetadata.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
+		String path = projectOperations.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
 		File file = new File(path);
 		MutableFile mutableFile = file.exists() ? fileManager.updateFile(path) : fileManager.createFile(path);
 		byte[] input = message.getBytes();
@@ -317,7 +315,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
 					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
 					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
 						bos.write(buffer, 0, size);

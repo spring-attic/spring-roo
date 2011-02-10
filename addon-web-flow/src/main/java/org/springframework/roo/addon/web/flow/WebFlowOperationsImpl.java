@@ -1,6 +1,7 @@
 package org.springframework.roo.addon.web.flow;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.felix.scr.annotations.Component;
@@ -11,13 +12,10 @@ import org.springframework.roo.addon.web.mvc.controller.WebMvcOperations;
 import org.springframework.roo.addon.web.mvc.jsp.JspOperations;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.project.ProjectType;
 import org.springframework.roo.project.Repository;
@@ -33,16 +31,12 @@ import org.w3c.dom.Element;
  * 
  * @author Stefan Schmidt
  * @author Rossen Stoyanchev
- * 
  * @since 1.0
  */
 @Component
 @Service
 public class WebFlowOperationsImpl implements WebFlowOperations {
-
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
-	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private MenuOperations menuOperations;
 	@Reference private WebMvcOperations webMvcOperations;
@@ -50,11 +44,11 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	@Reference private TilesOperations tilesOperations;
 
 	public boolean isInstallWebFlowAvailable() {
-		return metadataService.get(ProjectMetadata.getProjectIdentifier()) != null;
+		return projectOperations.isProjectAvailable();
 	}
 
 	public boolean isManageWebFlowAvailable() {
-		return fileManager.exists(getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
+		return isInstallWebFlowAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring/webflow-config.xml"));
 	}
 
 	/**
@@ -65,7 +59,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 		final String flowId = getFlowId(flowName);
 		String webRelativeFlowPath = "/WEB-INF/views/" + flowId;
-		String resolvedFlowPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
+		String resolvedFlowPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, webRelativeFlowPath);
 		String resolvedFlowDefinitionPath = resolvedFlowPath + "/flow.xml";
 
 		if (fileManager.exists(resolvedFlowPath)) {
@@ -98,7 +92,7 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 	}
 
 	private void installWebFlowConfiguration() {
-		String resolvedSpringConfigPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring");
+		String resolvedSpringConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "/WEB-INF/spring");
 		if (fileManager.exists(resolvedSpringConfigPath + "/webflow-config.xml")) {
 			return;
 		}
@@ -106,7 +100,6 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 		copyTemplate("webflow-config.xml", resolvedSpringConfigPath);
 
 		String webMvcConfigPath = resolvedSpringConfigPath + "/webmvc-config.xml";
-
 		if (!fileManager.exists(webMvcConfigPath)) {
 			webMvcOperations.installAllWebMvcArtifacts();
 			jspOperations.installCommonViewArtefacts();
@@ -127,10 +120,14 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 
 	private void updateConfiguration() {
 		Element configuration = XmlUtils.getConfiguration(getClass());
-		List<Element> dependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration);
-		for (Element d : dependencies) {
-			projectOperations.dependencyUpdate(new Dependency(d));
+
+		List<Dependency> dependencies = new ArrayList<Dependency>();
+		List<Element> webFlowDependencies = XmlUtils.findElements("/configuration/springWebFlow/dependencies/dependency", configuration);
+		for (Element d : webFlowDependencies) {
+			dependencies.add(new Dependency(d));
 		}
+		projectOperations.addDependencies(dependencies);
+		
 		List<Element> repositories = XmlUtils.findElements("/configuration/springWebFlow/repositories/repository", configuration);
 		for (Element r : repositories) {
 			projectOperations.addRepository(new Repository(r));
@@ -153,13 +150,4 @@ public class WebFlowOperationsImpl implements WebFlowOperations {
 			new IllegalStateException("Encountered an error during copying of resources for Web Flow addon.", e);
 		}
 	}
-
-	private PathResolver getPathResolver() {
-		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		if (projectMetadata == null) {
-			return null;
-		}
-		return projectMetadata.getPathResolver();
-	}
-
 }

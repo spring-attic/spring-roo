@@ -26,7 +26,6 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Dependency;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlElementBuilder;
@@ -45,22 +44,21 @@ import org.w3c.dom.Element;
 public class SolrOperationsImpl implements SolrOperations {
 	private static final Dependency SOLRJ = new Dependency("org.apache.solr", "solr-solrj", "1.4.0");
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MetadataService metadataService;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
 	public boolean isInstallSearchAvailable() {
-		return fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
+		return projectOperations.isProjectAvailable() && fileManager.exists(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, "META-INF/persistence.xml"));
 	}
 
 	public void setupConfig(String solrServerUrl) {
-		projectOperations.dependencyUpdate(SOLRJ);
+		projectOperations.addDependency(SOLRJ);
 
 		updateSolrProperties(solrServerUrl);
 
-		String contextPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
+		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
 		MutableFile contextMutableFile = null;
 
 		Document appCtx;
@@ -98,7 +96,7 @@ public class SolrOperationsImpl implements SolrOperations {
 	}
 
 	private void updateSolrProperties(String solrServerUrl) {
-		String solrPath = pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
+		String solrPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "solr.properties");
 		MutableFile solrMutableFile = null;
 
 		Properties props = new Properties();
@@ -143,8 +141,6 @@ public class SolrOperationsImpl implements SolrOperations {
 		if (id == null) {
 			throw new IllegalArgumentException("Cannot locate source for '" + javaType.getFullyQualifiedTypeName() + "'");
 		}
-		
-		
 
 		// Obtain the physical type and itd mutable details
 		PhysicalTypeMetadata ptm = (PhysicalTypeMetadata) metadataService.get(id);
