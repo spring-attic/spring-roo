@@ -14,7 +14,7 @@ import org.springframework.roo.support.util.StringUtils;
 /**
  * Provides utility methods historically in BeanInfoMetadata.
  * 
- * This class is deprecated - please use the class of thye same name in classpath
+ * This class is deprecated - please use the class of the same name in classpath
  * 
  * @author Ben Alex
  * @since 1.1.1

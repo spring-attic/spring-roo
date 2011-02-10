@@ -23,6 +23,7 @@ import org.springframework.roo.project.Path;
  */
 @Component(immediate=true)
 @Service
+@Deprecated
 public final class BeanInfoMetadataProviderImpl extends AbstractItdMetadataProvider implements BeanInfoMetadataProvider {
 
 	protected void activate(ComponentContext context) {

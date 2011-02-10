@@ -29,6 +29,7 @@ import org.springframework.roo.support.util.StringUtils;
  * @author Ben Alex
  * @since 1.0
  */
+@Deprecated
 public class BeanInfoMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 	private static final String PROVIDES_TYPE_STRING = BeanInfoMetadata.class.getName();
 	private static final String PROVIDES_TYPE = MetadataIdentificationUtils.create(PROVIDES_TYPE_STRING);

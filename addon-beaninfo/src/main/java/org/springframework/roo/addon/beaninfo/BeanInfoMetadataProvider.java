@@ -9,4 +9,5 @@ import org.springframework.roo.classpath.itd.ItdTriggerBasedMetadataProvider;
  * @since 1.1
  *
  */
+@Deprecated
 public interface BeanInfoMetadataProvider extends ItdTriggerBasedMetadataProvider {}
