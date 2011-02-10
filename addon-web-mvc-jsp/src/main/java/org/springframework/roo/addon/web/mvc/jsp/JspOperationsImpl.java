@@ -23,6 +23,8 @@ import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperationsImpl;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
+import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.TypeManagementService;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
 import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -32,7 +34,6 @@ import org.springframework.roo.classpath.details.annotations.AnnotationMetadataB
 import org.springframework.roo.classpath.details.annotations.EnumAttributeValue;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.classpath.operations.ClasspathOperations;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.EnumDetails;
 import org.springframework.roo.model.JavaSymbolName;
@@ -70,7 +71,8 @@ public class JspOperationsImpl implements JspOperations {
 	private static Logger logger = HandlerUtils.getLogger(JspOperationsImpl.class);
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private ClasspathOperations classpathOperations;
+	@Reference private TypeManagementService typeManagementService;
+	@Reference private TypeLocationService typeLocationService;
 	@Reference private WebMvcOperations webMvcOperations;
 	@Reference private PathResolver pathResolver;
 	@Reference private MenuOperations menuOperations;
@@ -222,7 +224,7 @@ public class JspOperationsImpl implements JspOperations {
 	public void createManualController(JavaType controller, String preferredMapping) {
 		Assert.notNull(controller, "Controller Java Type required");
 
-		String resourceIdentifier = classpathOperations.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
+		String resourceIdentifier = typeLocationService.getPhysicalLocationCanonicalPath(controller, Path.SRC_MAIN_JAVA);
 		String folderName = null;
 
 		// Create annotation @RequestMapping("/myobject/**")
@@ -318,7 +320,7 @@ public class JspOperationsImpl implements JspOperations {
 		ClassOrInterfaceTypeDetailsBuilder typeDetailsBuilder = new ClassOrInterfaceTypeDetailsBuilder(declaredByMetadataId, Modifier.PUBLIC, controller, PhysicalTypeCategory.CLASS);
 		typeDetailsBuilder.setAnnotations(annotations);
 		typeDetailsBuilder.setDeclaredMethods(methods);
-		classpathOperations.generateClassFile(typeDetailsBuilder.build());
+		typeManagementService.generateClassFile(typeDetailsBuilder.build());
 
 		installView(folderName, "/index", new JavaSymbolName(controller.getSimpleTypeName()).getReadableSymbolName() + " View", "Controller", null, false);
 	}

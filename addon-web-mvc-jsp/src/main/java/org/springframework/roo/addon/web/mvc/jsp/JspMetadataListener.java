@@ -13,24 +13,23 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
-import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.addon.entity.IdentifierMetadata;
-import org.springframework.roo.addon.entity.RooIdentifier;
-import org.springframework.roo.addon.finder.FinderMetadata;
-import org.springframework.roo.addon.plural.PluralMetadata;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
-import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
+import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.addon.web.mvc.jsp.tiles.TilesOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataDependencyRegistry;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataItem;
@@ -69,11 +68,8 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 	@Reference private PathResolver pathResolver;
 	@Reference private TilesOperations tilesOperations;
 	@Reference private PropFileOperations propFileOperations;
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private TypeLocationService typeLocationService;
-
-	private Map<JavaType, String> pluralCache = new HashMap<JavaType, String>();
-
-	private BeanInfoMetadata beanInfoMetadata; // caution: concurrent access not supported
 
 	protected void activate(ComponentContext context) {
 		metadataDependencyRegistry.registerDependency(WebScaffoldMetadata.getMetadataIdentiferType(), getProvidesType());
@@ -97,37 +93,14 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			return null;
 		}
 		
-		// Shouldn't be needed, as we get notified for every change to web scaffold metadata anyway
-		// metadataDependencyRegistry.registerDependency(webScaffoldMetadataKey, metadataIdentificationString);
-
-		// We need to lookup the metadata for the entity we are creating
-		String beanInfoMetadataKey = webScaffoldMetadata.getIdentifierForBeanInfoMetadata();
-		String entityMetadataKey = webScaffoldMetadata.getIdentifierForEntityMetadata();
-
-		BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(beanInfoMetadataKey);
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		
-		// We need to be informed if our dependent metadata changes
-		metadataDependencyRegistry.registerDependency(beanInfoMetadataKey, metadataIdentificationString);
-		metadataDependencyRegistry.registerDependency(entityMetadataKey, metadataIdentificationString);
-
-		// We need to abort if we couldn't find dependent metadata
-		if (beanInfoMetadata == null || !beanInfoMetadata.isValid() || entityMetadata == null || !entityMetadata.isValid()) {
-			// Can't get hold of the entity we are needing to build JSPs for
-			return null;
-		}
-
-		this.beanInfoMetadata = beanInfoMetadata;
+		JavaType formbackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
+		JavaTypeMetadataDetails formBackingTypeMetadataDetails = WebMetadataUtils.getJavaTypeMetadataDetails(formbackingType, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry);
+		Assert.notNull(formBackingTypeMetadataDetails, "Unable to obtain metadata for type " + formbackingType.getFullyQualifiedTypeName());
 
 		// Install web artifacts only if Spring MVC config is missing
 		if (!fileManager.exists(pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/views"))) {
 			jspOperations.installCommonViewArtefacts();
 		}
-
-		String finderMetadataKey = FinderMetadata.createIdentifier(EntityMetadata.getJavaType(entityMetadataKey), path);
-		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
-
-		JspMetadata md = new JspMetadata(metadataIdentificationString, beanInfoMetadata, webScaffoldMetadata);
 
 		installImage("images/show.png");
 		if (webScaffoldMetadata.getAnnotationValues().isUpdate()) {
@@ -140,9 +113,11 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.notNull(projectMetadata, "Project metadata required");
 
-		List<FieldMetadata> elegibleFields = getElegibleFields();
+		MemberDetails memberDetails = getMemberDetails(formbackingType);
+		
+		List<FieldMetadata> elegibleFields = WebMetadataUtils.getScaffoldElegibleFieldMetadata(formbackingType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
 
-		JspViewManager viewManager = new JspViewManager(metadataService, elegibleFields, beanInfoMetadata, entityMetadata, webScaffoldMetadata.getAnnotationValues(), typeLocationService);
+		JspViewManager viewManager = new JspViewManager(elegibleFields, webScaffoldMetadata.getAnnotationValues(), WebMetadataUtils.getRelatedApplicationTypeMetadata(formbackingType, memberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry));
 
 		String controllerPath = webScaffoldMetadata.getAnnotationValues().getPath();
 
@@ -168,7 +143,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		writeToDiskIfNecessary(showPath, viewManager.getShowDocument());
 		tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "show", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/show.jspx");
 
-		JavaSymbolName categoryName = new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName());
+		JavaSymbolName categoryName = new JavaSymbolName(formbackingType.getSimpleTypeName());
 
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put("menu_category_" + categoryName.getSymbolName().toLowerCase() + "_label", categoryName.getReadableSymbolName());
@@ -179,7 +154,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			JavaSymbolName menuItemId = new JavaSymbolName("new");
 			// add 'create new' menu item
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_new", "/" + controllerPath + "?form", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
+			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formbackingType.getSimpleTypeName()).getReadableSymbolName());
 			tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + "create", TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/create.jspx");
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("new"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
@@ -193,56 +168,60 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			tilesOperations.removeViewDefinition(controllerPath + "/" + "update", controllerPath);
 		}
 		// setup labels for i18n support
-		String resourceId = XmlUtils.convertId("label." + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName().toLowerCase());
-		properties.put(resourceId, new JavaSymbolName(beanInfoMetadata.getJavaBean().getSimpleTypeName()).getReadableSymbolName());
+		String resourceId = XmlUtils.convertId("label." + formbackingType.getFullyQualifiedTypeName().toLowerCase());
+		properties.put(resourceId, new JavaSymbolName(formbackingType.getSimpleTypeName()).getReadableSymbolName());
 
 		String pluralResourceId = XmlUtils.convertId(resourceId + ".plural");
-		properties.put(pluralResourceId, new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName());
-
-		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
+		properties.put(pluralResourceId, new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
+		
+		JavaTypePersistenceMetadataDetails javaTypePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(formbackingType, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+		Assert.notNull(javaTypePersistenceMetadataDetails, "Unable to determine persistence metadata for type " + formbackingType.getFullyQualifiedTypeName());
+		
+		for (MethodMetadata method : MemberFindingUtils.getMethods(memberDetails)) {
+			if (!BeanInfoUtils.isAccessorMethod(method)) {
+				continue;
+			}
 			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(fieldName);
+			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
+			Assert.notNull(field, "Unable to determine field metadata for accessor method " + method.getMethodName().getSymbolName());
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
-			if (field != null && isRooIdentifier(field.getFieldType())) {
-				IdentifierMetadata im = (IdentifierMetadata) metadataService.get(IdentifierMetadata.createIdentifier(field.getFieldType(), Path.SRC_MAIN_JAVA));
-				if (im != null) {
-					for (FieldMetadata f : im.getFields()) {
+			if (WebMetadataUtils.isRooIdentifier(method.getReturnType(), metadataService)) {
+				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), metadataService, metadataIdentificationString, metadataDependencyRegistry);
+				if (typePersistenceMetadataDetails != null) {
+					for (FieldMetadata f : typePersistenceMetadataDetails.getRooIdentifierFields()) {
 						String sb = f.getFieldName().getReadableSymbolName();
-						properties.put(XmlUtils.convertId(resourceId + "." + entityMetadata.getIdentifierField().getFieldName().getSymbolName() + "." + f.getFieldName().getSymbolName().toLowerCase()), (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb);
+						properties.put(XmlUtils.convertId(resourceId + "." + javaTypePersistenceMetadataDetails.getIdentifierField().getFieldName().getSymbolName() + "." + f.getFieldName().getSymbolName().toLowerCase()), (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb);
 					}
 				}
-			} else if (!fieldName.equals(entityMetadata.getIdentifierField().getFieldName()) || !fieldName.equals(entityMetadata.getVersionField().getFieldName())) {
+			} else if (!method.getMethodName().equals(javaTypePersistenceMetadataDetails.getIdentifierAccessorMethod().getMethodName()) || (javaTypePersistenceMetadataDetails.getVersionAccessorMethod() != null && !method.getMethodName().equals(javaTypePersistenceMetadataDetails.getVersionAccessorMethod().getMethodName()))) {
 				String sb = fieldName.getReadableSymbolName();
 				properties.put(fieldResourceId, (sb == null || sb.length() == 0) ? fieldName.getSymbolName() : sb);
 			}
 		}
 
-		if (entityMetadata.getFindAllMethod() != null) {
+		if (javaTypePersistenceMetadataDetails.getFindAllMethod() != null) {
 			// Add 'list all' menu item
 			JavaSymbolName menuItemId = new JavaSymbolName("list");
 			menuOperations.addMenuItem(categoryName, menuItemId, "global_menu_list", "/" + controllerPath + "?page=1&size=${empty param.size ? 10 : param.size}", MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
-			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(getPlural(beanInfoMetadata.getJavaBean())).getReadableSymbolName());
+			properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + menuItemId.getSymbolName().toLowerCase() + "_label", new JavaSymbolName(formBackingTypeMetadataDetails.getPlural()).getReadableSymbolName());
 		} else {
 			menuOperations.cleanUpMenuItem(categoryName, new JavaSymbolName("list"), MenuOperations.DEFAULT_MENU_ITEM_PREFIX);
 		}
 		
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(beanInfoMetadata.getJavaBean(), Path.SRC_MAIN_JAVA));
-		Assert.notNull(pluralMetadata, "Could not determine plural for type " + beanInfoMetadata.getJavaBean().getFullyQualifiedTypeName());
-
 		List<String> allowedMenuItems = new ArrayList<String>();
-		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders() && finderMetadata != null) {
-			for (MethodMetadata methodMetadata : finderMetadata.getAllDynamicFinders()) {
+		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
+			Map<MethodMetadata, List<FieldMetadata>> finderMethodsAndParamFields = WebMetadataUtils.getDynamicFinderMethodsAndFields(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+			for (MethodMetadata methodMetadata : finderMethodsAndParamFields.keySet()) {
 				String finderName = methodMetadata.getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
 				// finders only get scaffolded if the finder name is not too long (see ROO-1027)
 				if (listPath.length() > 244) {
 					continue;
 				}
-				
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(methodMetadata));
-				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()) + "By", ""));
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(methodMetadata, finderMethodsAndParamFields.get(methodMetadata)));
+				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
 				// Add 'Find by' menu item
-				menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + getPlural(beanInfoMetadata.getJavaBean()), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
+				menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
 				for (JavaSymbolName paramName : methodMetadata.getParameterNames()) {
@@ -257,7 +236,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// clean up links to finders which are removed by now
 		menuOperations.cleanUpFinderMenuItems(categoryName, allowedMenuItems);
 
-		return md;
+		return new JspMetadata(metadataIdentificationString, webScaffoldMetadata);
 	}
 
 	/** return indicates if disk was changed (ie updated or created) */
@@ -300,48 +279,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// A file existed, but it contained the same content, so we return false
 		return false;
 	}
-
-	private List<FieldMetadata> getElegibleFields() {
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-
-			if (field != null && hasMutator(field)) {
-
-				// Never include id field (it shouldn't normally have a mutator anyway, but the user might have added one)
-				if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
-					continue;
-				}
-				// Never include version field (it shouldn't normally have a mutator anyway, but the user might have added one)
-				if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
-					continue;
-				}
-				fields.add(field);
-			}
-		}
-		return fields;
-	}
-
-	private boolean hasMutator(FieldMetadata fieldMetadata) {
-		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
-		}
-		return false;
-	}
-
-	private boolean isRooIdentifier(JavaType type) {
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		if (physicalTypeMetadata == null) {
-			return false;
-		}
-		ClassOrInterfaceTypeDetails cid = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
-		if (cid == null) {
-			return false;
-		}
-		return null != MemberFindingUtils.getAnnotationOfType(cid.getAnnotations(), new JavaType(RooIdentifier.class.getName()));
-	}
-
+	
 	public void notify(String upstreamDependency, String downstreamDependency) {
 		if (MetadataIdentificationUtils.isIdentifyingClass(downstreamDependency)) {
 			Assert.isTrue(MetadataIdentificationUtils.getMetadataClass(upstreamDependency).equals(MetadataIdentificationUtils.getMetadataClass(WebScaffoldMetadata.getMetadataIdentiferType())), "Expected class-level notifications only for web scaffold metadata (not '" + upstreamDependency + "')");
@@ -379,17 +317,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		}
 	}
 
-	private String getPlural(JavaType type) {
-		if (pluralCache.get(type) != null) {
-			return pluralCache.get(type);
-		}
-		PluralMetadata pluralMetadata = (PluralMetadata) metadataService.get(PluralMetadata.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		Assert.notNull(pluralMetadata, "Could not determine the plural for the '" + type.getFullyQualifiedTypeName() + "' type");
-		if (!pluralMetadata.getPlural().equals(type.getSimpleTypeName())) {
-			pluralCache.put(type, pluralMetadata.getPlural());
-			return pluralMetadata.getPlural();
-		}
-		pluralCache.put(type, pluralMetadata.getPlural() + "Items");
-		return pluralMetadata.getPlural() + "Items";
+	private MemberDetails getMemberDetails(JavaType type) {
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
+		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + type.getFullyQualifiedTypeName());
+		return memberDetailsScanner.getMemberDetails(getClass().getName(), (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails());
 	}
 }

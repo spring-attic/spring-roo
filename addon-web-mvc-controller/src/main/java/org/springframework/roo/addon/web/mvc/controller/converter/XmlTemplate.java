@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;

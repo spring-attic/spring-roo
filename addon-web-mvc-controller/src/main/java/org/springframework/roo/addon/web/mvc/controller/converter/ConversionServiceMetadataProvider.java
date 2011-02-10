@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +9,17 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.addon.beaninfo.BeanInfoUtils;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
+import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -117,7 +122,7 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			} 
 			
-			if (BeanInfoUtils.isAccessorMethod(method) && isApplicationType(method.getReturnType())) {
+			if (BeanInfoUtils.isAccessorMethod(method) && WebMetadataUtils.isApplicationType(method.getReturnType(), metadataService)) {
 				// Track any related java types in the project
 				metadataDependencyRegistry.registerDependency(method.getDeclaredByMetadataId(), metadataIdentificationString);
 			}
@@ -140,22 +145,13 @@ public final class ConversionServiceMetadataProvider extends AbstractItdMetadata
 		JavaType fieldType = field.getFieldType();
 		if (field == null // Should not happen
 				|| fieldType.isCommonCollectionType() || fieldType.isArray() // Exclude collections and arrays
-				|| isApplicationType(fieldType) // Exclude references to other domain objects as they are too verbose
+				|| WebMetadataUtils.isApplicationType(fieldType, metadataService) // Exclude references to other domain objects as they are too verbose
 				|| fieldType.equals(JavaType.BOOLEAN_PRIMITIVE) || fieldType.equals(JavaType.BOOLEAN_OBJECT) // Exclude boolean values as they would not be meaningful in this presentation
-				|| isEmbeddedFieldType(field) /* not interested in embedded types */) {
+				|| WebMetadataUtils.isEmbeddedFieldType(field) /* not interested in embedded types */) {
 			return false;
 		}
 		return true;
 	}
-
-	private boolean isApplicationType(JavaType javaType) {
-		return (metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA)) != null);
-	}
-
-	private boolean isEmbeddedFieldType(FieldMetadata field) {
-		return MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Embedded")) != null;
-	}
-	
 
 	public String getItdUniquenessFilenameSuffix() {
 		return "ConversionService";

@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.web.mvc.controller.XmlTemplate.DomElementCallback;
+import org.springframework.roo.addon.web.mvc.controller.converter.XmlTemplate.DomElementCallback;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;

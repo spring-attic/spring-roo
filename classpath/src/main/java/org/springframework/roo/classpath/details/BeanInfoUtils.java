@@ -1,6 +1,8 @@
 package org.springframework.roo.classpath.details;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
@@ -8,6 +10,7 @@ import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetails;
 import org.springframework.roo.model.JavaSymbolName;
+import org.springframework.roo.model.JavaType;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
 
@@ -84,6 +87,29 @@ public abstract class BeanInfoUtils {
 	 */
 	public static boolean isAccessorMethod(MethodMetadata method) {
 		return (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is")) && method.getParameterTypes().size() == 0 && Modifier.isPublic(method.getModifier());
+	}
+	
+	/**
+	 * Attempts to locate an accessor and a mutator method for a given field.
+	 * 
+	 * <p>
+	 * Not every JavaBean getter or setter actually backs to a field with an identical name. In such cases, false will be returned.
+	 * 
+	 * @param field the member holders to scan (required)
+	 * @param memberDetails the member details to scan
+	 * @return true if an accessor and a mutator are present, or false otherwise
+	 */
+	public static boolean hasAccessorAndMutator(FieldMetadata field, MemberDetails memberDetails) {
+		Assert.notNull(field, "Field metadata required");
+		Assert.notNull(memberDetails, "Member details required");
+		String capitalizedFieldName = StringUtils.capitalize(field.getFieldName().getSymbolName());
+		for (MemberHoldingTypeDetails holder : memberDetails.getDetails()) {
+			if (MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("get" + capitalizedFieldName), new ArrayList<JavaType>()) != null
+					&& MemberFindingUtils.getDeclaredMethod(holder, new JavaSymbolName("set" + capitalizedFieldName), Arrays.asList(field.getFieldType())) != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

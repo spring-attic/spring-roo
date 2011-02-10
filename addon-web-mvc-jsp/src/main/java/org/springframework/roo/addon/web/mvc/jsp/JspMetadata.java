@@ -1,8 +1,7 @@
 package org.springframework.roo.addon.web.mvc.jsp;
 
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.web.mvc.controller.WebScaffoldAnnotationValues;
-import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -26,10 +25,9 @@ public class JspMetadata extends AbstractMetadataItem {
 	private WebScaffoldMetadata webScaffoldMetadata;
 	private WebScaffoldAnnotationValues annotationValues;
 	
-	public JspMetadata(String identifier, BeanInfoMetadata beanInfoMetadata, WebScaffoldMetadata webScaffoldMetadata) {
+	public JspMetadata(String identifier, WebScaffoldMetadata webScaffoldMetadata) {
 		super(identifier);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
-		Assert.notNull(beanInfoMetadata, "Bean info metadata required");
 		Assert.notNull(webScaffoldMetadata, "Web scaffold metadata required");
 		
 		this.webScaffoldMetadata = webScaffoldMetadata;		

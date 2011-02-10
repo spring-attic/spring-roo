@@ -1,4 +1,4 @@
-package org.springframework.roo.addon.web.mvc.controller;
+package org.springframework.roo.addon.web.mvc.controller.converter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -12,6 +12,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.springframework.roo.addon.web.mvc.controller.converter.ConversionServiceOperationsImpl;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.model.JavaType;
@@ -46,7 +47,7 @@ public class ConversionServiceOperationsImplTests {
 		operations.manageWebMvcConfig(new JavaPackage(getClass().getPackage().getName()));
 		String output = webMvcConfigFile.getOutputAsString();
 		assertThat(output, containsString("<mvc:annotation-driven conversion-service=\"applicationConversionService\"/>"));
-		assertThat(output, containsString("<bean class=\"org.springframework.roo.addon.web.mvc.controller.ApplicationConversionServiceFactoryBean\" id=\"applicationConversionService\"/>"));
+		assertThat(output, containsString("<bean class=\"org.springframework.roo.addon.web.mvc.controller.converter.ApplicationConversionServiceFactoryBean\" id=\"applicationConversionService\"/>"));
 	}
 	
 	@Test
@@ -90,7 +91,7 @@ public class ConversionServiceOperationsImplTests {
 		
 		operations.installJavaClass(javaType.getPackage());
 		String output = file.getOutputAsString();
-		assertThat(output, containsString("package org.springframework.roo.addon.web.mvc.controller;"));
+		assertThat(output, containsString("package org.springframework.roo.addon.web.mvc.controller.converter;"));
 		assertThat(output, containsString("import org.springframework.format.FormatterRegistry;"));
 		assertThat(output, containsString("import org.springframework.format.support.FormattingConversionServiceFactoryBean;"));
 		assertThat(output, containsString("import org.springframework.roo.addon.web.mvc.controller.RooConversionService;"));

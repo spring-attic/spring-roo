@@ -3,27 +3,27 @@ package org.springframework.roo.addon.web.selenium;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.addon.beaninfo.BeanInfoMetadata;
-import org.springframework.roo.addon.web.mvc.controller.WebScaffoldMetadata;
+import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
+import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.addon.web.mvc.jsp.menu.MenuOperations;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.PhysicalTypeMetadata;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.operations.DateTime;
+import org.springframework.roo.classpath.scanner.MemberDetails;
+import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -54,7 +54,7 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 	@Reference private PathResolver pathResolver;
 	@Reference private MetadataService metadataService;
 	@Reference private MenuOperations menuOperations;
-	private BeanInfoMetadata beanInfoMetadata;   // caution: concurrent access not supported
+	@Reference private MemberDetailsScanner memberDetailsScanner;
 	
 	private static final Logger logger = HandlerUtils.getLogger(SeleniumOperationsImpl.class);
 	
@@ -75,7 +75,6 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataIdentifier);
 		Assert.notNull(webScaffoldMetadata, "Web controller '" + controller.getFullyQualifiedTypeName()  + "' does not appear to be an automatic, scaffolded controller");
-		this.beanInfoMetadata = (BeanInfoMetadata) metadataService.get(webScaffoldMetadata.getIdentifierForBeanInfoMetadata());
 		
 		//we abort the creation of a selenium test if the controller does not allow the creation of new instances for the form backing object
 		if (!webScaffoldMetadata.getAnnotationValues().isCreate()) {
@@ -87,7 +86,9 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 			serverURL = serverURL + "/";
 		}
 		
-		String relativeTestFilePath = "selenium/test-" + beanInfoMetadata.getJavaBean().getSimpleTypeName().toLowerCase() + ".xhtml";
+		JavaType formBackingType = webScaffoldMetadata.getAnnotationValues().getFormBackingObject();
+		
+		String relativeTestFilePath = "selenium/test-" + formBackingType.getSimpleTypeName().toLowerCase() + ".xhtml";
 		String seleniumPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, relativeTestFilePath);
 		MutableFile seleniumMutableFile = null;
 		
@@ -124,9 +125,14 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		Element tbody = XmlUtils.findRequiredElement("/html/body/table/tbody", root);
 		
 		tbody.appendChild(openCommand(selenium, serverURL + projectMetadata.getProjectName() + "/" + webScaffoldMetadata.getAnnotationValues().getPath() + "?form"));							
-//		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));		
+//		tbody.appendChild(clickAndWaitCommand(selenium, "link=Create new " + beanInfoMetadata.getJavaBean().getSimpleTypeName()));
 		
-		for (FieldMetadata field : getEligableFields()) {
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, Path.SRC_MAIN_JAVA));
+		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
+		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
+
+		for (FieldMetadata field : WebMetadataUtils.getScaffoldElegibleFieldMetadata(formBackingType, memberDetails, metadataService, null, null)) {
 			if (!field.getFieldType().isCommonCollectionType() && !isSpecialType(field.getFieldType())) {
 				tbody.appendChild(typeCommand(selenium, field));
 			} else {				
@@ -250,35 +256,6 @@ public class SeleniumOperationsImpl implements SeleniumOperations {
 		XmlUtils.findRequiredElement("/project/build/plugins", root).appendChild(plugin);
 
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
-	}
-	
-	private List<FieldMetadata> getEligableFields() {
-		List<FieldMetadata> fields = new ArrayList<FieldMetadata>();
-		for (MethodMetadata method : beanInfoMetadata.getPublicAccessors(false)) {
-			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
-			FieldMetadata field = beanInfoMetadata.getFieldForPropertyName(propertyName);
-			
-			if(field != null && hasMutator(field)) {
-				
-				// Never include id field (it shouldn't normally have a mutator anyway, but the user might have added one)
-				if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Id")) != null) {
-					continue;
-				}
-				// Never include version field (it shouldn't normally have a mutator anyway, but the user might have added one)
-				if (MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("javax.persistence.Version")) != null) {
-					continue;
-				}				
-				fields.add(field);
-			}
-		}
-		return fields;
-	}	
-	
-	private boolean hasMutator(FieldMetadata fieldMetadata) {
-		for (MethodMetadata mutator : beanInfoMetadata.getPublicMutators()) {
-			if (fieldMetadata.equals(beanInfoMetadata.getFieldForPropertyName(BeanInfoUtils.getPropertyNameForJavaBeanMethod(mutator)))) return true;
-		}
-		return false;
 	}
 	
 	private Node clickAndWaitCommand(Document document, String linkTarget){
