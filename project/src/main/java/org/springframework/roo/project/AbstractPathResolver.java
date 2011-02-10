@@ -17,12 +17,12 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class AbstractPathResolver implements PathResolver {
 
 	/** Paths provided to constructor */
 	private List<PathInformation> pathOrder = new ArrayList<PathInformation>();
+	
 	/** Cached map of the paths */
 	private Map<Path,PathInformation> pathCache = new HashMap<Path, PathInformation>();
 	
@@ -140,5 +140,4 @@ public abstract class AbstractPathResolver implements PathResolver {
 		newPath = new File(pi.getLocation(), relativePath);
 		return FileDetails.getCanonicalPath(newPath);
 	}
-	
 }

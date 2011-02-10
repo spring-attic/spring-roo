@@ -14,7 +14,7 @@ import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
+import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 import org.springframework.roo.support.util.StringUtils;
@@ -35,16 +35,15 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 	public static final String CONVERSION_SERVICE_SIMPLE_TYPE = "ApplicationConversionServiceFactoryBean";
 	public static final String CONVERSION_SERVICE_BEAN_NAME = "applicationConversionService";
 	@Reference private FileManager fileManager;
-	@Reference private PathResolver pathResolver; 
+	@Reference private ProjectOperations projectOperations;
 	@Reference private TypeLocationService typeLocationService;
 
-	public ConversionServiceOperationsImpl() {
-		// For testing
-	}
+	public ConversionServiceOperationsImpl() {}
 
-	public ConversionServiceOperationsImpl(FileManager fileManager, PathResolver pathResolver, TypeLocationService typeLocationService) {
+	public ConversionServiceOperationsImpl(FileManager fileManager, ProjectOperations projectOperations, TypeLocationService typeLocationService) {
+		// For testing
 		this.fileManager = fileManager;
-		this.pathResolver = pathResolver;
+		this.projectOperations = projectOperations;
 		this.typeLocationService = typeLocationService;
 	}
 
@@ -54,8 +53,6 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 		fileManager.scan();
 	}
 
-	/* Private methods */
-	
 	void installJavaClass(JavaPackage thePackage) {
 		JavaType javaType = new JavaType(thePackage.getFullyQualifiedPackageName() + "." + CONVERSION_SERVICE_SIMPLE_TYPE);
 		String physicalPath = typeLocationService.getPhysicalLocationCanonicalPath(javaType, Path.SRC_MAIN_JAVA);
@@ -74,7 +71,7 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 	}
 
 	void manageWebMvcConfig(final JavaPackage thePackage) {
-		String webMvcConfigPath = pathResolver.getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
+		String webMvcConfigPath = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(webMvcConfigPath), webMvcConfigPath + " doesn't exists");		
 
 		new XmlTemplate(fileManager).update(webMvcConfigPath, new DomElementCallback() {
@@ -113,5 +110,4 @@ public class ConversionServiceOperationsImpl implements ConversionServiceOperati
 			return true;
 		}
 	}
-	
 }

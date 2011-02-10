@@ -17,12 +17,10 @@ import org.springframework.roo.project.PathInformation;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class MavenPathResolver extends AbstractPathResolver {
-
 	private List<PathInformation> pathInformation = new ArrayList<PathInformation>();
 
 	protected void activate(ComponentContext context) {
@@ -43,6 +41,4 @@ public class MavenPathResolver extends AbstractPathResolver {
 	protected List<PathInformation> getPathInformation() {
 		return pathInformation;
 	}
-
-	
 }
