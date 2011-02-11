@@ -35,6 +35,7 @@ public class GwtFileListener implements FileEventListener {
 	@Reference private MetadataService metadataService;
 	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private GwtTemplatingService gwtTemplatingService;
+	@Reference private GwtTypeService gwtTypeService;
 	private boolean processedApplicationFiles = false;
 
 	private static final String PROXY_FILE_SUFFIX = "Proxy.java";
@@ -56,6 +57,7 @@ public class GwtFileListener implements FileEventListener {
 		}
 
 		//TODO: What does this even do? Is it still needed? - JT
+		//TODO: We need to decide how the add-on should deal with files after the mirrored type is no more
 		// Something happened with a GWT auto-generated *.java file (or we're starting monitoring)
 		/* if (isMaintainedByRoo) {
 					// First thing is for us to figure out the proxy file (or what it used to be called, if it has gone away)
@@ -122,7 +124,7 @@ public class GwtFileListener implements FileEventListener {
 		List<ClassOrInterfaceTypeDetails> templateTypeDetails = gwtTemplatingService.getStaticTemplateTypeDetails(type);
 		List<ClassOrInterfaceTypeDetails> typesToBeWritten = new ArrayList<ClassOrInterfaceTypeDetails>();
 		for (ClassOrInterfaceTypeDetails templateTypeDetail : templateTypeDetails) {
-			typesToBeWritten.addAll(GwtUtils.buildType(type, templateTypeDetail, GwtUtils.getExtendsTypes(templateTypeDetail, metadataService)));
+			typesToBeWritten.addAll(GwtUtils.buildType(type, templateTypeDetail, gwtTypeService.getExtendsTypes(templateTypeDetail)));
 		}
 		gwtFileManager.write(typesToBeWritten, type.isOverwriteConcrete());
 	}

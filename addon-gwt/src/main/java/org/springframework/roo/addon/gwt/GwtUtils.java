@@ -8,7 +8,6 @@ import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.DataType;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -23,12 +22,13 @@ import java.util.*;
  * Utility methods used in the GWT Add-On.
  *
  * @author James Tyrrell
- * @since 1.1.1
+ * @since 1.1.2
  */
 
 class GwtUtils {
 
-	private GwtUtils() {}
+	private GwtUtils() {
+	}
 
 	private static GwtTypeNamingStrategy gwtTypeNamingStrategy = new DefaultGwtTypeNamingStrategy();
 
@@ -55,51 +55,6 @@ class GwtUtils {
 
 	private static boolean areMethodsEqual(MethodMetadata m1, MethodMetadata m2) {
 		return m1.getMethodName().equals(m2.getMethodName()) && m1.getParameterTypes().containsAll(m2.getParameterTypes());
-	}
-
-	/**
-	 * Return the type arg for the client side method, given the domain method return type.
-	 * if domainMethodReturnType is List<Integer> or Set<Integer>, returns the same.
-	 * if domainMethodReturnType is List<Employee>, return List<EmployeeProxy>
-	 *
-	 * @param type
-	 * @param metadataService
-	 * @param projectMetadata
-	 * @param governorType
-	 * @return
-	 */
-	public static JavaType getGwtSideLeafType(JavaType type, MetadataService metadataService, ProjectMetadata projectMetadata, JavaType governorType, boolean requestType) {
-		if (type.isPrimitive()) {
-			if (!requestType) {
-				checkPrimitive(type);
-			}
-			return convertPrimitiveType(type);
-		}
-
-		if (isCommonType(type)) {
-			return type;
-		}
-
-		if (isCollectionType(type)) {
-			List<JavaType> args = type.getParameters();
-			if (args != null && args.size() == 1) {
-				JavaType elementType = args.get(0);
-				return new JavaType(type.getFullyQualifiedTypeName(), 0, DataType.TYPE, null, Arrays.asList(getGwtSideLeafType(elementType, metadataService, projectMetadata, governorType, requestType)));
-			}
-			return type;
-		}
-
-		PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(type, Path.SRC_MAIN_JAVA));
-		if (isDomainObject(type, ptmd)) {
-
-			if (isEmbeddable(ptmd)) {
-				throw new IllegalStateException("GWT does not currently support embedding objects in entities, such as '" + type.getSimpleTypeName() + "' in '" + governorType.getSimpleTypeName() + "'.");
-			}
-
-			return getDestinationJavaType(type, GwtType.PROXY, projectMetadata);
-		}
-
-		return type;
 	}
 
 	public static JavaType getDestinationJavaType(GwtType type, ProjectMetadata projectMetadata) {
@@ -155,7 +110,7 @@ class GwtUtils {
 				JavaType.FLOAT_OBJECT.equals(type) ||
 				JavaType.DOUBLE_OBJECT.equals(type) ||
 				JavaType.STRING_OBJECT.equals(type) ||
-				type.isPrimitive() && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName()) ;
+				type.isPrimitive() && !JavaType.VOID_PRIMITIVE.getFullyQualifiedTypeName().equals(type.getFullyQualifiedTypeName());
 	}
 
 	public static boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
@@ -208,7 +163,7 @@ class GwtUtils {
 
 	/**
 	 * @param physicalType
-	 * @param mirrorType the mirror class we're producing (required)
+	 * @param mirrorType      the mirror class we're producing (required)
 	 * @param projectMetadata
 	 * @return the MID to the mirror class applicable for the current governor (never null)
 	 */
@@ -216,7 +171,7 @@ class GwtUtils {
 		return gwtTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(mirrorType, projectMetadata, physicalType);
 	}
 
-		private static HashMap<JavaSymbolName, JavaType> resolveTypes(JavaType generic, JavaType typed) {
+	private static HashMap<JavaSymbolName, JavaType> resolveTypes(JavaType generic, JavaType typed) {
 		HashMap<JavaSymbolName, JavaType> typeMap = new HashMap<JavaSymbolName, JavaType>();
 		boolean typeCountMatch = generic.getParameters().size() == typed.getParameters().size();
 		Assert.isTrue(typeCountMatch, "Type count must match.");
@@ -227,21 +182,6 @@ class GwtUtils {
 			i++;
 		}
 		return typeMap;
-	}
-
-	public static List<MemberHoldingTypeDetails> getExtendsTypes(ClassOrInterfaceTypeDetails childType, MetadataService metadataService) {
-		List<MemberHoldingTypeDetails> extendsTypes = new ArrayList<MemberHoldingTypeDetails>();
-		if (childType != null) {
-			for (JavaType javaType : childType.getExtendsTypes()) {
-				String superTypeId = PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
-				if (metadataService.get(superTypeId) == null) {
-					continue;
-				}
-				MemberHoldingTypeDetails superType = ((PhysicalTypeMetadata) metadataService.get(superTypeId)).getMemberHoldingTypeDetails();
-				extendsTypes.add(superType);
-			}
-		}
-		return extendsTypes;
 	}
 
 	private static ClassOrInterfaceTypeDetailsBuilder createAbstractBuilder(ClassOrInterfaceTypeDetailsBuilder concreteClass, List<MemberHoldingTypeDetails> extendsTypesDetails) {
@@ -305,6 +245,7 @@ class GwtUtils {
 
 	public static List<ClassOrInterfaceTypeDetails> buildType(GwtType destType, ClassOrInterfaceTypeDetails templateClass, List<MemberHoldingTypeDetails> extendsTypes) {
 		try {
+			//A type may consist of a concrete type which depend on
 			List<ClassOrInterfaceTypeDetails> types = new ArrayList<ClassOrInterfaceTypeDetails>();
 			ClassOrInterfaceTypeDetailsBuilder templateClassBuilder = new ClassOrInterfaceTypeDetailsBuilder(templateClass);
 
