@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 
+import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldAnnotationValues;
@@ -18,7 +19,6 @@ import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.model.JavaSymbolName;
@@ -216,19 +216,19 @@ public class JspViewManager {
 		return document;
 	}
 
-	public Document getFinderDocument(MethodMetadata finder, List<FieldMetadata> paramFields) {
+	public Document getFinderDocument(FinderMetadataDetails finderMetadataDetails) {
 		DocumentBuilder builder = XmlUtils.getDocumentBuilder();
 		Document document = builder.newDocument();
 
 		// Add document namespaces
 		Element div = (Element) document.appendChild(new XmlElementBuilder("div", document).addAttribute("xmlns:form", "urn:jsptagdir:/WEB-INF/tags/form").addAttribute("xmlns:field", "urn:jsptagdir:/WEB-INF/tags/form/fields").addAttribute("xmlns:jsp", "http://java.sun.com/JSP/Page").addAttribute("version", "2.0").addChild(new XmlElementBuilder("jsp:directive.page", document).addAttribute("contentType", "text/html;charset=UTF-8").build()).addChild(new XmlElementBuilder("jsp:output", document).addAttribute("omit-xml-declaration", "yes").build()).build());
 
-		Element formFind = new XmlElementBuilder("form:find", document).addAttribute("id", XmlUtils.convertId("ff:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("path", controllerPath).addAttribute("finderName", finder.getMethodName().getSymbolName().replace("find" + formbackingTypeMetadata.getPlural(), "")).build();
+		Element formFind = new XmlElementBuilder("form:find", document).addAttribute("id", XmlUtils.convertId("ff:" + formbackingType.getFullyQualifiedTypeName())).addAttribute("path", controllerPath).addAttribute("finderName", finderMetadataDetails.getFinderMethodMetadata().getMethodName().getSymbolName().replace("find" + formbackingTypeMetadata.getPlural(), "")).build();
 		formFind.setAttribute("z", XmlRoundTripUtils.calculateUniqueKeyFor(formFind));
 
 		div.appendChild(formFind);
 
-		for (FieldMetadata field: paramFields) {
+		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
 			JavaType type = field.getFieldType();
 			JavaSymbolName paramName = field.getFieldName();
 			

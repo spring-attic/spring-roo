@@ -8,12 +8,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.propfiles.PropFileOperations;
+import org.springframework.roo.addon.web.mvc.controller.details.FinderMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypeMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.JavaTypePersistenceMetadataDetails;
 import org.springframework.roo.addon.web.mvc.controller.details.WebMetadataUtils;
@@ -212,21 +214,21 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
-			Map<MethodMetadata, List<FieldMetadata>> finderMethodsAndParamFields = WebMetadataUtils.getDynamicFinderMethodsAndFields(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
-			for (MethodMetadata methodMetadata : finderMethodsAndParamFields.keySet()) {
-				String finderName = methodMetadata.getMethodName().getSymbolName();
+			Set<FinderMetadataDetails> finderMethodsDetails = WebMetadataUtils.getDynamicFinderMethodsAndFields(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+			for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
+				String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";
 				// finders only get scaffolded if the finder name is not too long (see ROO-1027)
 				if (listPath.length() > 244) {
 					continue;
 				}
-				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(methodMetadata, finderMethodsAndParamFields.get(methodMetadata)));
+				writeToDiskIfNecessary(listPath, viewManager.getFinderDocument(finderDetails));
 				JavaSymbolName finderLabel = new JavaSymbolName(finderName.replace("find" + formBackingTypeMetadataDetails.getPlural() + "By", ""));
 				// Add 'Find by' menu item
 				menuOperations.addMenuItem(categoryName, finderLabel, "global_menu_find", "/" + controllerPath + "?find=" + finderName.replace("find" + formBackingTypeMetadataDetails.getPlural(), "") + "&form", MenuOperations.FINDER_MENU_ITEM_PREFIX);
 				properties.put("menu_item_" + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase() + "_label", finderLabel.getReadableSymbolName());
 				allowedMenuItems.add(MenuOperations.FINDER_MENU_ITEM_PREFIX + categoryName.getSymbolName().toLowerCase() + "_" + finderLabel.getSymbolName().toLowerCase());
-				for (JavaSymbolName paramName : methodMetadata.getParameterNames()) {
+				for (JavaSymbolName paramName : finderDetails.getFinderMethodMetadata().getParameterNames()) {
 					properties.put(XmlUtils.convertId(resourceId + "." + paramName.getSymbolName().toLowerCase()), paramName.getReadableSymbolName());
 				}
 				tilesOperations.addViewDefinition(controllerPath, controllerPath + "/" + finderName, TilesOperations.DEFAULT_TEMPLATE, "/WEB-INF/views/" + controllerPath + "/" + finderName + ".jspx");
