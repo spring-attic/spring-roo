@@ -126,6 +126,7 @@ input, textarea, select {
 input.image {
 	border: none;
 	height: auto;
+	vertical-align: middle;
 }
 
 submit {
@@ -265,6 +266,8 @@ table thead {
 }
 
 table a:link {color: #303030;}
+
+.utilbox {width: 18px;}
 
 caption {
 	caption-side: top;
