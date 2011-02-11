@@ -14,19 +14,10 @@ import java.util.Map;
 public class GwtTemplateDataHolder {
 
 	private final Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap;
-	private Map<GwtType, ClassOrInterfaceTypeDetails> abstractTypeDetailsMap;
 	private final Map<GwtType, String> xmlTemplates;
 
 	public GwtTemplateDataHolder(Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap, Map<GwtType, String> xmlTemplates) {
 		this.templateTypeDetailsMap = templateTypeDetailsMap;
-		this.xmlTemplates = xmlTemplates;
-	}
-
-	public GwtTemplateDataHolder(Map<GwtType, ClassOrInterfaceTypeDetails> templateTypeDetailsMap,
-	                             Map<GwtType, ClassOrInterfaceTypeDetails> abstractTypeDetailsMap,
-	                             Map<GwtType, String> xmlTemplates) {
-		this.templateTypeDetailsMap = templateTypeDetailsMap;
-		this.abstractTypeDetailsMap = abstractTypeDetailsMap;
 		this.xmlTemplates = xmlTemplates;
 	}
 
@@ -36,9 +27,5 @@ public class GwtTemplateDataHolder {
 
 	public Map<GwtType, String> getXmlTemplates() {
 		return xmlTemplates;
-	}
-
-	public Map<GwtType, ClassOrInterfaceTypeDetails> getAbstractTypeDetailsMap() {
-		return abstractTypeDetailsMap;
 	}
 }

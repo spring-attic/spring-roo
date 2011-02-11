@@ -6,8 +6,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
@@ -263,12 +265,12 @@ public abstract class WebMetadataUtils {
 		return Collections.unmodifiableMap(dates);
 	}
 	
-	public static Map<MethodMetadata, List<FieldMetadata>> getDynamicFinderMethodsAndFields(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
+	public static Set<FinderMetadataDetails> getDynamicFinderMethodsAndFields(JavaType javaType, MemberDetails memberDetails, MetadataService metadataService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		Assert.notNull(memberDetails, "Member details required");
 		
-		Map<MethodMetadata, List<FieldMetadata>> dynamicFinderMethods = new HashMap<MethodMetadata, List<FieldMetadata>>();
+		Set<FinderMetadataDetails> finderMetadataDetails = new HashSet<FinderMetadataDetails>();
 		String finderMetadataKey = FinderMetadata.createIdentifier(javaType, Path.SRC_MAIN_JAVA);
 		FinderMetadata finderMetadata = (FinderMetadata) metadataService.get(finderMetadataKey);
 		if (finderMetadata != null) {
@@ -289,10 +291,10 @@ public abstract class WebMetadataUtils {
 					}
 				}
 				registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
-				dynamicFinderMethods.put(method, fields);
+				finderMetadataDetails.add(new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields));
 			}
 		}
-		return Collections.unmodifiableMap(dynamicFinderMethods);
+		return Collections.unmodifiableSet(finderMetadataDetails);
 	}
 	
 	private static boolean isTransientFieldType(FieldMetadata field) {

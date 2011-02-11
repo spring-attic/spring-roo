@@ -61,6 +61,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private GwtTemplatingService gwtTemplateService;
+	@Reference private GwtTypeService gwtTypeService;
 
 	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
 
@@ -120,7 +121,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
 				if (Modifier.isPublic(method.getModifier())) {
 					boolean requestType = GwtUtils.isRequestMethod(entityMetadata, method);
-					gwtClientTypeMap.put(method.getReturnType(), GwtUtils.getGwtSideLeafType(method.getReturnType(), metadataService, projectMetadata, governorTypeName, requestType));
+					gwtClientTypeMap.put(method.getReturnType(), gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, governorTypeName, requestType));
 				}
 			}
 		}
@@ -170,7 +171,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			gwtType.dynamicallyResolveFieldsToWatch(clientSideTypeMap);
 			gwtType.dynamicallyResolveMethodsToWatch(mirrorTypeMap.get(GwtType.PROXY), clientSideTypeMap, projectMetadata);
 
-			List<MemberHoldingTypeDetails> extendsTypes = GwtUtils.getExtendsTypes(templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), metadataService);
+			List<MemberHoldingTypeDetails> extendsTypes = gwtTypeService.getExtendsTypes(templateDataHolder.getTemplateTypeDetailsMap().get(gwtType));
 
 			typesToBeWritten.put(gwtType, gwtMetadata.buildType(gwtType, templateDataHolder.getTemplateTypeDetailsMap().get(gwtType), extendsTypes));
 

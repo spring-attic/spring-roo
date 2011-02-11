@@ -45,6 +45,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
+	@Reference private GwtTypeService gwtTypeService;
 
 	private static Logger logger = HandlerUtils.getLogger(GwtTemplatingServiceImpl.class);
 
@@ -256,7 +257,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
 				if (Modifier.isPublic(method.getModifier())) {
 					boolean requestType = GwtUtils.isRequestMethod(entityMetadata, method);
-					gwtClientTypeMap.put(method.getReturnType(), GwtUtils.getGwtSideLeafType(method.getReturnType(), metadataService, getProjectMetadata(), governorTypeName, requestType));
+					gwtClientTypeMap.put(method.getReturnType(), gwtTypeService.getGwtSideLeafType(method.getReturnType(), getProjectMetadata(), governorTypeName, requestType));
 				}
 			}
 		}
