@@ -413,7 +413,10 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 			
 			// ROO-746: Use @GeneratedValue(strategy = GenerationType.TABLE) if the root of the governor declares @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 			if ("AUTO".equals(generationType)) {
-				AnnotationMetadata inheritence = MemberFindingUtils.getTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Inheritance"));
+				AnnotationMetadata inheritence = MemberFindingUtils.getDeclaredTypeAnnotation(governorTypeDetails, new JavaType("javax.persistence.Inheritance"));
+				if (inheritence == null) {
+					inheritence = getInheritanceAnnotation();
+				}
 				if (inheritence != null) {
 					AnnotationAttributeValue<?> value = inheritence.getAttribute(new JavaSymbolName("strategy"));
 					if (value instanceof EnumAttributeValue) {

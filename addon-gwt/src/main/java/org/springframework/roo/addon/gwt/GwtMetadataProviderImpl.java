@@ -6,12 +6,10 @@ import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
+import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
-import org.springframework.roo.classpath.details.MemberFindingUtils;
-import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
-import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
@@ -101,10 +99,15 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		ClassOrInterfaceTypeDetails governorTypeDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 
+		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
+			return null;
+		}
+
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtMetadataProviderImpl.class.getName(), governorTypeDetails).getDetails();
 
 		boolean rooEntity = false;
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
+
 			AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(memberHoldingTypeDetail, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 			if (annotationMetadata != null) {
 				rooEntity = true;
@@ -115,16 +118,9 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
-		Map<JavaType, JavaType> gwtClientTypeMap = new HashMap<JavaType, JavaType>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
-				if (Modifier.isPublic(method.getModifier())) {
-					boolean requestType = GwtUtils.isRequestMethod(entityMetadata, method);
-					gwtClientTypeMap.put(method.getReturnType(), gwtTypeService.getGwtSideLeafType(method.getReturnType(), projectMetadata, governorTypeName, requestType));
-				}
-			}
-		}
+		Map<JavaType, JavaType> gwtClientTypeMap = gwtTemplateService.getClientTypeMap(governorTypeDetails);// new HashMap<JavaType, JavaType>();
 
 		// Next let's obtain a handle to the "proxy" we'd want to produce/modify/delete as applicable for this governor
 		JavaType keyTypeName = gwtTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(GwtType.PROXY, projectMetadata, governorTypeName);
@@ -154,7 +150,7 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
+
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTemplateService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
 		//GwtTemplateServiceImpl gwtTemplateService = new GwtTemplateServiceImpl(physicalTypeMetadataProvider, projectMetadata, entityMetadata, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
 		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);//getTemplateTypeDetails();
