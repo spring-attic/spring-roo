@@ -12,6 +12,7 @@ import org.springframework.roo.classpath.details.*;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
@@ -236,10 +237,11 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	public Map<JavaType, JavaType> getClientTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails) {
 
 		JavaType governorTypeName = governorTypeDetails.getName();
+		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(getProjectMetadata(), governorTypeName);
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTemplatingServiceImpl.class.getName(), governorTypeDetails).getDetails();
 
-		boolean rooEntity = false;
+		/*boolean rooEntity = false;
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
 			AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(memberHoldingTypeDetail, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
 			if (annotationMetadata != null) {
@@ -249,15 +251,53 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 
 		if (!rooEntity) {
 			return null;
-		}
+		}*/
 
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
+		/*EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		Map<JavaType, JavaType> gwtClientTypeMap = new HashMap<JavaType, JavaType>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
 			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
 				if (Modifier.isPublic(method.getModifier())) {
 					boolean requestType = GwtUtils.isRequestMethod(entityMetadata, method);
 					gwtClientTypeMap.put(method.getReturnType(), gwtTypeService.getGwtSideLeafType(method.getReturnType(), getProjectMetadata(), governorTypeName, requestType));
+				}
+			}
+		}*/
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
+		Map<JavaType, JavaType> gwtClientTypeMap = new HashMap<JavaType, JavaType>();
+		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
+
+			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
+				if (Modifier.isPublic(method.getModifier())) {
+					boolean requestType = false;
+					JavaType returnType = method.getReturnType();
+					if (MetadataIdentificationUtils.getMetadataClass(memberHoldingTypeDetail.getDeclaredByMetadataId()).equals(EntityMetadata.class.getName())) {
+						EntityMetadata alternativeEntityMetadata = (EntityMetadata) metadataService.get(memberHoldingTypeDetail.getDeclaredByMetadataId());
+						requestType = GwtUtils.isRequestMethod(alternativeEntityMetadata, method);
+
+
+						if (!requestType) {
+							continue;
+						}
+
+						if (!alternativeEntityMetadata.equals(entityMetadata) && !GwtUtils.isCommonType(returnType)) {
+
+							returnType = mirrorTypeMap.get(GwtType.PROXY);
+						}
+					}
+
+					boolean standardAccessor = method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is");
+					if (!standardAccessor && !requestType) {
+						continue;
+					}
+
+					JavaType clientSideType = gwtTypeService.getGwtSideLeafType(returnType, getProjectMetadata(), governorTypeName, requestType);
+					if (clientSideType == null) {
+						continue;
+					}
+
+					gwtClientTypeMap.put(returnType, clientSideType);
+					gwtClientTypeMap.put(clientSideType, clientSideType);
 				}
 			}
 		}
@@ -276,7 +316,8 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 						logger.severe("'owner' is not allowed to be used as field name as it is currently reserved by GWT. Please rename the field 'owner' in type " + memberHoldingTypeDetail.getName().getSimpleTypeName() + ".");
 						continue;
 					}
-					JavaType propertyType = gwtClientTypeMap.get(method.getReturnType());//GwtUtils.getGwtSideLeafType(method.getReturnType(), metadataService, getProjectMetadata(), memberHoldingTypeDetail.getName(), requestType);
+
+					JavaType propertyType = gwtClientTypeMap.get(method.getReturnType());
 					PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType, Path.SRC_MAIN_JAVA));
 					GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(getProjectMetadata(), propertyType, ptmd, propertyName.getSymbolName(), method.getMethodName().getSymbolName());
 					clientSideTypeMap.put(propertyName, gwtProxyProperty);

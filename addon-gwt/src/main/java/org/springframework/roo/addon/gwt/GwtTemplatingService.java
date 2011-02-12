@@ -15,4 +15,6 @@ public interface GwtTemplatingService {
 	Map<JavaSymbolName, GwtProxyProperty> getClientSideTypeMap(List<MemberHoldingTypeDetails> memberHoldingTypeDetails, Map<JavaType, JavaType> gwtClientTypeMap);
 
 	List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type);
+
+	public Map<JavaType, JavaType> getClientTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails);
 }

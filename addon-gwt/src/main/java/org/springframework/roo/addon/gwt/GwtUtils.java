@@ -41,7 +41,7 @@ class GwtUtils {
 	}
 
 	public static boolean isRequestMethod(EntityMetadata entityMetadata, MethodMetadata methodMetadata) {
-		return isOneMethodsEqual(methodMetadata, entityMetadata.getFindAllMethod(), entityMetadata.getFindMethod(), entityMetadata.getFindEntriesMethod(), entityMetadata.getCountMethod(), entityMetadata.getPersistMethod(), entityMetadata.getRemoveMethod());
+		return isOneMethodsEqual(methodMetadata, entityMetadata.getFindAllMethod(), entityMetadata.getFindMethod(), entityMetadata.getFindEntriesMethod(), entityMetadata.getCountMethod(), entityMetadata.getPersistMethod(), entityMetadata.getRemoveMethod(), entityMetadata.getVersionAccessor(), entityMetadata.getIdentifierAccessor());
 	}
 
 	private static boolean isOneMethodsEqual(MethodMetadata m1, MethodMetadata... m2) {
@@ -54,7 +54,7 @@ class GwtUtils {
 	}
 
 	private static boolean areMethodsEqual(MethodMetadata m1, MethodMetadata m2) {
-		return m1.getMethodName().equals(m2.getMethodName()) && m1.getParameterTypes().containsAll(m2.getParameterTypes());
+		return m1.getMethodName().equals(m2.getMethodName()) && AnnotatedJavaType.convertFromAnnotatedJavaTypes(m1.getParameterTypes()).equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(m2.getParameterTypes()));
 	}
 
 	public static JavaType getDestinationJavaType(GwtType type, ProjectMetadata projectMetadata) {
@@ -65,7 +65,7 @@ class GwtUtils {
 		return gwtType.getPath().packageName(projectMetadata) + "." + gwtType.getTemplate();
 	}
 
-	private static <T extends AbstractIdentifiableAnnotatedJavaStructureBuilder> T convertModifier(T builder) {
+	private static <T extends AbstractIdentifiableAnnotatedJavaStructureBuilder<? extends IdentifiableAnnotatedJavaStructure>> T convertModifier(T builder) {
 		if (Modifier.isPrivate(builder.getModifier())) {
 			builder.setModifier(Modifier.PROTECTED);
 		}
@@ -114,6 +114,7 @@ class GwtUtils {
 	}
 
 	public static boolean isDomainObject(JavaType returnType, PhysicalTypeMetadata ptmd) {
+
 		boolean isEnum = ptmd != null
 				&& ptmd.getMemberHoldingTypeDetails() != null
 				&& ptmd.getMemberHoldingTypeDetails().getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION;
