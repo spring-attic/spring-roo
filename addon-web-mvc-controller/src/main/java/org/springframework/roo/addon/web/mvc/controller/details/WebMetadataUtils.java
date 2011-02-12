@@ -22,7 +22,6 @@ import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.scaffold.WebScaffoldMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
 import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
@@ -132,9 +131,10 @@ public abstract class WebMetadataUtils {
 			}
 			JavaSymbolName propertyName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, propertyName);
-			if (!BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
+			if (field == null || !BeanInfoUtils.hasAccessorAndMutator(field, memberDetails)) {
 				continue;
 			}
+			registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
 			fields.add(field);
 		}
 		return Collections.unmodifiableList(fields);
@@ -192,7 +192,7 @@ public abstract class WebMetadataUtils {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
 		
-		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifierNamingUtils.createIdentifier(PhysicalTypeIdentifier.class.getName(), javaType, Path.SRC_MAIN_JAVA));
+		PhysicalTypeMetadata physicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA));
 		if (physicalTypeMetadata != null) {
 			ClassOrInterfaceTypeDetails details = (ClassOrInterfaceTypeDetails) physicalTypeMetadata.getMemberHoldingTypeDetails();
 			if (details != null) {
@@ -320,7 +320,7 @@ public abstract class WebMetadataUtils {
 	public static JavaTypeMetadataDetails getJavaTypeMetadataDetails(JavaType javaType, MetadataService metadataService, TypeLocationService typeLocationService, String metadataIdentificationString, MetadataDependencyRegistry metadataDependencyRegistry) {
 		Assert.notNull(javaType, "Java type required");
 		Assert.notNull(metadataService, "Metadata service required");
-		
+		registerDependency(metadataDependencyRegistry, PhysicalTypeIdentifier.createIdentifier(javaType, Path.SRC_MAIN_JAVA), metadataIdentificationString);
 		return new JavaTypeMetadataDetails(
 				javaType, 
 				getPlural(javaType, metadataService, metadataIdentificationString, metadataDependencyRegistry), 

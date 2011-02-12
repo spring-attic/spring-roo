@@ -187,7 +187,9 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 			}
 			JavaSymbolName fieldName = BeanInfoUtils.getPropertyNameForJavaBeanMethod(method);
 			FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
-			Assert.notNull(field, "Unable to determine field metadata for accessor method " + method.getMethodName().getSymbolName());
+			if (field == null) {
+				continue; 
+			}
 			String fieldResourceId = XmlUtils.convertId(resourceId + "." + fieldName.getSymbolName().toLowerCase());
 			if (WebMetadataUtils.isRooIdentifier(method.getReturnType(), metadataService)) {
 				JavaTypePersistenceMetadataDetails typePersistenceMetadataDetails = WebMetadataUtils.getJavaTypePersistenceMetadataDetails(method.getReturnType(), metadataService, metadataIdentificationString, metadataDependencyRegistry);

@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -40,7 +39,6 @@ import org.springframework.roo.felix.pgp.PgpKeyId;
 import org.springframework.roo.felix.pgp.PgpService;
 import org.springframework.roo.shell.Shell;
 import org.springframework.roo.support.util.Assert;
-import org.springframework.roo.support.util.TemplateUtils;
 import org.springframework.roo.support.util.XmlUtils;
 import org.springframework.roo.uaa.UaaRegistrationService;
 import org.springframework.roo.url.stream.UrlInputStreamService;
@@ -64,7 +62,6 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 	@Reference private PgpService pgpService;
 	@Reference private UrlInputStreamService urlInputStreamService;
 	private static final Logger log = Logger.getLogger(AddOnRooBotOperationsImpl.class.getName());
-	private Properties props;
 	private ComponentContext context;
 	private static String ROOBOT_XML_URL = "http://spring-roo-repository.springsource.org/roobot/roobot.xml.zip";
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
@@ -86,11 +83,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 			}
 		}, "Spring Roo RooBot Add-In Index Eager Download");
 		t.start();
-		props = new Properties();
-		try {
-			props.load(TemplateUtils.getTemplate(getClass(), "manager.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
+		String roobot = context.getBundleContext().getProperty("roobot.url");
+		if (roobot != null && roobot.length() > 0) {
+			ROOBOT_XML_URL = roobot;
 		}
 	}
 	
@@ -532,14 +527,9 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
-			String url = props.getProperty("roobot.url", ROOBOT_XML_URL);
-			if (url == null) {
-				log.warning("Bundle properties could not be loaded");
-				return false;
-			}
-			if (url.startsWith("http://")) {
+			if (ROOBOT_XML_URL.startsWith("http://")) {
 				// Handle it as HTTP
-				URL httpUrl = new URL(url);
+				URL httpUrl = new URL(ROOBOT_XML_URL);
 				String failureMessage = urlInputStreamService.getUrlCannotBeOpenedMessage(httpUrl);
 				if (failureMessage != null) {
 					if (!startupTime) {
@@ -552,8 +542,8 @@ public class AddOnRooBotOperationsImpl implements AddOnRooBotOperations {
 				// It appears we can acquire the URL, so let's do it
 				is = urlInputStreamService.openConnection(httpUrl);
 			} else {
-				// Fallback to normal protocol handler (likely in local development testing etc
-				is = new URL(url).openStream();
+				// Fallback to normal protocol handler (likely in local development testing etc)
+				is = new URL(ROOBOT_XML_URL).openStream();
 			}
 			if (is == null) {
 				log.warning("Could not connect to Roo Addon bundle repository index");
