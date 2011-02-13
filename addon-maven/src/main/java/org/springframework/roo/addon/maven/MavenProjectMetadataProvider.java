@@ -563,6 +563,9 @@ public class MavenProjectMetadataProvider implements ProjectMetadataProvider, Fi
 		if (repository.getName() != null) {
 			repositoryElement.appendChild(new XmlElementBuilder("name", document).setText(repository.getName()).build());
 		}
+		if (repository.isEnableSnapshots()) {
+			repositoryElement.appendChild(new XmlElementBuilder("snapshots", document).addChild(new XmlElementBuilder("enabled", document).setText("true").build()).build());
+		}
 		return repositoryElement;
 	}
 
