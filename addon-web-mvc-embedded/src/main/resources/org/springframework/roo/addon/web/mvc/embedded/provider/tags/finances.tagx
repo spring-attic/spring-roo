@@ -17,5 +17,5 @@
         "rollingDate":"1 year","showAnnotations":"true","liveQuote":"true","ticker":"${sec_stockSymbol}","embedCodeDate":"2010-7-13"
       },{});
     }
-	</script>
+  </script>
 </jsp:root>

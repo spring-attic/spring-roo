@@ -11,12 +11,7 @@
 
     <c:when test="${provider eq 'youtube'}">
       <spring:url value="http://www.youtube.com/v/${videoId}" var="video" />
-      <object width="545" height="320">
-        <param name="movie" value="${fn:escapeXml(video)}"></param>
-        <param name="allowFullScreen" value="true"></param>
-        <param name="allowscriptaccess" value="always"></param>
-        <embed src="" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="545" height="320"></embed>
-      </object>
+      <iframe title="YouTube video player" width="545" height="320" src="http://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen="true"></iframe>
     </c:when>
 
     <c:when test="${provider eq 'vimeo'}">

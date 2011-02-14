@@ -26,7 +26,7 @@
         <spring:param name="page" value="1" />
         <spring:param name="viewMode" value="slideshow" />
       </spring:url>
-      <object id="doc_124839913729923" name="doc_124839913729923" height="500" width="100%" type="application/x-shockwave-flash" data="${base_url}" style="outline:none;" rel="media:presentation" resource="${document}" xmlns:media="http://search.yahoo.com/searchmonkey/m$
+      <object id="doc_124839913729923" name="doc_124839913729923" height="500" width="100%" type="application/x-shockwave-flash" data="${base_url}" style="outline:none;" resource="${document}">
         <param name="movie" value="${base_url}" />
         <param name="wmode" value="opaque" />
         <param name="bgcolor" value="#ffffff" />
