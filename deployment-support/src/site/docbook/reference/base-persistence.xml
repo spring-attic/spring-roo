@@ -501,9 +501,9 @@ private Date birthDay;
 </programlisting>You'll notice that the @Temporal annotation is part of the
     JPA specification and defines how date values are persisted to and
     retrieved from the database in a transparent fashion. The @DateTimeFormat
-    annotation is part of the Spring framework and takes care of automatically
-    converting between String and Date values when necessary (especially Web
-    frontends frequently take advantage of these converters).</para>
+    annotation is part of the Spring framework and takes care of printing and
+    parsing Dates to and from String values when necessary (especially Web
+    frontends frequently take advantage of this formatting capability).</para>
 
     <para>Also note that Roo created a Person_Roo_JavaBean.aj ITD to generate
     accessors and mutators for the birthDay field and it also updated the

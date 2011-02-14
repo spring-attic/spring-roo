@@ -15,7 +15,7 @@
       a number of severe technical limitations and it has a <link
       xlink:href="http://en.wikipedia.org/wiki/Internet_Explorer_6#Criticism">fast
       declining user base</link> Spring Roo does not support IE6. Your mileage
-      may vary - there will likely be issues with CSS support. </para>
+      may vary - there will likely be issues with CSS support.</para>
     </sidebar>The Web MVC addons allow you to conveniently scaffold Spring MVC
   controllers and JSP(X) views for an existing domain model. Currently this
   domain model is derived from the Roo supported JPA integration through the
@@ -208,25 +208,6 @@
               </row>
 
               <row>
-                <entry>Converter&lt;Person, String&gt; <emphasis
-                role="bold">getPersonConverter</emphasis>() {..}</entry>
-
-                <entry>Creates a better visual representation of Person
-                instances (used to replace the default Roo generated
-                Person.toString() method). This method can be adjusted if
-                different visual representations of the Person instance are
-                desired.</entry>
-              </row>
-
-              <row>
-                <entry>void <emphasis
-                role="bold">registerConverters</emphasis>(WebDataBinder
-                binder) {..}</entry>
-
-                <entry>Central method to register all converters.</entry>
-              </row>
-
-              <row>
                 <entry>void <emphasis
                 role="bold">addDateTimeFormatPatterns</emphasis>(ModelMap
                 modelMap) {..}</entry>
@@ -257,8 +238,7 @@
 
         <para><programlisting>@RooWebScaffold(path = "people", formBackingObject = Person.class, <emphasis
               role="bold">create</emphasis> = false, <emphasis role="bold">
-                update</emphasis> = false, <emphasis role="bold">delete</emphasis> = false, exposeFinders = true, 
-                registerConverters = true)
+                update</emphasis> = false, <emphasis role="bold">delete</emphasis> = false, exposeFinders = true)
 @RequestMapping("/people")
 @Controller
 public class PersonController {}</programlisting>If you don't define a custom
@@ -273,10 +253,9 @@ public class PersonController {}</programlisting>If you don't define a custom
         admin access (/admin/people). This way you can easily secure the
         /admin/* path with the Spring Security addon.</para>
 
-        <para>You can also configure Roo to not generate custom converters
-        through the @RooWebScaffold annotation. Finally if you installed
-        finders in your form backing entity you an choose to not expose these
-        finders through the Web MVC frontend.</para>
+        <para>Finally if you installed finders in your form backing entity you
+        an choose to not expose these finders through the Web MVC
+        frontend.</para>
 
         <para></para>
       </listitem>
@@ -339,6 +318,71 @@ public class CarController {
         <para></para>
       </listitem>
     </orderedlist>
+  </section>
+
+  <section xml:id="conversion-service">
+    <title>Application Conversion Service</title>
+
+    <para>Whenever a controller is created for the first time in an
+    application, Roo will also install an application-wide ConversionService
+    and configure it for use in webmvc-config.xml as follows:</para>
+
+    <programlisting>&lt;mvc:annotation-driven conversion-service="applicationConversionService"/&gt;
+...
+&lt;bean id="applicationConversionService" class="com.springsource.vote.web.ApplicationConversionServiceFactoryBean"/&gt;</programlisting>
+
+    <para>Spring MVC uses the ConversionService when it needs to convert
+    between two objects types -- e.g. Date and String. To become more familiar
+    with its features we recommend that you review the (brief) sections on
+    "Type Conversion" and "Field Formatting" in the Spring Framework
+    documentation.</para>
+
+    <para>The ApplicationConversionServiceFactoryBean is a Roo-managed Java
+    class and it looks like this:</para>
+
+    <programlisting>@RooConversionService
+public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
+
+    @Override
+    protected void installFormatters(FormatterRegistry registry) {
+        super.installFormatters(registry);
+        // Register application converters and formatters
+    }
+
+}</programlisting>
+
+    <para>As the comment indicates you can use the installFormatters() method
+    to register any Converters and Formatters you wish to add. In addition to
+    that Roo will automatically maintain an ITD with Converter registrations
+    for every associated entity that needs to be displayed somewhere in a
+    view. A typical use case is where entities from a many-to-one association
+    need to be displayed in one of the JSP views. Rather than using the
+    toString() method for that, a Converter defines the formatting logic for
+    how to present the associated entity as a String.</para>
+
+    <para>In some cases you may wish to customize how a specific entity is
+    formatted as a String in JSP views. For example suppose we have an entity
+    called Vote. To customize how it is displayed in the JSP views add a
+    method like this:</para>
+
+    <programlisting>@RooConversionService
+public class ApplicationConversionServiceFactoryBean extends FormattingConversionServiceFactoryBean {
+
+    // ...
+
+    Converter&lt;Vote, String&gt; getVoteConverter() {
+        return new Converter&lt;Vote, String&gt;() {
+            public String convert(Vote source) {
+                return new StringBuilder().append(source.getIp()).append(" ").append(source.getRegistered()).toString();
+            }
+        };
+    }
+
+}</programlisting>
+
+    <para>At this point Roo will notice that the addition of the method and
+    will remove it from the ITD much like overriding the toString() method in
+    a Roo entity works.</para>
   </section>
 
   <section xml:id="jsp-views">
