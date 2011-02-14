@@ -44,18 +44,17 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 	protected ItdTypeDetailsProvidingMetadataItem getMetadata(String metadataIdentificationString, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, String itdFilename) {
 		// We need to parse the annotation, which we expect to be present
 		WebScaffoldAnnotationValues annotationValues = new WebScaffoldAnnotationValues(governorPhysicalTypeMetadata);
-		if (!annotationValues.isAnnotationFound() || annotationValues.formBackingObject == null) {
+		if (!annotationValues.isAnnotationFound() || annotationValues.formBackingObject == null || governorPhysicalTypeMetadata.getMemberHoldingTypeDetails() == null) {
 			return null;
 		}
 		
 		// Lookup the form backing object's metadata
-		JavaType javaType = annotationValues.formBackingObject;
+		JavaType formBackingType = annotationValues.formBackingObject;
 		Path path = Path.SRC_MAIN_JAVA;
-		String entityMetadataKey = EntityMetadata.createIdentifier(javaType, path);
+		String entityMetadataKey = EntityMetadata.createIdentifier(formBackingType, path);
 		
 		// We need to lookup the metadata we depend on
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(entityMetadataKey);
-		
 		
 		// We need to abort if we couldn't find dependent metadata
 		if (entityMetadata == null || !entityMetadata.isValid()) {
@@ -67,18 +66,21 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		
 		installConversionService(governorPhysicalTypeMetadata.getMemberHoldingTypeDetails().getName());
 		
-		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(javaType, path));
-		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + javaType.getFullyQualifiedTypeName());
+		ClassOrInterfaceTypeDetails controllerClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) governorPhysicalTypeMetadata.getMemberHoldingTypeDetails();
+		MemberDetails controllerMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), controllerClassOrInterfaceDetails);
+		
+		PhysicalTypeMetadata formBackingObjectPhysicalTypeMetadata = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(formBackingType, path));
+		Assert.notNull(formBackingObjectPhysicalTypeMetadata, "Unable to obtain physical type metdata for type " + formBackingType.getFullyQualifiedTypeName());
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
-		MemberDetails memberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
+		MemberDetails formBackingObjectMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
 		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, 
-				MemberFindingUtils.getMethods(memberDetails), 
-				WebMetadataUtils.getRelatedApplicationTypeMetadata(javaType, memberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDependentApplicationTypeMetadata(javaType, memberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDatePatterns(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry), 
-				WebMetadataUtils.getDynamicFinderMethodsAndFields(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry),
+				MemberFindingUtils.getMethods(controllerMemberDetails), 
+				WebMetadataUtils.getRelatedApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
+				WebMetadataUtils.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
+				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry), 
+				WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry),
 				annotationValues.isExposeJson() && MemberFindingUtils.getTypeAnnotation(formbackingClassOrInterfaceDetails, new JavaType("org.springframework.roo.addon.json.RooJson")) != null);
 	}
 	

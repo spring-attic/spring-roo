@@ -107,7 +107,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		}
 		if (annotationValues.exposeFinders && dynamicFinderMethods.size() > 0) { // No need for null check of entityMetadata.getDynamicFinders as it guarantees non-null (but maybe empty list)
 			for (FinderMetadataDetails finder : new TreeSet<FinderMetadataDetails>(dynamicFinderMethods)) {
-				builder.addMethod(getFinderFormMethod(finder.getFinderMethodMetadata()));
+				builder.addMethod(getFinderFormMethod(finder));
 				builder.addMethod(getFinderMethod(finder));
 			}
 		}
@@ -868,23 +868,18 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 		StringBuilder methodParams = new StringBuilder();
-
+		
 		for (FieldMetadata field: finderDetails.getFinderMethodParamFields()) {
+			JavaSymbolName fieldName = field.getFieldName();
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(field.getFieldName().getSymbolName())));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(fieldName.getSymbolName())));
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 			}
 			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes);
 			annotations.add(requestParamAnnotation.build());
 			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				JavaSymbolName fieldName = null;
-				if (field.getFieldName().getSymbolName().startsWith("max") || field.getFieldName().getSymbolName().startsWith("min")) {
-					fieldName = new JavaSymbolName(uncapitalize(field.getFieldName().getSymbolName().substring(3)));
-				} else {
-					fieldName = field.getFieldName();
-				}
 				paramNames.add(fieldName);
 				if (field != null) {
 					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
@@ -928,13 +923,13 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		return methodBuilder.build();
 	}
 
-	private MethodMetadata getFinderFormMethod(MethodMetadata methodMetadata) {
-		Assert.notNull(methodMetadata, "Method metadata required for finder");
-		JavaSymbolName finderFormMethodName = new JavaSymbolName(methodMetadata.getMethodName().getSymbolName() + "Form");
+	private MethodMetadata getFinderFormMethod(FinderMetadataDetails finder) {
+		Assert.notNull(finder, "Method metadata required for finder");
+		JavaSymbolName finderFormMethodName = new JavaSymbolName(finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "Form");
 
 		List<AnnotatedJavaType> paramTypes = new ArrayList<AnnotatedJavaType>();
 		List<JavaSymbolName> paramNames = new ArrayList<JavaSymbolName>();
-		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodMetadata.getParameterTypes());
+		List<JavaType> types = AnnotatedJavaType.convertFromAnnotatedJavaTypes(finder.getFinderMethodMetadata().getParameterTypes());
 
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
 
@@ -961,7 +956,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (types.contains(new JavaType(Date.class.getName())) || types.contains(new JavaType(Calendar.class.getName()))) {
 			bodyBuilder.appendFormalLine("addDateTimeFormatPatterns(uiModel);");
 		}
-		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + methodMetadata.getMethodName().getSymbolName() + "\";");
+		bodyBuilder.appendFormalLine("return \"" + controllerPath + "/" + finder.getFinderMethodMetadata().getMethodName().getSymbolName() + "\";");
 
 		if (needmodel) {
 			paramTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), null));
@@ -973,7 +968,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		
 		List<AnnotationAttributeValue<?>> requestMappingAttributes = new ArrayList<AnnotationAttributeValue<?>>();
 		List<StringAttributeValue> arrayValues = new ArrayList<StringAttributeValue>();
-		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "find=" + methodMetadata.getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
+		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "find=" + finder.getFinderMethodMetadata().getMethodName().getSymbolName().replaceFirst("find" + javaTypeMetadataHolder.getPlural(), "")));
 		arrayValues.add(new StringAttributeValue(new JavaSymbolName("value"), "form"));
 		requestMappingAttributes.add(new ArrayAttributeValue<StringAttributeValue>(new JavaSymbolName("params"), arrayValues));
 		requestMappingAttributes.add(new EnumAttributeValue(new JavaSymbolName("method"), new EnumDetails(new JavaType("org.springframework.web.bind.annotation.RequestMethod"), new JavaSymbolName("GET"))));
@@ -998,9 +993,10 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 
 		boolean dateFieldPresent = false;
 		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
+			JavaSymbolName fieldName = field.getFieldName();
 			List<AnnotationMetadata> annotations = new ArrayList<AnnotationMetadata>();
 			List<AnnotationAttributeValue<?>> attributes = new ArrayList<AnnotationAttributeValue<?>>();
-			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(field.getFieldName().getSymbolName())));
+			attributes.add(new StringAttributeValue(new JavaSymbolName("value"), uncapitalize(fieldName.getSymbolName())));
 			if (field.getFieldType().equals(JavaType.BOOLEAN_PRIMITIVE) || field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
 				attributes.add(new BooleanAttributeValue(new JavaSymbolName("required"), false));
 			}
@@ -1008,26 +1004,20 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			annotations.add(requestParamAnnotation.build());
 			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
 				dateFieldPresent = true;
-				JavaSymbolName fieldName = null;
-				if (field.getFieldName().getSymbolName().startsWith("max") || field.getFieldName().getSymbolName().startsWith("min")) {
-					fieldName = new JavaSymbolName(uncapitalize(field.getFieldName().getSymbolName().substring(3)));
-				} else {
-					fieldName = field.getFieldName();
-				}
-				paramNames.add(fieldName);
-				if (field != null) {
-					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-					if (annotation != null) {
-						annotations.add(annotation);
-					}
+				JavaType dateTimeFormat = new JavaType("org.springframework.format.annotation.DateTimeFormat");
+				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), dateTimeFormat);
+				if (annotation != null) {
+					dateTimeFormat.getNameIncludingTypeParameters(false, builder.getImportRegistrationResolver());
+					annotations.add(annotation);
 				}
 			}
+			paramNames.add(fieldName);
 			annotatedParamTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {
-				methodParams.append(field.getFieldName() + " == null ? new Boolean(false) : " + field.getFieldName() + ", ");
+				methodParams.append(fieldName + " == null ? new Boolean(false) : " + fieldName + ", ");
 			} else {
-				methodParams.append(field.getFieldName() + ", ");
+				methodParams.append(fieldName + ", ");
 			}
 		}
 
@@ -1038,8 +1028,9 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		annotatedParamTypes.add(new AnnotatedJavaType(new JavaType("org.springframework.ui.Model"), new ArrayList<AnnotationMetadata>()));
 		
 		MethodMetadata existingMethod = methodExists(finderMethodName, annotatedParamTypes);
-		if (existingMethod != null) return existingMethod;
-		
+		if (existingMethod != null) {
+			return existingMethod;
+		}
 		List<JavaSymbolName> newParamNames = new ArrayList<JavaSymbolName>();
 		newParamNames.addAll(paramNames);
 		newParamNames.add(new JavaSymbolName("uiModel"));

@@ -229,14 +229,15 @@ public class JspViewManager {
 		div.appendChild(formFind);
 
 		for (FieldMetadata field: finderMetadataDetails.getFinderMethodParamFields()) {
+			
 			JavaType type = field.getFieldType();
 			JavaSymbolName paramName = field.getFieldName();
 			
 			// Ignoring java.util.Map field types (see ROO-194)
-			if (field.getFieldType().equals(new JavaType(Map.class.getName()))) {
+			if (type.equals(new JavaType(Map.class.getName()))) {
 				continue;
 			}
-			Assert.notNull(field, "could not find field '" + paramName + "' in '" + type.getFullyQualifiedTypeName() + "'");
+			Assert.notNull(paramName, "could not find field '" + paramName + "' in '" + type.getFullyQualifiedTypeName() + "'");
 			Element fieldElement = null;
 			
 			JavaTypeMetadataDetails typeMetadataHolder = relatedDomainTypes.get(getJavaTypeForField(field));
@@ -259,7 +260,7 @@ public class JspViewManager {
 				if (typePersistenceMetadataHolder != null) {
 					fieldElement = new XmlElementBuilder("field:select", document).addAttribute("items", "${" + typeMetadataHolder.getPlural().toLowerCase() + "}").addAttribute("itemValue", typePersistenceMetadataHolder.getIdentifierField().getFieldName().getSymbolName()).addAttribute("path", "/" + getPathForType(type)).build();
 				}
-			} else if (field.getFieldType().getFullyQualifiedTypeName().equals(Date.class.getName()) || field.getFieldType().getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
+			} else if (type.getFullyQualifiedTypeName().equals(Date.class.getName()) || type.getFullyQualifiedTypeName().equals(Calendar.class.getName())) {
 				fieldElement = new XmlElementBuilder("field:datetime", document).addAttribute("dateTimePattern", "${" + entityName + "_" + paramName.getSymbolName().toLowerCase() + "_date_format}").build();
 			} else {
 				fieldElement = document.createElement("field:input");

@@ -86,9 +86,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		// Work out the MIDs of the other metadata we depend on
 		// NB: The JavaType and Path are to the corresponding web scaffold controller class
 
-		JavaType javaType = JspMetadata.getJavaType(metadataIdentificationString);
-		Path path = JspMetadata.getPath(metadataIdentificationString);
-		String webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(javaType, path);
+		String webScaffoldMetadataKey = WebScaffoldMetadata.createIdentifier(JspMetadata.getJavaType(metadataIdentificationString), JspMetadata.getPath(metadataIdentificationString));
 		WebScaffoldMetadata webScaffoldMetadata = (WebScaffoldMetadata) metadataService.get(webScaffoldMetadataKey);
 
 		if (webScaffoldMetadata == null || !webScaffoldMetadata.isValid()) {
@@ -216,7 +214,7 @@ public final class JspMetadataListener implements MetadataProvider, MetadataNoti
 		
 		List<String> allowedMenuItems = new ArrayList<String>();
 		if (webScaffoldMetadata.getAnnotationValues().isExposeFinders()) {
-			Set<FinderMetadataDetails> finderMethodsDetails = WebMetadataUtils.getDynamicFinderMethodsAndFields(javaType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
+			Set<FinderMetadataDetails> finderMethodsDetails = WebMetadataUtils.getDynamicFinderMethodsAndFields(formbackingType, memberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry);
 			for (FinderMetadataDetails finderDetails : finderMethodsDetails) {
 				String finderName = finderDetails.getFinderMethodMetadata().getMethodName().getSymbolName();
 				String listPath = destinationDirectory + "/" + finderName + ".jspx";

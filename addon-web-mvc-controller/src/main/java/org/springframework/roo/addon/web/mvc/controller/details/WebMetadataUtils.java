@@ -27,6 +27,7 @@ import org.springframework.roo.classpath.TypeLocationService;
 import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
 import org.springframework.roo.classpath.details.MemberFindingUtils;
 import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
@@ -287,11 +288,14 @@ public abstract class WebMetadataUtils {
 					}
 					FieldMetadata field = BeanInfoUtils.getFieldForPropertyName(memberDetails, fieldName);
 					if (field != null) {
-						fields.add(field);
+						FieldMetadataBuilder fieldMd = new FieldMetadataBuilder(field);
+						fieldMd.setFieldName(paramNames.get(i));
+						fields.add(fieldMd.build());
 					}
 				}
 				registerDependency(metadataDependencyRegistry, method.getDeclaredByMetadataId(), metadataIdentificationString);
-				finderMetadataDetails.add(new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields));
+				FinderMetadataDetails details = new FinderMetadataDetails(method.getMethodName().getSymbolName(), method, fields);
+				finderMetadataDetails.add(details);
 			}
 		}
 		return Collections.unmodifiableSet(finderMetadataDetails);
