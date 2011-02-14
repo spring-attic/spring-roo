@@ -28,25 +28,22 @@ import org.springframework.roo.support.util.ExceptionUtils;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
-@Component(immediate=true)
+@Component(immediate = true)
 @Service
 public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher implements ProcessManager {
-
 	private static final Logger logger = HandlerUtils.getLogger(DefaultProcessManager.class);
-	
 	@Reference private UndoManager undoManager;
 	@Reference private FileMonitorService fileMonitorService;
 	@Reference private StartLevel startLevel;
 	private boolean developmentMode = false;
-	private long minimumDelayBetweenPoll = -1; // how many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
-	private long lastPollTime = 0; // what time the last poll was completed
-	private long lastPollDuration = 0; // how many ms the last poll actually took
-	private String workingDir = null; // the working directory of the current roo project
+	private long minimumDelayBetweenPoll = -1; // How many ms must pass at minimum between each poll (negative denotes auto-scaling; 0 = never)
+	private long lastPollTime = 0; // What time the last poll was completed
+	private long lastPollDuration = 0; // How many ms the last poll actually took
+	private String workingDir = null; // The working directory of the current roo project
 	
 	protected void activate(ComponentContext context) {
-		// obtain the working directory from the framework properties
+		// Obtain the working directory from the framework properties
 		// TODO CD move constant to proper location
 		workingDir = context.getBundleContext().getProperty("roo.working.directory");
 		context.getBundleContext().addFrameworkListener(new FrameworkListener() {
@@ -81,7 +78,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	protected void deactivate(ComponentContext context) {
 		// We have lost a required component (eg UndoManager; ROO-1037)
-		terminate(); // safe to call even if we'd terminated earlier
+		terminate(); // Safe to call even if we'd terminated earlier
 	}
 	
 	public void terminate() {
@@ -144,17 +141,17 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 			setProcessManagerStatus(ProcessManagerStatus.BUSY_EXECUTING);
 			try {
 				return doTransactionally(callback);
-			} catch (RuntimeException ex) {
-				logException(ex);
-				throw ex;
+			} catch (RuntimeException e) {
+				logException(e);
+				throw e;
 			} finally {
 				setProcessManagerStatus(ProcessManagerStatus.AVAILABLE);
 			}
 		}
 	}
 
-	private void logException(Throwable ex) {
-		Throwable root = ExceptionUtils.extractRootCause(ex);
+	private void logException(Throwable t) {
+		Throwable root = ExceptionUtils.extractRootCause(t);
 		if (developmentMode) {
 			logger.log(Level.FINE, root.getMessage(), root);
 		} else {
@@ -176,17 +173,17 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 		try {
 			ActiveProcessManager.setActiveProcessManager(this);
 			
-			// run the requested operation
+			// Run the requested operation
 			if (callback == null) {
 				fileMonitorService.scanAll();
 			} else {
 				result = callback.callback();
 			}
 			
-			// flush the undo manager so that any changes it has been holding are written to disk and the file monitor service
+			// Flush the undo manager so that any changes it has been holding are written to disk and the file monitor service
 			undoManager.flush();
 			
-			// guarantee scans repeat until there are no more changes detected
+			// Guarantee scans repeat until there are no more changes detected
 			while (fileMonitorService.isDirty()) {
 				if (fileMonitorService instanceof NotifiableFileMonitorService) {
 					((NotifiableFileMonitorService)fileMonitorService).scanNotified();
@@ -196,22 +193,22 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				undoManager.flush(); // in case something else happened as a result of event notifications above
 			}
 			
-			// it all seems to have worked, so clear the undo history
+			// It all seems to have worked, so clear the undo history
 			setProcessManagerStatus(ProcessManagerStatus.RESETTING_UNDOS);
 			
 			undoManager.reset();
 			
-		} catch (RuntimeException rt) {
+		} catch (RuntimeException e) {
 			// Something went wrong, so attempt to undo
 			try {
 				setProcessManagerStatus(ProcessManagerStatus.UNDOING);
-				throw rt;
+				throw e;
 			} finally {
 				undoManager.undo();
 			}
 		} finally {
 			// TODO: Review in consultation with Christian as STS is clearing active process manager itself
-			//ActiveProcessManager.clearActiveProcessManager();
+			// ActiveProcessManager.clearActiveProcessManager();
 		}
 		
 		return result;
@@ -241,9 +238,10 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 				return;
 			}
 			backgroundPoll();
-			// record the completion time so we can ensure we don't re-poll too soon
+			// Record the completion time so we can ensure we don't re-poll too soon
 			lastPollTime = System.currentTimeMillis();
-			// compute how many milliseconds it took to run
+			
+			// Compute how many milliseconds it took to run
 			lastPollDuration = lastPollTime - started;
 			if (lastPollDuration == 0) {
 				lastPollDuration = 1; // ensure it correctly reflects that it has ever run
@@ -259,6 +257,7 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 
 	public void setDevelopmentMode(boolean developmentMode) {
 		this.developmentMode = developmentMode;
+		
 		// To assist with debugging, development mode does not undertake undo operations
 		this.undoManager.setUndoEnabled(!developmentMode);
 	}
@@ -283,5 +282,4 @@ public class DefaultProcessManager extends AbstractProcessManagerStatusPublisher
 	public long getLastPollDuration() {
 		return lastPollDuration;
 	}
-
 }

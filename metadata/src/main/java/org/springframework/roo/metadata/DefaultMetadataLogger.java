@@ -18,7 +18,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.1.2
- *
  */
 @Service
 @Component
@@ -77,7 +76,7 @@ public class DefaultMetadataLogger implements MetadataLogger {
 		// Figure out the indentation level
 		int indentationLevel = eventStack.size();
 		String hex = Long.toHexString(eventIdentifier);
-		sb.replace(8-hex.length(), 8, hex);
+		sb.replace(8 - hex.length(), 8, hex);
 		for (int i = 0; i < indentationLevel; i++) {
 			sb.append(" ");
 		}
@@ -132,10 +131,10 @@ public class DefaultMetadataLogger implements MetadataLogger {
 	private void logToFile(String line) {
 		if (fileLog == null) {
 			try {
-				fileLog = new FileWriter("metadata.log", false); // overwrite existing (don't append)
+				fileLog = new FileWriter("metadata.log", false); // Overwrite existing (don't append)
 			} catch (IOException ignore) {}
 			if (fileLog == null) {
-				// still failing, so give up
+				// Still failing, so give up
 				return;
 			}
 		}

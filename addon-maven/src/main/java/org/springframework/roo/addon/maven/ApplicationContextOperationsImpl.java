@@ -5,7 +5,6 @@ import java.io.InputStream;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -24,18 +23,13 @@ import org.w3c.dom.Element;
  * @author Ben Alex
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Component
 @Service
 public class ApplicationContextOperationsImpl implements ApplicationContextOperations {
-
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	
-	protected void activate(ComponentContext context) {
-	}
-
 	public void createMiddleTierApplicationContext() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 		Assert.isTrue(projectMetadata != null, "Project metadata required");

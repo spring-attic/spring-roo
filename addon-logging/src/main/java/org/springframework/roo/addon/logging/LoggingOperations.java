@@ -1,15 +1,14 @@
 package org.springframework.roo.addon.logging;
 
 /**
- * Interface to {@link LoggingOperationsImpl}.
+ * Provides logging configuration operations.
  * 
  * @author Ben Alex
- *
+ * @since 1.0
  */
 public interface LoggingOperations {
 
-	public abstract boolean isConfigureLoggingAvailable();
+	boolean isConfigureLoggingAvailable();
 
-	public abstract void configureLogging(LogLevel logLevel, LoggerPackage loggerPackage);
-
+	void configureLogging(LogLevel logLevel, LoggerPackage loggerPackage);
 }

@@ -38,14 +38,12 @@ import org.w3c.dom.NodeList;
  * Services must be defined in the XML file indicated by the "Service-Component" manifest header.
  * 
  * @author Ben Alex
- *
  */
 public class Activator implements BundleActivator {
-	
 	private ServiceReference startLevelServiceReference;
 	private StartLevel startLevel;
 	/** key: required class, any one of its services interfaces */
-	private SortedMap<String,String> requiredImplementations = new TreeMap<String,String>();
+	private SortedMap<String, String> requiredImplementations = new TreeMap<String, String>();
 	private SortedSet<String> runningImplementations = new TreeSet<String>();
 	
 	public void start(BundleContext context) throws Exception {
@@ -214,5 +212,4 @@ public class Activator implements BundleActivator {
 	public void stop(BundleContext context) throws Exception {
 		context.ungetService(startLevelServiceReference);
 	}
-	
 }

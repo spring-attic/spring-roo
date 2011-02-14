@@ -31,17 +31,12 @@ import org.springframework.roo.support.util.Assert;
 @Component
 @Service
 public final class DefaultMetadataDependencyRegistry implements MetadataDependencyRegistry {
-
 	@Reference private MetadataLogger metadataLogger;
-	
 	/** key: upstream dependency; value: list<downstream dependencies> */
 	private Map<String, Set<String>> upstreamKeyed = new HashMap<String, Set<String>>();
-	
 	/** key: downstream dependency; value: list<upstream dependencies> */
 	private Map<String, Set<String>> downstreamKeyed = new HashMap<String, Set<String>>();
-	
 	private MetadataService metadataService;
-	
 	private Set<MetadataNotificationListener> listeners = new HashSet<MetadataNotificationListener>();
 	
 	public void registerDependency(String upstreamDependency, String downstreamDependency) {
@@ -62,7 +57,6 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			downstreamKeyed.put(downstreamDependency, upstream);
 		}
 		upstream.add(upstreamDependency);
-		
 	}
 
 	public void deregisterDependencies(String downstreamDependency) {
@@ -179,7 +173,6 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 		this.listeners.remove(listener);
 	}
 
-
 	public void notifyDownstream(String upstreamDependency) {
 		try {
 			metadataLogger.startEvent();
@@ -246,6 +239,4 @@ public final class DefaultMetadataDependencyRegistry implements MetadataDependen
 			metadataLogger.stopEvent();
 		}
 	}
-
-
 }

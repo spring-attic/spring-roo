@@ -12,17 +12,15 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public abstract class MonitoringRequest {
 	private File resource;
 	private Set<FileOperation> notifyOn;
-	
+
 	public MonitoringRequest(File resource, Set<FileOperation> notifyOn) {
 		Assert.notNull(resource, "File to monitor is required");
 		Assert.isTrue(resource.exists(), "File must exist");
 		Assert.notEmpty(notifyOn, "At least one FileOperation to monitor must be specified");
-
 		this.resource = resource;
 		this.notifyOn = notifyOn;
 	}
@@ -47,8 +45,6 @@ public abstract class MonitoringRequest {
 		}
 		MonitoringRequestEditor mre = new MonitoringRequestEditor();
 		mre.setAsText(workingDir + ",CRUD");
-		MonitoringRequest mr = (MonitoringRequest)mre.getValue();
-		return mr;
+		return (MonitoringRequest) mre.getValue();
 	}
-	
 }

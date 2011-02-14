@@ -15,10 +15,11 @@ import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
+import org.springframework.roo.support.util.StringUtils;
 import org.springframework.roo.support.util.TemplateUtils;
 
 /**
- * Provides logging configuration operations.
+ * Implementation of {@link LoggingOperations}.
  *
  * @author Stefan Schmidt
  * @since 1.0
@@ -61,18 +62,25 @@ public class LoggingOperationsImpl implements LoggingOperations {
 		}
 
 		JavaPackage topLevelPackage = projectOperations.getProjectMetadata().getTopLevelPackage();
+		final String logStr = "log4j.logger.";
 		
-		for (String packageName : loggerPackage.getPackageNames()) {
-			if (LoggerPackage.ROOT.equals(loggerPackage)) {
+		switch (loggerPackage) {
+			case ROOT:
 				props.remove("log4j.rootLogger");
-				props.setProperty("log4j.rootLogger", logLevel.getKey() + ", stdout");
-			} else {						
-				packageName = packageName.equals("TO_BE_CHANGED_BY_LISTENER") ? topLevelPackage.getFullyQualifiedPackageName() : packageName;
-				props.remove("log4j.logger." + packageName);
-				props.setProperty("log4j.logger." + packageName, logLevel.getKey());
-			}
+				props.setProperty("log4j.rootLogger", logLevel.name() + ", stdout");
+				break;
+			case PROJECT:
+				props.remove(logStr + topLevelPackage.getFullyQualifiedPackageName());
+				props.setProperty(logStr + topLevelPackage.getFullyQualifiedPackageName(), logLevel.name());
+				break;
+			default:
+				for (String packageName : loggerPackage.getPackageNames()) {
+					props.remove(logStr + packageName);
+					props.setProperty(logStr + packageName, logLevel.name());
+				}
+				break;
 		}
-		
+
 		try {
 			OutputStream outputStream = log4jMutableFile.getOutputStream();
 			props.store(outputStream, "Updated at " + new Date());

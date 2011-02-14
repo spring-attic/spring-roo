@@ -919,6 +919,11 @@ public class JpaOperationsImpl implements JpaOperations {
 			if ("datanucleus.ConnectionPassword".equals(key)) {
 				properties.add("datanucleus.ConnectionPassword = " + value);
 			}
+			
+			if (properties.size() == 4) {
+				// All required properties have been found so ignore rest of elements
+				break;
+			}
 		}
 		return properties;
 	}

@@ -15,12 +15,10 @@ import org.springframework.roo.shell.converters.StaticFieldConverter;
  * 
  * @author Stefan Schmidt
  * @since 1.0
- *
  */
 @Component
 @Service
 public class LoggingCommands implements CommandMarker {
-	
 	@Reference private LoggingOperations loggingOperations;
 	@Reference private StaticFieldConverter staticFieldConverter;
 	
@@ -39,10 +37,11 @@ public class LoggingCommands implements CommandMarker {
 		return loggingOperations.isConfigureLoggingAvailable();
 	}
 	
-	@CliCommand(value="logging setup", help="Configure logging in your project")
-	public void configureLogging(@CliOption(key={"","level"}, mandatory=true, help="The log level to configure") LogLevel logLevel,
-			@CliOption(key="package", mandatory=false, help="The package to append the logging level to (all by default)") LoggerPackage loggerAppender) {
-		
-		loggingOperations.configureLogging(logLevel, loggerAppender==null ? LoggerPackage.ROOT : loggerAppender);
+	@CliCommand(value = "logging setup", help = "Configure logging in your project") 
+	public void configureLogging(
+		@CliOption(key = { "", "level" }, mandatory = true, help = "The log level to configure") LogLevel logLevel, 
+		@CliOption(key = "package", mandatory = false, help = "The package to append the logging level to (all by default)") LoggerPackage loggerPackage) {
+
+		loggingOperations.configureLogging(logLevel, loggerPackage == null ? LoggerPackage.ROOT : loggerPackage);
 	}
 }

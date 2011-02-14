@@ -17,7 +17,6 @@ import org.springframework.roo.support.util.Assert;
  * 
  * @author Ben Alex
  * @since 1.0
- *
  */
 public class Path implements Comparable<Path> {
 	public static final Path SRC_MAIN_JAVA = new Path("SRC_MAIN_JAVA");
@@ -54,7 +53,7 @@ public class Path implements Comparable<Path> {
 	}
 
 	public boolean equals(Object obj) {
-		return obj != null && obj instanceof Path && this.compareTo((Path)obj) == 0;
+		return obj != null && obj instanceof Path && this.compareTo((Path) obj) == 0;
 	}
 
 	public int compareTo(Path o) {
