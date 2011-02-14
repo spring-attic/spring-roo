@@ -16,6 +16,7 @@ import java.util.zip.ZipInputStream;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.model.JavaPackage;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
@@ -46,10 +47,18 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
 	private static final char SEPARATOR = File.separatorChar;
+	private static String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
 
 	private enum Type {
 		SIMPLE, ADVANCED, I18N, WRAPPER
 	};
+	
+	protected void activate(ComponentContext context) {
+		String iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
+		if (iconSetUrl != null && iconSetUrl.length() > 0) {
+			ICON_SET_URL = iconSetUrl;
+		}
+	}
 	
 	public boolean isCommandAvailable() {
 		return !projectOperations.isProjectAvailable();
@@ -307,7 +316,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		BufferedInputStream bis = null;
 		ZipInputStream zis = null;
 		try {
-			bis = new BufferedInputStream(httpService.openConnection(new URL("http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip")));
+			bis = new BufferedInputStream(httpService.openConnection(new URL(ICON_SET_URL)));
 			zis = new ZipInputStream(bis);
 			ZipEntry entry;
 			String expectedEntryName = "png/" + countryCode + ".png";
