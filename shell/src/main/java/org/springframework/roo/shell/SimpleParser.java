@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -941,36 +942,34 @@ public class SimpleParser implements Parser {
 					Assert.notNull(cmd, "CliCommand not found");
 
 					for (String value : cmd.value()) {
-						sb.append("Keyword:                   " + value).append(System.getProperty("line.separator"));
+						sb.append("Keyword:                   ").append(value).append(System.getProperty("line.separator"));
 					}
 
-					sb.append("Description:               " + cmd.help()).append(System.getProperty("line.separator"));
+					sb.append("Description:               ").append(cmd.help()).append(System.getProperty("line.separator"));
 
 					for (Annotation[] annotations : parameterAnnotations) {
 						CliOption cliOption = null;
 						for (Annotation a : annotations) {
 							if (a instanceof CliOption) {
 								cliOption = (CliOption) a;
-							}
 
-							for (String key : cliOption.key()) {
-								if ("".equals(key)) {
-									key = "** default **";
+								for (String key : cliOption.key()) {
+									if ("".equals(key)) {
+										key = "** default **";
+									}
+									sb.append(" Keyword:                  ").append(key).append(System.getProperty("line.separator"));
 								}
-								sb.append(" Keyword:                  " + key).append(System.getProperty("line.separator"));
-							}
 
-							sb.append("   Help:                   " + cliOption.help()).append(System.getProperty("line.separator"));
-							sb.append("   Mandatory:              " + cliOption.mandatory()).append(System.getProperty("line.separator"));
-							sb.append("   Default if specified:   '" + cliOption.specifiedDefaultValue() + "'").append(System.getProperty("line.separator"));
-							sb.append("   Default if unspecified: '" + cliOption.unspecifiedDefaultValue() + "'").append(System.getProperty("line.separator"));
-							sb.append(System.getProperty("line.separator"));
+								sb.append("   Help:                   ").append(cliOption.help()).append(System.getProperty("line.separator"));
+								sb.append("   Mandatory:              ").append(cliOption.mandatory()).append(System.getProperty("line.separator"));
+								sb.append("   Default if specified:   '").append(cliOption.specifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
+								sb.append("   Default if unspecified: '").append(cliOption.unspecifiedDefaultValue()).append("'").append(System.getProperty("line.separator"));
+								sb.append(System.getProperty("line.separator"));
+							}
 
 						}
-						Assert.notNull(cliOption, "CliOption not found for parameter '" + annotations + "'");
+						Assert.notNull(cliOption, "CliOption not found for parameter '" + Arrays.toString(annotations) + "'");
 					}
-
-					logger.info(sb.toString());
 				}
 				// Only a single argument, so default to the normal help operation
 			}
