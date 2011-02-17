@@ -8,6 +8,12 @@ import java.util.Set;
 import org.springframework.roo.metadata.AbstractMetadataItem;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
 import org.springframework.roo.model.JavaPackage;
+import org.springframework.roo.project.maven.pom.Dependency;
+import org.springframework.roo.project.maven.pom.Filter;
+import org.springframework.roo.project.maven.pom.Plugin;
+import org.springframework.roo.project.maven.pom.Property;
+import org.springframework.roo.project.maven.pom.Repository;
+import org.springframework.roo.project.maven.pom.Resource;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 

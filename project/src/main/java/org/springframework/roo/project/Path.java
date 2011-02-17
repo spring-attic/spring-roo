@@ -28,7 +28,6 @@ public class Path implements Comparable<Path> {
 	public static final Path SPRING_CONFIG_ROOT = new Path("SPRING_CONFIG_ROOT");
 	
 	private String name;
-	
 	/**
 	 * Creates a name with the specified string.
 	 * 
@@ -37,13 +36,14 @@ public class Path implements Comparable<Path> {
 	 * identification string tokenization.
 	 * 
 	 * @param name the name (required and cannot contain a "?" character)
+	 * @param autoCreate a flag which if set cause the path to be created on first contact
 	 */
 	public Path(String name) {
 		Assert.hasText(name, "Name required");
 		Assert.isTrue(!name.contains("?"), "Name cannot contain a question mark character ('" + name + "')");
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}

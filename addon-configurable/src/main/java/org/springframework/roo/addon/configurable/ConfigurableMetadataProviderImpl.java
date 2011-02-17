@@ -41,8 +41,7 @@ public final class ConfigurableMetadataProviderImpl extends AbstractItdMetadataP
 	protected String getGovernorPhysicalTypeIdentifier(String metadataIdentificationString) {
 		JavaType javaType = ConfigurableMetadata.getJavaType(metadataIdentificationString);
 		Path path = ConfigurableMetadata.getPath(metadataIdentificationString);
-		String physicalTypeIdentifier = PhysicalTypeIdentifier.createIdentifier(javaType, path);
-		return physicalTypeIdentifier;
+		return PhysicalTypeIdentifier.createIdentifier(javaType, path);
 	}
 
 	protected String createLocalIdentifier(JavaType javaType, Path path) {

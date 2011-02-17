@@ -7,7 +7,6 @@ import org.springframework.roo.file.monitor.FileMonitorService;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.UndoManager;
-import org.springframework.roo.project.ProjectMetadata;
 
 /**
  * Represents the primary means for add-ons to modify the underlying disk storage.

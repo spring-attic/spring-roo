@@ -63,7 +63,7 @@ public class IdentifierMetadataProviderImpl extends AbstractIdentifierServiceAwa
 	}
 
 	public String getProvidesType() {
-		return IdentifierMetadata.getMetadataIdentiferType();
+		return IdentifierMetadata.getMetadataIdentifierType();
 	}
 
 	/**

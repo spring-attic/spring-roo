@@ -374,7 +374,7 @@ public abstract class AbstractShell extends AbstractShellStatusPublisher impleme
 				try {
 					jarFile.close();
 				}
-				catch (IOException e) {}
+				catch (IOException ignored) {}
 			}
 		}
 		

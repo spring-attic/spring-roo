@@ -2,6 +2,7 @@ package org.springframework.roo.addon.entity;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -383,7 +384,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Ensure there isn't already a field called "id"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
-		JavaSymbolName idField = null;
+		JavaSymbolName idField;
 		while (true) {
 			// Compute the required field name
 			index++;
@@ -553,8 +554,8 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 	 * If a parent is defined, it may provide the field.
 	 * 
 	 * <p>
-	 * If no parent is defined, one may be located or created. Any declared or inherited field which has the 
-	 * @javax.persistence.Version annotation will be taken as the version and returned. If no such field is located,
+	 * If no parent is defined, one may be located or created. Any declared or inherited field which is annotated
+	 * with javax.persistence.Version will be taken as the version and returned. If no such field is located,
 	 * a private field may be created as per the details contained in {@link RooEntity}.
 	 * 
 	 * @return the version (may return null)
@@ -588,7 +589,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		
 		// Ensure there isn't already a field called "version"; if so, compute a unique name (it's not really a fatal situation at the end of the day)
 		int index= -1;
-		JavaSymbolName verField = null;
+		JavaSymbolName verField;
 		while (true) {
 			// Compute the required field name
 			index++;
@@ -1138,9 +1139,7 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		if (finders == null || finders.length == 0) {
 			return result;
 		}
-		for (String finder : finders) {
-			result.add(finder);
-		}
+		result.addAll(Arrays.asList(finders));
 		return Collections.unmodifiableList(result);
 	}
 
@@ -1163,19 +1162,19 @@ public class EntityMetadata extends AbstractItdTypeDetailsProvidingMetadataItem 
 		return tsc.toString();
 	}
 
-	public static final String getMetadataIdentiferType() {
+	public static String getMetadataIdentifierType() {
 		return PROVIDES_TYPE;
 	}
 	
-	public static final String createIdentifier(JavaType javaType, Path path) {
+	public static String createIdentifier(JavaType javaType, Path path) {
 		return PhysicalTypeIdentifierNamingUtils.createIdentifier(PROVIDES_TYPE_STRING, javaType, path);
 	}
 
-	public static final JavaType getJavaType(String metadataIdentificationString) {
+	public static JavaType getJavaType(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getJavaType(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 
-	public static final Path getPath(String metadataIdentificationString) {
+	public static Path getPath(String metadataIdentificationString) {
 		return PhysicalTypeIdentifierNamingUtils.getPath(PROVIDES_TYPE_STRING, metadataIdentificationString);
 	}
 

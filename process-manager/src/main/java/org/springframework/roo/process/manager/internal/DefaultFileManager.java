@@ -6,20 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
-import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
-import org.springframework.roo.file.monitor.MonitoringRequest;
 import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
-import org.springframework.roo.file.monitor.event.FileOperation;
 import org.springframework.roo.file.undo.CreateDirectory;
 import org.springframework.roo.file.undo.CreateFile;
 import org.springframework.roo.file.undo.DefaultFilenameResolver;
@@ -30,16 +25,9 @@ import org.springframework.roo.file.undo.UndoEvent;
 import org.springframework.roo.file.undo.UndoListener;
 import org.springframework.roo.file.undo.UndoManager;
 import org.springframework.roo.file.undo.UpdateFile;
-import org.springframework.roo.metadata.MetadataDependencyRegistry;
-import org.springframework.roo.metadata.MetadataIdentificationUtils;
-import org.springframework.roo.metadata.MetadataNotificationListener;
-import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
 import org.springframework.roo.process.manager.ProcessManager;
-import org.springframework.roo.project.Path;
-import org.springframework.roo.project.PathResolver;
-import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.FileCopyUtils;
 
@@ -51,27 +39,22 @@ import org.springframework.roo.support.util.FileCopyUtils;
  */
 @Component
 @Service
-public class DefaultFileManager implements FileManager, MetadataNotificationListener, UndoListener {
-	@Reference private MetadataService metadataService;
+public class DefaultFileManager implements FileManager, UndoListener {
 	@Reference private UndoManager undoManager;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private ProcessManager processManager;
-	
-	private boolean pathsRegistered = false;
-	private FilenameResolver filenameResolver = new DefaultFilenameResolver();
-	/** key: file identifier, value: new textual content */
-	private Map<String, String> deferredFileWrites = new HashMap<String, String>();
+	@Reference private FilenameResolver filenameResolver;
 
 	protected void activate(ComponentContext context) {
-		metadataDependencyRegistry.addNotificationListener(this);
 		undoManager.addUndoListener(this);
 	}
 
 	protected void deactivate(ComponentContext context) {
-		metadataDependencyRegistry.removeNotificationListener(this);
 		undoManager.removeUndoListener(this);
 	}
+	
+	/** key: file identifier, value: new textual content */
+	private Map<String, String> deferredFileWrites = new HashMap<String, String>();
 
 	public boolean exists(String fileIdentifier) {
 		Assert.hasText(fileIdentifier, "File identifier required");
@@ -97,8 +80,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			this.fileMonitorService.notifyCreated(actual.getCanonicalPath());
 		} catch (IOException ignored) {}
 		new CreateDirectory(undoManager, filenameResolver, actual);
-		FileDetails fileDetails = new FileDetails(actual, actual.lastModified());
-		return fileDetails;
+		return new FileDetails(actual, actual.lastModified());
 	}
 
 	public FileDetails readFile(String fileIdentifier) {
@@ -151,61 +133,13 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 		return new DefaultMutableFile(actual, fileMonitorService, renderer);
 	}
 
-	public void notify(String upstreamDependency, String downstreamDependency) {
-		if (pathsRegistered) {
-			return;
-		}
-
-		Assert.isTrue(MetadataIdentificationUtils.isValid(upstreamDependency), "Upstream dependency is an invalid metadata identification string ('" + upstreamDependency + "')");
-
-		if (upstreamDependency.equals(ProjectMetadata.getProjectIdentifier())) {
-			// Acquire the Project Metadata, if available
-			ProjectMetadata md = (ProjectMetadata) metadataService.get(upstreamDependency);
-			if (md == null) {
-				return;
-			}
-
-			PathResolver pathResolver = md.getPathResolver();
-			Assert.notNull(pathResolver, "Path resolver could not be acquired from changed metadata '" + md + "'");
-			this.filenameResolver = new PathResolvingAwareFilenameResolver(pathResolver);
-
-			Set<FileOperation> notifyOn = new HashSet<FileOperation>();
-			notifyOn.add(FileOperation.MONITORING_START);
-			notifyOn.add(FileOperation.MONITORING_FINISH);
-			notifyOn.add(FileOperation.CREATED);
-			notifyOn.add(FileOperation.RENAMED);
-			notifyOn.add(FileOperation.UPDATED);
-			notifyOn.add(FileOperation.DELETED);
-
-			for (Path p : pathResolver.getPaths()) {
-				// Verify path exists and ensure it's monitored, except root (which we assume is already monitored via ProcessManager)
-				if (!Path.ROOT.equals(p)) {
-					String fileIdentifier = pathResolver.getRoot(p);
-					File file = new File(fileIdentifier);
-					Assert.isTrue(!file.exists() || (file.exists() && file.isDirectory()), "Path '" + fileIdentifier + "' must either not exist or be a directory");
-					if (!file.exists()) {
-						// Create directory, but no notifications as that will happen once we start monitoring it below
-						new CreateDirectory(undoManager, filenameResolver, file);
-					}
-					MonitoringRequest request = new DirectoryMonitoringRequest(file, true, notifyOn);
-					new UndoableMonitoringRequest(undoManager, fileMonitorService, request, md.isValid());
-				}
-			}
-
-			// Avoid doing this operation again unless the validity changes
-			pathsRegistered = md.isValid();
-		
-			// Explicitly perform a scan now that we've added all the directories we wish to monitor
-			fileMonitorService.scanAll();
-		}
-	}
 
 	public SortedSet<FileDetails> findMatchingAntPath(String antPath) {
 		return fileMonitorService.findMatchingAntPath(antPath);
 	}
 
 	public int scan() {
-		return ((NotifiableFileMonitorService) fileMonitorService).scanNotified();
+		return fileMonitorService.scanNotified();
 	}
 
 	public void createOrUpdateTextFileIfRequired(String fileIdentifier, String newContents, boolean writeImmediately) {
@@ -241,7 +175,7 @@ public class DefaultFileManager implements FileManager, MetadataNotificationList
 			String existing = null;
 			try {
 				existing = FileCopyUtils.copyToString(new FileReader(f));
-			} catch (IOException ignoreAndJustOverwriteIt) {}
+			} catch (IOException ignored) {}
 
 			if (!newContents.equals(existing)) {
 				mutableFile = updateFile(fileIdentifier);

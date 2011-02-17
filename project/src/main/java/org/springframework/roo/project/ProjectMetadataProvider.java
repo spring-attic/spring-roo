@@ -3,6 +3,12 @@ package org.springframework.roo.project;
 import java.util.List;
 
 import org.springframework.roo.metadata.MetadataProvider;
+import org.springframework.roo.project.maven.pom.Dependency;
+import org.springframework.roo.project.maven.pom.Filter;
+import org.springframework.roo.project.maven.pom.Plugin;
+import org.springframework.roo.project.maven.pom.Property;
+import org.springframework.roo.project.maven.pom.Repository;
+import org.springframework.roo.project.maven.pom.Resource;
 
 /**
  * Provides mutability services for {@link ProjectMetadata}.
@@ -29,7 +35,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to add the specified dependency. If the dependency already exists according
-	 * to {@link ProjectMetadata#isDependencyRegistered(Dependency)}, the method silently returns.
+	 * to {@link ProjectMetadata#isDependencyRegistered(org.springframework.roo.project.maven.pom.Dependency)}, the method silently returns.
 	 * Otherwise the dependency is added.
 	 * 
 	 * <p>
@@ -55,7 +61,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to add the specified build plugin. If the plugin already exists 
-	 * according to {@link ProjectMetadata#isBuildPluginRegistered(Plugin)}, 
+	 * according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.maven.pom.Plugin)},
 	 * the method silently returns. Otherwise the plugin is added.
 	 * 
 	 * <p>
@@ -68,7 +74,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to remove the specified build plugin dependency. If the dependency does not 
-	 * exist according to {@link ProjectMetadata#isBuildPluginRegistered(Plugin)},
+	 * exist according to {@link ProjectMetadata#isBuildPluginRegistered(org.springframework.roo.project.maven.pom.Plugin)},
 	 * the method silently returns. Otherwise the located dependency is removed.
 	 * 
 	 * <p>
@@ -159,7 +165,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 
 	/**
 	 * Attempts to add the specified property. If the property already exists 
-	 * according to {@link ProjectMetadata#isPropertyRegistered(Property)}, 
+	 * according to {@link ProjectMetadata#isPropertyRegistered(org.springframework.roo.project.maven.pom.Property)},
 	 * the method silently returns. Otherwise the property is added.
 	 * 
 	 * <p>
@@ -185,7 +191,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 
 	/**
 	 * Attempts to add the specified filter. If the filter already exists according
-	 * to {@link ProjectMetadata#isFilterRegistered(Filter)}, the method silently returns.
+	 * to {@link ProjectMetadata#isFilterRegistered(org.springframework.roo.project.maven.pom.Filter)}, the method silently returns.
 	 * Otherwise the filter is added.
 	 * 
 	 * <p>
@@ -198,7 +204,7 @@ public interface ProjectMetadataProvider extends MetadataProvider {
 	
 	/**
 	 * Attempts to remove the specified filter. If the filter does not 
-	 * exist according to {@link ProjectMetadata#isFilterRegistered(Filter)},
+	 * exist according to {@link ProjectMetadata#isFilterRegistered(org.springframework.roo.project.maven.pom.Filter)},
 	 * the method silently returns. Otherwise the located filter is removed.
 	 * 
 	 * <p>

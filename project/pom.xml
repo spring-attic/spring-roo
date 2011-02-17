@@ -46,5 +46,30 @@
             <artifactId>org.springframework.roo.model</artifactId>
             
         </dependency>
+		<dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.file.undo</artifactId>
+
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.shell</artifactId>
+
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.process.manager</artifactId>
+
+        </dependency>
+		<dependency>
+            <groupId>org.springframework.roo</groupId>
+            <artifactId>org.springframework.roo.uaa</artifactId>
+
+        </dependency>
+        <!-- Spring User Agent Analysis (UAA) -->
+        <dependency>
+            <groupId>org.springframework.uaa</groupId>
+            <artifactId>org.springframework.uaa.client</artifactId>
+        </dependency>
 	</dependencies>
 </project>

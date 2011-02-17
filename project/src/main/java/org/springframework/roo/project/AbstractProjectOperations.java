@@ -7,6 +7,20 @@ import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.springframework.roo.metadata.MetadataService;
+import org.springframework.roo.project.maven.pom.Dependency;
+import org.springframework.roo.project.maven.pom.DependencyListener;
+import org.springframework.roo.project.maven.pom.DependencyScope;
+import org.springframework.roo.project.maven.pom.DependencyType;
+import org.springframework.roo.project.maven.pom.Filter;
+import org.springframework.roo.project.maven.pom.FilterListener;
+import org.springframework.roo.project.maven.pom.Plugin;
+import org.springframework.roo.project.maven.pom.PluginListener;
+import org.springframework.roo.project.maven.pom.Property;
+import org.springframework.roo.project.maven.pom.PropertyListener;
+import org.springframework.roo.project.maven.pom.Repository;
+import org.springframework.roo.project.maven.pom.RepositoryListener;
+import org.springframework.roo.project.maven.pom.Resource;
+import org.springframework.roo.project.maven.pom.ResourceListener;
 import org.springframework.roo.support.util.Assert;
 
 /**

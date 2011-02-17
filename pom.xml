@@ -36,7 +36,6 @@
         <module>process-manager</module>
         <module>classpath</module>
         <module>classpath-javaparser</module>
-        <module>addon-maven</module>
         <module>addon-beaninfo</module>
         <module>addon-tostring</module>
         <module>addon-javabean</module>

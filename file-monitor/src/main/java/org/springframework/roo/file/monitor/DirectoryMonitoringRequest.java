@@ -19,7 +19,7 @@ public class DirectoryMonitoringRequest extends MonitoringRequest {
 	
 	public DirectoryMonitoringRequest(File file, boolean watchSubtree, Set<FileOperation> notifyOn) {
 		super(file, notifyOn);
-		Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
+		//Assert.isTrue(file.isDirectory(), "File '" + file + "' must be a directory");
 		this.watchSubtree = watchSubtree;
 	}
 

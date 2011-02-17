@@ -102,7 +102,7 @@ public final class EntityMetadataProviderImpl extends AbstractIdentifierServiceA
 	}
 
 	public String getProvidesType() {
-		return EntityMetadata.getMetadataIdentiferType();
+		return EntityMetadata.getMetadataIdentifierType();
 	}
 
 	/**

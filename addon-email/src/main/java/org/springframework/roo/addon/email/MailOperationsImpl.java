@@ -25,7 +25,7 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.process.manager.MutableFile;
-import org.springframework.roo.project.Dependency;
+import org.springframework.roo.project.maven.pom.Dependency;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectOperations;
 import org.springframework.roo.support.util.Assert;
@@ -63,15 +63,14 @@ public class MailOperationsImpl implements MailOperations {
 		Map<String, String> props = new HashMap<String, String>();
 		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not acquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -167,15 +166,14 @@ public class MailOperationsImpl implements MailOperations {
 		Map<String, String> props = new HashMap<String, String>();
 		
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);
@@ -247,15 +245,14 @@ public class MailOperationsImpl implements MailOperations {
 		mutableTypeDetails.addField(fieldBuilder.build());
 
 		String contextPath = projectOperations.getPathResolver().getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml");
-		MutableFile contextMutableFile = null;
-
-		Document appCtx = null;
+		MutableFile contextMutableFile;
+		Document appCtx;
 		try {
 			if (fileManager.exists(contextPath)) {
 				contextMutableFile = fileManager.updateFile(contextPath);
 				appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 			} else {
-				new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+				throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
 			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e);

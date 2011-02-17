@@ -18,7 +18,7 @@ public abstract class TemplateUtils {
 	 * @param templateFilename the filename of the template (required)
 	 * @return the full classloader-specific path to the template (never null)
 	 */
-	public static final String getTemplatePath(Class<?> clazz, String templateFilename) {
+	public static String getTemplatePath(Class<?> clazz, String templateFilename) {
 		Assert.notNull(clazz, "Owning class required");
 		Assert.hasText(templateFilename, "Template filename required");
 		Assert.isTrue(!templateFilename.startsWith("/"), "Template filename shouldn't start with a slash");
@@ -33,7 +33,7 @@ public abstract class TemplateUtils {
 	 * @param templateFilename the filename of the template (required)
 	 * @return the input stream (never null; an exception is thrown if cannot be found)
 	 */
-	public static final InputStream getTemplate(Class<?> clazz, String templateFilename) {
+	public static InputStream getTemplate(Class<?> clazz, String templateFilename) {
 		String templatePath = getTemplatePath(clazz, templateFilename);
 		InputStream result = clazz.getResourceAsStream(templatePath);
 		Assert.notNull(result, "Could not locate '" + templatePath + "' in classloader");

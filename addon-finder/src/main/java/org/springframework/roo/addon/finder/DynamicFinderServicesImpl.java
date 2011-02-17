@@ -277,11 +277,8 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		while (finder.length() > 0) {
 			Token token = getFirstToken(fieldTokens, finder, finderName.getSymbolName(), simpleTypeName);
 			if (token != null) {
-				if (token instanceof FieldToken) {
-					tokens.add((FieldToken) token);
-				}
-				if (token instanceof ReservedToken) {
-					tokens.add((ReservedToken) token);
+				if (token instanceof FieldToken || token instanceof ReservedToken) {
+					tokens.add(token);
 				}
 				finder = finder.substring(token.getValue().length());
 			}
@@ -346,42 +343,12 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 
 	private boolean isNumberOrDate(String fullyQualifiedTypeName) {
-		if (fullyQualifiedTypeName.equals(Double.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(double.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Float.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(float.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Integer.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(int.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Long.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(long.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Short.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(short.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Date.class.getName())) {
-			return true;
-		}
-		if (fullyQualifiedTypeName.equals(Calendar.class.getName())) {
-			return true;
-		}
-		return false;
+		return fullyQualifiedTypeName.equals(Double.class.getName()) ||
+				fullyQualifiedTypeName.equals(Float.class.getName()) ||
+				fullyQualifiedTypeName.equals(Integer.class.getName()) ||
+				fullyQualifiedTypeName.equals(Long.class.getName()) ||
+				fullyQualifiedTypeName.equals(Short.class.getName()) ||
+				fullyQualifiedTypeName.equals(Date.class.getName()) ||
+				fullyQualifiedTypeName.equals(Calendar.class.getName());
 	}
 }

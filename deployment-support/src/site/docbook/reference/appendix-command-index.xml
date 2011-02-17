@@ -2781,7 +2781,7 @@
     </section>
     <section xml:id="command-index-maven-commands">
         <title>Maven Commands</title>
-        <para>Maven Commands are contained in org.springframework.roo.addon.maven.MavenCommands.</para>
+        <para>Maven Commands are contained in org.springframework.roo.project.maven.MavenCommands.</para>
         <section xml:id="command-index-dependency-add">
             <title>dependency add</title>
             <para>Adds a new dependency to the Maven project object model (POM)</para>
