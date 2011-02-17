@@ -398,7 +398,6 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
      * 
      * @param compilationUnit the work-in-progress compilation unit (required)
      * @param cit the new class to add (required)
-     * @param bodyDeclarations the list to which the new class should be appended (required)
      * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
      */
 	private static final void updateOutput(final CompilationUnit compilationUnit, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
@@ -430,7 +429,7 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		}
 
 		if (cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE || cit.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
-			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE ? true : false;
+			boolean isInterface = cit.getPhysicalTypeCategory() == PhysicalTypeCategory.INTERFACE;
             
 			if (parent == null) {
             	// top level type

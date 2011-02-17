@@ -261,10 +261,11 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			return new JavaPackage("");
 		}
 
-		JavaType enclosingType = getEnclosingType();
-		if (enclosingType != null) {
-			return enclosingType.getPackage();
-		}
+		//TODO: Removed to fix ROO-2105, but there may be a better way -JT
+		//JavaType enclosingType = getEnclosingType();
+		//if (enclosingType != null) {
+		//	return enclosingType.getPackage();
+		//}
 
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		return new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
