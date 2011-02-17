@@ -21,8 +21,7 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 	 * The fully qualified package name will be enforced as follows:
 	 * 
 	 * <ul>
-	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}}
-	 * <li>The entire package name must be lowercase</li>
+	 * <li>The rules listed in {@link JavaSymbolName#assertJavaNameLegal(String)}
 	 * </ul>
 	 * 
 	 * @param fullyQualifiedPackageName the name (as per the above rules; mandatory)
@@ -30,7 +29,6 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 	public JavaPackage(String fullyQualifiedPackageName) {
 		Assert.notNull(fullyQualifiedPackageName, "Fully qualified package name required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedPackageName);
-		Assert.isTrue(fullyQualifiedPackageName.toLowerCase().equals(fullyQualifiedPackageName), "The entire package name must be lowercase (received '" + fullyQualifiedPackageName + "')");
 		this.fullyQualifiedPackageName = fullyQualifiedPackageName;
 	}
 	
