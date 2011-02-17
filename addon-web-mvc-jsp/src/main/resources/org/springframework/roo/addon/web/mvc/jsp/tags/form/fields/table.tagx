@@ -76,7 +76,7 @@
           <td class="utilbox">
             <spring:url value="${path}/${item[typeIdFieldName]}" var="show_form_url" />
             <spring:url value="/resources/images/show.png" var="show_image_url" />
-            <spring:message arguments="${typeName}" code="entity_show" var="show_label" />
+            <spring:message arguments="${typeName}" code="entity_show" var="show_label" htmlEscape="false" />
             <a href="${fn:escapeXml(show_form_url)}" alt="${fn:escapeXml(show_label)}" title="${fn:escapeXml(show_label)}">
               <img alt="${fn:escapeXml(show_label)}" class="image" src="${fn:escapeXml(show_image_url)}" title="${fn:escapeXml(show_label)}" />
             </a>
@@ -87,7 +87,7 @@
                 <spring:param name="form" />
               </spring:url>
               <spring:url value="/resources/images/update.png" var="update_image_url" />
-              <spring:message arguments="${typeName}" code="entity_update" var="update_label" />
+              <spring:message arguments="${typeName}" code="entity_update" var="update_label" htmlEscape="false" />
               <a href="${fn:escapeXml(update_form_url)}" alt="${fn:escapeXml(update_label)}" title="${fn:escapeXml(update_label)}">
                 <img alt="${fn:escapeXml(update_label)}" class="image" src="${fn:escapeXml(update_image_url)}" title="${fn:escapeXml(update_label)}" />
               </a>
@@ -98,7 +98,7 @@
               <spring:url value="${path}/${item[typeIdFieldName]}" var="delete_form_url" />
               <spring:url value="/resources/images/delete.png" var="delete_image_url" />
               <form:form action="${fn:escapeXml(delete_form_url)}" method="DELETE">
-                <spring:message arguments="${typeName}" code="entity_delete" var="delete_label" />
+                <spring:message arguments="${typeName}" code="entity_delete" var="delete_label" htmlEscape="false" />
                 <c:set var="delete_confirm_msg">
                   <spring:escapeBody javaScriptEscape="true">
                     <spring:message code="entity_delete_confirm" />
@@ -125,7 +125,7 @@
               </spring:url>
               <a href="${fn:escapeXml(create_url)}">
                 <spring:url value="/resources/images/add.png" var="create_img_url" />
-                <spring:message arguments="${typeName}" code="global_menu_new" var="add_message" />
+                <spring:message arguments="${typeName}" code="global_menu_new" var="add_message" htmlEscape="false" />
                 <img alt="${fn:escapeXml(add_message)}" src="${fn:escapeXml(create_img_url)}" title="${fn:escapeXml(add_message)}" />
               </a>
             </span>

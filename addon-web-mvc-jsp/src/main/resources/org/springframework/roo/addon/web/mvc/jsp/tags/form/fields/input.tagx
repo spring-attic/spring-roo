@@ -79,7 +79,7 @@
       </c:choose>
       <c:choose>
         <c:when test="${required}">
-          <spring:message code="field_required" var="field_required" />
+          <spring:message code="field_required" var="field_required" htmlEscape="false" />
           <spring:message argumentSeparator="," arguments="${label},(${field_required})" code="field_simple_validation" var="field_validation" htmlEscape="false" />
         </c:when>
         <c:otherwise>

@@ -14,9 +14,9 @@
       <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}" var="label" htmlEscape="false" />
     </c:if>
     <c:if test="${empty labelPlural}">
-      <spring:message code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}_plural" var="labelPlural" />
+      <spring htmlEscape="false"  code="label_${fn:toLowerCase(fn:substringAfter(id,'_'))}_plural" var="labelPlural" />
     </c:if>
-    <spring:message arguments="${labelPlural}" code="entity_list_all" var="title_msg" />
+    <spring:message arguments="${labelPlural}" code="entity_list_all" var="title_msg" htmlEscape="false" />
     <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
       <c:choose>
         <c:when test="${not empty items}">

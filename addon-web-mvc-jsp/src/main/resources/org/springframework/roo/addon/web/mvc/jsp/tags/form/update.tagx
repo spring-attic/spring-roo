@@ -21,14 +21,14 @@
     <c:if test="${empty versionField}">
       <c:set value="version" var="versionField" />
     </c:if>
-    <spring:message arguments="${label}" code="entity_update" var="title_msg" />
+    <spring:message arguments="${label}" code="entity_update" var="title_msg" htmlEscape="false" />
     <util:panel id="${id}" title="${title_msg}" openPane="${openPane}">
       <spring:url value="${path}" var="form_url" />
       <form:form action="${fn:escapeXml(form_url)}" method="PUT" modelAttribute="${modelAttribute}">
         <form:errors cssClass="errors" delimiter="&lt;p/&gt;" />
         <jsp:doBody />
         <div class="submit" id="${fn:escapeXml(id)}_submit">
-          <spring:message code="button_save" var="save_button" />
+          <spring:message code="button_save" var="save_button" htmlEscape="false" />
           <script type="text/javascript">Spring.addDecoration(new Spring.ValidateAllDecoration({elementId:'proceed', event:'onclick'}));</script>
           <input id="proceed" type="submit" value="${fn:escapeXml(save_button)}" />
         </div>
