@@ -184,21 +184,21 @@ public class WebMvcOperationsImpl implements WebMvcOperations {
 			if (!xmlContent.equals(existing)) {
 				mutableFile = fileManager.updateFile(fileName);
 			}
-
 		} else {
 			mutableFile = fileManager.createFile(fileName);
 			Assert.notNull(mutableFile, "Could not create XML file '" + fileName + "'");
 		}
 
-		try {
-			if (mutableFile != null) {
+		if (mutableFile != null) {
+			try {
 				// We need to write the file out (it's a new file, or the existing file has different contents)
 				FileCopyUtils.copy(xmlContent, new OutputStreamWriter(mutableFile.getOutputStream()));
+				
 				// Return and indicate we wrote out the file
 				return true;
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 
 		// A file existed, but it contained the same content, so we return false

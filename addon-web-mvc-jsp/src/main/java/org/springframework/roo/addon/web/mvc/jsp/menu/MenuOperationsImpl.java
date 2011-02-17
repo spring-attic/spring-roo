@@ -230,8 +230,8 @@ public class MenuOperationsImpl implements MenuOperations {
 			Assert.notNull(mutableFile, "Could not create JSP file '" + menuFileName + "'");
 		}
 		
-		try {
-			if (mutableFile != null) {
+		if (mutableFile != null) {
+			try {
 				// Build a string representation of the JSP
 				ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				XmlUtils.writeXml(XmlUtils.createIndentingTransformer(), byteArrayOutputStream, original);
@@ -241,9 +241,9 @@ public class MenuOperationsImpl implements MenuOperations {
 				FileCopyUtils.copy(jspContent, new OutputStreamWriter(mutableFile.getOutputStream()));
 				// Return and indicate we wrote out the file
 				return true;
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 		
 		// A file existed, but it contained the same content, so we return false
