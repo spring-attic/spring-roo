@@ -27,7 +27,7 @@ public final class JavaPackage implements Comparable<JavaPackage> {
 	 * @param fullyQualifiedPackageName the name (as per the above rules; mandatory)
 	 */
 	public JavaPackage(String fullyQualifiedPackageName) {
-		Assert.notNull(fullyQualifiedPackageName, "Fully qualified package name required");
+		Assert.hasText(fullyQualifiedPackageName, "Fully qualified package name required");
 		JavaSymbolName.assertJavaNameLegal(fullyQualifiedPackageName);
 		this.fullyQualifiedPackageName = fullyQualifiedPackageName;
 	}

@@ -75,7 +75,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * <p>
 	 * The fully qualified type name will be enforced as follows:
 	 * <ul>
-	 * <li>The rules listed in {link {@link JavaTypeUtils#assertJavaNameLegal(String)}
+	 * <li>The rules listed in {@link JavaSymbolName#assertJavaNameLegal(String)}
 	 * <li>First letter of simple type name must be uppercase</li>
 	 * </ul>
 	 * <p>
@@ -98,11 +98,9 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @param parameters the type parameters applicable (can be null if there aren't any)
 	 */
 	public JavaType(String fullyQualifiedTypeName, int array, DataType dataType, JavaSymbolName argName, List<JavaType> parameters) {
-		if (fullyQualifiedTypeName == null || fullyQualifiedTypeName.length() == 0) {
-			throw new IllegalArgumentException("Fully qualified type name required");
-		}
-		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
+		Assert.hasText(fullyQualifiedTypeName, "Fully qualified type name required");
 		Assert.notNull(dataType, "Data type required");
+		JavaSymbolName.assertJavaNameLegal(fullyQualifiedTypeName);
 		this.fullyQualifiedTypeName = fullyQualifiedTypeName;
 		this.defaultPackage = !fullyQualifiedTypeName.contains(".");
 		if (defaultPackage) {
@@ -112,12 +110,12 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			simpleTypeName = fullyQualifiedTypeName.substring(offset + 1);
 		}
 		// Disabled as per ROO-1734
-//		if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
-//			// Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
-//			if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
-//				throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
-//			}
-//		}
+		// if (!Character.isUpperCase(simpleTypeName.charAt(0))) {
+		//     // Doesn't start with an uppercase letter, so let's verify it starts with an underscore and then an uppercase
+		//     if (simpleTypeName.length() < 2 || !Character.isUpperCase(simpleTypeName.charAt(1)) || '_' != simpleTypeName.charAt(0)) {
+		//         throw new IllegalArgumentException("The first letter of the type name portion must be uppercase (attempted '" + fullyQualifiedTypeName + "')");
+		//     }
+		// }
 
 		this.array = array;
 		this.dataType = dataType;
@@ -211,7 +209,6 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 
 		if (!WILDCARD_NEITHER.equals(argName)) {
 			// It wasn't a WILDCARD_NEITHER, so we might need to continue with more details
-
 			if (dataType == DataType.TYPE || !staticForm) {
 				if (resolver != null) {
 					if (resolver.isFullyQualifiedFormRequiredAfterAutoImport(this)) {
@@ -279,7 +276,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public JavaType getEnclosingType() {
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
 		if (offset == -1) {
-			// there is no dot in the name, so there's no way there's an enclosing type
+			// There is no dot in the name, so there's no way there's an enclosing type
 			return null;
 		}
 		String possibleName = fullyQualifiedTypeName.substring(0, offset);

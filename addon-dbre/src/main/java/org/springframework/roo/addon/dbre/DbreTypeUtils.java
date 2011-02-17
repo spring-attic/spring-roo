@@ -119,7 +119,7 @@ public abstract class DbreTypeUtils {
 	 * @return a String representing the table or column.
 	 */
 	public static String suggestFieldName(String name) {
-		Assert.isTrue(StringUtils.hasText(name), "Table or column name required");
+		Assert.hasText(name, "Table or column name required");
 		return getName(name, true);
 	}
 

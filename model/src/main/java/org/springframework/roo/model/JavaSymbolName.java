@@ -108,12 +108,11 @@ public final class JavaSymbolName implements Comparable<JavaSymbolName> {
 	 * <li>Must not start or end with a period</li>
 	 * </ul>
 	 * 
-	 * @param name to evaluate (required)
+	 * @param name to the package name to evaluate (required)
 	 */
 	public static final void assertJavaNameLegal(String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Name required");
-		}
+		Assert.notNull(name, "Name required");
+		
 		// Note regular expression for legal characters found to be x5 slower in profiling than this approach
 		char[] value = name.toCharArray();
 		for (int i = 0; i < value.length; i++) {
