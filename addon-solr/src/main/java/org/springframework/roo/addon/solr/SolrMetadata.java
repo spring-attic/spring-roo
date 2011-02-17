@@ -267,7 +267,8 @@ public class SolrMetadata extends AbstractItdTypeDetailsProvidingMetadataItem {
 		List<JavaType> typeParams = new ArrayList<JavaType>();
 		typeParams.add(governorTypeDetails.getName());
 		InvocableMemberBodyBuilder bodyBuilder = new InvocableMemberBodyBuilder();
-		bodyBuilder.appendFormalLine("return search(new SolrQuery(\"" + javaType.getSimpleTypeName().toLowerCase() + "_solrsummary_t:\" + queryString.toLowerCase()));");
+		bodyBuilder.appendFormalLine("String searchString = \"" + javaType.getSimpleTypeName() + "_solrsummary_t:\" + queryString;");
+		bodyBuilder.appendFormalLine("return search(new SolrQuery(searchString.toLowerCase()));");
 
 		MethodMetadataBuilder methodBuilder = new MethodMetadataBuilder(getId(), Modifier.PUBLIC | Modifier.STATIC, methodName, queryResponse, AnnotatedJavaType.convertFromJavaTypes(paramTypes), paramNames, bodyBuilder);
 		return methodBuilder.build();
