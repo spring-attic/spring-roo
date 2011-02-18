@@ -36,7 +36,6 @@
         <module>process-manager</module>
         <module>classpath</module>
         <module>classpath-javaparser</module>
-        <module>addon-beaninfo</module>
         <module>addon-tostring</module>
         <module>addon-javabean</module>
         <module>addon-plural</module>
@@ -337,11 +336,6 @@
         <dependency>
             <groupId>org.springframework.roo</groupId>
             <artifactId>org.springframework.roo.addon.backup</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.roo</groupId>
-            <artifactId>org.springframework.roo.addon.beaninfo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
