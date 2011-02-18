@@ -26,7 +26,7 @@ public class ConnectionProviderImpl implements ConnectionProvider {
 	@Reference private JdbcDriverManager jdbcDriverManager;
 
 	public Connection getConnection(Properties props, boolean displayAddOns) throws RuntimeException {
-		Assert.isTrue(props != null && !props.isEmpty(), "Connection properties must not be null or empty");
+		Assert.notEmpty(props, "Connection properties must not be null or empty");
 
 		// The properties "user" and "password" are required to make a connection
 		if (props.getProperty(USER) == null) {

@@ -22,9 +22,9 @@ import org.apache.felix.scr.annotations.Reference;
  */
 @Component(componentAbstract = true)
 public abstract class AbstractHashCodeTrackingMetadataNotifier {
-
 	@Reference protected MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference protected MetadataService metadataService;
+
 	private Map<String,Integer> hashes = new HashMap<String, Integer>();
 
 	/**
