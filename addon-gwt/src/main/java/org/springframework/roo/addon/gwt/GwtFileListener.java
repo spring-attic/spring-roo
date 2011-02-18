@@ -1,22 +1,20 @@
 package org.springframework.roo.addon.gwt;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.springframework.roo.classpath.PhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.ProjectMetadata;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Listens for the creation and deletion of files by {@link GwtMetadata}.
@@ -30,15 +28,12 @@ import java.util.List;
 @Component
 @Service
 public class GwtFileListener implements FileEventListener {
+	private static final String PROXY_FILE_SUFFIX = "Proxy.java";
 	@Reference private GwtFileManager gwtFileManager;
-	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
-	@Reference private PhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private GwtTemplatingService gwtTemplatingService;
 	@Reference private GwtTypeService gwtTypeService;
 	private boolean processedApplicationFiles = false;
-
-	private static final String PROXY_FILE_SUFFIX = "Proxy.java";
 
 	public void onFileEvent(FileEvent fileEvent) {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());

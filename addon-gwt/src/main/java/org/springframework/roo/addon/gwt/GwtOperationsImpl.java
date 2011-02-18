@@ -261,9 +261,10 @@ public class GwtOperationsImpl implements GwtOperations {
 	}
 
 	private CharSequence getGaeHookup() {
-		return "    // AppEngine user authentication\n\n"
-				+ "    new GaeLoginWidgetDriver(requestFactory).setWidget(shell.loginWidget);\n"
-				+ "    new ReloadOnAuthenticationFailure().register(eventBus);\n\n";
+		StringBuilder builder = new StringBuilder("    // AppEngine user authentication\n\n");
+		builder.append("    // AppEngine user authentication\n\n");
+		builder.append("    new ReloadOnAuthenticationFailure().register(eventBus);\n\n");
+		return builder.toString();
 	}
 
 	private void updateMavenEclipsePlugin() {

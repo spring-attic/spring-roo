@@ -1,10 +1,35 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeIdentifierNamingUtils;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
@@ -25,18 +50,6 @@ import org.w3c.dom.Node;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Metadata for GWT.
@@ -65,14 +78,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	private Map<JavaSymbolName, GwtProxyProperty> orderedProxyFields;
 	private Map<JavaType, JavaType> gwtTypeMap;
 
-	public GwtMetadata(String identifier,
-	                   Map<GwtType, JavaType> mirrorTypeMap,
-	                   ClassOrInterfaceTypeDetails governorTypeDetails,
-	                   Path mirrorTypePath,
-	                   EntityMetadata entityMetadata,
-	                   Map<JavaSymbolName, GwtProxyProperty> fieldTypeMap,
-	                   Map<JavaType, JavaType> gwtTypeMap) {
-
+	public GwtMetadata(String identifier, Map<GwtType, JavaType> mirrorTypeMap, ClassOrInterfaceTypeDetails governorTypeDetails, Path mirrorTypePath, EntityMetadata entityMetadata, Map<JavaSymbolName, GwtProxyProperty> fieldTypeMap, Map<JavaType, JavaType> gwtTypeMap) {
 		super(identifier);
 		this.mirrorTypeMap = mirrorTypeMap;
 		this.governorTypeDetails = governorTypeDetails;
@@ -344,8 +350,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		return typeDetailsBuilder.build();
 	}
 
-	private void buildInstanceRequestMethod(String destinationMetadataId,
-	                                        List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
+	private void buildInstanceRequestMethod(String destinationMetadataId, List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData) {
 		// com.google.gwt.requestfactory.shared.InstanceRequest remove()
 		List<JavaType> methodReturnTypeArgs = Arrays.asList(mirrorTypeMap.get(GwtType.PROXY), JavaType.VOID_OBJECT);
 		JavaType methodReturnType = new JavaType("com.google.gwt.requestfactory.shared.InstanceRequest", 0, DataType.TYPE, null, methodReturnTypeArgs);
@@ -361,9 +366,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 		buildRequestMethod(destinationMetadataId, methods, methodMetaData, methodReturnType);
 	}
 
-	private void buildRequestMethod(String destinationMetadataId,
-	                                List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData,
-	                                JavaType methodReturnType) {
+	private void buildRequestMethod(String destinationMetadataId, List<MethodMetadataBuilder> methods, MethodMetadata methodMetaData, JavaType methodReturnType) {
 		JavaSymbolName methodName = methodMetaData.getMethodName();
 
 		List<JavaType> methodParameterTypes = new ArrayList<JavaType>();
@@ -394,6 +397,7 @@ public class GwtMetadata extends AbstractMetadataItem {
 	 * @param gwtType the mirror class we're producing (required)
 	 * @return the Java type the mirror class applicable for the current governor (never null)
 	 */
+	@SuppressWarnings("unused") 
 	private JavaType getDestinationJavaType(GwtType gwtType) {
 		return PhysicalTypeIdentifier.getJavaType(getDestinationMetadataId(gwtType));
 	}

@@ -24,13 +24,11 @@ import java.util.*;
  * @author James Tyrrell
  * @since 1.1.2
  */
-
-class GwtUtils {
+public class GwtUtils {
+	private static GwtTypeNamingStrategy gwtTypeNamingStrategy = new DefaultGwtTypeNamingStrategy();
 
 	private GwtUtils() {
 	}
-
-	private static GwtTypeNamingStrategy gwtTypeNamingStrategy = new DefaultGwtTypeNamingStrategy();
 
 	public static Map<GwtType, JavaType> getMirrorTypeMap(ProjectMetadata projectMetadata, JavaType governorType) {
 		Map<GwtType, JavaType> mirrorTypeMap = new HashMap<GwtType, JavaType>();
@@ -143,8 +141,7 @@ class GwtUtils {
 	}
 
 	public static boolean isCollectionType(JavaType returnType) {
-		return returnType.equals(new JavaType("java.util.List"))
-				|| returnType.equals(new JavaType("java.util.Set"));
+		return returnType.equals(new JavaType("java.util.List")) || returnType.equals(new JavaType("java.util.Set"));
 	}
 
 	public static boolean isRequestFactoryCompatible(JavaType type) {
@@ -164,7 +161,7 @@ class GwtUtils {
 
 	/**
 	 * @param physicalType
-	 * @param mirrorType      the mirror class we're producing (required)
+	 * @param mirrorType the mirror class we're producing (required)
 	 * @param projectMetadata
 	 * @return the MID to the mirror class applicable for the current governor (never null)
 	 */
@@ -199,7 +196,6 @@ class GwtUtils {
 		builder.getRegisteredImports().addAll(concreteClass.getRegisteredImports());
 
 		for (MemberHoldingTypeDetails extendsTypeDetails : extendsTypesDetails) {
-
 			for (ConstructorMetadata constructorMetadata : extendsTypeDetails.getDeclaredConstructors()) {
 				ConstructorMetadataBuilder abstractConstructor = new ConstructorMetadataBuilder(abstractId);
 				abstractConstructor.setModifier(constructorMetadata.getModifier());

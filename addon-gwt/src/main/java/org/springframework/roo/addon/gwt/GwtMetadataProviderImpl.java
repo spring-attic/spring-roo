@@ -1,32 +1,35 @@
 package org.springframework.roo.addon.gwt;
 
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
-import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
-import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
 import org.springframework.roo.classpath.details.annotations.AnnotationAttributeValue;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.details.annotations.StringAttributeValue;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
-import org.springframework.roo.metadata.*;
+import org.springframework.roo.metadata.MetadataDependencyRegistry;
+import org.springframework.roo.metadata.MetadataIdentificationUtils;
+import org.springframework.roo.metadata.MetadataItem;
+import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
-
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Monitors Java types and if necessary creates/updates/deletes the GWT files maintained for each mirror-compatible object.
@@ -56,15 +59,11 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private GwtTypeNamingStrategy gwtTypeNamingStrategy;
-	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private GwtTemplatingService gwtTemplateService;
 	@Reference private GwtTypeService gwtTypeService;
 
-	private static Logger logger = HandlerUtils.getLogger(GwtMetadataProviderImpl.class);
-
 	public MetadataItem get(String metadataIdentificationString) {
-
 		// Abort early if we can't continue
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		if (projectMetadata == null) {
@@ -144,17 +143,15 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		}
 
 		// Excellent, so we have uniqueness taken care of by now; let's get the some metadata so we can discover what fields are available (NB: this will return null for enums)
-		//BeanInfoMetadata beanInfoMetadata = (BeanInfoMetadata) metadataService.get(BeanInfoMetadata.createIdentifier(governorTypeName, governorTypePath));
 		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
 		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
 			return null;
 		}
 
-
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTemplateService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
-		//GwtTemplateServiceImpl gwtTemplateService = new GwtTemplateServiceImpl(physicalTypeMetadataProvider, projectMetadata, entityMetadata, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
+		// GwtTemplateServiceImpl gwtTemplateService = new GwtTemplateServiceImpl(physicalTypeMetadataProvider, projectMetadata, entityMetadata, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
 		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);//getTemplateTypeDetails();
-		//Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();//gwtTemplateService.getXmlTemplates();
+		// Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();//gwtTemplateService.getXmlTemplates();
 
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeMap, governorTypeDetails, keyTypePath, entityMetadata, clientSideTypeMap, gwtClientTypeMap);
 

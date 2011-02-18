@@ -1,6 +1,22 @@
 package org.springframework.roo.addon.gwt;
 
-import hapax.*;
+import hapax.Template;
+import hapax.TemplateDataDictionary;
+import hapax.TemplateDictionary;
+import hapax.TemplateException;
+import hapax.TemplateLoader;
+
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
@@ -8,8 +24,11 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
-import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
+import org.springframework.roo.classpath.details.BeanInfoUtils;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.FieldMetadata;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
 import org.springframework.roo.classpath.scanner.MemberDetailsScanner;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.metadata.MetadataIdentificationUtils;
@@ -22,11 +41,6 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
-
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Provides a basic implementation of {@link GwtTemplatingService} which
@@ -41,17 +55,14 @@ import java.util.logging.Logger;
 @Component
 @Service
 public class GwtTemplatingServiceImpl implements GwtTemplatingService {
-
+	private static Logger logger = HandlerUtils.getLogger(GwtTemplatingServiceImpl.class);
 	@Reference private MutablePhysicalTypeMetadataProvider physicalTypeMetadataProvider;
 	@Reference private FileManager fileManager;
 	@Reference private MetadataService metadataService;
 	@Reference private MemberDetailsScanner memberDetailsScanner;
 	@Reference private GwtTypeService gwtTypeService;
 
-	private static Logger logger = HandlerUtils.getLogger(GwtTemplatingServiceImpl.class);
-
 	public GwtTemplateDataHolder getMirrorTemplateTypeDetails(ClassOrInterfaceTypeDetails governorTypeDetails) {
-
 		JavaType governorTypeName = governorTypeDetails.getName();
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTemplatingServiceImpl.class.getName(), governorTypeDetails).getDetails();
@@ -101,7 +112,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTemplateDetails(TemplateDataDictionary dataDictionary, String templateFile, JavaType templateType) {
-
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
@@ -115,7 +125,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	}
 
 	private TemplateDataDictionary buildDictionary(GwtType type) {
-
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		switch (type) {
 			case APP_ENTITY_TYPES_PROCESSOR: {
@@ -233,9 +242,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		addImport(dataDictionary, gwtType.getPath().packageName(projectMetadata) + "." + simpleName + gwtType.getSuffix());
 	}
 
-
 	public Map<JavaType, JavaType> getClientTypeMap(ClassOrInterfaceTypeDetails governorTypeDetails) {
-
 		JavaType governorTypeName = governorTypeDetails.getName();
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(getProjectMetadata(), governorTypeName);
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
@@ -332,12 +339,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		return (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
 	}
 
-	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type,
-	                                                         ClassOrInterfaceTypeDetails governorTypeDetails,
-	                                                         Map<GwtType, JavaType> mirrorTypeMap,
-	                                                         Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap,
-	                                                         EntityMetadata entityMetadata) {
-
+	private TemplateDataDictionary buildMirrorDataDictionary(GwtType type, ClassOrInterfaceTypeDetails governorTypeDetails, Map<GwtType, JavaType> mirrorTypeMap, Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap, EntityMetadata entityMetadata) {
 		ProjectMetadata projectMetadata = getProjectMetadata();
 
 		JavaType proxyType = mirrorTypeMap.get(GwtType.PROXY);
@@ -369,7 +371,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		GwtProxyProperty dateProp = null;
 		Set<String> importSet = new HashSet<String>();
 		for (GwtProxyProperty property : clientSideTypeMap.values()) {
-
 			// Determine if this is the primary property.
 			if (primaryProp == null) {
 				// Choose the first available field.
@@ -508,7 +509,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	}
 
 	private boolean isReadOnly(String name, ClassOrInterfaceTypeDetails governorTypeDetails, EntityMetadata entityMetadata) {
-
 		FieldMetadata versionField = entityMetadata.getVersionField();
 		FieldMetadata idField = entityMetadata.getIdentifierField();
 		Assert.notNull(versionField, "Version unavailable for " + governorTypeDetails.getName() + " - required for GWT support");
@@ -522,12 +522,10 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		dataDictionary.addSection("imports").setVariable("import", importDeclaration);
 	}
 
-	private void maybeAddImport(TemplateDataDictionary dataDictionary,
-	                                  Set<String> importSet, JavaType type) {
+	private void maybeAddImport(TemplateDataDictionary dataDictionary, Set<String> importSet, JavaType type) {
 		if (!importSet.contains(type.getFullyQualifiedTypeName())) {
 			addImport(dataDictionary, type.getFullyQualifiedTypeName());
 			importSet.add(type.getFullyQualifiedTypeName());
 		}
 	}
-
 }

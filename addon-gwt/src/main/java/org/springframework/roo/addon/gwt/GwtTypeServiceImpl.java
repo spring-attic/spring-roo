@@ -23,11 +23,9 @@ import java.util.List;
  * @author James Tyrrell
  * @since 1.1.2
  */
-
 @Component
 @Service
 public class GwtTypeServiceImpl implements GwtTypeService {
-
 	@Reference private MetadataService metadataService;
 
 	/**
