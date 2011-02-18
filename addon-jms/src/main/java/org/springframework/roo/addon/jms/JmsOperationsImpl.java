@@ -91,15 +91,12 @@ public class JmsOperationsImpl implements JmsOperations {
 
 		Element root = (Element) appCtx.getFirstChild();
 
-		boolean needsPersisting = false;
-
-		if (name != null && name.length() > 0) {
+		if (StringUtils.hasText(name)) {
 			Element destination = appCtx.createElement("amq:" + destinationType.getType().toLowerCase());
 			destination.setAttribute("physicalName", name);
 			destination.setAttribute("id", name);
 			root.appendChild(destination);
 			addDefaultDestination(appCtx, name);
-			needsPersisting = true;
 		}
 
 		Element listenerContainer = XmlUtils.findFirstElement("/beans/listener-container[@destination-type = '" + destinationType.getType().toLowerCase() + "']", root);
@@ -108,12 +105,9 @@ public class JmsOperationsImpl implements JmsOperations {
 			listenerContainer.setAttribute("connection-factory", "jmsFactory");
 			listenerContainer.setAttribute("destination-type", destinationType.getType().toLowerCase());
 			root.appendChild(listenerContainer);
-			needsPersisting = true;
 		}
 
-		if (needsPersisting) {
-			XmlUtils.writeXml(jmsContextMutableFile.getOutputStream(), appCtx);
-		}
+		XmlUtils.writeXml(jmsContextMutableFile.getOutputStream(), appCtx);
 
 		updateConfiguration(jmsProvider);
 	}
@@ -158,13 +152,13 @@ public class JmsOperationsImpl implements JmsOperations {
 					contextMutableFile = fileManager.updateFile(contextPath);
 					appCtx = XmlUtils.getDocumentBuilder().parse(contextMutableFile.getInputStream());
 				} else {
-					new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
+					throw new IllegalStateException("Could not aquire the Spring applicationContext.xml file");
 				}
 			} catch (Exception e) {
 				throw new IllegalStateException(e);
 			}
 
-			Element root = (Element) appCtx.getFirstChild();
+			Element root = appCtx.getDocumentElement();
 			
 			if (XmlUtils.findFirstElementByName("task:annotation-driven", root) == null) {
 				if (root.getAttribute("xmlns:task").length() == 0) {
@@ -227,7 +221,8 @@ public class JmsOperationsImpl implements JmsOperations {
 			throw new IllegalStateException(e);
 		}
 
-		Element root = (Element) appCtx.getFirstChild();
+		Element root = appCtx.getDocumentElement();
+		
 		Element listenerContainer = XmlUtils.findFirstElementByName("jms:listener-container", root);
 		if (listenerContainer != null && destinationType.getType().toLowerCase().equals(listenerContainer.getAttribute("destination-type"))) {
 			listenerContainer = appCtx.createElement("jms:listener-container");
@@ -236,17 +231,19 @@ public class JmsOperationsImpl implements JmsOperations {
 			root.appendChild(listenerContainer);
 		}
 
-		Element jmsListener = appCtx.createElement("jms:listener");
-		jmsListener.setAttribute("ref", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
-		jmsListener.setAttribute("method", "onMessage");
-		jmsListener.setAttribute("destination", name);
+		if (listenerContainer != null) {
+			Element jmsListener = appCtx.createElement("jms:listener");
+			jmsListener.setAttribute("ref", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
+			jmsListener.setAttribute("method", "onMessage");
+			jmsListener.setAttribute("destination", name);
 
-		Element bean = appCtx.createElement("bean");
-		bean.setAttribute("class", targetType.getFullyQualifiedTypeName());
-		bean.setAttribute("id", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
-		root.appendChild(bean);
+			Element bean = appCtx.createElement("bean");
+			bean.setAttribute("class", targetType.getFullyQualifiedTypeName());
+			bean.setAttribute("id", StringUtils.uncapitalize(targetType.getSimpleTypeName()));
+			root.appendChild(bean);
 
-		listenerContainer.appendChild(jmsListener);
+			listenerContainer.appendChild(jmsListener);
+		}
 
 		XmlUtils.writeXml(jmsContextMutableFile.getOutputStream(), appCtx);
 	}
@@ -261,7 +258,7 @@ public class JmsOperationsImpl implements JmsOperations {
 			dependencies.add(new Dependency(dependencyElement));
 		}
 
-		List<Element> jmsDependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id='" + jmsProvider.getKey() + "']/dependencies/dependency", configuration);
+		List<Element> jmsDependencies = XmlUtils.findElements("/configuration/jmsProviders/provider[@id = '" + jmsProvider.getKey() + "']/dependencies/dependency", configuration);
 		for (Element dependencyElement : jmsDependencies) {
 			dependencies.add(new Dependency(dependencyElement));
 		}
