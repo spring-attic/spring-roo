@@ -42,21 +42,22 @@ import org.w3c.dom.Element;
 @Component
 @Service
 public class CreatorOperationsImpl implements CreatorOperations {
+	private static final char SEPARATOR = File.separatorChar;
+	private static final String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
 	@Reference private FileManager fileManager;
 	@Reference private PathResolver pathResolver;
 	@Reference private ProjectOperations projectOperations;
 	@Reference private UrlInputStreamService httpService;
-	private static final char SEPARATOR = File.separatorChar;
-	private static String ICON_SET_URL = "http://www.famfamfam.com/lab/icons/flags/famfamfam_flag_icons.zip";
+	private String iconSetUrl;
 
 	private enum Type {
 		SIMPLE, ADVANCED, I18N, WRAPPER
 	};
 	
 	protected void activate(ComponentContext context) {
-		String iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
-		if (iconSetUrl != null && iconSetUrl.length() > 0) {
-			ICON_SET_URL = iconSetUrl;
+		iconSetUrl = context.getBundleContext().getProperty("creator.i18n.iconset.url");
+		if (!StringUtils.hasText(iconSetUrl)) {
+			iconSetUrl = ICON_SET_URL;
 		}
 	}
 	
@@ -104,30 +105,31 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-		Element rootElement = pom.getDocumentElement();
-		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-		XmlUtils.findRequiredElement("/project/dependencies/dependency/groupId", rootElement).setTextContent(groupId);
-		XmlUtils.findRequiredElement("/project/dependencies/dependency/artifactId", rootElement).setTextContent(artifactId);
-		XmlUtils.findRequiredElement("/project/dependencies/dependency/version", rootElement).setTextContent(version);
-		XmlUtils.findRequiredElement("/project/properties/pkgArtifactId", rootElement).setTextContent(artifactId);
-		XmlUtils.findRequiredElement("/project/properties/pkgVersion", rootElement).setTextContent(version);
-		XmlUtils.findRequiredElement("/project/properties/pkgVendor", rootElement).setTextContent(vendorName);
-		XmlUtils.findRequiredElement("/project/properties/pkgLicense", rootElement).setTextContent(lincenseUrl);
-		XmlUtils.findRequiredElement("/project/properties/repo.folder", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
+		Element root = pom.getDocumentElement();
+		
+		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/groupId", root).setTextContent(groupId);
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/artifactId", root).setTextContent(artifactId);
+		XmlUtils.findRequiredElement("/project/dependencies/dependency/version", root).setTextContent(version);
+		XmlUtils.findRequiredElement("/project/properties/pkgArtifactId", root).setTextContent(artifactId);
+		XmlUtils.findRequiredElement("/project/properties/pkgVersion", root).setTextContent(version);
+		XmlUtils.findRequiredElement("/project/properties/pkgVendor", root).setTextContent(vendorName);
+		XmlUtils.findRequiredElement("/project/properties/pkgLicense", root).setTextContent(lincenseUrl);
+		XmlUtils.findRequiredElement("/project/properties/repo.folder", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
 		if (docUrl != null && docUrl.length() > 0) {
-			XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", rootElement).setTextContent(docUrl);
+			XmlUtils.findRequiredElement("/project/properties/pkgDocUrl", root).setTextContent(docUrl);
 		}
 		if (osgiImports != null && osgiImports.length() > 0) {
-			Element config = XmlUtils.findRequiredElement("/project/build/plugins/plugin[artifactId = 'maven-bundle-plugin']/configuration/instructions", rootElement);
+			Element config = XmlUtils.findRequiredElement("/project/build/plugins/plugin[artifactId = 'maven-bundle-plugin']/configuration/instructions", root);
 			config.appendChild(new XmlElementBuilder("Import-Package", pom).setText(osgiImports).build());
 		}
 		if (description != null && description.length() > 0) {
-			Element descriptionE = XmlUtils.findRequiredElement("/project/description", rootElement);
+			Element descriptionE = XmlUtils.findRequiredElement("/project/description", root);
 			descriptionE.setTextContent(description + " " + descriptionE.getTextContent());
 		}
 		
-		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
+		MutableFile pomMutableFile = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 	}
 
@@ -234,31 +236,30 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			throw new IllegalStateException(e);
 		}
 
-		Element rootElement = pom.getDocumentElement();
-		XmlUtils.findRequiredElement("/project/artifactId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-		XmlUtils.findRequiredElement("/project/groupId", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
-		XmlUtils.findRequiredElement("/project/name", rootElement).setTextContent(projectName);
-		XmlUtils.findRequiredElement("/project/properties/repo.folder", rootElement).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
+		Element root = pom.getDocumentElement();
+		
+		XmlUtils.findRequiredElement("/project/artifactId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/groupId", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName());
+		XmlUtils.findRequiredElement("/project/name", root).setTextContent(projectName);
+		XmlUtils.findRequiredElement("/project/properties/repo.folder", root).setTextContent(topLevelPackage.getFullyQualifiedPackageName().replace(".", "/"));
 		if (StringUtils.hasText(description)) {
-			XmlUtils.findRequiredElement("/project/description", rootElement).setTextContent(description);
+			XmlUtils.findRequiredElement("/project/description", root).setTextContent(description);
 		}
 
 		// Create new project
 		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
-		Assert.isTrue(projectOperations.isProjectAvailable(), "Project metadata unavailable");
 
 		writeTextFile("readme.txt", "Welcome to my addon!");
 		writeTextFile("legal" + SEPARATOR + "LICENSE.TXT", "Your license goes here");
 
 		fileManager.scan();
 	}
-	
+
 	private void install(String targetFilename, JavaPackage topLevelPackage, Path path, Type type, String projectName) {
 		if (!StringUtils.hasText(projectName)) {
 			projectName = topLevelPackage.getFullyQualifiedPackageName().replace(".", "-");
 		}
-		PathResolver pathResolver = projectOperations.getPathResolver();
 		String topLevelPackageName = topLevelPackage.getFullyQualifiedPackageName();
 		String packagePath = topLevelPackageName.replace('.', SEPARATOR);
 		String destinationFile = "";
@@ -297,7 +298,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 	private void writeTextFile(String fullPathFromRoot, String message) {
 		Assert.hasText(fullPathFromRoot, "Text file name to write is required");
 		Assert.hasText(message, "Message required");
-		String path = projectOperations.getPathResolver().getIdentifier(Path.ROOT, fullPathFromRoot);
+		String path = pathResolver.getIdentifier(Path.ROOT, fullPathFromRoot);
 		File file = new File(path);
 		MutableFile mutableFile = file.exists() ? fileManager.updateFile(path) : fileManager.createFile(path);
 		byte[] input = message.getBytes();
@@ -316,7 +317,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		BufferedInputStream bis = null;
 		ZipInputStream zis = null;
 		try {
-			bis = new BufferedInputStream(httpService.openConnection(new URL(ICON_SET_URL)));
+			bis = new BufferedInputStream(httpService.openConnection(new URL(iconSetUrl)));
 			zis = new ZipInputStream(bis);
 			ZipEntry entry;
 			String expectedEntryName = "png/" + countryCode + ".png";
@@ -324,7 +325,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				if (entry.getName().equals(expectedEntryName)) {
 					int size;
 					byte[] buffer = new byte[2048];
-					MutableFile target = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
+					MutableFile target = fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + "/" + countryCode + ".png"));
 					BufferedOutputStream bos = new BufferedOutputStream(target.getOutputStream(), buffer.length);
 					while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
 						bos.write(buffer, 0, size);
@@ -335,16 +336,20 @@ public class CreatorOperationsImpl implements CreatorOperations {
 				}
 			}
 		} catch (Exception e) {
-			throw new IllegalStateException("Could not acquire flag icon for locale " + locale.getCountry() + " please use --flagGraphic to specify the flag manually", e);
+			throw new IllegalStateException(getErrorMsg(locale.getCountry()), e);
 		} finally {
 			try {
-				zis.close();
-				bis.close();
-			} catch (Exception ignore) {}
+				if (zis != null) zis.close();
+				if (bis != null) bis.close();
+			} catch (Exception ignored) {}
 		}
 		
 		if (!success) {
-			throw new IllegalStateException("Could not acquire flag icon for locale " + locale + " please use --flagGraphic to specify the flag manually");
+			throw new IllegalStateException(getErrorMsg(locale.toString()));
 		}
+	}
+
+	private String getErrorMsg(String localeStr) {
+		return "Could not acquire flag icon for locale " + localeStr + " please use --flagGraphic to specify the flag manually";
 	}
 }

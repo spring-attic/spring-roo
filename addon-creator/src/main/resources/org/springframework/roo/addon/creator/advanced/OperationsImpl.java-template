@@ -16,11 +16,11 @@ import org.springframework.roo.classpath.details.MutableClassOrInterfaceTypeDeta
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadataBuilder;
 import org.springframework.roo.metadata.MetadataService;
 import org.springframework.roo.model.JavaType;
-import org.springframework.roo.project.Dependency;
-import org.springframework.roo.project.DependencyScope;
-import org.springframework.roo.project.DependencyType;
+import org.springframework.roo.project.maven.Dependency;
+import org.springframework.roo.project.maven.DependencyScope;
+import org.springframework.roo.project.maven.DependencyType;
 import org.springframework.roo.project.ProjectOperations;
-import org.springframework.roo.project.Repository;
+import org.springframework.roo.project.maven.Repository;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.XmlUtils;
 import org.w3c.dom.Element;
