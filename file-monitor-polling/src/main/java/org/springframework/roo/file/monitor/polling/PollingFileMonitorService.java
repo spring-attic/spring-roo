@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
-import java.util.logging.Logger;
 
 import org.springframework.roo.file.monitor.DirectoryMonitoringRequest;
 import org.springframework.roo.file.monitor.FileMonitorService;
@@ -22,7 +21,6 @@ import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.monitor.event.FileEvent;
 import org.springframework.roo.file.monitor.event.FileEventListener;
 import org.springframework.roo.file.monitor.event.FileOperation;
-import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 /**
@@ -49,7 +47,6 @@ import org.springframework.roo.support.util.Assert;
  * @since 1.0
  */
 public class PollingFileMonitorService implements NotifiableFileMonitorService {
-	private static final Logger logger = HandlerUtils.getLogger(PollingFileMonitorService.class);
 	protected Set<FileEventListener> fileEventListeners = new HashSet<FileEventListener>();
 	private Set<MonitoringRequest> requests = new LinkedHashSet<MonitoringRequest>();
 	private Map<MonitoringRequest, Map<File, Long>> priorExecution = new WeakHashMap<MonitoringRequest, Map<File, Long>>();

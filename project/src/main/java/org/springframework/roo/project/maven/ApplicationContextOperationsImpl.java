@@ -32,18 +32,18 @@ public class ApplicationContextOperationsImpl implements ApplicationContextOpera
 	
 	public void createMiddleTierApplicationContext() {
 		ProjectMetadata projectMetadata = (ProjectMetadata) metadataService.get(ProjectMetadata.getProjectIdentifier());
-		Assert.isTrue(projectMetadata != null, "Project metadata required");
+		Assert.notNull(projectMetadata, "Project metadata required");
 		
 		InputStream templateInputStream = TemplateUtils.getTemplate(getClass(), "applicationContext-template.xml");
 		Document pom;
 		try {
 			pom = XmlUtils.getDocumentBuilder().parse(templateInputStream);
-		} catch (Exception ex) {
-			throw new IllegalStateException(ex);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 		
-		Element rootElement = (Element) pom.getFirstChild();
-		XmlUtils.findFirstElementByName("context:component-scan", rootElement).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
+		Element root = pom.getDocumentElement();
+		XmlUtils.findFirstElementByName("context:component-scan", root).setAttribute("base-package", projectMetadata.getTopLevelPackage().getFullyQualifiedPackageName());
 
 		PathResolver pathResolver = projectMetadata.getPathResolver();
 		MutableFile mutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.SPRING_CONFIG_ROOT, "applicationContext.xml"));

@@ -16,9 +16,6 @@ import org.springframework.roo.file.undo.UndoManager;
  * {@link ProcessManager}, such that {@link ProcessManager} can undo or reset as required.
  * 
  * <p>
- * A {@link FileManager} must also listen for any new {@link ProjectMetadata}. When detected, it will verify the required directories exist and start monitoring them.
- * 
- * <p>
  * An implementation may elect to defer writes to disk or discard them until {@link #commit()} or {@link #clear()} respectively is invoked.
  * 
  * @author Ben Alex

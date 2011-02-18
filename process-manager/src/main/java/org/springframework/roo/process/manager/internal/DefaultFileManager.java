@@ -17,7 +17,6 @@ import org.springframework.roo.file.monitor.NotifiableFileMonitorService;
 import org.springframework.roo.file.monitor.event.FileDetails;
 import org.springframework.roo.file.undo.CreateDirectory;
 import org.springframework.roo.file.undo.CreateFile;
-import org.springframework.roo.file.undo.DefaultFilenameResolver;
 import org.springframework.roo.file.undo.DeleteDirectory;
 import org.springframework.roo.file.undo.DeleteFile;
 import org.springframework.roo.file.undo.FilenameResolver;
@@ -185,12 +184,12 @@ public class DefaultFileManager implements FileManager, UndoListener {
 			Assert.notNull(mutableFile, "Could not create file '" + fileIdentifier + "'");
 		}
 
-		try {
-			if (mutableFile != null) {
+		if (mutableFile != null) {
+			try {
 				FileCopyUtils.copy(newContents.getBytes(), mutableFile.getOutputStream());
+			} catch (IOException ioe) {
+				throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 			}
-		} catch (IOException ioe) {
-			throw new IllegalStateException("Could not output '" + mutableFile.getCanonicalPath() + "'", ioe);
 		}
 	}
 

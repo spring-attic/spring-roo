@@ -24,12 +24,11 @@ import java.util.Set;
 @Component(immediate = true)
 @Service
 public class ProjectPathMonitoringInitializer implements MetadataNotificationListener {
+	@Reference private FilenameResolver filenameResolver;
+	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
 	@Reference private MetadataService metadataService;
 	@Reference private NotifiableFileMonitorService fileMonitorService;
 	@Reference private UndoManager undoManager;
-	@Reference private MetadataDependencyRegistry metadataDependencyRegistry;
-	@Reference private FilenameResolver filenameResolver;
-
 	private boolean pathsRegistered = false;
 
 	protected void activate(ComponentContext context) {
@@ -56,7 +55,6 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 
 			PathResolver pathResolver = md.getPathResolver();
 			Assert.notNull(pathResolver, "Path resolver could not be acquired from changed metadata '" + md + "'");
-			//FilenameResolver filenameResolver = new PathResolvingAwareFilenameResolver(pathResolver);
 
 			Set<FileOperation> notifyOn = new HashSet<FileOperation>();
 			notifyOn.add(FileOperation.MONITORING_START);
@@ -71,7 +69,7 @@ public class ProjectPathMonitoringInitializer implements MetadataNotificationLis
 				if (!Path.ROOT.equals(p)) {
 					String fileIdentifier = pathResolver.getRoot(p);
 					File file = new File(fileIdentifier);
-					//Assert.isTrue(!file.exists() || (file.exists() && file.isDirectory()), "Path '" + fileIdentifier + "' must either not exist or be a directory");
+					Assert.isTrue(!file.exists() || (file.exists() && file.isDirectory()), "Path '" + fileIdentifier + "' must either not exist or be a directory");
 					if (!file.exists()) {
 						// Create directory, but no notifications as that will happen once we start monitoring it below
 						new CreateDirectory(undoManager, filenameResolver, file);

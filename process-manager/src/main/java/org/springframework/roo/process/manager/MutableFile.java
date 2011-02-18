@@ -35,5 +35,4 @@ public interface MutableFile {
 	 * @param message the additional information (can be null or empty to clear any extra information)
 	 */
 	void setDescriptionOfChange(String message);
-
 }

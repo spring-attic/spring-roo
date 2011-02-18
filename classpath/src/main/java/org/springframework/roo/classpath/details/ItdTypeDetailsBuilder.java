@@ -20,7 +20,7 @@ import org.springframework.roo.support.util.Assert;
  * <p>
  * All methods on this class (which does NOT include the constructor) accept null arguments,
  * and will automatically ignore any attempt to add an {@link IdentifiableJavaStructure} that is
- * not use the same {@link #declaredByMetadataId} as when the instance was constructed.
+ * not use the same declaredByMetadataId as when the instance was constructed.
  * 
  * <p>
  * In addition, any method on this class which accepts an {@link InvocableMemberMetadata} will
