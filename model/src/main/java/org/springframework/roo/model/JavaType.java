@@ -257,18 +257,24 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @return the package name (never null)
 	 */
 	public JavaPackage getPackage() {
-		if (isDefaultPackage()) {
+		if (isDefaultPackage() && !Character.isUpperCase(fullyQualifiedTypeName.charAt(0))) {
 			return new JavaPackage("");
 		}
 
-		//TODO: Removed to fix ROO-2105, but there may be a better way -JT
-		//JavaType enclosingType = getEnclosingType();
-		//if (enclosingType != null) {
-		//	return enclosingType.getPackage();
-		//}
-
+		JavaType enclosingType = getEnclosingType();
+		if (enclosingType != null) {
+			String enclosingTypeFullyQualifiedTypeName = enclosingType.getFullyQualifiedTypeName();
+			int offset = enclosingTypeFullyQualifiedTypeName.lastIndexOf(".");
+			// Handle case where the package name after the last period starts with a capital letter.
+			if (offset > -1 && Character.isUpperCase(enclosingTypeFullyQualifiedTypeName.charAt(offset + 1))) {
+				return new JavaPackage(enclosingTypeFullyQualifiedTypeName);
+			} else {
+				return enclosingType.getPackage();
+			}
+		}
+		
 		int offset = fullyQualifiedTypeName.lastIndexOf(".");
-		return new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
+		return offset == -1 ? new JavaPackage(fullyQualifiedTypeName) : new JavaPackage(fullyQualifiedTypeName.substring(0, offset));
 	}
 
 	/**
@@ -292,11 +298,13 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 			enclosedWithinPackage = possibleName.substring(0, offset2);
 			enclosedWithinTypeName = possibleName.substring(offset2 + 1);
 		}
-		if (enclosedWithinTypeName.charAt(0) == enclosedWithinTypeName.toUpperCase().charAt(0)) {
-			// First letter is uppercase, so treat it as a type name
+
+		if (Character.isUpperCase(enclosedWithinTypeName.charAt(0))) {
+			// First letter is uppercase, so treat it as a type name for now
 			String preTypeNamePortion = enclosedWithinPackage == null ? "" : (enclosedWithinPackage + ".");
 			return new JavaType(preTypeNamePortion + enclosedWithinTypeName);
 		}
+
 		return null;
 	}
 
