@@ -21,19 +21,6 @@ import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.type.ClassOrInterfaceType;
 import japa.parser.ast.type.Type;
-import japa.parser.ast.visitor.VoidVisitor;
-import japa.parser.ast.visitor.VoidVisitorAdapter;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
@@ -60,12 +47,22 @@ import org.springframework.roo.process.manager.FileManager;
 import org.springframework.roo.support.style.ToStringCreator;
 import org.springframework.roo.support.util.Assert;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Java Parser implementation of {@link ClassOrInterfaceTypeDetails}.
- * 
- * <p>
+ * <p/>
+ * <p/>
  * This class is immutable once constructed.
- * 
+ *
  * @author Ben Alex
  * @author James Tyrrell
  * @since 1.0.1
@@ -204,13 +201,8 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 				String fullName = qualifier + "." + simpleName;
 				// We want to calculate these...
 
-				JavaType type = new JavaType(fullName); // maybe
-				JavaPackage typePackage = type.getPackage(); // always
-				/*
-				 * if (fullName.toLowerCase().equals(fullName)) { // Everything is already lowercase, so assume it's just a straight package name and no static type imports are happening typePackage =
-				 * new JavaPackage(fullName); } else { // There is an uppercase in there, so let's make a JavaType as it can compute the enclosing type properly type = new JavaType(fullName);
-				 * typePackage = type.getPackage(); }
-				 */
+				JavaType type = new JavaType(fullName);
+				JavaPackage typePackage = type.getPackage();
 				ImportMetadataBuilder newImport = new ImportMetadataBuilder(declaredByMetadataId, modifier, typePackage, type, importDeclaration.isStatic(), importDeclaration.isAsterisk());
 				registeredImports.add(newImport.build());
 			}
@@ -396,35 +388,12 @@ public class JavaParserClassOrInterfaceTypeDetails extends AbstractCustomDataAcc
 		return Collections.unmodifiableList(annotations);
 	}
 
-	@SuppressWarnings("unused") 
-	private static ArrayList<String> listMembers(TypeDeclaration typeDeclaration) {
-		ArrayList<String> referenceTypes = new ArrayList<String>();
-		VoidVisitor<ArrayList<String>> visitor = new VoidVisitorAdapter<ArrayList<String>>() {
-
-			@Override 
-			public void visit(ClassOrInterfaceType n, ArrayList<String> arg) {
-				super.visit(n, arg);
-				arg.add(n.getName());
-			}
-
-			@Override 
-			public void visit(NameExpr n, ArrayList<String> arg) {
-				super.visit(n, arg);
-				arg.add(n.toString());
-			}
-		};
-
-		typeDeclaration.accept(visitor, referenceTypes);
-
-		return referenceTypes;
-	}
-
 	/**
 	 * Appends the presented class to the end of the presented body declarations. The body declarations appear within the presented compilation unit. This is used to progressively build inner types.
-	 * 
+	 *
 	 * @param compilationUnit the work-in-progress compilation unit (required)
-	 * @param cit the new class to add (required)
-	 * @param parent the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
+	 * @param cit             the new class to add (required)
+	 * @param parent          the class body declarations a subclass should be added to (may be null, which denotes a top-level type within the compilation unit)
 	 */
 	private static final void updateOutput(final CompilationUnit compilationUnit, CompilationUnitServices enclosingCompilationUnitServices, final ClassOrInterfaceTypeDetails cit, List<BodyDeclaration> parent) {
 		// Append the new imports this class declares
