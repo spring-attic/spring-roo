@@ -67,7 +67,7 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 	private Map<JavaType, JavaTypeMetadataDetails> specialDomainTypes;
 	private JavaTypeMetadataDetails javaTypeMetadataHolder;
 
-	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, List<MethodMetadata> existingMethods, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Set<FinderMetadataDetails> dynamicFinderMethods, boolean buildJson) {
+	public WebScaffoldMetadata(String identifier, JavaType aspectName, PhysicalTypeMetadata governorPhysicalTypeMetadata, WebScaffoldAnnotationValues annotationValues, List<MethodMetadata> existingMethods, SortedMap<JavaType, JavaTypeMetadataDetails> specialDomainTypes, List<JavaTypeMetadataDetails> dependentTypes, Map<JavaSymbolName, DateTimeFormatDetails> dateTypes, Set<FinderMetadataDetails> dynamicFinderMethods, JsonMetadata jsonMetadata) {
 		super(identifier, aspectName, governorPhysicalTypeMetadata);
 		Assert.isTrue(isValid(identifier), "Metadata identification string '" + identifier + "' does not appear to be a valid");
 		Assert.notNull(annotationValues, "Annotation values required");
@@ -119,7 +119,8 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 		if (!dateTypes.isEmpty()) {
 			builder.addMethod(getDateTimeFormatHelperMethod());
 		}
-		if (buildJson) {
+		if (jsonMetadata != null) {
+			this.jsonMetadata = jsonMetadata;
 			builder.addMethod(getJsonShowMethod());
 			builder.addMethod(getJsonListMethod());
 			builder.addMethod(getJsonCreateMethod());
@@ -880,14 +881,12 @@ public class WebScaffoldMetadata extends AbstractItdTypeDetailsProvidingMetadata
 			AnnotationMetadataBuilder requestParamAnnotation = new AnnotationMetadataBuilder(new JavaType("org.springframework.web.bind.annotation.RequestParam"), attributes);
 			annotations.add(requestParamAnnotation.build());
 			if (field.getFieldType().equals(new JavaType(Date.class.getName())) || field.getFieldType().equals(new JavaType(Calendar.class.getName()))) {
-				paramNames.add(fieldName);
-				if (field != null) {
-					AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
-					if (annotation != null) {
-						annotations.add(annotation);
-					}
+				AnnotationMetadata annotation = MemberFindingUtils.getAnnotationOfType(field.getAnnotations(), new JavaType("org.springframework.format.annotation.DateTimeFormat"));
+				if (annotation != null) {
+					annotations.add(annotation);
 				}
 			}
+			paramNames.add(fieldName);
 			annotatedParamTypes.add(new AnnotatedJavaType(field.getFieldType(), annotations));
 
 			if (field.getFieldType().equals(JavaType.BOOLEAN_OBJECT)) {

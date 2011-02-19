@@ -5,6 +5,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.osgi.service.component.ComponentContext;
 import org.springframework.roo.addon.entity.EntityMetadata;
+import org.springframework.roo.addon.json.JsonMetadata;
 import org.springframework.roo.addon.web.mvc.controller.RooConversionService;
 import org.springframework.roo.addon.web.mvc.controller.RooWebScaffold;
 import org.springframework.roo.addon.web.mvc.controller.converter.ConversionServiceOperations;
@@ -74,6 +75,13 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 		ClassOrInterfaceTypeDetails formbackingClassOrInterfaceDetails = (ClassOrInterfaceTypeDetails) formBackingObjectPhysicalTypeMetadata.getMemberHoldingTypeDetails();
 		MemberDetails formBackingObjectMemberDetails = memberDetailsScanner.getMemberDetails(getClass().getName(), formbackingClassOrInterfaceDetails);
 		
+		JsonMetadata jsonMetadata = null;
+		
+		if (annotationValues.isExposeJson()) {
+			jsonMetadata = (JsonMetadata) metadataService.get(JsonMetadata.createIdentifier(formBackingType, path));
+		}
+		
+		
 		// We do not need to monitor the parent, as any changes to the java type associated with the parent will trickle down to the governing java type
 		return new WebScaffoldMetadata(metadataIdentificationString, aspectName, governorPhysicalTypeMetadata, annotationValues, 
 				MemberFindingUtils.getMethods(controllerMemberDetails), 
@@ -81,7 +89,7 @@ public final class WebScaffoldMetadataProviderImpl extends AbstractItdMetadataPr
 				WebMetadataUtils.getDependentApplicationTypeMetadata(formBackingType, formBackingObjectMemberDetails, metadataService, typeLocationService, metadataIdentificationString, metadataDependencyRegistry), 
 				WebMetadataUtils.getDatePatterns(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry), 
 				WebMetadataUtils.getDynamicFinderMethodsAndFields(formBackingType, formBackingObjectMemberDetails, metadataService, metadataIdentificationString, metadataDependencyRegistry),
-				annotationValues.isExposeJson() && MemberFindingUtils.getTypeAnnotation(formbackingClassOrInterfaceDetails, new JavaType("org.springframework.roo.addon.json.RooJson")) != null);
+				jsonMetadata);
 	}
 	
 	void installConversionService(JavaType governor) {
