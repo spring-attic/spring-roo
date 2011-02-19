@@ -80,7 +80,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			return null;
 		}
 
-		String simpleTypeName = MemberFindingUtils.getJavaType(memberDetails).getSimpleTypeName();
+		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
 		String jpaQuery = getJpaQuery(tokens, simpleTypeName, finderName, plural);
 		List<JavaType> parameterTypes = getParameterTypes(tokens, finderName, plural);
 		List<JavaSymbolName> parameterNames = getParameterNames(tokens, finderName, plural);
@@ -101,6 +101,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 		for (Token token : tokens) {
 			if (token instanceof ReservedToken) {
 				String reservedToken = token.getValue();
+				if (lastFieldToken == null) continue;
 				String fieldName = lastFieldToken.getField().getFieldName().getSymbolName();
 				boolean setField = true;
 
@@ -173,13 +174,13 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 			}
 		}
 		if (isNewField) {
-			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+			if (lastFieldToken != null && !lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(simpleTypeName.toLowerCase()).append(".").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 			isFieldApplied = false;
 		}
 		if (!isFieldApplied) {
-			if (!lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
+			if (lastFieldToken != null && !lastFieldToken.getField().getFieldType().isCommonCollectionType()) {
 				builder.append(" = :").append(lastFieldToken.getField().getFieldName().getSymbolName());
 			}
 		}
@@ -201,6 +202,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 						JavaSymbolName fieldName = parameterNames.get(parameterNames.size() - 1);
 						// Remove the last field token
 						parameterNames.remove(parameterNames.size() - 1);
+						
 						// Replace by a min and a max value
 						parameterNames.add(new JavaSymbolName("min" + fieldName.getSymbolNameCapitalisedFirstLetter()));
 						parameterNames.add(new JavaSymbolName("max" + fieldName.getSymbolNameCapitalisedFirstLetter()));
@@ -256,7 +258,7 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 	}
 
 	private List<Token> tokenize(MemberDetails memberDetails, JavaSymbolName finderName, String plural) {
-		String simpleTypeName = MemberFindingUtils.getJavaType(memberDetails).getSimpleTypeName();
+		String simpleTypeName = getConcreteJavaType(memberDetails).getSimpleTypeName();
 		String finder = finderName.getSymbolName();
 
 		// Just in case it starts with findBy we can remove it here
@@ -350,5 +352,26 @@ public class DynamicFinderServicesImpl implements DynamicFinderServices {
 				fullyQualifiedTypeName.equals(Short.class.getName()) ||
 				fullyQualifiedTypeName.equals(Date.class.getName()) ||
 				fullyQualifiedTypeName.equals(Calendar.class.getName());
+	}
+	
+	/**
+	 * Returns the {@link JavaType} from the specified {@link MemberDetails} object;
+	 * 
+	 * <p>
+	 * If the found type is abstract the next {@link MemberHoldingTypeDetails) is searched.
+	 * 
+	 * @param memberDetails the {@link MemberDetails} to search (required)
+	 * @return the first non-abstract JavaType, or null if not found
+	 */
+	private JavaType getConcreteJavaType(MemberDetails memberDetails) {
+		Assert.notNull(memberDetails, "Member details required");
+		JavaType javaType = null;
+		for (MemberHoldingTypeDetails memberHoldingTypeDetails : memberDetails.getDetails()) {
+			if (Modifier.isAbstract(memberHoldingTypeDetails.getModifier())) {
+				continue;
+			}
+			javaType = memberHoldingTypeDetails.getName();
+		}
+		return javaType;
 	}
 }

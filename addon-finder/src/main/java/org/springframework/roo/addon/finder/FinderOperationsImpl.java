@@ -131,7 +131,7 @@ public class FinderOperationsImpl implements FinderOperations {
 			logger.warning("Cannot locate source for '" + typeName.getFullyQualifiedTypeName() + "'");
 			return;
 		}
-
+		
 		// Go and get the entity metadata, as any type with finders has to be an entity
 		JavaType javaType = PhysicalTypeIdentifier.getJavaType(id);
 		Path path = PhysicalTypeIdentifier.getPath(id);
