@@ -129,7 +129,7 @@ public class CreatorOperationsImpl implements CreatorOperations {
 			descriptionE.setTextContent(description + " " + descriptionE.getTextContent());
 		}
 		
-		MutableFile pomMutableFile = fileManager.createFile(projectOperations.getPathResolver().getIdentifier(Path.ROOT, "pom.xml"));
+		MutableFile pomMutableFile = fileManager.createFile(pathResolver.getIdentifier(Path.ROOT, "pom.xml"));
 		XmlUtils.writeXml(pomMutableFile.getOutputStream(), pom);
 	}
 
@@ -184,7 +184,6 @@ public class CreatorOperationsImpl implements CreatorOperations {
 		createProject(topLevelPackage, Type.I18N, description, projectName);
 
 		install("assembly.xml", topLevelPackage, Path.ROOT, Type.I18N, projectName);
-		PathResolver pathResolver = projectOperations.getPathResolver();
 		
 		try {
 			FileCopyUtils.copy(new FileInputStream(messageBundle), fileManager.createFile(pathResolver.getIdentifier(Path.SRC_MAIN_RESOURCES, packagePath + SEPARATOR + messageBundle.getName())).getOutputStream());

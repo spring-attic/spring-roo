@@ -93,6 +93,18 @@
       <version>${roo.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.model</artifactId>
+      <version>${roo.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.roo</groupId>
+      <artifactId>org.springframework.roo.classpath</artifactId>
+      <version>${roo.version}</version>
+      <type>bundle</type>
+    </dependency>
   </dependencies>
   <scm>
     <connection>scm:svn:https://${google.code.project.name}.googlecode.com/svn/trunk</connection>
