@@ -262,9 +262,10 @@
         read on.</para>
 
         <para>Remove all "registerConverters" attributes from
-        <code>@RooWebScaffold</code> annotations and the "conversion-service"
-        attribute from <code>&lt;mvc:annotation-driven/&gt;</code> if set.
-        Then run the Spring Roo 1.1.1 shell and let it install the new
+        <code>@RooWebScaffold</code> annotations and make sure the
+        "conversion-service" attribute from &lt;mvc:annotation-driven
+        conversion-service="applicationConversionService"/&gt; is set. Then
+        run the Spring Roo 1.1.1 shell and let it install the new
         ConversionService. When Roo is done making changes, manually move any
         custom <code>getXxxConverter()</code> methods to the new
         ConversionService, delete the GenericConversionService field from all
