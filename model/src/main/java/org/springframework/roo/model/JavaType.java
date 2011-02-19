@@ -257,8 +257,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	 * @return the package name (never null)
 	 */
 	public JavaPackage getPackage() {
-//		if (isDefaultPackage() && !Character.isUpperCase(fullyQualifiedTypeName.charAt(0))) {
-		if (isDefaultPackage()) {
+		if (isDefaultPackage() && !Character.isUpperCase(fullyQualifiedTypeName.charAt(0))) {
 			return new JavaPackage("");
 		}
 
