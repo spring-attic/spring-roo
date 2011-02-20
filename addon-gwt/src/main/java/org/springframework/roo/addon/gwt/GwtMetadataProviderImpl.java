@@ -104,15 +104,14 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 
-		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
+		//We are only interested in a certain types, we must verify that the MID passed in corresponds with such a type.
 		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
 			return null;
 		}
 
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtMetadataProviderImpl.class.getName(), governorTypeDetails).getDetails();
-
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
-		Map<JavaType, JavaType> gwtClientTypeMap = gwtTemplateService.getClientTypeMap(governorTypeDetails);// new HashMap<JavaType, JavaType>();
+		Map<JavaType, JavaType> gwtClientTypeMap = gwtTypeService.getClientTypeMap(governorTypeDetails);
 
 		// Next let's obtain a handle to the "proxy" we'd want to produce/modify/delete as applicable for this governor
 		JavaType keyTypeName = gwtTypeNamingStrategy.convertGovernorTypeNameIntoKeyTypeName(GwtType.PROXY, projectMetadata, governorTypeName);
@@ -136,8 +135,9 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		}
 
 		// Excellent, so we have uniqueness taken care of by now; let's get the some metadata so we can discover what fields are available (NB: this will return null for enums)
+		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
 
-		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTemplateService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
+		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTypeService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
 		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);
 
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeMap, governorTypeDetails, keyTypePath, entityMetadata, clientSideTypeMap, gwtClientTypeMap);
@@ -170,8 +170,16 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			gwtFileManager.write(typesToBeWritten.get(type), type.isOverwriteConcrete());
 		}
 
+		for (ClassOrInterfaceTypeDetails type : templateDataHolder.getTypeList()) {
+			gwtFileManager.write(type, false);
+		}
+
 		for (String destFile : xmlToBeWritten.keySet()) {
 			gwtFileManager.write(destFile, xmlToBeWritten.get(destFile));
+		}
+
+		for (String destFile : templateDataHolder.getXmlMap().keySet()) {
+			gwtFileManager.write(destFile, templateDataHolder.getXmlMap().get(destFile));
 		}
 
 		return gwtMetadata;

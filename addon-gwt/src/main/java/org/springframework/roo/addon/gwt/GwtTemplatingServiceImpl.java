@@ -5,26 +5,12 @@ import hapax.TemplateDataDictionary;
 import hapax.TemplateDictionary;
 import hapax.TemplateException;
 import hapax.TemplateLoader;
-
-import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.MutablePhysicalTypeMetadataProvider;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
-import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.BeanInfoUtils;
 import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
 import org.springframework.roo.classpath.details.FieldMetadata;
 import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
@@ -41,6 +27,16 @@ import org.springframework.roo.project.ProjectMetadata;
 import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 import org.springframework.roo.support.util.StringUtils;
+
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Provides a basic implementation of {@link GwtTemplatingService} which
@@ -66,8 +62,8 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		JavaType governorTypeName = governorTypeDetails.getName();
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTemplatingServiceImpl.class.getName(), governorTypeDetails).getDetails();
-		Map<JavaType, JavaType> clientTypeMap = getClientTypeMap(governorTypeDetails);
-		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = getClientSideTypeMap(memberHoldingTypeDetails, clientTypeMap);
+		Map<JavaType, JavaType> clientTypeMap = gwtTypeService.getClientTypeMap(governorTypeDetails);
+		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTypeService.getClientSideTypeMap(memberHoldingTypeDetails, clientTypeMap);
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		ProjectMetadata projectMetadata = getProjectMetadata();
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
@@ -90,7 +86,41 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 			}
 		}
 
-		return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates);
+		Map<String, String> xmlMap = new HashMap<String, String>();
+		List<ClassOrInterfaceTypeDetails> typeDetails = new ArrayList<ClassOrInterfaceTypeDetails>();
+		for (GwtProxyProperty proxyProperty : clientSideTypeMap.values()) {
+			if (proxyProperty.isCollection() && !proxyProperty.isCollectionOfProxy()) {
+				TemplateDataDictionary dataDictionary = TemplateDictionary.create();
+				dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(projectMetadata));
+				dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
+				JavaType collectionTypeImpl = getCollectionImplementation(proxyProperty.getPropertyType());
+				addImport(dataDictionary, collectionTypeImpl);
+				addImport(dataDictionary, proxyProperty.getPropertyType());
+
+				String collectionType = proxyProperty.getPropertyType().getSimpleTypeName();
+				String boundCollectionType = proxyProperty.getPropertyType().getParameters().get(0).getSimpleTypeName();
+
+				dataDictionary.setVariable("collectionType", collectionType);
+				dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
+				dataDictionary.setVariable("boundCollectionType", boundCollectionType);
+
+				JavaType collectionEditorType = new JavaType(GwtPath.MANAGED_UI.packageName(projectMetadata) + "." + boundCollectionType + collectionType + "Editor");
+				typeDetails.add(getTemplateDetails(dataDictionary, "CollectionEditor", collectionEditorType));
+
+				dataDictionary = TemplateDictionary.create();
+				dataDictionary.setVariable("packageName", GwtPath.MANAGED_UI.packageName(projectMetadata));
+				dataDictionary.setVariable("scaffoldUiPackage", GwtPath.SCAFFOLD_UI.packageName(projectMetadata));
+				dataDictionary.setVariable("collectionType", collectionType);
+				dataDictionary.setVariable("collectionTypeImpl", collectionTypeImpl.getSimpleTypeName());
+				dataDictionary.setVariable("boundCollectionType", boundCollectionType);
+				addImport(dataDictionary, proxyProperty.getPropertyType());
+
+				String contents = getTemplateContents("CollectionEditor" + "UiXml", dataDictionary);
+				xmlMap.put(GwtPath.MANAGED_UI.canonicalFileSystemPath(projectMetadata) + "/" + boundCollectionType + collectionType + "Editor.ui.xml", contents);
+			}
+		}
+
+		return new GwtTemplateDataHolder(templateTypeDetailsMap, xmlTemplates, typeDetails, xmlMap);
 	}
 
 	public List<ClassOrInterfaceTypeDetails> getStaticTemplateTypeDetails(GwtType type) {
@@ -112,10 +142,12 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 	}
 
 	public ClassOrInterfaceTypeDetails getTemplateDetails(TemplateDataDictionary dataDictionary, String templateFile, JavaType templateType) {
+		String templateContents = null;
 		try {
 			TemplateLoader templateLoader = TemplateResourceLoader.create();
 			Template template = templateLoader.getTemplate(templateFile);
-			String templateContents = template.renderToString(dataDictionary);
+			templateContents = template.renderToString(dataDictionary);
+
 			String templateId = PhysicalTypeIdentifier.createIdentifier(templateType, Path.SRC_MAIN_JAVA);
 			return physicalTypeMetadataProvider.parse(templateContents, templateId, templateType);
 
@@ -248,28 +280,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		Path governorTypePath = PhysicalTypeIdentifier.getPath(governorTypeDetails.getDeclaredByMetadataId());
 		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtTemplatingServiceImpl.class.getName(), governorTypeDetails).getDetails();
 
-		/*boolean rooEntity = false;
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(memberHoldingTypeDetail, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-			if (annotationMetadata != null) {
-				rooEntity = true;
-			}
-		}
-
-		if (!rooEntity) {
-			return null;
-		}*/
-
-		/*EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
-		Map<JavaType, JavaType> gwtClientTypeMap = new HashMap<JavaType, JavaType>();
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
-				if (Modifier.isPublic(method.getModifier())) {
-					boolean requestType = GwtUtils.isRequestMethod(entityMetadata, method);
-					gwtClientTypeMap.put(method.getReturnType(), gwtTypeService.getGwtSideLeafType(method.getReturnType(), getProjectMetadata(), governorTypeName, requestType));
-				}
-			}
-		}*/
 		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		Map<JavaType, JavaType> gwtClientTypeMap = new HashMap<JavaType, JavaType>();
 		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
@@ -310,29 +320,6 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 		}
 
 		return gwtClientTypeMap;
-	}
-
-	public Map<JavaSymbolName, GwtProxyProperty> getClientSideTypeMap(List<MemberHoldingTypeDetails> memberHoldingTypeDetails, Map<JavaType, JavaType> gwtClientTypeMap) {
-		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = new LinkedHashMap<JavaSymbolName, GwtProxyProperty>();
-
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-			for (MethodMetadata method : memberHoldingTypeDetail.getDeclaredMethods()) {
-				if (Modifier.isPublic(method.getModifier()) && !method.getReturnType().equals(JavaType.VOID_PRIMITIVE) && method.getParameterTypes().size() == 0 && (method.getMethodName().getSymbolName().startsWith("get") || method.getMethodName().getSymbolName().startsWith("is") || method.getMethodName().getSymbolName().startsWith("has"))) {
-					JavaSymbolName propertyName = new JavaSymbolName(StringUtils.uncapitalize(BeanInfoUtils.getPropertyNameForJavaBeanMethod(method).getSymbolName()));
-					if (propertyName.getSymbolName().equals("owner")) {
-						logger.severe("'owner' is not allowed to be used as field name as it is currently reserved by GWT. Please rename the field 'owner' in type " + memberHoldingTypeDetail.getName().getSimpleTypeName() + ".");
-						continue;
-					}
-
-					JavaType propertyType = gwtClientTypeMap.get(method.getReturnType());
-					PhysicalTypeMetadata ptmd = (PhysicalTypeMetadata) metadataService.get(PhysicalTypeIdentifier.createIdentifier(propertyType, Path.SRC_MAIN_JAVA));
-					GwtProxyProperty gwtProxyProperty = new GwtProxyProperty(getProjectMetadata(), propertyType, ptmd, propertyName.getSymbolName(), method.getMethodName().getSymbolName());
-					clientSideTypeMap.put(propertyName, gwtProxyProperty);
-				}
-			}
-		}
-
-		return clientSideTypeMap;
 	}
 
 	private ProjectMetadata getProjectMetadata() {
@@ -428,7 +415,7 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 
 			dataDictionary.setVariable("proxyRendererType", GwtType.EDIT_RENDERER.getPath().packageName(projectMetadata) + "." + proxyType.getSimpleTypeName() + "Renderer");
 
-			if (property.isProxy() || property.isEnum() || property.isCollectionOfProxy()) {
+			if (property.isProxy() || property.isEnum() || property.isCollectionOfProxy() || property.isCollection()) {
 				TemplateDataDictionary section = dataDictionary.addSection(property.isEnum() ? "setEnumValuePickers" : "setProxyValuePickers");
 				section.setVariable("setValuePicker", property.getSetValuePickerMethod());
 				section.setVariable("setValuePickerName", property.getSetValuePickerMethodName());
@@ -441,12 +428,11 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 					section.setVariable("findMethod", "find" + StringUtils.capitalize(propTypeName) + "Entries(0, 50)");
 				}
 				maybeAddImport(dataDictionary, importSet, property.getPropertyType());
+				maybeAddImport(dataDictionary, importSet, property.getValueType());
 				if (property.isCollectionOfProxy()) {
-					maybeAddImport(dataDictionary, importSet,
-							property.getPropertyType().getParameters().get(0));
+					maybeAddImport(dataDictionary, importSet, property.getPropertyType().getParameters().get(0));
 					maybeAddImport(dataDictionary, importSet, property.getSetEditorType());
 				}
-
 			}
 
 		}
@@ -527,5 +513,24 @@ public class GwtTemplatingServiceImpl implements GwtTemplatingService {
 			addImport(dataDictionary, type.getFullyQualifiedTypeName());
 			importSet.add(type.getFullyQualifiedTypeName());
 		}
+	}
+
+	private void addImport(TemplateDataDictionary dataDictionary, JavaType type) {
+		dataDictionary.addSection("imports").setVariable("import", type.getFullyQualifiedTypeName());
+		for (JavaType param : type.getParameters()) {
+			addImport(dataDictionary, param);
+		}
+	}
+
+	private JavaType getCollectionImplementation(JavaType javaType) {
+		if (javaType.getFullyQualifiedTypeName().equals("java.util.Set")) {
+			return new JavaType("java.util.HashSet", javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
+		}
+
+		if (javaType.getFullyQualifiedTypeName().equals("java.util.List")) {
+			return new JavaType("java.util.ArrayList", javaType.getArray(), javaType.getDataType(), javaType.getArgName(), javaType.getParameters());
+		}
+
+		return javaType;
 	}
 }

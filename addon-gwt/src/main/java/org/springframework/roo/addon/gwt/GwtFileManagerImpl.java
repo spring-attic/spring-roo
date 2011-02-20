@@ -81,8 +81,10 @@ public class GwtFileManagerImpl implements GwtFileManager {
 		String fileContents = physicalTypeMetadataProvider.getCompilationUnitContents(typeDetails);
 		if (includeWarning) {
 			fileContents = ROO_EDIT_WARNING + fileContents;
+		} else if (fileManager.exists(destFile)) {
+			return;
 		}
-		write(destFile, fileContents, !includeWarning);
+		write(destFile, fileContents, includeWarning);
 	}
 
 	public void write(List<ClassOrInterfaceTypeDetails> typeDetails, boolean includeWarning) {

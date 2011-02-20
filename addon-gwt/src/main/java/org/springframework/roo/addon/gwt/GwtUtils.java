@@ -4,7 +4,17 @@ import org.springframework.roo.addon.entity.EntityMetadata;
 import org.springframework.roo.classpath.PhysicalTypeCategory;
 import org.springframework.roo.classpath.PhysicalTypeIdentifier;
 import org.springframework.roo.classpath.PhysicalTypeMetadata;
-import org.springframework.roo.classpath.details.*;
+import org.springframework.roo.classpath.details.AbstractIdentifiableAnnotatedJavaStructureBuilder;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetails;
+import org.springframework.roo.classpath.details.ClassOrInterfaceTypeDetailsBuilder;
+import org.springframework.roo.classpath.details.ConstructorMetadata;
+import org.springframework.roo.classpath.details.ConstructorMetadataBuilder;
+import org.springframework.roo.classpath.details.FieldMetadataBuilder;
+import org.springframework.roo.classpath.details.IdentifiableAnnotatedJavaStructure;
+import org.springframework.roo.classpath.details.MemberFindingUtils;
+import org.springframework.roo.classpath.details.MemberHoldingTypeDetails;
+import org.springframework.roo.classpath.details.MethodMetadata;
+import org.springframework.roo.classpath.details.MethodMetadataBuilder;
 import org.springframework.roo.classpath.details.annotations.AnnotatedJavaType;
 import org.springframework.roo.classpath.details.annotations.AnnotationMetadata;
 import org.springframework.roo.classpath.itd.InvocableMemberBodyBuilder;
@@ -17,7 +27,11 @@ import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -179,7 +193,7 @@ public class GwtUtils {
 	}
 
 	public static boolean isCollectionType(JavaType returnType) {
-		return returnType.equals(new JavaType("java.util.List")) || returnType.equals(new JavaType("java.util.Set"));
+		return returnType.getFullyQualifiedTypeName().equals("java.util.List") || returnType.getFullyQualifiedTypeName().equals("java.util.Set");
 	}
 
 	public static boolean isRequestFactoryCompatible(JavaType type) {
@@ -199,7 +213,7 @@ public class GwtUtils {
 
 	/**
 	 * @param physicalType
-	 * @param mirrorType the mirror class we're producing (required)
+	 * @param mirrorType      the mirror class we're producing (required)
 	 * @param projectMetadata
 	 * @return the MID to the mirror class applicable for the current governor (never null)
 	 */
@@ -305,7 +319,7 @@ public class GwtUtils {
 				for (JavaSymbolName methodName : destType.getWatchedMethods().keySet()) {
 					for (MethodMetadataBuilder methodBuilder : templateClassBuilder.getDeclaredMethods()) {
 						if (methodBuilder.getMethodName().equals(methodName)) {
-							if (destType.getWatchedMethods().get(methodName).equals(AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodBuilder.getParameterTypes()))) {
+							if (destType.getWatchedMethods().get(methodName).containsAll(AnnotatedJavaType.convertFromAnnotatedJavaTypes(methodBuilder.getParameterTypes()))) {
 								MethodMetadataBuilder abstractMethodBuilder = new MethodMetadataBuilder(abstractClassBuilder.getDeclaredByMetadataId(), methodBuilder.build());
 								abstractClassBuilder.addMethod(convertModifier(abstractMethodBuilder));
 								methodsToRemove.add(methodBuilder);
@@ -319,7 +333,7 @@ public class GwtUtils {
 
 				for (JavaType innerTypeName : destType.getWatchedInnerTypes()) {
 					for (ClassOrInterfaceTypeDetailsBuilder innerType : templateClassBuilder.getDeclaredInnerTypes()) {
-						if (innerType.getName().equals(innerTypeName)) {
+						if (innerType.getName().getFullyQualifiedTypeName().equals(innerTypeName.getFullyQualifiedTypeName())) {
 							ClassOrInterfaceTypeDetailsBuilder builder = new ClassOrInterfaceTypeDetailsBuilder(abstractClassBuilder.getDeclaredByMetadataId(), innerType.build());
 							builder.setName(new JavaType(innerType.getName().getSimpleTypeName() + "_Roo_Gwt", 0, DataType.TYPE, null, innerType.getName().getParameters()));
 

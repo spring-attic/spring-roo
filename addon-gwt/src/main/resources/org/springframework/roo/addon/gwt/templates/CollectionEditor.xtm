@@ -1,0 +1,229 @@
+package {{=packageName}};
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.EditorDelegate;
+import com.google.gwt.editor.client.LeafValueEditor;
+import com.google.gwt.editor.client.ValueAwareEditor;
+import com.google.gwt.editor.client.adapters.EditorSource;
+import com.google.gwt.editor.client.adapters.ListEditor;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.requestfactory.client.RequestFactoryEditorDriver;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ValueListBox;
+import com.google.gwt.user.client.ui.Widget;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import {{=scaffoldUiPackage}}.CollectionRenderer;
+{{#imports}}import {{=import}};
+{{/imports}}
+
+public class {{=boundCollectionType}}{{=collectionType}}Editor extends Composite implements ValueAwareEditor<{{=collectionType}}<{{=boundCollectionType}}>>, LeafValueEditor<{{=collectionType}}<{{=boundCollectionType}}>> {
+
+	@UiField
+	FlowPanel container;
+
+	private Renderer<{{=boundCollectionType}}> renderer = new Renderer<{{=boundCollectionType}}>() {
+		@Override
+		public String render({{=boundCollectionType}} o) {
+			return o == null ? "" : String.valueOf(o);
+		}
+
+		@Override
+		public void render({{=boundCollectionType}} o, Appendable appendable) throws IOException {
+			appendable.append(render(o));
+		}
+	};
+
+	@UiField(provided = true)
+	@Ignore
+	ValueListBox<{{=boundCollectionType}}> picker = new ValueListBox<{{=boundCollectionType}}>(renderer);
+
+	@UiField
+	Button add;
+
+	@UiField
+	HTMLPanel editorPanel;
+
+	@UiField
+	Button clickToEdit;
+
+	@UiField
+	HTMLPanel viewPanel;
+
+	@UiField
+	Label viewLabel;
+
+	@UiField
+	Style style;
+
+	boolean editing = false;
+
+	private {{=collectionType}}<{{=boundCollectionType}}> values;
+
+	private List<{{=boundCollectionType}}> displayedList;
+
+	public CollectionEditor() {
+		initWidget(GWT.<Binder>create(Binder.class).createAndBindUi(this));
+		Driver driver = GWT.create(Driver.class);
+		ListEditor<{{=boundCollectionType}}, NameLabel> editor = ListEditor.of(new NameLabelSource());
+		driver.initialize(editor);
+		driver.display(new ArrayList<{{=boundCollectionType}}>());
+		displayedList = editor.getList();
+		editing = false;
+	}
+
+	@UiHandler("add")
+	public void addClicked(ClickEvent e) {
+		if (picker.getValue() == null || displayedList.contains(picker.getValue())) {
+		    return;
+	    }
+		displayedList.add(picker.getValue());
+		viewLabel.setText(makeFlatList(displayedList));
+	}
+
+	@UiHandler("clickToEdit")
+	public void clickToEditClicked(ClickEvent e) {
+		toggleEditorMode();
+	}
+
+
+	interface Binder extends UiBinder<Widget, {{=boundCollectionType}}{{=collectionType}}Editor> {
+	}
+
+	interface Driver extends RequestFactoryEditorDriver<List<{{=boundCollectionType}}>, ListEditor<{{=boundCollectionType}}, NameLabel>> {
+	}
+
+	public void onLoad() {
+		makeEditable(false);
+	}
+
+	public void setAcceptableValues(Collection<{{=boundCollectionType}}> values) {
+		picker.setAcceptableValues(values);
+	}
+
+	@Override
+	public void setDelegate(EditorDelegate<{{=collectionType}}<{{=boundCollectionType}}>> editorDelegate) {
+	}
+
+	@Override
+	public void onPropertyChange(java.lang.String... strings) {
+	}
+
+	@Override
+	public void flush() {
+	}
+
+	@Override
+	public void setValue({{=collectionType}}<{{=boundCollectionType}}> values) {
+
+		this.values = values;
+		makeEditable(editing = false);
+		if (displayedList != null) {
+			displayedList.clear();
+			if (values != null) {
+				for ({{=boundCollectionType}} e : values) {
+					displayedList.add(e);
+				}
+			}
+		}
+		viewLabel.setText(makeFlatList(values));
+	}
+
+	private void makeEditable(boolean editable) {
+		if (editable) {
+			editorPanel.setStylePrimaryName(style.editorPanelVisible());
+			viewPanel.setStylePrimaryName(style.viewPanelHidden());
+			clickToEdit.setText("Done");
+		} else {
+			editorPanel.setStylePrimaryName(style.editorPanelHidden());
+			viewPanel.setStylePrimaryName(style.viewPanelVisible());
+			clickToEdit.setText("Edit");
+		}
+	}
+
+	private java.lang.String makeFlatList(Collection values) {
+		return CollectionRenderer.of(renderer).render(values);
+	}
+
+	private void toggleEditorMode() {
+		editing = !editing;
+		makeEditable(editing);
+	}
+
+	@Override
+	public {{=collectionType}}<{{=boundCollectionType}}> getValue() {
+		if (values == null && displayedList.size() == 0) {
+			return null;
+		}
+		return new {{=collectionTypeImpl}}<{{=boundCollectionType}}>(displayedList);
+	}
+
+	interface Style extends CssResource {
+
+		java.lang.String editorPanelHidden();
+
+		java.lang.String editorPanelVisible();
+
+		java.lang.String viewPanelHidden();
+
+		java.lang.String viewPanelVisible();
+	}
+
+	class NameLabel extends Composite implements LeafValueEditor<{{=boundCollectionType}}> {
+
+		@Ignore
+		final Label displayNameEditor = new Label();
+
+		public NameLabel() {
+			this(null);
+		}
+
+		public NameLabel(EventBus eventBus) {
+			initWidget(displayNameEditor);
+		}
+
+		@Override
+		public void setValue({{=boundCollectionType}} o) {
+			displayNameEditor.setText(String.valueOf(o));
+		}
+
+		@Override
+		public {{=boundCollectionType}} getValue() {
+			return {{=boundCollectionType}}.valueOf(displayNameEditor.getText());
+		}
+	}
+
+	private class NameLabelSource extends EditorSource<NameLabel> {
+
+		@Override
+		public NameLabel create(int index) {
+			NameLabel label = new NameLabel();
+			container.insert(label, index);
+			return label;
+		}
+
+		@Override
+		public void dispose(NameLabel subEditor) {
+			subEditor.removeFromParent();
+		}
+
+		@Override
+		public void setIndex(NameLabel editor, int index) {
+			container.insert(editor, index);
+		}
+	}
+}

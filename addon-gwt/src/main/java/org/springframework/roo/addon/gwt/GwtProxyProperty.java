@@ -92,7 +92,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isString() {
-		return type != null && type.equals(new JavaType("java.lang.String"));
+		return type != null && type.equals(JavaType.STRING_OBJECT);
 	}
 
 	public String getBinder() {
@@ -124,7 +124,10 @@ class GwtProxyProperty {
 	}
 
 	private String getSetEditor() {
-		String typeName = type.getParameters().get(0).getSimpleTypeName();
+		String typeName = "java.lang.Object";
+		if (type.getParameters().size() > 0) {
+			typeName = type.getParameters().get(0).getSimpleTypeName();
+		}
 		if (typeName.endsWith(GwtType.PROXY.getSuffix())) {
 			typeName = typeName.substring(0, typeName.length() - GwtType.PROXY.getSuffix().length());
 		}
@@ -167,7 +170,10 @@ class GwtProxyProperty {
 	}
 
 	public String getCollectionRenderer() {
-		JavaType arg = type.getParameters().get(0);
+		JavaType arg = new JavaType("java.lang.Object");
+		if (type.getParameters().size() > 0) {
+			arg = type.getParameters().get(0);
+		}
 		return GwtPath.SCAFFOLD_PLACE.packageName(projectMetadata) + ".CollectionRenderer.of(" + new GwtProxyProperty(projectMetadata, arg, ptmd).getRenderer() + ")";
 	}
 
@@ -176,7 +182,7 @@ class GwtProxyProperty {
 	}
 
 	public String getRenderer() {
-		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() || isEmbeddable() ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
+		return isCollection() ? getCollectionRenderer() : isDate() ? "new DateTimeFormatRenderer(DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_SHORT))" : isPrimitive() || isEnum() || isEmbeddable() || type.equals(new JavaType("java.lang.Object")) ? "new AbstractRenderer<" + getType() + ">() {\n        public String render(" + getType() + " obj) {\n          return obj == null ? \"\" : String.valueOf(obj);\n        }\n      }" : getProxyRendererType() + ".instance()";
 	}
 
 	String getProxyRendererType() {
@@ -203,7 +209,7 @@ class GwtProxyProperty {
 			initializer = " = " + getCheckboxSubtype();
 		}
 
-		if (isEnum()) {
+		if (isEnum() && !isCollection()) {
 			initializer = String.format(" = new ValueListBox<%s>(%s)", type.getFullyQualifiedTypeName(), getRenderer());
 		}
 
@@ -219,11 +225,11 @@ class GwtProxyProperty {
 	}
 
 	public boolean isProxy() {
-		return !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection() && !isEmbeddable();
+		return ptmd != null && !isDate() && !isString() && !isPrimitive() && !isEnum() && !isCollection() && !isEmbeddable() && !type.getFullyQualifiedTypeName().equals("java.lang.Object");
 	}
 
-	private boolean isCollection() {
-		return type != null && (type.equals(new JavaType("java.util.List")) || type.equals(new JavaType("java.util.Set")));
+	public boolean isCollection() {
+		return type != null && (type.getFullyQualifiedTypeName().equals("java.util.List") || type.getFullyQualifiedTypeName().equals("java.util.Set"));
 	}
 
 	boolean isEnum() {
@@ -255,7 +261,7 @@ class GwtProxyProperty {
 	}
 
 	public boolean isCollectionOfProxy() {
-		return isCollection() && new GwtProxyProperty(projectMetadata, type.getParameters().get(0), ptmd).isProxy();
+		return type.getParameters().size() != 0 && isCollection() && new GwtProxyProperty(projectMetadata, type.getParameters().get(0), ptmd).isProxy();
 	}
 
 	public JavaType getValueType() {
