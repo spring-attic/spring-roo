@@ -107,9 +107,6 @@ public class GwtOperationsImpl implements GwtOperations {
 		// Update web.xml
 		updateWebXml();
 
-		// Update webmvc-config.xml
-		updateSpringWebCtx();
-
 		// Copy "static" directories
 		for (GwtPath path : GwtPath.values()) {
 			copyDirectoryContents(path);
@@ -362,6 +359,7 @@ public class GwtOperationsImpl implements GwtOperations {
 		XmlUtils.writeXml(mutableWebXml.getOutputStream(), webXmlDoc);
 	}
 
+	//TODO: Remove this once it has been established how GWT and MVC projects can get along.
 	private void updateSpringWebCtx() {
 		String mvcXml = projectOperations.getPathResolver().getIdentifier(Path.SRC_MAIN_WEBAPP, "WEB-INF/spring/webmvc-config.xml");
 		Assert.isTrue(fileManager.exists(mvcXml), "webmvc-config.xml not found; cannot continue");
