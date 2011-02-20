@@ -13,10 +13,12 @@ import org.springframework.roo.model.JavaSymbolName;
 import org.springframework.roo.model.JavaType;
 import org.springframework.roo.project.Path;
 import org.springframework.roo.project.ProjectMetadata;
+import org.springframework.roo.support.logging.HandlerUtils;
 import org.springframework.roo.support.util.Assert;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Utility methods used in the GWT Add-On.
@@ -26,6 +28,7 @@ import java.util.*;
  */
 public class GwtUtils {
 	private static GwtTypeNamingStrategy gwtTypeNamingStrategy = new DefaultGwtTypeNamingStrategy();
+	private static Logger logger = HandlerUtils.getLogger(GwtUtils.class);
 
 	private GwtUtils() {
 	}
@@ -40,6 +43,38 @@ public class GwtUtils {
 
 	public static boolean isRequestMethod(EntityMetadata entityMetadata, MethodMetadata methodMetadata) {
 		return isOneMethodsEqual(methodMetadata, entityMetadata.getFindAllMethod(), entityMetadata.getFindMethod(), entityMetadata.getFindEntriesMethod(), entityMetadata.getCountMethod(), entityMetadata.getPersistMethod(), entityMetadata.getRemoveMethod(), entityMetadata.getVersionAccessor(), entityMetadata.getIdentifierAccessor());
+	}
+
+	public static boolean hasRequiredEntityMethods(EntityMetadata entityMetadata) {
+		if (entityMetadata.getFindAllMethod() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Find All Method.");
+			return false;
+		}
+		if (entityMetadata.getFindEntriesMethod() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Find Entries method.");
+			return false;
+		}
+		if (entityMetadata.getCountMethod() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Count method.");
+			return false;
+		}
+		if (entityMetadata.getPersistMethod() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Persist method.");
+			return false;
+		}
+		if (entityMetadata.getRemoveMethod() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Remove method.");
+			return false;
+		}
+		if (entityMetadata.getVersionAccessor() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has a Version accessor method.");
+			return false;
+		}
+		if (entityMetadata.getIdentifierAccessor() == null) {
+			logger.severe("The GWT Add-On requires that a proxied entity has an Identifier accessor method.");
+			return false;
+		}
+		return true;
 	}
 
 	private static boolean isOneMethodsEqual(MethodMetadata m1, MethodMetadata... m2) {
@@ -79,11 +114,14 @@ public class GwtUtils {
 	}
 
 	public static boolean isMappable(ClassOrInterfaceTypeDetails governorTypeDetails, EntityMetadata entityMetadata) {
+		if (entityMetadata == null) {
+			return false;
+		}
 		if (Modifier.isAbstract(governorTypeDetails.getModifier())) {
 			return false;
 		}
 		if (governorTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.CLASS) {
-			return entityMetadata != null && entityMetadata.isValid() && entityMetadata.getFindAllMethod() != null;
+			return entityMetadata.isValid() && GwtUtils.hasRequiredEntityMethods(entityMetadata);
 		}
 		if (governorTypeDetails.getPhysicalTypeCategory() == PhysicalTypeCategory.ENUMERATION) {
 			return false;

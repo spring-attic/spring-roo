@@ -102,23 +102,16 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 			return null;
 		}
 
-		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtMetadataProviderImpl.class.getName(), governorTypeDetails).getDetails();
+		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 
-		boolean rooEntity = false;
-		for (MemberHoldingTypeDetails memberHoldingTypeDetail : memberHoldingTypeDetails) {
-
-			AnnotationMetadata annotationMetadata = MemberFindingUtils.getDeclaredTypeAnnotation(memberHoldingTypeDetail, new JavaType("org.springframework.roo.addon.entity.RooEntity"));
-			if (annotationMetadata != null) {
-				rooEntity = true;
-			}
-		}
-
-		if (!rooEntity) {
+		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
+		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
 			return null;
 		}
 
+		List<MemberHoldingTypeDetails> memberHoldingTypeDetails = memberDetailsScanner.getMemberDetails(GwtMetadataProviderImpl.class.getName(), governorTypeDetails).getDetails();
+
 		Map<GwtType, JavaType> mirrorTypeMap = GwtUtils.getMirrorTypeMap(projectMetadata, governorTypeName);
-		EntityMetadata entityMetadata = (EntityMetadata) metadataService.get(EntityMetadata.createIdentifier(governorTypeName, governorTypePath));
 		Map<JavaType, JavaType> gwtClientTypeMap = gwtTemplateService.getClientTypeMap(governorTypeDetails);// new HashMap<JavaType, JavaType>();
 
 		// Next let's obtain a handle to the "proxy" we'd want to produce/modify/delete as applicable for this governor
@@ -143,15 +136,9 @@ public class GwtMetadataProviderImpl implements GwtMetadataProvider {
 		}
 
 		// Excellent, so we have uniqueness taken care of by now; let's get the some metadata so we can discover what fields are available (NB: this will return null for enums)
-		// Handle the "governor is deleted/unavailable/not-suitable-for-mirroring" use case
-		if (!GwtUtils.isMappable(governorTypeDetails, entityMetadata)) {
-			return null;
-		}
 
 		Map<JavaSymbolName, GwtProxyProperty> clientSideTypeMap = gwtTemplateService.getClientSideTypeMap(memberHoldingTypeDetails, gwtClientTypeMap);
-		// GwtTemplateServiceImpl gwtTemplateService = new GwtTemplateServiceImpl(physicalTypeMetadataProvider, projectMetadata, entityMetadata, governorTypeDetails, mirrorTypeMap, clientSideTypeMap);
-		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);//getTemplateTypeDetails();
-		// Map<GwtType, String> xmlTemplates = new HashMap<GwtType, String>();//gwtTemplateService.getXmlTemplates();
+		GwtTemplateDataHolder templateDataHolder = gwtTemplateService.getMirrorTemplateTypeDetails(governorTypeDetails);
 
 		GwtMetadata gwtMetadata = new GwtMetadata(metadataIdentificationString, mirrorTypeMap, governorTypeDetails, keyTypePath, entityMetadata, clientSideTypeMap, gwtClientTypeMap);
 
