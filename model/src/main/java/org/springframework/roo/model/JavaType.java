@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,7 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 	public static final JavaType DOUBLE_PRIMITIVE = new JavaType("java.lang.Double", 0, DataType.PRIMITIVE, null, null);
 	public static final JavaType VOID_PRIMITIVE = new JavaType("java.lang.Void", 0, DataType.PRIMITIVE, null, null);
 
-	private List<JavaType> parameters = new ArrayList<JavaType>();
+	private List<JavaType> parameters = new LinkedList<JavaType>();
 	private JavaSymbolName argName = null;
 	private int array = 0;
 	private boolean defaultPackage;
@@ -348,22 +349,20 @@ public final class JavaType implements Comparable<JavaType>, Cloneable {
 		int result = 1;
 		result = prime * result + ((fullyQualifiedTypeName == null) ? 0 : fullyQualifiedTypeName.hashCode());
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		return result;
 	}
 
 	public final boolean equals(Object obj) {
 		// NB: Not using the normal convention of delegating to compareTo (for efficiency reasons)
-		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType;
+		return obj != null && obj instanceof JavaType && fullyQualifiedTypeName.equals(((JavaType) obj).fullyQualifiedTypeName) && this.dataType == ((JavaType) obj).dataType && ((JavaType)obj).parameters.containsAll(parameters);
 	}
 
 	public final int compareTo(JavaType o) {
 		// NB: If adding more fields to this class ensure the equals(Object) method is updated accordingly
 		if (o == null) return -1;
-		int cmp = fullyQualifiedTypeName.compareTo(o.fullyQualifiedTypeName);
-		if (cmp == 0) {
-			cmp = dataType.compareTo(o.dataType);
-		}
-		return cmp;
+		if (equals(o)) return 0;
+		return toString().compareTo(o.toString());
 	}
 
 	public final String toString() {
